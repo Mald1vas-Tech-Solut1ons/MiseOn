@@ -37,6 +37,9 @@ O cliente pede pela vitrine (link próprio da loja), o dono recebe em tempo real
 | Módulo | Recursos |
 |---|---|
 | 🪑 **Salão 3D & Assentos** | Engine **Three.js WebGL** interativa para visualização 3D de salão, assentos numerados por mesa, cronômetro de permanência do cliente e 3 modalidades de comanda fracionada (por cadeira, igualitária ou valor parcial). |
+| ⚖️ **Balança Buffet & Quilo** | Driver modular **MiseOn Scale Engine** com suporte a **Web Serial API (cabo USB/RS-232)**, **TCP/IP Rede** e **Emulador**. Vínculo direto do peso líquido com desconto de tara para comanda individual ou de mesa. |
+| 🔀 **Divisão Inteligente de Contas** | **Método 1 (Garçom Mobile)**: Fracionamento automático de bebidas/itens compartilhados no momento do lançamento. **Método 2 (Caixa PDV)**: Matriz interativa de divisão por produto no fechamento para cobranças individuais separadas. |
+| 📳 **PWA Garçom Push & Vibração** | Notificação instantânea com **Vibração Hálptica (Web Vibration API)** e aviso sonoro no smartphone do garçom para chamados de atendimento e solicitações de fechamento de conta. |
 | 🧊 **Estoque & Grafo PEPS 3D** | Ledger auditável PEPS com **Grafo 3D de Transformação de Lotes**, baixa automática no aceite, estorno no cancelamento, **Calculadora Dinâmica de Rendimento** e **Central de Compras Massiva** com conversão reversa. |
 | 🛍 **Vitrine** | Banners promocionais, busca, filtros por categoria, "os mais pedidos", grupos de adicionais/extras, combos, horário de funcionamento automático, pedido mínimo. |
 | 🛒 **Pedidos** | Carrinho, delivery/retirada/salão, cupons (1ª compra, por método de pagamento), taxa de entrega por bairro, troco, observações por item. |
@@ -217,6 +220,7 @@ Antes de colocar a mão na massa, certifique-se de ler nossa [Documentação de 
 - [x] **Salão 3D & Grafo PEPS 3D**: Engine Three.js WebGL para salão/assentos e rastreabilidade PEPS de estoque com conservação de valor.
 - [x] **Chat IA com Gemini**: Atendimento inteligente via WebSocket na vitrine com function calling (cardápio e suporte).
 - [x] **Emissor NF-e / NFC-e 4.0**: Emissão fiscal integrada ao PDV (pronto, pendente apenas upload do Certificado A1 / CNPJ).
+- [x] **Balança Buffet & Divisão Inteligente CTO**: Módulo de pesagem Web Serial (Toledo/Filizola/Urano), Divisão Inteligente Métodos 1 e 2, PWA Garçom com Notificação Push & Vibração Hálptica.
 - [ ] **Fase 4 (Próximos Passos)**: Onboarding self-service automatizado e programa de fidelidade/cashback avançado.
 
 ## ❤️ Autor
