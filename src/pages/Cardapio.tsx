@@ -20,6 +20,7 @@ import PagamentoStatus, { type PixInfo } from '../components/PagamentoStatus';
 import ThemeToggle from '../components/ThemeToggle';
 import ChatInterface from '../components/chat/ChatInterface';
 import MiseOnLoader from '../components/MiseOnLoader';
+import SEO from '../components/SEO';
 
 const guardarUltimoPedido = (slug: string | undefined, pedidoId: string, numero: number) => {
   if (!slug) return;
@@ -272,6 +273,33 @@ export default function Cardapio() {
 
   return (
     <div className="loja-marca min-h-screen pb-28 lg:pb-16">
+      <SEO
+        title={`${loja.nome} | Cardápio Digital & Pedidos Online`}
+        description={`Cardápio digital e pedidos online de ${loja.nome}. Faça seu pedido pelo site ou WhatsApp. Endereço: ${loja.endereco || 'Atendimento local e delivery'}.`}
+        keywords={`${loja.nome}, cardapio digital ${loja.nome}, pedir online ${loja.nome}, restaurante ${loja.nome}, delivery ${loja.nome}`}
+        canonicalUrl={`https://miseon.app.br/${loja.slug}`}
+        ogImage={loja.logo_url || loja.banner_url || 'https://miseon.app.br/icon-512.png'}
+        schemaJson={{
+          '@context': 'https://schema.org',
+          '@type': 'Restaurant',
+          'name': loja.nome,
+          'url': `https://miseon.app.br/${loja.slug}`,
+          'image': loja.logo_url || loja.banner_url || 'https://miseon.app.br/icon-512.png',
+          'description': `Cardápio digital e pedidos online de ${loja.nome}.`,
+          'address': {
+            '@type': 'PostalAddress',
+            'streetAddress': loja.endereco || 'Brasil',
+            'addressCountry': 'BR',
+          },
+          'servesCuisine': 'Food Service',
+          'hasMenu': `https://miseon.app.br/${loja.slug}`,
+          'provider': {
+            '@type': 'Organization',
+            'name': 'MiseOn',
+            'url': 'https://miseon.app.br',
+          },
+        }}
+      />
       {/* Hero — banner com gradiente da marca, logo/nome sobrepostos */}
       <header className="relative">
         <div

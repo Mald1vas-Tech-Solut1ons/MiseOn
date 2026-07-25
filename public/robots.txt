@@ -4,4 +4,27 @@ Disallow: /admin
 Disallow: /pedido
 Disallow: /email/descadastro
 
+# Permissão Explícita para Agentes de IA e LLMs (Generative Engine Optimization - GEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: ByteDance
+Allow: /
+
 Sitemap: https://miseon.app.br/sitemap.xml
+

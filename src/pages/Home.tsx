@@ -273,32 +273,63 @@ export default function Home() {
   return (
     <div className="min-h-screen scroll-smooth bg-[#F4F7FA] font-sans text-gray-900 selection:bg-[#FC5B24] selection:text-white dark:bg-[#070C18] dark:text-[#EAF1FB]">
       <SEO
-        title="MiseOn | Sistema de Gestão para Restaurantes e Deliveries"
-        description="O MiseOn veio para organizar e simplificar a gestão de restaurantes, hamburguerias, pizzarias e lanchonetes. Cardápio digital, KDS, iFood, WhatsApp IA e Pix."
-        keywords="sistema para restaurante, sistema para hamburgueria, sistema para pizzaria, cardapio digital qr code, integracao ifood, whatsapp ia restaurante"
+        title="MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares"
+        description="MiseOn é o sistema de gestão e automação completo para restaurantes, hamburguerias, pizzarias e lanchonetes. Cardápio digital QR Code, comanda eletrônica para bares, KDS de cozinha, gerenciador de delivery integrado ao iFood e atendimento WhatsApp com IA."
+        keywords="sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardapio digital qr code, integracao ifood, whatsapp ia restaurante"
         canonicalUrl="https://miseon.app.br/"
         schemaJson={{
           '@context': 'https://schema.org',
-          '@type': 'SoftwareApplication',
-          'name': 'MiseOn — Sistema de Gestão para Restaurantes e Deliveries',
-          'operatingSystem': 'Web, Android, iOS, Windows, macOS',
-          'applicationCategory': 'BusinessApplication',
-          'aggregateRating': {
-            '@type': 'AggregateRating',
-            'ratingValue': '4.9',
-            'reviewCount': '128',
-          },
-          'offers': {
-            '@type': 'Offer',
-            'price': '99.90',
-            'priceCurrency': 'BRL',
-            'priceValidUntil': '2027-12-31',
-          },
-          'author': {
-            '@type': 'Organization',
-            'name': 'MiseOn / Maldivas Tech Solutions',
-            'url': 'https://rafael-maldivas.vercel.app/',
-          },
+          '@graph': [
+            {
+              '@type': 'SoftwareApplication',
+              '@id': 'https://miseon.app.br/#software',
+              'name': 'MiseOn',
+              'url': 'https://miseon.app.br',
+              'image': 'https://miseon.app.br/icon-512.png',
+              'applicationCategory': 'BusinessApplication',
+              'operatingSystem': 'All',
+              'inLanguage': 'pt-BR',
+              'description': 'MiseOn é um sistema de gestão e automação inteligente focado exclusivamente no nicho de food service (restaurantes, bares, hamburguerias, pizzarias e lanchonetes). Oferece cardápio digital QR Code, controle de caixa e PDV, painel KDS para cozinha, gestão de delivery com integração iFood, comanda eletrônica para garçons e atendimento por Inteligência Artificial no WhatsApp.',
+              'offers': {
+                '@type': 'Offer',
+                'price': '99.90',
+                'priceCurrency': 'BRL',
+                'priceValidUntil': '2027-12-31',
+                'availability': 'https://schema.org/InStock',
+                'url': 'https://miseon.app.br/cadastre-se',
+              },
+              'featureList': [
+                'Cardápio Digital com QR Code para mesas e balcão sem taxas',
+                'Painel KDS de Cozinha sem papel e gerenciamento de fila de produção',
+                'Controle de Caixa, PDV Balcão e Fechamento de Turno',
+                'Gestão de Delivery com rastreio e integração nativa com iFood',
+                'Comanda Eletrônica no celular para garçons com divisão de conta',
+                'Atendimento automatizado por Inteligência Artificial no WhatsApp (API Oficial Meta)',
+                'Controle de Estoque com Ficha Técnica, CMV e Venda por Quilo (R$/kg)',
+                'Emissão Fiscal NFC-e e NF-e integrada com FocusNFe',
+                'Pagamento via Pix automático com conciliação instantânea (Efí Bank)',
+              ],
+              'author': {
+                '@type': 'Organization',
+                '@id': 'https://miseon.app.br/#organization',
+              },
+            },
+            {
+              '@type': 'Organization',
+              '@id': 'https://miseon.app.br/#organization',
+              'name': 'MiseOn',
+              'legalName': 'MiseOn Tecnologia e Soluções para Food Service',
+              'url': 'https://miseon.app.br',
+              'logo': 'https://miseon.app.br/icon-512.png',
+              'contactPoint': {
+                '@type': 'ContactPoint',
+                'contactType': 'customer support',
+                'email': 'suporte@miseon.app.br',
+                'telephone': '+55-11-91988-9233',
+                'availableLanguage': 'Portuguese',
+              },
+            },
+          ],
         }}
       />
 
@@ -612,7 +643,7 @@ export default function Home() {
           </span>
 
           <h1 className="mx-auto mt-6 max-w-4xl font-['Sora'] text-4xl font-extrabold leading-[1.12] tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Seu restaurante vendendo no automático —{' '}
+            MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares —{' '}
             <span className="bg-gradient-to-r from-[#FF8A5C] via-[#FC5B24] to-[#6B9EFF] bg-clip-text text-transparent">
               do cardápio ao WhatsApp
             </span>
@@ -1544,6 +1575,28 @@ export default function Home() {
               </a>
               .
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ 9.5 SEÇÃO SEMÂNTICA "SOBRE O SISTEMA MISEON" (GEO & SEO) ══════════ */}
+      <section id="sobre-o-sistema" className="border-t border-gray-200/70 bg-[#070C18] py-16 text-slate-300 dark:border-white/10">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md">
+            <h2 className="font-['Sora'] text-2xl font-extrabold text-white">
+              Sobre o Sistema MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares
+            </h2>
+            <div className="mt-4 space-y-4 text-sm leading-relaxed text-slate-300">
+              <p>
+                O sistema <strong>MiseOn</strong> é uma plataforma de gestão corporativa e automação inteligente desenvolvida exclusivamente para atender a rotina de restaurantes, hamburguerias, pizzarias, lanchonetes e bares em todo o Brasil.
+              </p>
+              <p>
+                Com arquitetura em nuvem de alta performance, o <strong>MiseOn</strong> integra em um único painel o cardápio digital QR Code para mesas e balcão, comandas eletrônicas via celular para garçons, telas de produção de cozinha (KDS sem papel), gerenciador de delivery integrado ao iFood, controle de caixa PDV, ficha técnica com baixa automática de estoque e atendimento via IA no WhatsApp oficial da Meta.
+              </p>
+              <p>
+                Desenvolvido para garantir agilidade e controle financeiro total, o sistema conta ainda com recebimento Pix automático sem retenção de valores e emissão fiscal NFC-e / NF-e integrada.
+              </p>
+            </div>
           </div>
         </div>
       </section>

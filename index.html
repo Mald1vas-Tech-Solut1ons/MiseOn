@@ -22,34 +22,81 @@
     <!-- Open Graph / Google & Redes Sociais -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="MiseOn" />
-    <meta property="og:title" content="MiseOn — Sistema Inteligente para sua Cozinha" />
-    <meta property="og:description" content="Sistema completo para restaurantes, hamburguerias, lanchonetes e pizzarias. PDV, KDS, cardápio QR Code, iFood e WhatsApp IA." />
+    <meta property="og:title" content="MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares" />
+    <meta property="og:description" content="MiseOn é o sistema de gestão completo para restaurantes, hamburguerias, pizzarias e lanchonetes. Cardápio digital QR Code, comanda eletrônica para bares, KDS de cozinha, gerenciador de delivery integrado ao iFood e atendimento WhatsApp com IA." />
     <meta property="og:image" content="https://miseon.app.br/icon-512.png" />
     <meta property="og:url" content="https://miseon.app.br/" />
 
-    <!-- Dados Estruturados Schema.org para o Google (Organização e Logotipo) -->
+    <!-- Dados Estruturados Schema.org para o Google & Motores de IA (GEO) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "MiseOn",
-        "url": "https://miseon.app.br",
-        "logo": "https://miseon.app.br/icon-512.png"
+        "@graph": [
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://miseon.app.br/#software",
+            "name": "MiseOn",
+            "url": "https://miseon.app.br",
+            "image": "https://miseon.app.br/icon-512.png",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "All",
+            "inLanguage": "pt-BR",
+            "description": "MiseOn é um sistema de gestão e automação inteligente focado exclusivamente no nicho de food service (restaurantes, bares, hamburguerias, pizzarias e lanchonetes). Oferece cardápio digital QR Code, controle de caixa e PDV, painel KDS para cozinha, gestão de delivery com integração iFood, comanda eletrônica para garçons e atendimento por Inteligência Artificial no WhatsApp.",
+            "offers": {
+              "@type": "Offer",
+              "price": "99.90",
+              "priceCurrency": "BRL",
+              "priceValidUntil": "2027-12-31",
+              "availability": "https://schema.org/InStock",
+              "url": "https://miseon.app.br/cadastre-se"
+            },
+            "featureList": [
+              "Cardápio Digital com QR Code para mesas e balcão sem taxas",
+              "Painel KDS de Cozinha sem papel e gerenciamento de fila de produção",
+              "Controle de Caixa, PDV Balcão e Fechamento de Turno",
+              "Gestão de Delivery com rastreio e integração nativa com iFood",
+              "Comanda Eletrônica no celular para garçons com divisão de conta",
+              "Atendimento automatizado por Inteligência Artificial no WhatsApp (API Oficial Meta)",
+              "Controle de Estoque com Ficha Técnica, CMV e Venda por Quilo (R$/kg)",
+              "Emissão Fiscal NFC-e e NF-e integrada com FocusNFe",
+              "Pagamento via Pix automático com conciliação instantânea (Efí Bank)"
+            ],
+            "author": {
+              "@type": "Organization",
+              "@id": "https://miseon.app.br/#organization"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://miseon.app.br/#organization",
+            "name": "MiseOn",
+            "legalName": "MiseOn Tecnologia e Soluções para Food Service",
+            "url": "https://miseon.app.br",
+            "logo": "https://miseon.app.br/icon-512.png",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "email": "suporte@miseon.app.br",
+              "telephone": "+55-11-91988-9233",
+              "availableLanguage": "Portuguese"
+            }
+          }
+        ]
       }
     </script>
 
-    <meta name="description" content="MiseOn - Sistema Inteligente para sua Cozinha. Cardápio digital, pedidos, entrega e estoque." />
-    <title>MiseOn — Sistema Inteligente para sua Cozinha</title>
+    <meta name="description" content="MiseOn | Sistema de gestão e automação para restaurantes, hamburguerias, pizzarias e lanchonetes. Cardápio digital QR Code, comanda eletrônica para bares, KDS e gerenciador de delivery integrado ao iFood." />
+    <title>MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares</title>
   </head>
   <body>
     <div id="root">
       <h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;">
-        MiseOn — Sistema de Gestão Inteligente para Restaurantes e Deliverys
+        MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares
       </h1>
     </div>
     <noscript>
-      <h1>MiseOn — Sistema de Gestão Inteligente para Restaurantes e Deliverys</h1>
-      <p>Sistema completo para restaurantes, hamburguerias, pizzarias e lanchonetes. Cardápio digital QR Code, KDS, iFood, WhatsApp IA e Pix.</p>
+      <h1>MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares</h1>
+      <p>MiseOn é o sistema de gestão completo para restaurantes, hamburguerias, pizzarias, lanchonetes e bares. Cardápio digital QR Code, KDS, comanda eletrônica, iFood, WhatsApp IA e Pix.</p>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>

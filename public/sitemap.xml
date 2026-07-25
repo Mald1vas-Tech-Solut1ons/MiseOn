@@ -15,28 +15,24 @@
       <video:title>Identidade e Ecossistema MiseOn</video:title>
       <video:description>Conheça o conceito, o rigor de engenharia e o design da plataforma MiseOn.</video:description>
       <video:content_loc>https://miseon.app.br/MiseOn%20brand%20identity/videoIntro1.mp4</video:content_loc>
-      <video:player_loc>https://miseon.app.br/videos</video:player_loc>
     </video:video>
     <video:video>
       <video:thumbnail_loc>https://miseon.app.br/MISEON-logo.png</video:thumbnail_loc>
       <video:title>Demonstracao do PDV e KDS em Tempo Real</video:title>
       <video:description>Veja como o fluxo continuo conecta o salao, o caixa e a linha de producao.</video:description>
       <video:content_loc>https://miseon.app.br/videoIntro.mp4</video:content_loc>
-      <video:player_loc>https://miseon.app.br/videos</video:player_loc>
     </video:video>
     <video:video>
       <video:thumbnail_loc>https://miseon.app.br/MISEON-logo.png</video:thumbnail_loc>
       <video:title>Integracao Nativa com iFood</video:title>
       <video:description>Sincronizacao instantanea de cardapio, pedidos do iFood no KDS e estoque.</video:description>
       <video:content_loc>https://miseon.app.br/videoMarketing.mp4</video:content_loc>
-      <video:player_loc>https://miseon.app.br/videos</video:player_loc>
     </video:video>
     <video:video>
       <video:thumbnail_loc>https://miseon.app.br/MISEON-logo.png</video:thumbnail_loc>
       <video:title>Atendimento Inteligente no WhatsApp com IA</video:title>
       <video:description>Como a IA do MiseOn conversa no WhatsApp e gera pedidos automaticamente.</video:description>
       <video:content_loc>https://miseon.app.br/videomarketing2.mp4</video:content_loc>
-      <video:player_loc>https://miseon.app.br/videos</video:player_loc>
     </video:video>
   </url>
   <url>
