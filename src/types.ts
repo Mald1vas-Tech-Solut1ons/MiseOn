@@ -4,7 +4,7 @@ export type TipoPedido = 'DELIVERY' | 'SALAO' | 'RETIRADA_BALCAO';
 export type StatusPedido = 'NOVO' | 'ACEITO' | 'PREPARANDO' | 'PRONTO' | 'EM_ROTA' | 'FINALIZADO' | 'CANCELADO';
 export type MetodoPgto = 'PIX' | 'CREDITO' | 'DEBITO' | 'DINHEIRO' | 'IFOOD';
 export type TipoRemetente = 'CLIENTE' | 'LOJA' | 'ENTREGADOR';
-export type TipoRemuneracao = 'FIXO' | 'POR_ENTREGA' | 'DESLIGADO';
+export type TipoRemuneracao = 'FIXO' | 'POR_ENTREGA' | 'POR_KM' | 'DESLIGADO';
 export type StatusRota = 'PENDENTE' | 'EM_ANDAMENTO' | 'FINALIZADA';
 export type EntregaModo = 'BAIRRO' | 'DISTANCIA' | 'HIBRIDO';
 // Fluxo passa-bastão (docs/PLANO-FLUXO-PEDIDOS.md): estação de preparo do
@@ -570,6 +570,9 @@ export interface ConfiguracoesCusto {
   expectativa_vendas_mes: number;
   tipo_remuneracao_entregador?: TipoRemuneracao;
   valor_remuneracao_entregador?: number;
+  entregador_taxa_minima?: number;
+  entregador_raio_minimo_km?: number;
+  entregador_taxa_km_excedente?: number;
   criado_em?: string;
   atualizado_em?: string;
 }

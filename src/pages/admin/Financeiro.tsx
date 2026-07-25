@@ -18,7 +18,21 @@ const defaultCustos: ConfiguracoesCusto = {
   custo_internet: 0,
   custo_gas: 0,
   outros_custos_fixos: 0,
-  expectativa_vendas_mes: 1000
+  expectativa_vendas_mes: 1000,
+  tipo_remuneracao_entregador: 'DESLIGADO',
+  valor_remuneracao_entregador: 0,
+  // Padrão sugerido pela plataforma para entregador freelancer (POR_KM):
+  // R$5 cobre até 5km, R$1,20 por km rodado além disso. A loja pode ajustar.
+  entregador_taxa_minima: 5,
+  entregador_raio_minimo_km: 5,
+  entregador_taxa_km_excedente: 1.2,
+};
+
+const REMUNERACAO_LABEL: Record<string, string> = {
+  DESLIGADO: 'Não remunero pelo sistema',
+  FIXO: 'Valor fixo mensal',
+  POR_ENTREGA: 'Valor fixo por entrega',
+  POR_KM: 'Por km rodado (freelancer)',
 };
 
 type Periodo = 'HOJE' | 'ONTEM' | '7D' | '30D' | 'MES';
@@ -453,6 +467,55 @@ export default function Financeiro() {
                    <p className="text-2xl font-black">{fmt(rateioSimulado)}</p>
                  </div>
                </div>
+             </div>
+
+             <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+               <p className="mb-3 flex items-center gap-1.5 text-sm font-bold text-gray-900 dark:text-gray-100"><Bike size={16} /> Remuneração do Entregador</p>
+               <label className="block mb-3">
+                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Como você paga seu(s) entregador(es)?</span>
+                 <select className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100"
+                   value={configCusto.tipo_remuneracao_entregador ?? 'DESLIGADO'}
+                   onChange={e => setConfigCusto({ ...configCusto, tipo_remuneracao_entregador: e.target.value as ConfiguracoesCusto['tipo_remuneracao_entregador'] })}>
+                   {Object.entries(REMUNERACAO_LABEL).map(([valor, label]) => <option key={valor} value={valor}>{label}</option>)}
+                 </select>
+               </label>
+
+               {(configCusto.tipo_remuneracao_entregador === 'FIXO' || configCusto.tipo_remuneracao_entregador === 'POR_ENTREGA') && (
+                 <label className="block">
+                   <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                     {configCusto.tipo_remuneracao_entregador === 'FIXO' ? 'Valor fixo mensal' : 'Valor por entrega'}
+                   </span>
+                   <input type="number" className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100"
+                     value={configCusto.valor_remuneracao_entregador ?? 0}
+                     onChange={e => setConfigCusto({ ...configCusto, valor_remuneracao_entregador: e.target.valueAsNumber || 0 })} />
+                 </label>
+               )}
+
+               {configCusto.tipo_remuneracao_entregador === 'POR_KM' && (
+                 <div className="grid gap-3 sm:grid-cols-3">
+                   <label className="block">
+                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Taxa mínima (R$)</span>
+                     <input type="number" step="0.01" className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100"
+                       value={configCusto.entregador_taxa_minima ?? 5}
+                       onChange={e => setConfigCusto({ ...configCusto, entregador_taxa_minima: e.target.valueAsNumber || 0 })} />
+                   </label>
+                   <label className="block">
+                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Raio coberto (km)</span>
+                     <input type="number" step="0.5" className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100"
+                       value={configCusto.entregador_raio_minimo_km ?? 5}
+                       onChange={e => setConfigCusto({ ...configCusto, entregador_raio_minimo_km: e.target.valueAsNumber || 0 })} />
+                   </label>
+                   <label className="block">
+                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">R$/km excedente</span>
+                     <input type="number" step="0.01" className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100"
+                       value={configCusto.entregador_taxa_km_excedente ?? 1.2}
+                       onChange={e => setConfigCusto({ ...configCusto, entregador_taxa_km_excedente: e.target.valueAsNumber || 0 })} />
+                   </label>
+                   <p className="col-span-full text-[10px] text-gray-500">
+                     Ex: entrega de 8km com os valores acima = R$5 + (8 − 5) × R$1,20 = R$8,60. Sem endereço geolocalizado, cai na taxa mínima.
+                   </p>
+                 </div>
+               )}
              </div>
 
              {mensagem && <p className={`mt-4 text-center text-sm font-semibold ${mensagem.includes('Erro') ? 'text-red-500' : 'text-green-600'}`}>{mensagem}</p>}

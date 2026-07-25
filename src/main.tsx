@@ -61,6 +61,7 @@ const EntregadorLayout   = lazy(() => import('./pages/entregador/EntregadorLayou
 const EntregadorLogin    = lazy(() => import('./pages/entregador/Login'));
 const EntregadorDashboard= lazy(() => import('./pages/entregador/Dashboard'));
 const EntregadorRota     = lazy(() => import('./pages/entregador/Rota'));
+const EntregadorDocumentos = lazy(() => import('./pages/entregador/Documentos'));
 
 // ── Lazy: SUPERADMIN (area interna restrita) ──────────────────────────────────
 const SuperAdminLogin  = lazy(() => import('./pages/superadmin/Login'));
@@ -130,6 +131,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/entregador" element={<EntregadorLayout />}>
                 <Route index element={<EntregadorDashboard />} />
                 <Route path="rota/:id" element={<EntregadorRota />} />
+                <Route path="documentos" element={<EntregadorDocumentos />} />
                 <Route path="conta"    element={<MinhaConta />} />
               </Route>
 

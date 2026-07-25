@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Navigate, useNavigate, NavLink } from 'react-router-dom';
-import { Bike, LogOut, Loader2, UserCircle } from 'lucide-react';
+import { Bike, LogOut, Loader2, UserCircle, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
@@ -9,6 +9,7 @@ export interface CtxEntregador {
   entregadorId: string;
   lojaId: string;
   nome: string;
+  statusDocumentos: 'pendente' | 'aprovado' | 'rejeitado';
 }
 
 export default function EntregadorLayout() {
@@ -38,7 +39,7 @@ export default function EntregadorLayout() {
     // Verifica se esse usuário é um entregador cadastrado
     const { data, error } = await supabase
       .from('entregadores')
-      .select('id, loja_id, nome, ativo')
+      .select('id, loja_id, nome, ativo, status_documentos')
       .eq('user_id', user.id)
       .maybeSingle();
 
@@ -55,6 +56,7 @@ export default function EntregadorLayout() {
       entregadorId: data.id,
       lojaId: data.loja_id,
       nome: data.nome,
+      statusDocumentos: data.status_documentos ?? 'pendente',
     });
     setLoading(false);
   };
@@ -91,6 +93,12 @@ export default function EntregadorLayout() {
             <p className="text-xs font-bold text-gray-300">{ctx.nome}</p>
             <p className="text-[10px] text-green-400">Online e operando</p>
           </div>
+          <NavLink to="/entregador/documentos" className={({isActive}) => `relative rounded-full p-2 transition-colors ${isActive ? 'bg-[var(--cor-primaria)] text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700 bg-gray-800'}`}>
+            <FileText size={16} />
+            {ctx.statusDocumentos !== 'aprovado' && (
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 border border-gray-900" />
+            )}
+          </NavLink>
           <NavLink to="/entregador/conta" className={({isActive}) => `rounded-full p-2 transition-colors ${isActive ? 'bg-[var(--cor-primaria)] text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700 bg-gray-800'}`}>
             <UserCircle size={16} />
           </NavLink>

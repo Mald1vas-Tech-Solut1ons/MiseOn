@@ -11,10 +11,13 @@ export default function EntregadorDashboard() {
   
   const [configRemuneracao, setConfigRemuneracao] = useState<string>('DESLIGADO');
   const [valorRemuneracao, setValorRemuneracao] = useState(0);
-  
+  const [taxaMinima, setTaxaMinima] = useState(5);
+  const [raioMinimoKm, setRaioMinimoKm] = useState(5);
+  const [taxaKmExcedente, setTaxaKmExcedente] = useState(1.2);
+
   const [metricas, setMetricas] = useState({
     corridasHoje: 0,
-    kmHoje: 0, // Mockado por enquanto, precisaria de tracking avançado pra calcular real
+    kmHoje: 0, // soma de pedidos.distancia_km das entregas finalizadas hoje
     tempoMedio: 0,
     pedidosEntregues: 0,
     ganhosHoje: 0,
@@ -29,14 +32,20 @@ export default function EntregadorDashboard() {
     // 1. Busca configurações da loja (para saber a remuneração)
     const { data: config } = await supabase
       .from('configuracoes_custo')
-      .select('tipo_remuneracao_entregador, valor_remuneracao_entregador')
+      .select('tipo_remuneracao_entregador, valor_remuneracao_entregador, entregador_taxa_minima, entregador_raio_minimo_km, entregador_taxa_km_excedente')
       .eq('loja_id', ctx.lojaId)
       .maybeSingle();
-      
+
     const tipoRem = config?.tipo_remuneracao_entregador || 'DESLIGADO';
     const valRem = Number(config?.valor_remuneracao_entregador || 0);
+    const taxaMin = Number(config?.entregador_taxa_minima ?? 5);
+    const raioMin = Number(config?.entregador_raio_minimo_km ?? 5);
+    const taxaKm = Number(config?.entregador_taxa_km_excedente ?? 1.2);
     setConfigRemuneracao(tipoRem);
     setValorRemuneracao(valRem);
+    setTaxaMinima(taxaMin);
+    setRaioMinimoKm(raioMin);
+    setTaxaKmExcedente(taxaKm);
 
     // 2. Busca Rota Ativa
     const { data: rota } = await supabase
@@ -62,34 +71,48 @@ export default function EntregadorDashboard() {
     
     const { data: rotasHoje } = await supabase
       .from('rotas_entrega')
-      .select('id, finalizado_em, criado_em, pedidos(id, status)')
+      .select('id, finalizado_em, criado_em, pedidos(id, status, distancia_km)')
       .eq('entregador_id', ctx.entregadorId)
       .eq('status', 'FINALIZADA')
       .gte('finalizado_em', hojeStart.toISOString());
-      
+
     if (rotasHoje) {
       const corridas = rotasHoje.length;
       let entregas = 0;
       let somaTempos = 0;
-      
+      let somaKm = 0;
+      let ganhos = 0;
+
       rotasHoje.forEach(r => {
-        const ped = r.pedidos || [];
-        entregas += ped.filter((p: any) => p.status === 'FINALIZADO').length;
+        const pedidosFinalizados = (r.pedidos || []).filter((p: any) => p.status === 'FINALIZADO');
+        entregas += pedidosFinalizados.length;
         if (r.finalizado_em && r.criado_em) {
           somaTempos += (new Date(r.finalizado_em).getTime() - new Date(r.criado_em).getTime()) / 60000; // minutos
         }
+
+        pedidosFinalizados.forEach((p: any) => {
+          const distancia = p.distancia_km != null ? Number(p.distancia_km) : null;
+          if (distancia != null) somaKm += distancia;
+
+          if (tipoRem === 'POR_ENTREGA') {
+            ganhos += valRem;
+          } else if (tipoRem === 'POR_KM') {
+            // Regra: taxa mínima cobre o raio mínimo; km rodado além disso
+            // é cobrado à parte. Sem distância real (loja sem geolocalização
+            // configurada), cai na taxa mínima — nunca inventa km.
+            ganhos += distancia == null || distancia <= raioMin
+              ? taxaMin
+              : taxaMin + taxaKm * (distancia - raioMin);
+          }
+        });
       });
-      
-      let ganhos = 0;
-      if (tipoRem === 'POR_ENTREGA') ganhos = entregas * valRem;
-      // se fosse POR_CORRIDA seria corridas * valRem, o sistema pode evoluir.
-      
+
       setMetricas({
         corridasHoje: corridas,
-        kmHoje: Math.floor(Math.random() * 10) + corridas * 3, // Mock para visualização do motoboy
+        kmHoje: Math.round(somaKm * 10) / 10,
         tempoMedio: corridas > 0 ? Math.round(somaTempos / corridas) : 0,
         pedidosEntregues: entregas,
-        ganhosHoje: ganhos,
+        ganhosHoje: Math.round(ganhos * 100) / 100,
       });
     }
 
@@ -115,7 +138,7 @@ export default function EntregadorDashboard() {
   return (
     <div className="p-4 space-y-6 pb-20">
       {/* Resumo Financeiro (Condicional) */}
-      {configRemuneracao === 'POR_ENTREGA' && (
+      {(configRemuneracao === 'POR_ENTREGA' || configRemuneracao === 'POR_KM') && (
         <div className="rounded-2xl bg-gradient-to-br from-orange-600 to-orange-800 p-5 text-white shadow-xl">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-orange-200 uppercase tracking-wider">Seus Ganhos (Hoje)</h2>
@@ -123,7 +146,11 @@ export default function EntregadorDashboard() {
           </div>
           <p className="text-4xl font-black">{fmt(metricas.ganhosHoje)}</p>
           <div className="mt-4 flex gap-4 text-xs font-semibold text-orange-200">
-            <p>Taxa Ativa: {fmt(valorRemuneracao)} <span className="font-normal opacity-80">/entrega</span></p>
+            {configRemuneracao === 'POR_KM' ? (
+              <p>Taxa: {fmt(taxaMinima)} até {raioMinimoKm}km <span className="font-normal opacity-80">+ {fmt(taxaKmExcedente)}/km excedente</span></p>
+            ) : (
+              <p>Taxa Ativa: {fmt(valorRemuneracao)} <span className="font-normal opacity-80">/entrega</span></p>
+            )}
           </div>
         </div>
       )}

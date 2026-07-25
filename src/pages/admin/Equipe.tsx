@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabase';
 import type { MembroEquipe, TipoContrato } from '../../types';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
+import AprovacaoEntregadores from '../../components/admin/AprovacaoEntregadores';
 
 const PAPEL_INFO: Record<string, { label: string; icon: typeof ShieldCheck; classe: string }> = {
   admin:      { label: 'Admin',      icon: ShieldCheck,     classe: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
@@ -196,6 +197,8 @@ export default function Equipe() {
           <Plus size={16} /> Criar acesso
         </button>
       </div>
+
+      <AprovacaoEntregadores lojaId={lojaId} />
 
       {/* ── Lista de membros ── */}
       {carregando ? (
