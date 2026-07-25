@@ -95,7 +95,43 @@ export interface Loja {
   aceita_online?: boolean | null;   // Pix/Crédito via Efí (pague agora)
   aceita_entrega?: boolean | null;  // Dinheiro/maquininha (pague na entrega)
   kds_etapas?: EtapaKDS[] | null; // Configuração de etapas do KDS Kanban
+  segmento_negocio?: SegmentoNegocio | null;
+  modulos_ativos?: ModulosAtivos | null;
 }
+
+export type SegmentoNegocio =
+  | 'HAMBURGUERIA'
+  | 'PIZZARIA'
+  | 'RESTAURANTE_A_LA_CARTE'
+  | 'RESTAURANTE_POR_QUILO'
+  | 'DARK_KITCHEN'
+  | 'BAR_PUB'
+  | 'GERAL';
+
+export interface ModulosAtivos {
+  balanca?: boolean;
+  mesas_3d?: boolean;
+  garcom_pwa?: boolean;
+  pizzas?: boolean;
+  kds?: boolean;
+  entregas?: boolean;
+  ifood?: boolean;
+  fiscal?: boolean;
+}
+
+export interface ReposicaoBuffet {
+  id: string;
+  loja_id: string;
+  produto_id: string;
+  nome_cuba: string;
+  peso_reposto_kg: number;
+  custo_estimado_total?: number;
+  preparado_por?: string | null;
+  observacao?: string | null;
+  criado_em: string;
+  produtos?: { nome: string; preco_por_quilo?: number };
+}
+
 
 export interface HorarioFuncionamento {
   id?: string;
