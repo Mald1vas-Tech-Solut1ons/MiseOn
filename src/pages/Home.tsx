@@ -274,7 +274,7 @@ export default function Home() {
     <div className="min-h-screen scroll-smooth bg-[#F4F7FA] font-sans text-gray-900 selection:bg-[#FC5B24] selection:text-white dark:bg-[#070C18] dark:text-[#EAF1FB]">
       <SEO
         title="MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares"
-        description="MiseOn é o sistema de gestão e automação completo para restaurantes, hamburguerias, pizzarias e lanchonetes. Cardápio digital QR Code, comanda eletrônica para bares, KDS de cozinha, gerenciador de delivery integrado ao iFood e atendimento WhatsApp com IA."
+        description="MiseOn: sistema de gestão e automação para restaurantes, hamburguerias, pizzarias e bares. Cardápio digital QR Code, KDS, comanda eletrônica e iFood."
         keywords="sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardapio digital qr code, integracao ifood, whatsapp ia restaurante"
         canonicalUrl="https://miseon.app.br/"
         schemaJson={{
