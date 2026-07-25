@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { ClipboardList, Boxes, Bike, Store, LogOut, UtensilsCrossed, MoreHorizontal, X, TrendingUp, Megaphone, Users, History, CreditCard, ShoppingCart, Flame, ChevronLeft, Menu, UserCircle, LifeBuoy, LayoutDashboard, Calculator, ChefHat, LayoutGrid, MessageSquare, MessageCircle, Plug, FileText, Compass } from 'lucide-react';
+import { ClipboardList, Boxes, Bike, Store, LogOut, UtensilsCrossed, MoreHorizontal, X, TrendingUp, Megaphone, Users, History, CreditCard, ShoppingCart, Flame, ChevronLeft, Menu, UserCircle, LifeBuoy, LayoutDashboard, Calculator, ChefHat, LayoutGrid, MessageSquare, MessageCircle, Plug, FileText, Compass, Scale, Smartphone } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { avaliarAssinatura } from '../../lib/assinatura';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -241,6 +241,8 @@ export default function AdminLayout() {
           { to: '/admin/inicio', icon: <LayoutDashboard size={20} />, label: 'Início', colorHex: C.blue },
           { to: '/admin/pdv', icon: <Calculator size={20} />, label: 'PDV Balcão', colorHex: C.orange },
           { to: '/admin/mesas', icon: <LayoutGrid size={20} />, label: 'Mapa de Mesas', colorHex: C.amber },
+          { to: '/admin/balanca', icon: <Scale size={20} />, label: 'Balança Buffet', colorHex: C.orange },
+          { to: '/admin/garcom-mobile', icon: <Smartphone size={20} />, label: 'Garçom Mobile PWA', colorHex: C.amber },
           { to: '/admin/pedidos', icon: <ClipboardList size={20} />, label: 'Pedidos', colorHex: C.green },
           { to: '/admin/kds', icon: <ChefHat size={20} />, label: 'Cozinha (KDS)', colorHex: C.red },
           { to: '/admin/cardapio', icon: <UtensilsCrossed size={20} />, label: 'Cardápio', colorHex: C.indigo },
@@ -399,7 +401,7 @@ export default function AdminLayout() {
                 <p className={`px-5 mb-2 mt-4 text-[10px] font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-[8px]' : ''}`}>
                   {isCollapsed ? '---' : 'Operação'}
                 </p>
-                {[...principal, ...mais].filter(p => ['/admin/pdv', '/admin/mesas', '/admin/pedidos', '/admin/kds', '/admin/producao', '/admin/entregas'].includes(p.to)).map(p => renderSidebarLink(p))}
+                {[...principal, ...mais].filter(p => ['/admin/pdv', '/admin/mesas', '/admin/balanca', '/admin/garcom-mobile', '/admin/pedidos', '/admin/kds', '/admin/producao', '/admin/entregas'].includes(p.to)).map(p => renderSidebarLink(p))}
               </div>
 
               {/* Atendimento e Canais */}

@@ -814,7 +814,7 @@ export default function Home() {
                       </span>
                     </div>
                     <p className="mt-1 text-sm leading-relaxed text-slate-300 max-w-3xl">
-                      Módulo de Peso Inteligente (R$/kg): baixa exata de estoque proporcional por grama consumida, PDV express de balança, cardápio digital com seletor de peso e relatórios por porções.
+                      Módulo de Peso Inteligente (R$/kg) + Integração Nativa com Balanças (Toledo/Filizola/Urano), Divisão Inteligente de Bebidas/Itens na Mesa (Garçom no Lançamento & Caixa por Produto) e PWA Garçom com Vibração Hálptica.
                     </p>
                   </div>
                 </div>

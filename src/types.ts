@@ -239,6 +239,12 @@ export interface ItemPedido {
   quantidade: number;
   observacao?: string;
   assento_numero?: number | null;
+  fracionado?: boolean;
+  participantes_assentos?: number[] | null;
+  quantidade_original?: number | null;
+  parent_item_id?: string | null;
+  origem_balanca?: boolean;
+  tara_g?: number;
   itens_pedido_opcoes?: { nome_opcao: string; preco_adicional: number }[];
   // join opcional com produtos para o KDS saber a estação de preparo de cada item
   produtos?: { estacao_preparo?: EstacaoPreparo | null } | null;
@@ -486,7 +492,7 @@ export interface Mesa {
 export interface Comanda {
   id: string;
   loja_id: string;
-  mesa_id: string;
+  mesa_id?: string | null;
   status: 'ABERTA' | 'FECHADA';
   taxa_servico_pct: number;
   valor_servico: number;
@@ -494,7 +500,53 @@ export interface Comanda {
   aberta_em: string;
   fechada_em?: string | null;
   fechada_por?: string | null;
+  tipo_comanda?: 'MESA' | 'INDIVIDUAL';
+  numero_cartao?: string | null;
+  nome_cliente?: string | null;
+  comanda_mae_id?: string | null;
 }
+
+// ── Balança & PWA Garçom ──────────────────────────────────────
+
+export type ProtocoloBalanca = 'TOLEDO_PRIX3' | 'TOLEDO_PRIX4' | 'FILIZOLA_CS15' | 'URANO' | 'CUSTOM_SERIAL' | 'NETWORK_TCP' | 'EMULADOR';
+export type ModoConexaoBalanca = 'WEB_SERIAL' | 'NETWORK_WEBHOOK' | 'EMULADOR';
+
+export interface BalancaConfiguracao {
+  id: string;
+  loja_id: string;
+  protocolo: ProtocoloBalanca;
+  modo_conexao: ModoConexaoBalanca;
+  baud_rate: number;
+  data_bits: number;
+  stop_bits: number;
+  parity: 'none' | 'even' | 'odd';
+  tara_padrao_g: number;
+  produto_buffet_id?: string | null;
+  ip_dispositivo?: string | null;
+  porta_dispositivo?: number | null;
+  ativo: boolean;
+  criado_em?: string;
+  atualizado_em?: string;
+}
+
+export type TipoChamadoGarcom = 'ATENDIMENTO' | 'FECHAMENTO' | 'DUVIDA' | 'OUTRO';
+export type StatusChamadoGarcom = 'PENDENTE' | 'EM_ATENDIMENTO' | 'CONCLUIDO' | 'CANCELADO';
+
+export interface ChamadoGarcom {
+  id: string;
+  loja_id: string;
+  mesa_id?: string | null;
+  comanda_id?: string | null;
+  assento_numero?: number | null;
+  tipo: TipoChamadoGarcom;
+  status: StatusChamadoGarcom;
+  mensagem?: string | null;
+  atendido_por?: string | null;
+  criado_em: string;
+  atendido_em?: string | null;
+  mesa_numero?: number;
+}
+
 
 // ── Frente de Caixa ───────────────────────────────────────────
 

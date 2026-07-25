@@ -38,6 +38,8 @@ const KDS           = lazy(() => import('./pages/admin/KDS'));
 const KDSProducao   = lazy(() => import('./pages/admin/KDSProducao'));
 const Mesas         = lazy(() => import('./pages/admin/Mesas'));
 const Entregas      = lazy(() => import('./pages/admin/Entregas'));
+const PainelBalanca = lazy(() => import('./pages/admin/PainelBalanca').then((m) => ({ default: m.PainelBalanca })));
+const PainelGarcomMobile = lazy(() => import('./pages/admin/PainelGarcomMobile').then((m) => ({ default: m.PainelGarcomMobile })));
 
 // ── Lazy: ADMIN_GESTAO (chunk separado — só carrega ao navegar) ───────────────
 const CardapioAdmin = lazy(() => import('./pages/admin/Cardapio'));
@@ -95,6 +97,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <Route path="pdv"       element={<PDV />} />
                 <Route path="kds"       element={<KDS />} />
                 <Route path="mesas"     element={<Mesas />} />
+                <Route path="balanca"   element={<PainelBalanca />} />
+                <Route path="garcom-mobile" element={<PainelGarcomMobile />} />
                 <Route path="pedidos"   element={<PainelPedidos />} />
                 <Route path="entregas"  element={<Entregas />} />
                 <Route path="cardapio"  element={<CardapioAdmin />} />
