@@ -10,6 +10,7 @@ import { BrandLoader } from '../../components/BrandLoader';
 import { podeAcessar, HOME_POR_PAPEL, type Papel } from '../../lib/permissoes';
 import { useGuidedTour } from '../../hooks/useGuidedTour';
 import { GuidedTourModal } from '../../components/tour/GuidedTourModal';
+import TornarSeLojista from '../../components/admin/TornarSeLojista';
 
 export interface RouteDef {
   to: string;
@@ -25,6 +26,7 @@ export interface CtxLoja {
   papel: string; // admin | operador | garcom | entregador
   status_assinatura?: string | null;
   diasAtraso: number;
+  trialTerminaEm: string | null;
 }
 
 export default function AdminLayout() {
@@ -32,6 +34,7 @@ export default function AdminLayout() {
   const loc = useLocation();
   const [ctx, setCtx] = useState<CtxLoja | null>(null);
   const [semLoja, setSemLoja] = useState(false);
+  const [emailUsuario, setEmailUsuario] = useState('');
   const [erroConexao, setErroConexao] = useState(false);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
 
@@ -99,7 +102,7 @@ export default function AdminLayout() {
       // e NUNCA deve derrubar a operação — mostra tela de erro com retry.
       // Só é "sem loja" quando a query funcionou e não achou vínculo (PGRST116).
       if (error && error.code !== 'PGRST116') { setErroConexao(true); return; }
-      if (!data) { setSemLoja(true); return; }
+      if (!data) { setEmailUsuario(user.email ?? ''); setSemLoja(true); return; }
       const papel = (data as any).papel ?? 'admin';
       const lojaInfo = (data as any).lojas;
 
@@ -112,7 +115,8 @@ export default function AdminLayout() {
         lojaSlug: lojaInfo?.slug ?? '',
         papel,
         status_assinatura: lojaInfo?.status_assinatura,
-        diasAtraso
+        diasAtraso,
+        trialTerminaEm: lojaInfo?.trial_termina_em ?? null,
       });
 
       if (lojaInfo?.cor_primaria) document.documentElement.style.setProperty('--cor-primaria', lojaInfo.cor_primaria);
@@ -166,10 +170,14 @@ export default function AdminLayout() {
 
   if (semLoja) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 p-8 text-center bg-gray-50 dark:bg-[#0B1120] text-gray-900 dark:text-gray-100">
-        <p className="font-semibold text-lg">Sua conta ainda não está vinculada a nenhuma loja.</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">Peça para o administrador da loja te convidar pela tela de Equipe, usando este mesmo e-mail.</p>
-        <button onClick={sair} className="mt-4 rounded-xl bg-[#004198] hover:bg-[#00337A] px-8 py-3 text-sm font-bold text-white shadow-lg transition-all active:scale-95">Voltar para o Login</button>
+      <div>
+        <TornarSeLojista emailUsuario={emailUsuario} onCriada={() => window.location.reload()} />
+        <div className="pb-8 text-center">
+          <p className="text-xs text-gray-400 dark:text-gray-500 max-w-md mx-auto">
+            Foi convidado pra equipe de uma loja que já existe? Peça pro admin te adicionar pela tela de Equipe, usando este mesmo e-mail, em vez de criar uma loja nova.
+          </p>
+          <button onClick={sair} className="mt-3 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">Sair do Sistema</button>
+        </div>
       </div>
     );
   }
@@ -539,6 +547,30 @@ export default function AdminLayout() {
 
         {/* ── CONTEÚDO DA PÁGINA (SCROLLÁVEL) ── */}
         <main className="flex-1 overflow-y-auto pb-20 lg:pb-0 relative custom-scrollbar px-6 sm:px-10 pt-2">
+
+          {/* BANNER PROATIVO: TRIAL AINDA VÁLIDO, MAS ACABANDO EM BREVE */}
+          {ctx.diasAtraso === 0 && ctx.status_assinatura === 'trial' && ctx.trialTerminaEm && (() => {
+            const diasRestantes = Math.ceil((new Date(ctx.trialTerminaEm).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+            if (diasRestantes > 5 || diasRestantes < 0) return null;
+            return (
+              <div className="bg-blue-500/10 border-b border-blue-500/20 px-4 py-3 sm:px-6 flex items-center justify-between shadow-inner">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-600 text-white p-1.5 rounded-lg">
+                    <CreditCard size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-blue-700 dark:text-blue-400 leading-tight">
+                      {diasRestantes <= 0 ? 'Seu teste grátis termina hoje' : `Seu teste grátis termina em ${diasRestantes} dia${diasRestantes === 1 ? '' : 's'}`}
+                    </h3>
+                    <p className="text-[11px] text-blue-600/80 dark:text-blue-400/80 mt-0.5">Garanta sua assinatura pra não perder o acesso.</p>
+                  </div>
+                </div>
+                <button onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">
+                  Assinar agora
+                </button>
+              </div>
+            );
+          })()}
 
           {/* BANNER DE CARÊNCIA INFECHÁVEL (DIAS 1 A 7 DE TOLERÂNCIA PÓS-VENCIMENTO) */}
           {ctx.diasAtraso > 0 && ctx.diasAtraso <= 7 && (

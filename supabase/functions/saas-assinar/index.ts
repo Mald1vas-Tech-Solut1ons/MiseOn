@@ -1,6 +1,19 @@
 // MiseOn — Edge Function: Assinatura SaaS Efí Bank
-// Processa o pagamento recorrente (assinatura) da loja para a plataforma MiseOn.
+// Processa o pagamento da loja para a plataforma MiseOn.
 // Usa a API de Cobranças da Efí (OAuth Basic).
+//
+// Dois fluxos bem diferentes por trás do mesmo botão "Assinar":
+//   - mensal: assinatura recorrente de verdade (plan + subscription da Efí),
+//     cobra R$169,90 todo mês até cancelar.
+//   - anual: cobrança ÚNICA de R$1.798,80 parcelada no cartão (1x/3x/6x/8x/12x
+//     via /v1/charge/one-step com installments) — não é recorrência, é o
+//     valor fechado do ano à vista parcelado, igual à promessa da tela.
+// Antes disto o "anual" também virava assinatura mensal recorrente (bug: o
+// parcelamento anunciado na tela nunca existiu de fato). O valor de "sem
+// juros" nas parcelas depende da configuração de taxa de juros da CONTA Efí
+// (has_interest) — isso não é controlado por código, é configuração do
+// painel/contrato Efí; se a conta tiver juros habilitados acima de certo
+// número de parcelas, o valor total pode variar do anunciado.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -9,9 +22,10 @@ const EFI_COB_URL = Deno.env.get('EFI_SANDBOX') === 'true'
   : 'https://cobrancas.api.efipay.com.br';
 
 const PLAN_NAME = 'MiseOn Profissional';
-const PLAN_VALUE = 15000; // R$ 150,00 em centavos
+const VALOR_MENSAL = 16990;      // R$ 169,90 em centavos (assinatura recorrente)
+const VALOR_ANUAL_TOTAL = 179880; // R$ 1.798,80 em centavos (cobrança única parcelada)
+const PARCELAS_VALIDAS = new Set([1, 3, 6, 8, 12]);
 
-// CORS: sem isto o navegador bloqueia a chamada do painel antes de chegar na Efí.
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -46,25 +60,19 @@ async function getToken(): Promise<string> {
 }
 
 async function getOrCreatePlan(token: string): Promise<number> {
-  // Busca planos existentes (limite 100 para garantir)
   const res = await fetch(`${EFI_COB_URL}/v1/plans?limit=100&offset=0`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   const data = await res.json();
   const plans = data.data || [];
-  
-  const existingPlan = plans.find((p: any) => p.name === PLAN_NAME && p.value === PLAN_VALUE);
+
+  const existingPlan = plans.find((p: any) => p.name === PLAN_NAME && p.value === VALOR_MENSAL);
   if (existingPlan) return existingPlan.plan_id;
 
-  // Cria o plano se não existir
   const createRes = await fetch(`${EFI_COB_URL}/v1/plan`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: PLAN_NAME,
-      repeats: null, // Recorrência contínua até ser cancelada
-      interval: 1    // Mensal
-    }),
+    body: JSON.stringify({ name: PLAN_NAME, repeats: null, interval: 1 }),
   });
   const createData = await createRes.json();
   if (!createData?.data?.plan_id) throw new Error(`Falha ao criar plano Efí: ${JSON.stringify(createData)}`);
@@ -74,7 +82,7 @@ async function getOrCreatePlan(token: string): Promise<number> {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   try {
-    const { loja_id, payment_token, customer } = await req.json();
+    const { loja_id, ciclo, parcelas, payment_token, customer } = await req.json();
     if (!loja_id || !payment_token || !customer?.name || !customer?.cpf) {
       return json({ error: 'Faltam dados obrigatórios' }, { status: 400 });
     }
@@ -84,67 +92,164 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
+    // Endereço do tomador (cadastro do onboarding) — a Efí exige endereço de
+    // cobrança no fluxo de cobrança única (one-step); a assinatura recorrente
+    // não exige, mas usamos o mesmo dado pra manter a fatura consistente.
+    const { data: dadosCadastro } = await supabase
+      .from('assinatura_dados_cadastro')
+      .select('*')
+      .eq('loja_id', loja_id)
+      .maybeSingle();
+
     const token = await getToken();
+    const ehAnual = ciclo === 'anual';
+    let subscriptionId: string | number | null = null;
+    let chargeIdReal: string | null = null;
+    let statusPago: string;
+    let valorCobrado: number; // em reais
+    let parcelasCobradas = 1;
 
-    // 1. Obter o ID do plano (MiseOn Profissional - R$ 150)
-    const planId = await getOrCreatePlan(token);
+    if (ehAnual) {
+      if (!dadosCadastro?.logradouro || !dadosCadastro?.cidade || !dadosCadastro?.uf || !dadosCadastro?.cep) {
+        return json({ error: 'Complete seu endereço no cadastro antes de assinar o plano anual.' }, { status: 422 });
+      }
+      const nParcelas = PARCELAS_VALIDAS.has(Number(parcelas)) ? Number(parcelas) : 12;
 
-    // 2. Criar a assinatura para a Loja
-    const subRes = await fetch(`${EFI_COB_URL}/v1/plan/${planId}/subscription`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        items: [{
-          name: 'Mensalidade MiseOn Profissional',
-          value: PLAN_VALUE,
-          amount: 1
-        }]
-      })
-    });
-    const subData = await subRes.json();
-    if (!subData?.data?.subscription_id) throw new Error(`Falha ao criar subscription: ${JSON.stringify(subData)}`);
-    const subscriptionId = subData.data.subscription_id;
+      const chargeRes = await fetch(`${EFI_COB_URL}/v1/charge/one-step`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{ name: 'Assinatura MiseOn SaaS Pro — Plano Anual', value: VALOR_ANUAL_TOTAL, amount: 1 }],
+          payment: {
+            credit_card: {
+              payment_token,
+              installments: nParcelas,
+              customer: {
+                name: customer.name,
+                cpf: String(customer.cpf).replace(/\D/g, ''),
+                email: dadosCadastro.email_cobranca || undefined,
+                phone_number: String(customer.phone ?? '').replace(/\D/g, '') || undefined,
+                address: {
+                  street: dadosCadastro.logradouro,
+                  number: dadosCadastro.numero || 'S/N',
+                  neighborhood: dadosCadastro.bairro || 'Centro',
+                  zipcode: String(dadosCadastro.cep).replace(/\D/g, ''),
+                  city: dadosCadastro.cidade,
+                  complement: dadosCadastro.complemento || undefined,
+                  state: dadosCadastro.uf,
+                },
+              },
+              billing_address: {
+                street: dadosCadastro.logradouro,
+                number: dadosCadastro.numero || 'S/N',
+                neighborhood: dadosCadastro.bairro || 'Centro',
+                zipcode: String(dadosCadastro.cep).replace(/\D/g, ''),
+                city: dadosCadastro.cidade,
+                complement: dadosCadastro.complemento || undefined,
+                state: dadosCadastro.uf,
+              },
+            },
+          },
+        }),
+      });
+      const chargeData = await chargeRes.json();
+      const status = String(chargeData?.data?.status ?? '').toLowerCase();
+      if (chargeData.code !== 200 || !['paid', 'approved', 'liquidado'].includes(status)) {
+        return json({ error: chargeData?.message ?? chargeData?.error_description ?? 'Cartão recusado', detail: chargeData }, { status: 402 });
+      }
+      chargeIdReal = String(chargeData.data.charge_id);
+      statusPago = status;
+      valorCobrado = VALOR_ANUAL_TOTAL / 100;
+      parcelasCobradas = nParcelas;
+    } else {
+      // Mensal: assinatura recorrente de verdade via plan/subscription.
+      const planId = await getOrCreatePlan(token);
+      const subRes = await fetch(`${EFI_COB_URL}/v1/plan/${planId}/subscription`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: [{ name: 'Mensalidade MiseOn Profissional', value: VALOR_MENSAL, amount: 1 }] }),
+      });
+      const subData = await subRes.json();
+      if (!subData?.data?.subscription_id) throw new Error(`Falha ao criar subscription: ${JSON.stringify(subData)}`);
+      subscriptionId = subData.data.subscription_id;
 
-    // 3. Pagar a assinatura com o cartão de crédito
-    const payRes = await fetch(`${EFI_COB_URL}/v1/subscription/${subscriptionId}/pay`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        payment: {
-          credit_card: {
-            payment_token,
-            customer: {
-              name: customer.name,
-              cpf: String(customer.cpf).replace(/\D/g, ''),
-              phone_number: String(customer.phone ?? '').replace(/\D/g, '') || undefined,
+      const payRes = await fetch(`${EFI_COB_URL}/v1/subscription/${subscriptionId}/pay`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          payment: {
+            credit_card: {
+              payment_token,
+              customer: {
+                name: customer.name,
+                cpf: String(customer.cpf).replace(/\D/g, ''),
+                phone_number: String(customer.phone ?? '').replace(/\D/g, '') || undefined,
+              }
             }
           }
-        }
-      })
-    });
-    const payData = await payRes.json();
-    if (payData.code !== 200 || !['active', 'paid'].includes(String(payData?.data?.status))) {
-      return json({ error: payData?.message ?? 'Cartão recusado', detail: payData }, { status: 402 });
+        }),
+      });
+      const payData = await payRes.json();
+      const status = String(payData?.data?.status ?? '');
+      if (payData.code !== 200 || !['active', 'paid'].includes(status)) {
+        return json({ error: payData?.message ?? 'Cartão recusado', detail: payData }, { status: 402 });
+      }
+      statusPago = status;
+      valorCobrado = VALOR_MENSAL / 100;
+      chargeIdReal = `sub-${subscriptionId}-${Date.now()}`;
     }
 
-    // 4. Sucesso! Atualiza o banco de dados da loja
+    // Atualiza o banco de dados da loja
     const novoVencimento = new Date();
-    novoVencimento.setMonth(novoVencimento.getMonth() + 1);
+    novoVencimento.setMonth(novoVencimento.getMonth() + (ehAnual ? 12 : 1));
 
     const { error: updErr } = await supabase.from('lojas').update({
       status_assinatura: 'ativa',
-      trial_termina_em: novoVencimento.toISOString(), // próximo vencimento da assinatura paga
+      trial_termina_em: novoVencimento.toISOString(),
     }).eq('id', loja_id);
     if (updErr) {
       console.error('Falha ao atualizar assinatura da loja', updErr);
       return json({ error: 'Pagamento aprovado, mas falha ao ativar a loja. Contate o suporte.', detail: updErr }, { status: 500 });
     }
 
+    // Gera a fatura da assinatura (valor real cobrado) e dispara a NFS-e.
+    const { data: fatura, error: eFatura } = await supabase.from('faturas_assinatura').insert({
+      loja_id,
+      ciclo: ehAnual ? 'anual' : 'mensal',
+      parcelas: parcelasCobradas,
+      forma_pagamento: 'cartao',
+      valor_cobrado: valorCobrado,
+      efi_subscription_id: subscriptionId != null ? String(subscriptionId) : null,
+      efi_charge_id: chargeIdReal,
+      status_cobranca: 'pago',
+      data_pagamento: new Date().toISOString(),
+      tomador_cpf_cnpj: dadosCadastro?.cpf_cnpj ?? null,
+      tomador_razao_social: dadosCadastro?.razao_social_ou_nome ?? null,
+      tomador_logradouro: dadosCadastro?.logradouro ?? null,
+      tomador_numero: dadosCadastro?.numero ?? null,
+      tomador_complemento: dadosCadastro?.complemento ?? null,
+      tomador_bairro: dadosCadastro?.bairro ?? null,
+      tomador_cidade: dadosCadastro?.cidade ?? null,
+      tomador_uf: dadosCadastro?.uf ?? null,
+      tomador_cep: dadosCadastro?.cep ?? null,
+      tomador_email: dadosCadastro?.email_cobranca ?? null,
+    }).select('id').single();
+
+    if (!eFatura && fatura?.id) {
+      supabase.functions.invoke('fiscal-emitir-nfse', { body: { fatura_id: fatura.id } }).catch((e) => {
+        console.error('Falha ao acionar emissão de NFS-e (não bloqueia o pagamento):', e);
+      });
+    } else if (eFatura) {
+      console.error('Falha ao registrar fatura da assinatura:', eFatura);
+    }
+
     return json({
       success: true,
       subscription_id: subscriptionId,
-      status: payData.data.status,
-      vencimento: novoVencimento.toISOString()
+      charge_id: chargeIdReal,
+      status: statusPago,
+      parcelas: parcelasCobradas,
+      vencimento: novoVencimento.toISOString(),
     });
 
   } catch (e) {

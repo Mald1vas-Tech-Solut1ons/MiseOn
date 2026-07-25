@@ -69,6 +69,7 @@ const Tenants          = lazy(() => import('./pages/superadmin/Tenants'));
 const Onboarding       = lazy(() => import('./pages/superadmin/Onboarding'));
 const Churn            = lazy(() => import('./pages/superadmin/Churn'));
 const Auditoria        = lazy(() => import('./pages/superadmin/Auditoria'));
+const FiscalPlataforma = lazy(() => import('./pages/superadmin/FiscalPlataforma'));
 
 import { BrandLoader } from './components/BrandLoader';
 
@@ -121,6 +122,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <Route path="onboarding" element={<Onboarding />} />
                 <Route path="churn"      element={<Churn />} />
                 <Route path="auditoria"  element={<Auditoria />} />
+                <Route path="fiscal"     element={<FiscalPlataforma />} />
               </Route>
 
               {/* ── Entregador ── */}

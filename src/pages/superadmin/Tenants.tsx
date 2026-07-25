@@ -24,6 +24,11 @@ export default function Tenants() {
   const [faturas, setFaturas] = useState<any[]>([]);
   const [carregandoFaturas, setCarregandoFaturas] = useState(false);
 
+  // Perfil de negócio (cadastro do onboarding self-service)
+  const [lojaPerfil, setLojaPerfil] = useState<Loja | null>(null);
+  const [perfil, setPerfil] = useState<any>(null);
+  const [carregandoPerfil, setCarregandoPerfil] = useState(false);
+
   // Chat State
   const [lojaSuporte, setLojaSuporte] = useState<Loja | null>(null);
   const [mensagens, setMensagens] = useState<any[]>([]);
@@ -52,13 +57,21 @@ export default function Tenants() {
   };
   useEffect(() => { setTimeout(carregar, 0); }, []);
 
-  // Lógica Faturas Reais
+  // Lógica Faturas Reais (assinatura SaaS do lojista, com status da NFS-e)
   useEffect(() => {
     if (!lojaFaturas) return;
     setTimeout(() => setCarregandoFaturas(true), 0);
-    supabase.from('faturas').select('*').eq('loja_id', lojaFaturas.id).order('criado_em', { ascending: false })
+    supabase.from('faturas_assinatura').select('*').eq('loja_id', lojaFaturas.id).order('created_at', { ascending: false })
       .then(({ data }) => { setFaturas(data || []); setCarregandoFaturas(false); });
   }, [lojaFaturas]);
+
+  // Perfil de negócio capturado no onboarding self-service
+  useEffect(() => {
+    if (!lojaPerfil) return;
+    setTimeout(() => setCarregandoPerfil(true), 0);
+    supabase.from('assinatura_dados_cadastro').select('*').eq('loja_id', lojaPerfil.id).maybeSingle()
+      .then(({ data }) => { setPerfil(data); setCarregandoPerfil(false); });
+  }, [lojaPerfil]);
 
   // Lógica Chat Real-time
   useEffect(() => {
@@ -291,6 +304,9 @@ export default function Tenants() {
                   <button onClick={() => setLojaFaturas(l)} className="flex-1 rounded-lg bg-indigo-500/10 py-2 text-xs font-semibold text-indigo-400 transition-colors hover:bg-indigo-500/20 border border-indigo-500/20">
                     Ver Faturas
                   </button>
+                  <button onClick={() => setLojaPerfil(l)} className="flex-1 rounded-lg bg-amber-500/10 py-2 text-xs font-semibold text-amber-400 transition-colors hover:bg-amber-500/20 border border-amber-500/20">
+                    Perfil do Negócio
+                  </button>
                   <button onClick={() => setLojaSuporte(l)} className="flex-1 rounded-lg bg-green-500/10 py-2 text-xs font-semibold text-green-400 transition-colors hover:bg-green-500/20 border border-green-500/20">
                     Atender Loja
                   </button>
@@ -331,36 +347,96 @@ export default function Tenants() {
         </div>
       )}
 
-      {/* MODAL DE FATURAS */}
+      {/* MODAL DE FATURAS DA ASSINATURA SAAS */}
       {lojaFaturas && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-gray-900 p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Histórico Financeiro (Efí Bank)</h3>
+              <h3 className="text-xl font-bold text-white">Faturas da Assinatura MiseOn</h3>
               <button onClick={() => setLojaFaturas(null)} className="text-gray-400 hover:text-white">&times;</button>
             </div>
-            <p className="text-sm text-gray-400 mb-6">Faturas geradas via Webhook PIX da loja <b>{lojaFaturas.nome}</b>.</p>
-            
+            <p className="text-sm text-gray-400 mb-6">Cobranças e notas fiscais da assinatura de <b>{lojaFaturas.nome}</b>.</p>
+
             <div className="space-y-3">
               {carregandoFaturas ? (
                 <p className="text-gray-500">Buscando faturas no banco...</p>
               ) : faturas.length === 0 ? (
-                <p className="text-gray-500">Esta loja ainda não possui faturas geradas no Efí Bank.</p>
-              ) : faturas.map((f, i) => (
-                <div key={i} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 p-4">
-                  <div>
-                    <p className="font-bold text-white">{new Date(f.criado_em).toLocaleDateString('pt-BR')}</p>
-                    <p className="text-xs text-gray-500 font-mono" title={f.id}>{f.txid}</p>
+                <p className="text-gray-500">Esta loja ainda não possui faturas de assinatura.</p>
+              ) : faturas.map((f) => (
+                <div key={f.id} className="rounded-xl border border-white/5 bg-white/5 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-white">{new Date(f.created_at).toLocaleDateString('pt-BR')}</p>
+                      <p className="text-xs text-gray-500">{f.ciclo === 'anual' ? 'Plano anual' : 'Plano mensal'} · {f.forma_pagamento}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-indigo-400">R$ {Number(f.valor_cobrado).toFixed(2)}</p>
+                      <span className={`text-xs font-bold uppercase px-2 py-1 rounded-md ${f.status_cobranca === 'pago' ? 'bg-green-400/10 text-green-400' : 'bg-yellow-400/10 text-yellow-400'}`}>
+                        {f.status_cobranca}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-indigo-400">R$ {Number(f.valor).toFixed(2)}</p>
-                    <span className={`text-xs font-bold uppercase px-2 py-1 rounded-md ${f.status === 'pago' ? 'bg-green-400/10 text-green-400' : 'bg-yellow-400/10 text-yellow-400'}`}>
-                      {f.status}
+                  <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3">
+                    <span className={`text-[11px] font-bold uppercase px-2 py-1 rounded-md ${
+                      f.nfse_status === 'emitida' ? 'bg-emerald-400/10 text-emerald-400'
+                      : f.nfse_status === 'erro' ? 'bg-red-400/10 text-red-400'
+                      : 'bg-gray-400/10 text-gray-400'
+                    }`}>
+                      NFS-e: {f.nfse_status.replace('_', ' ')}
                     </span>
+                    {f.nfse_pdf_url && (
+                      <a href={f.nfse_pdf_url} target="_blank" rel="noreferrer" className="text-xs font-semibold text-indigo-400 hover:underline">Ver PDF</a>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE PERFIL DE NEGÓCIO */}
+      {lojaPerfil && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-gray-900 p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-white">Perfil do Negócio</h3>
+              <button onClick={() => setLojaPerfil(null)} className="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <p className="text-sm text-gray-400 mb-6">Dados que <b>{lojaPerfil.nome}</b> informou no cadastro — use para personalizar o contato.</p>
+
+            {carregandoPerfil ? (
+              <p className="text-gray-500">Carregando…</p>
+            ) : !perfil ? (
+              <p className="text-gray-500">Esta loja ainda não preencheu o cadastro de perfil de negócio.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-xl border border-white/5 bg-white/5 p-3">
+                  <p className="text-gray-500 text-xs">Segmento</p>
+                  <p className="font-semibold text-white">{perfil.segmento_negocio?.replace(/_/g, ' ') ?? '—'}</p>
+                </div>
+                <div className="rounded-xl border border-white/5 bg-white/5 p-3">
+                  <p className="text-gray-500 text-xs">Funcionários</p>
+                  <p className="font-semibold text-white">{perfil.qtd_funcionarios ?? '—'}</p>
+                </div>
+                <div className="rounded-xl border border-white/5 bg-white/5 p-3">
+                  <p className="text-gray-500 text-xs">Atende no salão (garçom)</p>
+                  <p className="font-semibold text-white">{perfil.atende_salao_garcom ? 'Sim' : 'Não'}</p>
+                </div>
+                <div className="rounded-xl border border-white/5 bg-white/5 p-3">
+                  <p className="text-gray-500 text-xs">Entrega</p>
+                  <p className="font-semibold text-white">{perfil.faz_entregas ? (perfil.modelo_entrega === 'freelancer' ? 'Freelancer' : 'Fixo') : 'Não faz'}</p>
+                </div>
+                <div className="col-span-2 rounded-xl border border-white/5 bg-white/5 p-3">
+                  <p className="text-gray-500 text-xs">{perfil.tipo_pessoa === 'PJ' ? 'CNPJ' : 'CPF'} / Razão social</p>
+                  <p className="font-semibold text-white">{perfil.cpf_cnpj} — {perfil.razao_social_ou_nome}</p>
+                </div>
+                <div className="col-span-2 rounded-xl border border-white/5 bg-white/5 p-3">
+                  <p className="text-gray-500 text-xs">E-mail de cobrança</p>
+                  <p className="font-semibold text-white">{perfil.email_cobranca}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

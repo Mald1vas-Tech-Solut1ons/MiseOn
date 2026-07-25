@@ -1,5 +1,100 @@
 // Auto-generated templates index for Deno bundler
 export const TEMPLATES: Record<string, string> = {
+  "boas-vindas-loja": `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 14px;">
+  <tr>
+    <td style="background-color:#E7F8F0; border-radius:999px; padding:7px 14px;">
+      <span style="font-size:11px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:#047857;">Sua loja está pronta</span>
+    </td>
+  </tr>
+</table>
+
+<h1 class="h1" style="margin:0 0 12px; font-size:26px; line-height:1.22; font-weight:800; color:#0F172A; letter-spacing:-0.6px;">
+  Bem-vindo(a) ao ecossistema MiseOn, {{loja.nome}}!
+</h1>
+
+<p style="margin:0 0 26px; font-size:15px; line-height:1.7; color:#4B5563;">
+  A partir de agora você tem cardápio digital, PDV, controle de estoque, entregas e muito mais
+  em um só lugar. Seu teste grátis de <strong style="color:#0F172A;">{{trial_dias}} dias, sem cartão de crédito</strong>,
+  já começou.
+</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F7F9FC; border:1px solid #E4EAF2; border-radius:14px;">
+  <tr>
+    <td style="padding:20px 22px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase; color:#8A93A3;">Como começar</div>
+      <div style="font-size:14px; color:#374151; margin-top:8px; line-height:1.65;">
+        Preparamos um tour guiado dentro do sistema pra você conhecer cada módulo no seu ritmo —
+        ele começa automaticamente no seu primeiro acesso.
+      </div>
+    </td>
+  </tr>
+</table>
+
+{{#if login_url}}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="btn" style="margin:26px 0 0;">
+  <tr>
+    <td align="center" bgcolor="#FC5B24" style="border-radius:12px;">
+      <a href="{{login_url}}" style="display:inline-block; padding:15px 32px; font-size:15px; font-weight:700; color:#FFFFFF; text-decoration:none; border-radius:12px;">Entrar no meu painel</a>
+    </td>
+  </tr>
+</table>
+{{/if}}
+
+<p style="margin:24px 0 0; font-size:13px; line-height:1.65; color:#8A93A3;">
+  Qualquer dúvida, é só responder este e-mail — nossa equipe está pronta pra ajudar.
+</p>
+`,
+  "nota-fiscal-assinatura": `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 14px;">
+  <tr>
+    <td style="background-color:#E8F0FE; border-radius:999px; padding:7px 14px;">
+      <span style="font-size:11px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:#004198;">Nota fiscal emitida</span>
+    </td>
+  </tr>
+</table>
+
+<h1 class="h1" style="margin:0 0 12px; font-size:26px; line-height:1.22; font-weight:800; color:#0F172A; letter-spacing:-0.6px;">
+  Sua nota fiscal da assinatura MiseOn
+</h1>
+
+<p style="margin:0 0 26px; font-size:15px; line-height:1.7; color:#4B5563;">
+  Emitimos a nota fiscal de serviço referente à sua assinatura MiseOn. Segue o resumo abaixo.
+</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F7F9FC; border:1px solid #E4EAF2; border-radius:14px;">
+  <tr>
+    <td style="padding:20px 22px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase; color:#8A93A3;">Valor</div>
+      <div style="font-size:30px; font-weight:800; color:#004198; margin-top:4px; letter-spacing:-0.8px;">R$ {{valor}}</div>
+    </td>
+  </tr>
+  {{#if nfse_numero}}
+  <tr>
+    <td style="padding:0 22px 18px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #E4EAF2;">
+        <tr>
+          <td style="padding-top:14px; font-size:13px; color:#6B7280;">Número da nota</td>
+          <td align="right" style="padding-top:14px; font-size:13px; font-weight:700; color:#0F172A;">{{nfse_numero}}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  {{/if}}
+</table>
+
+{{#if nfse_pdf_url}}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="btn" style="margin:26px 0 0;">
+  <tr>
+    <td align="center" bgcolor="#FC5B24" style="border-radius:12px;">
+      <a href="{{nfse_pdf_url}}" style="display:inline-block; padding:15px 32px; font-size:15px; font-weight:700; color:#FFFFFF; text-decoration:none; border-radius:12px;">Baixar nota fiscal (PDF)</a>
+    </td>
+  </tr>
+</table>
+{{/if}}
+
+<p style="margin:24px 0 0; font-size:13px; line-height:1.65; color:#8A93A3;">
+  Dúvidas sobre esta nota? Fale com a gente pelo suporte@miseon.app.br.
+</p>
+`,
   "acesso-equipe": "<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin:0 0 14px;\">\n  <tr>\n    <td style=\"background-color:#E8F0FE; border-radius:999px; padding:7px 14px;\">\n      <span style=\"font-size:11px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:#004198;\">Acesso criado</span>\n    </td>\n  </tr>\n</table>\n\n<h1 class=\"h1\" style=\"margin:0 0 12px; font-size:26px; line-height:1.22; font-weight:800; color:#0F172A; letter-spacing:-0.6px;\">\n  {{#if nome}}{{nome}}, seu acesso está pronto{{else}}Seu acesso está pronto{{/if}}\n</h1>\n\n<p style=\"margin:0 0 26px; font-size:15px; line-height:1.7; color:#4B5563;\">\n  A <strong style=\"color:#0F172A;\">{{loja.nome}}</strong> criou o seu acesso ao sistema como <strong style=\"color:#0F172A;\">{{papel_rotulo}}</strong>.\n  Use os dados abaixo para entrar.\n</p>\n\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#F7F9FC; border:1px solid #E4EAF2; border-radius:14px;\">\n  <tr>\n    <td style=\"padding:20px 22px;\">\n      <div style=\"font-size:11px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase; color:#8A93A3;\">Seu login</div>\n      <div style=\"font-size:16px; font-weight:700; color:#0F172A; margin-top:5px; word-break:break-all;\">{{email}}</div>\n\n      <div style=\"border-top:1px solid #E4EAF2; margin:16px 0 0; padding-top:16px;\">\n        <div style=\"font-size:11px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase; color:#8A93A3;\">Endereço de acesso</div>\n        <div style=\"font-size:14px; color:#0A5CC4; margin-top:5px; word-break:break-all;\">{{login_url}}</div>\n      </div>\n    </td>\n  </tr>\n</table>\n\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-top:18px; background-color:#FFF7F4; border:1px solid #FFE0D5; border-radius:14px;\">\n  <tr>\n    <td style=\"padding:16px 20px;\">\n      <div style=\"font-size:11px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase; color:#C2410C;\">Importante</div>\n      <div style=\"font-size:14px; color:#7C2D12; margin-top:6px; line-height:1.6;\">\n        A senha provisória é entregue pessoalmente pelo responsável da loja — nunca por e-mail.\n        Troque a senha assim que entrar pela primeira vez e não compartilhe o seu acesso com ninguém.\n      </div>\n    </td>\n  </tr>\n</table>\n\n{{#if login_url}}\n<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"btn\" style=\"margin:26px 0 0;\">\n  <tr>\n    <td align=\"center\" bgcolor=\"#FC5B24\" style=\"border-radius:12px;\">\n      <a href=\"{{login_url}}\" style=\"display:inline-block; padding:15px 32px; font-size:15px; font-weight:700; color:#FFFFFF; text-decoration:none; border-radius:12px;\">Entrar no sistema</a>\n    </td>\n  </tr>\n</table>\n{{/if}}\n\n<p style=\"margin:24px 0 0; font-size:13px; line-height:1.65; color:#8A93A3;\">\n  Se você não esperava este acesso, avise o responsável pela {{loja.nome}}.\n</p>\n",
   "carrinho-abandonado": "<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin:0 0 14px;\">\n  <tr>\n    <td style=\"background-color:#FFF7F4; border-radius:999px; padding:7px 14px;\">\n      <span style=\"font-size:11px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:#C2410C;\">Seu carrinho está esperando</span>\n    </td>\n  </tr>\n</table>\n\n<h1 class=\"h1\" style=\"margin:0 0 12px; font-size:26px; line-height:1.22; font-weight:800; color:#0F172A; letter-spacing:-0.6px;\">\n  {{#if cliente_nome}}{{cliente_nome}}, ficou algo para trás{{else}}Ficou algo para trás{{/if}}\n</h1>\n\n<p style=\"margin:0 0 26px; font-size:15px; line-height:1.7; color:#4B5563;\">\n  Você montou um pedido na <strong style=\"color:#0F172A;\">{{loja.nome}}</strong> e não chegou a finalizar. Ainda dá tempo — está tudo salvo.\n</p>\n\n{{#if itens}}\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #E4EAF2; border-radius:14px; overflow:hidden;\">\n  <tr>\n    <td colspan=\"2\" style=\"background-color:#F7F9FC; padding:12px 20px; font-size:11px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase; color:#8A93A3;\">No seu carrinho</td>\n  </tr>\n  {{#each itens}}\n  <tr>\n    <td style=\"padding:13px 20px; border-top:1px solid #F1F3F7; font-size:14px; color:#374151; line-height:1.45;\">\n      <strong style=\"color:#0F172A;\">{{qtd}}&times;</strong>&nbsp; {{nome}}\n    </td>\n    <td align=\"right\" style=\"padding:13px 20px; border-top:1px solid #F1F3F7; font-size:14px; color:#374151; white-space:nowrap;\">R$ {{valor}}</td>\n  </tr>\n  {{/each}}\n</table>\n{{/if}}\n\n{{#if valor_estimado}}\n<p style=\"margin:18px 0 0; font-size:15px; color:#374151;\">\n  Total estimado: <strong style=\"color:#004198; font-size:18px;\">R$ {{valor_estimado}}</strong>\n</p>\n{{/if}}\n\n{{#if cupom_codigo}}\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-top:20px; background-color:#FFF7F4; border:1px dashed #FFB499; border-radius:14px;\">\n  <tr>\n    <td align=\"center\" style=\"padding:20px;\">\n      <div style=\"font-size:13px; color:#7C2D12; line-height:1.55;\">Para facilitar, use o cupom</div>\n      <div style=\"font-size:24px; font-weight:800; letter-spacing:2px; color:#C2410C; margin:8px 0 4px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;\">{{cupom_codigo}}</div>\n      <div style=\"font-size:13px; color:#9A5A3C;\">{{cupom_descricao}}</div>\n    </td>\n  </tr>\n</table>\n{{/if}}\n\n{{#if carrinho_url}}\n<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"btn\" style=\"margin:26px 0 0;\">\n  <tr>\n    <td align=\"center\" bgcolor=\"#FC5B24\" style=\"border-radius:12px;\">\n      <a href=\"{{carrinho_url}}\" style=\"display:inline-block; padding:15px 32px; font-size:15px; font-weight:700; color:#FFFFFF; text-decoration:none; border-radius:12px;\">Retomar meu pedido</a>\n    </td>\n  </tr>\n</table>\n{{/if}}\n\n<p style=\"margin:22px 0 0; font-size:13px; line-height:1.65; color:#8A93A3;\">\n  Se mudou de ideia, tudo bem — é só ignorar este e-mail.\n</p>\n",
   "cupom-disponivel": "<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin:0 0 14px;\">\n  <tr>\n    <td style=\"background-color:#E8F0FE; border-radius:999px; padding:7px 14px;\">\n      <span style=\"font-size:11px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; color:#004198;\">Cupom para você</span>\n    </td>\n  </tr>\n</table>\n\n<h1 class=\"h1\" style=\"margin:0 0 12px; font-size:26px; line-height:1.22; font-weight:800; color:#0F172A; letter-spacing:-0.6px;\">\n  {{#if cliente_nome}}{{cliente_nome}}, a {{loja.nome}} preparou um desconto para você{{else}}A {{loja.nome}} preparou um desconto para você{{/if}}\n</h1>\n\n<p style=\"margin:0 0 28px; font-size:15px; line-height:1.7; color:#4B5563;\">\n  {{#if motivo}}{{motivo}}{{else}}Como você já pediu aqui antes, a loja separou uma condição especial para o seu próximo pedido.{{/if}}\n</p>\n\n<!-- Cupom -->\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#070C18; border-radius:16px;\">\n  <tr>\n    <td align=\"center\" style=\"padding:30px 24px 26px;\">\n      <div style=\"font-size:11px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:#8A93A3; margin-bottom:10px;\">Desconto exclusivo</div>\n      <div style=\"font-size:44px; font-weight:800; color:#FC5B24; line-height:1; letter-spacing:-1.5px;\">{{valor_exibicao}}</div>\n      <div style=\"font-size:14px; color:#A6AEBC; margin-top:8px; line-height:1.5;\">{{descricao}}</div>\n\n      <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin:20px auto 0;\">\n        <tr>\n          <td style=\"background-color:#FFFFFF; border-radius:10px; padding:13px 26px;\">\n            <span style=\"font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:21px; font-weight:800; letter-spacing:3px; color:#070C18;\">{{codigo}}</span>\n          </td>\n        </tr>\n      </table>\n    </td>\n  </tr>\n</table>\n\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-top:18px; border:1px solid #E4EAF2; border-radius:14px;\">\n  <tr>\n    <td style=\"padding:16px 20px;\">\n      <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n        {{#if pedido_minimo}}\n        <tr>\n          <td style=\"font-size:13px; color:#6B7280;\">Pedido mínimo</td>\n          <td align=\"right\" style=\"font-size:13px; font-weight:700; color:#0F172A;\">R$ {{pedido_minimo}}</td>\n        </tr>\n        {{/if}}\n        {{#if validade}}\n        <tr>\n          <td style=\"padding-top:10px; font-size:13px; color:#6B7280;\">Válido até</td>\n          <td align=\"right\" style=\"padding-top:10px; font-size:13px; font-weight:700; color:#0F172A;\">{{validade}}</td>\n        </tr>\n        {{/if}}\n      </table>\n    </td>\n  </tr>\n</table>\n\n{{#if cardapio_url}}\n<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"btn\" style=\"margin:26px 0 0;\">\n  <tr>\n    <td align=\"center\" bgcolor=\"#FC5B24\" style=\"border-radius:12px;\">\n      <a href=\"{{cardapio_url}}\" style=\"display:inline-block; padding:15px 32px; font-size:15px; font-weight:700; color:#FFFFFF; text-decoration:none; border-radius:12px;\">Usar meu cupom</a>\n    </td>\n  </tr>\n</table>\n{{/if}}\n",

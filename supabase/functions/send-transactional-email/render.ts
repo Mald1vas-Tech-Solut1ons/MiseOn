@@ -92,6 +92,24 @@ export const EVENTOS: Record<string, EventoConfig> = {
     subtitulo: (d) => `Equipe · ${d.papel_rotulo}`,
     contato: true,
   },
+  'boas-vindas-loja': {
+    classe: 'TRANSACIONAL',
+    assunto: (_, l) => `Bem-vindo(a) ao ecossistema MiseOn, ${l.nome}!`,
+    previa: (d) => `Seu teste grátis de ${d.trial_dias} dias já começou.`,
+    rotulo: 'Boas-vindas',
+    subtitulo: () => 'Sua loja está pronta',
+    contato: false,
+  },
+  // Evento invertido: quem cobra é a MiseOn, não a loja — despachar() no
+  // worker troca o remetente para "MiseOn" só para este evento.
+  'nota-fiscal-assinatura': {
+    classe: 'TRANSACIONAL',
+    assunto: () => 'Sua nota fiscal da assinatura MiseOn',
+    previa: (d) => `Nota fiscal de R$ ${d.valor} disponível.`,
+    rotulo: 'Financeiro MiseOn',
+    subtitulo: () => 'Nota fiscal da assinatura',
+    contato: false,
+  },
 };
 
 // Um canal só: o que de fato responde rápido nesta loja.

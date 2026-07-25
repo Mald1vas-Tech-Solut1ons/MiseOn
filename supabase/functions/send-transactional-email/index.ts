@@ -122,6 +122,7 @@ async function hidratar(db: ReturnType<typeof admin>, item: any, loja: Loja) {
   if (item.evento === 'carrinho-abandonado' && daLoja) base.carrinho_url = daLoja;
   if (item.evento === 'cupom-disponivel' && daLoja) base.cardapio_url = daLoja;
   if (item.evento === 'acesso-equipe') base.login_url = `${SITE}/admin/login`;
+  if (item.evento === 'boas-vindas-loja') base.login_url = `${SITE}/admin`;
 
   // O que veio explícito na fila vence o que foi derivado.
   return { ...base, ...(item.payload ?? {}) };
@@ -140,8 +141,13 @@ async function despachar(db: ReturnType<typeof admin>, smtp: any, item: any) {
 
   // O nome visível é o da loja; o endereço técnico continua sendo o da
   // plataforma. É assim que o cliente reconhece quem está falando.
+  // Exceção: nota-fiscal-assinatura é a MiseOn cobrando a loja, não a loja
+  // falando com o cliente dela — o remetente vira a própria MiseOn.
+  const remetenteVisivel = item.evento === 'nota-fiscal-assinatura'
+    ? REMETENTE_NOME
+    : `${loja.nome ?? REMETENTE_NOME} via MiseOn`;
   const info = await smtp.sendMail({
-    from: `"${loja.nome ?? REMETENTE_NOME} via MiseOn" <${REMETENTE_EMAIL}>`,
+    from: `"${remetenteVisivel}" <${REMETENTE_EMAIL}>`,
     to: item.destinatario,
     subject: assunto,
     html,
