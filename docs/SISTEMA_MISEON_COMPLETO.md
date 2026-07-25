@@ -15,48 +15,60 @@ O **MiseOn** é um sistema operacional SaaS para restaurantes, lanchonetes, hamb
 
 ---
 
-## ⚖️ 2. Módulo de Balança de Buffet & Peso Inteligente
+## ⚙️ 2. Sistema 100% Configurável por Segmento & Módulos Híbridos ("TUDO CONFIGURÁVEL")
 
-Desenvolvido para atender restaurantes por quilo e buffets self-service com captura automática de pesagem:
+O **MiseOn** se adapta dinamicamente à realidade de qualquer estabelecimento comercial:
+
+### Presets Recomendados por Segmento (`segmento_negocio`):
+1. 🍔 **Hamburgueria & Fast Food**: Combos, adicionais, KDS cozinha, balcão e delivery (oculta balança e salão se desnecessário).
+2. 🍕 **Pizzaria**: Montador de pizzas meio-a-meio, tamanhos (P, M, G, GG) e bordas recheadas.
+3. 🍽️ **Restaurante À la Carte**: Salão 3D, mesas, comandas, PWA garçom e cozinha.
+4. ⚖️ **Restaurante por Quilo / Buffet**: Balança Web Serial, pesagem digital, cartão individual e reposição de cubas.
+5. 🛵 **Dark Kitchen / Delivery Apenas**: Operação 100% focada em entrega, iFood, WhatsApp IA e rotas no mapa (oculta mesas e salão).
+6. 🍺 **Bar & Pub**: Comandas por cartão, subcomandas por assento e salão.
+7. 🌐 **Híbrido / Multissegmento (Geral)**: Todos os módulos ativados.
+
+### Módulos Híbridos Personalizáveis (`modulos_ativos`):
+O lojista pode ligar/desligar qualquer módulo individualmente a qualquer momento em `/admin/loja` (ex: operação que funciona como **por quilo no almoço e pizzaria à noite**).
+A barra lateral de navegação ([AdminLayout.tsx](file:///c:/Users/rafae/Dev/MiseOn/src/pages/admin/AdminLayout.tsx)) filtra dinamicamente os menus de acordo com os módulos ativos do estabelecimento!
+
+---
+
+## ⚖️ 3. Módulo de Balança de Buffet, Peso Inteligente & Estoque de Cubas
+
+Desenvolvido para atender restaurantes por quilo e buffets self-service com captura automática de pesagem e gestão analógica à realidade da cozinha:
 
 - **Driver Modular (`BalancaEngine`)**:
   - **Web Serial API (Nativo)**: Leitura direta de portas COM / USB (RS-232) em navegadores modernos (Chrome, Edge, Brave).
   - **Rede Local (TCP/IP / Webhook)**: Comunicação via IP fixo da balança.
   - **Emulador Integrado**: Ferramenta de simulação de pesagem para testes operacionais sem hardware presente.
-- **Compatibilidade de Hardware**: Drivers parseadores de frame para **Toledo Prix 3 / Prix 4**, **Filizola CS 15 / Platina**, **Urano** e ASCII Serial Genérico.
-- **Automação de Tara**: Desconto automático da tara do prato em gramas com conversão direta de R$/kg.
-- **Gravação em Comanda**: Vínculo instantâneo do item pesado à comanda individual do cartão ou subcomanda de mesa.
+- **Compatibilidade de Hardware**: Toledo Prix 3/4, Filizola CS 15/Platina, Urano e ASCII Serial Genérico.
+- **Gestão de Estoque por Reposição de Cubas (`ModalReposicaoBuffet.tsx`)**:
+  - A cozinha registra a preparação e reposição de cubas na pista (ex: 5,000 kg de Strogonoff de Filé).
+  - O sistema calcula a proporção dos insumos da Ficha Técnica da cuba e realiza a baixa imediata no estoque (`SAIDA_MANUAL` / `SAIDA_BUFFET`), garantindo conciliação entre o peso reposto na pista e o peso vendido na balança dos clientes.
 
 ---
 
-## 🔀 3. Divisão Inteligente de Contas (Métodos 1 & 2)
+## 🔀 4. Divisão Inteligente de Contas (Métodos 1 & 2)
 
 Resolve a fricção de cobrança de consumo coletivo no salão:
 
-### Método 1: Garçom Fraciona no Lançamento (PWA Mobile)
-- Ao adicionar um item compartilhável (cerveja 1L, vinho, jarra, porção), o garçom seleciona os assentos/participantes na mesa.
-- O motor fraciona automaticamente a quantidade (`1 / N` participantes) e atribui as frações decimais aos assentos selecionados.
-
-### Método 2: Caixa Divide por Produto no Fechamento (PDV Caixa)
-- Itens lançados na comanda mãe/geral da mesa são apresentados em uma matriz interativa no caixa.
-- O operador atribui graficamente quais clientes racham determinado produto.
-- O sistema calcula o subtotal exato por cliente (prato por quilo + frações de bebidas + taxa de serviço) e emite cobranças e notas NFC-e individuais.
+- **Método 1: Garçom Fraciona no Lançamento (PWA Mobile)**: O garçom seleciona os assentos participantes na mesa no momento do pedido. O motor fraciona automaticamente a quantidade e atribui frações decimais aos assentos.
+- **Método 2: Caixa Divide por Produto no Fechamento (PDV Caixa)**: Apresenta uma matriz interativa no caixa para o operador distribuir produtos consumidos entre os assentos, gerando extratos e NFC-e individuais.
 
 ---
 
-## 📳 4. PWA Garçom com Notificação Push & Vibração Hálptica
+## 📳 5. PWA Garçom com Notificação Push & Vibração Hálptica
 
 Atendimento em tempo real no salão:
 
-- **Web Vibration API**: O smartphone do garçom logado no PWA vibra em padrões táteis dinâmicos ao receber chamados da mesa:
-  - *Chamado de Atendimento*: Vibração dupla (`[200, 100, 200]`).
-  - *Solicitação de Fechamento*: Vibração tripla (`[300, 100, 300, 100, 500]`).
+- **Web Vibration API**: O smartphone do garçom logado no PWA vibra em padrões táteis dinâmicos ao receber chamados da mesa (`[200, 100, 200]` para atendimento e `[300, 100, 300, 100, 500]` para fechamento).
 - **Web Push Notifications**: Notificações em segundo plano emitidas pelo Service Worker com tags persistentes.
 - **Supabase Realtime**: Atualização instantânea na tela via WebSocket do Postgres sem necessidade de polling.
 
 ---
 
-## 📦 5. Módulos Operacionais Integrados
+## 📦 6. Módulos Operacionais Integrados
 
 | Módulo | Descrição Técnica & Funcional |
 |---|---|
@@ -65,19 +77,19 @@ Atendimento em tempo real no salão:
 | 🪑 **Salão 3D & Assentos** | Engine **Three.js WebGL** interativa para visualização 3D de salão, assentos numerados por mesa e cronômetro de permanência. |
 | 🍳 **Cozinha (KDS Kanban)** | Tela de produção sem papel para a cozinha, com avanço de etapas, tempo de preparo e filtro por estação. |
 | 🛵 **Gestão de Entregas & Rotas** | Painel do entregador com rota no Google Maps, cálculo de taxa por km/bairro e rastreamento pelo cliente. |
-| 🧊 **Estoque PEPS & Ficha Técnica** | Baixa automática no aceite do pedido, estorno no cancelamento, CMV em tempo real, lotes PEPS e Central de Compras Massiva. |
+| 🧊 **Estoque PEPS & Cubas Buffet** | Baixa automática por reposição de cubas ou por venda, estorno no cancelamento, CMV em tempo real e lotes PEPS. |
 | 📈 **Double-Entry Ledger Financeiro** | Contabilidade de dupla entrada executada atômica via Triggers do Postgres (`vw_dre_mensal`, `vw_caixa_extrato`). |
 | 🤖 **Chat IA (Gemini & Meta)** | Atendimento por IA no WhatsApp via API Oficial Meta Business e Chat na Vitrine com Function Calling para pedidos. |
 | 🧾 **Emissor Fiscal NFC-e / NF-e 4.0** | Emissão fiscal nativa integrada ao PDV e à FocusNFe para documentos fiscais eletrônicos. |
 
 ---
 
-## 🛡️ 6. Garantias de Entrega & Segurança da Operação
+## 🛡️ 7. Garantias de Entrega & Segurança da Operação
 
 1. **Garantia do Faturamento (Pix Efí Direct)**: O valor das vendas via Pix cai direto na conta bancária do lojista (sem intermediação de saldo no SaaS).
-2. **Garantia de Integridade Contábil**: Lançamentos financeiros executados em nível de banco de dados por triggers PostgreSQL, imunes a falhas de conexão no cliente.
+2. **Garantia de Integridade Contábil**: Lançamentos financeiros executados em nível de banco de dados por triggers PostgreSQL.
 3. **Garantia Anti-Fraude na Balança**: Leitura serial USB direta impede alteração manual de pesos e valores no buffet.
-4. **Garantia de Continuidade**: Operação em modo PWA com resiliência contra oscilações de rede.
+4. **Garantia de Flexibilidade Híbrida**: Troca dinâmica de segmento e ativação de módulos sob medida para qualquer rotina operacional.
 
 ---
 

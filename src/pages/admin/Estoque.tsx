@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search } from 'lucide-react';
+import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Insumo, fmt, InsumoRendimentoJSON } from '../../types';
+import { Insumo, fmt, InsumoRendimentoJSON, type Produto } from '../../types';
 import { UNIDADES, destinosPermitidos, validarConversao } from '../../lib/unidades';
 import { OPCOES_SETOR, SETORES, validarSetor, derivarSetor } from '../../lib/estoque3d/rastreio/setores';
 import type { CtxLoja } from './AdminLayout';
@@ -10,6 +10,7 @@ import MiseOnLoader from '../../components/MiseOnLoader';
 import EstoquePreparos from './EstoquePreparos';
 import { SimuladorCusto } from '../../components/custeio';
 import type { ItemEstoque, FatorItem } from '../../lib/custeio';
+import { ModalReposicaoBuffet } from '../../components/estoque/ModalReposicaoBuffet';
 
 // three.js pesa ~600 KB: só entra no bundle de quem abrir a aba 3D.
 const EstoqueCusto3D = lazy(() => import('../../lib/estoque3d/EstoqueCusto3D'));
@@ -22,6 +23,10 @@ export default function Estoque() {
   const [inativos, setInativos] = useState<Insumo[]>([]);
   const [mostrarInativos, setMostrarInativos] = useState(false);
   const [salvando, setSalvando] = useState(false);
+
+  // Buffet / Quilo
+  const [modalBuffetAberto, setModalBuffetAberto] = useState(false);
+  const [produtosBuffet, setProdutosBuffet] = useState<Produto[]>([]);
 
   // States para Novo Insumo Dinâmico
   const [nome, setNome] = useState('');
@@ -123,13 +128,23 @@ export default function Estoque() {
     supabase.from('insumos').select('*, fichas_preparos!fichas_preparos_preparo_id_fkey(*)')
       .eq('loja_id', lojaId).order('nome')
       .then(({ data, error }) => {
-        // Descarta resposta de uma loja anterior que chegue fora de ordem.
         if (!atual) return;
         if (error) console.error('Erro ao carregar insumos:', error);
         const todos = (data as Insumo[]) ?? [];
         setInsumos(todos.filter((i) => i.ativo));
         setInativos(todos.filter((i) => !i.ativo));
       });
+
+    // Buscar produtos de buffet tipo POR_PESO
+    supabase.from('produtos')
+      .select('*')
+      .eq('loja_id', lojaId)
+      .eq('tipo_venda', 'POR_PESO')
+      .eq('disponivel', true)
+      .then(({ data }) => {
+        if (atual && data) setProdutosBuffet(data as Produto[]);
+      });
+
     return () => { atual = false; };
   }, [lojaId, versao]);
 
@@ -290,7 +305,15 @@ export default function Estoque() {
   return (
     <div className="p-4 max-w-4xl mx-auto pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-         <h2 className="font-black text-2xl dark:text-gray-100">Estoque Geral</h2>
+         <div className="flex items-center gap-3">
+            <h2 className="font-black text-2xl dark:text-gray-100">Estoque Geral</h2>
+            <button
+              onClick={() => setModalBuffetAberto(true)}
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md hover:brightness-110 transition"
+            >
+              <Scale size={15} /> Reposição de Cubas (Buffet)
+            </button>
+         </div>
          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shadow-inner">
            <button data-tour="tour-estoque-aba-insumos" onClick={() => setTab('insumos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'insumos' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Matérias-Primas</button>
            <button data-tour="tour-estoque-aba-preparos" onClick={() => setTab('preparos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'preparos' ? 'bg-white dark:bg-gray-900 shadow-sm text-orange-600 dark:text-orange-500' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Receitas & Preparos</button>
@@ -659,6 +682,19 @@ export default function Estoque() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Modal Reposição de Cubas de Buffet */}
+      {modalBuffetAberto && (
+        <ModalReposicaoBuffet
+          lojaId={lojaId}
+          produtosBuffet={produtosBuffet}
+          onSucesso={() => {
+            setModalBuffetAberto(false);
+            carregar();
+          }}
+          onCancelar={() => setModalBuffetAberto(false)}
+        />
       )}
         </>
       )}
