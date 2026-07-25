@@ -27,6 +27,8 @@ export interface CtxLoja {
   status_assinatura?: string | null;
   diasAtraso: number;
   trialTerminaEm: string | null;
+  segmento_negocio?: string | null;
+  modulos_ativos?: Record<string, boolean> | null;
 }
 
 export default function AdminLayout() {
@@ -94,7 +96,7 @@ export default function AdminLayout() {
       if (!user) return nav('/admin/login');
       const { data, error } = await supabase
         .from('usuarios_loja')
-        .select('loja_id, papel, lojas(nome, cor_primaria, cor_secundaria, slug, criado_em, status_assinatura, trial_termina_em)')
+        .select('loja_id, papel, lojas(nome, cor_primaria, cor_secundaria, slug, criado_em, status_assinatura, trial_termina_em, segmento_negocio, modulos_ativos)')
         .eq('user_id', user.id)
         .limit(1)
         .single();
@@ -117,6 +119,8 @@ export default function AdminLayout() {
         status_assinatura: lojaInfo?.status_assinatura,
         diasAtraso,
         trialTerminaEm: lojaInfo?.trial_termina_em ?? null,
+        segmento_negocio: lojaInfo?.segmento_negocio ?? 'GERAL',
+        modulos_ativos: lojaInfo?.modulos_ativos ?? null,
       });
 
       if (lojaInfo?.cor_primaria) document.documentElement.style.setProperty('--cor-primaria', lojaInfo.cor_primaria);
@@ -221,7 +225,7 @@ export default function AdminLayout() {
     gray: '#6b7280'
   };
 
-  const principal: RouteDef[] = ctx.papel === 'entregador'
+  const principalBruto: RouteDef[] = ctx.papel === 'entregador'
     ? [{ to: '/admin/entregas', icon: <Bike size={20} />, label: 'Entregas', colorHex: C.emerald }]
     : ctx.papel === 'garcom'
       ? [
@@ -251,7 +255,19 @@ export default function AdminLayout() {
           { to: '/admin/entregas', icon: <Bike size={20} />, label: 'Entregas', colorHex: C.emerald },
         ];
 
-  const mais: RouteDef[] = [
+  const modulos = ctx.modulos_ativos;
+
+  const principal = principalBruto.filter((item) => {
+    if (!modulos) return true;
+    if (item.to === '/admin/balanca' && modulos.balanca === false) return false;
+    if (item.to === '/admin/mesas' && modulos.mesas_3d === false) return false;
+    if (item.to === '/admin/garcom-mobile' && modulos.garcom_pwa === false) return false;
+    if (item.to === '/admin/kds' && modulos.kds === false) return false;
+    if (item.to === '/admin/entregas' && modulos.entregas === false) return false;
+    return true;
+  });
+
+  const maisBruto: RouteDef[] = [
     { to: '/admin/chat', icon: <MessageSquare size={20} />, label: 'Central de Atendimento (Chat)', colorHex: C.blue },
     { to: '/admin/ifood', icon: <Plug size={20} />, label: 'Integração iFood', colorHex: C.red },
     { to: '/admin/whatsapp', icon: <MessageCircle size={20} />, label: 'Integração WhatsApp', colorHex: C.green },
@@ -265,6 +281,13 @@ export default function AdminLayout() {
     { to: '/admin/fiscal', icon: <FileText size={20} />, label: 'Módulo Fiscal (NFe/NFCe)', colorHex: C.emerald },
     { to: '/admin/ajuda', icon: <LifeBuoy size={20} />, label: 'Central de Ajuda', colorHex: C.blue },
   ];
+
+  const mais = maisBruto.filter((item) => {
+    if (!modulos) return true;
+    if (item.to === '/admin/ifood' && modulos.ifood === false) return false;
+    if (item.to === '/admin/fiscal' && modulos.fiscal === false) return false;
+    return true;
+  });
 
   // Barra inferior do mobile: só os destinos de uso constante durante o turno
   // (não a lista inteira — isso é o que o menu "Mais" resolve). Derivado de

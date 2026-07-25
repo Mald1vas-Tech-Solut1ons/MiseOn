@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed } from 'lucide-react';
+import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PALETA_CORES, PALETA_FUNDO_POR_TEMA, isLightColor, fonteFamilia, obterFundoLojaPorTema, obterTokensLoja, resolverTemaLoja, type TemaLoja } from '../../lib/personalizacao';
 import ColorSwatchPicker from '../../components/ColorSwatchPicker';
@@ -10,16 +10,49 @@ import { FiscalOnboarding } from '../../components/admin/FiscalOnboarding';
 import { IfoodOnboarding } from '../../components/admin/IfoodOnboarding';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
-import type { EntregaModo, FaixaEntrega, HorarioFuncionamento } from '../../types';
+import type { EntregaModo, FaixaEntrega, HorarioFuncionamento, SegmentoNegocio, ModulosAtivos } from '../../types';
 import { maskCPFouCNPJ, maskTelefone, validarCPFouCNPJ } from '../../lib/mascaras';
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
 import { geocode } from '../../lib/geo';
 
-/**
- * Minha Loja — identidade white-label editável pelo lojista.
- * Preview ao vivo do cabeçalho da vitrine + paleta de cores/fontes curadas
- * (em vez de campos soltos) e upload real de imagem pro Supabase Storage.
- */
+export const PRESETS_SEGMENTOS: Record<SegmentoNegocio, { rotulo: string; descricao: string; modulos: ModulosAtivos }> = {
+  HAMBURGUERIA: {
+    rotulo: 'Hamburgueria & Fast Food',
+    descricao: 'Combos, adicionais, KDS cozinha, balcão e delivery.',
+    modulos: { balanca: false, mesas_3d: true, garcom_pwa: true, pizzas: false, kds: true, entregas: true, ifood: true, fiscal: true },
+  },
+  PIZZARIA: {
+    rotulo: 'Pizzaria',
+    descricao: 'Pizzas meio-a-meio, tamanhos, bordas e entregas.',
+    modulos: { balanca: false, mesas_3d: true, garcom_pwa: true, pizzas: true, kds: true, entregas: true, ifood: true, fiscal: true },
+  },
+  RESTAURANTE_A_LA_CARTE: {
+    rotulo: 'Restaurante À la Carte',
+    descricao: 'Salão 3D, mesas, comandas, PWA garçom e cozinha.',
+    modulos: { balanca: false, mesas_3d: true, garcom_pwa: true, pizzas: false, kds: true, entregas: true, ifood: true, fiscal: true },
+  },
+  RESTAURANTE_POR_QUILO: {
+    rotulo: 'Restaurante por Quilo / Buffet',
+    descricao: 'Balança Web Serial, pesagem digital, cartão individual e reposição de cubas.',
+    modulos: { balanca: true, mesas_3d: true, garcom_pwa: true, pizzas: false, kds: true, entregas: true, ifood: true, fiscal: true },
+  },
+  DARK_KITCHEN: {
+    rotulo: 'Dark Kitchen / Delivery Apenas',
+    descricao: 'Operação focada 100% em entrega, iFood, WhatsApp IA e rotas no mapa.',
+    modulos: { balanca: false, mesas_3d: false, garcom_pwa: false, pizzas: true, kds: true, entregas: true, ifood: true, fiscal: true },
+  },
+  BAR_PUB: {
+    rotulo: 'Bar & Pub',
+    descricao: 'Comandas por cartão, subcomandas por assento e salão.',
+    modulos: { balanca: false, mesas_3d: true, garcom_pwa: true, pizzas: false, kds: true, entregas: false, ifood: false, fiscal: true },
+  },
+  GERAL: {
+    rotulo: 'Híbrido / Multissegmento (Completo)',
+    descricao: 'Todos os módulos operacionais ativados.',
+    modulos: { balanca: true, mesas_3d: true, garcom_pwa: true, pizzas: true, kds: true, entregas: true, ifood: true, fiscal: true },
+  },
+};
+
 interface FormLoja {
   nome: string;
   descricao: string;
@@ -64,6 +97,8 @@ interface FormLoja {
   ifood_addon_ativo: boolean;
   ifood_taxa_pct: string;
   ifood_taxa_fixa: string;
+  segmento_negocio: SegmentoNegocio;
+  modulos_ativos: ModulosAtivos;
 }
 
 interface FaixaEntregaForm {
@@ -87,10 +122,12 @@ const vazio: FormLoja = {
   aceita_agendamento: false, agendamento_antecedencia_min: '30',
   lat: '', lng: '', entrega_modo: 'HIBRIDO', entrega_raio_km: '8', entrega_taxa_base: '0', entrega_taxa_km: '1.5', entrega_taxa_padrao: '0',
   nfe_ambiente: 'homologacao', nfe_habilitado: false, nfe_regime_tributario: 'Simples Nacional', nfe_inscricao_estadual: '', nfe_id_csc: '', nfe_csc: '',
-  ifood_merchant_id: '', ifood_addon_ativo: false, ifood_taxa_pct: '0', ifood_taxa_fixa: '0'
+  ifood_merchant_id: '', ifood_addon_ativo: false, ifood_taxa_pct: '0', ifood_taxa_fixa: '0',
+  segmento_negocio: 'GERAL',
+  modulos_ativos: PRESETS_SEGMENTOS.GERAL.modulos,
 };
 
-type Aba = 'aparencia' | 'identidade' | 'logistica' | 'horarios' | 'pagamentos' | 'fiscal' | 'ifood';
+type Aba = 'aparencia' | 'identidade' | 'segmento' | 'logistica' | 'horarios' | 'pagamentos' | 'fiscal' | 'ifood';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -151,6 +188,8 @@ export default function Loja() {
           ifood_addon_ativo: data.ifood_addon_ativo ?? false,
           ifood_taxa_pct: String(data.ifood_taxa_pct ?? 0),
           ifood_taxa_fixa: String(data.ifood_taxa_fixa ?? 0),
+          segmento_negocio: data.segmento_negocio ?? 'GERAL',
+          modulos_ativos: data.modulos_ativos ?? PRESETS_SEGMENTOS.GERAL.modulos,
         });
         setTemaPreview(resolverTemaLoja(data.tema_cardapio, data.cor_texto ?? vazio.cor_fundo_claro));
       }
@@ -345,6 +384,8 @@ export default function Loja() {
       ifood_taxa_pct: Number(form.ifood_taxa_pct || 0),
       ifood_taxa_fixa: Number(form.ifood_taxa_fixa || 0),
       ifood_addon_ativo: form.ifood_addon_ativo,
+      segmento_negocio: form.segmento_negocio,
+      modulos_ativos: form.modulos_ativos,
     }).eq('id', lojaId);
 
     if (erroLoja) {
@@ -502,13 +543,154 @@ export default function Loja() {
       </div>
 
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
-        {(['aparencia', 'identidade', 'logistica', 'horarios', 'pagamentos', 'fiscal', 'ifood'] as Aba[]).map((a) => (
+        {(['aparencia', 'identidade', 'segmento', 'logistica', 'horarios', 'pagamentos', 'fiscal', 'ifood'] as Aba[]).map((a) => (
           <button key={a} data-tour={a === 'pagamentos' ? "tour-loja-aba-pagamentos" : undefined} onClick={() => setAba(a)}
             className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ${aba === a ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm'}`}>
-            {a === 'aparencia' ? 'Aparência' : a === 'identidade' ? 'Identidade' : a === 'logistica' ? 'Entrega e Cobertura' : a === 'horarios' ? 'Horários' : a === 'pagamentos' ? 'Pagamentos' : a === 'fiscal' ? 'Fiscal (NFC-e)' : 'Integrações (iFood)'}
+            {a === 'aparencia'
+              ? 'Aparência'
+              : a === 'identidade'
+              ? 'Identidade'
+              : a === 'segmento'
+              ? 'Segmento & Módulos'
+              : a === 'logistica'
+              ? 'Entrega e Cobertura'
+              : a === 'horarios'
+              ? 'Horários'
+              : a === 'pagamentos'
+              ? 'Pagamentos'
+              : a === 'fiscal'
+              ? 'Fiscal (NFC-e)'
+              : 'Integrações (iFood)'}
           </button>
         ))}
       </div>
+
+      {aba === 'segmento' && (
+        <div className="space-y-6">
+          {/* Escolha de Segmento */}
+          <div className="rounded-2xl bg-white dark:bg-gray-900 dark:border-gray-800 p-5 shadow-sm space-y-4">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-bold dark:text-gray-100">
+                <Sliders size={18} className="text-[var(--cor-primaria)]" />
+                <span>Segmento de Negócio do Estabelecimento</span>
+              </div>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Selecione o perfil do seu negócio para ativar os pré-requisitos automáticos da sua operação.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {(Object.keys(PRESETS_SEGMENTOS) as SegmentoNegocio[]).map((segKey) => {
+                const info = PRESETS_SEGMENTOS[segKey];
+                const selecionado = form.segmento_negocio === segKey;
+
+                return (
+                  <button
+                    key={segKey}
+                    type="button"
+                    onClick={() => {
+                      setForm((f) => ({
+                        ...f,
+                        segmento_negocio: segKey,
+                        modulos_ativos: { ...info.modulos },
+                      }));
+                    }}
+                    className={`flex flex-col justify-between rounded-2xl p-4 text-left border transition-all ${
+                      selecionado
+                        ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 ring-2 ring-[var(--cor-primaria)]/30'
+                        : 'border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 hover:border-gray-300 dark:hover:border-gray-700'
+                    }`}
+                  >
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-sm dark:text-gray-100">{info.rotulo}</span>
+                        {selecionado && <Check size={16} className="text-[var(--cor-primaria)]" />}
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{info.descricao}</p>
+                    </div>
+
+                    <div className="mt-3 text-[10px] font-semibold text-[var(--cor-primaria)]">
+                      {selecionado ? '✓ Preset Aplicado' : 'Clique para selecionar'}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Módulos Híbridos Configuráveis */}
+          <div className="rounded-2xl bg-white dark:bg-gray-900 dark:border-gray-800 p-5 shadow-sm space-y-4">
+            <div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-bold dark:text-gray-100">
+                  <Layers size={18} className="text-orange-500" />
+                  <span>Módulos Operacionais Híbridos (TUDO CONFIGURÁVEL)</span>
+                </div>
+                <span className="rounded-full bg-orange-500/10 px-2.5 py-0.5 text-[11px] font-bold text-orange-400 border border-orange-500/20">
+                  Inteligente
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Ligue ou desligue qualquer recurso individualmente para atender exatamente a rotina da sua casa (ex: buffet no almoço + pizzaria à noite).
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {[
+                { key: 'balanca', rotulo: 'Balança de Buffet por Quilo', desc: 'Conexão Web Serial USB/RS-232 e pesagem digital.', icon: Scale },
+                { key: 'mesas_3d', rotulo: 'Salão 3D & Controle de Mesas', desc: 'Mapa 3D WebGL, assentos e comandas de salão.', icon: Utensils },
+                { key: 'garcom_pwa', rotulo: 'PWA Garçom Mobile (Vibração)', desc: 'Atendimento e lançamento fracionado por assento.', icon: Smartphone },
+                { key: 'pizzas', rotulo: 'Pizzas Meio-a-Meio & Bordas', desc: 'Montador de sabores fracionados e adicionais.', icon: Pizza },
+                { key: 'kds', rotulo: 'Cozinha KDS (Kanban Sem Papel)', desc: 'Fila de preparo e bastão de produção.', icon: ChefHat },
+                { key: 'entregas', rotulo: 'Gestão de Entregas & Rotas', desc: 'Cálculo de km no mapa e painel de motoboys.', icon: Bike },
+                { key: 'ifood', rotulo: 'Integração Nativa iFood', desc: 'Sincronização de pedidos e cardápio unificado.', icon: ShoppingBag },
+                { key: 'fiscal', rotulo: 'Emissor Fiscal NFC-e / NF-e 4.0', desc: 'Emissão de cupom fiscal direto no PDV.', icon: Shield },
+              ].map(({ key, rotulo, desc, icon: IconComponent }) => {
+                const ativo = !!(form.modulos_ativos as any)?.[key];
+
+                return (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl border ${ativo ? 'bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)] border-[var(--cor-primaria)]/20' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 border-transparent'}`}>
+                        <IconComponent size={20} />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-xs dark:text-gray-100">{rotulo}</div>
+                        <div className="text-[11px] text-gray-500 dark:text-gray-400">{desc}</div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForm((f) => ({
+                          ...f,
+                          modulos_ativos: {
+                            ...f.modulos_ativos,
+                            [key]: !ativo,
+                          },
+                        }));
+                      }}
+                      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                        ativo ? 'bg-[var(--cor-primaria)]' : 'bg-gray-300 dark:bg-gray-700'
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
+                          ativo ? 'left-[22px]' : 'left-0.5'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {aba === 'aparencia' && (
         <div className="space-y-5">
