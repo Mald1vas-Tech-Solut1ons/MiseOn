@@ -18,6 +18,8 @@ import { prepararLayoutSalao3D } from '../../lib/mesas3d/layoutMesas';
 import type { Mesa3DPosicionada } from '../../lib/mesas3d/types';
 import { GarcomMesaDrawer } from '../../components/mesas3d/GarcomMesaDrawer';
 import { EditorLayout3DModal } from '../../components/mesas3d/EditorLayout3DModal';
+import { ModalDivisaoProdutoCaixa } from '../../components/mesas/ModalDivisaoProdutoCaixa';
+import type { ItemPedido } from '../../types';
 
 /* ─────────────────────────────────────────────────────────────
    Mapa de Mesas — visão do salão para o garçom/gerente.
@@ -91,6 +93,7 @@ export default function Mesas() {
 
   const [mostrarTransferencia, setMostrarTransferencia] = useState(false);
   const [transferindoPara, setTransferindoPara] = useState('');
+  const [modalDivisaoCaixa, setModalDivisaoCaixa] = useState(false);
 
   const carregar = useCallback(async () => {
     const [{ data: mesasData }, { data: lj }, { data: comandas }] = await Promise.all([
@@ -547,7 +550,12 @@ export default function Mesas() {
               <h3 className="text-lg font-black dark:text-gray-100">Mesa {mesaDetalhe.numero}</h3>
               <div className="flex items-center gap-3">
                 {mesaDetalhe.comanda && (
-                  <button onClick={() => setMostrarTransferencia(!mostrarTransferencia)} className="text-xs font-bold text-[var(--cor-primaria)]">Mover</button>
+                  <>
+                    <button onClick={() => setModalDivisaoCaixa(true)} className="text-xs font-bold text-orange-500 hover:underline">
+                      Rachar por Produto
+                    </button>
+                    <button onClick={() => setMostrarTransferencia(!mostrarTransferencia)} className="text-xs font-bold text-[var(--cor-primaria)]">Mover</button>
+                  </>
                 )}
                 <button onClick={() => { setMesaDetalhe(null); setMostrarTransferencia(false); }} className="text-gray-400"><X size={20} /></button>
               </div>
@@ -743,6 +751,22 @@ export default function Mesas() {
           onClose={() => setModalEditorLayout(false)}
           onSalvo={() => {
             setModalEditorLayout(false);
+            carregar();
+          }}
+        />
+      )}
+
+      {/* Modal de Divisão de Produto no Caixa (Método 2) */}
+      {modalDivisaoCaixa && mesaDetalhe && (
+        <ModalDivisaoProdutoCaixa
+          numeroMesa={mesaDetalhe.numero}
+          capacidadeMesa={mesaDetalhe.capacidade || 6}
+          itensMesa={pedidosComanda.flatMap((p) => (p.itens_pedido || []) as unknown as ItemPedido[])}
+          onCancelar={() => setModalDivisaoCaixa(false)}
+          onConfirmarDivisao={(resumoAssentos) => {
+            console.log('Divisão confirmada pelo caixa:', resumoAssentos);
+            setModalDivisaoCaixa(false);
+            alert('Divisão por produto gravada com sucesso! As contas individuais dos assentos foram atualizadas.');
             carregar();
           }}
         />

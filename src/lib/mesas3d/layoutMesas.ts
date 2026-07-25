@@ -104,7 +104,9 @@ export function prepararLayoutSalao3D(
   pedidosMesas: Pedido[]
 ): Mesa3DPosicionada[] {
   const comandaPorMesa = new Map<string, Comanda>();
-  for (const c of comandasAbertas) comandaPorMesa.set(c.mesa_id, c);
+  for (const c of comandasAbertas) {
+    if (c.mesa_id) comandaPorMesa.set(c.mesa_id, c);
+  }
 
   const pedidosPorComanda = new Map<string, Pedido[]>();
   for (const p of pedidosMesas) {
