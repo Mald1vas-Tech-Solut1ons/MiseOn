@@ -71,6 +71,10 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         semMiseOn: 'Atender iFood em uma tela e pedidos do salão/delivery em outra gera confusão na equipe.',
         comMiseOn: 'Fila única no mesmo painel: pedidos do iFood, cardápio online e PDV balcão juntos no KDS.',
       },
+      {
+        semMiseOn: 'O blend que você mói, o molho da casa e a cebola caramelizada entram no estoque sem custo nenhum — e a ficha do lanche mostra uma margem que não existe.',
+        comMiseOn: 'Cada produção da cozinha é custeada na hora: o sistema soma o que saiu do estoque e mostra quanto custou a panela e quanto custa cada unidade pronta.',
+      },
     ],
     featuresTitle: 'Funcionalidades reais do MiseOn para a sua hamburgueria',
     featuresSubtitle: 'Recursos nativos desenvolvidos para a rotina prática do food service:',
@@ -99,6 +103,12 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         description: 'Link próprio e QR Code para mesas e delivery. Pagamento via Pix Efí direto na sua conta bancária.',
         tag: 'Vendas Diretas',
       },
+      {
+        iconName: 'BarChart3',
+        title: 'Custo Real do Blend e dos Molhos',
+        description: 'O que a sua cozinha produz entra no estoque valendo o que custou. A cada produção o sistema mostra o custo da panela e o custo por unidade — e esse valor entra na ficha do lanche.',
+        tag: 'CMV Que Não Mente',
+      },
     ],
     businessRules: {
       title: 'Recursos e Regras Operacionais para Hamburguerias',
@@ -109,6 +119,8 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         'Impressão de vias de produção em impressoras térmicas de balcão e cozinha.',
         'Pagamento Pix com recebimento direto e conciliação automática sem retenção pelo sistema.',
         'Gestão de entregas e motoboys com histórico de rotas.',
+        'Produção de preparos custeada em transação única: os ingredientes saem pelo custo real de compra (PEPS) e o preparo entra no estoque já valendo o que custou.',
+        'Perda de cocção entra no custo: se 10 kg de carne rendem 7 kg prontos, o custo se concentra nos 7 — não fica diluído nos 10.',
       ],
     },
     faqs: [
@@ -123,6 +135,14 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         pergunta: 'Consigo controlar o estoque dos insumos (pão, carne, molhos)?',
         resposta: 'Sim. Ao cadastrar os produtos com Ficha Técnica, o sistema realiza a baixa automática dos ingredientes no estoque a cada venda concluída.',
+      },
+      {
+        pergunta: 'O sistema sabe quanto custa o blend que eu mesmo moldo e o molho que faço na casa?',
+        resposta: 'Sim, e essa é uma diferença importante. Na maioria dos sistemas só o que você compra tem preço; o que a cozinha produz entra no estoque sem custo, e a ficha do lanche fica mais barata do que a realidade. No MiseOn, cada produção soma o custo real dos ingredientes que saíram do estoque e divide pela quantidade que saiu da panela. O blend passa a valer o que custou, e esse valor entra automaticamente na ficha de todos os lanches que o usam.',
+      },
+      {
+        pergunta: 'Por que o custo do meu lanche pode estar errado hoje?',
+        resposta: 'Se o item mais caro do prato é algo que a sua cozinha prepara — blend, molho, cebola caramelizada —, esse custo costuma sumir da conta. Um lanche com blend de R$ 8,10, molho e cebola pode aparecer custando R$ 4,52 quando custa R$ 13,24. A diferença muda o CMV de 14% para 41%: de "excelente" para "no limite". É com esse número que você decide preço e promoção.',
       },
     ],
   },
@@ -249,6 +269,10 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         semMiseOn: 'Operar iFood e vendas diretas em sistemas separados atrasando a forno.',
         comMiseOn: 'Pedidos do iFood e do cardápio online caindo no mesmo painel com baixa de estoque unificada.',
       },
+      {
+        semMiseOn: 'A massa artesanal e o molho de tomate preparados na casa entram no estoque com valor zerado — e a margem calculada para a pizza fica maquiada.',
+        comMiseOn: 'Custeio em lote de preparos: o sistema calcula o valor exato da produção da massa e do molho com base nos insumos consumidos pelo PEPS e repassa à ficha da pizza.',
+      },
     ],
     featuresTitle: 'Funcionalidades reais do MiseOn para a sua pizzaria',
     featuresSubtitle: 'Recursos nativos projetados para a produção e entrega de pizzas:',
@@ -277,6 +301,12 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         description: 'Controle o consumo de farinha, queijos e insumos conforme os produtos são vendidos.',
         tag: 'Estoque de Insumos',
       },
+      {
+        iconName: 'BarChart3',
+        title: 'Custo Real de Massas e Molhos',
+        description: 'Tudo o que sua cozinha produz (massa fermentada, molho de tomate, recheios) é custeado na produção e entra na ficha técnica com preço apurado por kg ou porção.',
+        tag: 'CMV da Pizza',
+      },
     ],
     businessRules: {
       title: 'Recursos Operacionais para Pizzarias',
@@ -287,6 +317,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         'Cálculo de taxa de entrega configurável por bairros ou por raio em km.',
         'Cardápio digital próprio com opções configuráveis para produtos.',
         'Recebimento direto via Pix Efí no checkout do cliente.',
+        'Produção de massas e molhos da casa com custeio automático por lote no estoque e abatimento por PEPS.',
       ],
     },
     faqs: [
@@ -301,6 +332,10 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         pergunta: 'Consigo integrar os pedidos do iFood com os pedidos do meu site?',
         resposta: 'Sim. A integração oficial iFood envia os pedidos diretamente para a mesma fila de produção no KDS do MiseOn.',
+      },
+      {
+        pergunta: 'Como o MiseOn calcula o custo das pizzas com massas e molhos caseiros?',
+        resposta: 'Quando o pizzaiolo produz 10 kg de massa ou 5 litros de molho, o MiseOn calcula em tempo real o valor total dos insumos consumidos pelo PEPS e atribui o custo exato por kg ou litro. Assim, ao vender a pizza, o custo da fatia de massa e da concha de molho é abatido com precisão no CMV.',
       },
     ],
   },
@@ -783,6 +818,10 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         semMiseOn: 'Métricas distorcidas em relatórios que contam 0.35kg como "0.35 vendas" em vez de 1 porção consumida.',
         comMiseOn: 'Contagem de "Mais Pedidos" baseada em porções servidas reais, fornecendo inteligência de negócios de verdade.',
       },
+      {
+        semMiseOn: 'A perda de cocção no buffet (10 kg de peça crua que viram 7 kg assados) dilui a margem sem o dono perceber quanto cada prato na travessa realmente custou.',
+        comMiseOn: 'Custo de produção com rendimento real: o MiseOn registra o peso pronto da travessa após o cozimento e absorve a perda no custo por kg do alimento pronto.',
+      },
     ],
     featuresTitle: 'Funcionalidades reais do Módulo de Venda por Peso',
     featuresSubtitle: 'Construído para a rotina dinâmica de buffets, marmitas e restaurantes self-service:',
@@ -811,6 +850,12 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         description: 'Seletor intuitivo com atalhos rápidos (250g, 350g, 500g, 1kg) para pedidos online e marmitas a peso.',
         tag: 'Autoatendimento',
       },
+      {
+        iconName: 'BarChart3',
+        title: 'Perda de Cocção & Custo do Buffet',
+        description: 'Apuração automática de rendimento pós-cozimento: se 10 kg de carne viram 7 kg prontos na travessa, o custo de compra se ajusta ao peso final pronto para servir.',
+        tag: 'Rendimento Real',
+      },
     ],
     businessRules: {
       title: 'Recursos Operacionais para Restaurantes por Quilo',
@@ -821,6 +866,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         'Suporte a produtos híbridos no mesmo caixa (buffet a quilo + bebidas unitárias + sobremesa).',
         'Impressão de comanda e romaneio com formatação clara de peso (ex: 0,350 kg).',
         'Relatórios de margem por prato baseados no valor do kg e custo dos insumos.',
+        'Cálculo de perda de cocção em preparos de buffet: o custo se concentra no peso líquido pronto para servir, eliminando margens maquiadas pelo peso bruto cru.',
       ],
     },
     faqs: [
@@ -835,6 +881,10 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         pergunta: 'Preciso de alguma balança específica para usar com o sistema?',
         resposta: 'Não! O operador de caixa digita diretamente o peso (em gramas ou kg) indicado na balança, garantindo agilidade extrema sem travas de homologação de hardware.',
+      },
+      {
+        pergunta: 'Como o sistema calcula a perda de cocção dos assados e grelhados do buffet?',
+        resposta: 'No MiseOn, a ordem de produção permite informar o rendimento padrão em kg após o cozimento. Se você cozinha 10 kg de carne e obtém 7 kg de assado pronto na travessa, o sistema ajusta o custo unitário por kg final servido. Dessa forma, o valor por grama consumido pelo cliente reflete 100% do custo real do ingrediente.',
       },
     ],
   },

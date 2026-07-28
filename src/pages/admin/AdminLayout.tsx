@@ -571,7 +571,7 @@ export default function AdminLayout() {
         </header>
 
         {/* ── CONTEÚDO DA PÁGINA (SCROLLÁVEL) ── */}
-        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0 relative custom-scrollbar px-6 sm:px-10 pt-2">
+        <main className="flex-1 overflow-y-auto pb-28 lg:pb-0 relative custom-scrollbar px-6 sm:px-10 pt-2">
 
           {/* BANNER PROATIVO: TRIAL AINDA VÁLIDO, MAS ACABANDO EM BREVE */}
           {ctx.diasAtraso === 0 && ctx.status_assinatura === 'trial' && ctx.trialTerminaEm && (() => {

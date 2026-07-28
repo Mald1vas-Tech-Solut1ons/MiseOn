@@ -180,7 +180,7 @@ export default function Dashboard() {
   const lotesQuaseVencendo = dados.lotesVencendo.filter((l) => new Date(l.vence_em!) > new Date());
 
   return (
-    <div className="mx-auto max-w-5xl p-4 pb-12">
+    <div className="mx-auto max-w-5xl p-4 pb-28 lg:pb-12">
       {/* ── Saudação ── */}
       <div data-tour="tour-dashboard-header" className="mb-5">
         <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{hoje}</p>

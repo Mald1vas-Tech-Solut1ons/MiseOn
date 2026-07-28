@@ -25,6 +25,16 @@ function statusValidade(vence_em?: string | null): { label: string; classe: stri
 const dataHoraBr = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+/** Retorno de fn_produzir_preparo — o custo real apurado na produção. */
+interface ResultadoProducao {
+  preparo: string;
+  quantidade: number;
+  unidade: string;
+  custo_total: number;
+  custo_unitario: number;
+  ingredientes: { insumo: string; quantidade: number; custo: number }[];
+}
+
 export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuffet = false }: { lojaId: string; insumosTotais: Insumo[]; onUpdate: () => void; isBuffet?: boolean }) {
   const [editando, setEditando] = useState<Insumo | 'novo' | null>(null);
   const [nome, setNome] = useState('');
@@ -42,6 +52,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
   const [produzindo, setProduzindo] = useState<Insumo | null>(null);
   const [multProducao, setMultProducao] = useState(1);
   const [produzindoSucesso, setProduzindoSucesso] = useState(false);
+  const [resultadoProducao, setResultadoProducao] = useState<ResultadoProducao | null>(null);
 
   const preparos = insumosTotais.filter(i => i.is_preparo && i.ativo);
   const insumosBrutos = insumosTotais.filter(i => !i.is_preparo && i.ativo);
@@ -168,48 +179,25 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
     if (!produzindo || multProducao < 1) return;
     setSalvando(true);
     try {
-      const fichaOrig = (produzindo as any).fichas_preparos || [];
-      
-      // 1. Dar saída nos ingredientes proporcionais ao multProducao
-      const movimentacoesSaida = fichaOrig.map((f: any) => ({
-        loja_id: lojaId,
-        insumo_id: f.insumo_id,
-        tipo: 'SAIDA',
-        quantidade: Number(f.quantidade) * multProducao,
-        motivo: `Produção de ${produzindo.nome} (${multProducao} receitas)`
-      }));
-      if (movimentacoesSaida.length > 0) await supabase.from('movimentacoes_estoque').insert(movimentacoesSaida);
-      
-      for (const m of movimentacoesSaida) {
-        const insumoAtual = insumosTotais.find(i => i.id === m.insumo_id);
-        if (insumoAtual) {
-          await supabase.from('insumos').update({ quantidade_atual: Number(insumoAtual.quantidade_atual) - m.quantidade }).eq('id', m.insumo_id);
-        }
-      }
-
-      // 2. Dar entrada no preparo
-      // Se houver rendimento_padrao_kg, usamos ele (Fator de cocção para Buffet/Kg). Senão, usamos porções.
-      const qtdBaseRendimento = produzindo.rendimento_padrao_kg ? Number(produzindo.rendimento_padrao_kg) : Number(produzindo.rendimento_porcoes || 1);
-      const qtdEntrada = qtdBaseRendimento * multProducao;
-      
-      await supabase.from('movimentacoes_estoque').insert({
-        loja_id: lojaId,
-        insumo_id: produzindo.id,
-        tipo: 'ENTRADA',
-        quantidade: qtdEntrada,
-        motivo: `Produção Concluída (${multProducao} receitas)`
+      // Produção roda inteira no banco, numa transação só (fn_produzir_preparo).
+      //
+      // A versão anterior fazia isto em 5 chamadas soltas do navegador — baixa
+      // ingredientes, atualiza saldos num laço, dá entrada, atualiza saldo,
+      // grava a ordem. Duas consequências ruins:
+      //   1. Não era atômica: queda de conexão no meio deixava o estoque
+      //      inconsistente, com ingrediente baixado e preparo nunca criado.
+      //   2. A entrada do preparo ia SEM custo, então ele passava a valer zero
+      //      no estoque e todo prato feito com ele nascia barato — o X-PAULISTA
+      //      aparecia a R$ 4,52 quando custa R$ 13,24.
+      // Agora o banco consome os lotes pelo PEPS, soma o custo real dos
+      // ingredientes e dá entrada no preparo já custeado.
+      const { data, error } = await supabase.rpc('fn_produzir_preparo', {
+        p_preparo_id: produzindo.id,
+        p_multiplicador: multProducao,
       });
-      await supabase.from('insumos').update({ quantidade_atual: Number(produzindo.quantidade_atual) + qtdEntrada }).eq('id', produzindo.id);
+      if (error) throw error;
 
-      // 3. Registra a ordem de serviço (lote) com vencimento pela validade da receita
-      const validade = Number(produzindo.validade_horas || 0);
-      await supabase.from('producoes_preparo').insert({
-        loja_id: lojaId,
-        preparo_id: produzindo.id,
-        lotes: multProducao,
-        quantidade_produzida: qtdEntrada,
-        vence_em: validade > 0 ? new Date(Date.now() + validade * 3600e3).toISOString() : null,
-      });
+      setResultadoProducao(data as ResultadoProducao);
       carregarProducoes();
 
       setProduzindoSucesso(true);
@@ -217,11 +205,12 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
         setProduzindoSucesso(false);
         setProduzindo(null);
         setMultProducao(1);
+        setResultadoProducao(null);
         onUpdate();
-      }, 2000);
-    } catch (e) {
+      }, 6000);
+    } catch (e: any) {
       console.error(e);
-      alert('Erro na produção.');
+      alert(`Erro na produção: ${e?.message ?? 'falha desconhecida'}`);
     }
     setSalvando(false);
   };
@@ -426,12 +415,61 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
             <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-orange-500/20 to-transparent pointer-events-none" />
             
             {produzindoSucesso ? (
-               <div className="text-center py-10 animate-in zoom-in duration-300">
-                  <div className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4 text-green-500">
-                    <CheckCircle2 size={40} />
+               <div className="text-center py-6 animate-in zoom-in duration-300">
+                  <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-3 text-green-500">
+                    <CheckCircle2 size={34} />
                   </div>
                   <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100">Pronto!</h3>
-                  <p className="text-gray-500 mt-2 font-medium">Os insumos foram debitados e o lote de {produzindo.nome} foi adicionado ao estoque.</p>
+
+                  {resultadoProducao ? (
+                    <>
+                      {/* O custo apurado na hora: é o número que o dono usa para
+                          precificar. Antes o preparo entrava valendo zero e ele
+                          nunca via quanto a panela custou de verdade. */}
+                      <p className="text-gray-500 mt-1 text-sm font-medium">
+                        {fmt(resultadoProducao.quantidade)} {resultadoProducao.unidade} de {resultadoProducao.preparo} no estoque.
+                      </p>
+
+                      <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-left dark:border-green-900/40 dark:bg-green-900/10">
+                        <p className="text-[10px] font-black uppercase tracking-wider text-green-800 dark:text-green-400">
+                          Custo apurado desta produção
+                        </p>
+                        <div className="mt-2 flex items-baseline justify-between">
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Total da panela</span>
+                          <span className="text-xl font-black text-gray-900 dark:text-gray-100">
+                            R$ {fmt(resultadoProducao.custo_total)}
+                          </span>
+                        </div>
+                        <div className="mt-1 flex items-baseline justify-between border-t border-green-200/70 pt-2 dark:border-green-900/40">
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                            Custo por {resultadoProducao.unidade}
+                          </span>
+                          <span className="text-lg font-black text-green-700 dark:text-green-400">
+                            R$ {fmt(resultadoProducao.custo_unitario)}
+                          </span>
+                        </div>
+
+                        {resultadoProducao.ingredientes?.length > 0 && (
+                          <ul className="mt-3 space-y-1 border-t border-green-200/70 pt-2 dark:border-green-900/40">
+                            {resultadoProducao.ingredientes.map((ing, idx) => (
+                              <li key={idx} className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                                <span>{ing.insumo}</span>
+                                <span className="font-semibold">R$ {fmt(ing.custo)}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      <p className="mt-3 text-[11px] leading-relaxed text-gray-400">
+                        Esse custo já entra nas fichas técnicas dos pratos que usam este preparo.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-gray-500 mt-2 font-medium">
+                      Os insumos foram debitados e o lote de {produzindo.nome} foi adicionado ao estoque.
+                    </p>
+                  )}
                </div>
             ) : (
                <>
