@@ -27,6 +27,22 @@ export interface PageMeta {
 const BASE = 'https://miseon.app.br';
 
 export const PAGE_META: Record<string, PageMeta> = {
+  // A home é prerenderizada em dist/index.html com este H1 REAL e VISÍVEL.
+  // Antes havia aqui um H1 escondido por CSS (clip:rect(0,0,0,0), 1px) que o
+  // Bing Webmaster Tools continuava reportando como "Marca H1 ausente" —
+  // analisador de SEO desconta conteúdo oculto, porque texto escondido é
+  // técnica conhecida de spam. Conteúdo dentro de <noscript> ele também não
+  // conta. A única coisa que resolve é H1 de verdade no HTML servido.
+  '/': {
+    title: 'MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares',
+    description:
+      'MiseOn: sistema de gestão e automação para restaurantes, hamburguerias, pizzarias e bares. Cardápio digital QR Code, KDS, comanda eletrônica e iFood.',
+    keywords:
+      'sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardapio digital qr code, integracao ifood, whatsapp ia restaurante',
+    canonicalUrl: `${BASE}/`,
+    h1: 'MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares — do cardápio ao WhatsApp',
+  },
+
   '/acesso': {
     title: 'Área de Acesso MiseOn | Cliente, Lojista e Entregador',
     description:

@@ -161,6 +161,31 @@ async function main() {
   const { PAGE_META } = await loadTsModule('src/data/pageMeta.ts');
   const { LANDING_PAGES_DATA } = await loadTsModule('src/data/landingPagesData.ts');
 
+  // dist/app.html — shell da SPA para as rotas que NÃO dá para gerar
+  // estaticamente: /admin, /superadmin, /entregador, /pedido/:id e o cardápio
+  // de cada loja (/:slug), que vêm do banco. O vercel.json aponta o rewrite
+  // catch-all para cá.
+  //
+  // Antes esse papel era do próprio dist/index.html, o que impedia a home de
+  // ser prerenderizada: dar conteúdo real ao index.html faria toda rota
+  // dinâmica servir o HTML da home. Separando os dois, a home ganha conteúdo
+  // real e as rotas dinâmicas seguem com shell neutro.
+  //
+  // noindex porque /app.html é acessível diretamente e seria conteúdo
+  // duplicado sem valor no índice.
+  // Substitui a diretiva robots existente em vez de acrescentar outra —
+  // duas tags <meta name="robots"> conflitantes na mesma página é instrução
+  // ambígua para o crawler.
+  let appShell = template.replace(
+    /<meta\s+name="robots"\s+content="[^"]*"\s*\/?>/,
+    '<meta name="robots" content="noindex, follow" />'
+  );
+  if (!appShell.includes('content="noindex, follow"')) {
+    throw new Error('Não consegui aplicar noindex no app.html — a meta robots do index.html mudou?');
+  }
+  await writeFile(path.join(DIST, 'app.html'), appShell, 'utf-8');
+  console.log('  ✓ app.html (shell da SPA para rotas dinâmicas, noindex)');
+
   const routes = [
     ...PUBLIC_ROUTES.filter((r) => r.prerender !== false).map((r) => r.path),
     ...DUPLICATE_ROUTES,
@@ -224,9 +249,13 @@ async function main() {
       throw new Error(`${routePath}: o <title> não foi aplicado — o template do index.html mudou?`);
     }
 
-    const outDir = path.join(DIST, slug);
-    await mkdir(outDir, { recursive: true });
-    await writeFile(path.join(outDir, 'index.html'), html, 'utf-8');
+    // A home vai para dist/index.html (é o que a Vercel serve em "/");
+    // as demais para dist/<rota>/index.html.
+    const outFile = routePath === '/'
+      ? path.join(DIST, 'index.html')
+      : path.join(DIST, slug, 'index.html');
+    await mkdir(path.dirname(outFile), { recursive: true });
+    await writeFile(outFile, html, 'utf-8');
     gerados++;
     console.log(`  ✓ ${routePath.padEnd(38)} → "${title}"`);
   }

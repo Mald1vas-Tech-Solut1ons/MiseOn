@@ -7,13 +7,12 @@
 // também — os dois scripts derivam tudo deste array.
 
 export const PUBLIC_ROUTES = [
-  // Home não é prerenderizada por este script: já tem title/description/H1
-  // únicos e corretos embutidos no index.html, e o arquivo dist/index.html
-  // precisa continuar sendo o shell genérico da SPA (é o fallback do
-  // vercel.json para toda rota dinâmica não coberta aqui — /admin, /superadmin,
-  // /entregador, /:slug de cada loja, /pedido/:id). Sobrescrevê-lo faria essas
-  // rotas dinâmicas herdarem o HTML/meta da Home no primeiro paint.
-  { path: '/', changefreq: 'weekly', priority: 1.0, prerender: false },
+  // A home É prerenderizada, em dist/index.html, com H1 real e visível.
+  // O shell da SPA para as rotas dinâmicas (/admin, /superadmin, /entregador,
+  // /:slug, /pedido/:id) foi movido para dist/app.html, para onde o rewrite
+  // catch-all do vercel.json aponta — por isso dar conteúdo real ao
+  // index.html não contamina mais as rotas dinâmicas.
+  { path: '/', changefreq: 'weekly', priority: 1.0 },
 
   { path: '/acesso', changefreq: 'yearly', priority: 0.4 },
   { path: '/sobre', changefreq: 'monthly', priority: 0.8 },

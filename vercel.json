@@ -5,7 +5,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!.*\\.[\\w]+$).*)", "destination": "/index.html" }
+    { "source": "/((?!.*\\.[\\w]+$).*)", "destination": "/app.html" }
   ],
   "headers": [
     {

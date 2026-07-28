@@ -92,19 +92,18 @@
     <title>MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares</title>
   </head>
   <body>
-    <!-- H1 de fallback para crawlers que não executam JavaScript (Bing e a
-         maioria dos bots de IA). NÃO REMOVER: foi adicionado deliberadamente
-         no commit d1de1dfb para eliminar o aviso "H1 tag missing" do Bing
-         Webmaster Tools, e removê-lo faz o aviso voltar na hora.
-         Fica dentro de #root de propósito — o React substitui todo o conteúdo
-         de #root ao montar, então nas páginas com conteúdo real (e nas
-         prerenderizadas) ele some e dá lugar ao H1 verdadeiro da página.
-         Visualmente oculto pelo padrão sr-only, nunca aparece para o usuário. -->
-    <div id="root">
-      <h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;">
-        MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares
-      </h1>
-    </div>
+    <!-- Este arquivo é só o esqueleto. No build (scripts/prerender.mjs) ele
+         vira duas coisas:
+           • dist/index.html  → a home, com H1 real e visível e conteúdo de
+             verdade, servida em "/"
+           • dist/app.html    → shell neutro para as rotas dinâmicas
+             (/admin, /superadmin, /entregador, /:slug, /pedido/:id)
+         Aqui NÃO entra H1 escondido por CSS. Já existiu um (commit d1de1dfb,
+         com clip:rect(0,0,0,0)) tentando calar o aviso "Marca H1 ausente" do
+         Bing Webmaster Tools, e nunca funcionou: analisador de SEO desconta
+         texto oculto, porque esconder conteúdo é técnica clássica de spam.
+         O que resolve é H1 real no HTML servido — e é o que o prerender faz. -->
+    <div id="root"></div>
     <noscript>
       <h1>MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares</h1>
       <p>MiseOn é o sistema de gestão completo para restaurantes, hamburguerias, pizzarias, lanchonetes e bares. Cardápio digital QR Code, KDS, comanda eletrônica, iFood, WhatsApp IA e Pix.</p>
