@@ -5,6 +5,7 @@ import { Search, MapPin, ArrowRight, ChevronLeft, Compass, Sparkles, LocateFixed
 import { supabase } from '../lib/supabase';
 import MiseOnLogo from '../components/MiseOnLogo';
 import SEO from '../components/SEO';
+import { PAGE_META } from '../data/pageMeta';
 import { MiseOnLoader } from '../components/MiseOnLoader';
 import type { FaixaEntrega } from '../types';
 import { geocode, lojaAtendeDistancia, type LatLng } from '../lib/geo';
@@ -151,11 +152,7 @@ export default function Lojas() {
 
   return (
     <div style={{ background: '#070C18', color: '#EAF1FB', fontFamily: "'Inter', sans-serif" }} className="min-h-screen">
-      <SEO
-        title="Lojas na MiseOn | Encontre Restaurantes Perto de Você"
-        description="Veja restaurantes, hamburguerias e pizzarias cadastrados no MiseOn perto de você e monte seu pedido direto, sem precisar instalar app."
-        canonicalUrl="https://miseon.app.br/lojas"
-      />
+      <SEO {...PAGE_META['/lojas']} />
       {/* Glow */}
       <div style={{ background: 'radial-gradient(circle, rgba(252,91,36,0.20) 0%, transparent 70%)', width: 500, height: 500, borderRadius: '50%', position: 'absolute', top: -180, left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }} />
 

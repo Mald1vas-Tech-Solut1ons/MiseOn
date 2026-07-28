@@ -1,15 +1,12 @@
 import { ShieldCheck, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SEO from '../../components/SEO';
+import { PAGE_META } from '../../data/pageMeta';
 
 export default function Privacidade() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-[#070C18] dark:text-[#EAF1FB]">
-      <SEO
-        title="Política de Privacidade (LGPD) | MiseOn"
-        description="Política de privacidade do MiseOn em conformidade com a LGPD: quais dados coletamos, como usamos e os direitos do titular sobre pedidos, cadastro e localização."
-        canonicalUrl="https://miseon.app.br/privacidade"
-      />
+      <SEO {...PAGE_META['/privacidade']} />
       <div className="mx-auto max-w-3xl">
         <Link
           to="/"

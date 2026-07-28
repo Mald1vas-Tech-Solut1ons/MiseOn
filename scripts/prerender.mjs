@@ -1,184 +1,240 @@
-// Prerenderiza as rotas públicas de marketing para HTML estático depois do
-// `vite build`, usando o Chromium do Puppeteer (já é devDependency do
-// projeto, usado hoje pelo Cypress — nenhuma dependência nova).
+// Gera HTML estático para as rotas públicas de marketing depois do
+// `vite build`. SEM BROWSER — apenas templating de string a partir dos dados
+// que já existem em src/data/. É determinístico e não depende de nenhuma
+// biblioteca de sistema.
 //
-// Problema que resolve: hoje TODAS as rotas servem o mesmo index.html vazio
-// (só meta tags da Home) para qualquer crawler que não execute JavaScript —
-// Bing, GPTBot, PerplexityBot, ClaudeBot, todos liberados no robots.txt mas
-// recebendo conteúdo idêntico em toda URL. O componente SEO.tsx já escreve
-// title/description/JSON-LD corretos por rota, só que via useEffect — tarde
-// demais para quem não roda JS. Este script deixa o Chromium montar a página
-// (incluindo o useEffect do SEO.tsx) e salva o HTML resultante como arquivo
-// estático por rota, sem tocar no app autenticado nem trocar de framework.
-import { createServer } from 'node:http';
-import { createReadStream } from 'node:fs';
-import { mkdir, stat, writeFile } from 'node:fs/promises';
+// POR QUE NÃO USA PUPPETEER (não reintroduza):
+// A primeira versão disto abria cada rota num Chromium headless. Funcionava
+// na máquina local e falhava no build da Vercel com
+// `libnspr4.so: cannot open shared object file` — o container de build não
+// tem as bibliotecas de sistema do Chromium. Resultado: o build passava, mas
+// ia ao ar SEM as páginas prerenderizadas. Prerender que depende de
+// infraestrutura que não controlamos não é confiável para isto.
+//
+// O QUE ISTO RESOLVE:
+// Todas as rotas serviam o mesmo index.html — mesmo <title>, mesma
+// description, mesmo H1 genérico. Para o Google isso é a mesma página
+// repetida ~20 vezes; ele desduplica e não indexa. Crawlers que não executam
+// JavaScript (Bing e a maioria dos bots de IA) nunca viam o conteúdo real,
+// porque o componente SEO.tsx só preenche as tags num useEffect, no browser.
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import puppeteer from 'puppeteer';
+import { build } from 'esbuild';
 import { PUBLIC_ROUTES, DUPLICATE_ROUTES } from './public-routes.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DIST = path.resolve(__dirname, '..', 'dist');
-const PORT = 4173 + Math.floor(Math.random() * 500);
+const ROOT = path.resolve(__dirname, '..');
+const DIST = path.join(ROOT, 'dist');
+const BASE = 'https://miseon.app.br';
 
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript',
-  '.mjs': 'text/javascript',
-  '.css': 'text/css',
-  '.json': 'application/json',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.webp': 'image/webp',
-  '.woff2': 'font/woff2',
-  '.ico': 'image/x-icon',
-  '.webmanifest': 'application/manifest+json',
-  '.xml': 'application/xml',
-  '.txt': 'text/plain',
-};
-
-// Servidor estático mínimo que reproduz o rewrite do vercel.json: serve o
-// arquivo exato se existir, senão cai para dist/index.html (comportamento de
-// SPA em produção) — é o mesmo contrato que o Chromium vai ver na Vercel.
-function startServer() {
-  return new Promise((resolve) => {
-    const server = createServer(async (req, res) => {
-      const urlPath = decodeURIComponent(req.url.split('?')[0]);
-      let filePath = path.join(DIST, urlPath);
-      try {
-        const s = await stat(filePath);
-        if (s.isDirectory()) filePath = path.join(filePath, 'index.html');
-        await stat(filePath);
-      } catch {
-        filePath = path.join(DIST, 'index.html');
-      }
-      res.setHeader('Content-Type', MIME[path.extname(filePath)] || 'application/octet-stream');
-      createReadStream(filePath)
-        .on('error', () => { res.statusCode = 404; res.end(); })
-        .pipe(res);
-    });
-    server.listen(PORT, () => resolve(server));
+/** Carrega um módulo .ts de src/data transpilando em memória com esbuild. */
+async function loadTsModule(relPath) {
+  const result = await build({
+    entryPoints: [path.join(ROOT, relPath)],
+    bundle: true,
+    format: 'esm',
+    platform: 'node',
+    write: false,
   });
+  const code = result.outputFiles[0].text;
+  const b64 = Buffer.from(code, 'utf-8').toString('base64');
+  return import(`data:text/javascript;base64,${b64}`);
 }
 
-async function prerenderRoute(browser, routePath) {
-  const page = await browser.newPage();
+const escapeHtml = (s) =>
+  String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 
-  // Não precisamos baixar vídeo/imagem/fonte pra capturar o HTML renderizado
-  // — só o texto e os data-attributes importam aqui. Acelera e reduz flakiness.
-  await page.setRequestInterception(true);
-  page.on('request', (req) => {
-    if (['media', 'image', 'font'].includes(req.resourceType())) req.abort();
-    else req.continue();
-  });
+/** Conteúdo estático rico para as landing pages de nicho. */
+function landingContent(data) {
+  const h1 = escapeHtml(`${data.h1Title} ${data.h1Highlight}`.trim());
+  const parts = [
+    `<h1>${h1}</h1>`,
+    `<p>${escapeHtml(data.subheadline)}</p>`,
+  ];
 
-  // Só exceções JS não tratadas derrubam o build. Console 'error' inclui os
-  // "Failed to load resource" das requisições de mídia/fonte/imagem que a
-  // gente aborta de propósito acima — não é sinal de bug.
-  const errors = [];
-  page.on('pageerror', (err) => errors.push(err.message));
-
-  await page.goto(`http://localhost:${PORT}${routePath}`, {
-    waitUntil: 'networkidle0',
-    timeout: 30000,
-  });
-
-  // O SEO.tsx escreve title/meta/JSON-LD num useEffect após o mount — espera
-  // um <h1> aparecer (sinal de que a página montou) e dá um respiro pro
-  // useEffect rodar antes de capturar o HTML final.
-  await page.waitForSelector('h1', { timeout: 10000 }).catch(() => {});
-  await new Promise((r) => setTimeout(r, 300));
-
-  let html = await page.content();
-  const title = await page.title();
-  await page.close();
-
-  // O <noscript> do index.html (H1 + parágrafo genéricos da Home) é o
-  // fallback para quando JS não roda. React nunca o remove — só substitui
-  // #root — então ele sobrevive intacto na captura. Numa página já
-  // prerenderizada isso é redundante (o conteúdo real já está no HTML sem
-  // depender de JS) e pior: cria um segundo <h1> genérico que um parser sem
-  // JS (a maioria dos crawlers não-Google) lê como elemento real, não texto
-  // inerte. Tira o bloco só das páginas prerenderizadas.
-  html = html.replace(/<noscript>[\s\S]*?<\/noscript>/, '');
-
-  if (errors.length) {
-    throw new Error(`Erro de console/JS em ${routePath}:\n${errors.join('\n')}`);
-  }
-  if (!title.trim()) {
-    throw new Error(`${routePath} não gerou <title> — SEO.tsx não rodou ou a rota não existe.`);
+  if (data.painPoints?.length) {
+    parts.push(`<h2>${escapeHtml(data.painPointsTitle)}</h2>`);
+    parts.push(
+      `<ul>${data.painPoints
+        .map(
+          (p) =>
+            `<li><strong>Sem o MiseOn:</strong> ${escapeHtml(p.semMiseOn)} <strong>Com o MiseOn:</strong> ${escapeHtml(p.comMiseOn)}</li>`
+        )
+        .join('')}</ul>`
+    );
   }
 
-  return { html, title };
+  if (data.features?.length) {
+    parts.push(`<h2>${escapeHtml(data.featuresTitle)}</h2>`);
+    parts.push(
+      `<ul>${data.features
+        .map((f) => `<li><strong>${escapeHtml(f.title)}:</strong> ${escapeHtml(f.description)}</li>`)
+        .join('')}</ul>`
+    );
+  }
+
+  if (data.businessRules?.items?.length) {
+    parts.push(`<h2>${escapeHtml(data.businessRules.title)}</h2>`);
+    parts.push(`<ul>${data.businessRules.items.map((i) => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`);
+  }
+
+  if (data.faqs?.length) {
+    parts.push('<h2>Perguntas Frequentes</h2>');
+    parts.push(
+      data.faqs
+        .map((f) => `<h3>${escapeHtml(f.pergunta)}</h3><p>${escapeHtml(f.resposta)}</p>`)
+        .join('')
+    );
+  }
+
+  return parts.join('\n      ');
+}
+
+/** JSON-LD de FAQPage — habilita rich snippet de perguntas no Google. */
+function faqJsonLd(data) {
+  if (!data.faqs?.length) return '';
+  const json = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: data.faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.pergunta,
+      acceptedAnswer: { '@type': 'Answer', text: f.resposta },
+    })),
+  };
+  return `<script type="application/ld+json">${JSON.stringify(json)}</script>`;
+}
+
+/** Aplica meta + conteúdo de uma rota sobre o shell gerado pelo Vite. */
+function renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd }) {
+  let html = template;
+
+  html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(title)}</title>`);
+  html = html.replace(
+    /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/,
+    `<meta name="description" content="${escapeHtml(description)}" />`
+  );
+  html = html.replace(
+    /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/,
+    `<link rel="canonical" href="${canonicalUrl}" />`
+  );
+  html = html.replace(
+    /<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/,
+    `<meta property="og:title" content="${escapeHtml(title)}" />`
+  );
+  html = html.replace(
+    /<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/,
+    `<meta property="og:description" content="${escapeHtml(description)}" />`
+  );
+  html = html.replace(
+    /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/,
+    `<meta property="og:url" content="${canonicalUrl}" />`
+  );
+
+  // Substitui o H1 genérico de fallback pelo conteúdo real da rota. O React
+  // troca tudo dentro de #root ao montar, então isto some para o usuário e
+  // permanece para o crawler sem JS.
+  html = html.replace(
+    /<div id="root">[\s\S]*?<\/div>/,
+    `<div id="root">\n      ${bodyHtml}\n    </div>`
+  );
+
+  // O <noscript> tem H1 e parágrafo genéricos da home — aqui viraria um
+  // segundo H1 genérico competindo com o H1 real da rota.
+  html = html.replace(/<noscript>[\s\S]*?<\/noscript>\s*/, '');
+
+  if (jsonLd) {
+    html = html.replace('</head>', `  ${jsonLd}\n  </head>`);
+  }
+
+  return html;
 }
 
 async function main() {
-  const server = await startServer();
+  const template = await readFile(path.join(DIST, 'index.html'), 'utf-8');
 
-  let browser;
-  try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-  } catch (err) {
-    // Falha de AMBIENTE (Chromium ausente/corrompido no runner de build) não
-    // pode derrubar o deploy inteiro por causa de uma melhoria de SEO — o
-    // site continua funcionando, só sem as páginas prerenderizadas (mesmo
-    // comportamento de antes desta feature existir, não uma regressão).
-    // Erros de CONTEÚDO (title duplicado/ausente, JS quebrado numa rota)
-    // continuam derrubando o build de propósito — ver o catch mais abaixo.
-    console.error('\n⚠️  PRERENDER PULADO — Chromium indisponível neste ambiente de build:');
-    console.error(`   ${err.message}`);
-    console.error('   O site vai buildar e ir ao ar normalmente, só sem as páginas prerenderizadas desta vez.');
-    console.error('   Rode "npx puppeteer browsers install chrome" e refaça o build.\n');
-    await new Promise((resolve) => server.close(resolve));
-    process.exitCode = 0;
-    return;
-  }
+  const { PAGE_META } = await loadTsModule('src/data/pageMeta.ts');
+  const { LANDING_PAGES_DATA } = await loadTsModule('src/data/landingPagesData.ts');
 
   const routes = [
     ...PUBLIC_ROUTES.filter((r) => r.prerender !== false).map((r) => r.path),
     ...DUPLICATE_ROUTES,
   ];
 
-  console.log(`Prerenderizando ${routes.length} rotas públicas...`);
+  console.log(`Gerando HTML estático de ${routes.length} rotas públicas (sem browser)...`);
   const seenTitles = new Map();
+  let gerados = 0;
 
-  try {
-    for (const routePath of routes) {
-      const { html, title } = await prerenderRoute(browser, routePath);
+  for (const routePath of routes) {
+    const slug = routePath.replace(/^\//, '');
+    const landing = LANDING_PAGES_DATA[slug];
+    const meta = PAGE_META[routePath];
 
-      // Barreira anti-regressão: se duas rotas não-duplicadas saírem com o
-      // MESMO <title>, o bug original (toda página idêntica pro crawler)
-      // voltou silenciosamente — falha o build em vez de shippar isso.
-      const isKnownDuplicate = DUPLICATE_ROUTES.includes(routePath);
-      if (!isKnownDuplicate) {
-        if (seenTitles.has(title)) {
-          throw new Error(
-            `Title duplicado: "${title}" em ${routePath} e ${seenTitles.get(title)}. ` +
-            `Se isso é intencional, adicione a rota em DUPLICATE_ROUTES (scripts/public-routes.mjs).`
-          );
-        }
-        seenTitles.set(title, routePath);
-      }
+    let title, description, canonicalUrl, bodyHtml, jsonLd;
 
-      const outDir = path.join(DIST, routePath.replace(/^\//, ''));
-      await mkdir(outDir, { recursive: true });
-      await writeFile(path.join(outDir, 'index.html'), html, 'utf-8');
-      console.log(`  ✓ ${routePath.padEnd(38)} → "${title}"`);
+    if (landing) {
+      title = landing.seo.title;
+      description = landing.seo.description;
+      canonicalUrl = landing.seo.canonicalUrl || `${BASE}${routePath}`;
+      bodyHtml = landingContent(landing);
+      jsonLd = faqJsonLd(landing);
+    } else if (meta) {
+      title = meta.title;
+      description = meta.description;
+      canonicalUrl = meta.canonicalUrl;
+      bodyHtml = `<h1>${escapeHtml(meta.h1)}</h1>\n      <p>${escapeHtml(meta.description)}</p>`;
+      jsonLd = '';
+    } else {
+      // Rota pública sem metadados: falha o build. Sem isto, a página iria ao
+      // ar herdando silenciosamente o title da home — que é exatamente o bug
+      // que este script existe para eliminar.
+      throw new Error(
+        `Rota "${routePath}" não tem metadados. Adicione em src/data/pageMeta.ts ` +
+        `(ou em src/data/landingPagesData.ts, se for landing de nicho).`
+      );
     }
-  } finally {
-    await browser.close();
-    await new Promise((resolve) => server.close(resolve));
+
+    // Barreira anti-regressão: dois títulos iguais entre rotas distintas
+    // significa que o bug original voltou. Falha o build em vez de publicar.
+    if (!DUPLICATE_ROUTES.includes(routePath)) {
+      if (seenTitles.has(title)) {
+        throw new Error(
+          `Title duplicado: "${title}" em ${routePath} e ${seenTitles.get(title)}. ` +
+          `Se for intencional, declare a rota em DUPLICATE_ROUTES (scripts/public-routes.mjs).`
+        );
+      }
+      seenTitles.set(title, routePath);
+    }
+
+    const html = renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd });
+
+    // Verificação do produto final, não da intenção: se o HTML gravado não
+    // tiver exatamente um H1 e o título certo, algo no template mudou e os
+    // regex acima pararam de casar — silenciosamente. Melhor falhar aqui.
+    const h1Count = (html.match(/<h1[\s>]/g) || []).length;
+    if (h1Count !== 1) {
+      throw new Error(`${routePath}: esperava exatamente 1 <h1> no HTML gerado, encontrei ${h1Count}.`);
+    }
+    if (!html.includes(`<title>${escapeHtml(title)}</title>`)) {
+      throw new Error(`${routePath}: o <title> não foi aplicado — o template do index.html mudou?`);
+    }
+
+    const outDir = path.join(DIST, slug);
+    await mkdir(outDir, { recursive: true });
+    await writeFile(path.join(outDir, 'index.html'), html, 'utf-8');
+    gerados++;
+    console.log(`  ✓ ${routePath.padEnd(38)} → "${title}"`);
   }
 
-  console.log(`Prerender concluído: ${routes.length} páginas estáticas geradas em dist/.`);
+  console.log(`Prerender concluído: ${gerados} páginas estáticas geradas em dist/.`);
 }
 
 main().catch((err) => {
-  console.error('Prerender falhou:', err.message);
+  console.error('\nPrerender falhou:', err.message);
   process.exit(1);
 });

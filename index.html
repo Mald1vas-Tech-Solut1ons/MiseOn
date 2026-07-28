@@ -92,7 +92,19 @@
     <title>MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares</title>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- H1 de fallback para crawlers que não executam JavaScript (Bing e a
+         maioria dos bots de IA). NÃO REMOVER: foi adicionado deliberadamente
+         no commit d1de1dfb para eliminar o aviso "H1 tag missing" do Bing
+         Webmaster Tools, e removê-lo faz o aviso voltar na hora.
+         Fica dentro de #root de propósito — o React substitui todo o conteúdo
+         de #root ao montar, então nas páginas com conteúdo real (e nas
+         prerenderizadas) ele some e dá lugar ao H1 verdadeiro da página.
+         Visualmente oculto pelo padrão sr-only, nunca aparece para o usuário. -->
+    <div id="root">
+      <h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;">
+        MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares
+      </h1>
+    </div>
     <noscript>
       <h1>MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares</h1>
       <p>MiseOn é o sistema de gestão completo para restaurantes, hamburguerias, pizzarias, lanchonetes e bares. Cardápio digital QR Code, KDS, comanda eletrônica, iFood, WhatsApp IA e Pix.</p>
