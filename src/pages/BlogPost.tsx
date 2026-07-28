@@ -191,6 +191,17 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
             </div>
           </div>
         </div>
+
+        {/* Banner com Imagem de Capa em Alta Resolução */}
+        <div className="mx-auto mt-8 max-w-4xl px-4 sm:px-6">
+          <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900 shadow-2xl">
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="h-64 sm:h-96 w-full object-cover"
+            />
+          </div>
+        </div>
       </header>
 
       {/* ══════════ 3. CORPO DO ARTIGO ══════════ */}

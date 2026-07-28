@@ -185,32 +185,43 @@ export default function Blog() {
               {postsFiltrados.map((post) => (
                 <article
                   key={post.slug}
-                  className="group flex flex-col justify-between rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md"
+                  className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md"
                 >
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="rounded-full bg-orange-500/10 px-3 py-0.5 text-[10px] font-bold text-[#FC5B24]">
-                        {post.category}
-                      </span>
-                      <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                        <Clock size={12} /> {post.readTime}
-                      </span>
-                    </div>
-
-                    <h3 className="mt-4 font-['Sora'] text-lg font-bold leading-snug text-gray-900 group-hover:text-[#FC5B24] dark:text-white transition-colors">
-                      <Link to={`/blog/${post.slug}`}>{post.title}</Link>
-                    </h3>
-
-                    <p className="mt-2 text-xs leading-relaxed text-gray-600 line-clamp-3 dark:text-slate-300">
-                      {post.description}
-                    </p>
+                  <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+                    <img
+                      src={post.coverImage}
+                      alt={post.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                    <span className="absolute bottom-3 left-3 rounded-full bg-[#FC5B24] px-3 py-0.5 text-[10px] font-bold text-white shadow-md">
+                      {post.category}
+                    </span>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-slate-400">{post.author.name}</span>
-                    <Link to={`/blog/${post.slug}`} className="flex items-center gap-1 text-xs font-bold text-[#FC5B24] group-hover:translate-x-1 transition-transform">
-                      Ler <ArrowRight size={13} />
-                    </Link>
+                  <div className="p-6 flex flex-col flex-1 justify-between">
+                    <div>
+                      <div className="flex items-center justify-between text-[11px] text-slate-400 mb-2">
+                        <span className="flex items-center gap-1"><Clock size={12} /> {post.readTime}</span>
+                        <span>{post.publishedAt}</span>
+                      </div>
+
+                      <h3 className="font-['Sora'] text-base font-bold leading-snug text-gray-900 group-hover:text-[#FC5B24] dark:text-white transition-colors">
+                        <Link to={`/blog/${post.slug}`}>{post.title}</Link>
+                      </h3>
+
+                      <p className="mt-2 text-xs leading-relaxed text-gray-600 line-clamp-3 dark:text-slate-300">
+                        {post.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-slate-400">{post.author.name}</span>
+                      <Link to={`/blog/${post.slug}`} className="flex items-center gap-1 text-xs font-bold text-[#FC5B24] group-hover:translate-x-1 transition-transform">
+                        Ler Artigo <ArrowRight size={13} />
+                      </Link>
+                    </div>
                   </div>
                 </article>
               ))}

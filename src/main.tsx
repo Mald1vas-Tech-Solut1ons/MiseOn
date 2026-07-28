@@ -79,6 +79,7 @@ const Auditoria        = lazy(() => import('./pages/superadmin/Auditoria'));
 const FiscalPlataforma = lazy(() => import('./pages/superadmin/FiscalPlataforma'));
 
 import { BrandLoader } from './components/BrandLoader';
+import { I18nProvider } from './contexts/I18nContext';
 
 function PageLoader() {
   return <BrandLoader title="CARREGANDO MISEON..." />;
@@ -88,10 +89,11 @@ registerSW({ immediate: true });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ToastProvider>
-      <BrowserRouter>
-        <ScreenTransition>
-          <Suspense fallback={<PageLoader />}>
+    <I18nProvider>
+      <ToastProvider>
+        <BrowserRouter>
+          <ScreenTransition>
+            <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* ── Admin ── */}
               <Route path="/admin/login" element={<Login />} />
@@ -183,5 +185,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </ScreenTransition>
       </BrowserRouter>
     </ToastProvider>
-  </React.StrictMode>,
+  </I18nProvider>
+</React.StrictMode>,
 );

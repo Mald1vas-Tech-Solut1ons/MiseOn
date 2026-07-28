@@ -10,6 +10,7 @@ import { useState } from 'react';
 import MiseOnLogo from '../components/MiseOnLogo';
 import SEO from '../components/SEO';
 import FooterSEO from '../components/FooterSEO';
+import { useI18n } from '../contexts/I18nContext';
 
 const WHATSAPP_CONTATO = '5511919889233';
 const zap = (msg: string) => `https://wa.me/${WHATSAPP_CONTATO}?text=${encodeURIComponent(msg)}`;
@@ -265,6 +266,7 @@ function FaqItem({ pergunta, resposta }: { pergunta: string; resposta: string })
 /* ───────────────────────────── Página ───────────────────────────── */
 
 export default function Home() {
+  const { idioma, setIdioma, t } = useI18n();
   const [menuAberto, setMenuAberto] = useState(false);
   const [planoAnual, setPlanoAnual] = useState(true);
   const [solucoesOpen, setSolucoesOpen] = useState(false);
@@ -562,11 +564,29 @@ export default function Home() {
           </div>
 
           <div className="hidden items-center gap-3 lg:flex">
+            {/* Seletor de Idioma Internacional i18n */}
+            <div className="flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 p-1 text-xs font-bold dark:border-white/15 dark:bg-white/10">
+              <button
+                onClick={() => setIdioma('pt-BR')}
+                className={`rounded-full px-2.5 py-1 transition ${idioma === 'pt-BR' ? 'bg-[#FC5B24] text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                title="Português (Brasil)"
+              >
+                🇧🇷 PT
+              </button>
+              <button
+                onClick={() => setIdioma('en-US')}
+                className={`rounded-full px-2.5 py-1 transition ${idioma === 'en-US' ? 'bg-[#FC5B24] text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                title="English (US)"
+              >
+                🇺🇸 EN
+              </button>
+            </div>
+
             <Link
               to="/acesso"
               className="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10"
             >
-              Entrar
+              {t('nav.entrar')}
             </Link>
             <Link
               to="/cadastre-se"

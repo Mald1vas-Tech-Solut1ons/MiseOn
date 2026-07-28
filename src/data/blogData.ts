@@ -5,6 +5,7 @@ export interface BlogPost {
   category: 'Engenharia de Cardápio' | 'Operação & KDS' | 'Tecnologia & IA' | 'Gestão Financeira';
   publishedAt: string;
   readTime: string;
+  coverImage: string;
   author: {
     name: string;
     role: string;
@@ -29,6 +30,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: 'Gestão Financeira',
     publishedAt: '2026-07-28',
     readTime: '8 min de leitura',
+    coverImage: '/blog-covers/cmv-peps-cover.png',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -99,6 +101,7 @@ A diferença entre um restaurante que estagna e um grupo gastronômico que escal
     category: 'Operação & KDS',
     publishedAt: '2026-07-28',
     readTime: '6 min de leitura',
+    coverImage: '/blog-covers/kds-kanban-cover.png',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -157,6 +160,7 @@ A transição para a cozinha digital não é mais um luxo futurista — é a inf
     category: 'Tecnologia & IA',
     publishedAt: '2026-07-28',
     readTime: '7 min de leitura',
+    coverImage: '/blog-covers/whatsapp-ia-cover.png',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -220,6 +224,7 @@ Proteger o canal de atendimento mais valioso da sua loja com tecnologia oficial 
     category: 'Engenharia de Cardápio',
     publishedAt: '2026-07-28',
     readTime: '9 min de leitura',
+    coverImage: '/blog-covers/peso-quilo-cover.png',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
