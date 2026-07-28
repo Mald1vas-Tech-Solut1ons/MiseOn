@@ -25,11 +25,12 @@ function statusValidade(vence_em?: string | null): { label: string; classe: stri
 const dataHoraBr = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
-export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate }: { lojaId: string; insumosTotais: Insumo[]; onUpdate: () => void }) {
+export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuffet = false }: { lojaId: string; insumosTotais: Insumo[]; onUpdate: () => void; isBuffet?: boolean }) {
   const [editando, setEditando] = useState<Insumo | 'novo' | null>(null);
   const [nome, setNome] = useState('');
   const [unidade, setUnidade] = useState('un');
   const [rendimentoPorcoes, setRendimentoPorcoes] = useState('');
+  const [rendimentoPadraoKg, setRendimentoPadraoKg] = useState('');
   const [pessoasServidas, setPessoasServidas] = useState('');
   const [validadeHoras, setValidadeHoras] = useState('');
   const [producoes, setProducoes] = useState<ProducaoPreparo[]>([]);
@@ -91,6 +92,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate }: { l
       setNome(p.nome);
       setUnidade(p.unidade_medida);
       setRendimentoPorcoes(String(p.rendimento_porcoes || ''));
+      setRendimentoPadraoKg(String(p.rendimento_padrao_kg || ''));
       setPessoasServidas(String(p.pessoas_servidas || ''));
       setValidadeHoras(p.validade_horas != null ? String(p.validade_horas) : '');
       setFicha((p as any).fichas_preparos?.map((f: any) => ({
@@ -102,6 +104,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate }: { l
       setNome('');
       setUnidade('un');
       setRendimentoPorcoes('');
+      setRendimentoPadraoKg('');
       setPessoasServidas('');
       setValidadeHoras('');
       setFicha([]);
@@ -120,6 +123,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate }: { l
         is_preparo: true,
         unidade_medida: unidade,
         rendimento_porcoes: Number(rendimentoPorcoes || 1),
+        rendimento_padrao_kg: rendimentoPadraoKg !== '' ? Number(rendimentoPadraoKg) : null,
         pessoas_servidas: Number(pessoasServidas || 1),
         validade_horas: validadeHoras !== '' && Number(validadeHoras) > 0 ? Number(validadeHoras) : null,
         ativo: true
@@ -183,13 +187,10 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate }: { l
         }
       }
 
-      // 2. Dar entrada no preparo (O rendimento já é 1 Receita = 1 'un' (ou X Litros). 
-      // Wait: the preparo is tracked in `unidade_medida`. 
-      // If the chef produces 1 recipe, and the recipe yields 10 Litros, do we credit 10 Litros?
-      // Yes! Because the `unidade_medida` of Molho is `L` (Litros), and the production is 10 L per recipe?
-      // Wait, let's keep it simple: 1 Lote de Produção = X rendimento final (rendimento_porcoes).
-      // So if rendimento_porcoes = 10, and multProducao = 2, we credit 20 into the stock of the preparo.
-      const qtdEntrada = Number(produzindo.rendimento_porcoes || 1) * multProducao;
+      // 2. Dar entrada no preparo
+      // Se houver rendimento_padrao_kg, usamos ele (Fator de cocção para Buffet/Kg). Senão, usamos porções.
+      const qtdBaseRendimento = produzindo.rendimento_padrao_kg ? Number(produzindo.rendimento_padrao_kg) : Number(produzindo.rendimento_porcoes || 1);
+      const qtdEntrada = qtdBaseRendimento * multProducao;
       
       await supabase.from('movimentacoes_estoque').insert({
         loja_id: lojaId,
@@ -349,13 +350,13 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate }: { l
               <input value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Molho de Tomate" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500" />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className={`grid grid-cols-2 ${isBuffet ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-3`}>
               <div>
                 <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">1 Lote Rende Qtos?</label>
                 <input value={rendimentoPorcoes} onChange={e => setRendimentoPorcoes(e.target.value)} type="number" placeholder="ex: 10" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
               </div>
               <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Unidade (ml, g, un)</label>
+                <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Unidade</label>
                 <select value={unidade} onChange={e => setUnidade(e.target.value)} className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold">
                   <option value="un">Un (Porção)</option>
                   <option value="L">Litros (L)</option>
@@ -364,6 +365,12 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate }: { l
                   <option value="g">Gramas (g)</option>
                 </select>
               </div>
+              {isBuffet && (
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Rendimento Kg (Buffet)</label>
+                  <input value={rendimentoPadraoKg} onChange={e => setRendimentoPadraoKg(e.target.value)} type="number" step="0.001" placeholder="ex: 2.500" className="mt-1 w-full p-2.5 rounded-xl border border-orange-300 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-900/10 text-orange-900 dark:text-orange-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
+                </div>
+              )}
               <div>
                 <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Pessoas Servidas</label>
                 <input value={pessoasServidas} onChange={e => setPessoasServidas(e.target.value)} type="number" placeholder="ex: 30" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />

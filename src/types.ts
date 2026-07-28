@@ -122,16 +122,17 @@ export interface ModulosAtivos {
 export interface ReposicaoBuffet {
   id: string;
   loja_id: string;
-  produto_id: string;
+  preparo_id: string;
   nome_cuba: string;
   peso_reposto_kg: number;
+  peso_sobra_limpa_kg?: number;
+  status?: 'NA_PISTA' | 'FECHADO';
   custo_estimado_total?: number;
   preparado_por?: string | null;
   observacao?: string | null;
   criado_em: string;
-  produtos?: { nome: string; preco_por_quilo?: number };
+  preparo?: Insumo;
 }
-
 
 export interface HorarioFuncionamento {
   id?: string;
@@ -431,6 +432,7 @@ export interface Insumo {
   rendimento_porcoes?: number;
   pessoas_servidas?: number;
   validade_horas?: number | null; // preparos: horas até vencer após produção (null = não controla)
+  rendimento_padrao_kg?: number | null;
   fichas_preparo?: FichaPreparo[];
   criado_em?: string;
 }

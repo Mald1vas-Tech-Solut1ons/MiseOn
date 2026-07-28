@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useMemo, lazy, Suspense } from 'react
 import { Link, useOutletContext } from 'react-router-dom';
 import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Insumo, fmt, InsumoRendimentoJSON, type Produto } from '../../types';
+import { Insumo, fmt, InsumoRendimentoJSON } from '../../types';
 import { UNIDADES, destinosPermitidos, validarConversao } from '../../lib/unidades';
 import { OPCOES_SETOR, SETORES, validarSetor, derivarSetor } from '../../lib/estoque3d/rastreio/setores';
 import type { CtxLoja } from './AdminLayout';
@@ -19,7 +19,8 @@ import ModalRaioXProduto from '../../components/estoque/ModalRaioXProduto';
 import { BarChart3 } from 'lucide-react';
 
 export default function Estoque() {
-  const { lojaId } = useOutletContext<CtxLoja>();
+  const { lojaId, segmento_negocio, modulos_ativos } = useOutletContext<CtxLoja>();
+  const isBuffet = segmento_negocio === 'SELF_SERVICE' || modulos_ativos?.balanca === true;
   const [tab, setTab] = useState<'insumos' | 'preparos' | 'custo3d' | 'rastreio3d'>('insumos');
   const [insumos, setInsumos] = useState<Insumo[]>([]);
   const [inativos, setInativos] = useState<Insumo[]>([]);
@@ -30,7 +31,6 @@ export default function Estoque() {
 
   // Buffet / Quilo
   const [modalBuffetAberto, setModalBuffetAberto] = useState(false);
-  const [produtosBuffet, setProdutosBuffet] = useState<Produto[]>([]);
 
   // States para Novo Insumo Dinâmico
   const [nome, setNome] = useState('');
@@ -139,16 +139,7 @@ export default function Estoque() {
         setInativos(todos.filter((i) => !i.ativo));
       });
 
-    // Buscar produtos de buffet tipo POR_PESO
-    supabase.from('produtos')
-      .select('*')
-      .eq('loja_id', lojaId)
-      .eq('tipo_venda', 'POR_PESO')
-      .eq('disponivel', true)
-      .then(({ data }) => {
-        if (atual && data) setProdutosBuffet(data as Produto[]);
-      });
-
+    // Não buscamos mais produtos de buffet do PDV, a Pista consome Preparos.
     return () => { atual = false; };
   }, [lojaId, versao]);
 
@@ -346,12 +337,14 @@ export default function Estoque() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
          <div className="flex items-center gap-3">
             <h2 className="font-black text-2xl dark:text-gray-100">Estoque Geral</h2>
-            <button
-              onClick={() => setModalBuffetAberto(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md hover:brightness-110 transition"
-            >
-              <Scale size={15} /> Reposição de Cubas (Buffet)
-            </button>
+             {isBuffet && (
+               <button
+                 onClick={() => setModalBuffetAberto(true)}
+                 className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md hover:brightness-110 transition"
+               >
+                 <Scale size={15} /> Reposição de Cubas (Buffet)
+               </button>
+             )}
          </div>
          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shadow-inner">
            <button data-tour="tour-estoque-aba-insumos" onClick={() => setTab('insumos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'insumos' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Matérias-Primas</button>
@@ -370,7 +363,7 @@ export default function Estoque() {
           <EstoqueCusto3D lojaId={lojaId} />
         </Suspense>
       ) : tab === 'preparos' ? (
-        <EstoquePreparos lojaId={lojaId} insumosTotais={[...insumos, ...inativos]} onUpdate={carregar} />
+        <EstoquePreparos lojaId={lojaId} insumosTotais={[...insumos, ...inativos]} onUpdate={carregar} isBuffet={isBuffet} />
       ) : (
         <>
           {criticos.length > 0 && (
@@ -742,7 +735,7 @@ export default function Estoque() {
       {modalBuffetAberto && (
         <ModalReposicaoBuffet
           lojaId={lojaId}
-          produtosBuffet={produtosBuffet}
+          preparosAtivos={insumos.filter(i => i.is_preparo && i.ativo)}
           onSucesso={() => {
             setModalBuffetAberto(false);
             carregar();
