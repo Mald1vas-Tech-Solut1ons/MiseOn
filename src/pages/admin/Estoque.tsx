@@ -152,9 +152,12 @@ export default function Estoque() {
   // insumos ativos da mesma loja, ignorando espacos e caixa).
   const avisarErroInsumo = (error: { code?: string; message: string }, nomeLimpo: string) => {
     alert(error.code === '23505'
-      ? `Ja existe um insumo ativo chamado "${nomeLimpo}". Use o existente ou escolha outro nome.`
-      : `Nao foi possivel salvar: ${error.message}`);
+      ? `Já existe um insumo ativo chamado "${nomeLimpo}". Use o existente ou escolha outro nome.`
+      : `Não foi possível salvar: ${error.message}`);
   };
+
+  const normalizeString = (str: string) => 
+    str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 
   const criar = async () => {
     // btrim tambem roda no banco (trigger tg_insumos_normaliza_nome), mas o nome
@@ -163,6 +166,30 @@ export default function Estoque() {
     // Guard de duplo-clique: sem ele, dois cliques rapidos criavam dois insumos
     // identicos, cada um com seu proprio saldo e ficha tecnica.
     if (!nomeLimpo || salvando) return;
+
+    const nomeNorm = normalizeString(nomeLimpo);
+    const duplicadoExato = [...insumos, ...inativos].find(i => normalizeString(i.nome) === nomeNorm && i.id !== editando?.id);
+    if (duplicadoExato) {
+      alert(`Já existe um insumo (mesmo que inativo) chamado "${duplicadoExato.nome}"! A busca é inteligente e entende que "${nomeLimpo}" é a mesma coisa. Evite criar itens duplicados.`);
+      return;
+    }
+
+    // Alerta inteligente para evitar "Alho" vs "Alho Dente"
+    const palavras = nomeNorm.split(' ');
+    const unidadesComuns = ['dente', 'dentes', 'cabeca', 'cabecas', 'maco', 'macos', 'folha', 'folhas', 'rodela', 'rodelas', 'kg', 'quilo', 'grama', 'gramas', 'litro', 'litros', 'ml', 'unidade', 'unidades'];
+    const temUnidadeNoNome = palavras.some(p => unidadesComuns.includes(p));
+    
+    if (temUnidadeNoNome && !editando) {
+      const baseName = palavras.filter(p => !unidadesComuns.includes(p)).join(' ');
+      if (baseName.length >= 3) {
+        const parecido = [...insumos, ...inativos].find(i => normalizeString(i.nome) === baseName || normalizeString(i.nome).includes(baseName));
+        if (parecido) {
+           const confirma = window.confirm(`🚨 ALERTA DE ORGANIZAÇÃO:\n\nVocê está tentando cadastrar "${nomeLimpo}", mas já tem "${parecido.nome}" no estoque.\n\nLembre-se: No MiseOn, você NÃO PRECISA criar "Alho Dente" e "Alho Cabeça". Você cadastra apenas "Alho" e usa o Passo 2 ali embaixo para dizer que a unidade de uso dele é em "dentes" ou "cabeças".\n\nDeseja criar esse item duplicado mesmo assim?`);
+           if (!confirma) return;
+        }
+      }
+    }
+
     // Defesa em profundidade: a UI já filtra os destinos ilegais, mas o save
     // recusa de novo — um estado antigo ou colado à mão não pode furar a regra.
     if (!cadeiaValida) {
@@ -288,15 +315,17 @@ export default function Estoque() {
   };
 
   const criticos = insumos.filter((i) => !i.is_preparo && Number(i.quantidade_atual) <= Number(i.estoque_minimo));
+  
+  const termoBusca = normalizeString(busca.trim());
   const insumosBrutos = insumos.filter(i => 
     !i.is_preparo && 
     (!filtroCategoria || i.categoria_insumo === filtroCategoria || (filtroCategoria === 'Ingrediente' && !i.categoria_insumo)) &&
-    (!busca.trim() || i.nome.toLowerCase().includes(busca.trim().toLowerCase()))
+    (!termoBusca || normalizeString(i.nome).includes(termoBusca) || normalizeString(i.unidade_medida || '').includes(termoBusca))
   );
   const inativosBrutos = inativos.filter(i => 
     !i.is_preparo && 
     (!filtroCategoria || i.categoria_insumo === filtroCategoria || (filtroCategoria === 'Ingrediente' && !i.categoria_insumo)) &&
-    (!busca.trim() || i.nome.toLowerCase().includes(busca.trim().toLowerCase()))
+    (!termoBusca || normalizeString(i.nome).includes(termoBusca) || normalizeString(i.unidade_medida || '').includes(termoBusca))
   );
 
   const categoriasDoBanco = Array.from(new Set([...insumos, ...inativos].map(i => i.categoria_insumo).filter(Boolean))) as string[];

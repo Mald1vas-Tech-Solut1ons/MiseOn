@@ -68,6 +68,11 @@ export const UNIDADES: readonly Unidade[] = [
   { codigo: 'fatias', rotulo: 'Fatias', grandeza: 'semantico', fatorBase: null },
   { codigo: 'porção', rotulo: 'Porções', grandeza: 'semantico', fatorBase: null },
   { codigo: 'peça', rotulo: 'Peças', grandeza: 'semantico', fatorBase: null },
+  { codigo: 'dente', rotulo: 'Dente (ex: alho)', grandeza: 'semantico', fatorBase: null },
+  { codigo: 'maço', rotulo: 'Maço (ex: couve, cebolinha)', grandeza: 'semantico', fatorBase: null },
+  { codigo: 'cabeça', rotulo: 'Cabeça (ex: alho, cebola)', grandeza: 'semantico', fatorBase: null },
+  { codigo: 'folha', rotulo: 'Folha (ex: alface, louro)', grandeza: 'semantico', fatorBase: null },
+  { codigo: 'rodela', rotulo: 'Rodela (ex: tomate, cebola)', grandeza: 'semantico', fatorBase: null },
 
   // ── Agrupadores abstratos — conteúdo declarado pelo lojista ───────────
   { codigo: 'cx', rotulo: 'Caixa (cx)', grandeza: 'agrupador', fatorBase: null },
