@@ -9,12 +9,28 @@ export const DICIONARIO = {
     'nav.funcionalidades': 'Funcionalidades',
     'nav.comoFunciona': 'Como Funciona',
     'nav.planos': 'Planos',
-    'nav.blog': 'Blog ✍️',
-    'nav.videos': 'Vídeos 🎬',
+    'nav.blog': 'Blog',
+    'nav.videos': 'Vídeos',
     'nav.entrar': 'Entrar',
     'nav.cadastrar': 'Cadastrar minha loja',
     'nav.testar30d': 'Testar 30 Dias Grátis',
-    
+    'nav.conteudo': 'Conteúdo',
+    'nav.conteudoTitulo': 'Conheça o MiseOn',
+    'nav.comoFuncionaDesc': 'O sistema em 4 passos',
+    'nav.blogDesc': 'CMV, engenharia e gestão',
+    'nav.videosDesc': 'Demonstrações em ação',
+    'nav.depoimentos': 'Depoimentos',
+    'nav.depoimentosDesc': 'Cases reais de clientes',
+    'nav.navegacao': 'Navegação',
+
+    // Cards de prova do hero
+    'prova.pedidos': 'Pedidos em tempo real',
+    'prova.pedidosDesc': 'Do site, do balcão ou do WhatsApp: tudo cai no mesmo painel, com aviso na hora.',
+    'prova.kds': 'Cozinha sob controle (KDS)',
+    'prova.kdsDesc': 'Tela de produção inteligente por etapas Kanban. Sem papel engordurado nem confusão.',
+    'prova.ia': 'IA no WhatsApp (API Meta)',
+    'prova.iaDesc': 'A IA tira dúvidas, envia o cardápio e não deixa nenhum cliente sem resposta.',
+
     // Hero
     'hero.badge': 'PLATAFORMA COMPLETA PARA RESTAURANTES',
     'hero.title': 'MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares —',
@@ -45,11 +61,27 @@ export const DICIONARIO = {
     'nav.funcionalidades': 'Features',
     'nav.comoFunciona': 'How It Works',
     'nav.planos': 'Pricing',
-    'nav.blog': 'Blog ✍️',
-    'nav.videos': 'Videos 🎬',
+    'nav.blog': 'Blog',
+    'nav.videos': 'Videos',
     'nav.entrar': 'Sign In',
     'nav.cadastrar': 'Register Your Restaurant',
     'nav.testar30d': 'Start 30-Day Free Trial',
+    'nav.conteudo': 'Resources',
+    'nav.conteudoTitulo': 'Get to know MiseOn',
+    'nav.comoFuncionaDesc': 'The system in 4 steps',
+    'nav.blogDesc': 'COGS, engineering and management',
+    'nav.videosDesc': 'Live product demos',
+    'nav.depoimentos': 'Testimonials',
+    'nav.depoimentosDesc': 'Real customer stories',
+    'nav.navegacao': 'Navigation',
+
+    // Cards de prova do hero
+    'prova.pedidos': 'Real-time orders',
+    'prova.pedidosDesc': 'From your website, the counter or WhatsApp: everything lands in one dashboard, with instant alerts.',
+    'prova.kds': 'Kitchen under control (KDS)',
+    'prova.kdsDesc': 'Smart Kanban production screen. No greasy paper tickets, no confusion.',
+    'prova.ia': 'AI on WhatsApp (Meta API)',
+    'prova.iaDesc': 'The AI answers questions, sends the menu and never leaves a customer waiting.',
 
     // Hero
     'hero.badge': 'ALL-IN-ONE FOOD SERVICE MANAGEMENT PLATFORM',
@@ -104,6 +136,13 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIdiomaState(novoIdioma);
     localStorage.setItem('miseon_idioma', novoIdioma);
   };
+
+  // Mantém o <html lang> em sincronia: buscadores e leitores de tela usam esse
+  // atributo para saber o idioma da página. Sem isso a versão EN continua
+  // anunciada como pt-BR.
+  useEffect(() => {
+    document.documentElement.lang = idioma;
+  }, [idioma]);
 
   const t = (chave: ChaveDicionario): string => {
     return DICIONARIO[idioma]?.[chave] || DICIONARIO['pt-BR']?.[chave] || chave;

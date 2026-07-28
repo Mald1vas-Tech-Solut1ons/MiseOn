@@ -358,7 +358,7 @@ export default function Home() {
                 onClick={() => setSolucoesOpen(!solucoesOpen)}
                 className="flex items-center gap-1 text-sm font-semibold text-gray-700 transition hover:text-[var(--cor-primaria)] dark:text-gray-200 dark:hover:text-white"
               >
-                Soluções
+                {t('nav.solucoes')}
                 <ChevronDown size={14} className={`transition-transform duration-200 ${solucoesOpen ? 'rotate-180 text-[#FC5B24]' : ''}`} />
               </button>
 
@@ -452,7 +452,7 @@ export default function Home() {
                 onClick={() => setRecursosOpen(!recursosOpen)}
                 className="flex items-center gap-1 text-sm font-semibold text-gray-700 transition hover:text-[var(--cor-primaria)] dark:text-gray-200 dark:hover:text-white"
               >
-                Funcionalidades
+                {t('nav.funcionalidades')}
                 <ChevronDown size={14} className={`transition-transform duration-200 ${recursosOpen ? 'rotate-180 text-[#FC5B24]' : ''}`} />
               </button>
 
@@ -537,7 +537,7 @@ export default function Home() {
               href="#planos"
               className="text-sm font-semibold text-gray-700 transition hover:text-[var(--cor-primaria)] dark:text-gray-200 dark:hover:text-white"
             >
-              Planos
+              {t('nav.planos')}
             </a>
 
             {/* 4. Conteúdo (Dropdown) — agrupa Como funciona, Blog e Vídeos, que
@@ -552,21 +552,21 @@ export default function Home() {
                 onClick={() => setConteudoOpen(!conteudoOpen)}
                 className="flex items-center gap-1 text-sm font-semibold text-gray-700 transition hover:text-[var(--cor-primaria)] dark:text-gray-200 dark:hover:text-white"
               >
-                Conteúdo
+                {t('nav.conteudo')}
                 <ChevronDown size={14} className={`transition-transform duration-200 ${conteudoOpen ? 'rotate-180 text-[#FC5B24]' : ''}`} />
               </button>
 
               {conteudoOpen && (
                 <div className="absolute top-full -left-4 mt-2 w-72 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0B1120]/95 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="mb-2 px-3 pt-1 text-[11px] font-black uppercase tracking-wider text-slate-400">
-                    Conheça o MiseOn
+                    {t('nav.conteudoTitulo')}
                   </div>
                   <div className="space-y-1">
                     {[
-                      { to: '/#como-funciona', ancora: true, icone: <Compass size={18} />, titulo: 'Como funciona', desc: 'O sistema em 4 passos' },
-                      { to: '/blog', icone: <BookOpen size={18} />, titulo: 'Blog', desc: 'CMV, engenharia e gestão' },
-                      { to: '/videos', icone: <PlayCircle size={18} />, titulo: 'Vídeos', desc: 'Demonstrações em ação' },
-                      { to: '/depoimentos', icone: <Quote size={18} />, titulo: 'Depoimentos', desc: 'Cases reais de clientes' },
+                      { to: '/#como-funciona', ancora: true, icone: <Compass size={18} />, titulo: t('nav.comoFunciona'), desc: t('nav.comoFuncionaDesc') },
+                      { to: '/blog', icone: <BookOpen size={18} />, titulo: t('nav.blog'), desc: t('nav.blogDesc') },
+                      { to: '/videos', icone: <PlayCircle size={18} />, titulo: t('nav.videos'), desc: t('nav.videosDesc') },
+                      { to: '/depoimentos', icone: <Quote size={18} />, titulo: t('nav.depoimentos'), desc: t('nav.depoimentosDesc') },
                     ].map((item) =>
                       item.ancora ? (
                         <a
@@ -628,7 +628,7 @@ export default function Home() {
               to="/cadastre-se"
               className="rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-5 py-2.5 font-['Sora'] text-sm font-bold text-white shadow-lg shadow-[#FC5B24]/25 transition hover:scale-105 hover:brightness-110"
             >
-              Cadastrar minha loja
+              {t('nav.cadastrar')}
             </Link>
           </div>
 
@@ -646,7 +646,7 @@ export default function Home() {
         {menuAberto && (
           <div className="border-t border-gray-200/70 bg-white/95 px-4 pb-5 pt-3 backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#070C18]/95">
             <div className="flex flex-col gap-1">
-              <div className="px-3 py-1 text-[11px] font-black uppercase text-slate-400">Soluções</div>
+              <div className="px-3 py-1 text-[11px] font-black uppercase text-slate-400">{t('nav.solucoes')}</div>
               {[
                 { to: '/sistema-para-restaurante-por-quilo', icone: <Scale size={16} />, rotulo: 'Restaurantes por Quilo', novo: true },
                 { to: '/sistema-para-hamburgueria', icone: <ChefHat size={16} />, rotulo: 'Hamburguerias' },
@@ -668,21 +668,21 @@ export default function Home() {
                 </Link>
               ))}
 
-              <div className="mt-2 px-3 py-1 text-[11px] font-black uppercase text-slate-400">Navegação</div>
+              <div className="mt-2 px-3 py-1 text-[11px] font-black uppercase text-slate-400">{t('nav.navegacao')}</div>
               <a href="#como-funciona" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
-                <span className="text-gray-400 dark:text-slate-400"><Compass size={16} /></span> Como funciona
+                <span className="text-gray-400 dark:text-slate-400"><Compass size={16} /></span> {t('nav.comoFunciona')}
               </a>
               <a href="#planos" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
-                <span className="text-gray-400 dark:text-slate-400"><Wallet size={16} /></span> Planos
+                <span className="text-gray-400 dark:text-slate-400"><Wallet size={16} /></span> {t('nav.planos')}
               </a>
               <Link to="/blog" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
-                <span className="text-gray-400 dark:text-slate-400"><BookOpen size={16} /></span> Blog
+                <span className="text-gray-400 dark:text-slate-400"><BookOpen size={16} /></span> {t('nav.blog')}
               </Link>
               <Link to="/videos" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
-                <span className="text-gray-400 dark:text-slate-400"><PlayCircle size={16} /></span> Vídeos
+                <span className="text-gray-400 dark:text-slate-400"><PlayCircle size={16} /></span> {t('nav.videos')}
               </Link>
               <Link to="/depoimentos" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
-                <span className="text-gray-400 dark:text-slate-400"><Quote size={16} /></span> Depoimentos
+                <span className="text-gray-400 dark:text-slate-400"><Quote size={16} /></span> {t('nav.depoimentos')}
               </Link>
 
               <div className="mt-3 flex flex-col gap-2">
@@ -690,13 +690,13 @@ export default function Home() {
                   to="/acesso"
                   className="rounded-xl border border-gray-300 px-4 py-2.5 text-center text-sm font-bold text-gray-700 dark:border-white/15 dark:text-gray-100"
                 >
-                  Entrar
+                  {t('nav.entrar')}
                 </Link>
                 <Link
                   to="/cadastre-se"
                   className="rounded-xl bg-[var(--cor-primaria)] px-4 py-2.5 text-center font-['Sora'] text-sm font-bold text-white shadow-lg"
                 >
-                  Cadastrar minha loja
+                  {t('nav.cadastrar')}
                 </Link>
               </div>
             </div>
@@ -714,20 +714,18 @@ export default function Home() {
         <div className="relative mx-auto max-w-6xl px-4 text-center sm:px-6">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-200 backdrop-blur-md">
             <Sparkles size={13} className="text-orange-400" />
-            Plataforma completa para restaurantes
+            {t('hero.badge')}
           </span>
 
           <h1 className="mx-auto mt-6 max-w-4xl font-['Sora'] text-4xl font-extrabold leading-[1.12] tracking-tight text-white sm:text-5xl lg:text-6xl">
-            MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares —{' '}
+            {t('hero.title')}{' '}
             <span className="bg-gradient-to-r from-[#FF8A5C] via-[#FC5B24] to-[#6B9EFF] bg-clip-text text-transparent">
-              do cardápio ao WhatsApp
+              {t('hero.titleHighlight')}
             </span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
-            O MiseOn é o sistema de gestão que coloca o seu cardápio digital, os pedidos,
-            a cozinha, as entregas, o estoque e o financeiro no mesmo painel — com uma
-            inteligência artificial que atende seus clientes no WhatsApp usando os dados reais da sua loja.
+            {t('hero.subtitle')}
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -735,13 +733,13 @@ export default function Home() {
               to="/cadastre-se"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105 hover:brightness-110 sm:w-auto"
             >
-              Cadastrar minha loja <ArrowRight size={18} />
+              {t('hero.ctaPrincipal')} <ArrowRight size={18} />
             </Link>
             <a
               href="#como-funciona"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-8 py-4 font-['Sora'] text-base font-bold text-white backdrop-blur-md transition hover:bg-white/15 sm:w-auto"
             >
-              Ver como funciona
+              {t('hero.ctaSecundario')}
             </a>
           </div>
 
@@ -750,9 +748,9 @@ export default function Home() {
             <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
               <ClipboardList size={22} className="mt-0.5 shrink-0 text-blue-300" />
               <div>
-                <p className="text-sm font-bold text-white">Pedidos em tempo real</p>
+                <p className="text-sm font-bold text-white">{t('prova.pedidos')}</p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-300/90">
-                  Do site, do balcão ou do WhatsApp: tudo cai no mesmo painel, com aviso na hora.
+                  {t('prova.pedidosDesc')}
                 </p>
               </div>
             </div>
@@ -760,9 +758,9 @@ export default function Home() {
             <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
               <ChefHat size={22} className="mt-0.5 shrink-0 text-orange-400" />
               <div>
-                <p className="text-sm font-bold text-white">Cozinha sob controle (KDS)</p>
+                <p className="text-sm font-bold text-white">{t('prova.kds')}</p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-300/90">
-                  Tela de produção inteligente por etapas Kanban. Sem papel engordurado nem confusão.
+                  {t('prova.kdsDesc')}
                 </p>
               </div>
             </div>
@@ -770,9 +768,9 @@ export default function Home() {
             <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
               <MessageCircle size={22} className="mt-0.5 shrink-0 text-emerald-400" />
               <div>
-                <p className="text-sm font-bold text-white">IA no WhatsApp (API Meta)</p>
+                <p className="text-sm font-bold text-white">{t('prova.ia')}</p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-300/90">
-                  A IA tira dúvidas, envia o cardápio e não deixa nenhum cliente sem resposta.
+                  {t('prova.iaDesc')}
                 </p>
               </div>
             </div>
