@@ -72,6 +72,16 @@ body {
 
 html { -webkit-tap-highlight-color: transparent; }
 
+/* ── Correção global para opções de Select ── */
+select option {
+  background-color: #ffffff;
+  color: #111827;
+}
+.dark select option {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
 /* ── BrandIntro (abertura de marca) ── */
 .mo-intro {
   position: fixed; inset: 0; z-index: 9999;
