@@ -162,7 +162,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                           <XAxis dataKey="data" tick={{ fontSize: 10, fill: '#6B7280' }} axisLine={false} tickLine={false} />
                           <YAxis tickFormatter={(val) => `R$ ${val}`} tick={{ fontSize: 10, fill: '#6B7280' }} axisLine={false} tickLine={false} />
                           <RechartsTooltip 
-                            formatter={(value: number) => [fmt(value), 'Custo Unitário']}
+                            formatter={(value: any) => [fmt(Number(value)), 'Custo Unitário']}
                             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
                             labelStyle={{ color: '#6B7280', fontSize: '12px', fontWeight: 'bold' }}
                           />
