@@ -71,6 +71,7 @@ const EntregadorDocumentos = lazy(() => import('./pages/entregador/Documentos'))
 const SuperAdminLogin  = lazy(() => import('./pages/superadmin/Login'));
 const SuperAdminLayout = lazy(() => import('./pages/superadmin/SuperAdminLayout'));
 const CrmLeads         = lazy(() => import('./pages/superadmin/CrmLeads'));
+const GuiaCeoGtm       = lazy(() => import('./pages/superadmin/GuiaCeoGtm'));
 const Tenants          = lazy(() => import('./pages/superadmin/Tenants'));
 const Onboarding       = lazy(() => import('./pages/superadmin/Onboarding'));
 const Churn            = lazy(() => import('./pages/superadmin/Churn'));
@@ -127,6 +128,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/superadmin" element={<SuperAdminLayout />}>
                 <Route index element={<Navigate to="leads" replace />} />
                 <Route path="leads"      element={<CrmLeads />} />
+                <Route path="guia-ceo"   element={<GuiaCeoGtm />} />
                 <Route path="tenants"    element={<Tenants />} />
                 <Route path="onboarding" element={<Onboarding />} />
                 <Route path="churn"      element={<Churn />} />

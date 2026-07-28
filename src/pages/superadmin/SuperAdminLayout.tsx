@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Building2, UserPlus, TrendingDown, ScrollText, LogOut, Receipt, Users } from 'lucide-react';
+import { Building2, UserPlus, TrendingDown, ScrollText, LogOut, Receipt, Users, BookOpen } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 export default function SuperAdminLayout() {
@@ -35,6 +35,7 @@ export default function SuperAdminLayout() {
 
   const itens = [
     { to: '/superadmin/leads', icon: <Users size={18} />, label: 'CRM Leads B2B' },
+    { to: '/superadmin/guia-ceo', icon: <BookOpen size={18} />, label: 'Manual CEO & GTM' },
     { to: '/superadmin/tenants', icon: <Building2 size={18} />, label: 'Tenants' },
     { to: '/superadmin/onboarding', icon: <UserPlus size={18} />, label: 'Onboarding' },
     { to: '/superadmin/churn', icon: <TrendingDown size={18} />, label: 'Churn' },
