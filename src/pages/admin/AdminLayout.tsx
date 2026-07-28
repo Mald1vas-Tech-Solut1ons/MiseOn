@@ -6,6 +6,7 @@ import { avaliarAssinatura } from '../../lib/assinatura';
 import ThemeToggle from '../../components/ThemeToggle';
 import { NotificationCenter } from '../../components/notifications/NotificationCenter';
 import { useLedgerAlerts } from '../../hooks/useLedgerAlerts';
+import { armarDesbloqueioDeSom } from '../../lib/som';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
 import { BrandLoader } from '../../components/BrandLoader';
 import { podeAcessar, HOME_POR_PAPEL, type Papel } from '../../lib/permissoes';
@@ -66,6 +67,10 @@ export default function AdminLayout() {
 
   // Notificações em tempo real para toda a área administrativa (Chat, IA, Atendimento e Pedidos)
   useRealtimeNotifications({ lojaId: ctx?.lojaId ?? '', contexto: 'PAINEL' });
+
+  // Libera a campainha no primeiro clique: o navegador nasce com o áudio
+  // suspenso e sem isso toda notificação chega muda.
+  useEffect(() => { armarDesbloqueioDeSom(); }, []);
 
   // Hook de controle do Tour Guiado pelo Sistema (deve estar no topo antes dos early-returns)
   const tour = useGuidedTour(ctx?.lojaId);

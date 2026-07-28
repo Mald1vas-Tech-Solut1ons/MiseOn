@@ -93,44 +93,11 @@ export function useRealtimeNotifications({ lojaId, pedidoId, contexto, entregado
       canais.push(canalEntregador);
     }
 
-    // Notificações Inteligentes do Assistente IA e Chat.
-    // Só no PAINEL: o AdminLayout envolve todas as telas administrativas (PDV
-    // inclusive), então habilitar no PDV faria o mesmo broadcast tocar duas vezes.
-    // O sino/histórico é responsabilidade do useNotificationStore — aqui só o
-    // alerta efêmero (toast + som + notificação de desktop).
-    if (lojaId && contexto === 'PAINEL') {
-      const canalAlertas = supabase.channel(`admin-alerts-${lojaId}`)
-        .on('broadcast', { event: 'chat_ia_answered' }, (payload) => {
-          const msg = payload.payload.message || 'O Assistente IA atendeu um cliente!';
-          toast(msg, 'info');
-          
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('Assistente MiseOn', { body: msg, icon: '/icon-192.png' });
-          }
-        })
-        .on('broadcast', { event: 'new_chat_message' }, (payload) => {
-          const msg = `Nova mensagem de ${payload.payload.cliente_nome || 'Cliente'}: ${payload.payload.message}`;
-          toast(msg, 'info');
-          tocarSom(); // Tocar som quando chega mensagem real!
-          
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('Nova Mensagem', { body: msg, icon: '/icon-192.png' });
-          } else if ('Notification' in window && Notification.permission !== 'denied') {
-            Notification.requestPermission();
-          }
-        })
-        .on('broadcast', { event: 'chat_handoff' }, (payload) => {
-          const msg = payload.payload.message || '🚨 Cliente solicitou atendimento humano!';
-          toast(msg, 'alerta');
-          tocarSom(); // Tocar som para alertar o lojista
-          
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('Atenção Necessária', { body: msg, icon: '/icon-192.png' });
-          }
-        })
-        .subscribe();
-      canais.push(canalAlertas);
-    }
+    // Chat e Assistente IA NÃO são tratados aqui de propósito.
+    // O canal `admin-alerts-{loja}` é assinado pelo useNotificationStore, que
+    // faz sino + toast + som + notificação de desktop num lugar só. Ter dois
+    // canais com o MESMO nome no mesmo client fazia só um deles receber os
+    // eventos — a notificação aparecia no sino e o som nunca tocava.
 
     return () => {
       canais.forEach(c => supabase.removeChannel(c));

@@ -446,10 +446,20 @@ export function useNotificationStore(lojaId?: string) {
       })
       .subscribe();
 
-    // Canal admin-alerts (worker + IA broadcast aqui).
-    // Silencioso de propósito: o useRealtimeNotifications já assina os MESMOS
-    // eventos e emite toast + som + notificação de desktop. Aqui só alimentamos
-    // o sino/histórico — sem isso, cada mensagem tocava e aparecia duas vezes.
+    // Canal admin-alerts (worker + IA broadcast aqui) — ÚNICO assinante deste
+    // tópico no app. Dois canais com o mesmo nome no mesmo client fazem só um
+    // receber os eventos, e era por isso que a notificação chegava muda.
+    // Aqui acontece tudo: sino + toast + som (via adicionarNotificacao) e a
+    // notificação de desktop, que alcança o lojista com a aba em segundo plano.
+    const avisarDesktop = (titulo: string, corpo: string) => {
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'granted') {
+        new Notification(titulo, { body: corpo, icon: '/icon-192.png' });
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission();
+      }
+    };
+
     const canalAlertas = supabase
       .channel(`admin-alerts-${lojaId}`)
       .on('broadcast', { event: 'new_chat_message' }, (payload) => {
@@ -464,9 +474,11 @@ export function useNotificationStore(lojaId?: string) {
           acaoUrl: '/admin/chat',
           acaoRotulo: 'Atender Cliente',
           metaData: { conversation_id: payload.payload?.conversation_id },
-        }, { silencioso: true });
+        });
+        avisarDesktop(`Mensagem de ${clienteNome}`, preview);
       })
       .on('broadcast', { event: 'chat_ia_answered' }, (payload) => {
+        // Silencioso: a IA já respondeu sozinha, não exige ação do lojista.
         adicionarNotificacao({
           id: `notif_CHAT_IA_${payload.payload?.conversation_id || Date.now()}`,
           tipo: 'CHAT_MENSAGEM',
@@ -479,16 +491,18 @@ export function useNotificationStore(lojaId?: string) {
         }, { silencioso: true });
       })
       .on('broadcast', { event: 'chat_handoff' }, (payload) => {
+        const corpo = payload.payload?.message || 'Cliente precisa de atendimento humano!';
         adicionarNotificacao({
           id: `notif_CHAT_HANDOFF_${payload.payload?.conversation_id || Date.now()}`,
           tipo: 'CHAT_HANDOFF',
           categoria: 'CHAT',
           titulo: '🚨 Atendimento Humano Solicitado',
-          mensagem: payload.payload?.message || 'Cliente precisa de atendimento humano!',
+          mensagem: corpo,
           acaoUrl: '/admin/chat',
           acaoRotulo: 'Ir para o Chat Agora',
           metaData: { conversation_id: payload.payload?.conversation_id },
-        }, { silencioso: true });
+        });
+        avisarDesktop('Atenção necessária', corpo);
       })
       .subscribe();
 
