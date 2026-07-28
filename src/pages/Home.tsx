@@ -5,6 +5,7 @@ import {
   Menu as MenuIcon, X, UtensilsCrossed, Megaphone, ShoppingBag,
   Mail, ChevronDown, Headset, BarChart3, Star, Quote, BadgeCheck, Scale,
   Database, FlaskConical, Eye, AlertTriangle, BookOpen,
+  Globe, PlayCircle, Compass,
 } from 'lucide-react';
 import { useState } from 'react';
 import MiseOnLogo from '../components/MiseOnLogo';
@@ -271,6 +272,7 @@ export default function Home() {
   const [planoAnual, setPlanoAnual] = useState(true);
   const [solucoesOpen, setSolucoesOpen] = useState(false);
   const [recursosOpen, setRecursosOpen] = useState(false);
+  const [conteudoOpen, setConteudoOpen] = useState(false);
 
   return (
     <div className="min-h-screen scroll-smooth bg-[#F4F7FA] font-sans text-gray-900 selection:bg-[#FC5B24] selection:text-white dark:bg-[#070C18] dark:text-[#EAF1FB]">
@@ -530,15 +532,7 @@ export default function Home() {
               )}
             </div>
 
-            {/* 3. Como funciona */}
-            <a
-              href="#como-funciona"
-              className="text-sm font-semibold text-gray-700 transition hover:text-[var(--cor-primaria)] dark:text-gray-200 dark:hover:text-white"
-            >
-              Como funciona
-            </a>
-
-            {/* 4. Planos */}
+            {/* 3. Planos */}
             <a
               href="#planos"
               className="text-sm font-semibold text-gray-700 transition hover:text-[var(--cor-primaria)] dark:text-gray-200 dark:hover:text-white"
@@ -546,41 +540,83 @@ export default function Home() {
               Planos
             </a>
 
-            {/* 5. Blog ✍️ */}
-            <Link
-              to="/blog"
-              className="text-sm font-bold text-emerald-500 transition hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
+            {/* 4. Conteúdo (Dropdown) — agrupa Como funciona, Blog e Vídeos, que
+                antes ocupavam três slots soltos e coloridos na barra */}
+            <div
+              className="relative"
+              onMouseEnter={() => setConteudoOpen(true)}
+              onMouseLeave={() => setConteudoOpen(false)}
             >
-              Blog ✍️
-            </Link>
+              <button
+                type="button"
+                onClick={() => setConteudoOpen(!conteudoOpen)}
+                className="flex items-center gap-1 text-sm font-semibold text-gray-700 transition hover:text-[var(--cor-primaria)] dark:text-gray-200 dark:hover:text-white"
+              >
+                Conteúdo
+                <ChevronDown size={14} className={`transition-transform duration-200 ${conteudoOpen ? 'rotate-180 text-[#FC5B24]' : ''}`} />
+              </button>
 
-            {/* 6. Vídeos 🎬 */}
-            <Link
-              to="/videos"
-              className="text-sm font-bold text-orange-500 transition hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300"
-            >
-              Vídeos 🎬
-            </Link>
+              {conteudoOpen && (
+                <div className="absolute top-full -left-4 mt-2 w-72 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0B1120]/95 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="mb-2 px-3 pt-1 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                    Conheça o MiseOn
+                  </div>
+                  <div className="space-y-1">
+                    {[
+                      { to: '/#como-funciona', ancora: true, icone: <Compass size={18} />, titulo: 'Como funciona', desc: 'O sistema em 4 passos' },
+                      { to: '/blog', icone: <BookOpen size={18} />, titulo: 'Blog', desc: 'CMV, engenharia e gestão' },
+                      { to: '/videos', icone: <PlayCircle size={18} />, titulo: 'Vídeos', desc: 'Demonstrações em ação' },
+                      { to: '/depoimentos', icone: <Quote size={18} />, titulo: 'Depoimentos', desc: 'Cases reais de clientes' },
+                    ].map((item) =>
+                      item.ancora ? (
+                        <a
+                          key={item.titulo}
+                          href="#como-funciona"
+                          onClick={() => setConteudoOpen(false)}
+                          className="group flex items-center gap-3 rounded-xl p-2.5 transition hover:bg-gray-100 dark:hover:bg-white/10"
+                        >
+                          <div className="shrink-0 rounded-lg bg-gray-100 p-2 text-gray-500 transition group-hover:bg-[#FC5B24]/15 group-hover:text-[#FC5B24] dark:bg-white/10 dark:text-slate-300">
+                            {item.icone}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-gray-900 dark:text-white">{item.titulo}</p>
+                            <p className="text-[11px] text-gray-500 dark:text-slate-400">{item.desc}</p>
+                          </div>
+                        </a>
+                      ) : (
+                        <Link
+                          key={item.titulo}
+                          to={item.to}
+                          onClick={() => setConteudoOpen(false)}
+                          className="group flex items-center gap-3 rounded-xl p-2.5 transition hover:bg-gray-100 dark:hover:bg-white/10"
+                        >
+                          <div className="shrink-0 rounded-lg bg-gray-100 p-2 text-gray-500 transition group-hover:bg-[#FC5B24]/15 group-hover:text-[#FC5B24] dark:bg-white/10 dark:text-slate-300">
+                            {item.icone}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-gray-900 dark:text-white">{item.titulo}</p>
+                            <p className="text-[11px] text-gray-500 dark:text-slate-400">{item.desc}</p>
+                          </div>
+                        </Link>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="hidden items-center gap-3 lg:flex">
-            {/* Seletor de Idioma Internacional i18n */}
-            <div className="flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 p-1 text-xs font-bold dark:border-white/15 dark:bg-white/10">
-              <button
-                onClick={() => setIdioma('pt-BR')}
-                className={`rounded-full px-2.5 py-1 transition ${idioma === 'pt-BR' ? 'bg-[#FC5B24] text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
-                title="Português (Brasil)"
-              >
-                🇧🇷 PT
-              </button>
-              <button
-                onClick={() => setIdioma('en-US')}
-                className={`rounded-full px-2.5 py-1 transition ${idioma === 'en-US' ? 'bg-[#FC5B24] text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
-                title="English (US)"
-              >
-                🇺🇸 EN
-              </button>
-            </div>
+            {/* Seletor de idioma — ícone de globo + sigla, sem bandeira emoji */}
+            <button
+              onClick={() => setIdioma(idioma === 'pt-BR' ? 'en-US' : 'pt-BR')}
+              title={idioma === 'pt-BR' ? 'Switch to English' : 'Mudar para Português'}
+              aria-label="Alternar idioma"
+              className="flex items-center gap-1.5 rounded-full px-2.5 py-2 text-xs font-bold text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+            >
+              <Globe size={15} />
+              {idioma === 'pt-BR' ? 'PT' : 'EN'}
+            </button>
 
             <Link
               to="/acesso"
@@ -611,34 +647,42 @@ export default function Home() {
           <div className="border-t border-gray-200/70 bg-white/95 px-4 pb-5 pt-3 backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#070C18]/95">
             <div className="flex flex-col gap-1">
               <div className="px-3 py-1 text-[11px] font-black uppercase text-slate-400">Soluções</div>
-              <Link to="/sistema-para-restaurante-por-quilo" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-bold text-emerald-400">
-                ⚖️ Restaurantes por Quilo (Novo)
-              </Link>
-              <Link to="/sistema-para-hamburgueria" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                🍔 Hamburguerias
-              </Link>
-              <Link to="/sistema-para-pizzaria" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                🍕 Pizzarias
-              </Link>
-              <Link to="/sistema-para-lanchonete" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                🥪 Lanchonetes
-              </Link>
-              <Link to="/sistema-para-restaurantes" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                🍽️ Restaurantes & Bares
-              </Link>
+              {[
+                { to: '/sistema-para-restaurante-por-quilo', icone: <Scale size={16} />, rotulo: 'Restaurantes por Quilo', novo: true },
+                { to: '/sistema-para-hamburgueria', icone: <ChefHat size={16} />, rotulo: 'Hamburguerias' },
+                { to: '/sistema-para-pizzaria', icone: <Boxes size={16} />, rotulo: 'Pizzarias' },
+                { to: '/sistema-para-lanchonete', icone: <UtensilsCrossed size={16} />, rotulo: 'Lanchonetes' },
+                { to: '/sistema-para-restaurantes', icone: <BarChart3 size={16} />, rotulo: 'Restaurantes & Bares' },
+              ].map((i) => (
+                <Link
+                  key={i.to}
+                  to={i.to}
+                  onClick={() => setMenuAberto(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10"
+                >
+                  <span className="text-gray-400 dark:text-slate-400">{i.icone}</span>
+                  {i.rotulo}
+                  {i.novo && (
+                    <span className="rounded-full bg-emerald-500 px-1.5 py-0.5 text-[9px] font-black text-slate-950">NOVO</span>
+                  )}
+                </Link>
+              ))}
 
               <div className="mt-2 px-3 py-1 text-[11px] font-black uppercase text-slate-400">Navegação</div>
-              <a href="#como-funciona" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                Como funciona
+              <a href="#como-funciona" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
+                <span className="text-gray-400 dark:text-slate-400"><Compass size={16} /></span> Como funciona
               </a>
-              <a href="#planos" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                Planos
+              <a href="#planos" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
+                <span className="text-gray-400 dark:text-slate-400"><Wallet size={16} /></span> Planos
               </a>
-              <Link to="/blog" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-bold text-emerald-400">
-                Blog & Estudos ✍️
+              <Link to="/blog" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
+                <span className="text-gray-400 dark:text-slate-400"><BookOpen size={16} /></span> Blog
               </Link>
-              <Link to="/videos" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-bold text-orange-400">
-                Vídeos 🎬
+              <Link to="/videos" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
+                <span className="text-gray-400 dark:text-slate-400"><PlayCircle size={16} /></span> Vídeos
+              </Link>
+              <Link to="/depoimentos" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
+                <span className="text-gray-400 dark:text-slate-400"><Quote size={16} /></span> Depoimentos
               </Link>
 
               <div className="mt-3 flex flex-col gap-2">
