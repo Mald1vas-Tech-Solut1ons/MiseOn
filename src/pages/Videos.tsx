@@ -1,8 +1,27 @@
 import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Play, Pause, Volume2, VolumeX, Maximize2, Sparkles, Video, Star, Quote, CheckCircle2 } from 'lucide-react';
 import { FooterSEO } from '../components/FooterSEO';
 import MiseOnLogo from '../components/MiseOnLogo';
+import SEO from '../components/SEO';
+
+// /videos, /depoimentos e /demonstracao renderizam este mesmo componente.
+// Título varia por rota para intenção de busca distinta, mas o canonical
+// sempre aponta para /videos — evita conteúdo duplicado nos três URLs.
+const META_POR_ROTA: Record<string, { title: string; description: string }> = {
+  '/depoimentos': {
+    title: 'Depoimentos de Clientes MiseOn | Cases Reais de Restaurantes',
+    description: 'Veja depoimentos em vídeo de donos de restaurante, hamburgueria e pizzaria que usam o MiseOn no dia a dia — resultado real, sem atores.',
+  },
+  '/demonstracao': {
+    title: 'Demonstração do Sistema MiseOn | PDV, KDS e iFood em Ação',
+    description: 'Demonstração em vídeo do PDV, KDS de cozinha e integração com iFood do MiseOn funcionando em tempo real.',
+  },
+};
+const META_PADRAO = {
+  title: 'Vídeos MiseOn | Identidade, Demonstração e Depoimentos',
+  description: 'Vídeos institucionais do MiseOn: identidade da marca, demonstração do PDV e KDS em tempo real e depoimentos de clientes reais.',
+};
 
 interface VideoItem {
   id: string;
@@ -72,6 +91,8 @@ const DEPOIMENTOS_FUTUROS = [
 ];
 
 export default function Videos() {
+  const location = useLocation();
+  const meta = META_POR_ROTA[location.pathname] ?? META_PADRAO;
   const [categoriaAtiva, setCategoriaAtiva] = useState<'todos' | 'marca' | 'demonstracao' | 'depoimento'>('todos');
   const [videoAtivo, setVideoAtivo] = useState<VideoItem>(VIDEOS[0]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -122,6 +143,11 @@ export default function Videos() {
 
   return (
     <div className="min-h-screen bg-[#070C18] text-slate-100 font-sans selection:bg-orange-500 selection:text-white">
+      <SEO
+        title={meta.title}
+        description={meta.description}
+        canonicalUrl="https://miseon.app.br/videos"
+      />
       {/* Schema.org Structured Data (JSON-LD) para SEO dos Vídeos */}
       <script
         type="application/ld+json"

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Store, Bike, ArrowRight, ChefHat } from 'lucide-react';
 import MiseOnLogo from '../components/MiseOnLogo';
+import SEO from '../components/SEO';
 
 /**
  * Hall de Acesso — separa claramente as modalidades de entrada.
@@ -53,6 +54,11 @@ const PORTAS: Porta[] = [
 export default function Acesso() {
   return (
     <div style={{ background: '#070C18', color: '#EAF1FB', fontFamily: "'Inter', sans-serif" }} className="min-h-screen">
+      <SEO
+        title="Área de Acesso MiseOn | Cliente, Lojista e Entregador"
+        description="Escolha como quer entrar no MiseOn: pedir como cliente, acessar o painel como lojista e equipe, ou abrir o app do entregador."
+        canonicalUrl="https://miseon.app.br/acesso"
+      />
       {/* Glow */}
       <div style={{ background: 'radial-gradient(circle, rgba(10,92,196,0.30) 0%, transparent 70%)', width: 600, height: 600, borderRadius: '50%', position: 'absolute', top: -180, left: '50%', transform: 'translateX(-55%)', pointerEvents: 'none' }} />
 

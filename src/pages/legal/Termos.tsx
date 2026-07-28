@@ -1,9 +1,15 @@
 import { FileText, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SEO from '../../components/SEO';
 
 export default function Termos() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-[#070C18] dark:text-[#EAF1FB]">
+      <SEO
+        title="Termos de Uso e Serviço | MiseOn"
+        description="Termos de uso e serviço da plataforma MiseOn: condições de assinatura, responsabilidades do lojista e do cliente final."
+        canonicalUrl="https://miseon.app.br/termos"
+      />
       <div className="mx-auto max-w-3xl">
         <Link
           to="/"

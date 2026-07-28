@@ -1,10 +1,16 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import MiseOnLogo from '../components/MiseOnLogo';
+import SEO from '../components/SEO';
 
 export default function CadastreSuaLoja() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4 py-10 bg-transparent">
+      <SEO
+        title="Cadastre sua Loja no MiseOn | 30 Dias Grátis, Sem Cartão"
+        description="Crie sua loja no MiseOn e libere 30 dias de uso completo sem compromisso: cardápio digital, WhatsApp com IA, PDV, entregas e controle de estoque."
+        canonicalUrl="https://miseon.app.br/cadastre-se"
+      />
       <div className="w-full max-w-md rounded-3xl border border-[rgba(10,92,196,0.2)] bg-[#0B1120]/80 backdrop-blur-xl p-8 shadow-[0_0_40px_rgba(10,92,196,0.15)] relative overflow-hidden">
         {/* Glow de fundo */}
         <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-[var(--cor-primaria)] opacity-10 blur-3xl" />
