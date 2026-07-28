@@ -544,7 +544,15 @@ export default function Home() {
               Planos
             </a>
 
-            {/* 5. Vídeos 🎬 */}
+            {/* 5. Blog ✍️ */}
+            <Link
+              to="/blog"
+              className="text-sm font-bold text-emerald-500 transition hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
+            >
+              Blog ✍️
+            </Link>
+
+            {/* 6. Vídeos 🎬 */}
             <Link
               to="/videos"
               className="text-sm font-bold text-orange-500 transition hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300"
@@ -606,6 +614,9 @@ export default function Home() {
               <a href="#planos" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
                 Planos
               </a>
+              <Link to="/blog" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-bold text-emerald-400">
+                Blog & Estudos ✍️
+              </Link>
               <Link to="/videos" onClick={() => setMenuAberto(false)} className="rounded-xl px-3 py-2 text-sm font-bold text-orange-400">
                 Vídeos 🎬
               </Link>
