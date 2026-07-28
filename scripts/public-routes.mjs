@@ -52,6 +52,15 @@ export const PUBLIC_ROUTES = [
         description: 'Como a IA do MiseOn conversa no WhatsApp e gera pedidos automaticamente.',
         content: '/videomarketing2.mp4',
       },
+      {
+        // Hospedado no canal do YouTube — usa player_loc (embed de terceiro),
+        // não content_loc (reservado a arquivo de mídia bruto), conforme a
+        // spec do Google para vídeo em sitemap.
+        thumbnail: 'https://img.youtube.com/vi/0ZP6ZQ7wvVA/hqdefault.jpg',
+        title: 'Pare de Perder Pedidos no WhatsApp | MiseOn Case #1',
+        description: 'Case #1 da série MiseOn: como o atendimento por WhatsApp com IA evita pedido perdido e organiza o fluxo da cozinha.',
+        player: 'https://www.youtube-nocookie.com/embed/0ZP6ZQ7wvVA?rel=0',
+      },
     ],
   },
 

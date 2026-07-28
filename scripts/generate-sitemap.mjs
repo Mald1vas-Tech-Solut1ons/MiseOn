@@ -21,18 +21,28 @@ function escapeXml(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// Path relativo (arquivo em public/) vira absoluto com BASE; URL já absoluta
+// (ex.: thumbnail do YouTube) é usada como está.
+const resolveUrl = (u) => (u.startsWith('http') ? u : `${BASE}${u}`);
+
 function videoBlock(videos) {
   if (!videos?.length) return '';
   return videos
-    .map(
-      (v) => `
+    .map((v) => {
+      // content_loc exige um arquivo de mídia bruto (nosso .mp4 local).
+      // player_loc é pra player de terceiro embutido (embed do YouTube) —
+      // são mutuamente exclusivos na spec do Google.
+      const locTag = v.player
+        ? `<video:player_loc allow_embed="yes">${resolveUrl(v.player)}</video:player_loc>`
+        : `<video:content_loc>${resolveUrl(v.content)}</video:content_loc>`;
+      return `
     <video:video>
-      <video:thumbnail_loc>${BASE}${v.thumbnail}</video:thumbnail_loc>
+      <video:thumbnail_loc>${resolveUrl(v.thumbnail)}</video:thumbnail_loc>
       <video:title>${escapeXml(v.title)}</video:title>
       <video:description>${escapeXml(v.description)}</video:description>
-      <video:content_loc>${BASE}${v.content}</video:content_loc>
-    </video:video>`
-    )
+      ${locTag}
+    </video:video>`;
+    })
     .join('');
 }
 

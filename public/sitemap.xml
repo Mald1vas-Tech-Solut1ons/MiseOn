@@ -69,6 +69,12 @@
       <video:description>Como a IA do MiseOn conversa no WhatsApp e gera pedidos automaticamente.</video:description>
       <video:content_loc>https://miseon.app.br/videomarketing2.mp4</video:content_loc>
     </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://img.youtube.com/vi/0ZP6ZQ7wvVA/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>Case MiseOn #1 — o sistema em operação numa cozinha real</video:title>
+      <video:description>Primeiro vídeo de uma nova série de cases do MiseOn, mostrando o sistema em uso no dia a dia de uma operação real de food service.</video:description>
+      <video:player_loc allow_embed="yes">https://www.youtube-nocookie.com/embed/0ZP6ZQ7wvVA?rel=0</video:player_loc>
+    </video:video>
   </url>
   <url>
     <loc>https://miseon.app.br/sistema-para-hamburgueria</loc>

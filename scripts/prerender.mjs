@@ -116,10 +116,28 @@ async function prerenderRoute(browser, routePath) {
 
 async function main() {
   const server = await startServer();
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+  } catch (err) {
+    // Falha de AMBIENTE (Chromium ausente/corrompido no runner de build) não
+    // pode derrubar o deploy inteiro por causa de uma melhoria de SEO — o
+    // site continua funcionando, só sem as páginas prerenderizadas (mesmo
+    // comportamento de antes desta feature existir, não uma regressão).
+    // Erros de CONTEÚDO (title duplicado/ausente, JS quebrado numa rota)
+    // continuam derrubando o build de propósito — ver o catch mais abaixo.
+    console.error('\n⚠️  PRERENDER PULADO — Chromium indisponível neste ambiente de build:');
+    console.error(`   ${err.message}`);
+    console.error('   O site vai buildar e ir ao ar normalmente, só sem as páginas prerenderizadas desta vez.');
+    console.error('   Rode "npx puppeteer browsers install chrome" e refaça o build.\n');
+    await new Promise((resolve) => server.close(resolve));
+    process.exitCode = 0;
+    return;
+  }
 
   const routes = [
     ...PUBLIC_ROUTES.filter((r) => r.prerender !== false).map((r) => r.path),

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, MapPin, Mail, ShieldCheck, MessageCircle, CreditCard, Lock } from 'lucide-react';
+import { Building2, MapPin, Mail, ShieldCheck, MessageCircle, CreditCard, Lock, Youtube } from 'lucide-react';
 import MiseOnLogo from './MiseOnLogo';
 
 export function FooterSEO() {
@@ -46,6 +46,16 @@ export function FooterSEO() {
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
               <ShieldCheck size={16} /> Plataforma Segura & Certificada
             </div>
+            <a
+              href="https://www.youtube.com/@MiseOnSISTEMA--CozinhasProfiss"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Canal oficial do MiseOn no YouTube (abre em nova aba)"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-red-500/40 hover:bg-red-500/10 hover:text-white"
+            >
+              <Youtube size={16} className="text-red-500" />
+              Inscreva-se no YouTube
+            </a>
           </div>
 
           {/* Coluna 2: Soluções por Nicho */}

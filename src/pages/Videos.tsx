@@ -28,8 +28,13 @@ interface VideoItem {
   titulo: string;
   subtitulo: string;
   descricao: string;
-  categoria: 'marca' | 'demonstracao' | 'depoimento';
-  src: string;
+  categoria: 'marca' | 'demonstracao' | 'depoimento' | 'case';
+  // Vídeo autohospedado (arquivo em public/): usa `src`.
+  // Vídeo hospedado no canal do YouTube (a partir de agora, o padrão para
+  // conteúdo novo — soma view/inscrito no canal, entra na busca de vídeo do
+  // Google e não pesa no carregamento do site): usa `youtubeId`.
+  src?: string;
+  youtubeId?: string;
   duracao: string;
   destaque?: boolean;
   autor?: string;
@@ -37,6 +42,10 @@ interface VideoItem {
   estabelecimento?: string;
   avatar?: string;
 }
+
+const youtubeThumbnail = (youtubeId: string) => `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+const youtubeEmbedUrl = (youtubeId: string) => `https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0`;
+const youtubeWatchUrl = (youtubeId: string) => `https://www.youtube.com/watch?v=${youtubeId}`;
 
 const VIDEOS: VideoItem[] = [
   {
@@ -79,6 +88,16 @@ const VIDEOS: VideoItem[] = [
     src: '/videomarketing2.mp4',
     duracao: 'Visão Geral',
   },
+  {
+    id: 'case-1',
+    titulo: 'Pare de Perder Pedidos no WhatsApp | MiseOn Case #1',
+    subtitulo: 'O primeiro de uma série de cases reais de uso do MiseOn',
+    descricao: 'Case #1 da série MiseOn: como o atendimento por WhatsApp com IA evita pedido perdido e organiza o fluxo da cozinha.',
+    categoria: 'case',
+    youtubeId: '0ZP6ZQ7wvVA',
+    duracao: 'Case #1',
+    destaque: true,
+  },
 ];
 
 const DEPOIMENTOS_FUTUROS = [
@@ -93,7 +112,7 @@ const DEPOIMENTOS_FUTUROS = [
 export default function Videos() {
   const location = useLocation();
   const meta = META_POR_ROTA[location.pathname] ?? META_PADRAO;
-  const [categoriaAtiva, setCategoriaAtiva] = useState<'todos' | 'marca' | 'demonstracao' | 'depoimento'>('todos');
+  const [categoriaAtiva, setCategoriaAtiva] = useState<'todos' | 'marca' | 'demonstracao' | 'depoimento' | 'case'>('todos');
   const [videoAtivo, setVideoAtivo] = useState<VideoItem>(VIDEOS[0]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -157,10 +176,16 @@ export default function Videos() {
             '@type': 'VideoObject',
             name: videoAtivo.titulo,
             description: videoAtivo.descricao,
-            thumbnailUrl: 'https://miseon.app.br/MISEON-logo.png',
+            thumbnailUrl: videoAtivo.youtubeId
+              ? youtubeThumbnail(videoAtivo.youtubeId)
+              : 'https://miseon.app.br/MISEON-logo.png',
             uploadDate: '2026-07-24',
-            contentUrl: `https://miseon.app.br${videoAtivo.src}`,
-            embedUrl: `https://miseon.app.br/videos`,
+            contentUrl: videoAtivo.youtubeId
+              ? youtubeWatchUrl(videoAtivo.youtubeId)
+              : `https://miseon.app.br${videoAtivo.src}`,
+            embedUrl: videoAtivo.youtubeId
+              ? youtubeEmbedUrl(videoAtivo.youtubeId)
+              : 'https://miseon.app.br/videos',
             publisher: {
               '@type': 'Organization',
               name: 'MiseOn Tecnologia',
@@ -227,20 +252,35 @@ export default function Videos() {
       <section className="mx-auto max-w-5xl px-4 py-6">
         <div className="relative overflow-hidden rounded-3xl border border-slate-700/80 bg-slate-900/90 shadow-2xl shadow-orange-950/20">
           
-          {/* Player HTML5 */}
+          {/* Player: vídeo autohospedado usa <video> com controles próprios;
+              vídeo do YouTube usa o iframe oficial embed (controles nativos
+              do YouTube — não dá pra pilotar play/pause/mute de um iframe
+              cross-origin via videoRef, então essa reprodução não passa pela
+              barra de controle flutuante abaixo). */}
           <div className="relative aspect-video w-full bg-black">
-            <video
-              ref={videoRef}
-              src={videoAtivo.src}
-              className="h-full w-full object-contain"
-              playsInline
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onEnded={() => setIsPlaying(false)}
-            />
+            {videoAtivo.youtubeId ? (
+              <iframe
+                key={videoAtivo.youtubeId}
+                src={youtubeEmbedUrl(videoAtivo.youtubeId)}
+                title={videoAtivo.titulo}
+                className="h-full w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                ref={videoRef}
+                src={videoAtivo.src}
+                className="h-full w-full object-contain"
+                playsInline
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)}
+              />
+            )}
 
-            {/* Overlay de Controle de Play Inicial */}
-            {!isPlaying && (
+            {/* Overlay de Controle de Play Inicial (só no player autohospedado) */}
+            {!videoAtivo.youtubeId && !isPlaying && (
               <div
                 onClick={togglePlay}
                 className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 backdrop-blur-[2px] transition hover:bg-black/30"
@@ -251,7 +291,8 @@ export default function Videos() {
               </div>
             )}
 
-            {/* Floating Control Bar */}
+            {/* Floating Control Bar (só no player autohospedado) */}
+            {!videoAtivo.youtubeId && (
             <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 flex items-center justify-between text-white opacity-90 hover:opacity-100 transition-opacity">
               <div className="flex items-center gap-3">
                 <button
@@ -284,6 +325,7 @@ export default function Videos() {
                 </button>
               </div>
             </div>
+            )}
           </div>
 
           {/* Detalhes do Vídeo Ativo */}
@@ -291,7 +333,12 @@ export default function Videos() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-400">
-                  <Video size={14} /> {videoAtivo.categoria === 'marca' ? 'Vídeo Oficial de Apresentação' : 'Demonstração de Produto'}
+                  <Video size={14} />{' '}
+                  {videoAtivo.categoria === 'marca'
+                    ? 'Vídeo Oficial de Apresentação'
+                    : videoAtivo.categoria === 'case'
+                    ? 'Case de Cliente'
+                    : 'Demonstração de Produto'}
                 </span>
                 <h2 className="font-['Sora'] mt-1 text-xl font-bold text-white sm:text-2xl">
                   {videoAtivo.titulo}
@@ -333,6 +380,7 @@ export default function Videos() {
               { id: 'todos', label: 'Todos os Vídeos' },
               { id: 'marca', label: 'Marca & Conceito' },
               { id: 'demonstracao', label: 'Demonstrações' },
+              { id: 'case', label: 'Cases de Clientes' },
             ].map((cat) => (
               <button
                 key={cat.id}
@@ -361,21 +409,32 @@ export default function Videos() {
                   : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 hover:bg-slate-800/60'
               }`}
             >
-              {/* Miniatura com Vídeo em Loop Silencioso */}
+              {/* Miniatura: vídeo local usa preview em loop no hover; vídeo do
+                  YouTube usa a thumbnail estática oficial (o iframe embed não
+                  expõe o arquivo bruto pra tocar em preview) */}
               <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
-                <video
-                  src={v.src}
-                  muted
-                  loop
-                  playsInline
-                  onMouseOver={(e) => (e.currentTarget as HTMLVideoElement).play()}
-                  onMouseOut={(e) => {
-                    const vid = e.currentTarget as HTMLVideoElement;
-                    vid.pause();
-                    vid.currentTime = 0;
-                  }}
-                  className="h-full w-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-500"
-                />
+                {v.youtubeId ? (
+                  <img
+                    src={youtubeThumbnail(v.youtubeId)}
+                    alt={v.titulo}
+                    loading="lazy"
+                    className="h-full w-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-500"
+                  />
+                ) : (
+                  <video
+                    src={v.src}
+                    muted
+                    loop
+                    playsInline
+                    onMouseOver={(e) => (e.currentTarget as HTMLVideoElement).play()}
+                    onMouseOut={(e) => {
+                      const vid = e.currentTarget as HTMLVideoElement;
+                      vid.pause();
+                      vid.currentTime = 0;
+                    }}
+                    className="h-full w-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-500"
+                  />
+                )}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/90 text-white shadow-lg group-hover:scale-110 transition">
                     <Play size={22} className="ml-0.5 fill-white" />
@@ -389,7 +448,11 @@ export default function Videos() {
               {/* Informações do Card */}
               <div className="p-5">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400">
-                  {v.categoria === 'marca' ? 'Identidade Institucional' : 'Demonstração'}
+                  {v.categoria === 'marca'
+                    ? 'Identidade Institucional'
+                    : v.categoria === 'case'
+                    ? 'Case de Cliente'
+                    : 'Demonstração'}
                 </span>
                 <h4 className="font-['Sora'] mt-1 text-base font-bold text-white group-hover:text-orange-400 transition">
                   {v.titulo}
