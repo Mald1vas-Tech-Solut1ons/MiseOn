@@ -72,9 +72,10 @@ export function SEO({
         document.head.appendChild(scriptElement);
       }
       scriptElement.textContent = JSON.stringify(schemaJson);
-    } else if (scriptElement) {
-      scriptElement.remove();
     }
+    // Sem schema próprio: mantém o bloco herdado do index.html (Organization +
+    // SoftwareApplication do site). Removê-lo deixaria a página sem nenhum dado
+    // estruturado, que é pior do que ter o schema institucional.
   }, [title, description, keywords, canonicalUrl, ogType, ogImage, schemaJson]);
 
   return null;

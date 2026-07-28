@@ -13,7 +13,10 @@
     <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large" />
 
     <!-- Favicon para Google Search & Navegadores -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <!-- .ico na raiz: o Bingbot busca /favicon.ico por caminho fixo e ignora as
+         tags rel=icon. Sem ele o resultado no Bing sai sem logo. -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
     <link rel="shortcut icon" href="/icon-192.png" />
@@ -27,8 +30,10 @@
     <meta property="og:image" content="https://miseon.app.br/icon-512.png" />
     <meta property="og:url" content="https://miseon.app.br/" />
 
-    <!-- Dados Estruturados Schema.org para o Google & Motores de IA (GEO) -->
-    <script type="application/ld+json">
+    <!-- Dados Estruturados Schema.org para o Google & Motores de IA (GEO).
+         O id é o mesmo que o componente SEO usa: sem ele, o React injetava um
+         SEGUNDO bloco e a página servia dois JSON-LD idênticos aos robôs. -->
+    <script id="seo-json-ld" type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@graph": [
