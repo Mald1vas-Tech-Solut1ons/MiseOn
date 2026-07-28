@@ -80,7 +80,7 @@ serve(async (req) => {
         ia_ativa,
         telefone,
         canal,
-        lojas ( nome, segmento, aberto_manual, chat_ia_ativo )
+        lojas ( nome, segmento, slug, aberto_manual, chat_ia_ativo )
       `)
       .eq('id', conversation_id)
       .single();
@@ -88,13 +88,51 @@ serve(async (req) => {
     if (convError || !convData) throw new Error('Conversa não encontrada: ' + convError?.message);
     
     const lojaInfo = convData.lojas as any;
-    if (!lojaInfo?.chat_ia_ativo) {
-      console.log('IA desativada globalmente para esta loja.');
-      return new Response(JSON.stringify({ skipped: true }), { headers: corsHeaders, status: 200 });
-    }
-    if (!convData.ia_ativa) {
-      console.log('IA silenciada (handoff) para esta conversa.');
-      return new Response(JSON.stringify({ skipped: true }), { headers: corsHeaders, status: 200 });
+    const lojaSlug = lojaInfo?.slug || '';
+    const linkCardapio = lojaSlug ? `https://miseon.app.br/${lojaSlug}` : `https://miseon.app.br`;
+
+    // Se a IA estiver desativada ou silenciada (handoff), envia uma mensagem automática de cortesia em vez de silêncio absoluto
+    if (!lojaInfo?.chat_ia_ativo || !convData.ia_ativa) {
+      console.log('IA desativada ou em handoff humano para esta conversa.');
+      
+      // Se for a primeira mensagem do cliente e não houve envio recente do sistema
+      const { data: ultimasMsgs } = await supabase
+        .from('chat_messages')
+        .select('remetente_tipo')
+        .eq('conversation_id', conversation_id)
+        .order('criado_em', { ascending: false })
+        .limit(2);
+
+      const deveEnviarBoasVindas = ultimasMsgs && (ultimasMsgs.length === 1 || ultimasMsgs[0]?.remetente_tipo === 'CLIENTE');
+
+      if (deveEnviarBoasVindas && convData.canal === 'WHATSAPP' && convData.telefone) {
+        const msgBoasVindas = `Olá! Seja bem-vindo(a) ao *${lojaInfo?.nome || 'nosso atendimento'}*! 👋\n\n` +
+          `No momento o nosso assistente automatizado está pausado. Um atendente humano responderá assim que possível.\n\n` +
+          `🛒 Enquanto isso, você pode conferir nosso cardápio e fazer seu pedido diretamente por aqui:\n${linkCardapio}`;
+
+        await supabase.from('chat_messages').insert({
+          conversation_id,
+          remetente_tipo: 'SISTEMA',
+          conteudo: msgBoasVindas
+        });
+
+        const waSendUrl = Deno.env.get('SUPABASE_URL') + '/functions/v1/whatsapp-send';
+        await fetch(waSendUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            loja_id: convData.loja_id,
+            telefone: convData.telefone,
+            texto: msgBoasVindas,
+            conversation_id: conversation_id
+          })
+        }).catch(e => console.error("Erro ao enviar boas-vindas whatsapp-send:", e));
+      }
+
+      return new Response(JSON.stringify({ skipped: true, fallbackEnviado: true }), { headers: corsHeaders, status: 200 });
     }
 
     // 2. Verifica se a última mensagem é do cliente
@@ -187,13 +225,13 @@ serve(async (req) => {
 
     // 6. Prepara o prompt
     // RN-08 (Anti-injection) e RN-06 (Nunca emitir preço falso) e RN-12 (Link de atribuição)
-    const attributionLink = \`https://app.miseon.com.br/menu/\${convData.loja_id}?wa=\${conversation_id}\`;
+    const attributionLink = linkCardapio;
 
-    const systemPrompt = \`Você é a IA de atendimento inicial da loja "\${lojaInfo.nome}" (\${lojaInfo.segmento || 'alimentação'}).
-STATUS DA LOJA: \${lojaAberta ? 'ABERTA' : 'FECHADA'}.
+    const systemPrompt = `Você é a IA de atendimento inicial da loja "${lojaInfo.nome}" (${lojaInfo.segmento || 'alimentação'}).
+STATUS DA LOJA: ${lojaAberta ? 'ABERTA' : 'FECHADA'}.
 
 CARDÁPIO ATUAL E INGREDIENTES:
-\${cardapioContexto}
+${cardapioContexto}
 
 TAXAS DE ENTREGA:
 \${taxasContexto}
