@@ -28,6 +28,37 @@ const urlList = PUBLIC_ROUTES.map((r) => `https://${host}${r.path}`);
 
 const payload = JSON.stringify({ host, key, keyLocation, urlList });
 
+/**
+ * Confere que a chave está publicada ANTES de submeter.
+ * O endpoint do IndexNow responde 200 na hora e só depois vai buscar
+ * keyLocation para provar que somos donos do domínio — se der 404 ali, ele
+ * descarta tudo em silêncio e o 200 vira falso positivo.
+ * Isso já aconteceu: os dois arquivos de chave foram deletados de public/ no
+ * commit 583a2bf e ficaram 404 em produção sem ninguém notar.
+ */
+function verificarChave() {
+  return new Promise((resolve) => {
+    https
+      .get(keyLocation, (res) => {
+        let body = '';
+        res.on('data', (c) => (body += c));
+        res.on('end', () => resolve({ status: res.statusCode, body: body.trim() }));
+      })
+      .on('error', () => resolve({ status: 0, body: '' }));
+  });
+}
+
+const check = await verificarChave();
+if (check.status !== 200 || check.body !== key) {
+  console.error(`\n❌ A chave do IndexNow não está publicada corretamente.`);
+  console.error(`   ${keyLocation} → HTTP ${check.status}`);
+  console.error(`   esperado no corpo: "${key}" | recebido: "${check.body.slice(0, 40)}"`);
+  console.error(`\n   O arquivo precisa existir em public/${key}.txt contendo exatamente a chave.`);
+  console.error(`   Sem isso o Bing descarta a submissão, mesmo respondendo 200. Nada foi enviado.\n`);
+  process.exit(1);
+}
+console.log(`Chave validada em ${keyLocation}`);
+
 console.log(`Enviando ${urlList.length} URLs ao IndexNow (Bing, Yandex, Seznam, Naver)...`);
 
 const req = https.request(
