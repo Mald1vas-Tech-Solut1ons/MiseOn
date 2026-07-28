@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
-  MessageCircle, Loader2, Save, AlertTriangle, Plug, RefreshCw,
+  MessageCircle, Loader2, Save, AlertTriangle, RefreshCw,
   Unplug, Activity, Sparkles, Mail,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -41,8 +41,6 @@ interface StatusResponse {
   eventos: EventoSaude[];
 }
 
-const FORM_VAZIO = { app_id: '', phone_number_id: '', waba_id: '', access_token: '', app_secret: '' };
-
 // Embedded Signup (Meta): fluxo self-service — o lojista conecta o WhatsApp
 // da loja SEM criar conta de desenvolvedor. config_id vem do app MiseOn
 // (App Dashboard → WhatsApp → Cadastro incorporado).
@@ -72,8 +70,6 @@ export default function WhatsApp() {
   const [carregando, setCarregando] = useState(true);
   const [conexao, setConexao] = useState<Conexao | null>(null);
   const [eventos, setEventos] = useState<EventoSaude[]>([]);
-  const [form, setForm] = useState(FORM_VAZIO);
-  const [conectando, setConectando] = useState(false);
   const [testando, setTestando] = useState(false);
   const [desconectando, setDesconectando] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
@@ -138,24 +134,6 @@ export default function WhatsApp() {
         await carregar();
       });
   }, [chamar, lojaId, carregar, toast]);
-
-  const conectar = async () => {
-    if (Object.values(form).some((v) => !v.trim())) {
-      toast('Preencha os 5 campos do painel da Meta antes de conectar.', 'erro');
-      return;
-    }
-    setConectando(true);
-    try {
-      const data = await chamar({ acao: 'conectar', loja_id: lojaId, ...form });
-      toast(`WhatsApp conectado: ${data.verified_name ?? data.display_phone ?? 'número verificado'} 🎉`, 'sucesso');
-      setForm(FORM_VAZIO);
-      await carregar();
-    } catch (e) {
-      toast((e as Error).message, 'erro');
-      await carregar();
-    }
-    setConectando(false);
-  };
 
   const testar = async () => {
     setTestando(true);
@@ -324,55 +302,22 @@ export default function WhatsApp() {
           </div>
         )}
 
-        {/* ── Conexão assistida (credenciais da Meta) ── */}
+        {/* ── Deu problema? Suporte assume — sem credencial na mão do lojista ── */}
         {status !== 'CONECTADO' && (
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <div className="mb-4 flex items-center gap-2">
-              <Plug size={18} className="text-emerald-600 dark:text-emerald-400" />
+            <div className="flex items-start gap-2.5">
+              <Mail size={18} className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
               <div>
-                <h3 className="font-['Sora'] text-base font-bold text-gray-900 dark:text-white">Conexão assistida (alternativa)</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Para quem prefere conectar com as credenciais do próprio app da Meta:
-                  <b> nossa equipe faz esse processo junto com você</b> — não é necessário
-                  conhecimento técnico, apenas seguir o passo a passo guiado.
+                <h3 className="font-['Sora'] text-base font-bold text-gray-900 dark:text-white">
+                  A conexão não concluiu?
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                  Não existe nada para você configurar manualmente — <b>o MiseOn cuida de toda a
+                  parte técnica com a Meta</b>. Se o botão acima não concluir, fale com o suporte
+                  em <b>suporte@miseon.app.br</b> que a gente resolve a conexão pra você.
                 </p>
               </div>
             </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {([
-                { campo: 'app_id', rotulo: 'App ID', ajuda: 'Configurações do app → Básico → "ID do aplicativo"', placeholder: 'Ex: 1234567890123456' },
-                { campo: 'phone_number_id', rotulo: 'Phone Number ID', ajuda: 'WhatsApp → Configuração da API → "Identificação do número de telefone"', placeholder: 'Ex: 109876543210987' },
-                { campo: 'waba_id', rotulo: 'WABA ID', ajuda: 'WhatsApp → Configuração da API → "ID da conta do WhatsApp Business"', placeholder: 'Ex: 112233445566778' },
-                { campo: 'access_token', rotulo: 'Access Token', ajuda: 'WhatsApp → Configuração da API → "Token de acesso" (token permanente recomendado)', placeholder: 'EAA...' },
-                { campo: 'app_secret', rotulo: 'App Secret', ajuda: 'Configurações do app → Básico → "Chave secreta do aplicativo"', placeholder: '32 caracteres' },
-              ] as { campo: keyof typeof FORM_VAZIO; rotulo: string; ajuda: string; placeholder: string }[]).map((f) => (
-                <label key={f.campo} className={f.campo === 'access_token' || f.campo === 'app_secret' ? 'sm:col-span-2' : ''}>
-                  <span className="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">{f.rotulo}</span>
-                  <input
-                    type={f.campo === 'access_token' || f.campo === 'app_secret' ? 'password' : 'text'}
-                    value={form[f.campo]}
-                    onChange={(e) => setForm((old) => ({ ...old, [f.campo]: e.target.value.trim() }))}
-                    placeholder={f.placeholder}
-                    autoComplete="off"
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 font-['JetBrains_Mono'] text-sm outline-none transition focus:border-emerald-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
-                  />
-                  <span className="mt-1 block text-[11px] leading-snug text-gray-400">{f.ajuda}</span>
-                </label>
-              ))}
-            </div>
-
-            <button
-              onClick={conectar}
-              disabled={conectando}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 p-3.5 text-base font-black text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:opacity-50"
-            >
-              {conectando ? <Loader2 size={20} className="animate-spin" /> : <Plug size={20} />}
-              {conectando ? 'Configurando na Meta...' : 'Conectar WhatsApp'}
-            </button>
-            <p className="mt-2 text-center text-[11px] text-gray-400">
-              Ao conectar, o MiseOn registra o webhook e inscreve seu app na conta do WhatsApp Business automaticamente.
-            </p>
           </div>
         )}
 

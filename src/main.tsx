@@ -77,6 +77,7 @@ const Onboarding       = lazy(() => import('./pages/superadmin/Onboarding'));
 const Churn            = lazy(() => import('./pages/superadmin/Churn'));
 const Auditoria        = lazy(() => import('./pages/superadmin/Auditoria'));
 const FiscalPlataforma = lazy(() => import('./pages/superadmin/FiscalPlataforma'));
+const WhatsAppPlataforma = lazy(() => import('./pages/superadmin/WhatsAppPlataforma'));
 
 import { BrandLoader } from './components/BrandLoader';
 import { I18nProvider } from './contexts/I18nContext';
@@ -136,6 +137,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <Route path="churn"      element={<Churn />} />
                 <Route path="auditoria"  element={<Auditoria />} />
                 <Route path="fiscal"     element={<FiscalPlataforma />} />
+                <Route path="whatsapp"   element={<WhatsAppPlataforma />} />
               </Route>
 
               {/* ── Entregador ── */}

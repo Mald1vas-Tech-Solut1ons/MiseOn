@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Building2, UserPlus, TrendingDown, ScrollText, LogOut, Receipt, Users, BookOpen } from 'lucide-react';
+import { Building2, UserPlus, TrendingDown, ScrollText, LogOut, Receipt, Users, BookOpen, MessageCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 export default function SuperAdminLayout() {
@@ -41,6 +41,7 @@ export default function SuperAdminLayout() {
     { to: '/superadmin/churn', icon: <TrendingDown size={18} />, label: 'Churn' },
     { to: '/superadmin/auditoria', icon: <ScrollText size={18} />, label: 'Auditoria' },
     { to: '/superadmin/fiscal', icon: <Receipt size={18} />, label: 'Fiscal' },
+    { to: '/superadmin/whatsapp', icon: <MessageCircle size={18} />, label: 'WhatsApp' },
   ];
 
   return (

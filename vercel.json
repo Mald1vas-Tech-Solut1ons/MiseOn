@@ -7,7 +7,7 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     {
-      "source": "/((?!sistema-para-|integracao-ifood|cardapio-qr-code|api-whatsapp-|gestao-|blog|sobre|contato|termos|privacidade|lojas|cadastre-se|videos|depoimentos|demonstracao|ajuda/|acesso|api/|assets/|.*\\.[\\w]+$).*)",
+      "source": "/((?!api/|assets/|.*\\.[\\w]+$).*)",
       "destination": "/app.html"
     }
   ],

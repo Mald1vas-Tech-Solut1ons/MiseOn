@@ -6,6 +6,7 @@ import { avaliarAssinatura } from '../../lib/assinatura';
 import ThemeToggle from '../../components/ThemeToggle';
 import { NotificationCenter } from '../../components/notifications/NotificationCenter';
 import { useLedgerAlerts } from '../../hooks/useLedgerAlerts';
+import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
 import { BrandLoader } from '../../components/BrandLoader';
 import { podeAcessar, HOME_POR_PAPEL, type Papel } from '../../lib/permissoes';
 import { useGuidedTour } from '../../hooks/useGuidedTour';
@@ -62,6 +63,9 @@ export default function AdminLayout() {
   // Monitoramento financeiro em tempo real — alertas de estorno suspeito,
   // cancelamento com estoque comprometido e erros de webhook
   useLedgerAlerts({ lojaId: ctx?.lojaId ?? '' });
+
+  // Notificações em tempo real para toda a área administrativa (Chat, IA, Atendimento e Pedidos)
+  useRealtimeNotifications({ lojaId: ctx?.lojaId ?? '', contexto: 'PAINEL' });
 
   // Hook de controle do Tour Guiado pelo Sistema (deve estar no topo antes dos early-returns)
   const tour = useGuidedTour(ctx?.lojaId);

@@ -89,17 +89,38 @@ serve(async (req) => {
     const { data: { user: caller } } = await admin.auth.getUser(jwt);
     if (!caller) return erro("Não autenticado", 401);
 
-    const { data: acesso } = await admin
-      .from("usuarios_loja")
-      .select("papel")
+    // SuperAdmin da plataforma opera qualquer loja: as ações manuais (colar
+    // credenciais da Meta) saíram do painel do lojista e viraram ferramenta de
+    // suporte — o assinante conecta só pelo Embedded Signup.
+    const { data: souSuperadmin } = await admin
+      .from("plataforma_admins")
+      .select("user_id")
       .eq("user_id", caller.id)
-      .eq("loja_id", loja_id)
       .maybeSingle();
-    if (!acesso) return erro("Você não tem acesso a esta loja", 403);
 
-    // ações que alteram a conexão exigem admin da loja
-    if (["conectar", "desconectar", "testar", "trocar_codigo"].includes(acao) && acesso.papel !== "admin") {
-      return erro("Só o admin da loja pode gerenciar a conexão do WhatsApp", 403);
+    if (!souSuperadmin) {
+      const { data: acesso } = await admin
+        .from("usuarios_loja")
+        .select("papel")
+        .eq("user_id", caller.id)
+        .eq("loja_id", loja_id)
+        .maybeSingle();
+      if (!acesso) return erro("Você não tem acesso a esta loja", 403);
+
+      // ações que alteram a conexão exigem admin da loja
+      if (["conectar", "atualizar_token", "desconectar", "testar", "trocar_codigo"].includes(acao) && acesso.papel !== "admin") {
+        return erro("Só o admin da loja pode gerenciar a conexão do WhatsApp", 403);
+      }
+
+      // RN: credenciais manuais da Meta são ferramenta de suporte da plataforma.
+      // O lojista nunca precisa de conta de desenvolvedor — ele usa o Embedded
+      // Signup, que preenche phone_number_id/waba_id/token automaticamente.
+      if (["conectar", "atualizar_token"].includes(acao)) {
+        return erro(
+          "Conexão manual é exclusiva do suporte MiseOn. Use o botão 'Conectar com Facebook'.",
+          403,
+        );
+      }
     }
 
     const buscarConexao = () =>
@@ -144,6 +165,101 @@ serve(async (req) => {
         },
         eventos: eventos ?? [],
       });
+    }
+
+    // ── diagnostico ── testa toda a pipeline IA em tempo real ──────────────
+    if (acao === "diagnostico") {
+      const resultados: Record<string, unknown> = {};
+
+      // 1. Verifica conexão WhatsApp
+      const { data: conexaoDiag } = await buscarConexao();
+      resultados.conexao_status = conexaoDiag?.status ?? "NÃO CONFIGURADO";
+
+      // 2. Verifica toggles de IA
+      const { data: lojaDiag } = await admin
+        .from("lojas")
+        .select("whatsapp_ia_ativo, chat_ia_ativo, nome")
+        .eq("id", loja_id)
+        .single();
+      resultados.whatsapp_ia_ativo = lojaDiag?.whatsapp_ia_ativo ?? false;
+      resultados.chat_ia_ativo = lojaDiag?.chat_ia_ativo ?? false;
+      resultados.loja_nome = lojaDiag?.nome ?? "—";
+
+      // 3. Verifica se GROQ_API_KEY está configurada
+      const groqKey = Deno.env.get("GROQ_API_KEY");
+      resultados.groq_configurado = !!groqKey;
+
+      // 4. Testa chamada real ao Groq (sem salvar nada)
+      if (groqKey) {
+        try {
+          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${groqKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "llama-3.3-70b-versatile",
+              messages: [
+                { role: "system", content: "Responda apenas: OK" },
+                { role: "user", content: "Teste de diagnóstico." },
+              ],
+              max_tokens: 10,
+            }),
+          });
+          const groqData = await groqRes.json().catch(() => ({}));
+          resultados.groq_status = groqRes.ok ? "OK" : "ERRO";
+          resultados.groq_resposta = groqData.choices?.[0]?.message?.content?.trim() ?? groqData.error?.message ?? "sem resposta";
+        } catch (e) {
+          resultados.groq_status = "ERRO";
+          resultados.groq_resposta = String(e);
+        }
+      } else {
+        resultados.groq_status = "NÃO CONFIGURADO";
+        resultados.groq_resposta = "";
+      }
+
+      // 5. Última conversa WhatsApp desta loja
+      const { data: ultimaConv } = await admin
+        .from("chat_conversations")
+        .select("id, ia_ativa, cliente_nome, telefone, criado_em")
+        .eq("loja_id", loja_id)
+        .eq("canal", "WHATSAPP")
+        .order("criado_em", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      resultados.ultima_conversa = ultimaConv
+        ? { id: ultimaConv.id, ia_ativa: ultimaConv.ia_ativa, cliente_nome: ultimaConv.cliente_nome }
+        : null;
+
+      // 6. Eventos recentes
+      const { data: eventosDiag } = await admin
+        .from("whatsapp_eventos")
+        .select("status, erro, criado_em")
+        .eq("loja_id", loja_id)
+        .order("criado_em", { ascending: false })
+        .limit(3);
+      resultados.eventos_recentes = eventosDiag ?? [];
+
+      // 7. Lista de problemas encontrados
+      const problemas: string[] = [];
+      if (!lojaDiag?.whatsapp_ia_ativo && !lojaDiag?.chat_ia_ativo) {
+        problemas.push("IA desligada: ative o toggle 'Atendimento automático com IA' na página de Integração WhatsApp e clique em Salvar.");
+      }
+      if (!groqKey) {
+        problemas.push("GROQ_API_KEY ausente: vá em Supabase Dashboard → Edge Functions → Secrets e adicione GROQ_API_KEY com sua chave do Groq.");
+      }
+      if (groqKey && resultados.groq_status === "ERRO") {
+        problemas.push("GROQ_API_KEY inválida ou expirada: gere uma nova chave em console.groq.com e atualize o secret.");
+      }
+      if (conexaoDiag?.status !== "CONECTADO") {
+        problemas.push(`WhatsApp não está CONECTADO (status: ${resultados.conexao_status}).`);
+      }
+      if (ultimaConv?.ia_ativa === false) {
+        problemas.push("Última conversa com ia_ativa=false (humano assumiu). Abra o Chat e reative a IA nessa conversa.");
+      }
+
+      resultados.problemas = problemas;
+      resultados.pipeline_ok = problemas.length === 0;
+
+      return json({ ok: true, diagnostico: resultados });
     }
 
     // ── conectar ───────────────────────────────────────────────────────────
@@ -245,6 +361,65 @@ serve(async (req) => {
         .from("whatsapp_conexoes")
         .update({ status: "CONECTADO", conectado_em: new Date().toISOString(), ultimo_erro: null })
         .eq("loja_id", loja_id);
+
+      return json({
+        ok: true,
+        display_phone: validacao.displayPhone,
+        verified_name: validacao.verifiedName,
+      });
+    }
+
+    // ── atualizar_token ── troca só o token de uma conexão que já existe ───
+    // phone_number_id, waba_id e app_secret já estão salvos: quando o token da
+    // Meta expira (o temporário dura 24h), o lojista só precisa colar o novo.
+    // Um campo, um clique — sem recadastrar as credenciais do app inteiro.
+    if (acao === "atualizar_token") {
+      const { access_token } = body;
+      if (!access_token || !String(access_token).trim()) {
+        return erro("Cole o token de acesso gerado no painel da Meta.");
+      }
+
+      const { data: conexao } = await buscarConexao();
+      if (!conexao) {
+        return erro(
+          "Esta loja ainda não tem uma conexão. Use o assistente de conexão completo primeiro.",
+        );
+      }
+
+      const token = String(access_token).trim();
+
+      // (a) valida o token contra o número já cadastrado — nada é salvo antes
+      const validacao = await validarToken(conexao.phone_number_id, token);
+      if (!validacao.ok) {
+        console.warn("atualizar_token: token inválido:", validacao.detalhe);
+        return erro(
+          "Token inválido ou sem acesso a este número. Confira se ele foi gerado com as " +
+          "permissões whatsapp_business_messaging e whatsapp_business_management. " +
+          `(Detalhe da Meta: ${validacao.detalhe})`,
+        );
+      }
+
+      // (b) reforça a inscrição do app na WABA (idempotente — não bloqueia)
+      const wabaRes = await fetch(`${GRAPH}/${conexao.waba_id}/subscribed_apps`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const wabaData = await wabaRes.json().catch(() => ({}));
+      if (!wabaRes.ok || wabaData?.success !== true) {
+        console.warn("atualizar_token: inscrição na WABA falhou:", msgGraph(wabaData));
+      }
+
+      const { error: eUpd } = await admin
+        .from("whatsapp_conexoes")
+        .update({
+          access_token: token,
+          display_phone: validacao.displayPhone,
+          status: "CONECTADO",
+          conectado_em: new Date().toISOString(),
+          ultimo_erro: null,
+        })
+        .eq("loja_id", loja_id);
+      if (eUpd) throw eUpd;
 
       return json({
         ok: true,

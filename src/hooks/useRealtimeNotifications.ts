@@ -93,8 +93,12 @@ export function useRealtimeNotifications({ lojaId, pedidoId, contexto, entregado
       canais.push(canalEntregador);
     }
 
-    // Notificações Inteligentes do Assistente IA e Chat
-    if (lojaId && (contexto === 'PAINEL' || contexto === 'PDV')) {
+    // Notificações Inteligentes do Assistente IA e Chat.
+    // Só no PAINEL: o AdminLayout envolve todas as telas administrativas (PDV
+    // inclusive), então habilitar no PDV faria o mesmo broadcast tocar duas vezes.
+    // O sino/histórico é responsabilidade do useNotificationStore — aqui só o
+    // alerta efêmero (toast + som + notificação de desktop).
+    if (lojaId && contexto === 'PAINEL') {
       const canalAlertas = supabase.channel(`admin-alerts-${lojaId}`)
         .on('broadcast', { event: 'chat_ia_answered' }, (payload) => {
           const msg = payload.payload.message || 'O Assistente IA atendeu um cliente!';

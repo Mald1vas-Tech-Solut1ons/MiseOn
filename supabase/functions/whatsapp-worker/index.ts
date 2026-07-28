@@ -182,6 +182,7 @@ serve(async (req) => {
             canal: "WHATSAPP",
             telefone,
             cliente_nome: nomeContato,
+            ia_ativa: true,
             wa_janela_expira_em: new Date(
               Date.now() + 24 * 3600 * 1000,
             ).toISOString(),
@@ -219,11 +220,15 @@ serve(async (req) => {
         .eq("id", conversationId);
 
       // Grava a mensagem do cliente → aparece no ChatAdmin (aceite do E2)
-      const { error: msgErr } = await supabase.from("chat_messages").insert({
-        conversation_id: conversationId,
-        remetente_tipo: "CLIENTE",
-        conteudo: textoDaMensagem(msg),
-      });
+      const { data: msgGravada, error: msgErr } = await supabase
+        .from("chat_messages")
+        .insert({
+          conversation_id: conversationId,
+          remetente_tipo: "CLIENTE",
+          conteudo: textoDaMensagem(msg),
+        })
+        .select("id")
+        .single();
       if (msgErr) throw new Error("gravar mensagem: " + msgErr.message);
 
       // E3: Chama a IA (chat-ai-reception) que fará o roteamento para whatsapp-send
@@ -243,9 +248,12 @@ serve(async (req) => {
       await channel.send({
         type: 'broadcast',
         event: 'new_chat_message',
-        payload: { 
-          conversation_id: conversationId, 
-          loja_id: evento.loja_id, 
+        payload: {
+          conversation_id: conversationId,
+          // ID da mensagem, não da conversa: o painel deduplica por ele. Com o
+          // id da conversa, só a 1ª mensagem de cada cliente virava notificação.
+          message_id: msgGravada?.id ?? null,
+          loja_id: evento.loja_id,
           canal: "WHATSAPP",
           cliente_nome: nomeContato || telefone,
           message: textoDaMensagem(msg)

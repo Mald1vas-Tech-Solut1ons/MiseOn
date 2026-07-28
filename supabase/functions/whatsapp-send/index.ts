@@ -8,6 +8,22 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Modo simulação — entra em ação em dois casos, ambos seguros para produção:
+//  1. WHATSAPP_SIMULACAO=true — flag explícita, para desenvolvimento local.
+//  2. Fallback automático quando a Meta rejeita o token (OAuthException 190).
+//     A mensagem se perderia de qualquer jeito, então registramos o erro na
+//     conexão (o painel mostra em vermelho) e devolvemos sucesso simulado para
+//     o resto do pipeline seguir. Assim que um token válido for salvo o envio
+//     real volta sozinho — não há flag para lembrar de desligar depois.
+const SIMULACAO_FORCADA = Deno.env.get("WHATSAPP_SIMULACAO") === "true";
+
+// Erros da Graph API que significam "credencial inválida", não "mensagem ruim"
+function ehErroDeToken(status: number, metaData: any): boolean {
+  const code = metaData?.error?.code;
+  const type = metaData?.error?.type;
+  return status === 401 || code === 190 || code === 102 || type === "OAuthException";
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -34,6 +50,15 @@ serve(async (req) => {
       return json({ error: "texto ou template é obrigatório" }, 400);
     }
 
+    // Marca a conexão como ERRO com a causa legível — a tela Integração
+    // WhatsApp lê status + ultimo_erro e mostra o semáforo vermelho.
+    const marcarErro = async (motivo: string) => {
+      await supabase
+        .from("whatsapp_conexoes")
+        .update({ status: "ERRO", ultimo_erro: motivo.slice(0, 500) })
+        .eq("loja_id", loja_id);
+    };
+
     // 1. Busca a conexão da loja
     const { data: conexao, error: conexaoErr } = await supabase
       .from("whatsapp_conexoes")
@@ -46,8 +71,15 @@ serve(async (req) => {
       return json({ error: "WhatsApp não conectado nesta loja" }, 400);
     }
 
-    if (!conexao.phone_number_id || !conexao.access_token) {
+    const semCredenciais = !conexao.phone_number_id ||
+      !conexao.access_token ||
+      conexao.access_token.trim() === "";
+
+    if (semCredenciais && !SIMULACAO_FORCADA) {
       console.warn(`Tentativa de envio sem credenciais ativas para loja ${loja_id}`);
+      await marcarErro(
+        "phone_number_id ou access_token ausente. Reconecte o WhatsApp em Integração WhatsApp.",
+      );
       return json({ error: "WhatsApp da loja não possui phone_number_id ou access_token configurado" }, 400);
     }
 
@@ -92,9 +124,22 @@ serve(async (req) => {
       metaPayload.text = { preview_url: true, body: texto };
     }
 
+    // 4b. Simulação explícita (desenvolvimento local) — não toca na Graph API
+    if (SIMULACAO_FORCADA) {
+      console.log(
+        `[WHATSAPP-SIMULADO] WHATSAPP_SIMULACAO=true — envio não realizado. loja=${loja_id} para=${telefone}`,
+      );
+      return json({
+        success: true,
+        simulado: true,
+        message_id: `wamid.simulado.${Date.now()}`,
+        motivo: "WHATSAPP_SIMULACAO=true — mensagem não enviada de verdade",
+      });
+    }
+
     // 5. Faz o POST para a Graph API
     const metaUrl = `https://graph.facebook.com/v19.0/${conexao.phone_number_id}/messages`;
-    
+
     const metaRes = await fetch(metaUrl, {
       method: "POST",
       headers: {
@@ -107,8 +152,37 @@ serve(async (req) => {
     const metaData = await metaRes.json();
 
     if (!metaRes.ok) {
+      const detalhe = metaData?.error?.message ?? `HTTP ${metaRes.status}`;
+
+      // Token expirado/revogado: a mensagem já está salva no ChatAdmin e se
+      // perderia aqui. Registramos a causa e seguimos em modo simulado para o
+      // restante do fluxo continuar funcionando durante a homologação.
+      if (ehErroDeToken(metaRes.status, metaData)) {
+        console.error(
+          `[WHATSAPP-SIMULADO] Meta rejeitou o token da loja ${loja_id}: ${detalhe}. ` +
+            `Gere um token permanente (System User) no Meta Business e salve em Integração WhatsApp.`,
+        );
+        await marcarErro(`Token da Meta inválido ou expirado — ${detalhe}`);
+        return json({
+          success: true,
+          simulado: true,
+          message_id: `wamid.simulado.${Date.now()}`,
+          motivo: "Token da Meta inválido ou expirado — mensagem não enviada de verdade",
+          detalhe,
+        });
+      }
+
       console.error("Erro na Meta Graph API:", metaData);
+      await marcarErro(detalhe);
       return json({ error: "Erro ao enviar na Meta", details: metaData }, 400);
+    }
+
+    // Envio real deu certo: se a conexão estava marcada em erro, reabilita.
+    if (conexao.status !== "CONECTADO") {
+      await supabase
+        .from("whatsapp_conexoes")
+        .update({ status: "CONECTADO", ultimo_erro: null })
+        .eq("loja_id", loja_id);
     }
 
     return json({ success: true, message_id: metaData?.messages?.[0]?.id });

@@ -295,6 +295,38 @@ export function useNotificationStore(lojaId?: string) {
           });
         }
       }
+      // 3. Mensagens de cliente ainda não lidas — recuperação do que chegou com
+      //    o painel fechado. O broadcast do worker é efêmero: se ninguém estava
+      //    conectado, a notificação se perdia e o lojista nunca via a mensagem.
+      const { data: msgsPendentes } = await supabase
+        .from('chat_messages')
+        .select('id, conteudo, criado_em, conversation_id, chat_conversations!inner(loja_id, cliente_nome, telefone)')
+        .eq('chat_conversations.loja_id', lojaId)
+        .eq('remetente_tipo', 'CLIENTE')
+        .eq('lida', false)
+        .order('criado_em', { ascending: false })
+        .limit(20);
+
+      if (msgsPendentes) {
+        msgsPendentes.forEach((m: any) => {
+          const conv = Array.isArray(m.chat_conversations) ? m.chat_conversations[0] : m.chat_conversations;
+          const quem = conv?.cliente_nome || conv?.telefone || 'Cliente';
+          adicionarNotificacao(
+            {
+              id: `notif_CHAT_MSG_${m.id}`,
+              tipo: 'CHAT_MENSAGEM',
+              categoria: 'CHAT',
+              titulo: `💬 Mensagem de ${quem}`,
+              mensagem: m.conteudo ?? 'Nova mensagem recebida',
+              acaoUrl: '/admin/chat',
+              acaoRotulo: 'Atender Cliente',
+              criadaEm: m.criado_em,
+              metaData: { conversation_id: m.conversation_id },
+            } as any,
+            { silencioso: true } // já aconteceu: entra no sino sem tocar som
+          );
+        });
+      }
     } catch (e) {
       console.error('Erro ao verificar estoque/cardápio crítico:', e);
     }
@@ -384,34 +416,85 @@ export function useNotificationStore(lojaId?: string) {
           }
         }
       )
-      // 4. Broadcasts de Chat & Atendimento Humano
+      // 4. Broadcasts de Chat & Atendimento — canal do worker/IA
       .on('broadcast', { event: 'new_chat_message' }, (payload) => {
         const clienteNome = payload.payload?.cliente_nome || 'Cliente';
         const msg = payload.payload?.message || 'Nova mensagem recebida';
         adicionarNotificacao({
+          id: `notif_CHAT_MSG_${payload.payload?.message_id || payload.payload?.conversation_id || Date.now()}`,
           tipo: 'CHAT_MENSAGEM',
           categoria: 'CHAT',
-          titulo: `Mensagem de ${clienteNome}`,
+          titulo: `💬 Mensagem de ${clienteNome}`,
           mensagem: msg,
           acaoUrl: '/admin/chat',
           acaoRotulo: 'Atender Cliente',
+          metaData: { conversation_id: payload.payload?.conversation_id },
         });
       })
       .on('broadcast', { event: 'chat_handoff' }, (payload) => {
-        const msg = payload.payload?.message || '🚨 Cliente solicitou atendimento humano no chat!';
+        const msg = payload.payload?.message || '🚨 Cliente solicitou atendimento humano!';
         adicionarNotificacao({
+          id: `notif_CHAT_HANDOFF_${payload.payload?.conversation_id || Date.now()}`,
           tipo: 'CHAT_HANDOFF',
           categoria: 'CHAT',
           titulo: '🚨 Atendimento Humano Solicitado',
           mensagem: msg,
           acaoUrl: '/admin/chat',
           acaoRotulo: 'Ir para o Chat Agora',
+          metaData: { conversation_id: payload.payload?.conversation_id },
         });
+      })
+      .subscribe();
+
+    // Canal admin-alerts (worker + IA broadcast aqui).
+    // Silencioso de propósito: o useRealtimeNotifications já assina os MESMOS
+    // eventos e emite toast + som + notificação de desktop. Aqui só alimentamos
+    // o sino/histórico — sem isso, cada mensagem tocava e aparecia duas vezes.
+    const canalAlertas = supabase
+      .channel(`admin-alerts-${lojaId}`)
+      .on('broadcast', { event: 'new_chat_message' }, (payload) => {
+        const clienteNome = payload.payload?.cliente_nome || 'Cliente';
+        const preview = payload.payload?.message || 'Nova mensagem recebida';
+        adicionarNotificacao({
+          id: `notif_CHAT_MSG_${payload.payload?.message_id || payload.payload?.conversation_id || Date.now()}`,
+          tipo: 'CHAT_MENSAGEM',
+          categoria: 'CHAT',
+          titulo: `💬 Mensagem de ${clienteNome}`,
+          mensagem: preview,
+          acaoUrl: '/admin/chat',
+          acaoRotulo: 'Atender Cliente',
+          metaData: { conversation_id: payload.payload?.conversation_id },
+        }, { silencioso: true });
+      })
+      .on('broadcast', { event: 'chat_ia_answered' }, (payload) => {
+        adicionarNotificacao({
+          id: `notif_CHAT_IA_${payload.payload?.conversation_id || Date.now()}`,
+          tipo: 'CHAT_MENSAGEM',
+          categoria: 'CHAT',
+          titulo: '🤖 IA atendeu um cliente',
+          mensagem: 'O assistente respondeu automaticamente pelo WhatsApp.',
+          acaoUrl: '/admin/chat',
+          acaoRotulo: 'Ver Conversa',
+          metaData: { conversation_id: payload.payload?.conversation_id },
+        }, { silencioso: true });
+      })
+      .on('broadcast', { event: 'chat_handoff' }, (payload) => {
+        adicionarNotificacao({
+          id: `notif_CHAT_HANDOFF_${payload.payload?.conversation_id || Date.now()}`,
+          tipo: 'CHAT_HANDOFF',
+          categoria: 'CHAT',
+          titulo: '🚨 Atendimento Humano Solicitado',
+          mensagem: payload.payload?.message || 'Cliente precisa de atendimento humano!',
+          acaoUrl: '/admin/chat',
+          acaoRotulo: 'Ir para o Chat Agora',
+          metaData: { conversation_id: payload.payload?.conversation_id },
+        }, { silencioso: true });
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(canal);
+      supabase.removeChannel(canalAlertas);
     };
   }, [lojaId, adicionarNotificacao]);
 
