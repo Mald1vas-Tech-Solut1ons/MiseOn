@@ -19,6 +19,7 @@ export function FooterSEO() {
   ];
 
   const legal = [
+    { title: 'Blog do Restaurante', href: '/blog' },
     { title: 'Sobre Nós', href: '/sobre' },
     { title: 'Vídeos & Demonstrações', href: '/videos' },
     { title: 'Contato & Suporte', href: '/contato' },

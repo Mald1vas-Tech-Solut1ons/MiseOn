@@ -136,6 +136,14 @@ export const PAGE_META: Record<string, PageMeta> = {
     canonicalUrl: `${BASE}/gestao-de-estoque-3d`,
     h1: 'Gestão de Estoque Físico, Fichas Técnicas e Observabilidade 3D em Tempo Real',
   },
+  '/blog': {
+    title: 'Blog MiseOn | Engenharia, CMV & Tecnologia para Food Service',
+    description:
+      'Artigos especializados para donos de restaurantes, hamburguerias e pizzarias. Estudos profundos sobre CMV real, Ficha Técnica, KDS sem papel e IA no WhatsApp.',
+    keywords: 'blog restaurante, cmv food service, kds producao, ficha tecnica hamburgueria, whatsapp ia delivery',
+    canonicalUrl: `${BASE}/blog`,
+    h1: 'Blog MiseOn: Engenharia, CMV & Tecnologia para Food Service',
+  },
   '/ajuda/estoque': {
     title: 'Engenharia de Estoque 3D, Ficha Técnica & Preparos — MiseOn',
     description:

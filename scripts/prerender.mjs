@@ -160,22 +160,12 @@ async function main() {
 
   const { PAGE_META } = await loadTsModule('src/data/pageMeta.ts');
   const { LANDING_PAGES_DATA } = await loadTsModule('src/data/landingPagesData.ts');
+  const { BLOG_POSTS } = await loadTsModule('src/data/blogData.ts');
 
   // dist/app.html — shell da SPA para as rotas que NÃO dá para gerar
   // estaticamente: /admin, /superadmin, /entregador, /pedido/:id e o cardápio
   // de cada loja (/:slug), que vêm do banco. O vercel.json aponta o rewrite
   // catch-all para cá.
-  //
-  // Antes esse papel era do próprio dist/index.html, o que impedia a home de
-  // ser prerenderizada: dar conteúdo real ao index.html faria toda rota
-  // dinâmica servir o HTML da home. Separando os dois, a home ganha conteúdo
-  // real e as rotas dinâmicas seguem com shell neutro.
-  //
-  // noindex porque /app.html é acessível diretamente e seria conteúdo
-  // duplicado sem valor no índice.
-  // Substitui a diretiva robots existente em vez de acrescentar outra —
-  // duas tags <meta name="robots"> conflitantes na mesma página é instrução
-  // ambígua para o crawler.
   let appShell = template.replace(
     /<meta\s+name="robots"\s+content="[^"]*"\s*\/?>/,
     '<meta name="robots" content="noindex, follow" />'
@@ -199,10 +189,26 @@ async function main() {
     const slug = routePath.replace(/^\//, '');
     const landing = LANDING_PAGES_DATA[slug];
     const meta = PAGE_META[routePath];
+    const blogPost = routePath.startsWith('/blog/') ? BLOG_POSTS.find((p) => `/blog/${p.slug}` === routePath) : null;
 
     let title, description, canonicalUrl, bodyHtml, jsonLd;
 
-    if (landing) {
+    if (blogPost) {
+      title = blogPost.seo.title;
+      description = blogPost.seo.description;
+      canonicalUrl = blogPost.seo.canonicalUrl;
+      bodyHtml = `<h1>${escapeHtml(blogPost.title)}</h1>\n      <p>${escapeHtml(blogPost.description)}</p>\n      <article>${escapeHtml(blogPost.summary)}</article>`;
+      jsonLd = `<script type="application/ld+json">${JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: blogPost.title,
+        description: blogPost.description,
+        author: { '@type': 'Person', name: blogPost.author.name, jobTitle: blogPost.author.role },
+        publisher: { '@type': 'Organization', name: 'MiseOn', logo: 'https://miseon.app.br/icon-512.png' },
+        datePublished: blogPost.publishedAt,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl }
+      })}</script>`;
+    } else if (landing) {
       title = landing.seo.title;
       description = landing.seo.description;
       canonicalUrl = landing.seo.canonicalUrl || `${BASE}${routePath}`;
@@ -215,12 +221,9 @@ async function main() {
       bodyHtml = `<h1>${escapeHtml(meta.h1)}</h1>\n      <p>${escapeHtml(meta.description)}</p>`;
       jsonLd = '';
     } else {
-      // Rota pública sem metadados: falha o build. Sem isto, a página iria ao
-      // ar herdando silenciosamente o title da home — que é exatamente o bug
-      // que este script existe para eliminar.
       throw new Error(
         `Rota "${routePath}" não tem metadados. Adicione em src/data/pageMeta.ts ` +
-        `(ou em src/data/landingPagesData.ts, se for landing de nicho).`
+        `(ou em src/data/landingPagesData.ts ou src/data/blogData.ts).`
       );
     }
 

@@ -25,6 +25,8 @@ const DescadastroEmail = lazy(() => import('./pages/legal/DescadastroEmail'));
 const Videos           = lazy(() => import('./pages/Videos'));
 const NicheLandingPage = lazy(() => import('./pages/landing/NicheLandingPage'));
 const EstoquePage      = lazy(() => import('./pages/landing/EstoquePage'));
+const Blog             = lazy(() => import('./pages/Blog'));
+const BlogPost         = lazy(() => import('./pages/BlogPost'));
 
 // ── Lazy: ADMIN_LAYOUT (único layout compartilhado — carrega rápido) ─────────
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -166,6 +168,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/gestao-fiscal-nfe"         element={<NicheLandingPage forcedSlug="gestao-fiscal-nfe" />} />
               <Route path="/gestao-de-estoque-3d"      element={<EstoquePage />} />
               <Route path="/ajuda/estoque"             element={<EstoquePage />} />
+              <Route path="/blog"                      element={<Blog />} />
+              <Route path="/blog/:slug"                element={<BlogPost />} />
 
               <Route path="/:slug/meus-pedidos" element={<MeusPedidos />} />
               <Route path="/:slug"         element={<Cardapio />} />

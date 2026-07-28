@@ -73,6 +73,11 @@ export const PUBLIC_ROUTES = [
   { path: '/api-whatsapp-restaurantes', changefreq: 'weekly', priority: 0.9 },
   { path: '/gestao-fiscal-nfe', changefreq: 'weekly', priority: 0.9 },
   { path: '/gestao-de-estoque-3d', changefreq: 'weekly', priority: 0.8 },
+  { path: '/blog', changefreq: 'daily', priority: 0.9 },
+  { path: '/blog/evolucao-do-cmv-do-caderno-ao-custeio-peps-3d', changefreq: 'monthly', priority: 0.8 },
+  { path: '/blog/o-fim-do-papel-na-cozinha-kds-kanban-operacional', changefreq: 'monthly', priority: 0.8 },
+  { path: '/blog/ia-no-whatsapp-do-restaurante-atendimento-oficial-meta-vs-bots-amadores', changefreq: 'monthly', priority: 0.8 },
+  { path: '/blog/verdade-sobre-venda-por-quilo-perda-coccao-peso-inteligente', changefreq: 'monthly', priority: 0.8 },
 ];
 
 // Rotas que renderizam o MESMO componente/conteúdo de uma rota acima
