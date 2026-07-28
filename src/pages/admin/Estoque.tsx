@@ -15,6 +15,8 @@ import { ModalReposicaoBuffet } from '../../components/estoque/ModalReposicaoBuf
 // three.js pesa ~600 KB: só entra no bundle de quem abrir a aba 3D.
 const EstoqueCusto3D = lazy(() => import('../../lib/estoque3d/EstoqueCusto3D'));
 const EstoqueRastreio3D = lazy(() => import('../../lib/estoque3d/rastreio/EstoqueRastreio3D'));
+import ModalRaioXProduto from '../../components/estoque/ModalRaioXProduto';
+import { BarChart3 } from 'lucide-react';
 
 export default function Estoque() {
   const { lojaId } = useOutletContext<CtxLoja>();
@@ -23,6 +25,8 @@ export default function Estoque() {
   const [inativos, setInativos] = useState<Insumo[]>([]);
   const [mostrarInativos, setMostrarInativos] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  
+  const [raioXInsumo, setRaioXInsumo] = useState<Insumo | null>(null);
 
   // Buffet / Quilo
   const [modalBuffetAberto, setModalBuffetAberto] = useState(false);
@@ -114,7 +118,7 @@ export default function Estoque() {
       }],
     };
   }, [unidadeCompra, passosRendimento, precoCompra, qtdEstoqueCompra, editando?.id, nome]);
-  const [entrada, setEntrada] = useState<{ insumo: Insumo; qtd: string; custo: string } | null>(null);
+  const [entrada, setEntrada] = useState<{ insumo: Insumo; qtd: string; custo: string; lote?: string; validade?: string } | null>(null);
 
   // `carregar()` apenas incrementa a versao; quem busca de fato e o effect abaixo.
   // Antes isto era `useEffect(() => { setTimeout(carregar, 0); }, [lojaId])` — o
@@ -293,8 +297,14 @@ export default function Estoque() {
       .update({ quantidade_atual: Number(entrada.insumo.quantidade_atual) + qtd })
       .eq('id', entrada.insumo.id);
     await supabase.from('movimentacoes_estoque').insert({
-      loja_id: lojaId, insumo_id: entrada.insumo.id, tipo: 'ENTRADA',
-      quantidade: qtd, custo_total: Number(entrada.custo || 0), motivo: 'Compra',
+      loja_id: lojaId, 
+      insumo_id: entrada.insumo.id, 
+      tipo: 'ENTRADA',
+      quantidade: qtd, 
+      custo_total: Number(entrada.custo || 0), 
+      motivo: 'Compra',
+      lote_fornecedor: entrada.lote || null,
+      vence_em: entrada.validade || null
     });
     setEntrada(null);
     carregar();
@@ -659,6 +669,9 @@ export default function Estoque() {
                 )}
               </div>
               <div className="flex shrink-0 items-center gap-2">
+                <button onClick={() => setRaioXInsumo(i)} className="rounded-lg p-2 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" title="Raio-X (Análise de Lotes e Gráficos)">
+                   <BarChart3 size={16} />
+                </button>
                 <button onClick={() => setEntrada({ insumo: i, qtd: '', custo: '' })}
                   className="rounded-lg border px-3 py-1.5 text-xs font-bold text-green-700 dark:text-green-400 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">+ Entrada</button>
                 <div className="flex items-center border-l dark:border-gray-700 pl-2 ml-1 space-x-1">
@@ -701,11 +714,23 @@ export default function Estoque() {
               <input className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" type="number" autoFocus
                 value={entrada.qtd} onChange={(e) => setEntrada({ ...entrada, qtd: e.target.value })} />
             </label>
-            <label className="block">
+            <label className="block mb-3">
               <span className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Custo da compra R$ (opcional)</span>
               <input className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" type="number"
                 value={entrada.custo} onChange={(e) => setEntrada({ ...entrada, custo: e.target.value })} />
             </label>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+               <label className="block">
+                 <span className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Lote (opcional)</span>
+                 <input className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" type="text" placeholder="Ex: L1234"
+                   value={entrada.lote || ''} onChange={(e) => setEntrada({ ...entrada, lote: e.target.value })} />
+               </label>
+               <label className="block">
+                 <span className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Validade (opcional)</span>
+                 <input className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" type="date"
+                   value={entrada.validade || ''} onChange={(e) => setEntrada({ ...entrada, validade: e.target.value })} />
+               </label>
+            </div>
             <button onClick={registrarEntrada} className="mt-5 w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-lg">
               Registrar Estoque
             </button>
@@ -723,6 +748,13 @@ export default function Estoque() {
             carregar();
           }}
           onCancelar={() => setModalBuffetAberto(false)}
+        />
+      )}
+      {/* Modal Raio-X Individual */}
+      {raioXInsumo && (
+        <ModalRaioXProduto
+          insumo={raioXInsumo}
+          onClose={() => setRaioXInsumo(null)}
         />
       )}
         </>

@@ -803,6 +803,8 @@ export interface Movimentacao {
   quantidade: number;
   motivo?: string;
   pedido_id?: string;
+  lote_fornecedor?: string;
+  vence_em?: string;
   criado_em: string;
 }
 
