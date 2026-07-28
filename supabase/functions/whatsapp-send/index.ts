@@ -46,9 +46,9 @@ serve(async (req) => {
       return json({ error: "WhatsApp não conectado nesta loja" }, 400);
     }
 
-    if (conexao.status !== "CONECTADO") {
-      console.warn(`Tentativa de envio com WhatsApp pendente/erro para loja ${loja_id}`);
-      return json({ error: "WhatsApp da loja não está com status CONECTADO" }, 400);
+    if (!conexao.phone_number_id || !conexao.access_token) {
+      console.warn(`Tentativa de envio sem credenciais ativas para loja ${loja_id}`);
+      return json({ error: "WhatsApp da loja não possui phone_number_id ou access_token configurado" }, 400);
     }
 
     // 2. Busca configurações da loja
