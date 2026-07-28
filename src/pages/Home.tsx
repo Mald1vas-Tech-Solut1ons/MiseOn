@@ -4,7 +4,7 @@ import {
   MessageCircle, ShieldCheck, ArrowRight, Check, Sparkles,
   Menu as MenuIcon, X, UtensilsCrossed, Megaphone, ShoppingBag,
   Mail, ChevronDown, Headset, BarChart3, Star, Quote, BadgeCheck, Scale,
-  Database, FlaskConical, Eye, AlertTriangle,
+  Database, FlaskConical, Eye, AlertTriangle, BookOpen,
 } from 'lucide-react';
 import { useState } from 'react';
 import MiseOnLogo from '../components/MiseOnLogo';
@@ -681,23 +681,45 @@ export default function Home() {
                 </p>
               </div>
             </div>
+
             <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
-              <MessageCircle size={22} className="mt-0.5 shrink-0 text-emerald-300" />
+              <ChefHat size={22} className="mt-0.5 shrink-0 text-orange-400" />
               <div>
-                <p className="text-sm font-bold text-white">IA que responde no WhatsApp</p>
+                <p className="text-sm font-bold text-white">Cozinha sob controle (KDS)</p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-300/90">
-                  Preço, cardápio e horário lidos do seu cadastro — sem resposta inventada.
+                  Tela de produção inteligente por etapas Kanban. Sem papel engordurado nem confusão.
                 </p>
               </div>
             </div>
+
             <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
-              <Wallet size={22} className="mt-0.5 shrink-0 text-orange-300" />
+              <MessageCircle size={22} className="mt-0.5 shrink-0 text-emerald-400" />
               <div>
-                <p className="text-sm font-bold text-white">Pix direto na sua conta</p>
+                <p className="text-sm font-bold text-white">IA no WhatsApp (API Meta)</p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-300/90">
-                  Recebimento via Efí com split automático. O dinheiro da venda é seu, na hora.
+                  A IA tira dúvidas, envia o cardápio e não deixa nenhum cliente sem resposta.
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* ══════════ SELOS DE HOMOLOGAÇÃO & CERTIFICAÇÕES OFICIAIS ══════════ */}
+          <div className="mt-10 pt-8 border-t border-white/10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-300 font-semibold">
+            <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-emerald-300 backdrop-blur-md">
+              <ShieldCheck size={16} className="text-emerald-400" />
+              <span>API Cloud Oficial Meta Verified</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-blue-300 backdrop-blur-md">
+              <Wallet size={16} className="text-blue-400" />
+              <span>Parceiro Homologado Efí Bank (Pix)</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-amber-300 backdrop-blur-md">
+              <Boxes size={16} className="text-amber-400" />
+              <span>Emissão Fiscal FocusNFe Homologada</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-purple-300 backdrop-blur-md">
+              <BadgeCheck size={16} className="text-purple-400" />
+              <span>Conexão SSL 256-bit Certificada</span>
             </div>
           </div>
         </div>
@@ -1489,6 +1511,118 @@ export default function Home() {
             >
               <MessageCircle size={18} /> Ainda com dúvidas? Fale com nosso time
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ 8.5 BLOG & COMUNIDADE DE ESPECIALISTAS ══════════ */}
+      <section id="blog-destaque" className="scroll-mt-24 py-20 bg-gradient-to-br from-[#0B1120] via-[#0C1730] to-[#070C18] text-white border-t border-b border-white/10">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FC5B24]/20 border border-[#FC5B24]/40 px-4 py-1 text-xs font-black uppercase tracking-widest text-orange-300">
+              <BookOpen size={14} className="text-[#FC5B24]" />
+              Blog & Centro de Inteligência em Food Service
+            </span>
+            <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Conteúdo profundo sobre CMV, KDS, Engenharia de Cardápio e IA
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-slate-300">
+              Aprenda com estudos de caso reais, análises financeiras e regras de operação validadas na prática em cozinhas profissionais.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
+              <div>
+                <span className="text-[10px] font-black uppercase text-[#FC5B24]">Gestão Financeira</span>
+                <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
+                  A Evolução do CMV: Do Caderno ao Custeio PEPS 3D
+                </h3>
+                <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                  Como calcular a perda de cocção e valorizar preparos em lote sem margens maquiadas.
+                </p>
+              </div>
+              <Link to="/blog/evolucao-do-cmv-do-caderno-ao-custeio-peps-3d" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FC5B24] hover:underline">
+                Ler estudo <ArrowRight size={13} />
+              </Link>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
+              <div>
+                <span className="text-[10px] font-black uppercase text-blue-400">Operação & KDS</span>
+                <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
+                  O Fim do Papel na Cozinha com KDS Kanban
+                </h3>
+                <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                  Reduza até 35% do tempo de preparo eliminando rasuras e papel engordurado.
+                </p>
+              </div>
+              <Link to="/blog/o-fim-do-papel-na-cozinha-kds-kanban-operacional" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FC5B24] hover:underline">
+                Ler estudo <ArrowRight size={13} />
+              </Link>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
+              <div>
+                <span className="text-[10px] font-black uppercase text-emerald-400">Tecnologia & IA</span>
+                <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
+                  IA no WhatsApp: Conexão Oficial Meta vs Bots Amadores
+                </h3>
+                <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                  Evite banimento do seu número de delivery e atenda clientes com precisão.
+                </p>
+              </div>
+              <Link to="/blog/ia-no-whatsapp-do-restaurante-atendimento-oficial-meta-vs-bots-amadores" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FC5B24] hover:underline">
+                Ler estudo <ArrowRight size={13} />
+              </Link>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
+              <div>
+                <span className="text-[10px] font-black uppercase text-amber-400">Restaurante por Quilo</span>
+                <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
+                  Perda de Cocção & Peso Inteligente no Buffet
+                </h3>
+                <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                  Entenda o encolhimento de carnes e a baixa de estoque por grama servida.
+                </p>
+              </div>
+              <Link to="/blog/verdade-sobre-venda-por-quilo-perda-coccao-peso-inteligente" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FC5B24] hover:underline">
+                Ler estudo <ArrowRight size={13} />
+              </Link>
+            </div>
+          </div>
+
+          {/* BOX DE CONVITE PARA AUTORES E ESPECIALISTAS */}
+          <div className="mt-12 rounded-3xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-blue-500/10 p-8 backdrop-blur-xl">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-orange-300">
+                  🖋️ Escreva para o Blog MiseOn
+                </span>
+                <h3 className="mt-2 font-['Sora'] text-2xl font-bold text-white">
+                  É Consultor de CMV, Chef, Nutricionista ou Especialista em Gastronomia?
+                </h3>
+                <p className="mt-2 text-xs text-slate-300 max-w-2xl leading-relaxed">
+                  Publique seus artigos técnicos em nosso Blog e seja lido por milhares de donos de restaurantes e gestores de food service de todo o Brasil.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Link
+                  to="/blog"
+                  className="rounded-full bg-white px-5 py-3 font-['Sora'] text-xs font-bold text-gray-900 shadow-md transition hover:bg-gray-100"
+                >
+                  Acessar Hub do Blog
+                </Link>
+                <a
+                  href="mailto:contato@miseon.app.br?subject=Proposta%20de%20Artigo%20para%20o%20Blog%20MiseOn"
+                  className="rounded-full bg-[#FC5B24] px-5 py-3 font-['Sora'] text-xs font-bold text-white shadow-lg shadow-[#FC5B24]/30 transition hover:scale-105"
+                >
+                  Enviar Proposta de Artigo
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

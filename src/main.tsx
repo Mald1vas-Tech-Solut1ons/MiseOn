@@ -70,6 +70,7 @@ const EntregadorDocumentos = lazy(() => import('./pages/entregador/Documentos'))
 // ── Lazy: SUPERADMIN (area interna restrita) ──────────────────────────────────
 const SuperAdminLogin  = lazy(() => import('./pages/superadmin/Login'));
 const SuperAdminLayout = lazy(() => import('./pages/superadmin/SuperAdminLayout'));
+const CrmLeads         = lazy(() => import('./pages/superadmin/CrmLeads'));
 const Tenants          = lazy(() => import('./pages/superadmin/Tenants'));
 const Onboarding       = lazy(() => import('./pages/superadmin/Onboarding'));
 const Churn            = lazy(() => import('./pages/superadmin/Churn'));
@@ -124,7 +125,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               {/* ── Superadmin ── */}
               <Route path="/superadmin/login" element={<SuperAdminLogin />} />
               <Route path="/superadmin" element={<SuperAdminLayout />}>
-                <Route index element={<Navigate to="tenants" replace />} />
+                <Route index element={<Navigate to="leads" replace />} />
+                <Route path="leads"      element={<CrmLeads />} />
                 <Route path="tenants"    element={<Tenants />} />
                 <Route path="onboarding" element={<Onboarding />} />
                 <Route path="churn"      element={<Churn />} />

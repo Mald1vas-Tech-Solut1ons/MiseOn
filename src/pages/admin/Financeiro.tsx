@@ -7,6 +7,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { supabase } from '../../lib/supabase';
 import { fmt, ProdutoCusto, ConfiguracoesCusto, Pedido, MetodoPgto } from '../../types';
+import DreGerencial from '../../components/admin/DreGerencial';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
 
@@ -80,7 +81,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function Financeiro() {
   const { lojaId } = useOutletContext<CtxLoja>();
-  const [aba, setAba] = useState<'EXTRATO' | 'MARGENS' | 'CUSTOS_FIXOS'>('EXTRATO');
+  const [aba, setAba] = useState<'EXTRATO' | 'MARGENS' | 'DRE' | 'CUSTOS_FIXOS'>('EXTRATO');
   const [periodo, setPeriodo] = useState<Periodo>('HOJE');
 
   const [produtos, setProdutos] = useState<ProdutoCusto[]>([]);
@@ -237,8 +238,11 @@ export default function Financeiro() {
       <div className="flex gap-2 mb-4 border-b border-gray-100 dark:border-gray-800 pb-2">
         {abaBtn('EXTRATO', '💰 Extrato de Vendas')}
         {abaBtn('MARGENS', '📈 Margens')}
+        {abaBtn('DRE', '📊 DRE Gerencial')}
         {abaBtn('CUSTOS_FIXOS', '🏢 Custos Operacionais')}
       </div>
+
+      {aba === 'DRE' && <DreGerencial />}
 
       {aba === 'EXTRATO' && (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">

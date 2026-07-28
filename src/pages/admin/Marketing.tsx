@@ -4,9 +4,10 @@ import { Plus, Trash2, X, Save, ChevronUp, ChevronDown, MessageCircle, Search, W
 import { supabase } from '../../lib/supabase';
 import { Cupom, Banner, TaxaEntrega, HorarioFuncionamento, MetodoPgto, Cliente, CarrinhoAbandonado, fmt } from '../../types';
 import ImageUpload from '../../components/ImageUpload';
+import CrmClientes from '../../components/admin/CrmClientes';
 import type { CtxLoja } from './AdminLayout';
 
-type Tab = 'cupons' | 'banners' | 'taxas' | 'horarios' | 'clientes' | 'cashback' | 'recuperacao';
+type Tab = 'cupons' | 'banners' | 'taxas' | 'horarios' | 'clientes' | 'crm' | 'cashback' | 'recuperacao';
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 export default function Marketing() {
@@ -16,10 +17,10 @@ export default function Marketing() {
   return (
     <div className="p-4">
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
-        {(['cupons', 'banners', 'taxas', 'horarios', 'clientes', 'cashback', 'recuperacao'] as Tab[]).map((t) => (
+        {(['cupons', 'banners', 'taxas', 'horarios', 'clientes', 'crm', 'cashback', 'recuperacao'] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ${tab === t ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm'}`}>
-            {{ cupons: 'Cupons', banners: 'Banners', taxas: 'Taxas de entrega', horarios: 'Horários', clientes: 'Clientes', cashback: 'Cashback', recuperacao: 'Recuperação de vendas' }[t]}
+            {{ cupons: 'Cupons', banners: 'Banners', taxas: 'Taxas de entrega', horarios: 'Horários', clientes: 'Clientes Base', crm: 'CRM & RFM Inteligente', cashback: 'Cashback', recuperacao: 'Recuperação de vendas' }[t]}
           </button>
         ))}
       </div>
@@ -29,6 +30,7 @@ export default function Marketing() {
       {tab === 'taxas' && <TaxasTab lojaId={lojaId} />}
       {tab === 'horarios' && <HorariosTab lojaId={lojaId} />}
       {tab === 'clientes' && <ClientesTab lojaId={lojaId} />}
+      {tab === 'crm' && <CrmClientes />}
       {tab === 'cashback' && <CashbackTab lojaId={lojaId} />}
       {tab === 'recuperacao' && <RecuperacaoTab lojaId={lojaId} lojaSlug={lojaSlug} />}
     </div>
