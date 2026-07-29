@@ -11,8 +11,8 @@ const json = (data: any, init?: ResponseInit) => new Response(JSON.stringify(dat
   ...init
 });
 
-const TOKEN_PROD = Deno.env.get('FOCUS_API_TOKEN_PROD') || Deno.env.get('FOCUS_NFE_PROD') || 'xX5kei7tYxvv2SJaOiOcBG1XvlHGREzW';
-const TOKEN_HOMOLOG = Deno.env.get('FOCUS_API_TOKEN_HOMOLOG') || Deno.env.get('FOCUS_NFE_HOMOLOG') || 'L3nlRbLoipxYXMDt3d61tDCKQeS42Dol';
+const TOKEN_PROD = Deno.env.get('FOCUS_API_TOKEN_PROD') || Deno.env.get('FOCUS_NFE_PROD');
+const TOKEN_HOMOLOG = Deno.env.get('FOCUS_API_TOKEN_HOMOLOG') || Deno.env.get('FOCUS_NFE_HOMOLOG');
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -61,6 +61,10 @@ serve(async (req) => {
       : (isProd ? 'https://api.focusnfe.com.br/v2/nfe' : 'https://homologacao.focusnfe.com.br/v2/nfe');
 
     const token = isProd ? TOKEN_PROD : TOKEN_HOMOLOG;
+    if (!token) {
+      const secretVar = isProd ? 'FOCUS_API_TOKEN_PROD ou FOCUS_NFE_PROD' : 'FOCUS_API_TOKEN_HOMOLOG ou FOCUS_NFE_HOMOLOG';
+      return json({ error: `Token Focus NFe não configurado nas variáveis de ambiente/secrets (${secretVar}).` }, { status: 500 });
+    }
     const chave = nota.chave_nfe || nota.ref;
 
     // Cancela no Focus NFe API v2

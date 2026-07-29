@@ -13,11 +13,8 @@ function json(obj: any, init?: ResponseInit) {
   });
 }
 
-// Credentials provided by User
-const TOKEN_PROD = Deno.env.get('FOCUS_API_TOKEN_PROD') || 'xX5kei7tYxvv2SJaOiOcBG1XvlHGREzW';
-const TOKEN_HOMOLOG = Deno.env.get('FOCUS_API_TOKEN_HOMOLOG') || 'L3nlRbLoipxYXMDt3d61tDCKQeS42Dol';
-// CPF: 34372131801 (from user input)
-const CPF_LOJISTA = '34372131801'; 
+const TOKEN_PROD = Deno.env.get('FOCUS_API_TOKEN_PROD') || Deno.env.get('FOCUS_NFE_PROD');
+const TOKEN_HOMOLOG = Deno.env.get('FOCUS_API_TOKEN_HOMOLOG') || Deno.env.get('FOCUS_NFE_HOMOLOG');
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -43,12 +40,15 @@ Deno.serve(async (req) => {
     const isProd = pedido.lojas.nfe_ambiente === 'producao';
     const baseUrl = isProd ? 'https://api.focusnfe.com.br/v2/nfce' : 'https://homologacao.focusnfe.com.br/v2/nfce';
     const token = isProd ? TOKEN_PROD : TOKEN_HOMOLOG;
+    if (!token) {
+      const secretVar = isProd ? 'FOCUS_API_TOKEN_PROD ou FOCUS_NFE_PROD' : 'FOCUS_API_TOKEN_HOMOLOG ou FOCUS_NFE_HOMOLOG';
+      return json({ error: `Token Focus NFe não configurado nas variáveis de ambiente/secrets (${secretVar}).` }, { status: 500 });
+    }
     
-    // Map to Focus NFe format
-    // Minimum viable payload for NFC-e according to Focus NFe documentation
-    
-    // Use CPF_LOJISTA as the default CNPJ if not set in DB
-    const cnpjEmitente = pedido.lojas.cnpj ? pedido.lojas.cnpj.replace(/\D/g, '') : CPF_LOJISTA;
+    const cnpjEmitente = pedido.lojas?.cnpj ? pedido.lojas.cnpj.replace(/\D/g, '') : '';
+    if (!cnpjEmitente) {
+      return json({ error: 'CNPJ/CPF do emitente não configurado para a loja.' }, { status: 400 });
+    }
     
     const ref = `miseon_${pedido_id.substring(0,8)}_${Date.now()}`;
     

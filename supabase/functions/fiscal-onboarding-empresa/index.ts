@@ -91,8 +91,13 @@ serve(async (req) => {
     const isProd = ambiente === 'producao';
     const baseUrl = isProd ? 'https://api.focusnfe.com.br/v2/empresas' : 'https://homologacao.focusnfe.com.br/v2/empresas';
     const tokenMaster = isProd 
-      ? (Deno.env.get('FOCUS_API_TOKEN_PROD') || Deno.env.get('FOCUS_NFE_PROD') || 'xX5kei7tYxvv2SJaOiOcBG1XvlHGREzW')
-      : (Deno.env.get('FOCUS_API_TOKEN_HOMOLOG') || Deno.env.get('FOCUS_NFE_HOMOLOG') || 'L3nlRbLoipxYXMDt3d61tDCKQeS42Dol');
+      ? (Deno.env.get('FOCUS_API_TOKEN_PROD') || Deno.env.get('FOCUS_NFE_PROD'))
+      : (Deno.env.get('FOCUS_API_TOKEN_HOMOLOG') || Deno.env.get('FOCUS_NFE_HOMOLOG'));
+
+    if (!tokenMaster) {
+      const secretVar = isProd ? 'FOCUS_API_TOKEN_PROD ou FOCUS_NFE_PROD' : 'FOCUS_API_TOKEN_HOMOLOG ou FOCUS_NFE_HOMOLOG';
+      return json({ error: `Token Focus NFe não configurado nas variáveis de ambiente/secrets (${secretVar}).` }, { status: 500 });
+    }
 
     const cleanCnpj = (cnpj || '').replace(/\D/g, '');
     const cleanIe = (inscricao_estadual || '').replace(/\D/g, '');

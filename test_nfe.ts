@@ -1,7 +1,22 @@
-const TOKEN_HOMOLOG = 'L3nlRbLoipxYXMDt3d61tDCKQeS42Dol';
-const CPF_LOJISTA = '34372131801'; 
+declare const Deno: any;
+declare const process: any;
+
+const TOKEN_HOMOLOG = (typeof Deno !== 'undefined' ? Deno.env.get('FOCUS_API_TOKEN_HOMOLOG') || Deno.env.get('FOCUS_NFE_HOMOLOG') : undefined)
+  || (typeof process !== 'undefined' ? process.env?.FOCUS_API_TOKEN_HOMOLOG || process.env?.FOCUS_NFE_HOMOLOG : undefined);
+
+const CPF_LOJISTA = (typeof Deno !== 'undefined' ? Deno.env.get('FOCUS_CNPJ_TEST') : undefined)
+  || (typeof process !== 'undefined' ? process.env?.FOCUS_CNPJ_TEST : undefined);
 
 async function runTest() {
+  if (!TOKEN_HOMOLOG) {
+    console.error("❌ ERRO: Defina a variável de ambiente FOCUS_API_TOKEN_HOMOLOG (ou FOCUS_NFE_HOMOLOG) para rodar este teste.");
+    return;
+  }
+  if (!CPF_LOJISTA) {
+    console.error("❌ ERRO: Defina a variável de ambiente FOCUS_CNPJ_TEST com o CNPJ/CPF do emitente de teste para rodar este teste.");
+    return;
+  }
+
   console.log("=> Testando envio de NFC-e (Focus NFe) sem depender do banco de dados...");
 
   // Pedido Mock para a API Focus NFe
