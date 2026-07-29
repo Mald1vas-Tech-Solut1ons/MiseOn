@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale, ClipboardCheck, Scissors, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale, ClipboardCheck, Scissors, CheckCircle2, Apple } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, fmt, InsumoRendimentoJSON } from '../../types';
 import { UNIDADES, destinosPermitidos, validarConversao, opcoesDeEntrada } from '../../lib/unidades';
@@ -18,6 +18,7 @@ import ModalTransformar from '../../components/estoque/ModalTransformar';
 const EstoqueCusto3D = lazy(() => import('../../lib/estoque3d/EstoqueCusto3D'));
 const EstoqueRastreio3D = lazy(() => import('../../lib/estoque3d/rastreio/EstoqueRastreio3D'));
 import ModalRaioXProduto from '../../components/estoque/ModalRaioXProduto';
+import ModalNutricaoInsumo from '../../components/estoque/ModalNutricaoInsumo';
 import { BarChart3 } from 'lucide-react';
 
 export default function Estoque() {
@@ -30,6 +31,7 @@ export default function Estoque() {
   const [salvando, setSalvando] = useState(false);
   
   const [raioXInsumo, setRaioXInsumo] = useState<Insumo | null>(null);
+  const [nutricaoInsumo, setNutricaoInsumo] = useState<Insumo | null>(null);
 
   // Buffet / Quilo
   const [modalBuffetAberto, setModalBuffetAberto] = useState(false);
@@ -774,6 +776,9 @@ export default function Estoque() {
                 <button onClick={() => setTransformando(i)} className="rounded-lg p-2 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-colors" title="Desmontar em outros insumos (ex: peça em fatias)">
                    <Scissors size={16} />
                 </button>
+                <button onClick={() => setNutricaoInsumo(i)} className="rounded-lg p-2 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" title="Nutrição do insumo">
+                   <Apple size={16} />
+                </button>
                 <button onClick={() => abrirEntrada(i)}
                   className="rounded-lg border px-3 py-1.5 text-xs font-bold text-green-700 dark:text-green-400 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">+ Entrada</button>
                 <div className="flex items-center border-l dark:border-gray-700 pl-2 ml-1 space-x-1">
@@ -919,6 +924,14 @@ export default function Estoque() {
         <ModalRaioXProduto
           insumo={raioXInsumo}
           onClose={() => setRaioXInsumo(null)}
+        />
+      )}
+
+      {nutricaoInsumo && (
+        <ModalNutricaoInsumo
+          insumo={nutricaoInsumo}
+          lojaId={lojaId}
+          onClose={() => setNutricaoInsumo(null)}
         />
       )}
 

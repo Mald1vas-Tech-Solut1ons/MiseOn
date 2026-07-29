@@ -497,6 +497,49 @@ export interface Insumo {
   criado_em?: string;
 }
 
+/** NUT-04. Origem do dado nutricional — sustenta o nível do selo (§4 do PLANO-NUTRICIONAL). */
+export type OrigemNutricao = 'ROTULO_EAN' | 'ROTULO_FOTO' | 'USDA' | 'TBCA' | 'IA' | 'MANUAL';
+
+/**
+ * Nutrição declarada de um insumo, por loja. Sempre expressa por `base_qtd`
+ * `base_unidade` (100 g ou 100 ml). `densidade_g_ml` e `peso_medio_un_g` são
+ * as duas pontes que existem só quando a unidade de estoque do insumo não
+ * bate com a grandeza da nutrição — ver fn_normalizar_para_nutricao.
+ */
+export interface InsumoNutricao {
+  insumo_id: string;
+  loja_id: string;
+  base_qtd: number;
+  base_unidade: 'g' | 'ml';
+  densidade_g_ml?: number | null;
+  peso_medio_un_g?: number | null;
+  nutrientes: Record<string, number>;
+  alergenos_contem: string[];
+  alergenos_pode_conter: string[];
+  origem: OrigemNutricao;
+  fonte_ref?: string | null;
+  fonte_versao?: string | null;
+  fonte_url?: string | null;
+  confianca: number;
+  revisado: boolean;
+  revisado_por?: string | null;
+  revisado_em?: string | null;
+  ia_modelo?: string | null;
+  ia_justificativa?: string | null;
+  ia_payload?: Record<string, unknown> | null;
+  atualizado_em: string;
+}
+
+/** Retorno de fn_calcular_nutricao_receita / fn_recalcular_nutricao_produto / fn_simular_nutricao. */
+export interface ResultadoCalculoNutricional {
+  status: 'COMPLETO' | 'PARCIAL' | 'SEM_DADOS';
+  nutrientes: Record<string, number>;
+  massa_g: number;
+  cobertura_pct: number;
+  insumos_faltantes: Array<{ insumo_id: string; nome: string; motivo: string }>;
+  erro?: string;
+}
+
 export interface ProducaoPreparo {
   id: string;
   loja_id: string;
