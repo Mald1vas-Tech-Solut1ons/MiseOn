@@ -41,7 +41,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { loja_id, telefone, texto, template, conversation_id } = await req.json();
+    const { loja_id, telefone, texto, template, conversation_id, access_token } = await req.json();
 
     if (!loja_id || !telefone) {
       return json({ error: "loja_id e telefone são obrigatórios" }, 400);
@@ -71,9 +71,13 @@ serve(async (req) => {
       return json({ error: "WhatsApp não conectado nesta loja" }, 400);
     }
 
+    const tokenFinal = (access_token && String(access_token).trim() !== "")
+      ? String(access_token).trim()
+      : conexao.access_token;
+
     const semCredenciais = !conexao.phone_number_id ||
-      !conexao.access_token ||
-      conexao.access_token.trim() === "";
+      !tokenFinal ||
+      tokenFinal.trim() === "";
 
     if (semCredenciais && !SIMULACAO_FORCADA) {
       console.warn(`Tentativa de envio sem credenciais ativas para loja ${loja_id}`);
@@ -109,11 +113,13 @@ serve(async (req) => {
       }
     }
 
-    // 4. Prepara o payload para a Graph API
+    // 4. Prepara o payload para a Graph API (garante apenas dígitos no telefone)
+    const telLimpo = String(telefone).replace(/\D/g, "");
+
     let metaPayload: any = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: telefone,
+      to: telLimpo,
     };
 
     if (template) {
@@ -127,7 +133,7 @@ serve(async (req) => {
     // 4b. Simulação explícita (desenvolvimento local) — não toca na Graph API
     if (SIMULACAO_FORCADA) {
       console.log(
-        `[WHATSAPP-SIMULADO] WHATSAPP_SIMULACAO=true — envio não realizado. loja=${loja_id} para=${telefone}`,
+        `[WHATSAPP-SIMULADO] WHATSAPP_SIMULACAO=true — envio não realizado. loja=${loja_id} para=${telLimpo}`,
       );
       return json({
         success: true,
@@ -143,7 +149,7 @@ serve(async (req) => {
     const metaRes = await fetch(metaUrl, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${conexao.access_token}`,
+        "Authorization": `Bearer ${tokenFinal}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(metaPayload),
@@ -154,36 +160,34 @@ serve(async (req) => {
     if (!metaRes.ok) {
       const detalhe = metaData?.error?.message ?? `HTTP ${metaRes.status}`;
 
-      // Token expirado/revogado: a mensagem já está salva no ChatAdmin e se
-      // perderia aqui. Registramos a causa e seguimos em modo simulado para o
-      // restante do fluxo continuar funcionando durante a homologação.
       if (ehErroDeToken(metaRes.status, metaData)) {
         console.error(
-          `[WHATSAPP-SIMULADO] Meta rejeitou o token da loja ${loja_id}: ${detalhe}. ` +
+          `[WHATSAPP-ERRO] Meta rejeitou o token da loja ${loja_id}: ${detalhe}. ` +
             `Gere um token permanente (System User) no Meta Business e salve em Integração WhatsApp.`,
         );
         await marcarErro(`Token da Meta inválido ou expirado — ${detalhe}`);
         return json({
-          success: true,
-          simulado: true,
-          message_id: `wamid.simulado.${Date.now()}`,
-          motivo: "Token da Meta inválido ou expirado — mensagem não enviada de verdade",
-          detalhe,
-        });
+          error: `Token da Meta inválido ou expirado: ${detalhe}. Gere um token permanente no Meta Business.`,
+          code: "TOKEN_INVALIDO",
+          details: metaData,
+        }, 401);
       }
 
       console.error("Erro na Meta Graph API:", metaData);
       await marcarErro(detalhe);
-      return json({ error: "Erro ao enviar na Meta", details: metaData }, 400);
+      return json({ error: `Erro na Meta: ${detalhe}`, details: metaData }, 400);
     }
 
-    // Envio real deu certo: se a conexão estava marcada em erro, reabilita.
-    if (conexao.status !== "CONECTADO") {
-      await supabase
-        .from("whatsapp_conexoes")
-        .update({ status: "CONECTADO", ultimo_erro: null })
-        .eq("loja_id", loja_id);
-    }
+    // Envio real deu certo: salva token permanente e reabilita status CONECTADO
+    await supabase
+      .from("whatsapp_conexoes")
+      .update({
+        access_token: tokenFinal,
+        status: "CONECTADO",
+        ultimo_erro: null,
+        conectado_em: new Date().toISOString()
+      })
+      .eq("loja_id", loja_id);
 
     return json({ success: true, message_id: metaData?.messages?.[0]?.id });
   } catch (error: any) {

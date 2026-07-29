@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { tocarSom } from '../../lib/som';
+import { useToast } from '../../components/ui/Toast';
 import type { CtxLoja } from './AdminLayout';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -278,6 +279,8 @@ export default function ChatAdmin() {
     await supabase.from('lojas').update({ chat_ia_ativo: novo }).eq('id', lojaId);
   };
 
+  const toast = useToast();
+
   const toggleIaConversa = async (convId: string, atual: boolean) => {
     const novo = !atual;
     await supabase.from('chat_conversations').update({ ia_ativa: novo }).eq('id', convId);
@@ -311,7 +314,7 @@ export default function ChatAdmin() {
 
     // Envia pelo WhatsApp se for canal WA
     if (convAtiva?.canal === 'WHATSAPP' && convAtiva.telefone) {
-      await supabase.functions.invoke('whatsapp-send', {
+      const { data: resData, error: resErr } = await supabase.functions.invoke('whatsapp-send', {
         body: {
           loja_id: lojaId,
           telefone: convAtiva.telefone,
@@ -319,14 +322,32 @@ export default function ChatAdmin() {
           conversation_id: ativa,
         },
       });
-      // Humano assumiu — silencia IA nesta conversa
-      if (convAtiva.ia_ativa) {
-        await supabase.from('chat_conversations')
-          .update({ ia_ativa: false })
-          .eq('id', ativa);
-        setConversas(prev =>
-          prev.map(c => c.id === ativa ? { ...c, ia_ativa: false } : c)
-        );
+
+      if (resErr || resData?.error || resData?.simulado) {
+        const erroMsg = resErr?.message || resData?.error || (resData?.simulado ? resData.motivo : 'Falha ao enviar mensagem no WhatsApp.');
+        toast(`Erro no WhatsApp: ${erroMsg}`, 'erro');
+
+        const motivoDisplay = resData?.code === 'TOKEN_INVALIDO'
+          ? '⚠️ Falha no WhatsApp: Token da Meta expirou. Atualize o token em Integração WhatsApp.'
+          : String(erroMsg).includes('Janela de 24h')
+          ? '⚠️ Falha no WhatsApp: A janela de 24h para este cliente expirou.'
+          : `⚠️ Falha ao entregar no WhatsApp: ${erroMsg}`;
+
+        await supabase.from('chat_messages').insert({
+          conversation_id: ativa,
+          remetente_tipo: 'SISTEMA',
+          conteudo: motivoDisplay,
+        });
+      } else {
+        // Humano assumiu — silencia IA nesta conversa
+        if (convAtiva.ia_ativa) {
+          await supabase.from('chat_conversations')
+            .update({ ia_ativa: false })
+            .eq('id', ativa);
+          setConversas(prev =>
+            prev.map(c => c.id === ativa ? { ...c, ia_ativa: false } : c)
+          );
+        }
       }
     }
 
@@ -349,7 +370,8 @@ export default function ChatAdmin() {
   const janelaRestante = convAtiva?.wa_janela_expira_em
     ? new Date(convAtiva.wa_janela_expira_em).getTime() - Date.now()
     : null;
-  const janelaExpirando = janelaRestante !== null && janelaRestante < 2 * 3600 * 1000;
+  const janelaExpirada = janelaRestante !== null && janelaRestante <= 0;
+  const janelaExpirando = janelaRestante !== null && janelaRestante > 0 && janelaRestante < 2 * 3600 * 1000;
 
   // ── UI ────────────────────────────────────────────────────────────────────────
   return (
@@ -517,9 +539,15 @@ export default function ChatAdmin() {
                     <span>{fone(convAtiva.telefone)}</span>
                   )}
                   {janelaRestante !== null && (
-                    <span className={janelaExpirando ? 'text-red-500 font-semibold' : ''}>
-                      {janelaExpirando ? '⚠️ ' : ''}
-                      Janela expira: {new Date(convAtiva!.wa_janela_expira_em!).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    <span className={janelaExpirada || janelaExpirando ? 'text-red-500 font-semibold' : 'text-gray-400'}>
+                      {janelaExpirada ? (
+                        '⚠️ Janela de 24h expirada (Meta bloqueou mensagens diretas)'
+                      ) : (
+                        <>
+                          {janelaExpirando ? '⚠️ ' : ''}
+                          Janela expira: {new Date(convAtiva!.wa_janela_expira_em!).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </>
+                      )}
                     </span>
                   )}
                 </div>
