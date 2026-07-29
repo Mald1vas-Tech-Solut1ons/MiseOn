@@ -427,6 +427,43 @@ export interface FavoritoCliente {
   produto?: Produto;
 }
 
+/**
+ * Discriminador do catálogo de itens (ERP — Onda 0).
+ *
+ * Nem tudo que entra pela porta dos fundos é comida. O tipo determina o
+ * comportamento: se entra em ficha técnica, para onde o consumo é lançado no
+ * razão, e se controla validade. O catálogo vive em `tipos_item`, e a fonte de
+ * verdade do comportamento é o banco — este union é só o espelho tipado.
+ */
+export type TipoItem =
+  | 'INGREDIENTE'
+  | 'PREPARO'
+  | 'REVENDA'
+  | 'EMBALAGEM'
+  | 'DESCARTAVEL'
+  | 'LIMPEZA'
+  | 'ESCRITORIO'
+  | 'MANUTENCAO'
+  | 'UNIFORME_EPI'
+  | 'ATIVO_IMOBILIZADO';
+
+export type NaturezaItem = 'ESTOQUE_CMV' | 'ALMOXARIFADO' | 'IMOBILIZADO';
+
+/** Linha do catálogo `tipos_item` — declara o comportamento, não só o rótulo. */
+export interface TipoItemCatalogo {
+  codigo: TipoItem;
+  rotulo: string;
+  descricao?: string | null;
+  entra_ficha_tecnica: boolean;
+  natureza: NaturezaItem;
+  conta_estoque: string;
+  conta_consumo: string;
+  controla_validade: boolean;
+  icone?: string | null;
+  ordem: number;
+  ativo: boolean;
+}
+
 export interface Insumo {
   id: string;
   nome: string;
@@ -437,6 +474,17 @@ export interface Insumo {
   qtd_embalagem: number;
   detalhes_rendimento?: InsumoRendimentoJSON | null;
   ativo: boolean;
+  /**
+   * ERP Onda 0. `is_preparo` continua existindo e continua correto: um trigger
+   * no banco mantém os dois sincronizados nos dois sentidos, então código
+   * antigo que só conhece `is_preparo` e código novo que só conhece `tipo_item`
+   * convivem sem nenhum dos lados ceder.
+   */
+  tipo_item?: TipoItem;
+  /** Código de barras (EAN/GTIN). Chave forte do de-para de NF-e e porta de entrada da nutrição. */
+  gtin?: string | null;
+  /** Classificação fiscal da NF-e. Classificador determinístico de `tipo_item`. */
+  ncm?: string | null;
   is_preparo?: boolean;
   categoria_insumo?: string;
   /** Setor físico de armazenamento (geladeira/armario/dispensa); null = automático. */
