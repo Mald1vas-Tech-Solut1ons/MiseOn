@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validarConversao, destinosPermitidos, converter } from './unidades';
+import { validarConversao, destinosPermitidos, converter, opcoesDeEntrada } from './unidades';
 import { construirGrafoCusto, auditarConservacao, ErroConservacao } from './estoque3d/types';
 import { COMPRAS_EXEMPLO } from './estoque3d/dadosExemplo';
 
@@ -78,6 +78,67 @@ describe('conversão dimensional', () => {
   });
   it('retorna null sem fator universal', () => {
     expect(converter(1, 'cx', 'kg')).toBeNull();
+  });
+});
+
+describe('unidades aceitas na entrada de estoque', () => {
+  // Alho: compra o quilo, quebra em porções, usa em dentes.
+  const alho = [
+    { de_qtd: 1, de_unidade: 'kg', para_qtd: 9, para_unidade: 'porção' },
+    { de_qtd: 1, de_unidade: 'porção', para_qtd: 5, para_unidade: 'un' },
+  ];
+
+  it('oferece a unidade de compra e cada quebra da cadeia', () => {
+    const codigos = opcoesDeEntrada('un', alho).map((o) => o.codigo);
+    expect(codigos.slice(0, 3)).toEqual(['kg', 'porção', 'un']);
+  });
+
+  it('converte a unidade de compra até a unidade de uso', () => {
+    const porCodigo = new Map(opcoesDeEntrada('un', alho).map((o) => [o.codigo, o.fatorParaBase]));
+    expect(porCodigo.get('kg')).toBe(45);
+    expect(porCodigo.get('porção')).toBe(5);
+    expect(porCodigo.get('un')).toBe(1);
+  });
+
+  it('deriva submúltiplos dos degraus dimensionais (comprou 500 g, não 1 kg)', () => {
+    const g = opcoesDeEntrada('un', alho).find((o) => o.codigo === 'g')!;
+    expect(g.origem).toBe('derivada');
+    expect(500 * g.fatorParaBase).toBeCloseTo(22.5, 9);
+  });
+
+  it('aceita unidade fora da cadeia via equivalência aprendida (cabeça de alho)', () => {
+    const eq = [{ unidade: 'cabeça', rende_qtd: 12, rende_unidade: 'un' }];
+    const cabeca = opcoesDeEntrada('un', alho, eq).find((o) => o.codigo === 'cabeça')!;
+    expect(cabeca.fatorParaBase).toBe(12);
+    expect(cabeca.origem).toBe('equivalencia');
+  });
+
+  it('descarta equivalência que aponta para outra unidade-base', () => {
+    const eq = [{ unidade: 'cabeça', rende_qtd: 12, rende_unidade: 'porção' }];
+    expect(opcoesDeEntrada('un', alho, eq).some((o) => o.codigo === 'cabeça')).toBe(false);
+  });
+
+  it('a cadeia vence a equivalência quando as duas trazem a mesma unidade', () => {
+    const eq = [{ unidade: 'kg', rende_qtd: 3, rende_unidade: 'un' }];
+    expect(opcoesDeEntrada('un', alho, eq).find((o) => o.codigo === 'kg')!.fatorParaBase).toBe(45);
+  });
+
+  it('sem cadeia cadastrada, oferece a base e seus irmãos de grandeza', () => {
+    const codigos = opcoesDeEntrada('kg', null).map((o) => o.codigo);
+    expect(codigos).toEqual(['kg', 'g']);
+    expect(opcoesDeEntrada('un', []).map((o) => o.codigo)).toEqual(['un']);
+  });
+
+  it('ignora cadeia que não termina na unidade do saldo (cadastro legado)', () => {
+    const codigos = opcoesDeEntrada('g', alho).map((o) => o.codigo);
+    expect(codigos).toEqual(['g', 'kg']);
+  });
+
+  it('a cadeia declarada vence o submúltiplo derivado quando colidem', () => {
+    const cadeia = [{ de_qtd: 1, de_unidade: 'kg', para_qtd: 800, para_unidade: 'g' }];
+    const g = opcoesDeEntrada('g', cadeia)!.find((o) => o.codigo === 'g')!;
+    expect(g.fatorParaBase).toBe(1);
+    expect(g.origem).toBe('cadeia');
   });
 });
 

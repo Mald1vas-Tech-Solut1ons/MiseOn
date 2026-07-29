@@ -203,6 +203,102 @@ export function destinosPermitidos(codigoOrigem: string): Unidade[] {
   return UNIDADES.filter((d) => validarConversao(codigoOrigem, d.codigo).ok);
 }
 
+// ---------------------------------------------------------------------------
+// Entrada de estoque: em que unidades o lojista pode dar entrada
+// ---------------------------------------------------------------------------
+
+export interface RegraRendimento {
+  de_qtd: number;
+  de_unidade: string;
+  para_qtd: number;
+  para_unidade: string;
+}
+
+export interface EquivalenciaEntrada {
+  unidade: string;
+  /** Quantas `rende_unidade` valem 1 `unidade`. */
+  rende_qtd: number;
+  rende_unidade: string;
+}
+
+export interface OpcaoEntrada {
+  codigo: string;
+  rotulo: string;
+  /** Quantas unidades-base do estoque valem 1 unidade desta opção. */
+  fatorParaBase: number;
+  /**
+   * `cadeia` = declarada no cadastro (compra ou passo); `derivada` = submúltiplo
+   * dimensional (kg⇄g); `equivalencia` = atalho de entrada aprendido depois.
+   */
+  origem: 'cadeia' | 'derivada' | 'equivalencia';
+}
+
+/**
+ * Unidades aceitas ao dar entrada de um insumo, com o fator para a unidade-base
+ * do estoque (a que está em `insumos.unidade_medida`).
+ *
+ * O saldo é sempre guardado na unidade de uso, mas ninguém compra em "dente de
+ * alho": compra-se o quilo. Então toda unidade que o próprio lojista declarou
+ * na cadeia de rendimento — a de compra e cada quebra intermediária — vale como
+ * unidade de entrada, e a conversão é a mesma cadeia lida ao contrário.
+ *
+ * Aos degraus dimensionais somam-se seus irmãos de grandeza (comprou 500 g de
+ * um insumo cadastrado em kg): o fator sai da física, não de declaração humana.
+ */
+export function opcoesDeEntrada(
+  unidadeBase: string,
+  regras?: RegraRendimento[] | null,
+  equivalencias?: EquivalenciaEntrada[] | null,
+): OpcaoEntrada[] {
+  const cadeia = (regras ?? []).filter(
+    (r) => Number(r.de_qtd) > 0 && Number(r.para_qtd) > 0,
+  );
+  // Cadeia desalinhada do saldo (cadastro legado, edição pela metade): descartar
+  // é melhor que converter com fator errado — o estoque estaria mentindo.
+  const alinhada =
+    cadeia.length > 0 && cadeia[cadeia.length - 1].para_unidade === unidadeBase;
+
+  // Da base para trás: cada degrau acumula o rendimento do degrau seguinte.
+  const degraus: { codigo: string; fator: number }[] = [
+    { codigo: unidadeBase, fator: 1 },
+  ];
+  if (alinhada) {
+    let fator = 1;
+    for (let i = cadeia.length - 1; i >= 0; i--) {
+      fator *= Number(cadeia[i].para_qtd) / Number(cadeia[i].de_qtd);
+      degraus.push({ codigo: cadeia[i].de_unidade, fator });
+    }
+  }
+  degraus.reverse(); // exibe da unidade de compra até a de uso
+
+  const vistos = new Set<string>();
+  const opcoes: OpcaoEntrada[] = [];
+  const inclui = (codigo: string, fatorParaBase: number, origem: OpcaoEntrada['origem']) => {
+    const u = getUnidade(codigo);
+    if (!u || vistos.has(codigo) || !Number.isFinite(fatorParaBase) || fatorParaBase <= 0) return;
+    vistos.add(codigo);
+    opcoes.push({ codigo, rotulo: u.rotulo, fatorParaBase, origem });
+  };
+
+  // Passadas em ordem de autoridade: a cadeia declarada vence a equivalência
+  // aprendida, que vence o submúltiplo derivado — os três podem colidir no
+  // mesmo código (ex.: cadeia kg → porção → g e um atalho salvo em g).
+  for (const d of degraus) inclui(d.codigo, d.fator, 'cadeia');
+  for (const e of equivalencias ?? []) {
+    if (e.rende_unidade !== unidadeBase) continue; // base mudou: atalho caducou
+    inclui(e.unidade, Number(e.rende_qtd), 'equivalencia');
+  }
+  for (const d of degraus) {
+    const u = getUnidade(d.codigo);
+    if (!u || !ehDimensional(u)) continue;
+    for (const irmao of UNIDADES) {
+      if (irmao.grandeza !== u.grandeza || !ehDimensional(irmao)) continue;
+      inclui(irmao.codigo, d.fator * (irmao.fatorBase! / u.fatorBase!), 'derivada');
+    }
+  }
+  return opcoes;
+}
+
 /**
  * Converte uma quantidade entre unidades da MESMA grandeza dimensional.
  * Retorna null quando não há fator universal (agrupadores/semânticas).

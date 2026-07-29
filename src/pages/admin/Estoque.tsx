@@ -3,7 +3,7 @@ import { Link, useOutletContext } from 'react-router-dom';
 import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, fmt, InsumoRendimentoJSON } from '../../types';
-import { UNIDADES, destinosPermitidos, validarConversao } from '../../lib/unidades';
+import { UNIDADES, destinosPermitidos, validarConversao, opcoesDeEntrada } from '../../lib/unidades';
 import { OPCOES_SETOR, SETORES, validarSetor, derivarSetor } from '../../lib/estoque3d/rastreio/setores';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
@@ -118,7 +118,37 @@ export default function Estoque() {
       }],
     };
   }, [unidadeCompra, passosRendimento, precoCompra, qtdEstoqueCompra, editando?.id, nome]);
-  const [entrada, setEntrada] = useState<{ insumo: Insumo; qtd: string; custo: string; lote?: string; validade?: string } | null>(null);
+  const [entrada, setEntrada] = useState<{
+    insumo: Insumo; qtd: string; unidade: string; custo: string; lote?: string; validade?: string;
+    /** Rendimento declarado na hora, quando a unidade não está no cadastro. */
+    rendimentoNovo: string;
+    lembrarConversao: boolean;
+  } | null>(null);
+
+  // Unidades aceitas na entrada do insumo aberto no modal, com o fator para a
+  // unidade-base do saldo. Recalcula só quando troca o insumo.
+  const opcoesEntrada = useMemo(
+    () => entrada
+      ? opcoesDeEntrada(entrada.insumo.unidade_medida, entrada.insumo.detalhes_rendimento?.regras, entrada.insumo.detalhes_rendimento?.equivalencias)
+      : [],
+    [entrada?.insumo],
+  );
+  const opcaoEntrada = opcoesEntrada.find(o => o.codigo === entrada?.unidade);
+  // Unidade fora do cadastro (chegou cabeça de alho num item comprado em kg):
+  // o lojista declara o rendimento aqui mesmo, sem ter que reeditar o insumo.
+  const unidadeAvulsa = !!entrada && !opcaoEntrada;
+  const validacaoAvulsa = entrada && unidadeAvulsa
+    ? validarConversao(entrada.unidade, entrada.insumo.unidade_medida, 1, Number(entrada.rendimentoNovo) || 0)
+    : null;
+  const fatorEntrada = opcaoEntrada
+    ? opcaoEntrada.fatorParaBase
+    : (validacaoAvulsa?.ok ? Number(entrada?.rendimentoNovo || 0) : 0);
+  const qtdEntradaBase = Number(entrada?.qtd || 0) * fatorEntrada;
+
+  const abrirEntrada = (i: Insumo) => setEntrada({
+    insumo: i, qtd: '', custo: '', rendimentoNovo: '', lembrarConversao: true,
+    unidade: opcoesDeEntrada(i.unidade_medida, i.detalhes_rendimento?.regras, i.detalhes_rendimento?.equivalencias)[0]?.codigo ?? i.unidade_medida,
+  });
 
   // `carregar()` apenas incrementa a versao; quem busca de fato e o effect abaixo.
   // Antes isto era `useEffect(() => { setTimeout(carregar, 0); }, [lojaId])` — o
@@ -212,6 +242,15 @@ export default function Estoque() {
        }
     }
     
+    // Atalhos de entrada aprendidos não aparecem neste form; sem carregá-los de
+    // volta, salvar o insumo os apagaria em silêncio. Os que apontam para outra
+    // unidade-base morrem junto com a base antiga — o fator não valeria mais.
+    const equivalencias = (editando?.detalhes_rendimento?.equivalencias ?? [])
+      .filter(e => e.rende_unidade === unidadeUso);
+    if (equivalencias.length > 0) {
+      jsonRegras = { regras: jsonRegras?.regras ?? [], equivalencias };
+    }
+
     const categoriaFinal = isNovaCategoria ? nomeNovaCategoria : categoriaInsumo;
     
     const payload = {
@@ -283,21 +322,49 @@ export default function Estoque() {
 
   const registrarEntrada = async () => {
     if (!entrada || !entrada.qtd) return;
-    const qtd = Number(entrada.qtd);
-    await supabase.from('insumos')
-      .update({ quantidade_atual: Number(entrada.insumo.quantidade_atual) + qtd })
-      .eq('id', entrada.insumo.id);
+    // O saldo mora na unidade de uso; a digitada é só a lente do lojista.
+    const qtd = qtdEntradaBase;
+    if (!(qtd > 0)) return;
+    const base = entrada.insumo.unidade_medida;
+
+    const patch: Record<string, unknown> = {
+      quantidade_atual: Number(entrada.insumo.quantidade_atual) + qtd,
+    };
+    // Atalho aprendido: da próxima vez "cabeça" já aparece na lista do insumo.
+    if (unidadeAvulsa && entrada.lembrarConversao) {
+      const atual = entrada.insumo.detalhes_rendimento;
+      patch.detalhes_rendimento = {
+        regras: atual?.regras ?? [],
+        equivalencias: [
+          ...(atual?.equivalencias ?? []).filter(e => e.unidade !== entrada.unidade),
+          { unidade: entrada.unidade, rende_qtd: fatorEntrada, rende_unidade: base },
+        ],
+      };
+    }
+    await supabase.from('insumos').update(patch).eq('id', entrada.insumo.id);
     await supabase.from('movimentacoes_estoque').insert({
-      loja_id: lojaId, 
-      insumo_id: entrada.insumo.id, 
+      loja_id: lojaId,
+      insumo_id: entrada.insumo.id,
       tipo: 'ENTRADA',
-      quantidade: qtd, 
-      custo_total: Number(entrada.custo || 0), 
-      motivo: 'Compra',
+      quantidade: qtd,
+      custo_total: Number(entrada.custo || 0),
+      // Guarda o que foi digitado: sem isso, "45 un" no histórico esconde que
+      // a compra foi de 5 kg e o erro de conversão fica invisível na auditoria.
+      motivo: entrada.unidade === base ? 'Compra' : `Compra (${entrada.qtd} ${entrada.unidade})`,
       lote_fornecedor: entrada.lote || null,
       vence_em: entrada.validade || null
     });
     setEntrada(null);
+    carregar();
+  };
+
+  const removerEquivalencia = async (i: Insumo, unidade: string) => {
+    if (!window.confirm(`Remover a conversão de entrada "1 ${unidade}" de ${i.nome}?\n\nO estoque já lançado não muda — só deixa de aparecer como opção nas próximas entradas.`)) return;
+    const equivalencias = (i.detalhes_rendimento?.equivalencias ?? []).filter(e => e.unidade !== unidade);
+    const { error } = await supabase.from('insumos')
+      .update({ detalhes_rendimento: { regras: i.detalhes_rendimento?.regras ?? [], equivalencias } })
+      .eq('id', i.id);
+    if (error) { alert(`Não foi possível remover: ${error.message}`); return; }
     carregar();
   };
 
@@ -651,12 +718,21 @@ export default function Estoque() {
                     Custo Unitário: <span className="font-semibold text-[var(--cor-primaria)]">{fmt(custoUnit)}</span>
                   </p>
                 </div>
-                {i.detalhes_rendimento?.regras && i.detalhes_rendimento.regras.length > 0 && (
+                {((i.detalhes_rendimento?.regras?.length ?? 0) > 0 || (i.detalhes_rendimento?.equivalencias?.length ?? 0) > 0) && (
                   <div className="mt-2 flex flex-wrap gap-1">
-                    {i.detalhes_rendimento.regras.map((r: any, idx: number) => (
+                    {(i.detalhes_rendimento?.regras ?? []).map((r: any, idx: number) => (
                       <span key={idx} className="text-[9px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded">
                         {r.de_qtd} {r.de_unidade} ➔ {r.para_qtd} {r.para_unidade}
                       </span>
+                    ))}
+                    {/* Atalhos de entrada aprendidos: clicáveis porque um
+                        rendimento digitado errado precisa ter volta. */}
+                    {(i.detalhes_rendimento?.equivalencias ?? []).map((e) => (
+                      <button key={e.unidade} onClick={() => removerEquivalencia(i, e.unidade)}
+                        title="Remover essa conversão de entrada"
+                        className="text-[9px] bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50 px-1.5 py-0.5 rounded hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-colors">
+                        entrada: 1 {e.unidade} ➔ {e.rende_qtd} {e.rende_unidade} ✕
+                      </button>
                     ))}
                   </div>
                 )}
@@ -665,7 +741,7 @@ export default function Estoque() {
                 <button onClick={() => setRaioXInsumo(i)} className="rounded-lg p-2 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" title="Raio-X (Análise de Lotes e Gráficos)">
                    <BarChart3 size={16} />
                 </button>
-                <button onClick={() => setEntrada({ insumo: i, qtd: '', custo: '' })}
+                <button onClick={() => abrirEntrada(i)}
                   className="rounded-lg border px-3 py-1.5 text-xs font-bold text-green-700 dark:text-green-400 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">+ Entrada</button>
                 <div className="flex items-center border-l dark:border-gray-700 pl-2 ml-1 space-x-1">
                    <button onClick={() => iniciarEdicao(i)} className="rounded-lg p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Editar Insumo"><Pencil size={16} /></button>
@@ -702,15 +778,76 @@ export default function Estoque() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6" onClick={() => setEntrada(null)}>
           <div className="w-full max-w-xs rounded-2xl bg-white dark:bg-gray-900 p-5 dark:border dark:border-gray-800" onClick={(e) => e.stopPropagation()}>
             <p className="font-bold text-gray-900 dark:text-gray-100 mb-4">Nova Entrada — {entrada.insumo.nome}</p>
-            <label className="block mb-3">
-              <span className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Qtd em {entrada.insumo.unidade_medida}</span>
-              <input className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" type="number" autoFocus
-                value={entrada.qtd} onChange={(e) => setEntrada({ ...entrada, qtd: e.target.value })} />
-            </label>
+            <div className="mb-3">
+              <span className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Quanto entrou?</span>
+              <div className="flex gap-2">
+                <input className="w-full min-w-0 rounded-xl border border-gray-300 p-3 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" type="number" min="0" step="any" autoFocus placeholder="0"
+                  value={entrada.qtd} onChange={(e) => setEntrada({ ...entrada, qtd: e.target.value })} />
+                <select className="shrink-0 rounded-xl border border-gray-300 p-3 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100"
+                  value={entrada.unidade} onChange={(e) => setEntrada({ ...entrada, unidade: e.target.value, rendimentoNovo: '' })}>
+                  <optgroup label="Do cadastro">
+                    {opcoesEntrada.map(o => (
+                      <option key={o.codigo} value={o.codigo}>{o.codigo}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Outra unidade (você informa o rendimento)">
+                    {UNIDADES.filter(u => !opcoesEntrada.some(o => o.codigo === u.codigo)).map(u => (
+                      <option key={u.codigo} value={u.codigo}>{u.codigo}</option>
+                    ))}
+                  </optgroup>
+                </select>
+              </div>
+              {/* A conta na cara do lojista: ele digita na unidade que comprou,
+                  mas o saldo continua sendo contado na unidade de uso. */}
+              {opcaoEntrada && opcaoEntrada.fatorParaBase !== 1 && (
+                <p className="mt-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+                  {Number(entrada.qtd) > 0
+                    ? <>Entra como <b className="text-green-700 dark:text-green-400">{qtdEntradaBase.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} {entrada.insumo.unidade_medida}</b> no estoque.</>
+                    : <>1 {opcaoEntrada.codigo} = {opcaoEntrada.fatorParaBase.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} {entrada.insumo.unidade_medida}.</>}
+                </p>
+              )}
+            </div>
+
+            {/* Unidade que o cadastro não conhece: o lojista ensina o rendimento
+                agora, em vez de ser obrigado a converter de cabeça. */}
+            {unidadeAvulsa && (
+              <div className="mb-3 rounded-xl border border-blue-200 bg-blue-50/60 p-3 dark:border-blue-900/40 dark:bg-blue-900/10">
+                <span className="mb-1.5 block text-xs font-medium text-blue-800 dark:text-blue-300">
+                  Quanto rende 1 {entrada.unidade}?
+                </span>
+                <div className="flex items-center gap-2">
+                  <input className="w-24 rounded-lg border border-blue-200 p-2 text-sm focus:outline-none dark:bg-gray-950 dark:border-blue-800/50 dark:text-gray-100" type="number" min="0" step="any" placeholder="0"
+                    value={entrada.rendimentoNovo} onChange={(e) => setEntrada({ ...entrada, rendimentoNovo: e.target.value })} />
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{entrada.insumo.unidade_medida}</span>
+                </div>
+                {validacaoAvulsa && !validacaoAvulsa.ok && Number(entrada.rendimentoNovo) > 0 && (
+                  <p className="mt-2 flex items-start gap-1.5 text-[11px] font-medium text-red-600 dark:text-red-400">
+                    <AlertTriangle size={13} className="shrink-0 mt-px" />
+                    <span>{validacaoAvulsa.mensagem}</span>
+                  </p>
+                )}
+                {qtdEntradaBase > 0 && (
+                  <p className="mt-2 text-[11px] text-gray-600 dark:text-gray-400">
+                    {entrada.qtd} {entrada.unidade} entram como{' '}
+                    <b className="text-green-700 dark:text-green-400">{qtdEntradaBase.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} {entrada.insumo.unidade_medida}</b>.
+                  </p>
+                )}
+                <label className="mt-2.5 flex items-center gap-2 text-[11px] text-gray-600 dark:text-gray-400">
+                  <input type="checkbox" className="accent-[var(--cor-primaria)]"
+                    checked={entrada.lembrarConversao} onChange={(e) => setEntrada({ ...entrada, lembrarConversao: e.target.checked })} />
+                  Guardar essa conversão no cadastro de {entrada.insumo.nome}
+                </label>
+              </div>
+            )}
             <label className="block mb-3">
               <span className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Custo da compra R$ (opcional)</span>
               <input className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" type="number"
                 value={entrada.custo} onChange={(e) => setEntrada({ ...entrada, custo: e.target.value })} />
+              {Number(entrada.custo) > 0 && qtdEntradaBase > 0 && (
+                <span className="mt-1.5 block text-[11px] text-gray-500 dark:text-gray-400">
+                  Sai a {fmt(Number(entrada.custo) / qtdEntradaBase)} por {entrada.insumo.unidade_medida} nesta compra.
+                </span>
+              )}
             </label>
             <div className="grid grid-cols-2 gap-3 mb-3">
                <label className="block">
@@ -724,7 +861,8 @@ export default function Estoque() {
                    value={entrada.validade || ''} onChange={(e) => setEntrada({ ...entrada, validade: e.target.value })} />
                </label>
             </div>
-            <button onClick={registrarEntrada} className="mt-5 w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-lg">
+            <button onClick={registrarEntrada} disabled={!(qtdEntradaBase > 0)}
+              className="mt-5 w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
               Registrar Estoque
             </button>
           </div>

@@ -195,6 +195,18 @@ export interface InsumoRendimentoJSON {
     para_qtd: number;
     para_unidade: string;
   }[];
+  /**
+   * Unidades de entrada fora da cadeia de compra, aprendidas quando o lojista
+   * recebe o insumo numa medida que ele não cadastrou (ex.: cabeça de alho num
+   * item comprado em kg). Ficam à parte de `regras` de propósito: a cadeia é
+   * linear e alimenta o custeio; estas são atalhos laterais só de entrada.
+   */
+  equivalencias?: {
+    unidade: string;
+    /** Quantas `rende_unidade` valem 1 `unidade`. */
+    rende_qtd: number;
+    rende_unidade: string;
+  }[];
 }
 
 export interface FichaTecnica {
