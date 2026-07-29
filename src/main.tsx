@@ -22,6 +22,7 @@ const Privacidade     = lazy(() => import('./pages/legal/Privacidade'));
 const Sobre          = lazy(() => import('./pages/legal/Sobre'));
 const Contato         = lazy(() => import('./pages/legal/Contato'));
 const DescadastroEmail = lazy(() => import('./pages/legal/DescadastroEmail'));
+const RedefinirSenha    = lazy(() => import('./pages/RedefinirSenha'));
 const Videos           = lazy(() => import('./pages/Videos'));
 const NicheLandingPage = lazy(() => import('./pages/landing/NicheLandingPage'));
 const EstoquePage      = lazy(() => import('./pages/landing/EstoquePage'));
@@ -157,6 +158,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/termos"        element={<Termos />} />
               <Route path="/privacidade"   element={<Privacidade />} />
               <Route path="/email/descadastro" element={<DescadastroEmail />} />
+              <Route path="/redefinir-senha" element={<RedefinirSenha />} />
               <Route path="/lojas"         element={<Lojas />} />
               <Route path="/cadastre-se"   element={<CadastreSuaLoja />} />
               <Route path="/videos"        element={<Videos />} />
