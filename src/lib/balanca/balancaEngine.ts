@@ -61,8 +61,8 @@ export class BalancaEngine {
     this.conectando = true;
 
     try {
-      if (this.config.modo_conexao === 'EMULADOR') {
-        this.iniciarEmulador();
+      if (this.config.modo_conexao === 'MANUAL') {
+        // Modo manual não requer conexão de hardware real
         return true;
       }
 
@@ -233,29 +233,26 @@ export class BalancaEngine {
   /**
    * Emulador interno para simulação e validação em ambiente de desenvolvimento
    */
-  public iniciarEmulador(pesoSimuladoKg: number = 0.450) {
+  public iniciarEmulador(pesoSimuladoKg: number = 0.000) {
     if (this.emuladorInterval) clearInterval(this.emuladorInterval);
 
     const taraKg = (this.config.tara_padrao_g || 200) / 1000;
 
-    this.emuladorInterval = setInterval(() => {
-      // Simula pequena variação na balança
-      const oscilacao = (Math.random() * 0.004 - 0.002);
-      const pesoBrutoKg = Math.max(0, pesoSimuladoKg + oscilacao);
-      this.notificar({
-        pesoBrutoKg: Number(pesoBrutoKg.toFixed(3)),
-        taraKg,
-        pesoLiquidoKg: Number(Math.max(0, pesoBrutoKg - taraKg).toFixed(3)),
-        estavel: true,
-        timestamp: new Date(),
-        rawFrame: `[EMULADOR] BRUTO:${pesoBrutoKg.toFixed(3)}kg TARA:${taraKg.toFixed(3)}kg`,
-      });
-    }, 1000);
+    // Emulador 100% limpo, sem oscilação chata (pedido do usuário)
+    const pesoBrutoKg = Math.max(0, pesoSimuladoKg);
+    const pesoLiquidoKg = Number(Math.max(0, pesoBrutoKg - taraKg).toFixed(3));
+
+    this.notificar({
+      pesoBrutoKg: Number(pesoBrutoKg.toFixed(3)),
+      taraKg,
+      pesoLiquidoKg,
+      estavel: true,
+      timestamp: new Date(),
+      rawFrame: `[EMULADOR_LIMPO] BRUTO:${pesoBrutoKg.toFixed(3)}kg TARA:${taraKg.toFixed(3)}kg`,
+    });
   }
 
   public simularPeso(pesoKg: number) {
-    if (this.config.modo_conexao === 'EMULADOR') {
-      this.iniciarEmulador(pesoKg);
-    }
+    this.iniciarEmulador(pesoKg);
   }
 }

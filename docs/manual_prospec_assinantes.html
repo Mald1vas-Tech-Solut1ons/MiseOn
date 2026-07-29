@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playbook Oficial - Tração Miseon SaaS</title>
+    <style>
+        :root {
+            --brand-dark: #111827;
+            --brand-red: #b91c1c;
+            --brand-gray: #f3f4f6;
+            --text-main: #374151;
+            --text-light: #6b7280;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #e5e7eb;
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.7;
+        }
+        .page {
+            max-width: 850px;
+            margin: 0 auto 40px auto;
+            background: #ffffff;
+            padding: 60px 80px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-top: 8px solid var(--brand-red);
+        }
+        .cover {
+            text-align: center;
+            padding: 100px 0;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 50px;
+        }
+        .cover h1 {
+            font-size: 3rem;
+            color: var(--brand-dark);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        .cover h2 {
+            font-size: 1.2rem;
+            color: var(--brand-red);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        h2.section-title {
+            font-size: 1.8rem;
+            color: var(--brand-dark);
+            border-bottom: 3px solid var(--brand-dark);
+            padding-bottom: 10px;
+            margin: 50px 0 30px 0;
+        }
+        h3 {
+            font-size: 1.3rem;
+            color: var(--brand-red);
+            margin: 30px 0 15px 0;
+        }
+        p, li {
+            font-size: 1.05rem;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-bottom: 25px;
+            padding-left: 25px;
+        }
+        .math-block {
+            background-color: var(--brand-dark);
+            color: #10b981;
+            padding: 25px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            margin: 30px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .script-block {
+            background-color: var(--brand-gray);
+            border-left: 5px solid var(--brand-red);
+            padding: 20px 25px;
+            margin: 25px 0;
+            font-style: italic;
+            color: var(--brand-dark);
+        }
+        .script-title {
+            font-weight: bold;
+            font-style: normal;
+            display: block;
+            margin-bottom: 10px;
+            color: var(--brand-red);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        .highlight {
+            background-color: #fef2f2;
+            padding: 15px;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--brand-dark);
+            color: #fff;
+        }
+        @media (max-width: 768px) {
+            .page { padding: 40px 25px; }
+            .cover h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page">
+        <!-- CAPA -->
+        <div class="cover">
+            <h2>Manual de Operações e Vendas</h2>
+            <h1>Miseon SaaS</h1>
+            <p>Estratégia Inside Sales: Conquistando os 10 Primeiros Assinantes via Prospecção 100% Digital e Assíncrona.</p>
+        </div>
+
+        <!-- MÓDULO 1 -->
+        <h2 class="section-title">Módulo 1: O Motor Financeiro (Regras de Negócio)</h2>
+        <p>A força do seu SaaS não está na interface, está na precisão matemática que o dono do restaurante não consegue fazer de cabeça. Para a demonstração chocar o cliente, o Miseon deve processar três pilares inflexíveis de custos operacionais.</p>
+
+        <h3>1.1 Fator de Correção (FC) e Rendimento</h3>
+        <p>Um erro primário das cozinhas é não calcular a perda. Se o restaurante compra 1kg de Bacon a R$ 40,00, mas perde 20% ao fritar (exsudação de gordura), o custo real daquele bacon na ficha técnica não é R$ 40,00, é R$ 50,00. O Miseon aplica essa correção antes de qualquer outro cálculo.</p>
+
+        <h3>1.2 O Custo Fixo Rateado (Overhead)</h3>
+        <p>A inteligência do dashboard está em provar que a embalagem e a operação custam caro. O sistema embute:</p>
+        <ul>
+            <li><strong>Embalagem:</strong> Sacola, caixa térmica, fita lacre, sachês (Média de R$ 2,50 a R$ 4,00 por pedido).</li>
+            <li><strong>Minuto de Produção:</strong> Soma-se Aluguel, Água, Luz, Gás e Folha de Pagamento. Divide-se pelos dias trabalhados e horas ativas. Se o lanche demora 8 minutos na chapa, esse tempo tem um valor em Reais que deve ser somado ao custo do lanche.</li>
+        </ul>
+
+        <h3>1.3 A Equação de Margem Real do Miseon</h3>
+        <div class="math-block">
+            CUSTO_TOTAL = (Insumos * Fator_Correção) + Embalagem + Custo_Minuto<br><br>
+            LUCRO_BRUTO = Preço_App - CUSTO_TOTAL<br><br>
+            LUCRO_LÍQUIDO = LUCRO_BRUTO - (Preço_App * Taxa_iFood_27%)<br><br>
+            MARGEM_% = (LUCRO_LÍQUIDO / Preço_App) * 100
+        </div>
+        <p>O objetivo é mostrar na tela do prospect que, na maioria das vezes, a <strong>MARGEM_%</strong> dele está beirando os 10% ou operando no vermelho sem que ele perceba.</p>
+
+
+        <!-- MÓDULO 2 -->
+        <h2 class="section-title">Módulo 2: Mapeamento de Território Digital</h2>
+        <p>Operando de casa, sua ferramenta principal é o cruzamento de plataformas. O iFood é a vitrine, o Instagram é a ponte e o WhatsApp é a mesa de fechamento.</p>
+
+        <h3>2.1 O Filtro de Leads (Onde atacar)</h3>
+        <p>Em Guarulhos e região, busque focar em dois nichos específicos que sofrem imensamente com flutuação de custo de insumo:</p>
+        <ul>
+            <li><strong>Hamburguerias Artesanais:</strong> Blend de carne e queijo variam de preço semanalmente.</li>
+            <li><strong>Dark Kitchens (Diversos):</strong> Dependem 100% de embalagem e sofrem impacto máximo da taxa de repasse da plataforma de delivery.</li>
+        </ul>
+
+        <h3>2.2 Rotina de Scraping (A Mineração)</h3>
+        <ol>
+            <li>Abra o iFood no navegador do PC. Filtre a sua região.</li>
+            <li>Selecione lojas abertas. Anote o <strong>Nome do Restaurante</strong> e o <strong>Lanche/Combo mais vendido</strong> com o preço exato.</li>
+            <li>Vá para o Instagram. Digite o nome da loja. Valide se a operação parece organizada (fotos boas, postagens recentes).</li>
+            <li>Clique no link da Bio (Linktree ou direto) e puxe o WhatsApp comercial.</li>
+            <li>Alimente sua planilha: <br><code>Restaurante | Prato | Preço iFood | WhatsApp | Status</code>.</li>
+            <li><strong>Meta diária:</strong> Levantar 15 leads qualificados.</li>
+        </ol>
+
+        <!-- MÓDULO 3 -->
+        <h2 class="section-title">Módulo 3: A Abordagem "Print de Choque" (Inside Sales)</h2>
+        <p>Esqueça edição de vídeo. Você vai usar apenas uma imagem matadora gerada dentro do seu próprio sistema e um texto focado na dor. A cadência acontece toda no WhatsApp.</p>
+
+        <div class="highlight">
+            <strong>O Setup do Print:</strong> Abra o Miseon. Cadastre uma ficha fictícia de "Burger Duplo". Coloque um custo médio de insumos (R$ 14,00). Adicione a embalagem (R$ 3,00) e a taxa de 27% do delivery. Coloque o preço de venda a R$ 38,00. O sistema vai mostrar uma margem líquida baixíssima (ex: R$ 6,00 de lucro). <strong>Tire um Print Screen (foto da tela) dessa matemática rodando. Você usará essa foto para todos.</strong>
+        </div>
+
+        <h3>3.1 O Script de Primeiro Contato</h3>
+        <div class="script-block">
+            <span class="script-title">Texto + Envio da Imagem (Print)</span>
+            "Fala [Nome do Restaurante], tudo bem? Sou o Rafael. Trabalho com inteligência de dados e otimização financeira para cozinhas aqui da região.
+            <br><br>
+            Dá uma olhada nessa imagem acima. Joguei a estrutura de custos de um combo médio de hambúrguer de R$ 38,00 no meu painel (Miseon), aplicando a inflação atual da carne e as taxas de 27% do iFood. O lucro líquido real que sobra no bolso do dono está sendo engolido e muitos nem percebem porque não rateiam a embalagem.
+            <br><br>
+            Com o aumento dos insumos, você consegue puxar esse lucro líquido exato do seu [Nome do Prato que você viu no iFood] em tempo real pelo sistema de vocês, ou o cálculo ainda é manual?"
+        </div>
+
+        <h3>3.2 Como Lidar com as Respostas (Matriz de Contorno)</h3>
+        <table>
+            <tr>
+                <th>Se o cliente responder:</th>
+                <th>Sua resposta deve ser:</th>
+            </tr>
+            <tr>
+                <td><em>"Nosso sistema não faz isso / Fazemos no papel."</em></td>
+                <td>"Imaginei. É o ralo financeiro de 90% das dark kitchens. O Miseon foi criado pra estancar isso. Posso pegar as variáveis desse seu lanche principal e rodar no meu sistema de graça hoje à tarde? Te mando o print real da sua operação. Não custa nada."</td>
+            </tr>
+            <tr>
+                <td><em>"Não tenho interesse / Tá tranquilo."</em></td>
+                <td>"Perfeito. Se em algum momento a variação do queijo ou da carne começar a comer a sua margem e a ficha técnica manual ficar inviável, salva meu contato. Um abraço e boas vendas!"</td>
+            </tr>
+            <tr>
+                <td><em>(Visualiza e ignora)</em></td>
+                <td>Mandar no dia seguinte: "[Nome], sei que a operação é corrida. Se quiser que eu rode aquela auditoria de custos na sua receita principal, me dá um toque. Abraço." (Depois disso, descarte o lead e avance).</td>
+            </tr>
+        </table>
+
+
+        <!-- MÓDULO 4 -->
+        <h2 class="section-title">Módulo 4: Fechamento e Lock-in (Concierge Onboarding)</h2>
+        <p>Se o cliente viu o valor do print e quer a ferramenta, ele vai esbarrar na barreira operacional: "Quem vai cadastrar minhas notas fiscais nisso?". Aqui entra a sua tacada de mestre para garantir os primeiros assinantes.</p>
+
+        <h3>4.1 A Oferta Fundador (Fechamento)</h3>
+        <div class="script-block">
+            <span class="script-title">Áudio ou Ligação Curta</span>
+            "Para não tomar seu tempo: o Miseon custa R$ 147,00 por mês. Mas para os 10 primeiros parceiros da plataforma, eu elimino a barreira do trabalho duro. 
+            <br><br>
+            Se fecharmos a assinatura, você não vai digitar uma linha. Você me manda o seu cardápio em PDF e algumas notas fiscais de base. Eu mesmo entro no sistema, crio as suas categorias e estruturo as suas 15 receitas principais. Eu te entrego o painel amanhã com os seus dados reais pulsando na tela, já acusando onde você precisa aumentar R$ 1,00 ou R$ 2,00 pra salvar a margem."
+        </div>
+
+        <h3>4.2 Por que essa estratégia é infalível para SaaS inicial:</h3>
+        <ul>
+            <li><strong>Custo de Troca Elevado (Lock-in):</strong> Quando você faz o cadastro, o Miseon se torna a única fonte da verdade daquela cozinha. O histórico de preços, o fator de correção exato da carne dele e o lucro estão todos lá. Ele não vai cancelar a sua assinatura de R$ 147,00 para ter que refazer todo esse trabalho de controle financeiro do zero.</li>
+            <li><strong>Geração de Case:</strong> Os dados reais deste cliente servirão de métrica para você comprovar a economia gerada e vender mais facilmente para o 11º cliente em diante.</li>
+        </ul>
+
+        <hr style="border-top: 2px dashed #d1d5db; margin: 50px 0;">
+        <p style="text-align: center; color: var(--text-light); font-size: 0.9rem;">
+            <strong>Métrica de Execução:</strong> O foco nas próximas 4 semanas é rodar o ciclo <em>"Extrair 15 contatos > Mandar o Print > Oferecer o Setup Gratuito"</em> diariamente.
+        </p>
+
+    </div>
+</body>
+</html>

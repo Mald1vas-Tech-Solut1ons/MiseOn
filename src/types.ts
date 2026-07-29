@@ -559,7 +559,7 @@ export interface Comanda {
 // ── Balança & PWA Garçom ──────────────────────────────────────
 
 export type ProtocoloBalanca = 'TOLEDO_PRIX3' | 'TOLEDO_PRIX4' | 'FILIZOLA_CS15' | 'URANO' | 'CUSTOM_SERIAL' | 'NETWORK_TCP' | 'EMULADOR';
-export type ModoConexaoBalanca = 'WEB_SERIAL' | 'NETWORK_WEBHOOK' | 'EMULADOR';
+export type ModoConexaoBalanca = 'WEB_SERIAL' | 'NETWORK_WEBHOOK' | 'MANUAL';
 
 export interface BalancaConfiguracao {
   id: string;
