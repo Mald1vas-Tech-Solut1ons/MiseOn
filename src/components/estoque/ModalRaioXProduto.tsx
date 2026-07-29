@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { fmt, Insumo } from '../../types';
-import { X, TrendingUp, TrendingDown, ListOrdered, AlertTriangle, Info } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, ListOrdered, AlertTriangle, Info, Truck, Award } from 'lucide-react';
 import MiseOnLoader from '../MiseOnLoader';
+import { HistoricoPreco, historicoPrecos } from '../../lib/compras';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 export default function ModalRaioXProduto({ insumo, onClose }: Props) {
   const [lotes, setLotes] = useState<any[]>([]);
   const [movimentacoes, setMovimentacoes] = useState<any[]>([]);
+  const [compras, setCompras] = useState<HistoricoPreco[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
     const carregar = async () => {
       setLoading(true);
 
-      const [resLotes, resMovs] = await Promise.all([
+      const [resLotes, resMovs, resCompras] = await Promise.all([
         supabase.from('lotes_estoque')
           .select('*')
           .eq('insumo_id', insumo.id)
@@ -30,12 +32,14 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
           .select('*')
           .eq('insumo_id', insumo.id)
           .order('criado_em', { ascending: false })
-          .limit(100)
+          .limit(100),
+        historicoPrecos(insumo.id).catch(() => [] as HistoricoPreco[]),
       ]);
 
       if (!atual) return;
       setLotes(resLotes.data || []);
       setMovimentacoes(resMovs.data || []);
+      setCompras(resCompras);
       setLoading(false);
     };
 
@@ -59,6 +63,34 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
       };
     }).filter(e => !e.isZero); // Filtra os de custo zerado do grafico para não distorcer a linha
   }, [movimentacoes]);
+
+  // Onde comprar melhor: agrupa as compras por fornecedor + marca e normaliza
+  // pelo custo da unidade-base. Comparar "R$ 30 a caixa" com "R$ 4 o quilo" só
+  // faz sentido depois dessa normalização.
+  const origens = useMemo(() => {
+    const mapa = new Map<string, {
+      fornecedor: string; marca: string | null; compras: number;
+      custoMedio: number; ultimo: number; ultimaData: string;
+    }>();
+    for (const c of compras) {
+      const chave = `${c.fornecedor_nome ?? '—'}|${c.marca ?? ''}`;
+      const atual = mapa.get(chave);
+      const custo = Number(c.custo_unitario_base);
+      if (!atual) {
+        mapa.set(chave, {
+          fornecedor: c.fornecedor_nome ?? 'Sem fornecedor',
+          marca: c.marca ?? null,
+          compras: 1, custoMedio: custo, ultimo: custo, ultimaData: c.recebido_em,
+        });
+      } else {
+        atual.custoMedio = (atual.custoMedio * atual.compras + custo) / (atual.compras + 1);
+        atual.compras += 1;
+        // A lista vem ordenada do mais recente para o mais antigo.
+        if (c.recebido_em > atual.ultimaData) { atual.ultimo = custo; atual.ultimaData = c.recebido_em; }
+      }
+    }
+    return [...mapa.values()].sort((a, b) => a.custoMedio - b.custoMedio);
+  }, [compras]);
 
   const ultimoCustoValido = chartData.length > 0 ? chartData[chartData.length - 1].custoUnitario : 0;
   const penultimoCustoValido = chartData.length > 1 ? chartData[chartData.length - 2].custoUnitario : 0;
@@ -142,6 +174,49 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                   )}
                 </div>
               </div>
+
+              {/* De quem comprar: o histórico virando decisão */}
+              {origens.length > 0 && (
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+                  <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-gray-100">
+                    <Truck size={16} className="text-emerald-500" /> Onde você compra melhor
+                  </h3>
+                  <div className="space-y-2">
+                    {origens.map((o, idx) => {
+                      const maisCaro = origens[origens.length - 1].custoMedio;
+                      const economia = maisCaro > 0 ? (1 - o.custoMedio / maisCaro) * 100 : 0;
+                      return (
+                        <div key={`${o.fornecedor}-${o.marca}`}
+                          className={`flex items-center justify-between gap-3 rounded-xl p-3 ${
+                            idx === 0 && origens.length > 1
+                              ? 'border border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-900/10'
+                              : 'bg-gray-50 dark:bg-gray-800/50'}`}>
+                          <div className="min-w-0">
+                            <p className="flex items-center gap-1.5 text-sm font-bold text-gray-800 dark:text-gray-200">
+                              {idx === 0 && origens.length > 1 && <Award size={13} className="shrink-0 text-emerald-500" />}
+                              {o.fornecedor}
+                              {o.marca && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gray-600 dark:bg-gray-700 dark:text-gray-300">{o.marca}</span>}
+                            </p>
+                            <p className="mt-0.5 text-[10px] text-gray-400">
+                              {o.compras} {o.compras === 1 ? 'compra' : 'compras'} · última em{' '}
+                              {new Date(o.ultimaData).toLocaleDateString('pt-BR')} a {fmt(o.ultimo)}
+                            </p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="text-sm font-black text-gray-900 dark:text-gray-100">{fmt(o.custoMedio)}</p>
+                            <p className="text-[10px] text-gray-400">média / {insumo.unidade_medida}</p>
+                            {idx === 0 && economia > 1 && (
+                              <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                −{economia.toFixed(0)}% vs o mais caro
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Gráfico de Custos */}
               <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">

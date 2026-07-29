@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale } from 'lucide-react';
+import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale, ClipboardCheck, Scissors, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, fmt, InsumoRendimentoJSON } from '../../types';
 import { UNIDADES, destinosPermitidos, validarConversao, opcoesDeEntrada } from '../../lib/unidades';
@@ -11,6 +11,8 @@ import EstoquePreparos from './EstoquePreparos';
 import { SimuladorCusto } from '../../components/custeio';
 import type { ItemEstoque, FatorItem } from '../../lib/custeio';
 import { ModalReposicaoBuffet } from '../../components/estoque/ModalReposicaoBuffet';
+import ModalInventario from '../../components/estoque/ModalInventario';
+import ModalTransformar from '../../components/estoque/ModalTransformar';
 
 // three.js pesa ~600 KB: só entra no bundle de quem abrir a aba 3D.
 const EstoqueCusto3D = lazy(() => import('../../lib/estoque3d/EstoqueCusto3D'));
@@ -31,6 +33,12 @@ export default function Estoque() {
 
   // Buffet / Quilo
   const [modalBuffetAberto, setModalBuffetAberto] = useState(false);
+
+  // Inventário e transformação (monta/desmonta). `undefined` = modal fechado;
+  // `null` = aberto sem insumo pré-selecionado.
+  const [inventarioAberto, setInventarioAberto] = useState(false);
+  const [transformando, setTransformando] = useState<Insumo | null | undefined>(undefined);
+  const [avisoEstoque, setAvisoEstoque] = useState<string | null>(null);
 
   // States para Novo Insumo Dinâmico
   const [nome, setNome] = useState('');
@@ -127,11 +135,12 @@ export default function Estoque() {
 
   // Unidades aceitas na entrada do insumo aberto no modal, com o fator para a
   // unidade-base do saldo. Recalcula só quando troca o insumo.
+  const insumoEntrada = entrada?.insumo;
   const opcoesEntrada = useMemo(
-    () => entrada
-      ? opcoesDeEntrada(entrada.insumo.unidade_medida, entrada.insumo.detalhes_rendimento?.regras, entrada.insumo.detalhes_rendimento?.equivalencias)
+    () => insumoEntrada
+      ? opcoesDeEntrada(insumoEntrada.unidade_medida, insumoEntrada.detalhes_rendimento?.regras, insumoEntrada.detalhes_rendimento?.equivalencias)
       : [],
-    [entrada?.insumo],
+    [insumoEntrada],
   );
   const opcaoEntrada = opcoesEntrada.find(o => o.codigo === entrada?.unidade);
   // Unidade fora do cadastro (chegou cabeça de alho num item comprado em kg):
@@ -412,6 +421,18 @@ export default function Estoque() {
                  <Scale size={15} /> Reposição de Cubas (Buffet)
                </button>
              )}
+             {tab === 'insumos' && (
+               <>
+                 <button onClick={() => setInventarioAberto(true)}
+                   className="flex items-center gap-1.5 rounded-xl border border-purple-200 px-3.5 py-1.5 text-xs font-bold text-purple-600 transition-colors hover:bg-purple-50 dark:border-purple-900/50 dark:text-purple-400 dark:hover:bg-purple-900/20">
+                   <ClipboardCheck size={15} /> Inventário
+                 </button>
+                 <button onClick={() => setTransformando(null)}
+                   className="flex items-center gap-1.5 rounded-xl border border-orange-200 px-3.5 py-1.5 text-xs font-bold text-orange-600 transition-colors hover:bg-orange-50 dark:border-orange-900/50 dark:text-orange-400 dark:hover:bg-orange-900/20">
+                   <Scissors size={15} /> Monta / Desmonta
+                 </button>
+               </>
+             )}
          </div>
          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shadow-inner">
            <button data-tour="tour-estoque-aba-insumos" onClick={() => setTab('insumos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'insumos' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Matérias-Primas</button>
@@ -433,6 +454,15 @@ export default function Estoque() {
         <EstoquePreparos lojaId={lojaId} insumosTotais={[...insumos, ...inativos]} onUpdate={carregar} isBuffet={isBuffet} />
       ) : (
         <>
+          {avisoEstoque && (
+            <div className="mb-4 flex items-start justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/40 dark:bg-emerald-900/10">
+              <p className="flex items-start gap-2 text-sm font-medium text-emerald-800 dark:text-emerald-400">
+                <CheckCircle2 size={16} className="mt-0.5 shrink-0" /> {avisoEstoque}
+              </p>
+              <button onClick={() => setAvisoEstoque(null)} className="shrink-0 text-xs font-bold text-emerald-700 hover:underline dark:text-emerald-500">Fechar</button>
+            </div>
+          )}
+
           {criticos.length > 0 && (
         <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:bg-amber-900/20 dark:border-amber-900/50 shadow-sm flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div>
@@ -741,6 +771,9 @@ export default function Estoque() {
                 <button onClick={() => setRaioXInsumo(i)} className="rounded-lg p-2 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" title="Raio-X (Análise de Lotes e Gráficos)">
                    <BarChart3 size={16} />
                 </button>
+                <button onClick={() => setTransformando(i)} className="rounded-lg p-2 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-colors" title="Desmontar em outros insumos (ex: peça em fatias)">
+                   <Scissors size={16} />
+                </button>
                 <button onClick={() => abrirEntrada(i)}
                   className="rounded-lg border px-3 py-1.5 text-xs font-bold text-green-700 dark:text-green-400 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">+ Entrada</button>
                 <div className="flex items-center border-l dark:border-gray-700 pl-2 ml-1 space-x-1">
@@ -886,6 +919,24 @@ export default function Estoque() {
         <ModalRaioXProduto
           insumo={raioXInsumo}
           onClose={() => setRaioXInsumo(null)}
+        />
+      )}
+
+      {inventarioAberto && (
+        <ModalInventario
+          insumos={insumos}
+          onFechar={() => setInventarioAberto(false)}
+          onSucesso={(msg) => { setInventarioAberto(false); setAvisoEstoque(msg); carregar(); }}
+        />
+      )}
+
+      {transformando !== undefined && (
+        <ModalTransformar
+          lojaId={lojaId}
+          insumos={insumos.filter(i => !i.is_preparo)}
+          inicial={transformando}
+          onFechar={() => setTransformando(undefined)}
+          onSucesso={(msg) => { setTransformando(undefined); setAvisoEstoque(msg); carregar(); }}
         />
       )}
         </>

@@ -73,6 +73,10 @@ export const UNIDADES: readonly Unidade[] = [
   { codigo: 'cabeça', rotulo: 'Cabeça (ex: alho, cebola)', grandeza: 'semantico', fatorBase: null },
   { codigo: 'folha', rotulo: 'Folha (ex: alface, louro)', grandeza: 'semantico', fatorBase: null },
   { codigo: 'rodela', rotulo: 'Rodela (ex: tomate, cebola)', grandeza: 'semantico', fatorBase: null },
+  { codigo: 'posta', rotulo: 'Posta (ex: peixe)', grandeza: 'semantico', fatorBase: null },
+  { codigo: 'filé', rotulo: 'Filé', grandeza: 'semantico', fatorBase: null },
+  { codigo: 'ramo', rotulo: 'Ramo (ex: salsa, alecrim)', grandeza: 'semantico', fatorBase: null },
+  { codigo: 'cubo', rotulo: 'Cubo / Dado', grandeza: 'semantico', fatorBase: null },
 
   // ── Agrupadores abstratos — conteúdo declarado pelo lojista ───────────
   { codigo: 'cx', rotulo: 'Caixa (cx)', grandeza: 'agrupador', fatorBase: null },
@@ -80,6 +84,14 @@ export const UNIDADES: readonly Unidade[] = [
   { codigo: 'fardo', rotulo: 'Fardo', grandeza: 'agrupador', fatorBase: null },
   { codigo: 'lata', rotulo: 'Lata', grandeza: 'agrupador', fatorBase: null },
   { codigo: 'gf', rotulo: 'Garrafa (gf)', grandeza: 'agrupador', fatorBase: null },
+  { codigo: 'dz', rotulo: 'Dúzia (dz)', grandeza: 'agrupador', fatorBase: null },
+  { codigo: 'bdj', rotulo: 'Bandeja', grandeza: 'agrupador', fatorBase: null },
+  { codigo: 'sc', rotulo: 'Saco / Saca', grandeza: 'agrupador', fatorBase: null },
+  { codigo: 'gl', rotulo: 'Galão', grandeza: 'agrupador', fatorBase: null },
+  { codigo: 'balde', rotulo: 'Balde', grandeza: 'agrupador', fatorBase: null },
+  { codigo: 'pote', rotulo: 'Pote / Vidro', grandeza: 'agrupador', fatorBase: null },
+  { codigo: 'engradado', rotulo: 'Engradado', grandeza: 'agrupador', fatorBase: null },
+  { codigo: 'bombona', rotulo: 'Bombona', grandeza: 'agrupador', fatorBase: null },
 ];
 
 const POR_CODIGO = new Map(UNIDADES.map((u) => [u.codigo, u]));
