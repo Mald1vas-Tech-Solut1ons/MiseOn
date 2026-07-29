@@ -57,7 +57,8 @@ export default function Compras() {
   // lojista precisa girar: "quero comprar para a semana" vira uma lista.
   const [diasAlvo, setDiasAlvo] = useState(7);
   const [selecao, setSelecao] = useState<Record<string, number>>({});
-  const [fornecedorPedido, setFornecedorPedido] = useState('');
+  const [selecaoUnidade, setSelecaoUnidade] = useState<Record<string, { codigo: string; fator: number }>>({});
+  const [fornecedorPedido, setFornecedorPedido] = useState('AUTO');
   const [filtroFornecedor, setFiltroFornecedor] = useState('');
 
   const [editandoFornecedor, setEditandoFornecedor] = useState<Fornecedor | null | undefined>(undefined);
@@ -103,6 +104,20 @@ export default function Compras() {
     [todasSugestoes, filtroFornecedor],
   );
 
+  const sugestoesPorCategoria = useMemo(() => {
+    const mapa = new Map<string, SugestaoCompra[]>();
+    for (const s of sugestoes) {
+      const cat = s.categoria || 'Geral';
+      if (!mapa.has(cat)) mapa.set(cat, []);
+      mapa.get(cat)!.push(s);
+    }
+    return Array.from(mapa.entries()).sort((a, b) => {
+      if (a[0] === 'Geral') return 1;
+      if (b[0] === 'Geral') return -1;
+      return a[0].localeCompare(b[0]);
+    });
+  }, [sugestoes]);
+
   // Toda sugestão nasce marcada com a quantidade sugerida — desmarcar é mais
   // rápido que marcar quando a lista é a operação inteira da semana.
   useEffect(() => {
@@ -111,35 +126,85 @@ export default function Compras() {
       for (const s of sugestoes) novo[s.insumo.id] = atual[s.insumo.id] ?? s.qtdSugerida;
       return novo;
     });
+    setSelecaoUnidade(atual => {
+      const novo: Record<string, { codigo: string; fator: number }> = {};
+      for (const s of sugestoes) novo[s.insumo.id] = atual[s.insumo.id] ?? { codigo: s.unidadeCompra, fator: s.fator };
+      return novo;
+    });
   }, [sugestoes]);
 
   const rupturas = sugestoes.filter(s => s.rupturaAntesDaEntrega);
   const marcados = sugestoes.filter(s => (selecao[s.insumo.id] ?? 0) > 0);
-  const totalEstimado = marcados.reduce((acc, s) => acc + (selecao[s.insumo.id] ?? 0) * s.precoUnitario, 0);
+  const totalEstimado = marcados.reduce((acc, s) => {
+    const unid = selecaoUnidade[s.insumo.id] ?? { codigo: s.unidadeCompra, fator: s.fator };
+    const precoCalc = (s.precoUnitario / s.fator) * unid.fator;
+    return acc + (selecao[s.insumo.id] ?? 0) * precoCalc;
+  }, 0);
   const valorEmRisco = validades.reduce((acc, v) => acc + Number(v.valor_em_risco), 0);
 
   const gerarPedido = async (receberAgora: boolean) => {
     if (marcados.length === 0 || salvando) return;
     setSalvando(true);
     try {
-      const compraId = await criarCompra(
-        lojaId,
-        marcados.map(s => ({
-          insumo_id: s.insumo.id,
-          qtd_pedida: selecao[s.insumo.id],
-          unidade_pedida: s.unidadeCompra,
-          fator_pedida: s.fator,
-          preco_unitario_previsto: s.precoUnitario || null,
-        })),
-        { fornecedor_id: fornecedorPedido || null, status: 'ENVIADO' },
-      );
+      const idsGerados: string[] = [];
+
+      if (fornecedorPedido === 'AUTO') {
+        const porFornecedor = new Map<string | null, typeof marcados>();
+        for (const s of marcados) {
+          const fid = s.fornecedorId ?? null;
+          if (!porFornecedor.has(fid)) porFornecedor.set(fid, []);
+          porFornecedor.get(fid)!.push(s);
+        }
+
+        for (const [fid, itensFornecedor] of porFornecedor.entries()) {
+          const compraId = await criarCompra(
+            lojaId,
+            itensFornecedor.map(s => {
+              const unid = selecaoUnidade[s.insumo.id] ?? { codigo: s.unidadeCompra, fator: s.fator };
+              const precoCalc = (s.precoUnitario / s.fator) * unid.fator;
+              return {
+                insumo_id: s.insumo.id,
+                qtd_pedida: selecao[s.insumo.id],
+                unidade_pedida: unid.codigo,
+                fator_pedida: unid.fator,
+                preco_unitario_previsto: precoCalc || null,
+              };
+            }),
+            { fornecedor_id: fid, status: 'ENVIADO' },
+          );
+          idsGerados.push(compraId);
+        }
+      } else {
+        const fid = fornecedorPedido === 'NENHUM' ? null : fornecedorPedido;
+        const compraId = await criarCompra(
+          lojaId,
+          marcados.map(s => {
+            const unid = selecaoUnidade[s.insumo.id] ?? { codigo: s.unidadeCompra, fator: s.fator };
+            const precoCalc = (s.precoUnitario / s.fator) * unid.fator;
+            return {
+              insumo_id: s.insumo.id,
+              qtd_pedida: selecao[s.insumo.id],
+              unidade_pedida: unid.codigo,
+              fator_pedida: unid.fator,
+              preco_unitario_previsto: precoCalc || null,
+            };
+          }),
+          { fornecedor_id: fid, status: 'ENVIADO' },
+        );
+        idsGerados.push(compraId);
+      }
+
       setSelecao({});
       await carregar();
-      if (receberAgora) {
-        const nova = (await listarCompras(lojaId)).find(c => c.id === compraId);
+      
+      if (receberAgora && idsGerados.length === 1) {
+        const nova = (await listarCompras(lojaId)).find(c => c.id === idsGerados[0]);
         if (nova) setRecebendo(nova);
       } else {
-        setAviso(`Pedido criado com ${marcados.length} ${marcados.length === 1 ? 'item' : 'itens'}. Confira quando a mercadoria chegar.`);
+        const msg = idsGerados.length > 1
+          ? `${idsGerados.length} pedidos gerados separando os itens por fornecedor.`
+          : `Pedido criado com ${marcados.length} ${marcados.length === 1 ? 'item' : 'itens'}. Confira quando a mercadoria chegar.`;
+        setAviso(msg);
         setAba('pedidos');
       }
     } catch (e) {
@@ -218,7 +283,7 @@ export default function Compras() {
               ))}
             </div>
             {fornecedores.length > 0 && (
-              <select value={filtroFornecedor} onChange={e => { setFiltroFornecedor(e.target.value); setFornecedorPedido(e.target.value); }}
+              <select value={filtroFornecedor} onChange={e => { setFiltroFornecedor(e.target.value); setFornecedorPedido(e.target.value || 'AUTO'); }}
                 className="rounded-lg border border-gray-300 p-2 text-xs font-bold focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100">
                 <option value="">Todos os fornecedores</option>
                 {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
@@ -253,83 +318,109 @@ export default function Compras() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm dark:divide-gray-800 dark:border-gray-800 dark:bg-gray-900">
-              {sugestoes.map(s => {
-                const qtd = selecao[s.insumo.id] ?? 0;
-                const ativo = qtd > 0;
-                return (
-                  <div key={s.insumo.id} className={`flex flex-col gap-4 p-4 transition-colors sm:flex-row sm:items-center sm:p-5 ${ativo ? '' : 'bg-gray-50/50 opacity-60 dark:bg-gray-950/50'}`}>
-                    <div className="flex flex-1 items-center gap-4">
-                      <button onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: ativo ? 0 : s.qtdSugerida }))}
-                        className={`shrink-0 transition-colors ${ativo ? 'text-[var(--cor-primaria)]' : 'text-gray-300 dark:text-gray-600'}`}>
-                        {ativo ? <CheckCircle2 size={26} /> : <Circle size={26} strokeWidth={1.5} />}
-                      </button>
-                      <div className="min-w-0">
-                        <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900 dark:text-gray-100">
-                          {s.insumo.nome}
-                          {s.urgencia === 'ZERADO' && (
-                            <span className="rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">acabou</span>
-                          )}
-                          {s.urgencia === 'CRITICO' && (
-                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">crítico</span>
-                          )}
-                          {s.rupturaAntesDaEntrega && (
-                            <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                              <AlertTriangle size={9} /> acaba antes de chegar
-                            </span>
-                          )}
-                        </p>
-                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                          Tem <b>{Number(s.insumo.quantidade_atual).toLocaleString('pt-BR')} {s.insumo.unidade_medida}</b>
-                          {s.giro && s.giro.consumo_diario > 0 && (
-                            <> · sai <b>{s.giro.consumo_diario.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} {s.insumo.unidade_medida}/dia</b></>
-                          )}
-                        </p>
-                        <p className="mt-1 flex flex-wrap items-center gap-3 text-[10px] font-medium text-gray-400">
-                          {s.diasCobertura != null ? (
-                            <span className={`flex items-center gap-1 ${s.diasCobertura <= 2 ? 'text-red-500' : s.diasCobertura <= 5 ? 'text-amber-500' : ''}`}>
-                              <Clock size={10} /> dura {s.diasCobertura.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} dias
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1"><Clock size={10} /> sem giro nos últimos 30 dias</span>
-                          )}
-                          {s.fornecedorNome && (
-                            <span className="flex items-center gap-1">
-                              <Truck size={10} /> {s.fornecedorNome}
-                              {s.prazoEntrega > 0 && ` · chega em ${s.prazoEntrega}d`}
-                            </span>
-                          )}
-                          {s.giro && s.giro.perda_30d > 0 && (
-                            <span className="flex items-center gap-1 text-red-400">
-                              <TrendingDown size={10} /> perdeu {s.giro.perda_30d.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} {s.insumo.unidade_medida} no mês
-                            </span>
-                          )}
-                          <span>1 {s.unidadeCompra} = {s.fator.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} {s.insumo.unidade_medida}</span>
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-6 sm:w-auto sm:justify-end">
-                      <div className="flex flex-col items-center">
-                        <div className="flex items-center rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
-                          <button onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: Math.max(0, qtd - 1) }))}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg font-black text-gray-500 transition-colors hover:bg-white dark:hover:bg-gray-700">-</button>
-                          <input type="number" min="0" value={qtd}
-                            onChange={e => setSelecao(v => ({ ...v, [s.insumo.id]: Math.max(0, e.target.valueAsNumber || 0) }))}
-                            className="w-14 bg-transparent text-center text-lg font-bold focus:outline-none dark:text-gray-100" />
-                          <button onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: qtd + 1 }))}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg font-black text-gray-500 transition-colors hover:bg-white dark:hover:bg-gray-700">+</button>
-                        </div>
-                        <p className="mt-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">{s.unidadeCompra}</p>
-                      </div>
-                      <div className="min-w-[80px] text-right">
-                        <p className="text-sm font-black text-gray-900 dark:text-gray-100">{fmt(qtd * s.precoUnitario)}</p>
-                        <p className="mt-1 text-[10px] text-gray-400">{fmt(s.precoUnitario)}/{s.unidadeCompra}</p>
-                      </div>
-                    </div>
+            <div className="space-y-6">
+              {sugestoesPorCategoria.map(([cat, lista]) => (
+                <div key={cat} className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+                  <div className="bg-gray-50/50 px-5 py-3 border-b border-gray-100 dark:bg-gray-950/50 dark:border-gray-800">
+                    <h4 className="font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider text-sm">{cat}</h4>
                   </div>
-                );
-              })}
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {lista.map(s => {
+                      const qtd = selecao[s.insumo.id] ?? 0;
+                      const ativo = qtd > 0;
+                      const unid = selecaoUnidade[s.insumo.id] ?? { codigo: s.unidadeCompra, fator: s.fator };
+                      const precoCalc = (s.precoUnitario / s.fator) * unid.fator;
+                      return (
+                        <div key={s.insumo.id} className={`flex flex-col gap-4 p-4 transition-colors sm:flex-row sm:items-center sm:p-5 ${ativo ? '' : 'bg-gray-50/50 opacity-60 dark:bg-gray-950/50'}`}>
+                          <div className="flex flex-1 items-center gap-4">
+                            <button onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: ativo ? 0 : s.qtdSugerida }))}
+                              className={`shrink-0 transition-colors ${ativo ? 'text-[var(--cor-primaria)]' : 'text-gray-300 dark:text-gray-600'}`}>
+                              {ativo ? <CheckCircle2 size={26} /> : <Circle size={26} strokeWidth={1.5} />}
+                            </button>
+                            <div className="min-w-0">
+                              <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900 dark:text-gray-100">
+                                {s.insumo.nome}
+                                {s.urgencia === 'ZERADO' && (
+                                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">acabou</span>
+                                )}
+                                {s.urgencia === 'CRITICO' && (
+                                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">crítico</span>
+                                )}
+                                {s.rupturaAntesDaEntrega && (
+                                  <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                                    <AlertTriangle size={9} /> acaba antes de chegar
+                                  </span>
+                                )}
+                              </p>
+                              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                Tem <b>{Number(s.insumo.quantidade_atual).toLocaleString('pt-BR')} {s.insumo.unidade_medida}</b>
+                                {s.giro && s.giro.consumo_diario > 0 && (
+                                  <> · sai <b>{s.giro.consumo_diario.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} {s.insumo.unidade_medida}/dia</b></>
+                                )}
+                              </p>
+                              <p className="mt-1 flex flex-wrap items-center gap-3 text-[10px] font-medium text-gray-400">
+                                {s.diasCobertura != null ? (
+                                  <span className={`flex items-center gap-1 ${s.diasCobertura <= 2 ? 'text-red-500' : s.diasCobertura <= 5 ? 'text-amber-500' : ''}`}>
+                                    <Clock size={10} /> dura {s.diasCobertura.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} dias
+                                  </span>
+                                ) : (
+                                  <span className="flex items-center gap-1"><Clock size={10} /> sem giro nos últimos 30 dias</span>
+                                )}
+                                {s.fornecedorNome && (
+                                  <span className="flex items-center gap-1">
+                                    <Truck size={10} /> {s.fornecedorNome}
+                                    {s.prazoEntrega > 0 && ` · chega em ${s.prazoEntrega}d`}
+                                  </span>
+                                )}
+                                {s.giro && s.giro.perda_30d > 0 && (
+                                  <span className="flex items-center gap-1 text-red-400">
+                                    <TrendingDown size={10} /> perdeu {s.giro.perda_30d.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} {s.insumo.unidade_medida} no mês
+                                  </span>
+                                )}
+                                <span>1 {unid.codigo} = {unid.fator.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} {s.insumo.unidade_medida}</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between gap-6 sm:w-auto sm:justify-end">
+                            <div className="flex flex-col items-center">
+                              <div className="flex items-center rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
+                                <button onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: Math.max(0, qtd - 1) }))}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg font-black text-gray-500 transition-colors hover:bg-white dark:hover:bg-gray-700">-</button>
+                                <input type="number" min="0" value={qtd}
+                                  onChange={e => setSelecao(v => ({ ...v, [s.insumo.id]: Math.max(0, e.target.valueAsNumber || 0) }))}
+                                  className="w-14 bg-transparent text-center text-lg font-bold focus:outline-none dark:text-gray-100" />
+                                <button onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: qtd + 1 }))}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg font-black text-gray-500 transition-colors hover:bg-white dark:hover:bg-gray-700">+</button>
+                              </div>
+                              <select
+                                value={unid.codigo}
+                                onChange={e => {
+                                  const op = s.opcoesCompra.find(o => o.codigo === e.target.value);
+                                  if (op) {
+                                    setSelecaoUnidade(v => ({ ...v, [s.insumo.id]: { codigo: op.codigo, fator: op.fatorParaBase } }));
+                                    const fatorConv = unid.fator / op.fatorParaBase;
+                                    setSelecao(v => ({ ...v, [s.insumo.id]: Math.max(1, Math.ceil((v[s.insumo.id] || 0) * fatorConv)) }));
+                                  }
+                                }}
+                                className="mt-1.5 bg-transparent text-[10px] font-bold uppercase tracking-wider text-gray-400 focus:outline-none cursor-pointer hover:text-gray-600 dark:hover:text-gray-200 text-center"
+                              >
+                                {s.opcoesCompra.map(o => (
+                                  <option key={o.codigo} value={o.codigo}>{o.codigo}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="min-w-[80px] text-right">
+                              <p className="text-sm font-black text-gray-900 dark:text-gray-100">{fmt(qtd * precoCalc)}</p>
+                              <p className="mt-1 text-[10px] text-gray-400">{fmt(precoCalc)}/{unid.codigo}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
@@ -348,8 +439,9 @@ export default function Compras() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <select value={fornecedorPedido} onChange={e => setFornecedorPedido(e.target.value)}
                     className="rounded-xl border border-gray-300 p-2.5 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100">
-                    <option value="">Sem fornecedor</option>
-                    {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
+                    <option value="AUTO">Separar por fornecedor</option>
+                    <option value="NENHUM">Forçar sem fornecedor</option>
+                    {fornecedores.map(f => <option key={f.id} value={f.id}>Forçar para: {f.nome}</option>)}
                   </select>
                   <button onClick={() => gerarPedido(false)} disabled={salvando}
                     className="flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">

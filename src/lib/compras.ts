@@ -15,7 +15,7 @@
  */
 
 import { supabase } from './supabase';
-import { opcoesDeEntrada } from './unidades';
+import { opcoesDeEntrada, OpcaoEntrada } from './unidades';
 import type { Insumo } from '../types';
 
 export type CompraStatus =
@@ -166,6 +166,8 @@ export interface SugestaoCompra {
   /** Quanto comprar, na unidade de compra (embalagens inteiras). */
   qtdSugerida: number;
   precoUnitario: number;
+  opcoesCompra: OpcaoEntrada[];
+  categoria: string;
   diasCobertura: number | null;
   urgencia: 'ZERADO' | 'CRITICO' | 'COBERTURA';
   /** Dias entre pedir e receber, segundo o cadastro do fornecedor. */
@@ -223,6 +225,12 @@ export function sugerirCompra(
 
   const diasCobertura = giro?.dias_cobertura ?? null;
 
+  // O custo base é o custo de 1 unidade do estoque (unidade_medida)
+  // Ex: compra-se pacote de 5kg por 100 reais -> base = 100 / 5 = 20 por kg
+  const qtdEmb = Number(insumo.qtd_embalagem) || 1;
+  const precoEmb = Number(insumo.preco_embalagem) || 0;
+  const custoBase = precoEmb / qtdEmb;
+
   return {
     insumo,
     giro,
@@ -230,7 +238,9 @@ export function sugerirCompra(
     fator,
     faltaBase,
     qtdSugerida,
-    precoUnitario: Number(insumo.preco_embalagem) || 0,
+    precoUnitario: custoBase * fator,
+    opcoesCompra: opcoes,
+    categoria: insumo.categoria_insumo || 'Geral',
     diasCobertura,
     urgencia: saldo <= 0 ? 'ZERADO' : saldo <= minimo ? 'CRITICO' : 'COBERTURA',
     prazoEntrega,
