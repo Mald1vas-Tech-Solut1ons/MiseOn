@@ -18,11 +18,11 @@ const insumo = (over: Partial<Insumo> = {}): Insumo => ({
   ...over,
 });
 
-const giro = (consumoDiario: number): InsumoGiro => ({
+const giro = (consumoDiario: number, extra: Partial<InsumoGiro> = {}): InsumoGiro => ({
   insumo_id: 'i1', loja_id: 'l1', nome: 'Alho', unidade_medida: 'dente',
   quantidade_atual: 0, estoque_minimo: 0, consumo_30d: consumoDiario * 30,
   consumo_diario: consumoDiario, dias_cobertura: null, perda_30d: 0,
-  custo_unitario: 0.66, capital_parado: 0,
+  custo_unitario: 0.66, capital_parado: 0, ...extra,
 });
 
 describe('sugestão de compra', () => {
@@ -78,5 +78,56 @@ describe('sugestão de compra', () => {
     const semana = sugerirCompra(insumo(), giro(10), 7)!;
     const mes = sugerirCompra(insumo(), giro(10), 30)!;
     expect(mes.qtdSugerida).toBeGreaterThan(semana.qtdSugerida);
+  });
+});
+
+describe('prazo de entrega no ponto de pedido', () => {
+  it('soma o prazo do fornecedor ao período coberto', () => {
+    // 10 dentes/dia, cobrir 7 dias, fornecedor entrega em 3 → 10 dias, não 7.
+    const s = sugerirCompra(insumo(), giro(10, { prazo_entrega_dias: 3 }), 7)!;
+    expect(s.faltaBase).toBe(100);
+    expect(s.prazoEntrega).toBe(3);
+  });
+
+  it('fornecedor mais lento faz comprar mais', () => {
+    const rapido = sugerirCompra(insumo(), giro(10, { prazo_entrega_dias: 1 }), 7)!;
+    const lento = sugerirCompra(insumo(), giro(10, { prazo_entrega_dias: 5 }), 7)!;
+    expect(lento.qtdSugerida).toBeGreaterThan(rapido.qtdSugerida);
+  });
+
+  it('avisa quando o estoque acaba antes da entrega chegar', () => {
+    // Dura 2 dias, fornecedor leva 4: vai faltar mesmo comprando agora.
+    const s = sugerirCompra(
+      insumo({ quantidade_atual: 20 }),
+      giro(10, { prazo_entrega_dias: 4, dias_cobertura: 2 }),
+      7,
+    )!;
+    expect(s.rupturaAntesDaEntrega).toBe(true);
+  });
+
+  it('não alarma quando o saldo atravessa o prazo de entrega', () => {
+    // Precisa repor (alvo 90 > saldo 50), mas o que tem dura 5 dias e a
+    // entrega leva 2: dá tempo de sobra.
+    const s = sugerirCompra(
+      insumo({ quantidade_atual: 50 }),
+      giro(10, { prazo_entrega_dias: 2, dias_cobertura: 5 }),
+      7,
+    )!;
+    expect(s.rupturaAntesDaEntrega).toBe(false);
+  });
+
+  it('sem prazo cadastrado, o comportamento é o de antes', () => {
+    const s = sugerirCompra(insumo(), giro(10), 7)!;
+    expect(s.prazoEntrega).toBe(0);
+    expect(s.faltaBase).toBe(70);
+    expect(s.rupturaAntesDaEntrega).toBe(false);
+  });
+
+  it('carrega o fornecedor para a tela poder agrupar o pedido', () => {
+    const s = sugerirCompra(insumo(), giro(10, {
+      fornecedor_padrao_id: 'f1', fornecedor_nome: 'Hortifruti do Zé', prazo_entrega_dias: 2,
+    }), 7)!;
+    expect(s.fornecedorId).toBe('f1');
+    expect(s.fornecedorNome).toBe('Hortifruti do Zé');
   });
 });

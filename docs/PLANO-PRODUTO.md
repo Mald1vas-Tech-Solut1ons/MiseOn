@@ -1,6 +1,6 @@
 # MiseOn — Plano de Produto e Implementação
-**Referência competitiva:** Anota AI Premium (R$ 99,99/mês) · **MiseOn:** R$ 150/mês
-**Data:** julho/2026 · Baseado em auditoria do código real (src/ + supabase/)
+**Referência competitiva:** Anota AI Premium (R$ 99,99/mês) · **MiseOn:** R$ 129,90/mês (mensal) ou R$ 99,90/mês (anual)
+**Última revisão:** julho/2026 · Baseado em auditoria do código real (src/ + supabase/)
 
 ---
 
@@ -9,95 +9,117 @@
 | Recurso do concorrente | Status MiseOn | Detalhe real do código |
 |---|---|---|
 | Cardápio Digital | ✅ **Melhor** | White-label por loja (tema, fontes, cores, banners, link próprio) — Anota AI não personaliza assim |
-| QR Code para mesas | ❌ Falta | Enum `SALAO` existe no schema, zero UI |
-| Pedidos em Balcão (PDV) | ❌ Falta | `origem: 'balcao'` previsto no schema, sem tela |
-| Frente de Caixa | ❌ Falta | Sem controle de caixa/sangria/fechamento |
-| App Garçom / Comanda Digital | ❌ Falta | Não existe papel "garçom" nem comanda |
-| Pagamento Online | ✅ **Melhor** | Pix + crédito com split direto na conta do lojista (Efí), antecipação configurável por loja. Anota AI intermedia; nós não seguramos dinheiro. ⚠️ cartão pendente de validação com venda real |
-| Cupons | ✅ Tem | Marketing → cupons (percentual/fixo, primeira compra, método exigido, validade, limite) |
-| Cashback | ❌ Falta | Nada no schema |
-| Recuperador de Vendas | ❌ Falta | Nada (nem registro de carrinho abandonado) |
-| Agendamento de Pedidos | 🟡 Meio pronto | `agendado_para` + `aceita_agendamento` no schema; checkout não expõe |
-| Cadastro de Entregadores | ✅ **Melhor** | App próprio do entregador com rota, live tracking no mapa para o cliente |
-| KDS (Display de cozinha) | 🟡 Parcial | PainelPedidos é cozinha+despacho juntos; KDSProducao é produção de preparos. Falta visão "só cozinha" agregada por item |
-| Gestor de Estoque | ✅ **Melhor** | Ficha técnica com baixa automática, preparos com validade/lote, rendimento multi-etapa |
-| Registro de Compras | ✅ Tem | Central de Compras com sugestão automática por estoque mínimo + entrada de estoque |
-| Gestão Financeira | ✅ Tem | Extrato ao vivo, KPIs, vendas por método, margem real por produto, custos fixos rateados |
-| NF Automatizada (IA) | ❌ Falta | Nada fiscal no sistema |
-| Integração com anúncios | ❌ Falta | Sem Pixel Meta / GA4 / catálogo |
+| QR Code para mesas | ✅ Tem | `Mesas.tsx` + QR por mesa, mapa de salão, salão 3D com assentos |
+| Pedidos em Balcão (PDV) | ✅ Tem | `PDV.tsx` touch-first, pedido nasce `origem='balcao'` e cai no fluxo normal |
+| Frente de Caixa | ✅ Tem | `caixa_turnos` + `caixa_movimentacoes`: abertura, sangria, reforço, conferência |
+| App Garçom / Comanda Digital | ✅ **Melhor** | `PainelGarcomMobile.tsx` com push + vibração háptica; divisão de conta por cadeira/igualitária/parcial |
+| Pagamento Online | ✅ **Melhor** | Pix + crédito com split direto na conta do lojista (Efí). ⚠️ cartão pendente de validação com venda real |
+| Cupons | ✅ Tem | Percentual/fixo, primeira compra, método exigido, validade, limite |
+| Cashback | ✅ Tem | `cashback_saldos` + `cashback_movimentos`, crédito no pedido finalizado, uso no checkout |
+| Recuperador de Vendas | ✅ Tem | `carrinhos_abandonados` + varredura automática e disparo de e-mail |
+| Agendamento de Pedidos | ✅ Tem | `agendado_para` exposto no `CheckoutDrawer` |
+| Cadastro de Entregadores | ✅ **Melhor** | App próprio do entregador com rota e live tracking no mapa |
+| KDS (Display de cozinha) | ✅ Tem | `KDS.tsx` (cozinha pura) + `KDSProducao.tsx` (produção de preparos) |
+| Gestor de Estoque | ✅ **Muito melhor** | Ficha técnica com baixa automática, PEPS auditável por lote, grafo 3D, preparos com validade, **monta/desmonta com rateio de custo** e **inventário multiunidade** |
+| Registro de Compras | ✅ **Muito melhor** | Fornecedores, pedido → recebimento conferido → nota, com marca/lote/validade/preço, entrega parcial e histórico de preço por fornecedor |
+| Gestão Financeira | ✅ **Melhor** | Ledger de dupla entrada por trigger, DRE mensal, extrato de caixa, margem real por produto |
+| NF Automatizada | ✅ Tem | `Fiscal.tsx` — NFC-e/NF-e 4.0 pronta, pendente upload do certificado A1 do lojista |
+| Integração com anúncios | ❌ **Falta** | Sem Pixel Meta / GA4 / catálogo — único gap de paridade que resta |
 | Suporte todos os dias | 🟡 Operacional | Central de Ajuda criada; suporte é processo, não código |
 
-**Leitura honesta:** somos mais fortes em *operação de cozinha/custo/entrega/pagamento* (nosso diferencial de venda) e mais fracos em *salão e balcão* (PDV, mesas, garçom) e em *growth do lojista* (cashback, recuperador, anúncios). Como cobramos R$ 150 contra R$ 99,99, a paridade de salão + os diferenciais precisam ficar explícitos na proposta de valor.
+**Leitura honesta:** a paridade está fechada, exceto Pixel/anúncios. O diferencial de venda migrou de "temos estoque" para **"somos o único que sabe quanto custa cada grama do seu prato, de quem você comprou e por quanto"**.
 
 ---
 
-## 2. Personas e suas dores (o plano é orientado por elas)
+## 2. Personas e suas dores
 
-- **Dono** — quer saber "quanto vendi, quanto sobrou, o que falta comprar" sem planilha. Hoje: Financeiro e Compras atendem, mas o admin abre direto em Pedidos — falta um **Dashboard inicial** com o dia em uma tela.
-- **Balcão/Caixa** — pessoa com fila na frente. Precisa lançar pedido em ≤ 30 segundos, receber em dinheiro/Pix/cartão, imprimir. Hoje **não tem tela para isso** (o gap mais grave).
-- **Cozinha** — precisa ver "o que fazer agora", agregado ("4 X-Burger, 2 sem cebola"), com tempo e atraso gritando em cor. Hoje o PainelPedidos serve, mas mistura despacho, impressão e cancelamento.
-- **Garçom** (restaurantes de salão) — abrir mesa, lançar item, fechar conta. Não existe.
-- **Entregador** — já bem servido (app próprio, rota, tracking).
-- **Cliente final** — já bem servido (cardápio bonito, acompanhamento em tempo real, PWA).
+- **Dono** — "quanto vendi, quanto sobrou, o que falta comprar". Atendido: Dashboard do dia, DRE, Central de Compras com sugestão por giro.
+- **Balcão/Caixa** — lançar pedido em ≤ 30s. Atendido pelo PDV + frente de caixa.
+- **Cozinha** — "o que fazer agora", agregado, com atraso em cor. Atendido pelo KDS.
+- **Garçom** — abrir mesa, lançar item, fechar conta. Atendido pelo painel mobile com push.
+- **Comprador/estoquista** — *(persona nova)* precisa saber o que pedir, de quem, por quanto, e conferir o que chegou sem fingir que veio tudo certo. Atendido pelo módulo de Suprimentos.
+- **Entregador** e **Cliente final** — bem servidos desde o MVP.
 
 ---
 
-## 3. Roadmap por fases
+## 3. O que foi entregue
 
-### Fase 0 — Fechar o que está aberto (1 semana) 🔴 antes de tudo
-| Item | Por quê | Esforço |
+| Fase | Escopo | Status |
 |---|---|---|
-| Validar cartão com venda real de R$ 1 (tenant com conta Efí real) | É a única ponta de pagamentos sem prova ao vivo | S |
-| Ativar modalidade antecipada (2ª conta Efí + 3 envs) e confirmar com suporte Efí o prazo do repasse no split | Promessa já exposta na UI | S |
-| **Dashboard inicial do admin** (`/admin` → resumo do dia: vendas, pedidos abertos, alertas de estoque baixo e lote vencendo, atalho para tudo) | O dono abre o sistema e vê o negócio, não uma lista de cards | M |
-| **Onboarding checklist do lojista** (banner no dashboard: cardápio ✓ pagamentos ✓ horários ✓ equipe ✓ primeira venda ✓) | Ativação do trial de 14 dias — reduz churn na entrada | S |
+| **0** | Dashboard do dia, onboarding do lojista | ✅ concluída |
+| **1** | PDV, frente de caixa, KDS puro | ✅ concluída |
+| **2** | Mesas, QR por mesa, comanda, modo garçom, salão 3D, divisão de contas | ✅ concluída |
+| **3** | Agendamento, recuperador de vendas, cashback | ✅ concluída (falta Pixel/anúncios) |
+| **4** | NFC-e / NF-e 4.0 | ✅ construída, pendente certificado A1 do lojista |
+| **5** | **Suprimentos: compras, fornecedores, monta/desmonta, inventário** | ✅ concluída |
 
-### Fase 1 — Balcão & PDV (2–3 semanas) 🔴 maior gap de paridade
+### Fase 5 — Suprimentos (julho/2026)
+
+O princípio: **pedido é intenção, recebimento é fato, e a diferença entre os dois é informação** — não erro a esconder.
+
+| Entrega | O que resolve |
+|---|---|
+| `fornecedores` | De quem se compra, com prazo de entrega, dias de entrega e pedido mínimo |
+| `compras` + `compras_itens` | Intenção e fato na mesma linha; fator de conversão gravado como snapshot |
+| `fn_receber_compra` | Conferência, razão, saldo, custo e financeiro numa **transação única** |
+| `fn_transformar_estoque` | Monta/desmonta com conservação de valor (PEPS real rateado por peso) |
+| `fn_ajustar_inventario` | Contagem física em qualquer unidade; sobra abre lote, falta vira custo |
+| `vw_insumo_giro` | Consumo diário, dias de cobertura, prazo do fornecedor, capital parado |
+| `vw_lotes_validade` | O dinheiro prestes a vencer, antes de virar lixo |
+| `vw_historico_precos_compra` | Custo normalizado por unidade-base — "onde você compra melhor" |
+
+**Dívidas antigas corrigidas no caminho:**
+1. `unidades_medida` não tinha `dente`, `cabeça`, `maço`, `folha`, `rodela` — a UI oferecia e a FK recusava. Cadastrar alho em "dente" estourava violação de chave estrangeira.
+2. `fn_lancar_custo_estoque` creditava `1.1.01` (**Caixa**) ao baixar CMV, porque não existia conta de estoque. Vender um lanche reduzia o caixa contábil sem um centavo sair. Criada `1.1.03 Estoque de Insumos`. ⚠️ **Lançamentos anteriores à correção seguem apontando para Caixa.**
+3. O abastecimento fazia `insert` + `update` em chamadas soltas do navegador: falha no meio deixava o razão com a entrada e o saldo sem ela.
+
+---
+
+## 4. O que falta para o lançamento
+
+### 4.1 Bloqueadores comerciais (não são código)
+| Item | Por quê | Dono |
+|---|---|---|
+| Validar cartão com venda real de R$ 1 | Única ponta de pagamento sem prova ao vivo | Rafael |
+| 2ª conta Efí + 3 envs para antecipação | Promessa já exposta na UI | Rafael |
+| Certificado A1 no tenant piloto | Fiscal está pronto, mas não emitiu nota real | Lojista piloto |
+
+### 4.2 Último gap de paridade
 | Item | Descrição | Esforço |
 |---|---|---|
-| **PDV `/admin/pdv`** | Tela touch-first: grade de produtos por categoria, carrinho lateral, cliente opcional ("Balcão"), desconto, pagamento (dinheiro com troco, Pix na tela via QR Efí, maquininha), imprime comanda + nota. Pedido nasce `origem='balcao'` e cai no fluxo normal (estoque, KDS, financeiro) | L |
-| **Frente de caixa** | Abertura/fechamento de caixa por turno: fundo de troco, sangria, reforço, conferência (esperado × contado) e relatório do turno no Financeiro | M |
-| **KDS puro `/admin/kds`** | Tela fullscreen para a cozinha: colunas Fila → Preparando → Pronto, itens agregados, cronômetro por pedido, cor por atraso, toque para avançar. PainelPedidos vira a visão "gerência/despacho" | M |
+| **Pixel & anúncios** | Campos Meta Pixel ID / GA4 na Loja; eventos ViewContent/AddToCart/Purchase no cardápio; guia na Central de Ajuda | S |
 
-### Fase 2 — Salão: mesas e garçom (2–3 semanas) 🟠 paridade
+### 4.3 Evolução natural do módulo de Suprimentos
 | Item | Descrição | Esforço |
 |---|---|---|
-| **Mesas + QR por mesa** | Cadastro de mesas, QR `/loja/:slug?mesa=N`; cliente pede da mesa (`tipo_pedido='SALAO'`, sem endereço/entrega); mapa de mesas no admin (livre/ocupada/conta pedida) | M |
-| **Comanda por mesa** | Vários pedidos agrupados na mesa, conta parcial, fechar conta (junto ou separado), taxa de serviço opcional | M |
-| **Modo garçom** | Novo papel `garcom` (Equipe já suporta papéis): no celular, vê mapa de mesas e lança pedidos como o PDV. É um modo do PDV, não outro app | M |
+| Enviar pedido pelo WhatsApp | O pedido já é um documento; falta o botão que manda a lista formatada para o fornecedor | S |
+| Importar XML da NF-e de compra | Ler a nota do fornecedor e pré-preencher a conferência (o `Fiscal.tsx` já cita entrada por XML) | M |
+| Curva ABC de insumos | `vw_insumo_giro` já tem giro e capital parado — falta a leitura que diz onde o dinheiro está preso | S |
+| Contas a pagar por fornecedor | O lançamento credita Fornecedores (2.1.01); falta a tela de vencimentos e baixa | M |
+| Receita técnica de desmonte | Salvar um desmonte como modelo ("desossa padrão de frango") para repetir em 1 clique | M |
 
-### Fase 3 — Growth do lojista (2–3 semanas) 🟠 retenção/receita
-| Item | Descrição | Esforço |
-|---|---|---|
-| **Agendamento de pedidos** | Schema pronto (`agendado_para`) — expor no checkout (janelas pelo horário de funcionamento) + seção "Agendados" no painel + lembrete | S |
-| **Recuperador de vendas** | Registrar carrinho abandonado e Pix não pago; lista "Vendas para recuperar" no Marketing com botão WhatsApp (mensagem pronta + cupom opcional). Fase 2 do item: automação | M |
-| **Cashback** | % configurável por loja; saldo por cliente (tabela `cashback_clientes`); crédito no pedido FINALIZADO, uso no checkout como desconto; extrato para o cliente em Meus Pedidos | M |
-| **Pixel & anúncios** | Campos Meta Pixel ID / GA4 na Loja; eventos ViewContent/AddToCart/Purchase no cardápio; guia na Central de Ajuda ("anuncie seu cardápio") | S |
-
-### Fase 4 — Fiscal (3–4 semanas, pode correr em paralelo) 🟡
-| Item | Descrição | Esforço |
-|---|---|---|
-| **NFC-e automatizada** | Integrar emissor via API (Focus NFe / PlugNotas / NFE.io — avaliar custo por nota ~R$ 0,10–0,20): certificado A1 do lojista, CFOP/NCM padrão alimentício com revisão assistida ("IA" do concorrente é isso), emitir na finalização, PDF/XML no pedido. Começar por 1 UF piloto (SP) | L |
-
-### Contínuo — Qualidade & UX (toda semana, junto das fases)
-- **Consistência visual**: hoje há 3 linguagens (admin claro Tailwind, PainelPedidos dark custom, KDS custom). Definir tokens únicos e padronizar botões/cards/inputs (component kit pequeno: `Botao`, `Card`, `Campo`, `Badge`).
-- **Mobile do admin**: dono opera do celular — auditar cada tela em 375px (Financeiro e Loja têm tabelas/grids apertados).
-- **Estados vazios que ensinam**: toda tela vazia com "o que é isso + botão do primeiro passo" (padrão já usado na Equipe).
+### 4.4 Contínuo — Qualidade & UX
+- **Consistência visual**: 3 linguagens convivendo (admin claro, PainelPedidos dark, KDS custom). Definir tokens e um kit pequeno (`Botao`, `Card`, `Campo`, `Badge`).
+- **Mobile do admin**: auditar cada tela em 375px — o dono opera do celular.
+- **Estados vazios que ensinam**: padrão da Equipe replicado em todas as telas novas.
 - **Impressão térmica**: revisar templates 58/80mm com lojista real.
-- **Sons/notificações configuráveis** no painel (volume, repetição para pedido não aceito).
-- **Performance**: bundle único de 2,5 MB — code-split por rota (`React.lazy`) na Fase 1.
 
 ---
-
-## 4. Ordem executiva resumida
-
-1. **Fase 0** — fecha pendências de pagamento + dashboard/onboarding (1 semana)
-2. **Fase 1** — PDV + caixa + KDS puro (o gap que trava venda para restaurante físico)
-3. **Fase 2** — Mesas/QR/garçom (fecha a paridade de salão)
-4. **Fase 3** — Agendamento (quick win), recuperador, cashback, pixel
-5. **Fase 4** — NFC-e (paralelizável; depende de contratação do emissor)
-
-**Total estimado: 10–13 semanas** para paridade total + diferenciais. A cada fase: testar com o Lanche do Paulista (tenant de provas), demo no Natureba só com autorização.
 
 ## 5. Posicionamento (para o comercial)
-Contra o Anota AI Premium, o MiseOn vende o que eles não têm: **dinheiro direto na conta do lojista (split), custo real por ficha técnica (margem por produto), app de entregador com tracking, marca própria por loja e multi-loja**. As Fases 1–2 eliminam o argumento "mas ele tem PDV/mesa/garçom"; a Fase 3 elimina "tem cashback/recuperador"; a 4, "emite nota".
+
+Contra o Anota AI Premium, a paridade já não é argumento deles — é nosso. O que o MiseOn vende e eles não têm:
+
+1. **Dinheiro direto na conta do lojista** (split Efí; não seguramos o dinheiro de ninguém).
+2. **Custo real por ficha técnica**, com PEPS auditável lote a lote — margem por produto que não é chute.
+3. **Desmonte com rateio de custo**: quem compra boi, frango ou peixe inteiro sabe quanto custa cada corte.
+4. **Compras profissionais**: histórico de preço por fornecedor e por marca, com alerta de quando o item acaba antes da entrega chegar.
+5. **App de entregador com tracking**, marca própria por loja e multi-loja.
+
+A frase de venda: *"Todo sistema te diz quanto você vendeu. O MiseOn te diz quanto sobrou — e por quê."*
+
+---
+
+## 6. Ambientes de teste
+- **Lanche do Paulista** — tenant de provas. Toda mudança nova nasce aqui.
+- **"N" de NATUREBA!** — tenant de apresentação. **Não alterar sem autorização explícita.**

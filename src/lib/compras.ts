@@ -109,6 +109,9 @@ export interface InsumoGiro {
   quantidade_atual: number;
   estoque_minimo: number;
   categoria_insumo?: string | null;
+  fornecedor_padrao_id?: string | null;
+  fornecedor_nome?: string | null;
+  prazo_entrega_dias?: number | null;
   consumo_30d: number;
   consumo_diario: number;
   dias_cobertura: number | null;
@@ -165,15 +168,30 @@ export interface SugestaoCompra {
   precoUnitario: number;
   diasCobertura: number | null;
   urgencia: 'ZERADO' | 'CRITICO' | 'COBERTURA';
+  /** Dias entre pedir e receber, segundo o cadastro do fornecedor. */
+  prazoEntrega: number;
+  /**
+   * O estoque acaba antes da mercadoria chegar. É o alerta mais acionável da
+   * tela: não adianta pedir na quantidade certa se já é tarde.
+   */
+  rupturaAntesDaEntrega: boolean;
+  fornecedorId: string | null;
+  fornecedorNome: string | null;
 }
 
 /**
  * Quanto comprar de um insumo para cobrir `diasAlvo` dias de operação.
  *
- * O `estoque_minimo` sozinho é um número digitado uma vez e esquecido: ignora
- * que dois itens com o mesmo mínimo podem girar 10 kg/dia e 200 g/dia. Aqui o
- * alvo é o MAIOR entre o mínimo cadastrado e o consumo real projetado — o
- * cadastro vira piso, não verdade única.
+ * Duas correções sobre o "estoque mínimo" clássico:
+ *
+ *  1. O mínimo sozinho é um número digitado uma vez e esquecido — ignora que
+ *     dois itens com o mesmo mínimo podem girar 10 kg/dia e 200 g/dia. Aqui o
+ *     alvo é o MAIOR entre o mínimo cadastrado e o consumo real projetado: o
+ *     cadastro vira piso, não verdade única.
+ *
+ *  2. Mercadoria não chega no ato. Se o fornecedor entrega em 2 dias, comprar
+ *     hoje o que cobre 7 dias deixa a operação descoberta — o alvo tem que
+ *     cobrir o ciclo MAIS o prazo de entrega (ponto de pedido).
  *
  * Retorna null quando não há o que comprar.
  */
@@ -185,8 +203,10 @@ export function sugerirCompra(
   const saldo = Number(insumo.quantidade_atual) || 0;
   const minimo = Number(insumo.estoque_minimo) || 0;
   const consumoDiario = Number(giro?.consumo_diario) || 0;
+  const prazoEntrega = Math.max(0, Number(giro?.prazo_entrega_dias) || 0);
 
-  const alvo = Math.max(minimo, consumoDiario * diasAlvo);
+  // Comprar hoje precisa cobrir até a PRÓXIMA entrega chegar, não até hoje.
+  const alvo = Math.max(minimo, consumoDiario * (diasAlvo + prazoEntrega));
   if (alvo <= 0 || saldo > alvo) return null;
 
   const opcoes = opcoesDeEntrada(
@@ -201,6 +221,8 @@ export function sugerirCompra(
   // Fornecedor não vende meia caixa: arredonda para embalagem inteira.
   const qtdSugerida = Math.max(1, Math.ceil(faltaBase / fator));
 
+  const diasCobertura = giro?.dias_cobertura ?? null;
+
   return {
     insumo,
     giro,
@@ -209,8 +231,13 @@ export function sugerirCompra(
     faltaBase,
     qtdSugerida,
     precoUnitario: Number(insumo.preco_embalagem) || 0,
-    diasCobertura: giro?.dias_cobertura ?? null,
+    diasCobertura,
     urgencia: saldo <= 0 ? 'ZERADO' : saldo <= minimo ? 'CRITICO' : 'COBERTURA',
+    prazoEntrega,
+    // Zerado com prazo de entrega é ruptura por definição: já está descoberto.
+    rupturaAntesDaEntrega: prazoEntrega > 0 && (diasCobertura ?? 0) < prazoEntrega,
+    fornecedorId: giro?.fornecedor_padrao_id ?? null,
+    fornecedorNome: giro?.fornecedor_nome ?? null,
   };
 }
 

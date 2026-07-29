@@ -40,7 +40,10 @@ O cliente pede pela vitrine (link próprio da loja), o dono recebe em tempo real
 | ⚖️ **Balança Buffet & Quilo** | Driver modular **MiseOn Scale Engine** com suporte a **Web Serial API (cabo USB/RS-232)**, **TCP/IP Rede** e **Emulador**. Vínculo direto do peso líquido com desconto de tara para comanda individual ou de mesa. |
 | 🔀 **Divisão Inteligente de Contas** | **Método 1 (Garçom Mobile)**: Fracionamento automático de bebidas/itens compartilhados no momento do lançamento. **Método 2 (Caixa PDV)**: Matriz interativa de divisão por produto no fechamento para cobranças individuais separadas. |
 | 📳 **PWA Garçom Push & Vibração** | Notificação instantânea com **Vibração Hálptica (Web Vibration API)** e aviso sonoro no smartphone do garçom para chamados de atendimento e solicitações de fechamento de conta. |
-| 🧊 **Estoque & Grafo PEPS 3D** | Ledger auditável PEPS com **Grafo 3D de Transformação de Lotes**, baixa automática no aceite, estorno no cancelamento, **Calculadora Dinâmica de Rendimento** e **Central de Compras Massiva** com conversão reversa. |
+| 🧊 **Estoque & Grafo PEPS 3D** | Ledger auditável PEPS com **Grafo 3D de Transformação de Lotes**, baixa automática no aceite, estorno no cancelamento, **Calculadora Dinâmica de Rendimento** e entrada de insumo em **qualquer unidade** (o sistema converte e aprende a conversão nova). |
+| 🔪 **Monta & Desmonta** | Desossa e fracionamento com **conservação de valor**: o frango inteiro vira peito, coxa e carcaça, e o custo sai do lote real (PEPS) rateado por peso — cada parte nasce com o preço que merece, sem centavo perdido. |
+| 📋 **Inventário Flexível** | Contagem física na unidade que estiver na mão (cabeça, caixa, quilo). Sobra abre lote novo, falta consome PEPS e vira custo: "sumiu" passa a ter valor em reais. |
+| 🚚 **Compras & Fornecedores** | Pedido → recebimento conferido → nota. Registra **marca, lote, validade, preço pago e fornecedor**; aceita entrega parcial, item substituído e outra unidade sem tratar nada disso como erro. Sugestão por **giro real de 30 dias + prazo de entrega** do fornecedor, com alerta de ruptura. Tudo numa transação única (`fn_receber_compra`). |
 | 🛍 **Vitrine** | Banners promocionais, busca, filtros por categoria, "os mais pedidos", grupos de adicionais/extras, combos, horário de funcionamento automático, pedido mínimo. |
 | 🛒 **Pedidos** | Carrinho, delivery/retirada/salão, cupons (1ª compra, por método de pagamento), taxa de entrega por bairro, troco, observações por item. |
 | 💸 **Pagamentos** | Pix **dentro da plataforma** (Efí Bank: QR Code + copia-e-cola + confirmação automática via webhook), **cartão de crédito online** com tokenização no navegador (PCI-safe, parcelado), fallback Pix estático, dinheiro/cartão na entrega. |
@@ -221,6 +224,7 @@ Antes de colocar a mão na massa, certifique-se de ler nossa [Documentação de 
 - [x] **Chat IA com Gemini**: Atendimento inteligente via WebSocket na vitrine com function calling (cardápio e suporte).
 - [x] **Emissor NF-e / NFC-e 4.0**: Emissão fiscal integrada ao PDV (pronto, pendente apenas upload do Certificado A1 / CNPJ).
 - [x] **Balança Buffet & Divisão Inteligente CTO**: Módulo de pesagem Web Serial (Toledo/Filizola/Urano), Divisão Inteligente Métodos 1 e 2, PWA Garçom com Notificação Push & Vibração Hálptica.
+- [x] **Suprimentos profissional**: fornecedores, pedido de compra com recebimento parcial/substituição, histórico de preço por marca, monta/desmonta com rateio de custo, inventário multiunidade e sugestão por giro + prazo de entrega.
 - [ ] **Fase 4 (Próximos Passos)**: Onboarding self-service automatizado e programa de fidelidade/cashback avançado.
 
 ## ❤️ Autor

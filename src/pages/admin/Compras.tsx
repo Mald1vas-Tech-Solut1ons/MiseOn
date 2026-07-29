@@ -15,7 +15,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
-  ShoppingCart, CheckCircle2, Circle, PackageCheck, Loader2,
+  ShoppingCart, CheckCircle2, Circle, PackageCheck, Loader2, AlertTriangle,
   Truck, Plus, Pencil, Archive, FileText, Clock, Zap, TrendingDown, CalendarClock,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -58,6 +58,7 @@ export default function Compras() {
   const [diasAlvo, setDiasAlvo] = useState(7);
   const [selecao, setSelecao] = useState<Record<string, number>>({});
   const [fornecedorPedido, setFornecedorPedido] = useState('');
+  const [filtroFornecedor, setFiltroFornecedor] = useState('');
 
   const [editandoFornecedor, setEditandoFornecedor] = useState<Fornecedor | null | undefined>(undefined);
   const [recebendo, setRecebendo] = useState<CompraResumo | null>(null);
@@ -80,7 +81,7 @@ export default function Compras() {
 
   const giroPorId = useMemo(() => new Map(giro.map(g => [g.insumo_id, g])), [giro]);
 
-  const sugestoes = useMemo(() => {
+  const todasSugestoes = useMemo(() => {
     const lista: SugestaoCompra[] = [];
     for (const i of insumos) {
       const s = sugerirCompra(i, giroPorId.get(i.id), diasAlvo);
@@ -93,6 +94,15 @@ export default function Compras() {
       (a.diasCobertura ?? 999) - (b.diasCobertura ?? 999));
   }, [insumos, giroPorId, diasAlvo]);
 
+  // Compra-se POR FORNECEDOR, não por lista geral: filtrar aqui é o que
+  // transforma a sugestão num pedido que dá para mandar no WhatsApp do Zé.
+  const sugestoes = useMemo(
+    () => filtroFornecedor
+      ? todasSugestoes.filter(s => (s.fornecedorId ?? '') === filtroFornecedor)
+      : todasSugestoes,
+    [todasSugestoes, filtroFornecedor],
+  );
+
   // Toda sugestão nasce marcada com a quantidade sugerida — desmarcar é mais
   // rápido que marcar quando a lista é a operação inteira da semana.
   useEffect(() => {
@@ -103,6 +113,7 @@ export default function Compras() {
     });
   }, [sugestoes]);
 
+  const rupturas = sugestoes.filter(s => s.rupturaAntesDaEntrega);
   const marcados = sugestoes.filter(s => (selecao[s.insumo.id] ?? 0) > 0);
   const totalEstimado = marcados.reduce((acc, s) => acc + (selecao[s.insumo.id] ?? 0) * s.precoUnitario, 0);
   const valorEmRisco = validades.reduce((acc, v) => acc + Number(v.valor_em_risco), 0);
@@ -206,10 +217,32 @@ export default function Compras() {
                 </button>
               ))}
             </div>
+            {fornecedores.length > 0 && (
+              <select value={filtroFornecedor} onChange={e => { setFiltroFornecedor(e.target.value); setFornecedorPedido(e.target.value); }}
+                className="rounded-lg border border-gray-300 p-2 text-xs font-bold focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100">
+                <option value="">Todos os fornecedores</option>
+                {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
+              </select>
+            )}
             <span className="text-xs text-gray-400">
-              O alvo é o maior entre o mínimo cadastrado e o consumo real projetado.
+              O alvo soma o consumo real do período ao prazo de entrega do fornecedor.
             </span>
           </div>
+
+          {rupturas.length > 0 && (
+            <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-900/20">
+              <p className="mb-1 flex items-center gap-1.5 text-sm font-bold text-red-800 dark:text-red-400">
+                <AlertTriangle size={16} /> {rupturas.length} {rupturas.length === 1 ? 'item acaba' : 'itens acabam'} antes da entrega chegar
+              </p>
+              <p className="text-xs text-red-700 dark:text-red-400/80">
+                {rupturas.slice(0, 4).map(s =>
+                  `${s.insumo.nome} (dura ${(s.diasCobertura ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}d, entrega em ${s.prazoEntrega}d)`
+                ).join(' · ')}
+                {rupturas.length > 4 && ` · +${rupturas.length - 4}`}
+                {' — '}peça hoje ou procure outro fornecedor.
+              </p>
+            </div>
+          )}
 
           {sugestoes.length === 0 ? (
             <div className="rounded-3xl border border-green-200 bg-green-50 p-8 text-center dark:border-green-900/30 dark:bg-green-900/10">
@@ -240,6 +273,11 @@ export default function Compras() {
                           {s.urgencia === 'CRITICO' && (
                             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">crítico</span>
                           )}
+                          {s.rupturaAntesDaEntrega && (
+                            <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                              <AlertTriangle size={9} /> acaba antes de chegar
+                            </span>
+                          )}
                         </p>
                         <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                           Tem <b>{Number(s.insumo.quantidade_atual).toLocaleString('pt-BR')} {s.insumo.unidade_medida}</b>
@@ -254,6 +292,12 @@ export default function Compras() {
                             </span>
                           ) : (
                             <span className="flex items-center gap-1"><Clock size={10} /> sem giro nos últimos 30 dias</span>
+                          )}
+                          {s.fornecedorNome && (
+                            <span className="flex items-center gap-1">
+                              <Truck size={10} /> {s.fornecedorNome}
+                              {s.prazoEntrega > 0 && ` · chega em ${s.prazoEntrega}d`}
+                            </span>
                           )}
                           {s.giro && s.giro.perda_30d > 0 && (
                             <span className="flex items-center gap-1 text-red-400">

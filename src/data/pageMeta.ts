@@ -129,10 +129,10 @@ export const PAGE_META: Record<string, PageMeta> = {
   // /ajuda/estoque renderiza o mesmo componente de /gestao-de-estoque-3d;
   // canonical aponta para a rota principal.
   '/gestao-de-estoque-3d': {
-    title: 'Engenharia de Estoque 3D, Ficha Técnica & Preparos — MiseOn',
+    title: 'Estoque, Compras e Desmonte de Insumos com Custo Real — MiseOn',
     description:
-      'Mapeamento tridimensional de estoque físico, fracionamento de insumos, custeio PEPS e ordens de produção com controle de validade para cozinhas profissionais.',
-    keywords: 'estoque 3d restaurante, ficha tecnica restaurante, fracionamento insumos, custeio peps comida, controle de preparos e lotes',
+      'Controle de compras com fornecedor, marca e recebimento parcial; desmonte de insumos com rateio de custo PEPS; inventário em qualquer unidade e mapa 3D do capital parado na cozinha.',
+    keywords: 'controle de compras restaurante, gestao de fornecedores food service, desmonte de insumos, rendimento de desossa, inventario de estoque restaurante, estoque 3d restaurante, ficha tecnica restaurante, custeio peps comida',
     canonicalUrl: `${BASE}/gestao-de-estoque-3d`,
     h1: 'Gestão de Estoque Físico, Fichas Técnicas e Observabilidade 3D em Tempo Real',
   },
@@ -145,9 +145,9 @@ export const PAGE_META: Record<string, PageMeta> = {
     h1: 'Blog MiseOn: Engenharia, CMV & Tecnologia para Food Service',
   },
   '/ajuda/estoque': {
-    title: 'Engenharia de Estoque 3D, Ficha Técnica & Preparos — MiseOn',
+    title: 'Estoque, Compras e Desmonte de Insumos com Custo Real — MiseOn',
     description:
-      'Mapeamento tridimensional de estoque físico, fracionamento de insumos, custeio PEPS e ordens de produção com controle de validade para cozinhas profissionais.',
+      'Controle de compras com fornecedor, marca e recebimento parcial; desmonte de insumos com rateio de custo PEPS; inventário em qualquer unidade e mapa 3D do capital parado na cozinha.',
     canonicalUrl: `${BASE}/gestao-de-estoque-3d`,
     h1: 'Gestão de Estoque Físico, Fichas Técnicas e Observabilidade 3D em Tempo Real',
   },

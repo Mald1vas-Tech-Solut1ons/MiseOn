@@ -1,6 +1,6 @@
 import {
   QrCode, Zap, CreditCard, Timer, Store, Map as MapIcon, Bike, Boxes,
-  ClipboardList, ShoppingCart, Gift, TrendingUp,
+  ClipboardList, ShoppingCart, Gift, TrendingUp, Truck, Scissors,
 } from 'lucide-react';
 
 const FEATURES = [
@@ -13,7 +13,9 @@ const FEATURES = [
   { icon: <Bike size={20} />, titulo: 'Entrega com rota ao vivo', texto: 'Despache para o motoboy com um clique e acompanhe a rota em tempo real.' },
   { icon: <Boxes size={20} />, titulo: 'Estoque com ficha técnica', texto: 'Vendeu um combo? Baixa automática do pão, da carne e da embalagem.' },
   { icon: <ClipboardList size={20} />, titulo: 'Produção com lotes e validade', texto: 'Preparos organizados por lote, com validade e rendimento controlados.' },
-  { icon: <ShoppingCart size={20} />, titulo: 'Central de compras', texto: 'Lista de compras gerada a partir do estoque mínimo real de cada insumo.' },
+  { icon: <ShoppingCart size={20} />, titulo: 'Compras que pensam', texto: 'A lista sai do giro real dos últimos 30 dias e do prazo do seu fornecedor.' },
+  { icon: <Truck size={20} />, titulo: 'Recebimento conferido', texto: 'Veio menos, de outra marca, mais caro? Registra o que chegou de verdade.' },
+  { icon: <Scissors size={20} />, titulo: 'Desmonte com rateio de custo', texto: 'Frango inteiro vira peito e carcaça — cada corte com o seu custo real.' },
   { icon: <Gift size={20} />, titulo: 'Cupons, cashback e carrinho', texto: 'Fidelize com cashback e recupere automaticamente carrinhos abandonados.' },
   { icon: <TrendingUp size={20} />, titulo: 'Financeiro com gráficos', texto: 'Faturamento, custo e lucro por período — com a equipe em papéis definidos.' },
 ];

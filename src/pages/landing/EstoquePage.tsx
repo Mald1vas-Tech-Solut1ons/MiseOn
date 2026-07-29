@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import {
   Boxes, Database, FlaskConical, Eye, ArrowRight, Sparkles,
   ShieldCheck, AlertTriangle, ChevronDown, Menu as MenuIcon, X, Wallet,
-  HelpCircle, Layers, RefreshCw, BarChart3
+  HelpCircle, Layers, RefreshCw, BarChart3, Truck, Scissors, Scale,
+  ClipboardCheck, TrendingDown
 } from 'lucide-react';
 import SEO from '../../components/SEO';
 import FooterSEO from '../../components/FooterSEO';
@@ -15,6 +16,43 @@ const IMG_RECEITA  = '/images/estoque/media__1784863116232.png';
 const IMG_PREPAROS = '/images/estoque/media__1784863162515.png';
 const IMG_3D       = '/images/estoque/media__1784863268521.png';
 
+// Fora do componente: as perguntas alimentam o accordion E o rich snippet do
+// Google. Duas cópias da mesma pergunta acabariam divergindo na primeira edição.
+const FAQS = [
+  {
+    p: 'Como funciona o fracionamento quando compro um fardo ou pacote?',
+    r: 'No cadastro do insumo, você indica a "Unidade de Compra" (ex: Pacote) e a "Unidade de Armazenamento/Uso" (ex: Gramas). Ao digitar que 1 pacote rende 2000g, o MiseOn passa a controlar o saldo em gramas e realiza a baixa em tempo real a cada venda no cardápio ou PDV.',
+  },
+  {
+    p: 'O que é o método PEPS e por que ele é importante?',
+    r: 'PEPS significa "Primeiro que Entra, Primeiro que Sai". Ao realizar vendas ou produções, o sistema utiliza o valor de custo do lote mais antigo existente no estoque. Isso garante um DRE financeiro preciso e cálculo do CMV sem distorções de inflação.',
+  },
+  {
+    p: 'Como funciona o controle de validade de preparos na cozinha?',
+    r: 'Ao cadastrar uma Receita Base (ex: Blend de Carne ou Molho), você define a validade em horas ou dias (ex: 24h). Quando a cozinha clica em "Produzir", o lote é gerado com timestamp de validade. Se ultrapassar o prazo sem ser consumido, o sistema sinaliza como "LOTE VENCIDO" para descarte seguro.',
+  },
+  {
+    p: 'E se o fornecedor entregar menos do que eu pedi, ou de outra marca?',
+    r: 'É o caso normal, não a exceção. Na conferência do recebimento você informa o que realmente chegou: a quantidade, a unidade, a marca, o lote, a validade e o preço pago. O MiseOn marca o item como parcial ou substituído, dá entrada só do que veio e guarda a divergência no histórico daquele fornecedor. Nada é bloqueado e nada precisa ser "arredondado" para o sistema aceitar.',
+  },
+  {
+    p: 'Comprei o alho no quilo, mas conto em cabeça e uso em dente. Como faço?',
+    r: 'Você escolhe a unidade na hora de dar entrada, contar o inventário ou desmontar — o sistema converte usando a cadeia de rendimento do cadastro. Se aparecer uma unidade que ele ainda não conhece (como "cabeça"), ele pergunta uma única vez quanto ela rende e guarda essa conversão no insumo para as próximas vezes.',
+  },
+  {
+    p: 'Compro carne e frango inteiros. Dá para saber o custo de cada corte?',
+    r: 'Sim — é a função Monta & Desmonta. Você informa quanto saiu do insumo bruto e quais partes entraram, com um peso de rateio para cada uma (1 kg de filé não vale o mesmo que 1 kg de carcaça). O MiseOn retira o custo real do lote pelo PEPS e distribui entre as partes, fechando no centavo. Cada corte passa a ter custo próprio na ficha técnica.',
+  },
+  {
+    p: 'Como o sistema sabe a hora certa de comprar?',
+    r: 'A sugestão não olha só o estoque mínimo (um número digitado uma vez e esquecido). Ela lê o consumo real dos últimos 30 dias, projeta quantos dias o saldo ainda cobre e soma o prazo de entrega do fornecedor. Se o insumo acaba antes da mercadoria chegar, a tela avisa — o alerta mais útil de todos.',
+  },
+  {
+    p: 'Como o gráfico de Observabilidade 3D auxilia a minha gestão?',
+    r: 'A visualização 3D traduz dados numéricos complexos em elementos visuais interativos. Você enxerga no espaço tridimensional a proporção de capital investido em cada setor da cozinha, ajudando a identificar gargalos e excessos de compras.',
+  },
+];
+
 export default function EstoquePage() {
   const [menuAberto, setMenuAberto] = useState(false);
   const [faqAberto, setFaqAberto] = useState<number | null>(null);
@@ -23,7 +61,7 @@ export default function EstoquePage() {
     {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
-      'name': 'MiseOn — Engenharia de Estoque 3D & Ficha Técnica',
+      'name': 'MiseOn — Estoque, Compras e Desmonte com Custo Real',
       'operatingSystem': 'Web, Android, iOS, Windows, macOS',
       'applicationCategory': 'BusinessApplication',
       'offers': {
@@ -31,16 +69,25 @@ export default function EstoquePage() {
         'price': '99.90',
         'priceCurrency': 'BRL',
       },
-      'description': 'Sistema completo de Gestão de Estoque Físico 3D, Fracionamento de Insumos, Ficha Técnica, Custeio PEPS e Ordens de Produção para Restaurantes.',
+      'description': 'Gestão de compras com fornecedor e recebimento conferido, desmonte de insumos com rateio de custo PEPS, inventário multiunidade, ficha técnica e mapa 3D do estoque para restaurantes.',
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': FAQS.map((f) => ({
+        '@type': 'Question',
+        'name': f.p,
+        'acceptedAnswer': { '@type': 'Answer', 'text': f.r },
+      })),
     },
   ];
 
   return (
     <div className="min-h-screen bg-[#070C18] font-sans text-[#EAF1FB] selection:bg-[#FC5B24] selection:text-white">
       <SEO
-        title="Engenharia de Estoque 3D, Ficha Técnica & Preparos — MiseOn"
-        description="Mapeamento tridimensional de estoque físico, fracionamento de insumos, custeio PEPS e ordens de produção com controle de validade para cozinhas profissionais."
-        keywords="estoque 3d restaurante, ficha tecnica restaurante, fracionamento insumos, custeio peps comida, controle de preparos e lotes"
+        title="Estoque, Compras e Desmonte de Insumos com Custo Real — MiseOn"
+        description="Controle de compras com fornecedor, marca e recebimento parcial; desmonte de insumos com rateio de custo PEPS; inventário em qualquer unidade e mapa 3D do capital parado na cozinha."
+        keywords="controle de compras restaurante, gestao de fornecedores food service, desmonte de insumos, rendimento de desossa, inventario de estoque restaurante, estoque 3d restaurante, ficha tecnica restaurante, custeio peps comida"
         canonicalUrl="https://miseon.app.br/gestao-de-estoque-3d"
         schemaJson={schemaJson}
       />
@@ -53,10 +100,11 @@ export default function EstoquePage() {
           </Link>
 
           <div className="hidden items-center gap-6 lg:flex text-sm font-semibold">
-            <a href="#fracionamento" className="text-gray-300 hover:text-white transition">1. Insumos & Fracionamento</a>
-            <a href="#preparos" className="text-gray-300 hover:text-white transition">2. Receitas & Preparos</a>
-            <a href="#observabilidade-3d" className="text-gray-300 hover:text-white transition">3. Observabilidade 3D</a>
-            <a href="#faq" className="text-gray-300 hover:text-white transition">Ajuda & Dúvidas</a>
+            <a href="#fracionamento" className="text-gray-300 hover:text-white transition">1. Insumos</a>
+            <a href="#preparos" className="text-gray-300 hover:text-white transition">2. Preparos</a>
+            <a href="#compras" className="text-gray-300 hover:text-white transition">3. Compras & Desmonte</a>
+            <a href="#observabilidade-3d" className="text-gray-300 hover:text-white transition">4. Observabilidade 3D</a>
+            <a href="#faq" className="text-gray-300 hover:text-white transition">Ajuda</a>
           </div>
 
           <div className="hidden items-center gap-3 lg:flex">
@@ -84,7 +132,8 @@ export default function EstoquePage() {
             <div className="flex flex-col gap-2 font-semibold text-sm">
               <a href="#fracionamento" onClick={() => setMenuAberto(false)} className="py-2">1. Insumos & Fracionamento</a>
               <a href="#preparos" onClick={() => setMenuAberto(false)} className="py-2">2. Receitas & Preparos</a>
-              <a href="#observabilidade-3d" onClick={() => setMenuAberto(false)} className="py-2">3. Observabilidade 3D</a>
+              <a href="#compras" onClick={() => setMenuAberto(false)} className="py-2">3. Compras & Desmonte</a>
+              <a href="#observabilidade-3d" onClick={() => setMenuAberto(false)} className="py-2">4. Observabilidade 3D</a>
               <a href="#faq" onClick={() => setMenuAberto(false)} className="py-2">Ajuda & Dúvidas</a>
               <Link to="/cadastre-se" className="mt-2 rounded-xl bg-[var(--cor-primaria)] p-3 text-center text-white font-bold">
                 Cadastrar Minha Loja
@@ -277,12 +326,134 @@ export default function EstoquePage() {
         </div>
       </section>
 
-      {/* ══════════ PASSO 3: OBSERVABILIDADE 3D E RASTREABILIDADE ══════════ */}
+      {/* ══════════ PASSO 3: COMPRAS, FORNECEDORES E DESMONTE ══════════ */}
+      <section id="compras" className="scroll-mt-24 border-t border-white/10 bg-[#0A101D] py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-emerald-300">
+              <Truck size={14} /> Passo 03 · Compras & Fornecedores
+            </span>
+            <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold text-white sm:text-4xl">
+              Comprou metade, de outra marca, mais caro?{' '}
+              <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                O sistema registra o que aconteceu de verdade.
+              </span>
+            </h2>
+            <p className="mt-5 text-base leading-relaxed text-slate-300">
+              Na vida real o fornecedor manda menos do que você pediu, troca a marca e muda o preço na
+              hora da entrega. Sistema que só aceita "recebi tudo certo" obriga o lojista a mentir — e
+              o custo do prato vira ficção. No MiseOn, <b className="text-white">pedido é intenção,
+              recebimento é fato</b>, e a diferença entre os dois vira informação sobre o seu fornecedor.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition hover:border-emerald-400/40">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-400">
+                <ClipboardCheck size={20} />
+              </div>
+              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">Conferência de entrega</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+                Marca, lote, validade, preço pago e nota fiscal item a item. Veio menos? Veio outro
+                produto? Não veio? Tudo é registrado — e o estoque entra numa transação só, nunca pela metade.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition hover:border-emerald-400/40">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-400/10 text-blue-400">
+                <Scale size={20} />
+              </div>
+              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">Entre na unidade que quiser</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+                Comprou o quilo, chegou em cabeça, usa em dente. Você digita na unidade que tem na mão e o
+                sistema converte. Unidade nova? Ele pergunta o rendimento uma vez e nunca mais esquece.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition hover:border-emerald-400/40">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-400/10 text-amber-400">
+                <TrendingDown size={20} />
+              </div>
+              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">Lista que pensa</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+                A sugestão lê o giro real dos últimos 30 dias e soma o prazo de entrega do fornecedor.
+                Se o item acaba antes da mercadoria chegar, a tela avisa antes de você descobrir na panela.
+              </p>
+            </div>
+          </div>
+
+          {/* Desmonte — o argumento que nenhum concorrente tem */}
+          <div className="mt-8 overflow-hidden rounded-3xl border border-orange-500/25 bg-gradient-to-br from-[#160D06] via-[#0F1524] to-[#0A101D]">
+            <div className="grid gap-8 p-8 lg:grid-cols-2 lg:items-center lg:p-10">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-400/10 px-3.5 py-1 text-xs font-black uppercase tracking-widest text-orange-400">
+                  <Scissors size={14} /> Exclusivo · Monta & Desmonta
+                </span>
+                <h3 className="mt-4 font-['Sora'] text-2xl font-extrabold text-white sm:text-3xl">
+                  Quem compra o frango inteiro precisa saber quanto custa o peito.
+                </h3>
+                <p className="mt-4 text-base leading-relaxed text-slate-300">
+                  Desossar, filetar, fatiar: um insumo vira vários, cada um com preço, ficha e giro
+                  próprios. O MiseOn puxa o custo do lote real pelo PEPS e distribui entre as partes
+                  com o peso que cada uma merece — <b className="text-white">sem um centavo se perder
+                  no caminho</b>. É a conta que a maioria dos restaurantes faz de cabeça, e erra.
+                </p>
+                <p className="mt-4 text-sm text-slate-400">
+                  Também vale ao contrário: junte insumos e monte cestas, kits e combos com o custo somado.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-black/40 p-6 font-mono text-sm">
+                <p className="text-xs uppercase tracking-widest text-slate-500">Exemplo real</p>
+                <div className="mt-4 flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-slate-300">5 kg de frango inteiro</span>
+                  <span className="font-bold text-white">R$ 50,00</span>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-xs text-orange-400">
+                  <Scissors size={13} /> desmonta em
+                </div>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between rounded-lg bg-emerald-500/10 px-3 py-2">
+                    <span className="text-slate-200">3 kg de peito</span>
+                    <span className="font-bold text-emerald-400">R$ 14,81/kg</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-blue-500/10 px-3 py-2">
+                    <span className="text-slate-200">2 kg de carcaça</span>
+                    <span className="font-bold text-blue-400">R$ 2,78/kg</span>
+                  </div>
+                </div>
+                <p className="mt-4 border-t border-white/10 pt-3 text-xs text-slate-400">
+                  R$ 44,44 + R$ 5,56 = <b className="text-white">R$ 50,00</b>. Fecha no centavo, sempre.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Inventário */}
+          <div className="mt-5 flex flex-col gap-4 rounded-3xl border border-purple-400/20 bg-purple-400/5 p-6 sm:flex-row sm:items-center">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-400/10 text-purple-300">
+              <RefreshCw size={22} />
+            </div>
+            <div>
+              <h3 className="font-['Sora'] text-base font-bold text-white">
+                Inventário do jeito que a contagem acontece
+              </h3>
+              <p className="mt-1 text-sm leading-relaxed text-slate-300">
+                Ninguém conta 540 dentes de alho — conta 3 cabeças. Você conta na unidade que estiver na
+                prateleira e o sistema converte. O que sobrou entra com custo; o que sumiu vira perda
+                precificada em reais, não um susto.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ PASSO 4: OBSERVABILIDADE 3D E RASTREABILIDADE ══════════ */}
       <section id="observabilidade-3d" className="scroll-mt-24 py-20 border-t border-white/10 bg-[#0A101D]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-purple-400/30 bg-purple-400/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-purple-300">
-              <Eye size={14} /> Passo 03 · Inovação Exclusiva MiseOn
+              <Eye size={14} /> Passo 04 · Inovação Exclusiva MiseOn
             </span>
             <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl">
               Observabilidade 3D de Estoque Físico &{' '}
@@ -358,24 +529,7 @@ export default function EstoquePage() {
           </div>
 
           <div className="mt-10 space-y-4">
-            {[
-              {
-                p: 'Como funciona o fracionamento quando compro um fardo ou pacote?',
-                r: 'No cadastro do insumo, você indica a "Unidade de Compra" (ex: Pacote) e a "Unidade de Armazenamento/Uso" (ex: Gramas). Ao digitar que 1 pacote rende 2000g, o MiseOn passa a controlar o saldo em gramas e realiza a baixa em tempo real a cada venda no cardápio ou PDV.'
-              },
-              {
-                p: 'O que é o método PEPS e por que ele é importante?',
-                r: 'PEPS significa "Primeiro que Entra, Primeiro que Sai". Ao realizar vendas ou produções, o sistema utiliza o valor de custo do lote mais antigo existente no estoque. Isso garante um DRE financeiro preciso e cálculo do CMV sem distorções de inflação.'
-              },
-              {
-                p: 'Como funciona o controle de validade de preparos na cozinha?',
-                r: 'Ao cadastrar uma Receita Base (ex: Blend de Carne ou Molho), você define a validade em horas ou dias (ex: 24h). Quando a cozinha clica em "Produzir", o lote é gerado com timestamp de validade. Se ultrapassar o prazo sem ser consumido, o sistema sinaliza como "LOTE VENCIDO" para descarte seguro.'
-              },
-              {
-                p: 'Como o gráfico de Observabilidade 3D auxilia a minha gestão?',
-                r: 'A visualização 3D traduz dados numéricos complexos em elementos visuais interativos. Você enxerga no espaço tridimensional a proporção de capital investido em cada setor da cozinha, ajudando a identificar gargalos e excessos de compras.'
-              }
-            ].map((faq, idx) => {
+            {FAQS.map((faq, idx) => {
               const aberto = faqAberto === idx;
               return (
                 <div key={idx} className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
