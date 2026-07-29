@@ -11,7 +11,8 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { X, Loader2, PackageCheck, AlertTriangle, Ban, RotateCcw, Info } from 'lucide-react';
+import { X, Loader2, PackageCheck, AlertTriangle, Ban, RotateCcw, Info, Barcode, Sparkles } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 import { fmt, Insumo } from '../../types';
 import MiseOnLoader from '../MiseOnLoader';
 import SeletorQuantidade from '../estoque/SeletorQuantidade';
@@ -35,7 +36,10 @@ interface Conferencia {
   vence: string;
   naoVeio: boolean;
   substituto: string;
+  gtin: string;
 }
+
+type StatusNutricao = 'ocioso' | 'buscando' | 'encontrado' | 'nao_encontrado';
 
 export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso }: Props) {
   const [itens, setItens] = useState<CompraItem[]>([]);
@@ -47,6 +51,9 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  // NUT-09: captura de GTIN na conferência — a nutrição chega junto do
+  // recebimento, sem o lojista perceber que fez trabalho de cadastro nutricional.
+  const [statusNutricao, setStatusNutricao] = useState<Record<string, StatusNutricao>>({});
 
   const porId = useMemo(() => new Map(insumos.map(i => [i.id, i])), [insumos]);
 
@@ -73,13 +80,14 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
           vence: it.vence_em ?? '',
           naoVeio: false,
           substituto: '',
+          gtin: porId.get(it.insumo_id)?.gtin ?? '',
         };
       }
       setConf(inicial);
       setCarregando(false);
     }).catch(e => { if (vivo) { setErro(e.message); setCarregando(false); } });
     return () => { vivo = false; };
-  }, [compra.id]);
+  }, [compra.id, porId]);
 
   const alvoDe = (it: CompraItem, c?: Conferencia) => {
     const subst = c?.substituto ? porId.get(c.substituto) : undefined;
@@ -101,6 +109,24 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
 
   const atualizar = (id: string, patch: Partial<Conferencia>) =>
     setConf(c => ({ ...c, [id]: { ...c[id], ...patch } }));
+
+  /**
+   * NUT-09: ao digitar/escanear o código de barras na conferência, o insumo
+   * aprende o GTIN (se ainda não tinha) e a nutrição é buscada em segundo
+   * plano — o lojista só está conferindo a compra, não sabe que também
+   * cadastrou nutrição (§5.1 ① do PLANO-NUTRICIONAL).
+   */
+  const aprenderGtin = async (itemId: string, insumoId: string, gtinDigitado: string) => {
+    const gtinLimpo = gtinDigitado.replace(/\D/g, '');
+    if (gtinLimpo.length < 8) return;
+    if (porId.get(insumoId)?.gtin === gtinLimpo) return; // já sabíamos, nada a fazer
+
+    setStatusNutricao(s => ({ ...s, [itemId]: 'buscando' }));
+    const { data, error } = await supabase.functions.invoke('nutricao-ean', {
+      body: { insumo_id: insumoId, gtin: gtinLimpo },
+    });
+    setStatusNutricao(s => ({ ...s, [itemId]: (!error && data?.encontrado) ? 'encontrado' : 'nao_encontrado' }));
+  };
 
   const confirmar = async () => {
     setErro(null);
@@ -301,6 +327,32 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                           ))}
                         </select>
                       </label>
+                    </div>
+
+                    <div className="mt-3">
+                      <label className="block max-w-xs">
+                        <span className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-gray-600 dark:text-gray-400">
+                          <Barcode size={12} /> Código de barras (opcional)
+                        </span>
+                        <input placeholder="Escaneie ou digite o EAN"
+                          inputMode="numeric"
+                          className="w-full rounded-lg border border-gray-300 p-2 text-xs focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
+                          value={c.gtin}
+                          onChange={e => atualizar(it.id, { gtin: e.target.value })}
+                          onBlur={() => aprenderGtin(it.id, c.substituto || it.insumo_id, c.gtin)}
+                        />
+                      </label>
+                      {statusNutricao[it.id] === 'buscando' && (
+                        <p className="mt-1 text-[10px] text-gray-400">Buscando informação nutricional…</p>
+                      )}
+                      {statusNutricao[it.id] === 'encontrado' && (
+                        <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                          <Sparkles size={11} /> Nutrição encontrada — revise em Estoque › Nutrição
+                        </p>
+                      )}
+                      {statusNutricao[it.id] === 'nao_encontrado' && (
+                        <p className="mt-1 text-[10px] text-gray-400">Sem nutrição na base para este código — dá para fotografar o rótulo depois.</p>
+                      )}
                     </div>
 
                     {(falta || sobra || caro) && (

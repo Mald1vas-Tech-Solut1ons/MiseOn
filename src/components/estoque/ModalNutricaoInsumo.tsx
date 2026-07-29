@@ -1,9 +1,37 @@
-import { useEffect, useMemo, useState } from 'react';
-import { X, Apple, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { X, Apple, AlertCircle, CheckCircle2, Info, Barcode, Camera, Sparkles } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, InsumoNutricao } from '../../types';
 import { getUnidade } from '../../lib/unidades';
 import MiseOnLoader from '../MiseOnLoader';
+
+/**
+ * Redimensiona para no máximo 1600px no maior lado e recomprime em JPEG.
+ * Foto de câmera de celular vem com 8-12 MB — sem isso, o upload falha ou
+ * fica lento, e o custo por chamada de OCR sobe à toa (ADR-04, §5.1 ②).
+ */
+async function comprimirImagem(file: File): Promise<{ base64: string; mimeType: string }> {
+  const bitmap = await createImageBitmap(file);
+  const escala = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+  const largura = Math.round(bitmap.width * escala);
+  const altura = Math.round(bitmap.height * escala);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = largura;
+  canvas.height = altura;
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(bitmap, 0, 0, largura, altura);
+
+  const blob: Blob = await new Promise((resolve) =>
+    canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.85),
+  );
+  const base64 = await new Promise<string>((resolve) => {
+    const leitor = new FileReader();
+    leitor.onload = () => resolve((leitor.result as string).split(',')[1]);
+    leitor.readAsDataURL(blob);
+  });
+  return { base64, mimeType: 'image/jpeg' };
+}
 
 interface Props {
   insumo: Insumo;
@@ -29,10 +57,11 @@ const ALERGENOS = [
 ] as const;
 
 /**
- * NUT-08 — a via de escape que sempre funciona: cadastro manual de nutrição
- * por insumo, direto do painel de Estoque. Zero dependência de IA, foto ou
- * base científica. origem='MANUAL' e revisado=true na hora — o próprio ato
- * de digitar e salvar aqui É a revisão (ADR-02).
+ * NUT-08 (cadastro manual) + NUT-10/11 (confirmação de EAN e foto de rótulo).
+ * As três formas de captura convergem neste único formulário: buscar por
+ * código de barras ou fotografar o rótulo só PRÉ-PREENCHE os campos — a
+ * gravação com revisado=true só acontece quando o lojista clica Salvar
+ * (ADR-02: IA e lookup externo capturam, humano publica).
  */
 export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }: Props) {
   const [carregando, setCarregando] = useState(true);
@@ -46,6 +75,15 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
   const [valores, setValores] = useState<Record<string, string>>({});
   const [contem, setContem] = useState<Set<string>>(new Set());
   const [podeConter, setPodeConter] = useState<Set<string>>(new Set());
+
+  const [origemAtual, setOrigemAtual] = useState<InsumoNutricao['origem'] | null>(null);
+  const [revisadoAtual, setRevisadoAtual] = useState(false);
+
+  const [gtinBusca, setGtinBusca] = useState(insumo.gtin ?? '');
+  const [buscandoEan, setBuscandoEan] = useState(false);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
+  const [mensagemCaptura, setMensagemCaptura] = useState('');
+  const inputFotoRef = useRef<HTMLInputElement>(null);
 
   const unidade = getUnidade(insumo.unidade_medida);
   const dimensional = !!unidade?.fatorBase;
@@ -79,6 +117,8 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
         );
         setContem(new Set(existente.alergenos_contem ?? []));
         setPodeConter(new Set(existente.alergenos_pode_conter ?? []));
+        setOrigemAtual(existente.origem);
+        setRevisadoAtual(existente.revisado);
       }
       setCarregando(false);
     })();
@@ -89,6 +129,63 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
     const novo = new Set(set);
     if (novo.has(item)) novo.delete(item); else novo.add(item);
     setter(novo);
+  };
+
+  /** Aplica uma sugestão (EAN ou foto) nos campos do formulário — o lojista revisa e confirma clicando Salvar. */
+  const aplicarSugestao = (r: {
+    base_qtd?: number; base_unidade: 'g' | 'ml';
+    nutrientes: Record<string, number>;
+    alergenos_contem: string[]; alergenos_pode_conter?: string[];
+  }) => {
+    setBaseUnidade(r.base_unidade);
+    setValores(Object.fromEntries(Object.entries(r.nutrientes).map(([k, v]) => [k, String(v)])));
+    setContem(new Set(r.alergenos_contem));
+    setPodeConter(new Set(r.alergenos_pode_conter ?? []));
+    setRevisadoAtual(false);
+  };
+
+  const buscarPorEan = async () => {
+    const gtinLimpo = gtinBusca.replace(/\D/g, '');
+    if (gtinLimpo.length < 8) return setErro('Digite um código de barras válido (mínimo 8 dígitos).');
+    setErro(''); setMensagemCaptura(''); setBuscandoEan(true);
+
+    const { data, error } = await supabase.functions.invoke('nutricao-ean', {
+      body: { insumo_id: insumo.id, gtin: gtinLimpo },
+    });
+    setBuscandoEan(false);
+
+    if (error || !data) return setErro('Não foi possível buscar esse código agora. Tente de novo.');
+    if (!data.encontrado) return setMensagemCaptura(data.motivo || 'Não encontramos esse código.');
+
+    aplicarSugestao(data);
+    setOrigemAtual('ROTULO_EAN');
+    setMensagemCaptura(
+      `Encontramos "${data.nome_referencia}" no Open Food Facts` +
+      (data.sanidade_energetica === false ? ' — os valores parecem inconsistentes, confira antes de salvar.' : '') +
+      '. Confira os valores abaixo e salve.',
+    );
+  };
+
+  const capturarFoto = async (file: File) => {
+    setErro(''); setMensagemCaptura(''); setEnviandoFoto(true);
+    try {
+      const { base64, mimeType } = await comprimirImagem(file);
+      const { data, error } = await supabase.functions.invoke('nutricao-ocr-rotulo', {
+        body: { insumo_id: insumo.id, foto_base64: base64, mime_type: mimeType },
+      });
+      if (error || !data) { setErro('Não foi possível ler a foto agora. Tente de novo.'); return; }
+      if (!data.legivel) { setMensagemCaptura(data.motivo || 'Não consegui ler essa foto — tente com mais luz e sem reflexo.'); return; }
+
+      aplicarSugestao(data);
+      setOrigemAtual('ROTULO_FOTO');
+      setMensagemCaptura(
+        'Lemos o rótulo da foto' +
+        (data.sanidade_energetica === false ? ' — os valores parecem inconsistentes, confira antes de salvar.' : '') +
+        '. Confira os valores abaixo e salve.',
+      );
+    } finally {
+      setEnviandoFoto(false);
+    }
   };
 
   const nutrientesPreenchidos = useMemo(
@@ -128,7 +225,9 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
       nutrientes: nutrientesPreenchidos,
       alergenos_contem: Array.from(contem),
       alergenos_pode_conter: Array.from(podeConter),
-      origem: 'MANUAL',
+      // Proveniência é imutável (ADR-06): confirmar uma sugestão de EAN/foto
+      // não vira "manual" — só a origem em branco (digitado do zero) é.
+      origem: origemAtual ?? 'MANUAL',
       confianca: 1,
       revisado: true,
       revisado_por: user?.id ?? null,
@@ -154,7 +253,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
             <h2 className="text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <Apple size={18} className="text-emerald-600 dark:text-emerald-400" /> Nutrição — {insumo.nome}
             </h2>
-            <p className="text-xs text-gray-500 font-medium mt-0.5">Cadastro manual. Salvar aqui já conta como revisado.</p>
+            <p className="text-xs text-gray-500 font-medium mt-0.5">Digite, busque por código de barras ou fotografe o rótulo — salvar aqui já conta como revisado.</p>
           </div>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-300 rounded-xl transition-colors">
             <X size={20} />
@@ -171,6 +270,49 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                   <AlertCircle size={16} className="mt-0.5 shrink-0" /> <p>{erro}</p>
                 </div>
               )}
+
+              {mensagemCaptura && (
+                <div className="flex items-start gap-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-sm font-medium text-blue-700 dark:text-blue-400">
+                  <Sparkles size={16} className="mt-0.5 shrink-0" /> <p>{mensagemCaptura}</p>
+                </div>
+              )}
+
+              <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">Captura rápida (opcional)</p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="relative flex-1">
+                    <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <input
+                      value={gtinBusca}
+                      onChange={(e) => setGtinBusca(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && buscarPorEan()}
+                      placeholder="Código de barras (EAN)"
+                      inputMode="numeric"
+                      className="w-full rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white pl-9 pr-3 py-2.5 text-sm"
+                    />
+                  </div>
+                  <button onClick={buscarPorEan} disabled={buscandoEan || !gtinBusca}
+                    className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 px-4 py-2.5 text-sm font-bold hover:bg-blue-100 dark:hover:bg-blue-900/30 disabled:opacity-50 transition-colors">
+                    {buscandoEan ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-700 border-t-transparent" /> : <Barcode size={16} />}
+                    Buscar
+                  </button>
+                  <button onClick={() => inputFotoRef.current?.click()} disabled={enviandoFoto}
+                    className="flex items-center justify-center gap-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-900 px-4 py-2.5 text-sm font-bold hover:bg-purple-100 dark:hover:bg-purple-900/30 disabled:opacity-50 transition-colors">
+                    {enviandoFoto ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-purple-700 border-t-transparent" /> : <Camera size={16} />}
+                    Fotografar rótulo
+                  </button>
+                  <input
+                    ref={inputFotoRef} type="file" accept="image/*" capture="environment" className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) capturarFoto(f); e.target.value = ''; }}
+                  />
+                </div>
+                {origemAtual && origemAtual !== 'MANUAL' && (
+                  <p className="mt-2.5 text-[11px] text-gray-500 dark:text-gray-400">
+                    Fonte atual: <b>{{ ROTULO_EAN: 'código de barras (Open Food Facts)', ROTULO_FOTO: 'foto do rótulo (lida por IA)', USDA: 'base científica USDA', TBCA: 'base científica TBCA', IA: 'estimativa por IA' }[origemAtual]}</b>
+                    {!revisadoAtual && ' — ainda não revisado. Confira e clique em Salvar para confirmar.'}
+                  </p>
+                )}
+              </div>
 
               <div>
                 <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Valores declarados por</p>
