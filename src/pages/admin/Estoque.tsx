@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useMemo, lazy, Suspense } from 'react
 import { Link, useOutletContext } from 'react-router-dom';
 import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale, ClipboardCheck, Scissors, CheckCircle2, Apple } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Insumo, fmt, InsumoRendimentoJSON } from '../../types';
+import { Insumo, TipoItem, fmt, InsumoRendimentoJSON } from '../../types';
 import { UNIDADES, destinosPermitidos, validarConversao, opcoesDeEntrada } from '../../lib/unidades';
 import { OPCOES_SETOR, SETORES, validarSetor, derivarSetor } from '../../lib/estoque3d/rastreio/setores';
 import type { CtxLoja } from './AdminLayout';
@@ -21,6 +21,12 @@ import ModalRaioXProduto from '../../components/estoque/ModalRaioXProduto';
 import ModalNutricaoInsumo from '../../components/estoque/ModalNutricaoInsumo';
 import { BarChart3 } from 'lucide-react';
 
+// Só insumo que vira comida tem tabela nutricional — álcool em gel,
+// uniforme e material de escritório não entram (mesmo critério do
+// tipo_item.entra_ficha_tecnica da ERP Onda 0, restrito ao que é ingerível).
+const TIPOS_COM_NUTRICAO: readonly TipoItem[] = ['INGREDIENTE', 'PREPARO', 'REVENDA'];
+const ehTipoComNutricao = (tipo?: TipoItem) => !!tipo && TIPOS_COM_NUTRICAO.includes(tipo);
+
 export default function Estoque() {
   const { lojaId, segmento_negocio, modulos_ativos } = useOutletContext<CtxLoja>();
   const isBuffet = segmento_negocio === 'SELF_SERVICE' || modulos_ativos?.balanca === true;
@@ -32,6 +38,9 @@ export default function Estoque() {
   
   const [raioXInsumo, setRaioXInsumo] = useState<Insumo | null>(null);
   const [nutricaoInsumo, setNutricaoInsumo] = useState<Insumo | null>(null);
+  // Pra lojista discernir de longe quem já tem nutrição pronta, quem tem
+  // sugestão esperando revisão, e quem ainda nem foi tocado — sem abrir modal.
+  const [statusNutricao, setStatusNutricao] = useState<Record<string, 'completo' | 'pendente'>>({});
 
   // Buffet / Quilo
   const [modalBuffetAberto, setModalBuffetAberto] = useState(false);
@@ -178,6 +187,17 @@ export default function Estoque() {
         const todos = (data as Insumo[]) ?? [];
         setInsumos(todos.filter((i) => i.ativo));
         setInativos(todos.filter((i) => !i.ativo));
+      });
+
+    supabase.from('insumos_nutricao').select('insumo_id, revisado, nutrientes').eq('loja_id', lojaId)
+      .then(({ data, error }) => {
+        if (!atual || error) return;
+        const mapa: Record<string, 'completo' | 'pendente'> = {};
+        for (const r of data ?? []) {
+          const temValor = r.nutrientes && Object.keys(r.nutrientes).length > 0;
+          mapa[r.insumo_id] = r.revisado && temValor ? 'completo' : 'pendente';
+        }
+        setStatusNutricao(mapa);
       });
 
     // Não buscamos mais produtos de buffet do PDV, a Pista consome Preparos.
@@ -709,6 +729,12 @@ export default function Estoque() {
          </div>
       </div>
 
+      <div className="mb-3 flex items-center gap-4 text-[11px] text-gray-400 dark:text-gray-500">
+        <span className="flex items-center gap-1.5"><Apple size={13} className="rounded-full bg-emerald-500 p-0.5 text-white" /> Nutrição revisada</span>
+        <span className="flex items-center gap-1.5"><span className="relative inline-flex"><Apple size={13} className="text-emerald-500" /><span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-400" /></span> Aguardando revisão</span>
+        <span className="flex items-center gap-1.5"><Apple size={13} className="text-emerald-500" /> Ainda não cadastrada</span>
+      </div>
+
       <div className="space-y-3">
         {insumosBrutos.map((i) => {
           const custoUnit = Number(i.qtd_embalagem) > 0 ? Number(i.preco_embalagem) / Number(i.qtd_embalagem) : 0;
@@ -776,9 +802,28 @@ export default function Estoque() {
                 <button onClick={() => setTransformando(i)} className="rounded-lg p-2 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-colors" title="Desmontar em outros insumos (ex: peça em fatias)">
                    <Scissors size={16} />
                 </button>
-                <button onClick={() => setNutricaoInsumo(i)} className="rounded-lg p-2 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" title="Nutrição do insumo">
-                   <Apple size={16} />
-                </button>
+                {/* Álcool em gel, detergente, uniforme... não têm tabela nutricional —
+                    só insumo que é comida (ou vira comida) mostra este botão. O
+                    estado visual diz, sem abrir nada: pronto, pendente de revisão,
+                    ou nunca tocado — a lacuna é sempre visível, nunca silenciosa. */}
+                {ehTipoComNutricao(i.tipo_item) && (
+                  <button onClick={() => setNutricaoInsumo(i)}
+                    title={
+                      statusNutricao[i.id] === 'completo' ? 'Nutrição revisada'
+                      : statusNutricao[i.id] === 'pendente' ? 'Nutrição aguardando revisão'
+                      : 'Nutrição ainda não cadastrada'
+                    }
+                    className={`relative rounded-lg p-2 border transition-colors ${
+                      statusNutricao[i.id] === 'completo'
+                        ? 'bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600'
+                        : 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                    }`}>
+                     <Apple size={16} />
+                     {statusNutricao[i.id] === 'pendente' && (
+                       <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-white dark:ring-gray-900" />
+                     )}
+                  </button>
+                )}
                 <button onClick={() => abrirEntrada(i)}
                   className="rounded-lg border px-3 py-1.5 text-xs font-bold text-green-700 dark:text-green-400 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">+ Entrada</button>
                 <div className="flex items-center border-l dark:border-gray-700 pl-2 ml-1 space-x-1">
@@ -932,6 +977,7 @@ export default function Estoque() {
           insumo={nutricaoInsumo}
           lojaId={lojaId}
           onClose={() => setNutricaoInsumo(null)}
+          onSalvo={carregar}
         />
       )}
 

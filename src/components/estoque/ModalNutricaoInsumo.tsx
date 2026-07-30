@@ -1,9 +1,39 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Apple, AlertCircle, CheckCircle2, Info, Barcode, Camera, Sparkles } from 'lucide-react';
+import { X, Apple, AlertCircle, CheckCircle2, Info, Barcode, Camera, Sparkles, Wand2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, InsumoNutricao } from '../../types';
 import { getUnidade } from '../../lib/unidades';
 import MiseOnLoader from '../MiseOnLoader';
+
+/**
+ * `supabase.functions.invoke` engole o corpo da resposta em erros não-2xx —
+ * o motivo real (ex.: "Gemini: model not found") fica em `error.context`,
+ * a Response crua. Sem isto, todo erro de function vira um genérico inútil.
+ */
+async function motivoReal(error: unknown, generico: string): Promise<string> {
+  const ctx = (error as { context?: Response })?.context;
+  if (ctx && typeof ctx.json === 'function') {
+    try {
+      const corpo = await ctx.clone().json();
+      if (corpo?.error) return corpo.error;
+    } catch { /* corpo não era JSON — usa o genérico */ }
+  }
+  return generico;
+}
+
+// alimentos_referencia.fonte ('USDA_FDC', 'TBCA', ...) → insumos_nutricao.origem
+// (só aceita 'USDA'|'TBCA'|...). Sem este de-para, salvar quebra a constraint.
+const FONTE_PARA_ORIGEM: Record<string, InsumoNutricao['origem']> = {
+  USDA_FDC: 'USDA',
+  TBCA: 'TBCA',
+  IBGE_POF: 'USDA', // sem código próprio ainda; mais perto de base científica genérica
+  ROTULO_FABRICANTE: 'ROTULO_EAN',
+};
+
+// Rótulo curto e sem jargão de enum interno, pra exibir ao lojista.
+const ROTULO_FONTE: Record<string, string> = {
+  USDA_FDC: 'USDA', TBCA: 'TBCA', IBGE_POF: 'IBGE/POF', ROTULO_FABRICANTE: 'rótulo do fabricante',
+};
 
 /**
  * Redimensiona para no máximo 1600px no maior lado e recomprime em JPEG.
@@ -78,11 +108,19 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
 
   const [origemAtual, setOrigemAtual] = useState<InsumoNutricao['origem'] | null>(null);
   const [revisadoAtual, setRevisadoAtual] = useState(false);
+  const [fonteRef, setFonteRef] = useState<string | null>(null);
+  const [fonteVersao, setFonteVersao] = useState<string | null>(null);
+  const [fonteUrl, setFonteUrl] = useState<string | null>(null);
 
   const [gtinBusca, setGtinBusca] = useState(insumo.gtin ?? '');
   const [buscandoEan, setBuscandoEan] = useState(false);
   const [enviandoFoto, setEnviandoFoto] = useState(false);
+  const [estimandoIa, setEstimandoIa] = useState(false);
   const [mensagemCaptura, setMensagemCaptura] = useState('');
+  const [candidatosBase, setCandidatosBase] = useState<Array<{
+    id: string; nome: string; nome_pt: string | null; fonte: string; fonte_versao: string;
+    base_qtd: number; base_unidade: 'g' | 'ml'; nutrientes: Record<string, number>; similaridade: number;
+  }>>([]);
   const inputFotoRef = useRef<HTMLInputElement>(null);
 
   const unidade = getUnidade(insumo.unidade_medida);
@@ -119,11 +157,30 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
         setPodeConter(new Set(existente.alergenos_pode_conter ?? []));
         setOrigemAtual(existente.origem);
         setRevisadoAtual(existente.revisado);
+        setFonteRef(existente.fonte_ref ?? null);
+        setFonteVersao(existente.fonte_versao ?? null);
+        setFonteUrl(existente.fonte_url ?? null);
+      } else {
+        // Insumo sem nada cadastrado ainda: tenta a base científica (USDA/TBCA)
+        // pelo NOME, de graça e na hora — é o caminho certo pra in natura
+        // (tomate, cebola, alho...), que nunca vai ter código de barras (§5.1 ③).
+        const { data: candidatos } = await supabase.rpc('fn_buscar_alimento_referencia', {
+          p_termo: insumo.nome, p_limite: 4, p_minimo: 0.25,
+        });
+        const top = candidatos?.[0];
+        if (atual && top && top.similaridade >= 0.6) {
+          // Confiança alta: aplica direto, só falta o lojista conferir e salvar.
+          aplicarCandidatoBase(top);
+        } else if (atual && candidatos?.length) {
+          // Ambíguo (ex.: "Açúcar" vs. "Açúcar refinado"/"Açúcar mascavo") —
+          // mostra as opções em vez de decidir sozinho ou ficar em silêncio.
+          setCandidatosBase(candidatos);
+        }
       }
       setCarregando(false);
     })();
     return () => { atual = false; };
-  }, [insumo.id]);
+  }, [insumo.id, insumo.nome]);
 
   const toggle = (set: Set<string>, setter: (s: Set<string>) => void, item: string) => {
     const novo = new Set(set);
@@ -131,16 +188,37 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
     setter(novo);
   };
 
+  /** Aplica um candidato da base científica (USDA/TBCA) — auto (alta confiança) ou por escolha manual do lojista. */
+  const aplicarCandidatoBase = (c: {
+    id: string; nome: string; nome_pt: string | null; fonte: string; fonte_versao: string;
+    base_qtd: number; base_unidade: 'g' | 'ml'; nutrientes: Record<string, number>; similaridade: number;
+  }) => {
+    setBaseUnidade(c.base_unidade);
+    setValores(Object.fromEntries(Object.entries(c.nutrientes ?? {}).map(([k, v]) => [k, String(v)])));
+    setOrigemAtual(FONTE_PARA_ORIGEM[c.fonte] ?? 'MANUAL');
+    setFonteRef(c.id);
+    setFonteVersao(c.fonte_versao);
+    setFonteUrl(null);
+    setCandidatosBase([]);
+    setMensagemCaptura(
+      `${c.nome_pt || c.nome} · ${ROTULO_FONTE[c.fonte] ?? c.fonte} · ${Math.round(c.similaridade * 100)}%`,
+    );
+  };
+
   /** Aplica uma sugestão (EAN ou foto) nos campos do formulário — o lojista revisa e confirma clicando Salvar. */
   const aplicarSugestao = (r: {
     base_qtd?: number; base_unidade: 'g' | 'ml';
     nutrientes: Record<string, number>;
     alergenos_contem: string[]; alergenos_pode_conter?: string[];
+    peso_medio_un_g?: number | null;
   }) => {
     setBaseUnidade(r.base_unidade);
     setValores(Object.fromEntries(Object.entries(r.nutrientes).map(([k, v]) => [k, String(v)])));
     setContem(new Set(r.alergenos_contem));
     setPodeConter(new Set(r.alergenos_pode_conter ?? []));
+    // Peso líquido identificado (Cosmos) — só preenche se ainda não havia nada digitado.
+    if (r.peso_medio_un_g && !pesoMedioUnG) setPesoMedioUnG(String(r.peso_medio_un_g));
+    setFonteRef(null); setFonteVersao(null); setFonteUrl(null); // cada chamador define a sua, se tiver
     setRevisadoAtual(false);
   };
 
@@ -154,15 +232,19 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
     });
     setBuscandoEan(false);
 
-    if (error || !data) return setErro('Não foi possível buscar esse código agora. Tente de novo.');
-    if (!data.encontrado) return setMensagemCaptura(data.motivo || 'Não encontramos esse código.');
+    if (error || !data) return setErro(await motivoReal(error, 'Não foi possível buscar esse código agora. Tente de novo.'));
+    if (!data.encontrado) {
+      // Identificação parcial: nome e peso já vieram (Cosmos), só falta a nutrição.
+      if (data.peso_medio_sugerido_g && !pesoMedioUnG) setPesoMedioUnG(String(data.peso_medio_sugerido_g));
+      return setMensagemCaptura(data.motivo || 'Não encontramos esse código.');
+    }
 
     aplicarSugestao(data);
     setOrigemAtual('ROTULO_EAN');
+    setFonteUrl(data.fonte_url ?? null);
     setMensagemCaptura(
-      `Encontramos "${data.nome_referencia}" no Open Food Facts` +
-      (data.sanidade_energetica === false ? ' — os valores parecem inconsistentes, confira antes de salvar.' : '') +
-      '. Confira os valores abaixo e salve.',
+      `${data.nome_referencia} · Open Food Facts` +
+      (data.sanidade_energetica === false ? ' · valores inconsistentes, revise' : ''),
     );
   };
 
@@ -173,18 +255,39 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
       const { data, error } = await supabase.functions.invoke('nutricao-ocr-rotulo', {
         body: { insumo_id: insumo.id, foto_base64: base64, mime_type: mimeType },
       });
-      if (error || !data) { setErro('Não foi possível ler a foto agora. Tente de novo.'); return; }
+      if (error || !data) { setErro(await motivoReal(error, 'Não foi possível ler a foto agora. Tente de novo.')); return; }
       if (!data.legivel) { setMensagemCaptura(data.motivo || 'Não consegui ler essa foto — tente com mais luz e sem reflexo.'); return; }
 
       aplicarSugestao(data);
       setOrigemAtual('ROTULO_FOTO');
       setMensagemCaptura(
-        'Lemos o rótulo da foto' +
-        (data.sanidade_energetica === false ? ' — os valores parecem inconsistentes, confira antes de salvar.' : '') +
-        '. Confira os valores abaixo e salve.',
+        'Rótulo lido' +
+        (data.sanidade_energetica === false ? ' · valores inconsistentes, revise' : ''),
       );
     } finally {
       setEnviandoFoto(false);
+    }
+  };
+
+  /**
+   * Caminho ④ (§5.1, ADR-04 papel 3): quando não há código de barras nem foto,
+   * o Gemini estima a partir só do nome do insumo. Confiança sempre baixa
+   * (0,3) — nunca conta para o nível 2 do selo, e continua exigindo Salvar.
+   */
+  const estimarComIa = async () => {
+    setErro(''); setMensagemCaptura(''); setEstimandoIa(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('nutricao-estimar-ia', {
+        body: { insumo_id: insumo.id },
+      });
+      if (error || !data) { setErro(await motivoReal(error, 'Não foi possível estimar agora. Tente de novo.')); return; }
+      if (!data.estimavel) { setMensagemCaptura(data.motivo || 'Não deu para estimar a partir do nome do insumo.'); return; }
+
+      aplicarSugestao(data);
+      setOrigemAtual('IA');
+      setMensagemCaptura(`Estimativa por IA · ${data.justificativa}`);
+    } finally {
+      setEstimandoIa(false);
     }
   };
 
@@ -225,9 +328,12 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
       nutrientes: nutrientesPreenchidos,
       alergenos_contem: Array.from(contem),
       alergenos_pode_conter: Array.from(podeConter),
-      // Proveniência é imutável (ADR-06): confirmar uma sugestão de EAN/foto
-      // não vira "manual" — só a origem em branco (digitado do zero) é.
+      // Proveniência é imutável (ADR-06): confirmar uma sugestão de EAN/foto/
+      // base científica não vira "manual" — só a origem em branco é.
       origem: origemAtual ?? 'MANUAL',
+      fonte_ref: fonteRef,
+      fonte_versao: fonteVersao,
+      fonte_url: fonteUrl,
       confianca: 1,
       revisado: true,
       revisado_por: user?.id ?? null,
@@ -272,8 +378,27 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
               )}
 
               {mensagemCaptura && (
-                <div className="flex items-start gap-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 text-sm font-medium text-blue-700 dark:text-blue-400">
-                  <Sparkles size={16} className="mt-0.5 shrink-0" /> <p>{mensagemCaptura}</p>
+                <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                  <Sparkles size={12} className="shrink-0 text-blue-500 dark:text-blue-400" /> {mensagemCaptura}
+                </div>
+              )}
+
+              {candidatosBase.length > 0 && (
+                <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-4">
+                  <p className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">
+                    <Info size={14} /> "{insumo.nome}" é ambíguo — qual bate melhor?
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {candidatosBase.map((c) => (
+                      <button key={c.id} onClick={() => aplicarCandidatoBase(c)}
+                        className="rounded-full border border-amber-300 dark:border-amber-800 bg-white dark:bg-gray-900 px-3 py-1.5 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors">
+                        {c.nome_pt || c.nome} <span className="opacity-60">({Math.round(c.similaridade * 100)}%)</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[11px] text-amber-700/80 dark:text-amber-400/70">
+                    Nenhum bateu? O nome do insumo pode estar genérico demais — considere renomear (ex.: "Açúcar" → "Açúcar Refinado") ou use a captura por código de barras/foto abaixo.
+                  </p>
                 </div>
               )}
 
@@ -305,10 +430,20 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                     ref={inputFotoRef} type="file" accept="image/*" capture="environment" className="hidden"
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) capturarFoto(f); e.target.value = ''; }}
                   />
+                  <button onClick={estimarComIa} disabled={estimandoIa}
+                    title="Último recurso: a IA chuta a partir só do nome do insumo, com confiança baixa"
+                    className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 px-4 py-2.5 text-sm font-bold hover:bg-amber-100 dark:hover:bg-amber-900/30 disabled:opacity-50 transition-colors">
+                    {estimandoIa ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-700 border-t-transparent" /> : <Wand2 size={16} />}
+                    Estimar com IA
+                  </button>
                 </div>
+                <p className="mt-2 text-[11px] text-gray-400">
+                  Ordem recomendada: código de barras → foto do rótulo → estimativa por IA (menos confiável, sempre marcada em amarelo).
+                </p>
                 {origemAtual && origemAtual !== 'MANUAL' && (
-                  <p className="mt-2.5 text-[11px] text-gray-500 dark:text-gray-400">
-                    Fonte atual: <b>{{ ROTULO_EAN: 'código de barras (Open Food Facts)', ROTULO_FOTO: 'foto do rótulo (lida por IA)', USDA: 'base científica USDA', TBCA: 'base científica TBCA', IA: 'estimativa por IA' }[origemAtual]}</b>
+                  <p className={`mt-2.5 text-[11px] ${origemAtual === 'IA' ? 'font-bold text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {origemAtual === 'IA' && '⚠ '}
+                    Fonte atual: <b>{{ ROTULO_EAN: 'código de barras (Open Food Facts)', ROTULO_FOTO: 'foto do rótulo (lida por IA)', USDA: 'base científica USDA', TBCA: 'base científica TBCA', IA: 'estimativa por IA — NÃO é dado medido' }[origemAtual]}</b>
                     {!revisadoAtual && ' — ainda não revisado. Confira e clique em Salvar para confirmar.'}
                   </p>
                 )}
