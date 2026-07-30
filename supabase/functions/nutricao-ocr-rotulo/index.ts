@@ -27,7 +27,11 @@ const json = (data: unknown, init: ResponseInit = {}) =>
   });
 const erro = (msg: string, status = 400) => json({ error: msg }, { status });
 
-const MODELO = 'gemini-2.0-flash-lite';
+// ADR-04: OCR de rótulo é o papel barato — Flash-Lite, não o Flash cheio.
+// Lista real de modelos desta chave confirmada via ListModels (mesmo
+// diagnóstico do nutricao-estimar-ia). Alias "latest" em vez de versão fixa,
+// pelo mesmo motivo: para de quebrar a cada deprecação silenciosa do Google.
+const MODELO = 'gemini-flash-lite-latest';
 
 const CODIGOS_NUTRIENTES = [
   'ENERGIA_KCAL', 'CARBOIDRATOS', 'ACUCARES_TOTAIS', 'ACUCARES_ADICIONADOS',

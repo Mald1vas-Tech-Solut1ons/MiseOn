@@ -2,17 +2,26 @@
 //
 // Caminho ① do PLANO-NUTRICIONAL §5.1: o lojista (ou a conferência de compra,
 // NUT-09) já tem o GTIN do produto. Em vez de digitar a tabela nutricional,
-// buscamos no Open Food Facts (ODbL, atribuição obrigatória) e devolvemos uma
-// SUGESTÃO — nunca gravamos como revisado. ADR-02: humano publica.
+// buscamos e devolvemos uma SUGESTÃO — nunca gravamos como revisado.
+// ADR-02: humano publica.
+//
+// Duas fontes com papéis diferentes (não a mesma coisa com nomes trocados):
+//   Cosmos (Bluesoft)   → IDENTIFICAÇÃO: nome comercial, NCM, peso líquido.
+//                         Cobertura brasileira muito melhor que a OFF, mas
+//                         NÃO tem tabela nutricional — não é essa a função dela.
+//   Open Food Facts     → NUTRIÇÃO: kcal, macros, alérgenos. Cobertura BR fraca,
+//                         mas é a única das duas com dado nutricional em si.
+// O peso líquido da Cosmos fecha sozinho o problema mais comum do cadastro
+// manual: insumo em "un" sem peso médio informado (exatamente o cenário que
+// NUT-07 testa). O NCM alimenta o classificador de tipo_item da Onda 1 do ERP.
 //
 // Cache: platform-wide em alimentos_referencia (fonte='ROTULO_FABRICANTE',
-// codigo_fonte=gtin). Duas lojas que compram o mesmo produto de fabricante
-// não pagam a chamada externa duas vezes — e a proveniência (fonte_url) vai
-// junto, o que é exigência de licença (ODbL) e de defensabilidade (ADR-06).
+// codigo_fonte=gtin). Duas lojas que compram o mesmo produto não pagam a
+// chamada externa duas vezes — e a proveniência (fonte_url) vai junto.
 //
-// R-05 (risco de licença): consumimos por *lookup* e gravamos o valor como
-// dado do insumo do lojista, com atribuição — não redistribuímos a base do
-// Open Food Facts como base. A fronteira jurídica exata fica para antes do GA.
+// R-05 (risco de licença ODbL): consumimos por *lookup* e gravamos o valor
+// como dado do insumo do lojista, com atribuição — não redistribuímos a base
+// do Open Food Facts como base. A fronteira jurídica exata fica para antes do GA.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -97,6 +106,46 @@ function sanidadeEnergetica(n: Record<string, number>): boolean | null {
   return Math.abs(calc - n.ENERGIA_KCAL) <= n.ENERGIA_KCAL * 0.2;
 }
 
+interface IdentificacaoCosmos {
+  descricao: string | null;
+  ncm: string | null;
+  pesoLiquidoG: number | null;
+}
+
+/**
+ * Identificação (não nutrição) via Cosmos/Bluesoft. Falha silenciosa por
+ * design: sem a chave configurada, ou se a Cosmos cair, o fluxo inteiro
+ * continua funcionando com Open Food Facts — Cosmos é um bônus, não uma
+ * dependência dura.
+ */
+async function identificarNaCosmos(gtin: string): Promise<IdentificacaoCosmos | null> {
+  const token = Deno.env.get('COSMOS_API_KEY');
+  if (!token) return null;
+
+  try {
+    const r = await fetch(`https://api.cosmos.bluesoft.com.br/gtins/${gtin}.json`, {
+      headers: {
+        'X-Cosmos-Token': token,
+        'User-Agent': 'MiseOn (contato@miseon.app.br)',
+      },
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    if (!d || d.gtin == null) return null;
+
+    return {
+      descricao: d.description || d.brand?.name || null,
+      ncm: d.ncm?.code || null,
+      // A Cosmos documenta net_weight em gramas.
+      pesoLiquidoG: Number.isFinite(Number(d.net_weight)) && Number(d.net_weight) > 0
+        ? Number(d.net_weight)
+        : null,
+    };
+  } catch {
+    return null; // rede instável não pode derrubar a busca de nutrição
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
@@ -117,13 +166,35 @@ Deno.serve(async (req) => {
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
     const { data: insumo } = await admin
-      .from('insumos').select('id, loja_id, nome').eq('id', insumo_id).maybeSingle();
+      .from('insumos').select('id, loja_id, nome, unidade_medida, ncm').eq('id', insumo_id).maybeSingle();
     if (!insumo) return erro('Insumo não encontrado', 404);
 
     const { data: acesso } = await admin
       .from('usuarios_loja').select('papel').eq('user_id', caller.id).eq('loja_id', insumo.loja_id).maybeSingle();
     if (!acesso || !['admin', 'operador'].includes(acesso.papel)) {
       return erro('Sem permissão nesta loja', 403);
+    }
+
+    // Identificação (Cosmos) roda sempre, em paralelo com o resto — é bônus,
+    // não bloqueia nada mesmo se faltar chave ou a Cosmos estiver fora do ar.
+    const identificacao = await identificarNaCosmos(gtinLimpo);
+
+    if (identificacao?.ncm && !insumo.ncm) {
+      await admin.from('insumos').update({ ncm: identificacao.ncm }).eq('id', insumo.id);
+    }
+
+    // Só sugere peso médio se o insumo estiver numa unidade sem massa
+    // universal (un, fatias...) — em kg/g/L/ml a física já resolve sozinha,
+    // e sobrescrever seria pisar numa ponte que o lojista já declarou.
+    let pesoMedioSugerido: number | null = null;
+    if (identificacao?.pesoLiquidoG) {
+      const { data: um } = await admin
+        .from('unidades_medida').select('fator_base').eq('codigo', insumo.unidade_medida).maybeSingle();
+      if (um && um.fator_base == null) {
+        const { data: nutricaoAtual } = await admin
+          .from('insumos_nutricao').select('peso_medio_un_g').eq('insumo_id', insumo.id).maybeSingle();
+        if (!nutricaoAtual?.peso_medio_un_g) pesoMedioSugerido = identificacao.pesoLiquidoG;
+      }
     }
 
     // 1) Cache local: já buscamos este GTIN para QUALQUER loja antes?
@@ -138,13 +209,37 @@ Deno.serve(async (req) => {
       const off = await r.json();
 
       if (off.status !== 1 || !off.product) {
-        return json({ encontrado: false, motivo: 'Produto não está no Open Food Facts — tente a foto do rótulo.' });
+        // A OFF não achou nutrição, mas a Cosmos pode ter identificado o
+        // produto — o lojista sai com nome e peso prontos, faltando só a foto.
+        if (identificacao?.descricao) {
+          if (pesoMedioSugerido) {
+            await admin.from('insumos_nutricao').upsert({
+              insumo_id: insumo.id, loja_id: insumo.loja_id,
+              base_qtd: 100, base_unidade: 'g', nutrientes: {},
+              peso_medio_un_g: pesoMedioSugerido,
+              alergenos_contem: [], alergenos_pode_conter: [],
+              origem: 'MANUAL', confianca: 0, revisado: false,
+              atualizado_em: new Date().toISOString(),
+            }, { onConflict: 'insumo_id', ignoreDuplicates: false });
+          }
+          return json({
+            encontrado: false,
+            identificado_como: identificacao.descricao,
+            peso_medio_sugerido_g: pesoMedioSugerido,
+            motivo: `Identificamos "${identificacao.descricao}"${pesoMedioSugerido ? ` (${pesoMedioSugerido} g)` : ''}, mas não achamos tabela nutricional pronta — fotografe o rótulo.`,
+          });
+        }
+        return json({ encontrado: false, motivo: 'Produto não encontrado nas bases disponíveis — tente a foto do rótulo.' });
       }
 
       const nutriments = off.product.nutriments ?? {};
       const nutrientes = mapearNutrientes(nutriments);
       if (Object.keys(nutrientes).length === 0 || nutrientes.ENERGIA_KCAL == null) {
-        return json({ encontrado: false, motivo: 'Produto encontrado, mas sem tabela nutricional legível na base.' });
+        return json({
+          encontrado: false,
+          identificado_como: identificacao?.descricao ?? null,
+          motivo: 'Produto encontrado, mas sem tabela nutricional legível na base — tente a foto do rótulo.',
+        });
       }
 
       // Base: OFF expressa "_100g" mesmo para líquidos na maioria dos casos;
@@ -159,8 +254,10 @@ Deno.serve(async (req) => {
           fonte_url: `https://world.openfoodfacts.org/product/${gtinLimpo}`,
           licenca: 'ODbL-1.0',
           codigo_fonte: gtinLimpo,
-          nome: off.product.product_name || off.product.brands || `Produto ${gtinLimpo}`,
-          nome_pt: off.product.product_name_pt || off.product.product_name || null,
+          // Cosmos tem cobertura e formatação brasileira melhor — prevalece
+          // quando disponível; OFF é o complemento/fallback.
+          nome: off.product.product_name || identificacao?.descricao || off.product.brands || `Produto ${gtinLimpo}`,
+          nome_pt: identificacao?.descricao || off.product.product_name_pt || off.product.product_name || null,
           base_qtd: 100,
           base_unidade: baseUnidade,
           nutrientes,
@@ -179,6 +276,7 @@ Deno.serve(async (req) => {
       loja_id: insumo.loja_id,
       base_qtd: referencia.base_qtd,
       base_unidade: referencia.base_unidade,
+      peso_medio_un_g: pesoMedioSugerido,
       nutrientes: referencia.nutrientes,
       alergenos_contem: referencia.alergenos_contem,
       alergenos_pode_conter: [],
@@ -201,6 +299,7 @@ Deno.serve(async (req) => {
       nome_referencia: referencia.nome,
       base_qtd: referencia.base_qtd,
       base_unidade: referencia.base_unidade,
+      peso_medio_un_g: pesoMedioSugerido,
       nutrientes: referencia.nutrientes,
       alergenos_contem: referencia.alergenos_contem,
       fonte_url: referencia.fonte_url,
