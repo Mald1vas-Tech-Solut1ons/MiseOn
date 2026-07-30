@@ -17,42 +17,67 @@ serve(async (req) => {
     if (!nome_produto) throw new Error('nome_produto é obrigatório.');
 
     // Autenticação Supabase
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) throw new Error('Usuário não autenticado.');
+    const jwt = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
+    if (!jwt) throw new Error('Usuário não autenticado. Por favor, faça login novamente.');
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, { global: { headers: { Authorization: authHeader } } });
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const admin = createClient(supabaseUrl, serviceKey);
     
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error('Acesso negado.');
+    const { data: { user }, error: userError } = await admin.auth.getUser(jwt);
+    if (userError || !user) throw new Error('Sessão de usuário expirada ou inválida. Recarregue a página e faça login novamente.');
 
     const groqKey = Deno.env.get('GROQ_API_KEY');
-    if (!groqKey) throw new Error('Chave do Groq não configurada.');
+    if (!groqKey) {
+      throw new Error('Chave GROQ_API_KEY não configurada no Supabase (Secrets). Adicione GROQ_API_KEY no painel do Supabase.');
+    }
 
     const prompt = `Você é um copywriter especialista em gastronomia e food delivery.\n` +
       `Escreva uma descrição extremamente apetitosa, focada em vender e fazer o cliente "salivar", para um produto chamado "${nome_produto}". ` +
       (nome_categoria ? `O produto é da categoria: ${nome_categoria}. ` : '') +
       `A descrição deve ser curta (no máximo 3 linhas), direta, sem emojis exagerados, focando em texturas, sabores e desejo. Não use aspas na resposta.`;
 
-    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${groqKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        max_tokens: 150
-      })
-    });
+    const modelos = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'];
+    let respostaTexto = '';
+    let ultimoErro = '';
 
-    const aiData = await groqResponse.json();
-    if (aiData.error) throw new Error(`Erro do Groq: ${aiData.error.message}`);
+    for (const model of modelos) {
+      try {
+        const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${groqKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.7,
+            max_tokens: 150
+          })
+        });
 
-    const respostaTexto = aiData.choices?.[0]?.message?.content?.trim();
-    if (!respostaTexto) throw new Error('Não foi possível gerar a descrição.');
+        const aiData = await groqResponse.json();
+        if (aiData.error) {
+          ultimoErro = aiData.error.message || JSON.stringify(aiData.error);
+          console.warn(`Erro no modelo ${model}:`, ultimoErro);
+          continue;
+        }
+
+        const texto = aiData.choices?.[0]?.message?.content?.trim();
+        if (texto) {
+          respostaTexto = texto;
+          break;
+        }
+      } catch (err: any) {
+        ultimoErro = err.message || String(err);
+        console.warn(`Exceção ao chamar modelo ${model}:`, ultimoErro);
+      }
+    }
+
+    if (!respostaTexto) {
+      throw new Error(ultimoErro ? `Erro do Groq: ${ultimoErro}` : 'Não foi possível gerar a descrição.');
+    }
 
     return new Response(JSON.stringify({ texto: respostaTexto }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -60,9 +85,9 @@ serve(async (req) => {
     });
   } catch (error: any) {
     console.error('Erro na Edge Function ai-gerar-descricao:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error.message || 'Erro interno' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      status: 200,
     });
   }
 });

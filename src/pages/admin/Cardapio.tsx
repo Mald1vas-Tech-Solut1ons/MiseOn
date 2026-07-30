@@ -80,7 +80,7 @@ export default function CardapioAdmin() {
   };
 
   return (
-    <div data-tour="tour-cardapio-header" className="p-4">
+    <div data-tour="tour-cardapio-header" className="p-4 pb-28 lg:pb-12">
       <div className="mb-3 flex gap-2">
         {(['produtos', 'categorias'] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)}
@@ -305,7 +305,18 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
         body: { nome_produto: nome, nome_categoria: catNome }
       });
 
-      if (error) throw error;
+      if (error) {
+        let msg = error.message;
+        try {
+          if ('context' in error && (error as any).context) {
+            const body = await (error as any).context.json();
+            if (body?.error) msg = body.error;
+          }
+        } catch {
+          /* ignora falhas ao ler json do contexto do erro */
+        }
+        throw new Error(msg);
+      }
       if (data?.error) throw new Error(data.error);
       
       const texto = data?.texto;
