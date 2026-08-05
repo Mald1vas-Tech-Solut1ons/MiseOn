@@ -19,7 +19,9 @@ const EstoqueCusto3D = lazy(() => import('../../lib/estoque3d/EstoqueCusto3D'));
 const EstoqueRastreio3D = lazy(() => import('../../lib/estoque3d/rastreio/EstoqueRastreio3D'));
 import ModalRaioXProduto from '../../components/estoque/ModalRaioXProduto';
 import ModalNutricaoInsumo from '../../components/estoque/ModalNutricaoInsumo';
-import { BarChart3 } from 'lucide-react';
+import ScannerQRCodeModal from '../../components/estoque/ScannerQRCodeModal';
+import ModalImportarNFCe from '../../components/estoque/ModalImportarNFCe';
+import { BarChart3, QrCode } from 'lucide-react';
 
 // Só insumo que vira comida tem tabela nutricional — álcool em gel,
 // uniforme e material de escritório não entram (mesmo critério do
@@ -51,10 +53,41 @@ export default function Estoque() {
   const [transformando, setTransformando] = useState<Insumo | null | undefined>(undefined);
   const [avisoEstoque, setAvisoEstoque] = useState<string | null>(null);
 
+  // NFC-e Scanner & Importação
+  const [modalScannerAberto, setModalScannerAberto] = useState(false);
+  const [dadosNotaImportada, setDadosNotaImportada] = useState<any | null>(null);
+  const [consultandoNota, setConsultandoNota] = useState(false);
+
+  const processarQRCode = async (entrada: string) => {
+    setConsultandoNota(true);
+    try {
+      const isUrl = entrada.includes('http://') || entrada.includes('https://');
+      const { data, error } = await supabase.functions.invoke('nfe-importar-qrcode', {
+        body: {
+          url_qrcode: isUrl ? entrada : undefined,
+          chave_acesso: !isUrl ? entrada : undefined
+        }
+      });
+
+      if (error || !data || data.error) {
+        alert(`Erro ao consultar nota na SEFAZ: ${error?.message || data?.error || 'Verifique se o QR Code é de São Paulo.'}`);
+      } else {
+        setModalScannerAberto(false);
+        setDadosNotaImportada(data);
+      }
+    } catch (err: any) {
+      alert(`Falha de conexão com a SEFAZ: ${err?.message || err}`);
+    } finally {
+      setConsultandoNota(false);
+    }
+  };
+
   // States para Novo Insumo Dinâmico
+  const [modoCadastro, setModoCadastro] = useState<'RAPIDO' | 'AVANCADO'>('RAPIDO');
   const [nome, setNome] = useState('');
   const [categoriaInsumo, setCategoriaInsumo] = useState('Ingrediente');
   const [setor, setSetor] = useState('');
+  const [unidadeDireta, setUnidadeDireta] = useState('un');
   const [isNovaCategoria, setIsNovaCategoria] = useState(false);
   const [nomeNovaCategoria, setNomeNovaCategoria] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState<string | null>(null);
@@ -246,9 +279,15 @@ export default function Estoque() {
       }
     }
 
+    // Se estiver em modo RAPIDO, força a unidade de compra e o rendimento para 1:1 com a unidade direta
+    const uCompra = modoCadastro === 'RAPIDO' ? unidadeDireta : unidadeCompra;
+    const pRendimento = modoCadastro === 'RAPIDO' 
+      ? [{ id: '1', rendimento: '1', unidade: unidadeDireta }]
+      : passosRendimento;
+
     // Defesa em profundidade: a UI já filtra os destinos ilegais, mas o save
     // recusa de novo — um estado antigo ou colado à mão não pode furar a regra.
-    if (!cadeiaValida) {
+    if (modoCadastro === 'AVANCADO' && !cadeiaValida) {
       alert(`Conversão inválida:\n\n${errosCadeia.join('\n')}`);
       return;
     }
@@ -256,15 +295,15 @@ export default function Estoque() {
     try {
     const qtdEstoque = Number(qtdEstoqueCompra || 0);
     const precoEmb = Number(precoCompra || 0);
-    const rendEmb = passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1);
-    const unidadeUso = passosRendimento[passosRendimento.length - 1].unidade;
+    const rendEmb = pRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1);
+    const unidadeUso = pRendimento[pRendimento.length - 1].unidade;
     const estoqueFinal = qtdEstoque * rendEmb;
     
     let jsonRegras: InsumoRendimentoJSON | null = null;
-    if (passosRendimento.length > 1 || passosRendimento[0].unidade !== unidadeCompra || Number(passosRendimento[0].rendimento) !== 1) {
+    if (modoCadastro === 'AVANCADO' && (pRendimento.length > 1 || pRendimento[0].unidade !== uCompra || Number(pRendimento[0].rendimento) !== 1)) {
        jsonRegras = { regras: [] };
-       let unidadeAtual = unidadeCompra;
-       for (const passo of passosRendimento) {
+       let unidadeAtual = uCompra;
+       for (const passo of pRendimento) {
           jsonRegras.regras.push({
              de_qtd: 1, de_unidade: unidadeAtual,
              para_qtd: Number(passo.rendimento), para_unidade: passo.unidade
@@ -327,12 +366,15 @@ export default function Estoque() {
     setEstoqueMinimo(String(i.estoque_minimo || ''));
     
     if (i.detalhes_rendimento?.regras && i.detalhes_rendimento.regras.length > 0) {
+       setModoCadastro('AVANCADO');
        setUnidadeCompra(i.detalhes_rendimento.regras[0].de_unidade);
        setPassosRendimento(i.detalhes_rendimento.regras.map((r: any, idx: number) => ({
           id: String(idx), rendimento: String(r.para_qtd), unidade: r.para_unidade
        })));
        setQtdEstoqueCompra(String(Number(i.quantidade_atual) / Number(i.qtd_embalagem)));
     } else {
+       setModoCadastro('RAPIDO');
+       setUnidadeDireta(i.unidade_medida);
        setUnidadeCompra(i.unidade_medida);
        setPassosRendimento([{ id: '1', rendimento: '1', unidade: i.unidade_medida }]);
        setQtdEstoqueCompra(String(i.quantidade_atual));
@@ -346,7 +388,9 @@ export default function Estoque() {
 
   const cancelarEdicao = () => {
     setEditando(null);
+    setModoCadastro('RAPIDO');
     setNome(''); setQtdEstoqueCompra(''); setEstoqueMinimo(''); setPrecoCompra(''); setCategoriaInsumo('Ingrediente'); setSetor('');
+    setUnidadeDireta('un');
     setIsNovaCategoria(false); setNomeNovaCategoria('');
     setPassosRendimento([{ id: '1', rendimento: '1', unidade: 'un' }]); setUnidadeCompra('pct');
   };
@@ -499,13 +543,43 @@ export default function Estoque() {
         </div>
       )}
 
+      {/* BANNER DE IMPORTAÇÃO RÁPIDA NFC-E */}
+      <div className="mb-6 rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 p-4 text-white shadow-lg shadow-orange-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <p className="flex items-center gap-2 font-black text-lg">
+            <QrCode size={22} className="animate-bounce" /> Importar Cupom de Mercado (NFC-e SP)
+          </p>
+          <p className="text-xs text-orange-100 mt-0.5">
+            Escaneie o QR Code do cupom fiscal e lance 15 compras de supermercado em menos de 5 segundos no estoque.
+          </p>
+        </div>
+        <button
+          onClick={() => setModalScannerAberto(true)}
+          className="shrink-0 flex items-center gap-2 bg-white text-orange-600 hover:bg-orange-50 font-black text-sm px-5 py-3 rounded-xl shadow-md transition-all hover:scale-105"
+        >
+          <QrCode size={18} /> Escanear Nota Fiscal
+        </button>
+      </div>
+
       {/* NOVO INSUMO COM MOTOR DINÂMICO */}
       <div id="form-novo-insumo" data-tour="tour-estoque-btn-novo-insumo" className={`mb-8 rounded-2xl ${editando ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 ring-2 ring-blue-500/20' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'} border p-5 shadow-sm transition-all duration-300`}>
-        <div className="mb-5 flex items-center justify-between">
-           <p className="text-sm font-bold flex items-center gap-2 dark:text-gray-100">
-             {editando ? <Pencil size={18} className="text-blue-500" /> : <Calculator size={18} className="text-[var(--cor-primaria)]" />} 
-             {editando ? 'Editar Insumo' : 'Cadastrar Novo Insumo'}
-           </p>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+           <div className="flex items-center gap-3">
+             <p className="text-sm font-bold flex items-center gap-2 dark:text-gray-100">
+               {editando ? <Pencil size={18} className="text-blue-500" /> : <Calculator size={18} className="text-[var(--cor-primaria)]" />} 
+               {editando ? 'Editar Insumo' : 'Cadastrar Insumo'}
+             </p>
+             <div className="flex rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+               <button type="button" onClick={() => setModoCadastro('RAPIDO')}
+                 className={`rounded px-3 py-1 text-xs font-bold transition-all ${modoCadastro === 'RAPIDO' ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
+                 ⚡ Rápido (Direto)
+               </button>
+               <button type="button" onClick={() => setModoCadastro('AVANCADO')}
+                 className={`rounded px-3 py-1 text-xs font-bold transition-all ${modoCadastro === 'AVANCADO' ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
+                 ⚙️ Conversão de Embalagem
+               </button>
+             </div>
+           </div>
            {editando && (
              <button onClick={cancelarEdicao} className="text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                Cancelar Edição
@@ -514,7 +588,7 @@ export default function Estoque() {
         </div>
         
         <div className="space-y-5">
-           {/* Nome */}
+           {/* Linha 1: Dados básicos */}
            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <label data-tour="tour-estoque-campo-nome" className="block">
                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Nome do Insumo / Produto</span>
@@ -558,112 +632,164 @@ export default function Estoque() {
                    ))}
                  </select>
                  <span className="mt-1 block text-[10px] text-gray-400 dark:text-gray-500">
-                   Onde o item fica guardado — usado no Rastreio 3D. "Automático" deduz pelo tipo do item.
+                   Onde o item fica guardado — usado no Rastreio 3D.
                  </span>
               </label>
            </div>
            
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Compra */}
-              <div data-tour="tour-estoque-campo-compra" className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-200 dark:border-gray-700/50">
-                 <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">1. Como você compra?</p>
-                 <div className="space-y-3">
-                    <label className="block">
-                       <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Unidade de Compra</span>
-                       <select className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 outline-none" value={unidadeCompra} onChange={e => setUnidadeCompra(e.target.value)}>
-                         {UNIDADES.map(u => (
-                           <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>
-                         ))}
-                       </select>
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                       <label className="block">
-                          <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Preço pago (R$)</span>
-                          <input className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 focus:outline-none" type="number" placeholder="0.00" value={precoCompra} onChange={e => setPrecoCompra(e.target.value)} />
-                       </label>
-                       <label className="block">
-                          <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Qtd em Estoque</span>
-                          <div className="mt-1 flex rounded-lg border border-gray-300 overflow-hidden dark:border-gray-600">
-                             <input className="w-full p-2 text-sm dark:bg-gray-900 dark:text-gray-100 focus:outline-none bg-transparent" type="number" placeholder="0" value={qtdEstoqueCompra} onChange={e => setQtdEstoqueCompra(e.target.value)} />
-                             <div className="bg-gray-100 dark:bg-gray-800 px-2 flex items-center justify-center text-[11px] text-gray-500 font-medium border-l border-gray-300 dark:border-gray-600 min-w-[3rem]">{unidadeCompra}</div>
-                          </div>
-                       </label>
-                    </div>
-                 </div>
-              </div>
-              
-              {/* Uso / Conversão */}
-              <div data-tour="tour-estoque-campo-conversao" className="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
-                 <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mb-3 uppercase tracking-wider">2. COMO VOCÊ ARMAZENA / USA? (CONVERSÃO)</p>
-                 <div className="space-y-3">
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-2">Ex: Compro <b>Fardo</b> ➔ Rende 6 <b>Unidades</b>. Ou Compro <b>Caixa</b> ➔ Rende 20 <b>Kg</b>.</p>
-                    {passosRendimento.map((passo, index) => {
-                       const unidadeAnterior = index === 0 ? unidadeCompra : passosRendimento[index - 1].unidade;
-                       // UX preventiva: só entram no dropdown os destinos que a
-                       // matriz de grandezas considera legais para esta origem.
-                       const permitidos = destinosPermitidos(unidadeAnterior);
-                       const validacao = validarConversao(
-                          unidadeAnterior, passo.unidade, 1, Number(passo.rendimento) || 0,
-                       );
-                       return (
-                          <div key={passo.id} className="relative p-3 bg-white dark:bg-gray-900 border border-blue-200 dark:border-blue-800/50 rounded-lg shadow-sm">
-                             <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 block mb-2">
-                                Passo {index + 1}: Essa compra de 1 {unidadeAnterior} rende...
-                             </span>
-                             <div className="flex gap-2 items-center">
-                                <input className={`w-20 rounded-lg border p-2 text-sm dark:bg-gray-950 dark:text-gray-100 focus:outline-none text-center ${validacao.ok ? 'border-blue-200 dark:border-blue-800/50' : 'border-red-400 dark:border-red-500/60'}`} type="number" min="0" max={validacao.rendimentoCanonico} value={passo.rendimento} onChange={e => {
-                                   const newPassos = [...passosRendimento];
-                                   newPassos[index].rendimento = e.target.value;
-                                   setPassosRendimento(newPassos);
-                                }} />
-                                <select className="flex-1 rounded-lg border border-blue-200 p-2 text-sm dark:bg-gray-950 dark:border-blue-800/50 dark:text-gray-100 outline-none" value={passo.unidade} onChange={e => {
-                                   const newPassos = [...passosRendimento];
-                                   newPassos[index].unidade = e.target.value;
-                                   setPassosRendimento(newPassos);
-                                }}>
-                                  {permitidos.map(u => (
-                                    <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>
-                                  ))}
-                                </select>
-                                {index > 0 && (
-                                   <button onClick={() => setPassosRendimento(passosRendimento.filter(p => p.id !== passo.id))} className="p-2 text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg transition-colors">
-                                      <Trash2 size={16} />
-                                   </button>
-                                )}
-                             </div>
-                             {/* A trava explicada: por que este rendimento é impossível. */}
-                             {!validacao.ok && (
-                                <p className="mt-2 flex items-start gap-1.5 text-[11px] font-medium text-red-600 dark:text-red-400">
-                                   <AlertTriangle size={13} className="shrink-0 mt-px" />
-                                   <span>{validacao.mensagem}</span>
-                                </p>
-                             )}
-                             {/* Conversão dimensional: a física já sabe o rendimento. */}
-                             {validacao.ok && validacao.rendimentoCanonico != null && (
-                                <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                                   1 {unidadeAnterior} = {validacao.rendimentoCanonico.toLocaleString('pt-BR')} {passo.unidade} (fator fixo). Informe menos apenas se houver perda por limpeza.
-                                </p>
-                             )}
-                          </div>
-                       );
-                    })}
-                    
-                    <button onClick={() => setPassosRendimento([...passosRendimento, { id: Math.random().toString(), rendimento: '1', unidade: 'un' }])} className="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline mt-1">
-                       <Plus size={12} /> Adicionar quebra (ex: Peça para Fatias)
-                    </button>
+           {/* MODO RÁPIDO: Cadastro 1:1 Sem Complicação */}
+           {modoCadastro === 'RAPIDO' ? (
+             <div className="space-y-4 rounded-xl border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                 <label className="block">
+                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Unidade de Estoque</span>
+                   <select className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 font-bold outline-none focus:border-[var(--cor-primaria)]"
+                     value={unidadeDireta} onChange={e => { setUnidadeDireta(e.target.value); setUnidadeCompra(e.target.value); }}>
+                     {UNIDADES.map(u => (
+                       <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>
+                     ))}
+                   </select>
+                 </label>
 
-                    <label data-tour="tour-estoque-campo-minimo" className="block mt-4 pt-3 border-t border-blue-200 dark:border-blue-800/30">
-                       <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 block mb-1">Avisar estoque baixo quando chegar em:</span>
-                       <div className="flex rounded-lg border border-blue-200 overflow-hidden dark:border-blue-800/50">
-                          <input className="w-full p-2 text-sm dark:bg-gray-950 dark:text-gray-100 focus:outline-none bg-transparent" type="number" placeholder="0" value={estoqueMinimo} onChange={e => setEstoqueMinimo(e.target.value)} />
-                          <div className="bg-blue-100 dark:bg-blue-900/40 px-3 flex items-center justify-center text-[11px] text-blue-700 dark:text-blue-400 font-bold border-l border-blue-200 dark:border-blue-800/50 min-w-[3rem]">
-                             {passosRendimento[passosRendimento.length - 1].unidade}
-                          </div>
-                       </div>
-                    </label>
+                 <label className="block">
+                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Qtd em Estoque</span>
+                   <div className="mt-1 flex rounded-lg border border-gray-300 overflow-hidden dark:border-gray-700 bg-white dark:bg-gray-950">
+                     <input className="w-full p-2.5 text-sm font-bold dark:bg-gray-950 dark:text-gray-100 focus:outline-none bg-transparent" type="number" placeholder="0" value={qtdEstoqueCompra} onChange={e => setQtdEstoqueCompra(e.target.value)} />
+                     <div className="bg-gray-100 dark:bg-gray-800 px-2 flex items-center justify-center text-[11px] text-gray-500 font-bold border-l border-gray-300 dark:border-gray-700 min-w-[2.5rem]">{unidadeDireta}</div>
+                   </div>
+                 </label>
+
+                 <label className="block">
+                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Preço pago (R$)</span>
+                   <input className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm font-bold dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 focus:outline-none focus:border-[var(--cor-primaria)]" type="number" placeholder="0.00" value={precoCompra} onChange={e => setPrecoCompra(e.target.value)} />
+                 </label>
+
+                 <label className="block">
+                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Alerta Estoque Mínimo</span>
+                   <div className="mt-1 flex rounded-lg border border-gray-300 overflow-hidden dark:border-gray-700 bg-white dark:bg-gray-950">
+                     <input className="w-full p-2.5 text-sm font-bold dark:bg-gray-950 dark:text-gray-100 focus:outline-none bg-transparent" type="number" placeholder="0" value={estoqueMinimo} onChange={e => setEstoqueMinimo(e.target.value)} />
+                     <div className="bg-gray-100 dark:bg-gray-800 px-2 flex items-center justify-center text-[11px] text-gray-500 font-bold border-l border-gray-300 dark:border-gray-700 min-w-[2.5rem]">{unidadeDireta}</div>
+                   </div>
+                 </label>
+               </div>
+
+               {Number(precoCompra) > 0 && Number(qtdEstoqueCompra) > 0 && (
+                 <div className="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400 font-bold pt-2 border-t border-gray-200 dark:border-gray-800">
+                   <span>Custo unitário calculado: {fmt(Number(precoCompra) / Number(qtdEstoqueCompra))} por {unidadeDireta}</span>
+                   <span>Total em estoque: {fmt(Number(precoCompra))}</span>
                  </div>
-              </div>
-           </div>
+               )}
+
+               <button type="button" onClick={() => setModoCadastro('AVANCADO')} className="text-[11px] text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center gap-1">
+                 ⚙️ Compras este item em Fardo/Caixa e usa em Gramas/Unidades? Clique para configurar conversão de embalagem
+               </button>
+             </div>
+           ) : (
+             /* MODO AVANÇADO: Conversão de Embalagens Multi-step */
+             <>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Compra */}
+                  <div data-tour="tour-estoque-campo-compra" className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-200 dark:border-gray-700/50">
+                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">1. Como você compra?</p>
+                     <div className="space-y-3">
+                        <label className="block">
+                           <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Unidade de Compra</span>
+                           <select className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 outline-none" value={unidadeCompra} onChange={e => setUnidadeCompra(e.target.value)}>
+                             {UNIDADES.map(u => (
+                               <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>
+                             ))}
+                           </select>
+                        </label>
+                        <div className="grid grid-cols-2 gap-3">
+                           <label className="block">
+                              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Preço pago (R$)</span>
+                              <input className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 focus:outline-none" type="number" placeholder="0.00" value={precoCompra} onChange={e => setPrecoCompra(e.target.value)} />
+                           </label>
+                           <label className="block">
+                              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Qtd em Estoque</span>
+                              <div className="mt-1 flex rounded-lg border border-gray-300 overflow-hidden dark:border-gray-600">
+                                 <input className="w-full p-2 text-sm dark:bg-gray-900 dark:text-gray-100 focus:outline-none bg-transparent" type="number" placeholder="0" value={qtdEstoqueCompra} onChange={e => setQtdEstoqueCompra(e.target.value)} />
+                                 <div className="bg-gray-100 dark:bg-gray-800 px-2 flex items-center justify-center text-[11px] text-gray-500 font-medium border-l border-gray-300 dark:border-gray-600 min-w-[3rem]">{unidadeCompra}</div>
+                              </div>
+                           </label>
+                        </div>
+                     </div>
+                  </div>
+                  
+                  {/* Uso / Conversão */}
+                  <div data-tour="tour-estoque-campo-conversao" className="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                     <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mb-3 uppercase tracking-wider">2. COMO VOCÊ ARMAZENA / USA? (CONVERSÃO)</p>
+                     <div className="space-y-3">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-2">Ex: Compro <b>Fardo</b> ➔ Rende 6 <b>Unidades</b>. Ou Compro <b>Caixa</b> ➔ Rende 20 <b>Kg</b>.</p>
+                        {passosRendimento.map((passo, index) => {
+                           const unidadeAnterior = index === 0 ? unidadeCompra : passosRendimento[index - 1].unidade;
+                           const permitidos = destinosPermitidos(unidadeAnterior);
+                           const validacao = validarConversao(
+                              unidadeAnterior, passo.unidade, 1, Number(passo.rendimento) || 0,
+                           );
+                           return (
+                              <div key={passo.id} className="relative p-3 bg-white dark:bg-gray-900 border border-blue-200 dark:border-blue-800/50 rounded-lg shadow-sm">
+                                 <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 block mb-2">
+                                    Passo {index + 1}: Essa compra de 1 {unidadeAnterior} rende...
+                                 </span>
+                                 <div className="flex gap-2 items-center">
+                                    <input className={`w-20 rounded-lg border p-2 text-sm dark:bg-gray-950 dark:text-gray-100 focus:outline-none text-center ${validacao.ok ? 'border-blue-200 dark:border-blue-800/50' : 'border-red-400 dark:border-red-500/60'}`} type="number" min="0" max={validacao.rendimentoCanonico} value={passo.rendimento} onChange={e => {
+                                       const newPassos = [...passosRendimento];
+                                       newPassos[index].rendimento = e.target.value;
+                                       setPassosRendimento(newPassos);
+                                    }} />
+                                    <select className="flex-1 rounded-lg border border-blue-200 p-2 text-sm dark:bg-gray-950 dark:border-blue-800/50 dark:text-gray-100 outline-none" value={passo.unidade} onChange={e => {
+                                       const newPassos = [...passosRendimento];
+                                       newPassos[index].unidade = e.target.value;
+                                       setPassosRendimento(newPassos);
+                                    }}>
+                                      {permitidos.map(u => (
+                                        <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>
+                                      ))}
+                                    </select>
+                                    {index > 0 && (
+                                       <button onClick={() => setPassosRendimento(passosRendimento.filter(p => p.id !== passo.id))} className="p-2 text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg transition-colors">
+                                          <Trash2 size={16} />
+                                       </button>
+                                    )}
+                                 </div>
+                                 {!validacao.ok && (
+                                    <p className="mt-2 flex items-start gap-1.5 text-[11px] font-medium text-red-600 dark:text-red-400">
+                                       <AlertTriangle size={13} className="shrink-0 mt-px" />
+                                       <span>{validacao.mensagem}</span>
+                                    </p>
+                                 )}
+                                 {validacao.ok && validacao.rendimentoCanonico != null && (
+                                    <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                                       1 {unidadeAnterior} = {validacao.rendimentoCanonico.toLocaleString('pt-BR')} {passo.unidade} (fator fixo).
+                                    </p>
+                                 )}
+                              </div>
+                           );
+                        })}
+                        
+                        <button onClick={() => setPassosRendimento([...passosRendimento, { id: Math.random().toString(), rendimento: '1', unidade: 'un' }])} className="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline mt-1">
+                           <Plus size={12} /> Adicionar quebra
+                        </button>
+
+                        <label data-tour="tour-estoque-campo-minimo" className="block mt-4 pt-3 border-t border-blue-200 dark:border-blue-800/30">
+                           <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 block mb-1">Avisar estoque baixo quando chegar em:</span>
+                           <div className="flex rounded-lg border border-blue-200 overflow-hidden dark:border-blue-800/50">
+                              <input className="w-full p-2 text-sm dark:bg-gray-950 dark:text-gray-100 focus:outline-none bg-transparent" type="number" placeholder="0" value={estoqueMinimo} onChange={e => setEstoqueMinimo(e.target.value)} />
+                              <div className="bg-blue-100 dark:bg-blue-900/40 px-3 flex items-center justify-center text-[11px] text-blue-700 dark:text-blue-400 font-bold border-l border-blue-200 dark:border-blue-800/50 min-w-[3rem]">
+                                 {passosRendimento[passosRendimento.length - 1].unidade}
+                              </div>
+                           </div>
+                        </label>
+                     </div>
+                  </div>
+               </div>
+
+               <button type="button" onClick={() => setModoCadastro('RAPIDO')} className="text-[11px] text-gray-500 font-bold hover:underline flex items-center gap-1">
+                 ⚡ Voltar para Cadastro Direto / Rápido
+               </button>
+             </>
+           )}
            
            {/* Resumo */}
            {(Number(qtdEstoqueCompra) > 0 || Number(precoCompra) > 0) && (
@@ -671,39 +797,45 @@ export default function Estoque() {
                  <div>
                     <p className="text-[10px] text-green-700 dark:text-green-500 font-semibold uppercase">Estoque Final Calculado</p>
                     <p className="text-lg font-black text-green-800 dark:text-green-400">
-                       {Number(qtdEstoqueCompra || 0) * passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1)} {passosRendimento[passosRendimento.length - 1].unidade}
+                       {Number(qtdEstoqueCompra || 0) * (modoCadastro === 'RAPIDO' ? 1 : passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1))} {modoCadastro === 'RAPIDO' ? unidadeDireta : passosRendimento[passosRendimento.length - 1].unidade}
                     </p>
                  </div>
-                 {Number(precoCompra) > 0 && passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1) > 0 && (
+                 {Number(precoCompra) > 0 && (
                     <div className="text-right">
                        <p className="text-[10px] text-green-700 dark:text-green-500 font-semibold uppercase">Custo Unitário Final</p>
                        <p className="text-sm font-bold text-green-800 dark:text-green-400">
-                          {fmt(Number(precoCompra)/passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1))} por {passosRendimento[passosRendimento.length - 1].unidade}
+                          {fmt(Number(precoCompra) / (modoCadastro === 'RAPIDO' ? (Number(qtdEstoqueCompra) || 1) : passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1)))} por {modoCadastro === 'RAPIDO' ? unidadeDireta : passosRendimento[passosRendimento.length - 1].unidade}
                        </p>
                     </div>
                  )}
               </div>
            )}
 
-           {/* Simulador de Custo e Visualizador de Caminho ao vivo */}
-           <div className="mt-4 space-y-4">
-              <SimuladorCusto
-                 item={itemVirtual}
-                 unidadeOrigem={unidadeCompra}
-                 custoEstimado={
-                    Number(precoCompra) > 0 && passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1) > 0
-                       ? Number(precoCompra) / passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1)
-                       : undefined
-                 }
-              />
-           </div>
+           {/* Simulador de Custo e Visualizador de Caminho ao vivo (Só em modo avançado) */}
+           {modoCadastro === 'AVANCADO' && (
+             <div className="mt-4 space-y-4">
+                <SimuladorCusto
+                   item={itemVirtual}
+                   unidadeOrigem={unidadeCompra}
+                   custoEstimado={
+                      Number(precoCompra) > 0 && passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1) > 0
+                         ? Number(precoCompra) / passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1)
+                         : undefined
+                   }
+                />
+             </div>
+           )}
         </div>
         
         <button onClick={criar} disabled={salvando || !nome.trim()}
           className={`mt-5 w-full flex items-center justify-center gap-1 rounded-xl py-3.5 text-sm font-bold text-white shadow-md hover:scale-[1.01] transition-transform disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed ${editando ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--cor-primaria)]'}`}>
-          {salvando
-            ? <><Loader2 size={16} className="animate-spin" /> Salvando…</>
-            : editando ? 'Atualizar Insumo' : <><Plus size={16} /> Salvar Insumo</>}
+          {salvando ? (
+            <span className="flex items-center gap-1.5"><Loader2 size={16} className="animate-spin" /> Salvando…</span>
+          ) : editando ? (
+            'Atualizar Insumo'
+          ) : (
+            <span className="flex items-center gap-1.5"><Plus size={16} /> Salvar Insumo</span>
+          )}
         </button>
       </div>
 
@@ -996,6 +1128,30 @@ export default function Estoque() {
           inicial={transformando}
           onFechar={() => setTransformando(undefined)}
           onSucesso={(msg) => { setTransformando(undefined); setAvisoEstoque(msg); carregar(); }}
+        />
+      )}
+
+      {/* MODAL SCANNER DE QR CODE */}
+      {modalScannerAberto && (
+        <ScannerQRCodeModal
+          onFechar={() => setModalScannerAberto(false)}
+          onLido={processarQRCode}
+          carregando={consultandoNota}
+        />
+      )}
+
+      {/* MODAL DE CONFERÊNCIA DE IMPORTAÇÃO DA NFC-E */}
+      {dadosNotaImportada && (
+        <ModalImportarNFCe
+          lojaId={lojaId}
+          dadosNota={dadosNotaImportada}
+          insumosExistentes={[...insumos, ...inativos]}
+          onFechar={() => setDadosNotaImportada(null)}
+          onSucesso={(msg) => {
+            setDadosNotaImportada(null);
+            setAvisoEstoque(msg);
+            carregar();
+          }}
         />
       )}
         </>

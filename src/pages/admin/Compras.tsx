@@ -24,6 +24,9 @@ import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
 import ModalFornecedor from '../../components/compras/ModalFornecedor';
 import ModalRecebimento from '../../components/compras/ModalRecebimento';
+import ScannerQRCodeModal from '../../components/estoque/ScannerQRCodeModal';
+import ModalImportarNFCe from '../../components/estoque/ModalImportarNFCe';
+import { QrCode } from 'lucide-react';
 import {
   CompraResumo, Fornecedor, InsumoGiro, LoteValidade, ROTULO_STATUS,
   SugestaoCompra, arquivarFornecedor, cancelarCompra, carregarGiro,
@@ -63,6 +66,35 @@ export default function Compras() {
 
   const [editandoFornecedor, setEditandoFornecedor] = useState<Fornecedor | null | undefined>(undefined);
   const [recebendo, setRecebendo] = useState<CompraResumo | null>(null);
+
+  // NFC-e Scanner & Importação
+  const [modalScannerAberto, setModalScannerAberto] = useState(false);
+  const [dadosNotaImportada, setDadosNotaImportada] = useState<any | null>(null);
+  const [consultandoNota, setConsultandoNota] = useState(false);
+
+  const processarQRCode = async (entrada: string) => {
+    setConsultandoNota(true);
+    try {
+      const isUrl = entrada.includes('http://') || entrada.includes('https://');
+      const { data, error } = await supabase.functions.invoke('nfe-importar-qrcode', {
+        body: {
+          url_qrcode: isUrl ? entrada : undefined,
+          chave_acesso: !isUrl ? entrada : undefined
+        }
+      });
+
+      if (error || !data || data.error) {
+        alert(`Erro ao consultar nota na SEFAZ: ${error?.message || data?.error || 'Verifique se o QR Code é de São Paulo.'}`);
+      } else {
+        setModalScannerAberto(false);
+        setDadosNotaImportada(data);
+      }
+    } catch (err: any) {
+      alert(`Falha de conexão com a SEFAZ: ${err?.message || err}`);
+    } finally {
+      setConsultandoNota(false);
+    }
+  };
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -230,18 +262,26 @@ export default function Compras() {
             <p className="text-sm text-gray-500 dark:text-gray-400">Do que falta ao que chegou — com preço, marca e fornecedor.</p>
           </div>
         </div>
-        <div className="flex rounded-xl bg-gray-100 p-1 shadow-inner dark:bg-gray-800">
-          {([['repor', 'Repor'], ['pedidos', 'Pedidos'], ['fornecedores', 'Fornecedores']] as const).map(([k, label]) => (
-            <button key={k} onClick={() => setAba(k)}
-              className={`rounded-lg px-4 py-2 text-sm font-bold transition-all ${
-                aba === k ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-100'
-                          : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
-              {label}
-              {k === 'pedidos' && compras.some(c => c.status === 'ENVIADO' || c.status === 'RECEBIDO_PARCIAL') && (
-                <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-blue-500 align-middle" />
-              )}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setModalScannerAberto(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition hover:scale-105"
+          >
+            <QrCode size={16} /> Escanear Cupom (NFC-e)
+          </button>
+          <div className="flex rounded-xl bg-gray-100 p-1 shadow-inner dark:bg-gray-800">
+            {([['repor', 'Repor'], ['pedidos', 'Pedidos'], ['fornecedores', 'Fornecedores']] as const).map(([k, label]) => (
+              <button key={k} onClick={() => setAba(k)}
+                className={`rounded-lg px-4 py-2 text-sm font-bold transition-all ${
+                  aba === k ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-100'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
+                {label}
+                {k === 'pedidos' && compras.some(c => c.status === 'ENVIADO' || c.status === 'RECEBIDO_PARCIAL') && (
+                  <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-blue-500 align-middle" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -597,6 +637,30 @@ export default function Compras() {
           insumos={insumos}
           onFechar={() => setRecebendo(null)}
           onSucesso={(msg) => { setRecebendo(null); setAviso(msg); setAba('pedidos'); carregar(); }}
+        />
+      )}
+
+      {/* MODAL SCANNER DE QR CODE */}
+      {modalScannerAberto && (
+        <ScannerQRCodeModal
+          onFechar={() => setModalScannerAberto(false)}
+          onLido={processarQRCode}
+          carregando={consultandoNota}
+        />
+      )}
+
+      {/* MODAL DE CONFERÊNCIA DE IMPORTAÇÃO DA NFC-E */}
+      {dadosNotaImportada && (
+        <ModalImportarNFCe
+          lojaId={lojaId}
+          dadosNota={dadosNotaImportada}
+          insumosExistentes={insumos}
+          onFechar={() => setDadosNotaImportada(null)}
+          onSucesso={(msg) => {
+            setDadosNotaImportada(null);
+            setAviso(msg);
+            carregar();
+          }}
         />
       )}
     </div>
