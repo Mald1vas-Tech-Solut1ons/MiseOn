@@ -39,6 +39,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
   const [tipo, setTipo] = useState<'DESMONTE' | 'MONTAGEM'>('DESMONTE');
   const [custos, setCustos] = useState<Record<string, number>>({});
   const [obs, setObs] = useState('');
+  const [perdaKg, setPerdaKg] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -145,7 +146,10 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
 
     setSalvando(true);
     try {
-      const r = await transformarEstoque(lojaId, tipo, o, d, obs || undefined);
+      const obsFinal = Number(perdaKg) > 0 
+        ? `${obs ? obs + ' · ' : ''}Refugo/Perda descartado: ${perdaKg}`
+        : obs;
+      const r = await transformarEstoque(lojaId, tipo, o, d, obsFinal || undefined);
       onSucesso(
         `${tipo === 'DESMONTE' ? 'Desmonte' : 'Montagem'} registrado: ${fmt(r.custo_consumido)} ` +
         `distribuídos entre ${r.destinos} ${r.destinos === 1 ? 'item' : 'itens'}.`,
@@ -276,6 +280,28 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
               quantidade — use quando as partes valem o mesmo por unidade.
             </p>
           </div>
+
+          {/* PERDA / DESCARTE NATIVO PARA DESMONTE (AÇOUGUE / COZINHA) */}
+          {tipo === 'DESMONTE' && (
+            <div className="rounded-xl border border-red-200 bg-red-50/60 p-4 dark:border-red-900/40 dark:bg-red-900/10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold text-red-700 dark:text-red-400 flex items-center gap-1.5">
+                    <Trash2 size={14} /> Perda / Quebra de Processamento (Refugo)
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-red-600/80 dark:text-red-400/80">
+                    Gordura, pelancas e ossos jogados fora. <b>Não precisa cadastrar insumo de lixo!</b> O custo desta perda é absorvido automaticamente pelos cortes nobres obtidos.
+                  </p>
+                </div>
+                <div className="w-full sm:w-32 shrink-0">
+                  <span className="text-[10px] font-bold text-red-700 dark:text-red-400 uppercase">Qtd Perda</span>
+                  <input type="number" min="0" step="any" placeholder="0"
+                    className="mt-1 w-full rounded-lg border border-red-300 p-2 text-sm font-bold text-center dark:border-red-800 dark:bg-gray-950 dark:text-gray-100 focus:outline-none"
+                    value={perdaKg} onChange={e => setPerdaKg(e.target.value)} />
+                </div>
+              </div>
+            </div>
+          )}
 
           <label className="block">
             <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Observação</span>

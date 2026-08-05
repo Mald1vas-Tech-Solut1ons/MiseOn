@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, ChefHat, Flame, X, CheckCircle2, Clock, AlertTriangle, Timer } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { Plus, Pencil, Trash2, ChefHat, Flame, X, CheckCircle2, Clock, AlertTriangle, Timer, Copy } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, ProducaoPreparo, fmt } from '../../types';
 
@@ -41,23 +41,48 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
   const [unidade, setUnidade] = useState('un');
   const [rendimentoPorcoes, setRendimentoPorcoes] = useState('');
   const [rendimentoPadraoKg, setRendimentoPadraoKg] = useState('');
-  const [pessoasServidas, setPessoasServidas] = useState('');
-  const [validadeHoras, setValidadeHoras] = useState('');
+  const [validadeQtd, setValidadeQtd] = useState('');
+  const [validadeUnidade, setValidadeUnidade] = useState<'horas' | 'dias' | 'semanas' | 'meses'>('dias');
   const [producoes, setProducoes] = useState<ProducaoPreparo[]>([]);
   const [ficha, setFicha] = useState<{ insumo_id: string; quantidade: string }[]>([]);
   
   const [salvando, setSalvando] = useState(false);
-  
+
   // Gamificação da Produção
   const [produzindo, setProduzindo] = useState<Insumo | null>(null);
   const [multProducao, setMultProducao] = useState(1);
   const [produzindoSucesso, setProduzindoSucesso] = useState(false);
   const [resultadoProducao, setResultadoProducao] = useState<ResultadoProducao | null>(null);
 
+  const extrairValidadeDinamica = (h?: number | null) => {
+    if (h == null || h <= 0) return { qtd: '', u: 'dias' as const };
+    if (h % 720 === 0) return { qtd: String(h / 720), u: 'meses' as const };
+    if (h % 168 === 0) return { qtd: String(h / 168), u: 'semanas' as const };
+    if (h % 24 === 0) return { qtd: String(h / 24), u: 'dias' as const };
+    return { qtd: String(h), u: 'horas' as const };
+  };
+
+  const calcularHorasValidade = (): number | null => {
+    const q = Number(validadeQtd);
+    if (!q || q <= 0) return null;
+    if (validadeUnidade === 'meses') return q * 720;
+    if (validadeUnidade === 'semanas') return q * 168;
+    if (validadeUnidade === 'dias') return q * 24;
+    return q;
+  };
+
+  const fmtValidadeExtensa = (h?: number | null) => {
+    if (h == null || h <= 0) return '';
+    if (h % 720 === 0) { const m = h / 720; return `${m} mes${m > 1 ? 'es' : 'ês'}`; }
+    if (h % 168 === 0) { const s = h / 168; return `${s} sem`; }
+    if (h % 24 === 0) { const d = h / 24; return `${d} dias`; }
+    return `${h}h`;
+  };
+
   const preparos = insumosTotais.filter(i => i.is_preparo && i.ativo);
   const insumosBrutos = insumosTotais.filter(i => !i.is_preparo && i.ativo);
 
-  const carregarProducoes = async () => {
+  const carregarProducoes = useCallback(async () => {
     const { data } = await supabase
       .from('producoes_preparo')
       .select('*')
@@ -65,8 +90,11 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       .eq('status', 'ATIVO')
       .order('produzido_em', { ascending: false });
     setProducoes((data as ProducaoPreparo[]) ?? []);
-  };
-  useEffect(() => { setTimeout(carregarProducoes, 0); }, [lojaId]);
+  }, [lojaId]);
+
+  useEffect(() => {
+    carregarProducoes();
+  }, [carregarProducoes]);
 
   const descartarLote = async (lote: ProducaoPreparo) => {
     const preparo = insumosTotais.find(i => i.id === lote.preparo_id);
@@ -104,8 +132,9 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       setUnidade(p.unidade_medida);
       setRendimentoPorcoes(String(p.rendimento_porcoes || ''));
       setRendimentoPadraoKg(String(p.rendimento_padrao_kg || ''));
-      setPessoasServidas(String(p.pessoas_servidas || ''));
-      setValidadeHoras(p.validade_horas != null ? String(p.validade_horas) : '');
+      const v = extrairValidadeDinamica(p.validade_horas);
+      setValidadeQtd(v.qtd);
+      setValidadeUnidade(v.u);
       setFicha((p as any).fichas_preparos?.map((f: any) => ({
         insumo_id: f.insumo_id,
         quantidade: String(f.quantidade)
@@ -116,8 +145,8 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       setUnidade('un');
       setRendimentoPorcoes('');
       setRendimentoPadraoKg('');
-      setPessoasServidas('');
-      setValidadeHoras('');
+      setValidadeQtd('');
+      setValidadeUnidade('dias');
       setFicha([]);
     }
   };
@@ -135,8 +164,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
         unidade_medida: unidade,
         rendimento_porcoes: Number(rendimentoPorcoes || 1),
         rendimento_padrao_kg: rendimentoPadraoKg !== '' ? Number(rendimentoPadraoKg) : null,
-        pessoas_servidas: Number(pessoasServidas || 1),
-        validade_horas: validadeHoras !== '' && Number(validadeHoras) > 0 ? Number(validadeHoras) : null,
+        validade_horas: calcularHorasValidade(),
         ativo: true
       };
 
@@ -166,6 +194,21 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       alert('Erro ao salvar preparo.');
     }
     setSalvando(false);
+  };
+
+  const duplicarPreparo = (p: Insumo) => {
+    setEditando('novo');
+    setNome(`${p.nome} (Cópia)`);
+    setUnidade(p.unidade_medida);
+    setRendimentoPorcoes(String(p.rendimento_porcoes || ''));
+    setRendimentoPadraoKg(String(p.rendimento_padrao_kg || ''));
+    const v = extrairValidadeDinamica(p.validade_horas);
+    setValidadeQtd(v.qtd);
+    setValidadeUnidade(v.u);
+    setFicha((p as any).fichas_preparos?.map((f: any) => ({
+      insumo_id: f.insumo_id,
+      quantidade: String(f.quantidade)
+    })) || []);
   };
 
   const excluir = async (p: Insumo) => {
@@ -261,7 +304,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                          {p.nome}
                          {p.validade_horas != null && Number(p.validade_horas) > 0 && (
                            <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                             <Timer size={10} /> validade {Number(p.validade_horas) >= 24 ? `${Math.round(Number(p.validade_horas) / 24)}d` : `${Number(p.validade_horas)}h`}
+                             <Timer size={10} /> validade {fmtValidadeExtensa(p.validade_horas)}
                            </span>
                          )}
                          {temVencido && (
@@ -286,8 +329,9 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                          <Flame size={16} /> Produzir
                        </button>
                        <div className="flex flex-col gap-1 border-l pl-2 dark:border-gray-800">
-                         <button onClick={() => iniciarEdicao(p)} className="p-1.5 text-gray-400 hover:text-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"><Pencil size={15} /></button>
-                         <button onClick={() => excluir(p)} className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 size={15} /></button>
+                         <button onClick={() => iniciarEdicao(p)} title="Editar receita" className="p-1.5 text-gray-400 hover:text-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"><Pencil size={15} /></button>
+                         <button onClick={() => duplicarPreparo(p)} title="Duplicar receita (clonar)" className="p-1.5 text-gray-400 hover:text-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20"><Copy size={15} /></button>
+                         <button onClick={() => excluir(p)} title="Excluir receita" className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 size={15} /></button>
                        </div>
                      </div>
                    </div>
@@ -327,84 +371,121 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       )}
 
       {/* MODAL DE EDIÇÃO DE PREPARO */}
-      {editando && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-orange-200 dark:border-orange-900/30 relative">
-          <button onClick={() => setEditando(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={20} /></button>
-          
-          <h3 className="font-black text-xl mb-4 text-orange-600 dark:text-orange-500">{editando === 'novo' ? 'Nova Receita Base' : 'Editar Receita'}</h3>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Nome do Preparo</label>
-              <input value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Molho de Tomate" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500" />
-            </div>
+      {editando && (() => {
+        const custoFichaTotal = ficha.reduce((acc, f) => {
+          const ing = insumosTotais.find(x => x.id === f.insumo_id);
+          if (!ing) return acc;
+          const unit = Number(ing.qtd_embalagem) > 0 ? Number(ing.preco_embalagem) / Number(ing.qtd_embalagem) : 0;
+          return acc + (unit * Number(f.quantidade || 0));
+        }, 0);
+        const rend = Number(rendimentoPorcoes) || 1;
+        const custoPorUnidade = custoFichaTotal / rend;
 
-            <div className={`grid grid-cols-2 ${isBuffet ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-3`}>
+        return (
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-orange-200 dark:border-orange-900/30 relative">
+            <button onClick={() => setEditando(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={20} /></button>
+            
+            <h3 className="font-black text-xl mb-4 text-orange-600 dark:text-orange-500">{editando === 'novo' ? 'Nova Receita Base' : 'Editar Receita'}</h3>
+            
+            <div className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">1 Lote Rende Qtos?</label>
-                <input value={rendimentoPorcoes} onChange={e => setRendimentoPorcoes(e.target.value)} type="number" placeholder="ex: 10" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Nome do Preparo</label>
+                <input value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Molho de Tomate / Queijo Muçarela Ralado" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500" />
               </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Unidade</label>
-                <select value={unidade} onChange={e => setUnidade(e.target.value)} className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold">
-                  <option value="un">Un (Porção)</option>
-                  <option value="L">Litros (L)</option>
-                  <option value="ml">ml</option>
-                  <option value="kg">Kg</option>
-                  <option value="g">Gramas (g)</option>
-                </select>
-              </div>
-              {isBuffet && (
+
+              <div className={`grid grid-cols-2 ${isBuffet ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-3`}>
                 <div>
-                  <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Rendimento Kg (Buffet)</label>
-                  <input value={rendimentoPadraoKg} onChange={e => setRendimentoPadraoKg(e.target.value)} type="number" step="0.001" placeholder="ex: 2.500" className="mt-1 w-full p-2.5 rounded-xl border border-orange-300 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-900/10 text-orange-900 dark:text-orange-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
+                  <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">1 Lote Rende Qtos?</label>
+                  <input value={rendimentoPorcoes} onChange={e => setRendimentoPorcoes(e.target.value)} type="number" placeholder="ex: 10" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Unidade</label>
+                  <select value={unidade} onChange={e => setUnidade(e.target.value)} className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold">
+                    <option value="un">Un (Porção)</option>
+                    <option value="L">Litros (L)</option>
+                    <option value="ml">ml</option>
+                    <option value="kg">Kg</option>
+                    <option value="g">Gramas (g)</option>
+                  </select>
+                </div>
+                {isBuffet && (
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Rendimento Kg (Buffet)</label>
+                    <input value={rendimentoPadraoKg} onChange={e => setRendimentoPadraoKg(e.target.value)} type="number" step="0.001" placeholder="ex: 2.500" className="mt-1 w-full p-2.5 rounded-xl border border-orange-300 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-900/10 text-orange-900 dark:text-orange-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-900/10">
+                <label className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-amber-700 dark:text-amber-500"><Timer size={13} /> Validade após produção</label>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <input value={validadeQtd} onChange={e => setValidadeQtd(e.target.value)} type="number" min="0" placeholder="ex: 3" className="w-24 p-2.5 rounded-xl border border-amber-300 dark:border-amber-900/50 bg-white dark:bg-gray-950 dark:text-gray-100 outline-none focus:border-amber-500 text-center font-bold text-lg" />
+                    <select value={validadeUnidade} onChange={e => setValidadeUnidade(e.target.value as any)} className="p-2.5 rounded-xl border border-amber-300 dark:border-amber-900/50 bg-white dark:bg-gray-950 dark:text-gray-100 outline-none focus:border-amber-500 font-bold text-sm">
+                      <option value="horas">Horas</option>
+                      <option value="dias">Dias</option>
+                      <option value="semanas">Semanas</option>
+                      <option value="meses">Meses</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { q: '24', u: 'horas', l: '24 horas' },
+                      { q: '3', u: 'dias', l: '3 dias' },
+                      { q: '1', u: 'semanas', l: '1 semana' },
+                      { q: '1', u: 'meses', l: '1 mês' },
+                      { q: '3', u: 'meses', l: '3 meses' },
+                    ].map(o => (
+                      <button key={o.l} type="button" onClick={() => { setValidadeQtd(o.q); setValidadeUnidade(o.u as any); }} className={`rounded-full border px-3 py-1 text-xs font-bold transition ${validadeQtd === o.q && validadeUnidade === o.u ? 'border-amber-500 bg-amber-500 text-white' : 'border-amber-300 text-amber-700 dark:border-amber-900/50 dark:text-amber-500'}`}>{o.l}</button>
+                    ))}
+                  </div>
+                </div>
+                <p className="mt-2 text-[11px] text-amber-700/80 dark:text-amber-500/80">Cada produção vira uma ordem de serviço com data de vencimento. Deixe em branco para não controlar validade.</p>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                <h4 className="font-bold text-sm mb-3 dark:text-gray-200">Ficha Técnica (Ingredientes que compõem 1 Lote)</h4>
+                
+                <div className="space-y-2">
+                  {ficha.map((f, i) => (
+                    <div key={i} className="flex gap-2 items-center">
+                      <select value={f.insumo_id} onChange={e => { const n = [...ficha]; n[i].insumo_id = e.target.value; setFicha(n); }} className="flex-1 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-sm">
+                        <option value="">Selecione um Insumo Bruto...</option>
+                        {insumosBrutos.map(ib => <option key={ib.id} value={ib.id}>{ib.nome} ({ib.unidade_medida})</option>)}
+                      </select>
+                      <input value={f.quantidade} onChange={e => { const n = [...ficha]; n[i].quantidade = e.target.value; setFicha(n); }} type="number" placeholder="Qtd" className="w-24 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-sm text-center" />
+                      <button onClick={() => { const n = [...ficha]; n.splice(i, 1); setFicha(n); }} className="p-2 text-red-400 hover:text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg"><Trash2 size={16}/></button>
+                    </div>
+                  ))}
+                  <button onClick={() => setFicha([...ficha, { insumo_id: '', quantidade: '' }])} className="text-orange-600 dark:text-orange-500 font-bold text-xs flex items-center gap-1 mt-2">
+                    <Plus size={14}/> Adicionar Ingrediente
+                  </button>
+                </div>
+              </div>
+
+              {/* PAINEL DE CUSTO ESTIMADO EM TEMPO REAL */}
+              {custoFichaTotal > 0 && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/40 dark:bg-emerald-900/10">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400">Custo Estimado do Lote</p>
+                      <p className="text-xl font-black text-emerald-900 dark:text-emerald-100">{fmt(custoFichaTotal)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400">Custo Estimado P/ {unidade}</p>
+                      <p className="text-lg font-black text-emerald-700 dark:text-emerald-300">{fmt(custoPorUnidade)}</p>
+                    </div>
+                  </div>
                 </div>
               )}
-              <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Pessoas Servidas</label>
-                <input value={pessoasServidas} onChange={e => setPessoasServidas(e.target.value)} type="number" placeholder="ex: 30" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
-              </div>
-            </div>
 
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-900/10">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-amber-700 dark:text-amber-500"><Timer size={13} /> Validade após produção (horas)</label>
-              <div className="mt-2 flex items-center gap-2">
-                <input value={validadeHoras} onChange={e => setValidadeHoras(e.target.value)} type="number" min="0" placeholder="ex: 48" className="w-28 p-2.5 rounded-xl border border-amber-300 dark:border-amber-900/50 bg-white dark:bg-gray-950 dark:text-gray-100 outline-none focus:border-amber-500 text-center font-bold text-lg" />
-                <div className="flex flex-wrap gap-1.5">
-                  {[{ h: 24, l: '24h' }, { h: 48, l: '2 dias' }, { h: 72, l: '3 dias' }, { h: 120, l: '5 dias' }].map(o => (
-                    <button key={o.h} type="button" onClick={() => setValidadeHoras(String(o.h))} className={`rounded-full border px-3 py-1 text-xs font-bold transition ${Number(validadeHoras) === o.h ? 'border-amber-500 bg-amber-500 text-white' : 'border-amber-300 text-amber-700 dark:border-amber-900/50 dark:text-amber-500'}`}>{o.l}</button>
-                  ))}
-                </div>
-              </div>
-              <p className="mt-2 text-[11px] text-amber-700/80 dark:text-amber-500/80">Cada produção vira uma ordem de serviço com data de vencimento. Deixe em branco para não controlar validade.</p>
+              <button onClick={salvar} disabled={salvando} className="w-full mt-4 bg-orange-600 text-white font-bold rounded-xl py-3 shadow-md hover:bg-orange-700 disabled:opacity-50">
+                {salvando ? 'Salvando...' : 'Salvar Receita'}
+              </button>
             </div>
-
-            <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-              <h4 className="font-bold text-sm mb-3 dark:text-gray-200">Ficha Técnica (Ingredientes que compõem 1 Lote)</h4>
-              
-              <div className="space-y-2">
-                {ficha.map((f, i) => (
-                  <div key={i} className="flex gap-2 items-center">
-                    <select value={f.insumo_id} onChange={e => { const n = [...ficha]; n[i].insumo_id = e.target.value; setFicha(n); }} className="flex-1 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-sm">
-                      <option value="">Selecione um Insumo Bruto...</option>
-                      {insumosBrutos.map(ib => <option key={ib.id} value={ib.id}>{ib.nome} ({ib.unidade_medida})</option>)}
-                    </select>
-                    <input value={f.quantidade} onChange={e => { const n = [...ficha]; n[i].quantidade = e.target.value; setFicha(n); }} type="number" placeholder="Qtd" className="w-24 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-sm text-center" />
-                    <button onClick={() => { const n = [...ficha]; n.splice(i, 1); setFicha(n); }} className="p-2 text-red-400 hover:text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg"><Trash2 size={16}/></button>
-                  </div>
-                ))}
-                <button onClick={() => setFicha([...ficha, { insumo_id: '', quantidade: '' }])} className="text-orange-600 dark:text-orange-500 font-bold text-xs flex items-center gap-1 mt-2">
-                  <Plus size={14}/> Adicionar Ingrediente
-                </button>
-              </div>
-            </div>
-
-            <button onClick={salvar} disabled={salvando} className="w-full mt-4 bg-orange-600 text-white font-bold rounded-xl py-3 shadow-md hover:bg-orange-700 disabled:opacity-50">
-              {salvando ? 'Salvando...' : 'Salvar Receita'}
-            </button>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* GAMIFICADA: BORA COZINHAR */}
       {produzindo && (
