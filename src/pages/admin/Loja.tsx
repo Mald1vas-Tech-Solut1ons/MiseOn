@@ -542,7 +542,7 @@ export default function Loja() {
         </div>
       </div>
 
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-4 flex flex-wrap gap-2 pb-1">
         {(['aparencia', 'identidade', 'segmento', 'logistica', 'horarios', 'pagamentos', 'fiscal', 'ifood'] as Aba[]).map((a) => (
           <button key={a} data-tour={a === 'pagamentos' ? "tour-loja-aba-pagamentos" : undefined} onClick={() => setAba(a)}
             className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ${aba === a ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm'}`}>

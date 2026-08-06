@@ -235,7 +235,7 @@ export default function Financeiro() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-4 border-b border-gray-100 dark:border-gray-800 pb-2">
+      <div className="flex flex-wrap gap-2 mb-4 border-b border-gray-100 dark:border-gray-800 pb-2">
         {abaBtn('EXTRATO', '💰 Extrato de Vendas')}
         {abaBtn('MARGENS', '📈 Margens')}
         {abaBtn('DRE', '📊 DRE Gerencial')}

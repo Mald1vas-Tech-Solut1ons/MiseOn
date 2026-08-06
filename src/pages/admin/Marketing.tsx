@@ -16,10 +16,10 @@ export default function Marketing() {
 
   return (
     <div className="p-4">
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-4 flex flex-wrap gap-2 pb-1">
         {(['cupons', 'banners', 'taxas', 'horarios', 'clientes', 'crm', 'cashback', 'recuperacao'] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ${tab === t ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm'}`}>
+            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-all ${tab === t ? 'bg-[var(--cor-primaria)] text-white shadow-md' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 shadow-sm'}`}>
             {{ cupons: 'Cupons', banners: 'Banners', taxas: 'Taxas de entrega', horarios: 'Horários', clientes: 'Clientes Base', crm: 'CRM & RFM Inteligente', cashback: 'Cashback', recuperacao: 'Recuperação de vendas' }[t]}
           </button>
         ))}

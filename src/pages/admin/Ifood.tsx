@@ -112,7 +112,7 @@ export default function Ifood() {
       </div>
 
       {/* ── Abas ── */}
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-6 flex flex-wrap gap-2 pb-1">
         <button
           data-tour="tour-ifood-aba-credenciais"
           onClick={() => setAba('conexao')}
