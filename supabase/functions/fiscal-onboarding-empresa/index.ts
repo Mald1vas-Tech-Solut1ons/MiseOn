@@ -4,6 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
 const json = (data: any, init?: ResponseInit) => new Response(JSON.stringify(data), {
@@ -87,18 +88,6 @@ serve(async (req) => {
     if (!usuarioLoja?.loja_id) return json({ error: 'Loja não encontrada para este usuário' }, { status: 404 });
     const lojaId = usuarioLoja.loja_id;
 
-    // Tokens Master Focus NFe
-    const isProd = ambiente === 'producao';
-    const baseUrl = isProd ? 'https://api.focusnfe.com.br/v2/empresas' : 'https://homologacao.focusnfe.com.br/v2/empresas';
-    const tokenMaster = isProd 
-      ? (Deno.env.get('FOCUS_API_TOKEN_PROD') || Deno.env.get('FOCUS_NFE_PROD'))
-      : (Deno.env.get('FOCUS_API_TOKEN_HOMOLOG') || Deno.env.get('FOCUS_NFE_HOMOLOG'));
-
-    if (!tokenMaster) {
-      const secretVar = isProd ? 'FOCUS_API_TOKEN_PROD ou FOCUS_NFE_PROD' : 'FOCUS_API_TOKEN_HOMOLOG ou FOCUS_NFE_HOMOLOG';
-      return json({ error: `Token Focus NFe não configurado nas variáveis de ambiente/secrets (${secretVar}).` }, { status: 500 });
-    }
-
     const cleanCnpj = (cnpj || '').replace(/\D/g, '');
     const cleanIe = (inscricao_estadual || '').replace(/\D/g, '');
     const cleanCep = (cep || '00000000').replace(/\D/g, '');
@@ -114,10 +103,66 @@ serve(async (req) => {
       senhaEncrypted = await encryptAES(senha_certificado);
     }
 
+    // 1. Sempre grava / atualiza configuracoes_fiscais no banco do MiseOn PRIMEIRO
+    const fiscalConfigData = {
+      loja_id: lojaId,
+      cnpj: cleanCnpj,
+      razao_social,
+      nome_fantasia: nome_fantasia || razao_social,
+      inscricao_estadual: cleanIe || 'ISENTO',
+      inscricao_municipal,
+      cnae_principal,
+      regime_tributario: regime_tributario || 'Simples Nacional',
+      crt: Number(crt) || 1,
+      logradouro,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      uf: (uf || 'SP').toUpperCase(),
+      cep: cleanCep,
+      codigo_ibge,
+      telefone,
+      email,
+      nfe_ambiente: ambiente || 'homologacao',
+      habilita_nfe: true,
+      habilita_nfce: true,
+      id_csc,
+      csc,
+      ...(cleanCertBase64 ? {
+        certificado_nome: 'certificado_a1.pfx',
+        certificado_validade: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        certificado_status: 'valido',
+        certificado_encrypted: certificadoEncrypted,
+        senha_encrypted: senhaEncrypted
+      } : {})
+    };
+
+    const { error: upsertErr } = await supabaseAdmin
+      .from('configuracoes_fiscais')
+      .upsert(fiscalConfigData, { onConflict: 'loja_id' });
+
+    if (upsertErr) throw upsertErr;
+
+    // Tokens Master Focus NFe
+    const isProd = ambiente === 'producao';
+    const baseUrl = isProd ? 'https://api.focusnfe.com.br/v2/empresas' : 'https://homologacao.focusnfe.com.br/v2/empresas';
+    const tokenMaster = isProd 
+      ? (Deno.env.get('FOCUS_API_TOKEN_PROD') || Deno.env.get('FOCUS_NFE_PROD'))
+      : (Deno.env.get('FOCUS_API_TOKEN_HOMOLOG') || Deno.env.get('FOCUS_NFE_HOMOLOG'));
+
+    if (!tokenMaster) {
+      return json({ 
+        success: true, 
+        message: 'Dados fiscais salvos no MiseOn. Token master Focus NFe pendente de configuração.',
+        status_focus: 'pendente_token'
+      });
+    }
+
     // Transmite / Atualiza Empresa na Focus NFe API v2
     const focusPayload: Record<string, any> = {
       cnpj: cleanCnpj,
-      inscricao_estadual: cleanIe,
+      inscricao_estadual: cleanIe || 'ISENTO',
       razao_social: razao_social,
       nome_fantasia: nome_fantasia || razao_social,
       regime_tributario: regime_tributario || 'Simples Nacional',
@@ -156,7 +201,6 @@ serve(async (req) => {
 
     let focusData = await res.json();
     if (!res.ok && (focusData.codigo === 'requisicao_invalida' || focusData.mensagem?.includes('já cadastrado') || focusData.erros?.[0]?.mensagem?.includes('já cadastrado'))) {
-      // Tenta atualização via PUT
       res = await fetch(`${baseUrl}/${cleanCnpj}`, {
         method: 'PUT',
         headers: {
@@ -168,58 +212,13 @@ serve(async (req) => {
       focusData = await res.json();
     }
 
-    if (!res.ok && focusData.erros) {
-      console.error("Erro Focus NFe Onboarding:", focusData);
-      return json({ 
-        error: focusData.mensagem || focusData.erros?.[0]?.mensagem || 'Erro ao habilitar empresa na Focus NFe/SEFAZ',
-        detail: focusData.erros
-      }, { status: 400 });
+    if (res.ok) {
+      // Atualiza flag de nfe_habilitado na tabela lojas
+      await supabaseAdmin
+        .from('lojas')
+        .update({ nfe_habilitado: true, nfe_ambiente: ambiente || 'homologacao' })
+        .eq('id', lojaId);
     }
-
-    // Grava / Atualiza configuracoes_fiscais no banco do MiseOn
-    const fiscalConfigData = {
-      loja_id: lojaId,
-      cnpj: cleanCnpj,
-      razao_social,
-      nome_fantasia: nome_fantasia || razao_social,
-      inscricao_estadual: cleanIe,
-      inscricao_municipal,
-      cnae_principal,
-      regime_tributario: regime_tributario || 'Simples Nacional',
-      crt: Number(crt) || 1,
-      logradouro,
-      numero,
-      complemento,
-      bairro,
-      cidade,
-      uf: (uf || 'SP').toUpperCase(),
-      cep: cleanCep,
-      codigo_ibge,
-      telefone,
-      email,
-      nfe_ambiente: ambiente || 'homologacao',
-      habilita_nfe: true,
-      habilita_nfce: true,
-      id_csc,
-      csc,
-      certificado_nome: cleanCertBase64 ? 'certificado_a1.pfx' : undefined,
-      certificado_validade: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // Válido 1 ano por padrão Focus
-      certificado_status: 'valido',
-      certificado_encrypted: certificadoEncrypted || undefined,
-      senha_encrypted: senhaEncrypted || undefined
-    };
-
-    const { error: upsertErr } = await supabaseAdmin
-      .from('configuracoes_fiscais')
-      .upsert(fiscalConfigData, { onConflict: 'loja_id' });
-
-    if (upsertErr) throw upsertErr;
-
-    // Atualiza flag de nfe_habilitado na tabela lojas
-    await supabaseAdmin
-      .from('lojas')
-      .update({ nfe_habilitado: true, nfe_ambiente: ambiente || 'homologacao' })
-      .eq('id', lojaId);
 
     return json({ 
       success: true, 

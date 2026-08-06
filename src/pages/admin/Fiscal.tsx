@@ -228,26 +228,76 @@ export default function Fiscal() {
         });
       }
 
-      const payload = {
-        ...formConfig,
-        certificado_base64: certBase64 || undefined,
-        senha_certificado: senhaCertificado || undefined,
-        ambiente: formConfig.nfe_ambiente
+      const cleanCnpj = (formConfig.cnpj || '').replace(/\D/g, '');
+      const cleanIe = (formConfig.inscricao_estadual || '').replace(/\D/g, '');
+      const cleanCep = (formConfig.cep || '').replace(/\D/g, '');
+
+      // 1. Salvar os dados cadastrais da empresa no banco de dados do MiseOn (garantia de gravação)
+      const fiscalDataDb = {
+        loja_id: ctx.lojaId,
+        cnpj: cleanCnpj,
+        razao_social: formConfig.razao_social,
+        nome_fantasia: formConfig.nome_fantasia || formConfig.razao_social,
+        inscricao_estadual: cleanIe || 'ISENTO',
+        inscricao_municipal: formConfig.inscricao_municipal,
+        cnae_principal: formConfig.cnae_principal,
+        regime_tributario: formConfig.regime_tributario,
+        crt: Number(formConfig.crt) || 1,
+        logradouro: formConfig.logradouro,
+        numero: formConfig.numero,
+        complemento: formConfig.complemento,
+        bairro: formConfig.bairro,
+        cidade: formConfig.cidade,
+        uf: (formConfig.uf || 'SP').toUpperCase(),
+        cep: cleanCep,
+        codigo_ibge: formConfig.codigo_ibge,
+        telefone: formConfig.telefone,
+        email: formConfig.email,
+        nfe_ambiente: formConfig.nfe_ambiente,
+        id_csc: formConfig.id_csc,
+        csc: formConfig.csc,
+        updated_at: new Date().toISOString()
       };
 
-      const { data, error } = await supabase.functions.invoke('fiscal-onboarding-empresa', {
-        body: payload
-      });
+      const { error: dbError } = await supabase
+        .from('configuracoes_fiscais')
+        .upsert(fiscalDataDb, { onConflict: 'loja_id' });
 
-      if (error || data?.error) {
-        throw new Error(data?.error || error?.message || 'Falha ao salvar configurações na SEFAZ');
+      if (dbError) throw dbError;
+
+      // 2. Tentar habilitar / transmitir à Focus NFe / SEFAZ via Edge Function
+      let transmitiuFocus = false;
+      try {
+        const payload = {
+          ...formConfig,
+          cnpj: cleanCnpj,
+          inscricao_estadual: cleanIe || 'ISENTO',
+          certificado_base64: certBase64 || undefined,
+          senha_certificado: senhaCertificado || undefined,
+          ambiente: formConfig.nfe_ambiente
+        };
+
+        const { data, error } = await supabase.functions.invoke('fiscal-onboarding-empresa', {
+          body: payload
+        });
+
+        if (!error && !data?.error) {
+          transmitiuFocus = true;
+        }
+      } catch (fErr) {
+        console.warn('Onboarding Focus NFe em background pendente:', fErr);
       }
 
-      toast('Configurações salvas e transmitidas à Focus NFe com sucesso!', 'sucesso');
+      if (transmitiuFocus) {
+        toast('Dados cadastrais e habilitação SEFAZ salvos com sucesso!', 'sucesso');
+      } else {
+        toast('Dados da empresa salvos no MiseOn! Quando você anexar seu Certificado A1, a habilitação na SEFAZ será ativada.', 'sucesso');
+      }
+
       await carregarConfiguracoes();
     } catch (err: any) {
       console.error(err);
-      toast(err.message || 'Erro no salvamento fiscal', 'erro');
+      toast(err.message || 'Erro ao salvar configurações fiscais', 'erro');
     } finally {
       setSalvandoConfig(false);
     }

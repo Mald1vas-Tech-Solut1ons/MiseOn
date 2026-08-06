@@ -4,7 +4,23 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+};
+
+const json = (data: unknown, init: ResponseInit = {}) =>
+  new Response(JSON.stringify(data), {
+    ...init,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json', ...(init.headers ?? {}) },
+  });
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   try {
     const supabaseAuth = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -12,7 +28,7 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } },
     );
     const { data: { user: caller } } = await supabaseAuth.auth.getUser();
-    if (!caller) return Response.json({ error: 'Não autenticado' }, { status: 401 });
+    if (!caller) return json({ error: 'Não autenticado' }, { status: 401 });
 
     const admin = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -20,7 +36,7 @@ Deno.serve(async (req) => {
     );
 
     const { data: souSuperadmin } = await admin.from('plataforma_admins').select('user_id').eq('user_id', caller.id).maybeSingle();
-    if (!souSuperadmin) return Response.json({ error: 'Só o superadmin pode ver métricas' }, { status: 403 });
+    if (!souSuperadmin) return json({ error: 'Só o superadmin pode ver métricas' }, { status: 403 });
 
     const desde30d = new Date(Date.now() - 30 * 24 * 3600e3).toISOString();
     const { data: pedidos } = await admin
@@ -39,9 +55,9 @@ Deno.serve(async (req) => {
     }
 
     const metricas = Array.from(porLoja.entries()).map(([loja_id, m]) => ({ loja_id, ...m }));
-    return Response.json({ metricas });
+    return json({ metricas });
   } catch (e) {
     console.error(e);
-    return Response.json({ error: String(e) }, { status: 500 });
+    return json({ error: String(e) }, { status: 500 });
   }
 });
