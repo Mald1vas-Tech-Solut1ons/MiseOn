@@ -24,6 +24,261 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'estrategia-whatsapp-atribuicao-pixel-meta-vendas-sem-comissao',
+    title: 'Como Criar uma Máquina de Vendas no WhatsApp Sem Pagar Comissões: Atribuição de Pedidos e Meta Pixel',
+    description: 'Guia definitivo de growth para food service: como transformar o WhatsApp do seu restaurante em um canal direto rastreável com Meta Pixel, IA consultiva e atribuição de vendas.',
+    category: 'Tecnologia & IA',
+    publishedAt: '2026-08-15',
+    readTime: '9 min de leitura',
+    coverImage: '/blog-covers/whatsapp-ia-cover.png',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['WhatsApp Sales', 'Meta Pixel', 'Atribuição de Vendas', 'Sem Comissão', 'Growth Food Service'],
+    seo: {
+      title: 'Como Criar uma Máquina de Vendas no WhatsApp Sem Pagar Comissões — MiseOn',
+      description: 'Aprenda a rastrear vendas do WhatsApp com Meta Pixel, token de atribuição e IA consultiva LLaMA 3.3 sem pagar comissões por pedido.',
+      keywords: 'vendas whatsapp restaurante, pixel meta cardapio, atribuicao pedidos whatsapp, delivery sem comissao, gestao vendas whatsapp',
+      canonicalUrl: 'https://miseon.app.br/blog/estrategia-whatsapp-atribuicao-pixel-meta-vendas-sem-comissao',
+    },
+    summary: 'Restaurantes chegam a pagar 27% de comissão por pedido em marketplaces de delivery. Aprenda a transformar seu WhatsApp próprio em um canal direto com IA consultiva, token de atribuição e rastreamento Meta Pixel para dobrar a margem de lucro.',
+    content: `
+# Como Criar uma Máquina de Vendas no WhatsApp Sem Pagar Comissões
+
+Se você administra um restaurante, hamburgueria ou pizzaria no Brasil, sabe que o maior ralador de margens de lucro é a comissão de 12% a 27% cobrada pelos marketplaces de delivery.
+
+Embora os aplicativos sejam úteis para aquisição inicial de clientes, a sobrevivência financeira do seu restaurante exige que a **segunda compra do cliente aconteça no seu canal próprio**.
+
+Neste artigo, revelamos como a arquitetura do **MiseOn** combina **Inteligência Artificial Consultiva LLaMA 3.3 70B**, **tokens de atribuição de pedido (?wa=)** e **rastreamento Meta Pixel** para transformar o WhatsApp no seu canal mais lucrativo.
+
+---
+
+## 1. O Problema dos "Links Secos" no WhatsApp
+
+A maioria dos restaurantes comete um de dois erros no atendimento do WhatsApp:
+1. **Atendimento Manual Lento**: Deixar um funcionário digitando manualmente de quinta a domingo, gerando filas de espera de 20 minutos e perda de pedidos por demora.
+2. **Robôs Rígidos com Links Secos**: Instalar um bot que responde com uma mensagem fria e um link genérico sem contexto. O cliente se sente mal atendido e fecha a conversa.
+
+---
+
+## 2. A Solução: Atendimento Consultivo com IA LLaMA 3.3 70B
+
+A Inteligência Artificial do MiseOn atua como um garçom experiente de balcão. Em vez de simplesmente soltar um link, ela:
+- Cumprimenta o cliente pelo nome.
+- Responde a dúvidas reais ("Temos opções vegetarinas?", "O molho tem lactose?", "Qual é o prato mais vendido?").
+- Sugere 2 ou 3 opções deliciosas do cardápio real com preços atualizados.
+- Faz venda cruzada (*upsell*) sugerindo bebidas e sobremesas.
+- **Envia o link do cardápio digital com um token de atribuição atômico (\`?wa=<wa_token>\`)**.
+
+---
+
+## 3. O que é Atribuição de Pedidos e Por Que Ela Garante o Seu Lucro?
+
+Quando o cliente clica no link gerado pela IA no WhatsApp, o token \`?wa=\` acompanha o navegador até o checkout.
+
+Quando o pedido é finalizado:
+1. O banco de dados do MiseOn vincula o pedido diretamente à conversa do WhatsApp de origem.
+2. O balcão e a cozinha visualizam o badge **🟢 WhatsApp** na fila de produção.
+3. Se você utiliza tráfego pago no Instagram/Facebook, o **Meta Pixel** dispara o evento nativo \`Purchase\` informando à Meta que aquele anúncio gerou uma venda real de R$ 85,00.
+
+---
+
+## 4. O Resultado Prático na Sua Conta Bancária
+
+Com vendas diretas pelo WhatsApp:
+- **0% de Comissão por Pedido**: O faturamento de R$ 100.000,00 entra integralmente na conta da sua loja.
+- **Split Instantâneo via Efí**: O dinheiro pago via Pix ou Crédito cai direto na sua conta bancária sem intermediação.
+- **Base de Clientes Própria**: Seus clientes são seus, com histórico de compras e segmentação RFM para futuras campanhas de reengajamento.
+
+Inicie hoje a transição do seu delivery para o canal próprio e recupere o controle da sua margem de lucro.
+`,
+  },
+  {
+    slug: 'dre-gastronomico-margem-lucro-liquido-restaurantes',
+    title: 'DRE Gastronômico: A Diferença entre Faturar R$ 100 Mil e Sobrar Dinheiro no Bolso',
+    description: 'Como a Demonstração do Resultado do Exercício (DRE) com escrituração contábil por dupla entrada revela a margem líquida real de restaurantes e elimina sangrias de caixa.',
+    category: 'Gestão Financeira',
+    publishedAt: '2026-08-15',
+    readTime: '10 min de leitura',
+    coverImage: '/blog-covers/cmv-peps-cover.png',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['DRE', 'Financeiro Restaurante', 'Margem Liquida', 'CMV Real', 'Gestão Financeira'],
+    seo: {
+      title: 'DRE Gastronômico: Faturar vs Lucrar no Restaurante — MiseOn',
+      description: 'Aprenda a montar a Demonstração do Resultado do Exercício (DRE) do seu restaurante e descubra seu lucro líquido real com o sistema MiseOn.',
+      keywords: 'dre restaurante, demonstracao resultado exercicio comida, lucro liquido restaurante, calculo margem gastronomia, sistema financeiro restaurante',
+      canonicalUrl: 'https://miseon.app.br/blog/dre-gastronomico-margem-lucro-liquido-restaurantes',
+    },
+    summary: 'Muitos donos de restaurantes comemoram o faturamento de R$ 100 mil no mês sem perceber que o caixa está negativo. A Demonstração do Resultado do Exercício (DRE) automatizada por dupla entrada é a única ferramenta capaz de separar vaidade de lucro real.',
+    content: `
+# DRE Gastronômico: A Diferença entre Faturar R$ 100 Mil e Sobrar Dinheiro no Bolso
+
+Na gastronomia, existe um ditado brutal que todo gestor experiente conhece: **"Faturamento é vaidade, lucro é sanidade e caixa é rei."**
+
+É muito comum encontrar estabelecimentos de food service com salas cheias, motoboys saindo sem parar e faturamento mensal de R$ 100.000,00 a R$ 200.000,00, mas cujo proprietário precisa aportar dinheiro do próprio bolso para pagar os salários no dia 5.
+
+Por que isso acontece? Porque a gestão estava olhando apenas para o **Fluxo de Caixa bruto** e ignorando a **Demonstração do Resultado do Exercício (DRE)**.
+
+---
+
+## 1. Fluxo de Caixa vs. DRE: A Armadilha dos Números
+
+- **Fluxo de Caixa**: Mostra apenas o que *entrou* e o que *saiu* da conta em determinado dia. Se você antecipar R$ 50 mil de vendas de cartão hoje, seu fluxo de caixa parecerá excelente, mas seu negócio pode estar operando no prejuízo.
+- **DRE (Competência)**: Mostra a **eficiência real da operação**. Ele confronta todas as vendas do mês contra todos os custos operacionais (CMV dos pratos, salários, aluguel, energia, taxas de maquininha e impostos), independente de quando o dinheiro foi pago ou recebido.
+
+---
+
+## 2. A Estrutura Canônica do DRE no Food Service
+
+Para que o seu restaurante tenha uma operação saudável, a estrutura do seu DRE deve seguir estas proporções ideais:
+
+| Linha do DRE | Descrição | Meta Saudável |
+|---|---|---|
+| **(=) Faturamento Bruto** | Total de vendas (Balcão + Salão + Delivery + iFood) | 100% |
+| **(-) Impostos & Taxas de Maquininha** | Simples Nacional, taxas iFood e de cartão | 8% a 14% |
+| **(=) Receita Líquida** | O dinheiro que realmente pertence ao restaurante | 86% a 92% |
+| **(-) Custo de Mercadoria Vendida (CMV)** | Baixa de insumos e embalagens consumidas no período | **28% a 33%** |
+| **(=) Lucro Bruto** | Margem após pagar os ingredientes | 55% a 62% |
+| **(-) Custos Operacionais Fixos** | Aluguel, energia, água, gás, software, marketing | 15% a 20% |
+| **(-) Mão de Obra (Folha + Encargos)** | Equipe de cozinha, salão, atendimento e pro-labore | 18% a 22% |
+| **(=) LUCRO LÍQUIDO OPERACIONAL** | **O que REALMENTE sobra para os sócios** | **15% a 25%** |
+
+---
+
+## 3. Como o Ledger de Dupla Entrada do MiseOn Automatiza Seu DRE
+
+No MiseOn, você não precisa preencher planilhas no fim do mês. A cada ação realizada no sistema:
+1. **Uma venda no PDV ou no WhatsApp**: Credita a Receita e debita o Caixa/Contas a Receber.
+2. **A baixa do ingrediente na cozinha**: Debita a conta \`3.1.01 CMV\` e credita \`1.1.03 Estoque de Insumos\` pelo custo PEPS exato.
+3. **O pagamento da conta de energia**: Lança o débito em Despesas Operacionais.
+
+Ao final do mês, a tela de **Financeiro & DRE** do MiseOn gera a Demonstração do Resultado pronta, revelando exatamente a margem de lucro de cada produto e onde a sua operação pode economizar.
+`,
+  },
+  {
+    slug: 'engenharia-de-cardapio-combos-upsell-lucratividade',
+    title: 'Engenharia de Cardápio e Venda Cruzada: Como Aumentar o Ticket Médio em até 28% sem Subir Preços',
+    description: 'Técnicas avançadas de psicologia de preços, matriz de lucratividade (Estrelas, Enigmas, Burros de Carga e Cães) e automação de upsell no cardápio digital.',
+    category: 'Engenharia de Cardápio',
+    publishedAt: '2026-08-15',
+    readTime: '8 min de leitura',
+    coverImage: '/blog-covers/peso-quilo-cover.png',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Engenharia de Cardápio', 'Ticket Médio', 'Upsell', 'Combos', 'Psicologia de Preços'],
+    seo: {
+      title: 'Engenharia de Cardápio: Aumente o Ticket Médio em 28% — MiseOn',
+      description: 'Aprenda a aplicar a Engenharia de Cardápio no seu restaurante. Classifique pratos na Matriz de BCG gastronômica e automatize o upsell digital.',
+      keywords: 'engenharia de cardapio, matriz bcg restaurante, aumentar ticket medio delivery, upsell cardapio digital, precificacao pratos comida',
+      canonicalUrl: 'https://miseon.app.br/blog/engenharia-de-cardapio-combos-upsell-lucratividade',
+    },
+    summary: 'Aumentar o faturamento do restaurante não exige necessariamente atrair mais clientes. Aplicando os 4 quadrantes da Engenharia de Cardápio e disparando complementos estratégicos no checkout, o ticket médio cresce até 28% de forma imediata.',
+    content: `
+# Engenharia de Cardápio e Venda Cruzada: Como Aumentar o Ticket Médio em até 28%
+
+Muitos donos de restaurantes acreditam que para faturar mais é preciso gastar rios de dinheiro em anúncios para trazer novos clientes.
+
+Existe, porém, um caminho muito mais rápido, barato e rentável: **fazer com que o cliente que já está no seu cardápio gaste R$ 15,00 a R$ 25,00 a mais por pedido**.
+
+Isso é alcançado através da **Engenharia de Cardápio (Menu Engineering)** aliada à automação de vendas cruzadas (*upsell*).
+
+---
+
+## 1. Os 4 Quadrantes da Matriz de Cardápio
+
+A Engenharia de Cardápio classifica cada item do seu menu cruzando dois fatores: **Volume de Vendas (Popularidade)** e **Margem de Lucro Bruto (Lucratividade)**.
+
+- **⭐ ESTRELAS (Alta Margem + Altas Vendas)**: Seus campeões! Devem ter destaque máximo no topo do cardápio digital, fotos profissionais e selos de "Mais Pedido".
+- **🐎 BURROS DE CARGA (Baixa Margem + Altas Vendas)**: Pratos muito populares, mas com custo de ingrediente alto. **Estratégia**: Reduzir levemente a gramatura ou criar um combo com bebida/sobremesa de alta margem para recuperar a margem total.
+- **❓ ENIGMAS (Alta Margem + Baixas Vendas)**: Pratos muito lucrativos que poucos clientes pedem. **Estratégia**: Reescrever a descrição de forma mais apetitosa ou oferecer através da IA no WhatsApp.
+- **🐕 CÃES (Baixa Margem + Baixas Vendas)**: Ocupam espaço na cozinha, exigem estoque de insumos raros e não dão lucro. **Estratégia**: Elimine do cardápio imediatamente.
+
+---
+
+## 2. A Magia dos Complementos Obrigatórios e Recomendados (Upsell)
+
+Quando o cliente seleciona um hambúrguer ou uma refeição no Cardápio Digital do MiseOn:
+- O sistema abre os **Grupos de Opções Inteligentes**: *"Deseja adicionar bacon duplo por R$ 4,50?"*, *"Transforme em Combo com Batata M + Refrigerante por R$ 12,00"*.
+- **Psicologia de Preços**: Para o cliente, R$ 4,50 adicionados a um pedido de R$ 38,00 parecem um valor irrelevante. Para o restaurante, esse adicional possui uma margem de lucro de 70%!
+
+---
+
+## 3. Recompensas de Cashback para Segunda Compra
+
+Para fechar o ciclo de retenção, o MiseOn devolve 5% a 10% do valor do pedido em **Cashback** para ser utilizado na próxima compra.
+
+O cliente percebe o saldo acumulado como um incentivo exclusivo da sua loja, garantindo que no próximo fim de semana ele peça novamente direto no seu site em vez de procurar alternativas nos aplicativos concorrentes.
+`,
+  },
+  {
+    slug: 'gestao-de-suprimentos-compras-peps-fornecedores',
+    title: 'Gestão de Compras e Suprimentos no Food Service: O Guia Definitivo para Não Queimar Caixa no Estoque',
+    description: 'Como automatizar ordens de compra, negociar com fornecedores baseado no histórico de preços e evitar que ingrediente vire lixo nas prateleiras.',
+    category: 'Operação & KDS',
+    publishedAt: '2026-08-15',
+    readTime: '7 min de leitura',
+    coverImage: '/blog-covers/cmv-peps-cover.png',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Compras', 'Fornecedores', 'Suprimentos', 'Estoque PEPS', 'Redução de Custos'],
+    seo: {
+      title: 'Gestão de Compras e Suprimentos no Food Service — MiseOn',
+      description: 'Descubra como o módulo de compras e fornecedores do MiseOn calcula a sugestão de pedido por giro e evita capital parado no estoque do restaurante.',
+      keywords: 'gestao de compras restaurante, fornecedores comida, controle de suprimentos food service, estoque minimo insumos, ordem de compra whatsapp',
+      canonicalUrl: 'https://miseon.app.br/blog/gestao-de-suprimentos-compras-peps-fornecedores',
+    },
+    summary: 'Comprar de menos paralisa a cozinha no meio do pico de vendas; comprar de mais queima capital de giro e gera perdas por validade. Saiba como o módulo de Suprimentos do MiseOn equilibra esse ciclo com precisão matemática.',
+    content: `
+# Gestão de Compras e Suprimentos no Food Service: O Guia Definitivo
+
+A cozinha de um restaurante é uma indústria de transformação acelerada. Todos os dias, quilos de proteínas, laticínios, vegetais e embalagens entram pela porta de serviços e saem em forma de pratos finalizados ou caixas de entrega.
+
+O grande desafio do gestor de compras é responder a duas perguntas diárias:
+1. **O que eu preciso comprar hoje?**
+2. **De quem eu devo comprar para obter a melhor margem?**
+
+---
+
+## 1. O Princípio Dourado: "Pedido é Intenção, Recebimento é Fato"
+
+Em muitas operações sem sistema integrado, o comprador faz o pedido por telefone com o distribuidor por R$ 200,00. Quando o caminhão chega, a nota fiscal vem em R$ 240,00 com duas marcas trocadas e 3 itens em falta.
+
+No módulo de **Suprimentos do MiseOn**:
+- A **Ordem de Compra** registra a *intenção* (o que foi acordado com o fornecedor).
+- O **Recebimento de Compra** registra o *fato* (o que realmente chegou na conferência da nota).
+- A diferença entre a intenção e o fato é registrada em relatórios de histórico de fornecedor, permitindo que você descubra quais distribuidores cumprem prazos e preços de forma transparente.
+
+---
+
+## 2. Sugestão Inteligente de Compra por Giro de Vendas
+
+Em vez de "adivinhar" quanto queijo ou carne comprar para a semana, o MiseOn analisa a visão de **Giro de Insumos (\`vw_insumo_giro\`)**:
+- **Consumo Médio Diário**: O sistema calcula quantos gramas do insumo a sua cozinha consome por dia com base na baixa real das fichas técnicas.
+- **Prazo de Entrega do Fornecedor**: Se o distribuidor de laticínios leva 3 dias para entregar, o sistema avisa exatamente quando o estoque atingiu o **Ponto de Pedido**.
+- **Sugestão Automática**: Gera a lista de compras perfeita para cobrir os próximos X dias sem deixar capital parado desnecessariamente na câmara fria.
+
+---
+
+## 3. Disparo de Ordens de Compra via WhatsApp para Fornecedores
+
+Com a ordem de compra gerada no MiseOn, o comprador não precisa digitar tudo de novo. Com 1 clique no botão **"Enviar Ordem de Compra no WhatsApp"**, o sistema formata a lista completa de produtos, unidades, marcas exigidas e observações de entrega e abre a conversa diretamente com o representante do distribuidor.
+
+Sua cozinha ganha agilidade, seu estoque opera sem perdas e seu caixa preserva a liquidez que o seu negócio precisa para crescer.
+`,
+  },
+  {
     slug: 'evolucao-do-cmv-do-caderno-ao-custeio-peps-3d',
     title: 'A Evolução do CMV no Food Service: Do Caderno de Receitas à Engenharia de Estoque 3D e Custeio PEPS',
     description: 'Como o controle de custos na gastronomia evoluiu de palpites em cadernos para o custeio real por lote PEPS e a inteligência de rendimento com perda de cocção.',

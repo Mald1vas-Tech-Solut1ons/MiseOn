@@ -97,6 +97,8 @@ export interface Loja {
   kds_etapas?: EtapaKDS[] | null; // Configuração de etapas do KDS Kanban
   segmento_negocio?: SegmentoNegocio | null;
   modulos_ativos?: ModulosAtivos | null;
+  meta_pixel_id?: string | null;
+  ga4_measurement_id?: string | null;
 }
 
 export type SegmentoNegocio =

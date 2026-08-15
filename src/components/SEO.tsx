@@ -8,6 +8,8 @@ export interface SEOProps {
   ogType?: string;
   ogImage?: string;
   schemaJson?: Record<string, any> | Record<string, any>[];
+  metaPixelId?: string | null;
+  ga4MeasurementId?: string | null;
 }
 
 export function SEO({
@@ -18,6 +20,8 @@ export function SEO({
   ogType = 'website',
   ogImage = 'https://miseon.app.br/icon.png',
   schemaJson,
+  metaPixelId,
+  ga4MeasurementId,
 }: SEOProps) {
   useEffect(() => {
     // 1. Atualizar Título da Página
@@ -73,10 +77,48 @@ export function SEO({
       }
       scriptElement.textContent = JSON.stringify(schemaJson);
     }
-    // Sem schema próprio: mantém o bloco herdado do index.html (Organization +
-    // SoftwareApplication do site). Removê-lo deixaria a página sem nenhum dado
-    // estruturado, que é pior do que ter o schema institucional.
-  }, [title, description, keywords, canonicalUrl, ogType, ogImage, schemaJson]);
+
+    // 7. Meta Pixel Injection (Zero custo 3rd party, rastreamento nativo de anúncios)
+    if (metaPixelId && metaPixelId.trim()) {
+      const pid = metaPixelId.trim();
+      if (!document.getElementById('meta-pixel-script')) {
+        const metaScript = document.createElement('script');
+        metaScript.id = 'meta-pixel-script';
+        metaScript.textContent = `
+          !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+          n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+          (window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '${pid}');
+          fbq('track', 'PageView');
+        `;
+        document.head.appendChild(metaScript);
+      }
+    }
+
+    // 8. Google Analytics 4 (GA4) Injection
+    if (ga4MeasurementId && ga4MeasurementId.trim()) {
+      const gid = ga4MeasurementId.trim();
+      if (!document.getElementById('ga4-script')) {
+        const ga4Script = document.createElement('script');
+        ga4Script.id = 'ga4-script';
+        ga4Script.async = true;
+        ga4Script.src = `https://www.googletagmanager.com/gtag/js?id=${gid}`;
+        document.head.appendChild(ga4Script);
+
+        const ga4ConfigScript = document.createElement('script');
+        ga4ConfigScript.id = 'ga4-config-script';
+        ga4ConfigScript.textContent = `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${gid}');
+        `;
+        document.head.appendChild(ga4ConfigScript);
+      }
+    }
+  }, [title, description, keywords, canonicalUrl, ogType, ogImage, schemaJson, metaPixelId, ga4MeasurementId]);
 
   return null;
 }

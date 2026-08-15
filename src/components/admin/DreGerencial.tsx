@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
-  PieChart, DollarSign, ArrowUpRight, ArrowDownRight, Percent,
-  Building2, CreditCard, ShieldCheck, Download, Calculator, Info
+  ArrowUpRight, Download, Calculator
 } from 'lucide-react';
 
 interface LinhaDRE {

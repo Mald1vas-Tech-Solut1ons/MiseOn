@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Users as UsersIcon, Sparkles as SparklesIcon, TrendingUp as TrendingUpIcon,
-  AlertTriangle as AlertTriangleIcon, MessageSquare as MessageSquareIcon,
-  Gift as GiftIcon, Search as SearchIcon, Send as SendIcon, Award as AwardIcon,
-  RefreshCw as RefreshCwIcon, DollarSign, CheckCircle2
+  Users as UsersIcon, TrendingUp as TrendingUpIcon, MessageSquare as MessageSquareIcon,
+  Gift as GiftIcon, Search as SearchIcon, Send as SendIcon, CheckCircle2
 } from 'lucide-react';
 
 interface Cliente {

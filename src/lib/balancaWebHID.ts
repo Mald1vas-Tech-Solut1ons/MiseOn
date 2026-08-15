@@ -22,7 +22,7 @@ export async function conectarBalancaSerial(
     await port.open({ baudRate: 9600, dataBits: 8, stopBits: 1, parity: 'none' });
 
     const textDecoder = new TextDecoderStream();
-    const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+    port.readable.pipeTo(textDecoder.writable).catch(() => {});
     const reader = textDecoder.readable.getReader();
 
     let cancelado = false;

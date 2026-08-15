@@ -1,38 +1,69 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Trash2, X, Save, ChevronUp, ChevronDown, MessageCircle, Search, Wallet, QrCode, ShoppingCart, Gift } from 'lucide-react';
+import {
+  Plus, Trash2, X, Save, ChevronUp, ChevronDown, MessageCircle,
+  Wallet, QrCode, ShoppingCart, Gift, Target, Megaphone, Users
+} from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Cupom, Banner, TaxaEntrega, HorarioFuncionamento, MetodoPgto, Cliente, CarrinhoAbandonado, fmt } from '../../types';
+import { Cupom, Banner, Cliente, CarrinhoAbandonado, MetodoPgto, fmt } from '../../types';
 import ImageUpload from '../../components/ImageUpload';
 import CrmClientes from '../../components/admin/CrmClientes';
 import type { CtxLoja } from './AdminLayout';
 
-type Tab = 'cupons' | 'banners' | 'taxas' | 'horarios' | 'clientes' | 'crm' | 'cashback' | 'recuperacao';
-const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+type Tab = 'cupons' | 'banners' | 'cashback' | 'recuperacao' | 'anuncios' | 'disparos' | 'crm';
 
 export default function Marketing() {
   const { lojaId, lojaSlug } = useOutletContext<CtxLoja>();
   const [tab, setTab] = useState<Tab>('cupons');
 
   return (
-    <div className="p-4">
-      <div className="mb-4 flex flex-wrap gap-2 pb-1">
-        {(['cupons', 'banners', 'taxas', 'horarios', 'clientes', 'crm', 'cashback', 'recuperacao'] as Tab[]).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-all ${tab === t ? 'bg-[var(--cor-primaria)] text-white shadow-md' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 shadow-sm'}`}>
-            {{ cupons: 'Cupons', banners: 'Banners', taxas: 'Taxas de entrega', horarios: 'Horários', clientes: 'Clientes Base', crm: 'CRM & RFM Inteligente', cashback: 'Cashback', recuperacao: 'Recuperação de vendas' }[t]}
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="font-['JetBrains_Mono'] text-[11px] tracking-[0.25em] text-orange-500 uppercase">GESTÃO · MARKETING & VENDAS</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]" />
+        </div>
+        <h2 className="font-['Sora'] text-2xl font-black text-gray-900 dark:text-white">Marketing & Engajamento</h2>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-2xl">
+          Atraia novos clientes com anúncios rastreados, fidelize com cashback e recupere vendas no WhatsApp sem pagar comissões adicionais.
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+        {[
+          { id: 'cupons', label: 'Cupons', icon: Gift },
+          { id: 'banners', label: 'Banners de Vitrine', icon: Megaphone },
+          { id: 'cashback', label: 'Cashback Fidelidade', icon: Wallet },
+          { id: 'recuperacao', label: 'Recuperação de Vendas', icon: ShoppingCart },
+          { id: 'anuncios', label: 'Meta Pixel & GA4', icon: Target },
+          { id: 'disparos', label: 'Disparos WhatsApp', icon: MessageCircle },
+          { id: 'crm', label: 'CRM & RFM', icon: Users },
+        ].map(({ id, label, icon: IconComponent }) => (
+          <button
+            key={id}
+            onClick={() => setTab(id as Tab)}
+            className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all ${
+              tab === id
+                ? 'bg-[var(--cor-primaria)] text-white shadow-md shadow-[var(--cor-primaria)]/25'
+                : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 shadow-sm'
+            }`}
+          >
+            <IconComponent size={14} />
+            {label}
           </button>
         ))}
       </div>
 
+      {/* Tab Contents */}
       {tab === 'cupons' && <CuponsTab lojaId={lojaId} />}
       {tab === 'banners' && <BannersTab lojaId={lojaId} />}
-      {tab === 'taxas' && <TaxasTab lojaId={lojaId} />}
-      {tab === 'horarios' && <HorariosTab lojaId={lojaId} />}
-      {tab === 'clientes' && <ClientesTab lojaId={lojaId} />}
-      {tab === 'crm' && <CrmClientes />}
       {tab === 'cashback' && <CashbackTab lojaId={lojaId} />}
       {tab === 'recuperacao' && <RecuperacaoTab lojaId={lojaId} lojaSlug={lojaSlug} />}
+      {tab === 'anuncios' && <AnunciosTab lojaId={lojaId} />}
+      {tab === 'disparos' && <DisparosTab lojaId={lojaId} lojaSlug={lojaSlug} />}
+      {tab === 'crm' && <CrmClientes />}
     </div>
   );
 }
@@ -42,11 +73,12 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
   const [cupons, setCupons] = useState<Cupom[]>([]);
   const [editando, setEditando] = useState<Cupom | 'novo' | null>(null);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     const { data } = await supabase.from('cupons').select('*').eq('loja_id', lojaId).order('codigo');
     setCupons((data as Cupom[]) ?? []);
-  };
-  useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
+  }, [lojaId]);
+
+  useEffect(() => { carregar(); }, [carregar]);
 
   const toggleAtivo = async (c: Cupom) => {
     await supabase.from('cupons').update({ ativo: !c.ativo }).eq('id', c.id);
@@ -59,36 +91,93 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
   };
 
   return (
-    <div className="space-y-2">
-      <button onClick={() => setEditando('novo')}
-        className="mb-1 flex w-full items-center justify-center gap-1 rounded-xl bg-[var(--cor-primaria)] py-2.5 text-sm font-semibold text-white">
-        <Plus size={15} /> Novo cupom
-      </button>
-      {cupons.map((c) => (
-        <div key={c.id} className={`rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm ${c.ativo === false ? 'opacity-50' : ''}`}>
-          <div className="flex items-center justify-between">
-            <p className="font-bold">{c.codigo}</p>
-            <span className="text-sm font-semibold text-[var(--cor-primaria)]">
-              {c.tipo === 'FIXO' ? fmt(Number(c.valor)) : `${c.valor}%`}
-            </span>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {c.descricao || (c.apenas_primeiro_pedido ? 'Só na 1ª compra' : 'Uso geral')}
-            {c.pedido_minimo > 0 && ` · mín. ${fmt(Number(c.pedido_minimo))}`}
-            {c.metodo_exigido && ` · só ${c.metodo_exigido}`}
-          </p>
-          <div className="mt-2 flex gap-2">
-            <button onClick={() => setEditando(c)} className="flex-1 rounded-lg border py-1.5 text-xs font-medium">Editar</button>
-            <button onClick={() => toggleAtivo(c)} className="flex-1 rounded-lg border py-1.5 text-xs font-medium">{c.ativo === false ? 'Ativar' : 'Inativar'}</button>
-            <button onClick={() => excluir(c)} className="rounded-lg border border-red-200 px-3 text-red-500"><Trash2 size={14} /></button>
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white">Cupons de Desconto</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Ofereça incentivos estratégicos para primeira compra ou pedidos mínimos.</p>
         </div>
-      ))}
-      {cupons.length === 0 && <p className="py-10 text-center text-sm text-gray-400">Nenhum cupom cadastrado.</p>}
+        <button
+          onClick={() => setEditando('novo')}
+          className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110 transition-all"
+        >
+          <Plus size={14} /> Criar Cupom
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {cupons.map((c) => (
+          <div
+            key={c.id}
+            className={`rounded-2xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-4 shadow-sm space-y-3 transition ${
+              c.ativo === false ? 'opacity-50' : ''
+            }`}
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="inline-block font-mono text-base font-extrabold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-lg">
+                  {c.codigo}
+                </span>
+                {c.apenas_primeiro_pedido && (
+                  <span className="ml-2 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-[10px] font-bold px-2 py-0.5">
+                    1ª Compra
+                  </span>
+                )}
+              </div>
+              <span className="text-lg font-black text-[var(--cor-primaria)]">
+                {c.tipo === 'FIXO' ? fmt(Number(c.valor)) : `${c.valor}% OFF`}
+              </span>
+            </div>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400 min-h-[32px]">
+              {c.descricao || 'Cupom promocional para uso na vitrine.'}
+              {c.pedido_minimo > 0 && ` · Mín: ${fmt(Number(c.pedido_minimo))}`}
+              {c.metodo_exigido && ` · Válido em: ${c.metodo_exigido}`}
+            </p>
+
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3 gap-2">
+              <button
+                onClick={() => setEditando(c)}
+                className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+              >
+                Editar
+              </button>
+              <button
+                onClick={() => toggleAtivo(c)}
+                className={`flex-1 rounded-xl py-1.5 text-xs font-bold transition ${
+                  c.ativo === false
+                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                }`}
+              >
+                {c.ativo === false ? 'Ativar' : 'Pausar'}
+              </button>
+              <button
+                onClick={() => excluir(c)}
+                className="rounded-xl border border-red-200 dark:border-red-900/50 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {cupons.length === 0 && (
+        <div className="p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl">
+          <Gift size={32} className="mx-auto mb-2 text-gray-400" />
+          <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Nenhum cupom cadastrado</p>
+          <p className="text-xs text-gray-400 max-w-sm mx-auto mt-1">Crie cupons de primeira compra para aumentar a taxa de conversão do seu cardápio.</p>
+        </div>
+      )}
 
       {editando && (
-        <CupomModal lojaId={lojaId} cupom={editando === 'novo' ? null : editando}
-          onClose={() => setEditando(null)} onSalvo={() => { setEditando(null); carregar(); }} />
+        <CupomModal
+          lojaId={lojaId}
+          cupom={editando === 'novo' ? null : editando}
+          onClose={() => setEditando(null)}
+          onSalvo={() => { setEditando(null); carregar(); }}
+        />
       )}
     </div>
   );
@@ -127,40 +216,68 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
   };
 
   return (
-    <div className="fade fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={onClose}>
-      <div className="sheet w-full max-w-lg rounded-t-3xl bg-white dark:bg-gray-900 dark:border-gray-800 p-4" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold">{cupom ? 'Editar cupom' : 'Novo cupom'}</h3>
-          <button onClick={onClose}><X size={20} /></button>
+    <div className="fade fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="sheet w-full max-w-lg rounded-3xl bg-white dark:bg-gray-900 dark:border-gray-800 p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+          <h3 className="text-base font-bold dark:text-white">{cupom ? 'Editar cupom' : 'Criar novo cupom'}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
         </div>
-        <div className="mt-3 space-y-2 text-sm">
-          <input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="Código (ex: BEMVINDO10)" className="w-full rounded-xl border p-2.5 uppercase" />
-          <input value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Descrição (opcional)" className="w-full rounded-xl border p-2.5" />
-          <div className="grid grid-cols-2 gap-2">
-            <select value={tipo} onChange={(e) => setTipo(e.target.value as any)} className="rounded-xl border p-2.5">
-              <option value="FIXO">Valor fixo (R$)</option>
-              <option value="PERCENTUAL">Percentual (%)</option>
-            </select>
-            <input value={valor} onChange={(e) => setValor(e.target.value)} type="number" placeholder="Valor" className="rounded-xl border p-2.5" />
+
+        <div className="space-y-3 text-sm">
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase">Código do Cupom</label>
+            <input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="Ex: BEMVINDO10" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-mono font-bold uppercase outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <input value={pedidoMinimo} onChange={(e) => setPedidoMinimo(e.target.value)} type="number" placeholder="Pedido mínimo R$" className="rounded-xl border p-2.5" />
-            <input value={limiteUsos} onChange={(e) => setLimiteUsos(e.target.value)} type="number" placeholder="Limite de usos" className="rounded-xl border p-2.5" />
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase">Descrição (Exibida para o cliente)</label>
+            <input value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Ex: 10% de desconto no seu primeiro pedido!" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <select value={metodo} onChange={(e) => setMetodo(e.target.value as any)} className="rounded-xl border p-2.5">
-              <option value="">Qualquer método</option>
-              {(['PIX', 'CREDITO', 'DEBITO', 'DINHEIRO'] as MetodoPgto[]).map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
-            <input value={validade} onChange={(e) => setValidade(e.target.value)} type="date" className="rounded-xl border p-2.5" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase">Tipo de Desconto</label>
+              <select value={tipo} onChange={(e) => setTipo(e.target.value as any)} className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-semibold outline-none">
+                <option value="FIXO">Valor fixo (R$)</option>
+                <option value="PERCENTUAL">Percentual (%)</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase">Valor do Desconto</label>
+              <input value={valor} onChange={(e) => setValor(e.target.value)} type="number" placeholder="10" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-bold outline-none" />
+            </div>
           </div>
-          <label className="flex items-center gap-1.5 text-xs">
-            <input type="checkbox" checked={primeiraCompra} onChange={(e) => setPrimeiraCompra(e.target.checked)} /> Válido só na 1ª compra do cliente
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase">Pedido Mínimo (R$)</label>
+              <input value={pedidoMinimo} onChange={(e) => setPedidoMinimo(e.target.value)} type="number" placeholder="0" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase">Limite de Usos</label>
+              <input value={limiteUsos} onChange={(e) => setLimiteUsos(e.target.value)} type="number" placeholder="Ilimitado" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase">Forma de Pagamento</label>
+              <select value={metodo} onChange={(e) => setMetodo(e.target.value as any)} className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none">
+                <option value="">Qualquer método</option>
+                {(['PIX', 'CREDITO', 'DEBITO', 'DINHEIRO'] as MetodoPgto[]).map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase">Data de Validade</label>
+              <input value={validade} onChange={(e) => setValidade(e.target.value)} type="date" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none" />
+            </div>
+          </div>
+          <label className="flex items-center gap-2 pt-1 text-xs font-semibold text-gray-700 dark:text-gray-300">
+            <input type="checkbox" checked={primeiraCompra} onChange={(e) => setPrimeiraCompra(e.target.checked)} className="h-4 w-4 rounded accent-[var(--cor-primaria)]" />
+            Válido exclusivamente no 1º pedido do cliente
           </label>
         </div>
-        {erro && <p className="mt-2 text-sm font-medium text-red-500">{erro}</p>}
-        <button onClick={salvar} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 font-semibold text-white">
-          <Save size={16} /> Salvar
+
+        {erro && <p className="text-xs font-bold text-red-500">{erro}</p>}
+
+        <button onClick={salvar} className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">
+          <Save size={16} /> Salvar Cupom
         </button>
       </div>
     </div>
@@ -172,11 +289,12 @@ function BannersTab({ lojaId }: { lojaId: string }) {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [novo, setNovo] = useState({ imagem_url: '', titulo: '', link_redirecionamento: '' });
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     const { data } = await supabase.from('banners_destaque').select('*').eq('loja_id', lojaId).order('ordem_exibicao');
     setBanners((data as Banner[]) ?? []);
-  };
-  useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
+  }, [lojaId]);
+
+  useEffect(() => { carregar(); }, [carregar]);
 
   const criar = async () => {
     if (!novo.imagem_url) return;
@@ -206,197 +324,35 @@ function BannersTab({ lojaId }: { lojaId: string }) {
   };
 
   return (
-    <div className="space-y-2">
-      {banners.map((b, idx) => (
-        <div key={b.id} className={`flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-2.5 shadow-sm ${b.is_ativo === false ? 'opacity-50' : ''}`}>
-          <img src={b.imagem_url} className="h-12 w-20 shrink-0 rounded-lg object-cover" alt="" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{b.titulo || '(sem título)'}</p>
-            <p className="truncate text-xs text-gray-400">{b.link_redirecionamento || '—'}</p>
-          </div>
-          <div className="flex flex-col">
-            <button disabled={idx === 0} onClick={() => mover(b, -1)} className="text-gray-400 disabled:opacity-20"><ChevronUp size={14} /></button>
-            <button disabled={idx === banners.length - 1} onClick={() => mover(b, 1)} className="text-gray-400 disabled:opacity-20"><ChevronDown size={14} /></button>
-          </div>
-          <button onClick={() => toggleAtivo(b)} className="text-xs font-medium text-gray-500 dark:text-gray-400">{b.is_ativo === false ? 'Inativo' : 'Ativo'}</button>
-          <button onClick={() => excluir(b)} className="rounded-lg border border-red-200 p-1.5 text-red-500"><Trash2 size={14} /></button>
-        </div>
-      ))}
-
-      <div className="space-y-2 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm">
-        <p className="text-sm font-semibold">Novo banner</p>
-        <ImageUpload lojaId={lojaId} pasta="banners" value={novo.imagem_url} onChange={(u) => setNovo({ ...novo, imagem_url: u })} aspecto="aspect-[2/1]" />
-        <input value={novo.titulo} onChange={(e) => setNovo({ ...novo, titulo: e.target.value })} placeholder="Título (opcional)" className="w-full rounded-lg border p-2 text-sm" />
-        <input value={novo.link_redirecionamento} onChange={(e) => setNovo({ ...novo, link_redirecionamento: e.target.value })} placeholder="Link ao clicar (opcional)" className="w-full rounded-lg border p-2 text-sm" />
-        <button onClick={criar} className="w-full rounded-lg bg-[var(--cor-primaria)] py-2 text-sm font-semibold text-white">Adicionar</button>
-      </div>
-    </div>
-  );
-}
-
-// ── Taxas de entrega ──────────────────────────────────────────
-function TaxasTab({ lojaId }: { lojaId: string }) {
-  const [taxas, setTaxas] = useState<TaxaEntrega[]>([]);
-  const [novo, setNovo] = useState({ bairro: '', valor: '' });
-
-  const carregar = async () => {
-    const { data } = await supabase.from('taxas_entrega').select('*').eq('loja_id', lojaId).order('bairro');
-    setTaxas((data as TaxaEntrega[]) ?? []);
-  };
-  useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
-
-  const criar = async () => {
-    if (!novo.bairro || !novo.valor) return;
-    await supabase.from('taxas_entrega').insert({ loja_id: lojaId, bairro: novo.bairro, valor: Number(novo.valor) });
-    setNovo({ bairro: '', valor: '' });
-    carregar();
-  };
-  const atualizarValor = async (t: TaxaEntrega, valor: string) => {
-    if (!valor || Number(valor) === Number(t.valor)) return;
-    await supabase.from('taxas_entrega').update({ valor: Number(valor) }).eq('id', t.id);
-    carregar();
-  };
-  const toggleAtivo = async (t: TaxaEntrega) => {
-    await supabase.from('taxas_entrega').update({ ativo: !t.ativo }).eq('id', t.id);
-    carregar();
-  };
-  const excluir = async (t: TaxaEntrega) => {
-    if (!confirm(`Excluir a taxa do bairro "${t.bairro}"?`)) return;
-    await supabase.from('taxas_entrega').delete().eq('id', t.id);
-    carregar();
-  };
-
-  return (
-    <div className="space-y-2">
-      {taxas.map((t) => (
-        <div key={t.id} className={`flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-2.5 shadow-sm ${t.ativo === false ? 'opacity-50' : ''}`}>
-          <p className="flex-1 text-sm font-medium">{t.bairro}</p>
-          <div className="flex items-center gap-1 text-sm">
-            R$ <input defaultValue={t.valor} onBlur={(e) => atualizarValor(t, e.target.value)} type="number"
-              className="w-16 rounded-lg border p-1 text-sm" />
-          </div>
-          <button onClick={() => toggleAtivo(t)} className="text-xs font-medium text-gray-500 dark:text-gray-400">{t.ativo === false ? 'Inativa' : 'Ativa'}</button>
-          <button onClick={() => excluir(t)} className="rounded-lg border border-red-200 p-1.5 text-red-500"><Trash2 size={14} /></button>
-        </div>
-      ))}
-
-      <div className="flex gap-2 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-2.5 shadow-sm">
-        <input value={novo.bairro} onChange={(e) => setNovo({ ...novo, bairro: e.target.value })} placeholder="Bairro" className="flex-1 rounded-lg border p-2 text-sm" />
-        <input value={novo.valor} onChange={(e) => setNovo({ ...novo, valor: e.target.value })} type="number" placeholder="R$" className="w-20 rounded-lg border p-2 text-sm" />
-        <button onClick={criar} className="rounded-lg bg-[var(--cor-primaria)] px-4 text-sm font-semibold text-white">Add</button>
-      </div>
-    </div>
-  );
-}
-
-// ── Horários de funcionamento ─────────────────────────────────
-function HorariosTab({ lojaId }: { lojaId: string }) {
-  const [horarios, setHorarios] = useState<HorarioFuncionamento[]>([]);
-
-  const carregar = async () => {
-    const { data } = await supabase.from('horarios_funcionamento').select('*').eq('loja_id', lojaId).order('dia_semana');
-    setHorarios((data as HorarioFuncionamento[]) ?? []);
-  };
-  useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
-
-  const addIntervalo = async (dia: number) => {
-    await supabase.from('horarios_funcionamento').insert({ loja_id: lojaId, dia_semana: dia, abre: '08:00', fecha: '18:00' });
-    carregar();
-  };
-  const atualizar = async (h: HorarioFuncionamento, campo: 'abre' | 'fecha', valor: string) => {
-    await supabase.from('horarios_funcionamento').update({ [campo]: valor }).eq('id', h.id);
-    carregar();
-  };
-  const excluir = async (h: HorarioFuncionamento) => {
-    await supabase.from('horarios_funcionamento').delete().eq('id', h.id);
-    carregar();
-  };
-
-  return (
-    <div className="space-y-3">
-      {DIAS.map((nome, dia) => {
-        const doDia = horarios.filter((h) => h.dia_semana === dia);
-        return (
-          <div key={dia} className="rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold">{nome}</p>
-              <button onClick={() => addIntervalo(dia)} className="flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
-                <Plus size={12} /> Intervalo
-              </button>
-            </div>
-            {doDia.length === 0 && <p className="mt-1 text-xs text-gray-400">Fechado</p>}
-            {doDia.map((h) => (
-              <div key={h.id} className="mt-1.5 flex items-center gap-2">
-                <input defaultValue={h.abre?.slice(0, 5)} onBlur={(e) => atualizar(h, 'abre', e.target.value)} type="time" className="rounded-lg border p-1.5 text-xs" />
-                <span className="text-xs text-gray-400">até</span>
-                <input defaultValue={h.fecha?.slice(0, 5)} onBlur={(e) => atualizar(h, 'fecha', e.target.value)} type="time" className="rounded-lg border p-1.5 text-xs" />
-                <button onClick={() => excluir(h)} className="text-red-400"><X size={14} /></button>
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-3">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white">Banners do Carrossel da Vitrine</h3>
+          {banners.map((b, idx) => (
+            <div key={b.id} className={`flex items-center gap-3 rounded-2xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm ${b.is_ativo === false ? 'opacity-50' : ''}`}>
+              <img src={b.imagem_url} className="h-16 w-28 shrink-0 rounded-xl object-cover" alt="" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-gray-900 dark:text-white">{b.titulo || '(sem título)'}</p>
+                <p className="truncate text-xs text-gray-400">{b.link_redirecionamento || 'Sem link externo'}</p>
               </div>
-            ))}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Clientes (CRM) ────────────────────────────────────────────
-function ClientesTab({ lojaId }: { lojaId: string }) {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [busca, setBusca] = useState('');
-  const [mensagem, setMensagem] = useState('');
-  const [carregando, setCarregando] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.from('clientes').select('*').eq('loja_id', lojaId).order('ultimo_pedido', { ascending: false });
-      setClientes((data as Cliente[]) ?? []);
-      setCarregando(false);
-    })();
-  }, [lojaId]);
-
-  const enviarMensagem = (c: Cliente) => {
-    const texto = mensagem.trim() || `Oi ${c.nome ?? ''}! Temos novidades no cardápio, dá uma olhada 😉`;
-    window.open(`https://wa.me/${c.telefone.replace(/\D/g, '')}?text=${encodeURIComponent(texto)}`, '_blank');
-  };
-
-  const visiveis = clientes.filter((c) =>
-    !busca || c.nome?.toLowerCase().includes(busca.toLowerCase()) || c.telefone.includes(busca));
-
-  if (carregando) return <p className="py-10 text-center text-sm text-gray-400">Carregando…</p>;
-
-  return (
-    <div>
-      <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-        Toda pessoa que fez login pra pedir vira um contato aqui — use pra reativar quem sumiu ou avisar de promoção.
-      </p>
-
-      <textarea value={mensagem} onChange={(e) => setMensagem(e.target.value)}
-        placeholder="Mensagem padrão pra usar no botão de WhatsApp (opcional — se vazio, manda uma saudação genérica)"
-        rows={2} className="mb-3 w-full rounded-xl border p-2.5 text-sm" />
-
-      <div className="mb-3 flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 px-3 py-2 shadow-sm">
-        <Search size={16} className="text-gray-400" />
-        <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome ou telefone…"
-          className="w-full bg-transparent text-sm outline-none" />
-      </div>
-
-      <div className="space-y-2">
-        {visiveis.map((c) => (
-          <div key={c.id} className="flex items-center justify-between rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{c.nome || '(sem nome)'}</p>
-              <p className="truncate text-xs text-gray-400">{c.telefone}{c.email ? ` · ${c.email}` : ''}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {c.total_pedidos} pedido(s){c.ultimo_pedido ? ` · último em ${new Date(c.ultimo_pedido).toLocaleDateString('pt-BR')}` : ''}
-              </p>
+              <div className="flex flex-col">
+                <button disabled={idx === 0} onClick={() => mover(b, -1)} className="text-gray-400 hover:text-gray-600 disabled:opacity-20"><ChevronUp size={16} /></button>
+                <button disabled={idx === banners.length - 1} onClick={() => mover(b, 1)} className="text-gray-400 hover:text-gray-600 disabled:opacity-20"><ChevronDown size={16} /></button>
+              </div>
+              <button onClick={() => toggleAtivo(b)} className="text-xs font-bold text-gray-500 dark:text-gray-400 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg">{b.is_ativo === false ? 'Inativo' : 'Ativo'}</button>
+              <button onClick={() => excluir(b)} className="rounded-xl border border-red-200 p-2 text-red-500 hover:bg-red-50"><Trash2 size={14} /></button>
             </div>
-            <button onClick={() => enviarMensagem(c)} className="shrink-0 rounded-lg border p-2 text-green-600">
-              <MessageCircle size={16} />
-            </button>
-          </div>
-        ))}
-        {visiveis.length === 0 && <p className="py-10 text-center text-sm text-gray-400">Nenhum cliente ainda.</p>}
+          ))}
+          {banners.length === 0 && <p className="py-8 text-center text-xs text-gray-400">Nenhum banner cadastrado no carrossel.</p>}
+        </div>
+
+        <div className="rounded-3xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-5 shadow-sm space-y-3 h-fit">
+          <p className="text-sm font-bold dark:text-white">Adicionar Novo Banner</p>
+          <ImageUpload lojaId={lojaId} pasta="banners" value={novo.imagem_url} onChange={(u) => setNovo({ ...novo, imagem_url: u })} aspecto="aspect-[2/1]" />
+          <input value={novo.titulo} onChange={(e) => setNovo({ ...novo, titulo: e.target.value })} placeholder="Título promocional (opcional)" className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none" />
+          <input value={novo.link_redirecionamento} onChange={(e) => setNovo({ ...novo, link_redirecionamento: e.target.value })} placeholder="Link de redirecionamento (opcional)" className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none" />
+          <button onClick={criar} className="w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-xs font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">Adicionar Banner</button>
+        </div>
       </div>
     </div>
   );
@@ -411,7 +367,7 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
   const [salvando, setSalvando] = useState(false);
   const [msg, setMsg] = useState('');
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     const [{ data: loja }, { data: saldos }] = await Promise.all([
       supabase.from('lojas').select('cashback_pct').eq('id', lojaId).single(),
       supabase.from('cashback_saldos').select('saldo').eq('loja_id', lojaId).gt('saldo', 0),
@@ -423,8 +379,9 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
       passivoTotal: (saldos ?? []).reduce((s, x) => s + Number(x.saldo), 0),
     });
     setCarregando(false);
-  };
-  useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
+  }, [lojaId]);
+
+  useEffect(() => { carregar(); }, [carregar]);
 
   const salvar = async () => {
     setSalvando(true); setMsg('');
@@ -432,60 +389,57 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
     setSalvando(false);
     if (error) return setMsg('Erro ao salvar: ' + error.message);
     setPctOriginal(pct);
-    setMsg('Salvo!');
+    setMsg('Regra de Cashback salva com sucesso!');
     setTimeout(() => setMsg(''), 2500);
   };
 
-  if (carregando) return <p className="py-10 text-center text-sm text-gray-400">Carregando…</p>;
+  if (carregando) return <p className="py-10 text-center text-xs text-gray-400">Carregando dados de Cashback…</p>;
 
   return (
-    <div className="mx-auto max-w-lg">
-      <div className="mb-4 rounded-2xl border border-[var(--cor-primaria)]/30 bg-[var(--cor-primaria)]/5 p-4">
-        <p className="mb-1 flex items-center gap-1.5 text-sm font-bold text-[var(--cor-primaria)]"><Wallet size={15} /> Como funciona</p>
-        <p className="text-xs text-gray-600 dark:text-gray-300">
-          A cada pedido <b>finalizado</b> feito pelo cardápio online, o cliente ganha de volta um % em saldo — que
-          ele pode usar como desconto na próxima compra, direto no checkout. É um dos motivos mais fortes pra ele
-          voltar a comprar com você em vez de procurar outro lugar.
+    <div className="mx-auto max-w-2xl space-y-6">
+      <div className="rounded-3xl border border-[var(--cor-primaria)]/30 bg-[var(--cor-primaria)]/5 p-5">
+        <p className="mb-1 flex items-center gap-2 text-sm font-black text-[var(--cor-primaria)]"><Wallet size={16} /> Como Funciona o Programa de Fidelidade</p>
+        <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+          A cada pedido <b>finalizado</b> feito pelo cardápio online, o cliente ganha automaticamente um % do valor pago em saldo. Na compra seguinte, o saldo acumulado aparece como opção de desconto no checkout, gerando uma taxa de retenção até 4x superior a concorrentes sem programa de pontos.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <label className="block">
-          <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Cashback por pedido</span>
-          <div className="mt-2 flex items-center gap-2">
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-4">
+        <div>
+          <span className="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">Percentual de Cashback por Pedido</span>
+          <div className="mt-3 flex items-center gap-3">
             <input type="number" min="0" max="100" step="0.5" value={pct} onChange={(e) => setPct(e.target.value)}
-              className="w-28 rounded-xl border-2 border-[var(--cor-primaria)] bg-green-50 p-3 text-center text-2xl font-black text-[var(--cor-primaria)] outline-none dark:bg-green-900/10" />
-            <span className="text-xl font-bold text-gray-400">%</span>
+              className="w-32 rounded-2xl border-2 border-[var(--cor-primaria)] bg-green-50 p-3 text-center text-3xl font-black text-[var(--cor-primaria)] outline-none dark:bg-green-900/10" />
+            <span className="text-2xl font-black text-gray-400">% de retorno</span>
           </div>
-          <p className="mt-2 text-[11px] text-gray-400">0% desliga o cashback (o saldo que os clientes já têm continua valendo).</p>
-        </label>
+          <p className="mt-2 text-xs text-gray-400">Dica: 5% a 10% é o valor ideal utilizado pelas maiores redes para garantir a volta do cliente.</p>
+        </div>
 
-        {msg && <p className={`mt-3 text-sm font-semibold ${msg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
+        {msg && <p className={`text-xs font-bold ${msg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
+
         <button onClick={salvar} disabled={salvando || pct === pctOriginal}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white disabled:opacity-40">
-          <Save size={15} /> {salvando ? 'Salvando…' : 'Salvar'}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 disabled:opacity-40">
+          <Save size={16} /> {salvando ? 'Salvando…' : 'Salvar Regra de Cashback'}
         </button>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-[11px] font-semibold text-gray-400">Clientes com saldo</p>
-          <p className="mt-1 text-xl font-black dark:text-gray-100">{stats.clientesComSaldo}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <p className="text-xs font-bold text-gray-400 uppercase">Clientes com Saldo Ativo</p>
+          <p className="mt-2 text-3xl font-black dark:text-white">{stats.clientesComSaldo}</p>
+          <p className="text-[11px] text-gray-400 mt-1">Clientes engajados prontos para pedir de novo.</p>
         </div>
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-[11px] font-semibold text-gray-400">Passivo em aberto</p>
-          <p className="mt-1 text-xl font-black dark:text-gray-100">{fmt(stats.passivoTotal)}</p>
+        <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <p className="text-xs font-bold text-gray-400 uppercase">Passivo Total em Aberto</p>
+          <p className="mt-2 text-3xl font-black text-[var(--cor-primaria)]">{fmt(stats.passivoTotal)}</p>
+          <p className="text-[11px] text-gray-400 mt-1">Valor acumulado por clientes para futuros descontos.</p>
         </div>
       </div>
-      <p className="mt-2 text-[11px] text-gray-400">
-        "Passivo em aberto" é quanto você já prometeu de volta aos seus clientes — é dinheiro que vai sair como
-        desconto quando eles voltarem a comprar. Não é uma cobrança, é só pra você acompanhar o tamanho do compromisso.
-      </p>
     </div>
   );
 }
 
-// ── Recuperação de vendas ────────────────────────────────────
+// ── Recuperação de Vendas ────────────────────────────────────
 interface PixPendente {
   id: string; numero: number; identificador_cliente: string; telefone_contato?: string;
   valor_total: number; criado_em: string;
@@ -498,9 +452,9 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
   const [carregando, setCarregando] = useState(true);
   const [gerandoCupom, setGerandoCupom] = useState<string | null>(null);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     setCarregando(true);
-    const corteMinimo = new Date(Date.now() - 15 * 60000).toISOString(); // pelo menos 15min parado, não incomoda quem tá no meio do pagamento
+    const corteMinimo = new Date(Date.now() - 15 * 60000).toISOString();
     const janela3d = new Date(Date.now() - 3 * 86400000).toISOString();
     const janela7d = new Date(Date.now() - 7 * 86400000).toISOString();
 
@@ -524,35 +478,23 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
     }
     setCarrinhos((abandonados as CarrinhoAbandonado[] ?? []).map((c) => ({ ...c, ...mapa.get(c.user_id) })));
     setCarregando(false);
-  };
-  useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
+  }, [lojaId]);
 
-  const [agora, setAgora] = useState(() => Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setAgora(Date.now()), 60000);
-    return () => clearInterval(t);
-  }, []);
+  useEffect(() => { carregar(); }, [carregar]);
 
   const linkCardapio = `${window.location.origin}/${lojaSlug}`;
-  const tempoDecorrido = (iso: string) => {
-
-    const min = Math.floor((agora - new Date(iso).getTime()) / 60000);
-    if (min < 60) return `${min}min atrás`;
-    if (min < 1440) return `${Math.floor(min / 60)}h atrás`;
-    return `${Math.floor(min / 1440)}d atrás`;
-  };
 
   const enviarPix = (p: PixPendente) => {
     if (!p.telefone_contato) return;
-    const texto = `Oi ${p.identificador_cliente}! Vi que seu Pix do pedido #${p.numero} (${fmt(Number(p.valor_total))}) não caiu — o código expira rapidinho. Bora tentar de novo? ${linkCardapio}`;
+    const texto = `Oi ${p.identificador_cliente}! Vi que o Pix do seu pedido #${p.numero} (${fmt(Number(p.valor_total))}) não foi concluído. Quer tentar novamente? Acesse por aqui: ${linkCardapio}`;
     window.open(`https://wa.me/${p.telefone_contato.replace(/\D/g, '')}?text=${encodeURIComponent(texto)}`, '_blank');
   };
 
   const enviarCarrinho = (c: CarrinhoAbandonado & { nome?: string | null; telefone?: string }, comCupom?: string) => {
     if (!c.telefone) return;
     const saudacao = c.nome ? `Oi ${c.nome}!` : 'Oi!';
-    const textoBase = `${saudacao} Vi que você tava montando um pedido aqui (${c.itens_resumo}) e não finalizou. Ainda dá tempo! 😉`;
-    const textoCupom = comCupom ? `\n\nUsa o cupom *${comCupom}* e ganha 10% de desconto nessa compra 🎁` : '';
+    const textoBase = `${saudacao} Vi que você montou o pedido (${c.itens_resumo}), mas não finalizou. Quer que eu te ajude a concluir? 😉`;
+    const textoCupom = comCupom ? `\n\nUse o cupom *${comCupom}* para ganhar 10% OFF na sua compra 🎁` : '';
     window.open(`https://wa.me/${c.telefone.replace(/\D/g, '')}?text=${encodeURIComponent(textoBase + textoCupom + `\n${linkCardapio}`)}`, '_blank');
   };
 
@@ -569,70 +511,234 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
     enviarCarrinho(c, codigo);
   };
 
-  if (carregando) return <p className="py-10 text-center text-sm text-gray-400">Carregando…</p>;
+  if (carregando) return <p className="py-10 text-center text-xs text-gray-400">Buscando oportunidades de recuperação…</p>;
 
   return (
-    <div>
-      <div className="mb-4 flex gap-2">
-        <button onClick={() => setSubtab('pix')}
-          className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold ${subtab === 'pix' ? 'bg-[var(--cor-primaria)] text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'}`}>
-          <QrCode size={13} /> Pix não pago ({pixPendentes.length})
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <button
+          onClick={() => setSubtab('pix')}
+          className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
+            subtab === 'pix' ? 'bg-[var(--cor-primaria)] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+          }`}
+        >
+          <QrCode size={14} /> Pix Pendentes ({pixPendentes.length})
         </button>
-        <button onClick={() => setSubtab('carrinhos')}
-          className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold ${subtab === 'carrinhos' ? 'bg-[var(--cor-primaria)] text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'}`}>
-          <ShoppingCart size={13} /> Carrinhos abandonados ({carrinhos.length})
+        <button
+          onClick={() => setSubtab('carrinhos')}
+          className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
+            subtab === 'carrinhos' ? 'bg-[var(--cor-primaria)] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+          }`}
+        >
+          <ShoppingCart size={14} /> Carrinhos Abandonados ({carrinhos.length})
         </button>
       </div>
 
       {subtab === 'pix' && (
-        <div className="space-y-2">
-          <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-            Pedidos onde o cliente gerou o Pix mas não pagou — o QR já expirou, mas ele ainda pode voltar e tentar de novo.
-          </p>
+        <div className="space-y-3">
           {pixPendentes.map((p) => (
-            <div key={p.id} className="flex items-center justify-between rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold dark:text-gray-100">#{p.numero} · {p.identificador_cliente}</p>
-                <p className="text-xs text-gray-400">{fmt(Number(p.valor_total))} · {tempoDecorrido(p.criado_em)}</p>
+            <div key={p.id} className="flex items-center justify-between rounded-2xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-4 shadow-sm">
+              <div>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">Pedido #{p.numero} · {p.identificador_cliente}</p>
+                <p className="text-xs text-gray-400">{fmt(Number(p.valor_total))}</p>
               </div>
-              <button onClick={() => enviarPix(p)} disabled={!p.telefone_contato} className="shrink-0 rounded-lg border p-2 text-green-600 disabled:opacity-30">
-                <MessageCircle size={16} />
+              <button onClick={() => enviarPix(p)} disabled={!p.telefone_contato} className="flex items-center gap-1.5 rounded-xl border border-green-200 bg-green-50 dark:bg-green-950/40 px-3 py-2 text-xs font-bold text-green-700 dark:text-green-300 hover:bg-green-100">
+                <MessageCircle size={14} /> Enviar Lembrete Pix
               </button>
             </div>
           ))}
-          {pixPendentes.length === 0 && <p className="py-10 text-center text-sm text-gray-400">Nenhum Pix parado nos últimos dias — ótimo sinal! 🎉</p>}
+          {pixPendentes.length === 0 && <p className="py-8 text-center text-xs text-gray-400">Nenhum Pix pendente sem pagamento nos últimos dias. Excelente!</p>}
         </div>
       )}
 
       {subtab === 'carrinhos' && (
-        <div className="space-y-2">
-          <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-            Clientes que abriram o checkout, montaram o pedido, mas não finalizaram. Chame de volta — com ou sem cupom.
-          </p>
+        <div className="space-y-3">
           {carrinhos.map((c) => (
-            <div key={c.id} className="rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold dark:text-gray-100">{c.nome || 'Cliente'} {c.telefone ? `· ${c.telefone}` : ''}</p>
-                  <p className="truncate text-xs text-gray-400">{c.itens_resumo}</p>
-                  <p className="text-xs text-gray-400">{fmt(Number(c.valor_estimado))} · {tempoDecorrido(c.atualizado_em)}</p>
+            <div key={c.id} className="rounded-2xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-4 shadow-sm space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{c.nome || 'Cliente'} {c.telefone ? `· ${c.telefone}` : ''}</p>
+                  <p className="text-xs text-gray-400">{c.itens_resumo}</p>
+                  <p className="text-xs font-semibold text-[var(--cor-primaria)] mt-0.5">Valor estimado: {fmt(Number(c.valor_estimado))}</p>
                 </div>
               </div>
-              <div className="mt-2 flex gap-2">
-                <button onClick={() => enviarCarrinho(c)} disabled={!c.telefone}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-bold text-green-600 disabled:opacity-30">
-                  <MessageCircle size={13} /> Mensagem simples
+              <div className="flex gap-2">
+                <button onClick={() => enviarCarrinho(c)} disabled={!c.telefone} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50">
+                  <MessageCircle size={14} /> Falar no WhatsApp
                 </button>
-                <button onClick={() => gerarCupomEEnviar(c)} disabled={!c.telefone || gerandoCupom === c.id}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[var(--cor-primaria)]/10 py-2 text-xs font-bold text-[var(--cor-primaria)] disabled:opacity-30">
-                  <Gift size={13} /> {gerandoCupom === c.id ? 'Gerando…' : 'Enviar com cupom 10%'}
+                <button onClick={() => gerarCupomEEnviar(c)} disabled={!c.telefone || gerandoCupom === c.id} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] py-2 text-xs font-bold text-white shadow-sm hover:brightness-110">
+                  <Gift size={14} /> {gerandoCupom === c.id ? 'Gerando…' : 'Enviar com 10% OFF'}
                 </button>
               </div>
             </div>
           ))}
-          {carrinhos.length === 0 && <p className="py-10 text-center text-sm text-gray-400">Nenhum carrinho abandonado recente.</p>}
+          {carrinhos.length === 0 && <p className="py-8 text-center text-xs text-gray-400">Nenhum carrinho abandonado recente.</p>}
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Meta Pixel & GA4 ──────────────────────────────────────────
+function AnunciosTab({ lojaId }: { lojaId: string }) {
+  const [pixelId, setPixelId] = useState('');
+  const [ga4Id, setGa4Id] = useState('');
+  const [salvando, setSalvando] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    supabase.from('lojas').select('meta_pixel_id, ga4_measurement_id').eq('id', lojaId).single()
+      .then(({ data }) => {
+        if (data) {
+          setPixelId(data.meta_pixel_id ?? '');
+          setGa4Id(data.ga4_measurement_id ?? '');
+        }
+      });
+  }, [lojaId]);
+
+  const salvar = async () => {
+    setSalvando(true); setMsg('');
+    const { error } = await supabase.from('lojas').update({
+      meta_pixel_id: pixelId.trim() || null,
+      ga4_measurement_id: ga4Id.trim() || null,
+    }).eq('id', lojaId);
+
+    setSalvando(false);
+    if (error) return setMsg('Erro ao salvar: ' + error.message);
+    setMsg('Pixels salvos com sucesso!');
+    setTimeout(() => setMsg(''), 2500);
+  };
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-6">
+      <div className="rounded-3xl border border-blue-200 bg-blue-50/60 dark:bg-blue-950/30 dark:border-blue-900/50 p-5 space-y-2">
+        <p className="flex items-center gap-2 text-sm font-bold text-blue-800 dark:text-blue-300">
+          <Target size={16} /> Rastreamento Profissional de Anúncios no Instagram & Google
+        </p>
+        <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+          Cole abaixo os identificadores dos seus pixels. O cardápio do MiseOn dispara automaticamente os eventos de <b>PageView</b>, <b>AddToCart</b> e <b>Purchase</b> para otimizar suas campanhas de tráfego pago sem custo adicional de servidor.
+        </p>
+      </div>
+
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-5">
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase">Meta Pixel ID (Facebook / Instagram Ads)</label>
+          <input
+            value={pixelId}
+            onChange={(e) => setPixelId(e.target.value)}
+            placeholder="Ex: 123456789012345"
+            className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
+          />
+          <p className="text-[11px] text-gray-400 mt-1">Encontrado no Gerenciador de Negócios da Meta em Fontes de Dados → Pixels.</p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase">Google Analytics 4 (GA4 ID)</label>
+          <input
+            value={ga4Id}
+            onChange={(e) => setGa4Id(e.target.value)}
+            placeholder="Ex: G-XXXXXXXXXX"
+            className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
+          />
+          <p className="text-[11px] text-gray-400 mt-1">Encontrado no painel do Google Analytics em Administrador → Fluxos de dados.</p>
+        </div>
+
+        {msg && <p className={`text-xs font-bold ${msg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
+
+        <button onClick={salvar} disabled={salvando} className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">
+          <Save size={16} /> {salvando ? 'Salvando…' : 'Salvar Pixels de Rastreamento'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Disparos WhatsApp ─────────────────────────────────────────
+function DisparosTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string }) {
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [segmento, setSegmento] = useState<'todos' | 'vips' | 'inativos'>('todos');
+  const [mensagem, setMensagem] = useState('');
+
+  useEffect(() => {
+    supabase.from('clientes').select('*').eq('loja_id', lojaId).order('ultimo_pedido', { ascending: false })
+      .then(({ data }) => setClientes((data as Cliente[]) ?? []));
+  }, [lojaId]);
+
+  const trintaDiasAtras = new Date(Date.now() - 30 * 86400000).toISOString();
+  const filtrados = clientes.filter((c) => {
+    if (segmento === 'vips') return c.total_pedidos >= 5;
+    if (segmento === 'inativos') return !c.ultimo_pedido || c.ultimo_pedido < trintaDiasAtras;
+    return true;
+  });
+
+  const linkCardapio = `${window.location.origin}/${lojaSlug}`;
+
+  const enviarWhatsApp = (c: Cliente) => {
+    const texto = mensagem.trim() || `Oi ${c.nome || ''}! Temos novidades no nosso cardápio hoje 😋 Acesse e peça por aqui: ${linkCardapio}`;
+    window.open(`https://wa.me/${c.telefone.replace(/\D/g, '')}?text=${encodeURIComponent(texto)}`, '_blank');
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-4">
+        <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <Megaphone size={18} className="text-[var(--cor-primaria)]" />
+          Central de Disparos Promocionais no WhatsApp
+        </h3>
+
+        <div className="space-y-3">
+          <label className="block text-xs font-bold text-gray-500 uppercase">1. Selecione o Segmento de Clientes</label>
+          <div className="flex gap-2">
+            {[
+              { id: 'todos', label: `Todos os Clientes (${clientes.length})` },
+              { id: 'vips', label: `Clientes VIPs (+5 pedidos) (${clientes.filter(c => c.total_pedidos >= 5).length})` },
+              { id: 'inativos', label: `Inativos (+30 dias sem pedir) (${clientes.filter(c => !c.ultimo_pedido || c.ultimo_pedido < trintaDiasAtras).length})` },
+            ].map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => setSegmento(id as any)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                  segmento === id ? 'bg-[var(--cor-primaria)] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">2. Modelo de Mensagem Promocional</label>
+          <textarea
+            value={mensagem}
+            onChange={(e) => setMensagem(e.target.value)}
+            placeholder={`Oi {nome}! Hoje preparamos uma oferta especial pra você no nosso cardápio 🍔\nPeça online por aqui: ${linkCardapio}`}
+            rows={3}
+            className="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
+          />
+        </div>
+      </div>
+
+      {/* Lista de Destinatários */}
+      <div className="space-y-2">
+        <p className="text-xs font-bold text-gray-500 uppercase">Destinatários Selecionados ({filtrados.length})</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {filtrados.map((c) => (
+            <div key={c.id} className="flex items-center justify-between rounded-2xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm">
+              <div>
+                <p className="text-xs font-bold text-gray-900 dark:text-white">{c.nome || 'Cliente'}</p>
+                <p className="text-[11px] text-gray-400">{c.telefone}</p>
+              </div>
+              <button
+                onClick={() => enviarWhatsApp(c)}
+                className="flex items-center gap-1 rounded-xl border border-green-200 bg-green-50 dark:bg-green-950/40 px-3 py-1.5 text-xs font-bold text-green-700 dark:text-green-300 hover:bg-green-100"
+              >
+                <MessageCircle size={14} /> Disparar
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

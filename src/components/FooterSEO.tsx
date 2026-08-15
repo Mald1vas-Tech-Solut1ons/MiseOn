@@ -5,6 +5,7 @@ import MiseOnLogo from './MiseOnLogo';
 
 export function FooterSEO() {
   const nichos = [
+    { title: 'Restaurantes por Quilo (R$/kg)', href: '/sistema-para-restaurante-por-quilo' },
     { title: 'Sistema para Hamburgueria', href: '/sistema-para-hamburgueria' },
     { title: 'Sistema para Lanchonete', href: '/sistema-para-lanchonete' },
     { title: 'Sistema para Pizzaria', href: '/sistema-para-pizzaria' },

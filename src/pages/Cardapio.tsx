@@ -280,6 +280,8 @@ export default function Cardapio() {
         keywords={`${loja.nome}, cardapio digital ${loja.nome}, pedir online ${loja.nome}, restaurante ${loja.nome}, delivery ${loja.nome}`}
         canonicalUrl={`https://miseon.app.br/${loja.slug}`}
         ogImage={loja.logo_url || loja.banner_url || 'https://miseon.app.br/icon-512.png'}
+        metaPixelId={loja.meta_pixel_id}
+        ga4MeasurementId={loja.ga4_measurement_id}
         schemaJson={{
           '@context': 'https://schema.org',
           '@type': 'Restaurant',
