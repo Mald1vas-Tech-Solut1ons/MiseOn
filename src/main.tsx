@@ -29,6 +29,7 @@ const EstoquePage      = lazy(() => import('./pages/landing/EstoquePage'));
 const Blog             = lazy(() => import('./pages/Blog'));
 const BlogPost         = lazy(() => import('./pages/BlogPost'));
 const PainelTV         = lazy(() => import('./pages/PainelTV'));
+const MarketingStrategyPage = lazy(() => import('./pages/landing/MarketingStrategyPage'));
 
 // ── Lazy: ADMIN_LAYOUT (único layout compartilhado — carrega rápido) ─────────
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -178,6 +179,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/api-whatsapp-restaurantes" element={<NicheLandingPage forcedSlug="api-whatsapp-restaurantes" />} />
               <Route path="/gestao-fiscal-nfe"         element={<NicheLandingPage forcedSlug="gestao-fiscal-nfe" />} />
               <Route path="/gestao-de-estoque-3d"      element={<EstoquePage />} />
+              <Route path="/estrategia-de-marketing-para-restaurantes" element={<MarketingStrategyPage />} />
               <Route path="/ajuda/estoque"             element={<EstoquePage />} />
               <Route path="/blog"                      element={<Blog />} />
               <Route path="/blog/:slug"                element={<BlogPost />} />

@@ -24,6 +24,76 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'como-transformar-smart-tv-salao-menu-board-4k-chamada-por-voz',
+    title: 'Como Transformar Qualquer Smart TV em um Menu Board 4K com Chamada de Pedidos por Voz em Viva-Voz',
+    description: 'Guia prático para eliminar filas no balcão e modernizar o salão: aprenda a conectar a Smart TV do restaurante ao KDS da cozinha com alertas sonoros e QR Code de autoatendimento.',
+    category: 'Tecnologia & IA',
+    publishedAt: '2026-08-15',
+    readTime: '7 min de leitura',
+    coverImage: '/blog-covers/smart-tv-cover.png',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Smart TV 4K', 'Digital Menu Board', 'Chamada por Voz', 'KDS Cozinha', 'Autoatendimento'],
+    seo: {
+      title: 'Smart TV no Restaurante: Menu Board 4K & Chamada por Voz — MiseOn',
+      description: 'Descubra como conectar a Smart TV do salão ao KDS da cozinha. Exiba seu cardápio em 4K e chame pedidos por voz sintetizada automaticamente.',
+      keywords: 'tv restaurante cardapio, digital menu board, chamada de senhas tv, kds cozinha tv, comanda eletronica tv salao',
+      canonicalUrl: 'https://miseon.app.br/blog/como-transformar-smart-tv-salao-menu-board-4k-chamada-por-voz',
+    },
+    summary: 'Restaurantes modernos estão substituindo placas impressas por Smart TVs integradas ao KDS. Veja como configurar o painel 2-em-1 do MiseOn com cardápio 4K, QR Code de mesa e chamada de senhas por voz sintetizada.',
+    content: `
+# Como Transformar Qualquer Smart TV em um Menu Board 4K com Chamada de Pedidos por Voz
+
+No cenário ultracompetitivo do Food Service atual, a primeira impressão visual do cliente ao entrar no seu estabelecimento define a percepção de valor da sua marca.
+
+Placas de papelão impressas, lousas de giz manchadas e painéis de senhas antigos transmitem uma imagem ultrapassada. Por outro lado, **Smart TVs integradas ao sistema de produção da cozinha** oferecem um visual de alta tecnologia estilo *fast-casual* americano.
+
+Neste artigo, explicamos como a arquitetura de **Painel TV 4K do MiseOn** funciona na prática e como configurá-la em qualquer Smart TV do seu restaurante em menos de 2 minutos.
+
+---
+
+## 1. O Conceito 2-em-1: Cardápio Noturno + Chamada de Senhas
+
+A maioria das soluções do mercado cobra licenças caras para exibir um menu board e exige a compra de um segundo aparelho para chamar senhas no balcão.
+
+O MiseOn unifica ambas as necessidades em uma única tela inteligente:
+1. **Menu Board 4K Rotativo**: Enquanto nenhum pedido é chamado, a TV exibe as categorias do seu cardápio com fotos em alta definição, preços atualizados e o selo de destaques ("Mais Pedidos"). A tela alterna automaticamente de categoria a cada 12 segundos.
+2. **QR Code de Autoatendimento**: Exibe no canto da tela o QR Code direto para o cardápio no celular do cliente, eliminando filas no balcão de atendimento.
+3. **Interrupção para Chamada de Voz**: Quando o cozinheiro avança o pedido para **PRONTO** na tela do KDS da cozinha, a TV faz um efeito neon piscando com a senha do cliente e a **voz sintetizada da TV anuncia em viva-voz**:
+   > *"Atenção! Pedido número 142 de Rodrigo está pronto para retirada!"*
+
+---
+
+## 2. Passo a Passo de Configuração na Prática
+
+### Passo 1: Ligar a Smart TV ao Wi-Fi da Loja
+Conecte sua Smart TV (Samsung Tizen, LG WebOS, Android TV, TCL ou Chromecast) à rede de internet da loja.
+
+### Passo 2: Abrir o Navegador da TV
+Abra o aplicativo de **Navegador (Browser)** nativo da televisão.
+
+### Passo 3: Digitar o Endereço do Painel TV
+Acesse a URL da sua loja: \`https://miseon.app.br/tv/slug-da-loja\`
+*(Dica: você pode copiar este link diretamente no botão "Cardápio na TV 4K" na aba de configurações do seu painel administrativo MiseOn)*.
+
+### Passo 4: Alternar para Tela Cheia
+Pressione **F11** no teclado ou clique no botão de **Expandir Tela (Fullscreen)**. A aplicação se ajustará perfeitamente à resolução 4K ou Full HD sem bordas.
+
+---
+
+## 3. Os Benefícios Operacionais Imediatos
+
+- **Redução do Tempo de Retirada**: Clientes ouvem o chamado em viva-voz e buscam a refeição no segundo exato em que sai da cozinha, evitando que os pratos esfriem no balcão.
+- **Zero Impressão de Papel**: Mudou o preço do hambúrguer? Altere no painel administrativo e a TV atualiza no mesmo segundo.
+- **Aumento do Ticket Médio**: Pratos com fotos profissionais exibidos em tela grande despertam o desejo de consumo nos clientes que aguardam na fila.
+
+Eleve a experiência visual do seu restaurante hoje mesmo com a tecnologia nativa para Smart TV do MiseOn.
+`,
+  },
+  {
     slug: 'estrategia-whatsapp-atribuicao-pixel-meta-vendas-sem-comissao',
     title: 'Como Criar uma Máquina de Vendas no WhatsApp Sem Pagar Comissões: Atribuição de Pedidos e Meta Pixel',
     description: 'Guia definitivo de growth para food service: como transformar o WhatsApp do seu restaurante em um canal direto rastreável com Meta Pixel, IA consultiva e atribuição de vendas.',
