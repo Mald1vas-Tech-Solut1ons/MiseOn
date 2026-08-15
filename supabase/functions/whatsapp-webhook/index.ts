@@ -73,6 +73,19 @@ serve(async (req) => {
       return json({ error: "handshake inválido" }, 400);
     }
 
+    // Fallback: aceita o token fixo da plataforma (WHATSAPP_VERIFY_TOKEN)
+    // para permitir a configuração inicial no painel da Meta antes de
+    // existir qualquer loja cadastrada em whatsapp_conexoes.
+    const platformToken = Deno.env.get("WHATSAPP_VERIFY_TOKEN");
+    if (platformToken && token === platformToken) {
+      console.log("Handshake validado pelo token de plataforma (env)");
+      return new Response(challenge, {
+        status: 200,
+        headers: { "Content-Type": "text/plain" },
+      });
+    }
+
+    // Caminho normal: busca o verify_token por loja na tabela
     const { data: conexao } = await supabase
       .from("whatsapp_conexoes")
       .select("loja_id")

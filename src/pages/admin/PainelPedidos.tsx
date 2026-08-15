@@ -83,6 +83,7 @@ function CardPedido({
 // `filtros` no componente. Mostrar filtro de um canal inexistente é ruído.
 const FILTROS: { id: string; label: string; pred: (p: Pedido) => boolean }[] = [
   { id: 'TODOS',      label: 'Todos',       pred: () => true },
+  { id: 'WHATSAPP',   label: 'WhatsApp',    pred: (p) => p.origem === 'whatsapp' },
   { id: 'IFOOD',      label: 'iFood',       pred: (p) => p.origem === 'ifood' },
   { id: 'ABERTOS',    label: 'Abertos',     pred: (p) => ['NOVO', 'ACEITO'].includes(p.status) && p.estacao_atual !== 'COZINHA' },
   { id: 'NA_COZINHA', label: 'Na cozinha',  pred: (p) => p.estacao_atual === 'COZINHA' },
@@ -176,7 +177,7 @@ export default function PainelPedidos() {
     
     // Notificação real no WhatsApp com o link de rastreio em tempo real
     if (statusAntigo === 'NOVO' && status === 'ACEITO' && p.origem === 'whatsapp' && p.chat_conversation_id) {
-      const trackingLink = `https://app.miseon.com.br/menu/${lojaId}`;
+      const trackingLink = loja?.slug ? `https://miseon.app.br/${loja.slug}` : `https://miseon.app.br`;
       const texto = `✅ Seu pedido #${p.numero} foi aceito e já está em preparação!\n\nAcompanhe o status em tempo real pelo link:\n${trackingLink}`;
       
       supabase.from('chat_conversations').select('telefone').eq('id', p.chat_conversation_id).single()
@@ -227,10 +228,14 @@ export default function PainelPedidos() {
 
   const contagem = (f: (typeof FILTROS)[number]) => pedidos.filter(f.pred).length;
 
-  // Filtro iFood condicional: só existe se a loja tem a integração vinculada
-  // ou se há pedidos iFood no painel (ex.: loja desvinculou depois de vender).
+  // Filtros de canais condicionais: entram na lista apenas se fizer sentido para a loja
   const temIfood = !!loja?.ifood_merchant_id || pedidos.some((p) => p.origem === 'ifood');
-  const filtros = temIfood ? FILTROS : FILTROS.filter((f) => f.id !== 'IFOOD');
+  const temWhatsapp = pedidos.some((p) => p.origem === 'whatsapp');
+  const filtros = FILTROS.filter((f) => {
+    if (f.id === 'IFOOD') return temIfood;
+    if (f.id === 'WHATSAPP') return temWhatsapp;
+    return true;
+  });
 
   const filtroAtivo = filtros.find((f) => f.id === filtro) ?? filtros[0];
   const visiveis = [...ativos, ...encerrados].filter(filtroAtivo.pred);

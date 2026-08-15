@@ -38,11 +38,12 @@ interface Props {
   onSucesso: (numero: number, pedidoId: string, metodo: MetodoPgto, pix?: { copia_e_cola: string; qr_imagem?: string } | null, total?: number) => void;
   onCartao?: (info: { pedidoId: string; numero: number; total: number }) => void;
   onAbrirAuth: () => void;
+  waToken?: string | null;
 }
 
 export default function CheckoutDrawer({
   loja, aberta, carrinho, taxas, faixasDistancia, horarios, user,
-  setCarrinho, onClose, onSucesso, onCartao, onAbrirAuth,
+  setCarrinho, onClose, onSucesso, onCartao, onAbrirAuth, waToken,
 }: Props) {
   const [tipo, setTipo] = useState<'DELIVERY' | 'RETIRADA_BALCAO'>('DELIVERY');
   const [nome, setNome] = useState('');
@@ -347,6 +348,14 @@ export default function CheckoutDrawer({
     if (erroPedido || !pedido) {
       setEnviando(false);
       return setErro(mensagemErroSupabase('Erro ao criar pedido.', erroPedido));
+    }
+
+    // Vincular pedido à conversa de WhatsApp se houver token de atribuição
+    if (waToken) {
+      await supabase.rpc('fn_atribuir_conversa_ao_pedido', {
+        p_pedido_id: pedido.id,
+        p_wa_token: waToken,
+      });
     }
 
     // Debita o cashback usado — RPC atômica (evita gastar o mesmo saldo 2x em abas simultâneas)

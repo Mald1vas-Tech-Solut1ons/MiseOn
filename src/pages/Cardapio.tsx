@@ -90,6 +90,7 @@ export default function Cardapio() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const numeroMesaUrl = searchParams.get('mesa');
+  const waTokenUrl = searchParams.get('wa');
   const [mesaAtual, setMesaAtual] = useState<Mesa | null>(null);
   const [mesaErro, setMesaErro] = useState(false);
   const [pedidoMesaSucesso, setPedidoMesaSucesso] = useState<number | null>(null);
@@ -568,7 +569,7 @@ export default function Cardapio() {
       )}
 
       {checkoutAberto && !mesaAtual && (
-        <CheckoutDrawer loja={loja} aberta={aberta} carrinho={carrinho} taxas={taxas} faixasDistancia={faixasDistancia} horarios={horarios} user={user} setCarrinho={setCarrinho}
+        <CheckoutDrawer loja={loja} aberta={aberta} carrinho={carrinho} taxas={taxas} faixasDistancia={faixasDistancia} horarios={horarios} user={user} setCarrinho={setCarrinho} waToken={waTokenUrl}
           onClose={() => setCheckoutAberto(false)} onAbrirAuth={() => setModalAuthAberto(true)}
           onCartao={(info) => { setCheckoutAberto(false); setCartao(info); }}
           onSucesso={(num, id, metodo, pixData, total) => {
