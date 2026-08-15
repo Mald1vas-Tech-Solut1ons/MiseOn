@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone } from 'lucide-react';
+import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone, Calculator } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PALETA_CORES, PALETA_FUNDO_POR_TEMA, isLightColor, fonteFamilia, obterFundoLojaPorTema, obterTokensLoja, resolverTemaLoja, type TemaLoja } from '../../lib/personalizacao';
 import ColorSwatchPicker from '../../components/ColorSwatchPicker';
@@ -11,6 +11,7 @@ import { IfoodOnboarding } from '../../components/admin/IfoodOnboarding';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
 import type { EntregaModo, FaixaEntrega, HorarioFuncionamento, SegmentoNegocio, ModulosAtivos } from '../../types';
+import { fmt } from '../../types';
 import { maskCPFouCNPJ, maskTelefone, validarCPFouCNPJ } from '../../lib/mascaras';
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
 import { geocode } from '../../lib/geo';
@@ -87,6 +88,7 @@ interface FormLoja {
   entrega_taxa_base: string;
   entrega_taxa_km: string;
   entrega_taxa_padrao: string;
+  frete_gratis_valor_minimo: string;
   nfe_ambiente: 'homologacao' | 'producao';
   nfe_habilitado: boolean;
   nfe_regime_tributario: string;
@@ -120,7 +122,7 @@ const vazio: FormLoja = {
   efi_titular_documento: '', efi_conta: '', antecipacao_cartao: false,
   aceita_online: true, aceita_entrega: true,
   aceita_agendamento: false, agendamento_antecedencia_min: '30',
-  lat: '', lng: '', entrega_modo: 'HIBRIDO', entrega_raio_km: '8', entrega_taxa_base: '0', entrega_taxa_km: '1.5', entrega_taxa_padrao: '0',
+  lat: '', lng: '', entrega_modo: 'DISTANCIA', entrega_raio_km: '8', entrega_taxa_base: '5', entrega_taxa_km: '2.0', entrega_taxa_padrao: '0', frete_gratis_valor_minimo: '0',
   nfe_ambiente: 'homologacao', nfe_habilitado: false, nfe_regime_tributario: 'Simples Nacional', nfe_inscricao_estadual: '', nfe_id_csc: '', nfe_csc: '',
   ifood_merchant_id: '', ifood_addon_ativo: false, ifood_taxa_pct: '0', ifood_taxa_fixa: '0',
   segmento_negocio: 'GERAL',
@@ -175,9 +177,10 @@ export default function Loja() {
           lng: data.lng != null ? String(data.lng) : '',
           entrega_modo: (data.entrega_modo ?? 'HIBRIDO') as EntregaModo,
           entrega_raio_km: data.entrega_raio_km != null ? String(data.entrega_raio_km) : '8',
-          entrega_taxa_base: data.entrega_taxa_base != null ? String(data.entrega_taxa_base) : '0',
-          entrega_taxa_km: data.entrega_taxa_km != null ? String(data.entrega_taxa_km) : '1.5',
+          entrega_taxa_base: data.entrega_taxa_base != null ? String(data.entrega_taxa_base) : '5',
+          entrega_taxa_km: data.entrega_taxa_km != null ? String(data.entrega_taxa_km) : '2.0',
           entrega_taxa_padrao: data.entrega_taxa_padrao != null ? String(data.entrega_taxa_padrao) : '0',
+          frete_gratis_valor_minimo: data.frete_gratis_valor_minimo != null ? String(data.frete_gratis_valor_minimo) : '0',
           nfe_ambiente: data.nfe_ambiente ?? 'homologacao',
           nfe_habilitado: data.nfe_habilitado ?? false,
           nfe_regime_tributario: data.nfe_regime_tributario ?? 'Simples Nacional',
@@ -381,6 +384,7 @@ export default function Loja() {
       entrega_taxa_base: Number(form.entrega_taxa_base || 0),
       entrega_taxa_km: Number(form.entrega_taxa_km || 0),
       entrega_taxa_padrao: Number(form.entrega_taxa_padrao || 0),
+      frete_gratis_valor_minimo: Number(form.frete_gratis_valor_minimo || 0),
       ifood_taxa_pct: Number(form.ifood_taxa_pct || 0),
       ifood_taxa_fixa: Number(form.ifood_taxa_fixa || 0),
       ifood_addon_ativo: form.ifood_addon_ativo,
@@ -899,40 +903,83 @@ export default function Loja() {
               </button>
             </div>
 
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Modo de cobrança da entrega</span>
-                <select value={form.entrega_modo} onChange={(e) => setValor('entrega_modo', e.target.value as EntregaModo)}
-                  className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-                  <option value="HIBRIDO">Híbrido inteligente</option>
-                  <option value="DISTANCIA">Base + valor por km</option>
-                  <option value="BAIRRO">Somente por bairros</option>
-                </select>
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Taxa Mínima de Saída (R$)</span>
+                <input
+                  value={form.entrega_taxa_base}
+                  onChange={set('entrega_taxa_base')}
+                  type="number"
+                  step="0.50"
+                  placeholder="5.00"
+                  className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
+                />
+                <p className="mt-1 text-[11px] text-gray-400">Valor fixo cobrado em qualquer entrega.</p>
               </label>
 
               <label className="block">
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Raio máximo de atendimento (km)</span>
-                <input value={form.entrega_raio_km} onChange={set('entrega_raio_km')} type="number" step="0.1"
-                  className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Valor Adicional por Km (R$/km)</span>
+                <input
+                  value={form.entrega_taxa_km}
+                  onChange={set('entrega_taxa_km')}
+                  type="number"
+                  step="0.50"
+                  placeholder="2.00"
+                  className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
+                />
+                <p className="mt-1 text-[11px] text-gray-400">Adicional multiplicado pela distância em km.</p>
               </label>
 
               <label className="block">
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Taxa base</span>
-                <input value={form.entrega_taxa_base} onChange={set('entrega_taxa_base')} type="number" step="0.01"
-                  className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Raio Máximo de Cobertura (Km)</span>
+                <input
+                  value={form.entrega_raio_km}
+                  onChange={set('entrega_raio_km')}
+                  type="number"
+                  step="0.5"
+                  placeholder="8.0"
+                  className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
+                />
+                <p className="mt-1 text-[11px] text-gray-400">Bloqueia pedidos com distância superior a este raio.</p>
               </label>
 
               <label className="block">
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Valor por km (fallback)</span>
-                <input value={form.entrega_taxa_km} onChange={set('entrega_taxa_km')} type="number" step="0.01"
-                  className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Frete Grátis acima de (R$)</span>
+                <input
+                  value={form.frete_gratis_valor_minimo}
+                  onChange={set('frete_gratis_valor_minimo')}
+                  type="number"
+                  step="5.00"
+                  placeholder="0.00 (desativado)"
+                  className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <p className="mt-1 text-[11px] text-gray-400">Isenta a taxa se o subtotal atingir este valor (0 = sem frete grátis).</p>
               </label>
+            </div>
 
-              <label className="block md:col-span-2">
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Taxa padrão de contingência</span>
-                <input value={form.entrega_taxa_padrao} onChange={set('entrega_taxa_padrao')} type="number" step="0.01"
-                  className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-              </label>
+            {/* Simulador Interativo em Tempo Real */}
+            <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50/60 dark:bg-blue-950/30 dark:border-blue-900/50 p-4 space-y-2">
+              <p className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+                <Calculator size={14} /> Simulador da Taxa no Checkout
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+                <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
+                  <span className="text-gray-400">Distância: 3.5 km</span>
+                  <p className="font-bold text-gray-900 dark:text-white mt-0.5">
+                    Taxa: {fmt(Number(form.entrega_taxa_base || 0) + (3.5 * Number(form.entrega_taxa_km || 0)))}
+                  </p>
+                </div>
+                <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
+                  <span className="text-gray-400">Distância: 6.0 km</span>
+                  <p className="font-bold text-gray-900 dark:text-white mt-0.5">
+                    Taxa: {fmt(Number(form.entrega_taxa_base || 0) + (6.0 * Number(form.entrega_taxa_km || 0)))}
+                  </p>
+                </div>
+                <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
+                  <span className="text-gray-400">Acima de {form.entrega_raio_km || 8} km</span>
+                  <p className="font-bold text-red-500 mt-0.5">Fora da área (Bloqueado)</p>
+                </div>
+              </div>
             </div>
 
             <div className="mt-4 rounded-2xl border border-dashed border-gray-200 p-4 dark:border-gray-700">

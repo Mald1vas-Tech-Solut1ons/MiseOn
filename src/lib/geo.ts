@@ -54,6 +54,7 @@ export interface ConfigEntrega {
   entrega_taxa_km?: number | null;
   entrega_raio_km?: number | null;
   entrega_taxa_padrao?: number | null;
+  frete_gratis_valor_minimo?: number | null;
 }
 
 export interface FaixaEntregaCalculo {
@@ -76,17 +77,28 @@ export interface ResultadoEntrega {
   faixaId?: string | null;
   faixaNome?: string | null;
   raioConsideradoKm?: number | null;
+  freteGratis?: boolean;
 }
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
-/** Taxa a partir da distância: base + (km × por_km); bloqueia acima do raio. */
-export function taxaDaDistancia(loja: ConfigEntrega, distanciaKm: number): { taxa: number; fora: boolean } {
+/** Taxa a partir da distância: base + (km × por_km); bloqueia acima do raio; isenta se subtotal atingir frete grátis. */
+export function taxaDaDistancia(
+  loja: ConfigEntrega,
+  distanciaKm: number,
+  subtotal: number = 0,
+): { taxa: number; fora: boolean; freteGratis: boolean } {
   const base = Number(loja.entrega_taxa_base ?? 0);
   const perKm = Number(loja.entrega_taxa_km ?? 0);
   const raio = loja.entrega_raio_km != null ? Number(loja.entrega_raio_km) : null;
   const fora = raio != null && distanciaKm > raio;
-  return { taxa: r2(base + perKm * distanciaKm), fora };
+
+  const minFreteGratis = loja.frete_gratis_valor_minimo != null ? Number(loja.frete_gratis_valor_minimo) : 0;
+  const freteGratis = minFreteGratis > 0 && subtotal >= minFreteGratis;
+
+  const taxaFinal = freteGratis ? 0 : r2(base + perKm * distanciaKm);
+
+  return { taxa: taxaFinal, fora, freteGratis };
 }
 
 export function obterRaioMaximo(loja: ConfigEntrega, faixasDistancia: FaixaEntregaCalculo[] = []) {
@@ -104,7 +116,11 @@ export function taxaPorFaixa(
   loja: ConfigEntrega,
   distanciaKm: number,
   faixasDistancia: FaixaEntregaCalculo[],
-): { taxa: number; fora: boolean; faixa: FaixaEntregaCalculo | null; raio: number | null } {
+  subtotal: number = 0,
+): { taxa: number; fora: boolean; faixa: FaixaEntregaCalculo | null; raio: number | null; freteGratis: boolean } {
+  const minFreteGratis = loja.frete_gratis_valor_minimo != null ? Number(loja.frete_gratis_valor_minimo) : 0;
+  const freteGratis = minFreteGratis > 0 && subtotal >= minFreteGratis;
+
   const faixasAtivas = [...faixasDistancia]
     .filter((f) => f.ativo !== false)
     .sort((a, b) => Number(a.km_ate) - Number(b.km_ate));
@@ -113,7 +129,11 @@ export function taxaPorFaixa(
   const raio = obterRaioMaximo(loja, faixasAtivas);
 
   if (!faixa) {
-    return { taxa: 0, fora: raio != null ? distanciaKm > raio : true, faixa: null, raio };
+    return { taxa: 0, fora: raio != null ? distanciaKm > raio : true, faixa: null, raio, freteGratis };
+  }
+
+  if (freteGratis) {
+    return { taxa: 0, fora: raio != null ? distanciaKm > raio : false, faixa, raio, freteGratis: true };
   }
 
   const base = Number(loja.entrega_taxa_base ?? 0);
@@ -126,6 +146,7 @@ export function taxaPorFaixa(
     fora: raio != null ? distanciaKm > raio : false,
     faixa,
     raio,
+    freteGratis: false,
   };
 }
 
@@ -133,32 +154,31 @@ export function lojaAtendeDistancia(
   loja: ConfigEntrega,
   geoCliente: LatLng,
   faixasDistancia: FaixaEntregaCalculo[] = [],
+  subtotal: number = 0,
 ) {
   if (loja.lat == null || loja.lng == null) {
-    return { atende: true, distanciaKm: null as number | null, taxa: 0, faixa: null as FaixaEntregaCalculo | null, raio: obterRaioMaximo(loja, faixasDistancia) };
+    return { atende: true, distanciaKm: null as number | null, taxa: 0, faixa: null as FaixaEntregaCalculo | null, raio: obterRaioMaximo(loja, faixasDistancia), freteGratis: false };
   }
 
   const distanciaKm = r2(haversineKm({ lat: Number(loja.lat), lng: Number(loja.lng) }, geoCliente));
   if (loja.entrega_modo === 'HIBRIDO' && faixasDistancia.some((f) => f.ativo !== false)) {
-    const faixa = taxaPorFaixa(loja, distanciaKm, faixasDistancia);
-    return { atende: !faixa.fora, distanciaKm, taxa: faixa.taxa, faixa: faixa.faixa, raio: faixa.raio };
+    const faixa = taxaPorFaixa(loja, distanciaKm, faixasDistancia, subtotal);
+    return { atende: !faixa.fora, distanciaKm, taxa: faixa.taxa, faixa: faixa.faixa, raio: faixa.raio, freteGratis: faixa.freteGratis };
   }
 
-  const linear = taxaDaDistancia(loja, distanciaKm);
+  const linear = taxaDaDistancia(loja, distanciaKm, subtotal);
   return {
     atende: !linear.fora,
     distanciaKm,
     taxa: linear.taxa,
     faixa: null,
     raio: obterRaioMaximo(loja, faixasDistancia),
+    freteGratis: linear.freteGratis,
   };
 }
 
 /**
- * Calcula a entrega com fallback em cascata:
- *   1. DISTANCIA  — se a loja tem origem e o endereço do cliente geocodifica
- *   2. BAIRRO     — taxa cadastrada por bairro (match sem acento/caixa)
- *   3. PADRAO     — taxa padrão configurada quando nada acima resolve
+ * Calcula a entrega com cálculo por distância como padrão principal:
  * `geoCliente` opcional evita geocodificar de novo (quem chama pode cachear).
  */
 export async function calcularEntrega(
@@ -167,19 +187,20 @@ export async function calcularEntrega(
     enderecoQuery?: string;
     geoCliente?: LatLng | null;
     bairro?: string;
+    subtotal?: number;
     taxasBairro?: { bairro: string; valor: number | string }[];
     faixasDistancia?: FaixaEntregaCalculo[];
   },
 ): Promise<ResultadoEntrega> {
-  const { enderecoQuery, bairro, taxasBairro = [], faixasDistancia = [] } = params;
+  const { enderecoQuery, bairro, subtotal = 0, taxasBairro = [], faixasDistancia = [] } = params;
 
-  // 1) Distância
-  if ((loja.entrega_modo === 'DISTANCIA' || loja.entrega_modo === 'HIBRIDO') && loja.lat != null && loja.lng != null) {
+  // 1) Distância (Regra Principal)
+  if (loja.lat != null && loja.lng != null) {
     const geo = params.geoCliente ?? (enderecoQuery ? await geocode(enderecoQuery) : null);
     if (geo) {
       const distanciaKm = r2(haversineKm({ lat: Number(loja.lat), lng: Number(loja.lng) }, geo));
       if (loja.entrega_modo === 'HIBRIDO' && faixasDistancia.some((f) => f.ativo !== false)) {
-        const faixa = taxaPorFaixa(loja, distanciaKm, faixasDistancia);
+        const faixa = taxaPorFaixa(loja, distanciaKm, faixasDistancia, subtotal);
         return {
           taxa: faixa.taxa,
           distanciaKm,
@@ -189,9 +210,10 @@ export async function calcularEntrega(
           faixaId: faixa.faixa?.id ?? null,
           faixaNome: faixa.faixa?.nome ?? null,
           raioConsideradoKm: faixa.raio,
+          freteGratis: faixa.freteGratis,
         };
       }
-      const { taxa, fora } = taxaDaDistancia(loja, distanciaKm);
+      const { taxa, fora, freteGratis } = taxaDaDistancia(loja, distanciaKm, subtotal);
       return {
         taxa,
         distanciaKm,
@@ -199,11 +221,12 @@ export async function calcularEntrega(
         origem: 'DISTANCIA',
         geo,
         raioConsideradoKm: obterRaioMaximo(loja, faixasDistancia),
+        freteGratis,
       };
     }
   }
 
-  // 2) Bairro
+  // 2) Bairro (Fallback de compatibilidade)
   if (bairro && taxasBairro.length > 0) {
     const hit = taxasBairro.find((t) => normaliza(t.bairro) === normaliza(bairro));
     if (hit) return { taxa: Number(hit.valor), distanciaKm: null, foraDeArea: false, origem: 'BAIRRO', geo: null };

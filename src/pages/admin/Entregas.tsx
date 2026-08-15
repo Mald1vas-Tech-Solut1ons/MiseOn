@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import {
   MapPin, Navigation, CheckCircle2, Phone, Bike, MessageCircle, X,
   Plus, Trash2, Users, Send, Route, Loader2, AlertCircle, UserPlus, ChevronDown,
-  Radio, Printer
+  Radio, Printer, DollarSign, TrendingUp, Compass
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Pedido, Entregador, RotaEntrega, MensagemPedido, fmt } from '../../types';
@@ -365,6 +365,131 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Componente de Métricas de Rendimentos das Taxas de Entrega ─────────
+
+function PainelRendimentoEntregas({ lojaId }: { lojaId: string }) {
+  const [metricas, setMetricas] = useState({
+    totalTaxas: 0,
+    qtdEntregas: 0,
+    taxaMedia: 0,
+    distanciaMediaKm: 0,
+    curtasCount: 0, // 0-3 km
+    mediasCount: 0, // 3-6 km
+    longasCount: 0, // 6+ km
+  });
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const dataInicio = new Date(Date.now() - 30 * 86400000).toISOString();
+      const { data: pedidos } = await supabase
+        .from('pedidos')
+        .select('taxa_entrega, distancia_km, status')
+        .eq('loja_id', lojaId)
+        .eq('tipo_pedido', 'DELIVERY')
+        .gte('criado_em', dataInicio)
+        .neq('status', 'CANCELADO');
+
+      if (!pedidos || pedidos.length === 0) {
+        setCarregando(false);
+        return;
+      }
+
+      let somaTaxas = 0;
+      let somaDistancias = 0;
+      let comDistancia = 0;
+      let curtas = 0;
+      let medias = 0;
+      let longas = 0;
+
+      pedidos.forEach((p: any) => {
+        const t = Number(p.taxa_entrega || 0);
+        somaTaxas += t;
+        const d = Number(p.distancia_km);
+        if (Number.isFinite(d) && d > 0) {
+          somaDistancias += d;
+          comDistancia++;
+          if (d <= 3) curtas++;
+          else if (d <= 6) medias++;
+          else longas++;
+        }
+      });
+
+      const qtd = pedidos.length;
+      setMetricas({
+        totalTaxas: somaTaxas,
+        qtdEntregas: qtd,
+        taxaMedia: qtd > 0 ? somaTaxas / qtd : 0,
+        distanciaMediaKm: comDistancia > 0 ? somaDistancias / comDistancia : 0,
+        curtasCount: curtas,
+        mediasCount: medias,
+        longasCount: longas,
+      });
+      setCarregando(false);
+    })();
+  }, [lojaId]);
+
+  if (carregando) return null;
+
+  return (
+    <div className="rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm space-y-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
+        <div>
+          <h3 className="font-['Sora'] font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
+            <DollarSign className="text-emerald-500" size={20} />
+            Rendimentos & Performance das Taxas (Últimos 30 Dias)
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Indicadores financeiros reais arrecadados através do cálculo por distância.
+          </p>
+        </div>
+        <span className="self-start sm:self-auto rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          Cálculo Ativo por Km
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-2xl bg-emerald-500/5 border border-emerald-500/20 p-3.5">
+          <span className="text-[11px] font-semibold text-gray-400 block">Total em Taxas</span>
+          <p className="font-['Sora'] text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
+            {fmt(metricas.totalTaxas)}
+          </p>
+          <span className="text-[10px] text-gray-400 mt-0.5 block">{metricas.qtdEntregas} entregas no período</span>
+        </div>
+
+        <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 p-3.5">
+          <span className="text-[11px] font-semibold text-gray-400 block">Taxa Média por Pedido</span>
+          <p className="font-['Sora'] text-lg font-black text-gray-900 dark:text-white mt-0.5">
+            {fmt(metricas.taxaMedia)}
+          </p>
+          <span className="text-[10px] text-emerald-500 font-bold mt-0.5 flex items-center gap-0.5">
+            <TrendingUp size={12} /> R$/entrega cobrado
+          </span>
+        </div>
+
+        <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 p-3.5">
+          <span className="text-[11px] font-semibold text-gray-400 block">Distância Média</span>
+          <p className="font-['Sora'] text-lg font-black text-blue-500 mt-0.5">
+            {metricas.distanciaMediaKm.toFixed(1)} km
+          </p>
+          <span className="text-[10px] text-blue-400 font-medium mt-0.5 flex items-center gap-0.5">
+            <Compass size={12} /> Raio médio de rota
+          </span>
+        </div>
+
+        <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 p-3.5">
+          <span className="text-[11px] font-semibold text-gray-400 block">Distribuição por Raio</span>
+          <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-gray-700 dark:text-gray-300">
+            <span className="text-emerald-500">{metricas.curtasCount}c (0-3km)</span> ·
+            <span className="text-blue-500">{metricas.mediasCount}m (3-6km)</span>
+          </div>
+          <span className="text-[10px] text-gray-400 mt-0.5 block">{metricas.longasCount} entregas acima de 6km</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -823,6 +948,9 @@ export default function Entregas() {
 
       {/* Live Tracking Admin — aparece sempre que há entregadores em campo */}
       {papel === 'admin' && <LiveTrackingAdmin lojaId={lojaId} />}
+
+      {/* Painel de Rendimentos e Performance de Entregas por Distância */}
+      {papel === 'admin' && <PainelRendimentoEntregas lojaId={lojaId} />}
 
       {/* Tabs */}
       {papel === 'admin' && (

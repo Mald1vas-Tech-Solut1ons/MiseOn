@@ -134,6 +134,7 @@ export default function Financeiro() {
     const cancelados = pedidos.filter((p) => p.status === 'CANCELADO');
 
     const faturamento = validos.reduce((s, p) => s + Number(p.valor_total), 0);
+    const totalTaxasEntrega = validos.reduce((s, p) => s + Number(p.taxa_entrega || 0), 0);
     const ticketMedio = validos.length > 0 ? faturamento / validos.length : 0;
 
     const custoInsumo = new Map(produtos.map((c) => [c.produto_id, Number(c.custo_insumos)]));
@@ -153,6 +154,7 @@ export default function Financeiro() {
 
     return {
       faturamento,
+      totalTaxasEntrega,
       lucro: faturamento - custoTotal,
       qtdPedidos: validos.length,
       ticketMedio,
@@ -259,10 +261,14 @@ export default function Financeiro() {
           </div>
 
           {/* ── KPIs ── */}
-          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
               <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><DollarSign size={11} /> Faturamento</p>
               <p className="mt-1 text-lg font-bold dark:text-gray-100">{fmt(resumo.faturamento)}</p>
+            </div>
+            <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
+              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><Bike size={11} /> Taxas Entrega</p>
+              <p className="mt-1 text-lg font-bold text-blue-500">{fmt(resumo.totalTaxasEntrega)}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
               <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><TrendingUp size={11} /> Lucro estimado</p>
@@ -272,7 +278,7 @@ export default function Financeiro() {
               <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><ShoppingBag size={11} /> Pedidos</p>
               <p className="mt-1 text-lg font-bold dark:text-gray-100">{resumo.qtdPedidos}</p>
             </div>
-            <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
+            <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900 col-span-2 sm:col-span-1">
               <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><Ticket size={11} /> Ticket médio</p>
               <p className="mt-1 text-lg font-bold dark:text-gray-100">{fmt(resumo.ticketMedio)}</p>
             </div>

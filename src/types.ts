@@ -91,6 +91,7 @@ export interface Loja {
   entrega_taxa_km?: number | null;
   entrega_raio_km?: number | null;
   entrega_taxa_padrao?: number | null;
+  frete_gratis_valor_minimo?: number | null;
   // Formas de pagamento aceitas
   aceita_online?: boolean | null;   // Pix/Crédito via Efí (pague agora)
   aceita_entrega?: boolean | null;  // Dinheiro/maquininha (pague na entrega)

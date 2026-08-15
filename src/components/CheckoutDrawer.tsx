@@ -121,6 +121,7 @@ export default function CheckoutDrawer({
     ? [enderecoObj.logradouro, enderecoObj.numero, enderecoObj.bairro, enderecoObj.cidade, enderecoObj.uf, enderecoObj.cep, 'Brasil']
         .filter(Boolean).join(', ')
     : '';
+  const subtotal = carrinho.reduce((s, i) => s + precoItem(i), 0);
   const prontoParaCalcular =
     tipo === 'DELIVERY' &&
     ((!!enderecoObj?.logradouro && !!enderecoObj?.numero) || bairroAtual.trim().length > 0);
@@ -134,6 +135,7 @@ export default function CheckoutDrawer({
       const res = await calcularEntrega(loja, {
         enderecoQuery,
         bairro: bairroAtual,
+        subtotal,
         taxasBairro: taxas.map((t) => ({ bairro: t.bairro, valor: t.valor })),
         faixasDistancia,
       });
@@ -152,10 +154,9 @@ export default function CheckoutDrawer({
     }, 700);
     return () => { cancelado = true; clearTimeout(id); setCalcTaxa(false); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tipo, enderecoQuery, bairroAtual, loja.id, faixasDistancia]);
+    }, [tipo, enderecoQuery, bairroAtual, subtotal, loja.id, faixasDistancia]);
 
   // --- Calculos financeiros ---
-  const subtotal = carrinho.reduce((s, i) => s + precoItem(i), 0);
   const taxa = tipo === 'DELIVERY' ? (entrega?.taxa ?? 0) : 0;
   const foraDeArea = tipo === 'DELIVERY' && !!entrega?.foraDeArea;
   const desconto = cupom
