@@ -11,6 +11,7 @@ import { useState } from 'react';
 import MiseOnLogo from '../components/MiseOnLogo';
 import SEO from '../components/SEO';
 import FooterSEO from '../components/FooterSEO';
+import FlipCard from '../components/ui/FlipCard';
 import { useI18n } from '../contexts/I18nContext';
 
 const WHATSAPP_CONTATO = '5511919889233';
@@ -1018,18 +1019,24 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {RECURSOS.map((r) => (
-              <div
-                key={r.titulo}
-                className="group rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md"
-              >
-                <div className={`inline-flex rounded-2xl p-3 ${r.fundo} ${r.cor}`}>
-                  <r.icone size={24} />
-                </div>
-                <h3 className="mt-4 font-['Sora'] text-lg font-bold text-gray-900 dark:text-white">{r.titulo}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-slate-300">{r.texto}</p>
-              </div>
+          <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {RECURSOS.map((r, i) => (
+              <FlipCard
+                key={i}
+                icone={r.icone}
+                titulo={r.titulo}
+                resumo={r.texto}
+                detalhes={[
+                  'Integração em tempo real com a produção do KDS',
+                  'Ficha técnica automatizada com baixa de insumos PEPS',
+                  'Relatórios e métricas de desempenho no painel',
+                ]}
+                metrica="100% AUTOMÁTICO"
+                badge="MÓDULO NATIVO"
+                corTexto={r.cor}
+                corFundo="bg-[#0B1120]/90"
+                corBorda="border-white/10"
+              />
             ))}
           </div>
         </div>
