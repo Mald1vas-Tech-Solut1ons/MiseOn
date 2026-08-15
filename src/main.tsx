@@ -28,6 +28,7 @@ const NicheLandingPage = lazy(() => import('./pages/landing/NicheLandingPage'));
 const EstoquePage      = lazy(() => import('./pages/landing/EstoquePage'));
 const Blog             = lazy(() => import('./pages/Blog'));
 const BlogPost         = lazy(() => import('./pages/BlogPost'));
+const PainelTV         = lazy(() => import('./pages/PainelTV'));
 
 // ── Lazy: ADMIN_LAYOUT (único layout compartilhado — carrega rápido) ─────────
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -181,6 +182,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/blog"                      element={<Blog />} />
               <Route path="/blog/:slug"                element={<BlogPost />} />
 
+              <Route path="/tv/:slug"      element={<PainelTV />} />
               <Route path="/:slug/meus-pedidos" element={<MeusPedidos />} />
               <Route path="/:slug"         element={<Cardapio />} />
               <Route path="*"             element={<Home />} />

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   Plus, Trash2, X, Save, ChevronUp, ChevronDown, MessageCircle,
-  Wallet, QrCode, ShoppingCart, Gift, Target, Megaphone, Users
+  Wallet, QrCode, ShoppingCart, Gift, Target, Megaphone, Users, Mail, Send
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Cupom, Banner, Cliente, CarrinhoAbandonado, MetodoPgto, fmt } from '../../types';
@@ -10,7 +10,7 @@ import ImageUpload from '../../components/ImageUpload';
 import CrmClientes from '../../components/admin/CrmClientes';
 import type { CtxLoja } from './AdminLayout';
 
-type Tab = 'cupons' | 'banners' | 'cashback' | 'recuperacao' | 'anuncios' | 'disparos' | 'crm';
+type Tab = 'cupons' | 'banners' | 'cashback' | 'recuperacao' | 'anuncios' | 'disparos' | 'emails' | 'crm';
 
 export default function Marketing() {
   const { lojaId, lojaSlug } = useOutletContext<CtxLoja>();
@@ -39,6 +39,7 @@ export default function Marketing() {
           { id: 'recuperacao', label: 'Recuperação de Vendas', icon: ShoppingCart },
           { id: 'anuncios', label: 'Meta Pixel & GA4', icon: Target },
           { id: 'disparos', label: 'Disparos WhatsApp', icon: MessageCircle },
+          { id: 'emails', label: 'E-mails Transacionais', icon: Mail },
           { id: 'crm', label: 'CRM & RFM', icon: Users },
         ].map(({ id, label, icon: IconComponent }) => (
           <button
@@ -63,6 +64,7 @@ export default function Marketing() {
       {tab === 'recuperacao' && <RecuperacaoTab lojaId={lojaId} lojaSlug={lojaSlug} />}
       {tab === 'anuncios' && <AnunciosTab lojaId={lojaId} />}
       {tab === 'disparos' && <DisparosTab lojaId={lojaId} lojaSlug={lojaSlug} />}
+      {tab === 'emails' && <EmailsTab lojaId={lojaId} />}
       {tab === 'crm' && <CrmClientes />}
     </div>
   );
@@ -737,6 +739,128 @@ function DisparosTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string })
               </button>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Central de E-mails Transacionais ─────────────────────────────
+function EmailsTab({ lojaId }: { lojaId: string }) {
+  const [eventoSelecionado, setEventoSelecionado] = useState('pedido-recebido');
+  const [emailTeste, setEmailTeste] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  const enviarTeste = async () => {
+    if (!emailTeste.trim()) return alert('Digite o e-mail de destino do teste.');
+    setEnviando(true);
+    setFeedback(null);
+    try {
+      const { error } = await supabase.functions.invoke('send-transactional-email', {
+        body: {
+          loja_id: lojaId,
+          evento: eventoSelecionado,
+          destinatario: emailTeste.trim(),
+          dados: {
+            pedido_numero: 142,
+            valor: '48.50',
+            valorTotal: '48.50',
+            metodo: 'Pix',
+            itens: [{ nome: 'X-Burger Artesanal', quantidade: 2, preco: '24.25' }],
+          },
+        },
+      });
+
+      if (error) throw error;
+      setFeedback('E-mail de teste disparado com sucesso! Verifique a caixa de entrada.');
+    } catch (err: any) {
+      setFeedback(`Erro ao enviar teste: ${err.message || 'Verifique as variáveis de ambiente SMTP.'}`);
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-4">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
+          <div>
+            <h3 className="font-['Sora'] text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Mail className="text-orange-500" size={20} />
+              Central de E-mails Transacionais & Notificações
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              Modelos de e-mail responsivos com alta entregabilidade anti-spam e layout personalizado com a cor da sua marca.
+            </p>
+          </div>
+          <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+            Engine Ativa
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <label className="block">
+              <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Selecione o Modelo de E-mail:</span>
+              <select
+                value={eventoSelecionado}
+                onChange={(e) => setEventoSelecionado(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 p-3 text-sm font-bold dark:text-white"
+              >
+                <option value="pedido-recebido">📦 Pedido Recebido & Confirmado</option>
+                <option value="pagamento-confirmado">💳 Pagamento Aprovado (Pix/Cartão)</option>
+                <option value="pedido-a-caminho">🛵 Pedido em Rota de Entrega</option>
+                <option value="carrinho-abandonado">🛒 Recuperação de Carrinho (+45 min)</option>
+                <option value="cupom-disponivel">🎁 Oferta de Cupom & Desconto</option>
+                <option value="boas-vindas-loja">🎉 Boas-vindas ao Sistema</option>
+              </select>
+            </label>
+
+            <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 p-4 space-y-3 bg-gray-50 dark:bg-gray-950">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Disparar E-mail de Teste</p>
+              <input
+                type="email"
+                placeholder="Seu e-mail para receber o teste"
+                value={emailTeste}
+                onChange={(e) => setEmailTeste(e.target.value)}
+                className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2.5 text-sm dark:text-white"
+              />
+              <button
+                onClick={enviarTeste}
+                disabled={enviando}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-2.5 text-xs font-bold text-white shadow-md hover:brightness-110 disabled:opacity-50"
+              >
+                <Send size={14} /> {enviando ? 'Enviando e-mail...' : 'Enviar Teste Agora'}
+              </button>
+              {feedback && (
+                <p className={`text-xs font-bold ${feedback.includes('Erro') ? 'text-red-500' : 'text-emerald-500'}`}>
+                  {feedback}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-[#070C18] p-5 text-white space-y-3">
+            <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">Pré-visualização do Modelo</p>
+            <div className="rounded-xl bg-white text-gray-900 p-4 space-y-2 text-xs shadow-inner">
+              <div className="border-b pb-2 flex justify-between font-bold">
+                <span>Assunto: Pedido #142 confirmado</span>
+                <span className="text-orange-600">MiseOn Transactional</span>
+              </div>
+              <p className="text-gray-600 leading-relaxed">
+                Olá! Seu pedido <b>#142</b> foi recebido com sucesso e entrou na fila de preparo.
+              </p>
+              <div className="bg-gray-50 p-2 rounded-lg border font-mono">
+                2x X-Burger Artesanal — R$ 48,50
+              </div>
+              <div className="pt-2 text-center">
+                <span className="inline-block bg-[#FC5B24] text-white px-4 py-2 rounded-lg font-bold text-[11px]">
+                  Acompanhar Pedido
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

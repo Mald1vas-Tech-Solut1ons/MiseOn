@@ -16,7 +16,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   ShoppingCart, CheckCircle2, Circle, PackageCheck, Loader2, AlertTriangle,
-  Truck, Plus, Pencil, Archive, FileText, Clock, Zap, TrendingDown, CalendarClock,
+  Truck, Plus, Pencil, Archive, FileText, Clock, Zap, TrendingDown, CalendarClock, MessageCircle,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, fmt } from '../../types';
@@ -483,6 +483,29 @@ export default function Compras() {
                     <option value="NENHUM">Forçar sem fornecedor</option>
                     {fornecedores.map(f => <option key={f.id} value={f.id}>Forçar para: {f.nome}</option>)}
                   </select>
+                  <button
+                    onClick={() => {
+                      if (marcados.length === 0) return;
+                      const f = fornecedores.find(x => x.id === (fornecedorPedido !== 'AUTO' && fornecedorPedido !== 'NENHUM' ? fornecedorPedido : marcados[0]?.fornecedorId));
+                      let msg = `*ORDEM DE COMPRA — REPOSIÇÃO DE ESTOQUE*\n\nOlá ${f?.nome || 'Fornecedor'}, preciso dos seguintes insumos:\n\n`;
+                      marcados.forEach(s => {
+                        const unid = selecaoUnidade[s.insumo.id] ?? { codigo: s.unidadeCompra, fator: s.fator };
+                        msg += `• *${selecao[s.insumo.id]} ${unid.codigo}* — ${s.insumo.nome}\n`;
+                      });
+                      msg += `\nFavor me confirmar prazo e valores. Obrigado!`;
+                      const tel = (f?.telefone || '').replace(/\D/g, '');
+                      if (tel) {
+                        window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+                      } else {
+                        navigator.clipboard.writeText(msg);
+                        alert('Ordem de compra copiada para a área de transferência!');
+                      }
+                    }}
+                    disabled={marcados.length === 0}
+                    className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-emerald-500 disabled:opacity-50 transition-all"
+                  >
+                    <MessageCircle size={16} /> Enviar via WhatsApp
+                  </button>
                   <button onClick={() => gerarPedido(false)} disabled={salvando}
                     className="flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
                     <FileText size={16} /> Gerar pedido

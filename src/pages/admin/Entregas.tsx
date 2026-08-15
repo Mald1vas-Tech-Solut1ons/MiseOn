@@ -43,7 +43,7 @@ function LiveTrackingAdmin({ lojaId }: { lojaId: string }) {
   const [loading, setLoading] = useState(true);
   const defaultCenter: [number, number] = [-23.5505, -46.6333]; // SP como padrão
 
-  const carregarPosicoes = async () => {
+  const carregarPosicoes = useCallback(async () => {
     // Buscar todos os pedidos EM_ROTA desta loja com localização ativa
     const { data: pedidosRota } = await supabase
       .from('pedidos')
@@ -80,7 +80,7 @@ function LiveTrackingAdmin({ lojaId }: { lojaId: string }) {
 
     setPosicoes(merged);
     setLoading(false);
-  };
+  }, [lojaId]);
 
   useEffect(() => {
     setTimeout(carregarPosicoes, 0);
@@ -98,7 +98,7 @@ function LiveTrackingAdmin({ lojaId }: { lojaId: string }) {
       supabase.removeChannel(canal);
       clearInterval(interval);
     };
-  }, [lojaId]);
+  }, [carregarPosicoes]);
 
   const center = posicoes.length > 0
     ? [posicoes[0].lat, posicoes[0].lng] as [number, number]

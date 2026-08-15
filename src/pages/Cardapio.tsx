@@ -2,12 +2,13 @@ import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
-import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, ArrowRight, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, ArrowRight, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { maskCartaoCredito, maskValidadeCartao, maskCPF, validarCPF } from '../lib/mascaras';
 import ModalAuthCliente from '../components/ModalAuthCliente';
 import ModalMinhaConta from '../components/ModalMinhaConta';
 import PedidoMesaDrawer from '../components/PedidoMesaDrawer';
+import VoiceOrderModal from '../components/VoiceOrderModal';
 import { Button, Modal, SuccessCelebration, BandeiraMark, BANDEIRAS_ACEITAS } from '../components/ui';
 import {
   Loja, Banner, Categoria, Produto, TaxaEntrega, FaixaEntrega, ItemCarrinho,
@@ -129,6 +130,7 @@ export default function Cardapio() {
   const [cartao, setCartao] = useState<{ pedidoId: string; numero: number; total: number } | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [temaCliente, setTemaCliente] = useState<PreferenciaTema>(() => obterTemaPreferido());
+  const [modalVozAberto, setModalVozAberto] = useState(false);
 
   // Recuperação de vendas: quando o checkout abre com item no carrinho, registra
   // o "quase comprei" — se ele fechar sem terminar, o lojista consegue reativar.
@@ -427,12 +429,21 @@ export default function Cardapio() {
             <div className="vitrine-search flex items-center gap-2 rounded-2xl px-4 py-3">
               <Search size={16} style={{ color: 'var(--cor-texto-fraco)' }} />
               <input
+                type="text"
+                placeholder="Buscar no cardápio…"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                placeholder="Buscar no cardápio…"
-                className="w-full bg-transparent text-sm outline-none"
+                className="w-full bg-transparent text-sm font-semibold outline-none"
                 style={{ color: 'var(--cor-texto)' }}
               />
+              <button
+                type="button"
+                onClick={() => setModalVozAberto(true)}
+                className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-3 py-1.5 text-xs font-bold text-white shadow-md hover:brightness-110 transition-all shrink-0"
+                title="Fazer pedido por voz com IA"
+              >
+                <Mic size={14} className="animate-pulse" /> Pedir por voz
+              </button>
             </div>
           </div>
 
@@ -591,6 +602,21 @@ export default function Cardapio() {
       }} />}
 
       <ModalAuthCliente isOpen={modalAuthAberto} onClose={() => setModalAuthAberto(false)} />
+      
+      <VoiceOrderModal
+        aberto={modalVozAberto}
+        onFechar={() => setModalVozAberto(false)}
+        produtos={produtos}
+        onAdicionarAoCarrinho={({ produto, quantidade }) => {
+          setCarrinho((prev) => {
+            const idx = prev.findIndex((item) => item.produto.id === produto.id);
+            if (idx >= 0) {
+              return prev.map((item, i) => (i === idx ? { ...item, quantidade: item.quantidade + quantidade } : item));
+            }
+            return [...prev, { produto, quantidade, opcoesSelecionadas: [] }];
+          });
+        }}
+      />
       
       <ModalMinhaConta 
         isOpen={modalContaAberto} 
