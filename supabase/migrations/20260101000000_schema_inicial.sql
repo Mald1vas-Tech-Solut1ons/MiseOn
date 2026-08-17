@@ -498,33 +498,33 @@ ALTER PUBLICATION supabase_realtime ADD TABLE pedidos;
 -- ============================================================================
 -- LEDGER FINANCEIRO DE DUPLA ENTRADA & ATOMICIDADE
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS public.contas (
+CREATE TABLE IF NOT EXISTS contas (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   codigo TEXT NOT NULL,
   nome TEXT NOT NULL,
   tipo TEXT NOT NULL CHECK (tipo IN ('ATIVO', 'PASSIVO', 'RECEITA', 'CUSTO', 'RESULTADO')),
-  loja_id UUID NOT NULL REFERENCES public.lojas(id) ON DELETE CASCADE,
+  loja_id UUID NOT NULL REFERENCES lojas(id) ON DELETE CASCADE,
   criado_em TIMESTAMPTZ DEFAULT now(),
   UNIQUE(codigo, loja_id)
 );
 
-CREATE TABLE IF NOT EXISTS public.lancamentos_financeiros (
+CREATE TABLE IF NOT EXISTS lancamentos_financeiros (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  loja_id UUID NOT NULL REFERENCES public.lojas(id) ON DELETE CASCADE,
+  loja_id UUID NOT NULL REFERENCES lojas(id) ON DELETE CASCADE,
   data_lancamento DATE NOT NULL DEFAULT CURRENT_DATE,
   historico TEXT NOT NULL,
   valor NUMERIC(10,2) NOT NULL CHECK (valor > 0),
-  conta_debitada UUID NOT NULL REFERENCES public.contas(id),
-  conta_creditada UUID NOT NULL REFERENCES public.contas(id),
+  conta_debitada UUID NOT NULL REFERENCES contas(id),
+  conta_creditada UUID NOT NULL REFERENCES contas(id),
   referencia_tipo TEXT NOT NULL CHECK (referencia_tipo IN ('PEDIDO', 'PAGAMENTO', 'ESTORNO', 'CASHBACK', 'TAXA_IFOOD')),
   referencia_id UUID,
   criado_em TIMESTAMPTZ DEFAULT now(),
   CHECK (conta_debitada != conta_creditada)
 );
 
-CREATE OR REPLACE FUNCTION public.fn_criar_contas_padrao() RETURNS TRIGGER AS $body
+CREATE OR REPLACE FUNCTION fn_criar_contas_padrao() RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.contas (codigo, nome, tipo, loja_id) VALUES
+  INSERT INTO contas (codigo, nome, tipo, loja_id) VALUES
     ('1.1.01', 'Caixa', 'ATIVO', NEW.id),
     ('1.1.02', 'Banco Efí', 'ATIVO', NEW.id),
     ('2.1.01', 'Fornecedores', 'PASSIVO', NEW.id),
@@ -536,22 +536,22 @@ BEGIN
   ON CONFLICT DO NOTHING;
   RETURN NEW;
 END;
-$body LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE TRIGGER trg_criar_contas_padrao
-  AFTER INSERT ON public.lojas
-  FOR EACH ROW EXECUTE FUNCTION public.fn_criar_contas_padrao();
+  AFTER INSERT ON lojas
+  FOR EACH ROW EXECUTE FUNCTION fn_criar_contas_padrao();
 
-CREATE OR REPLACE FUNCTION public.fn_lancar_custo_estoque() RETURNS TRIGGER AS $body
+CREATE OR REPLACE FUNCTION fn_lancar_custo_estoque() RETURNS TRIGGER AS $$
 DECLARE
   v_conta_estoque UUID;
   v_conta_cmv UUID;
 BEGIN
-  SELECT id INTO v_conta_estoque FROM public.contas WHERE codigo = '1.1.01' AND loja_id = NEW.loja_id LIMIT 1;
-  SELECT id INTO v_conta_cmv FROM public.contas WHERE codigo = '4.1.01' AND loja_id = NEW.loja_id LIMIT 1;
+  SELECT id INTO v_conta_estoque FROM contas WHERE codigo = '1.1.01' AND loja_id = NEW.loja_id LIMIT 1;
+  SELECT id INTO v_conta_cmv FROM contas WHERE codigo = '4.1.01' AND loja_id = NEW.loja_id LIMIT 1;
 
   IF v_conta_estoque IS NOT NULL AND v_conta_cmv IS NOT NULL THEN
-    INSERT INTO public.lancamentos_financeiros (
+    INSERT INTO lancamentos_financeiros (
       loja_id, historico, valor, conta_debitada, conta_creditada, referencia_tipo, referencia_id
     )
     SELECT
@@ -562,12 +562,12 @@ BEGIN
       v_conta_estoque,
       'PEDIDO',
       NEW.pedido_id
-    FROM public.itens_pedido ip
-    JOIN public.produtos p ON p.id = ip.produto_id
+    FROM itens_pedido ip
+    JOIN produtos p ON p.id = ip.produto_id
     JOIN (
       SELECT ft.produto_id, SUM(ft.quantidade_consumida * (i.preco_embalagem / NULLIF(i.qtd_embalagem, 0))) AS insumo
-      FROM public.fichas_tecnicas ft
-      JOIN public.insumos i ON i.id = ft.insumo_id
+      FROM fichas_tecnicas ft
+      JOIN insumos i ON i.id = ft.insumo_id
       WHERE i.loja_id = NEW.loja_id
       GROUP BY ft.produto_id
     ) custo_unitario ON custo_unitario.produto_id = p.id
@@ -577,15 +577,15 @@ BEGIN
   END IF;
 
   RETURN NEW;
-END; $body LANGUAGE plpgsql SECURITY DEFINER;
+END; $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE TRIGGER trg_lancar_custo_estoque
-  AFTER INSERT ON public.movimentacoes_estoque
+  AFTER INSERT ON movimentacoes_estoque
   FOR EACH ROW
   WHEN (NEW.tipo = 'BAIXA_VENDA' AND NEW.pedido_id IS NOT NULL)
-  EXECUTE FUNCTION public.fn_lancar_custo_estoque();
+  EXECUTE FUNCTION fn_lancar_custo_estoque();
 
-CREATE OR REPLACE VIEW public.vw_lucro_real_produto AS
+CREATE OR REPLACE VIEW vw_lucro_real_produto AS
 SELECT
   p.id AS produto_id,
   p.nome,
@@ -597,12 +597,12 @@ SELECT
   CASE WHEN COALESCE(SUM(lf.valor) FILTER (WHERE c.nome IN ('Receita Vendas', 'Receita iFood')), 0) > 0 THEN
     ROUND(100 * (COALESCE(SUM(lf.valor) FILTER (WHERE c.nome IN ('Receita Vendas', 'Receita iFood')), 0) - COALESCE(SUM(lf.valor) FILTER (WHERE c.nome = 'Custo Mercadoria Vendida'), 0)) / COALESCE(SUM(lf.valor) FILTER (WHERE c.nome IN ('Receita Vendas', 'Receita iFood')), 0), 2)
   END AS margem_pct
-FROM public.produtos p
-LEFT JOIN public.lancamentos_financeiros lf ON lf.referencia_id = p.id AND lf.referencia_tipo = 'PEDIDO'
-LEFT JOIN public.contas c ON c.id = lf.conta_debitada OR c.id = lf.conta_creditada
+FROM produtos p
+LEFT JOIN lancamentos_financeiros lf ON lf.referencia_id = p.id AND lf.referencia_tipo = 'PEDIDO'
+LEFT JOIN contas c ON c.id = lf.conta_debitada OR c.id = lf.conta_creditada
 GROUP BY p.id, p.nome, p.preco;
 
-ALTER TABLE public.contas ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.lancamentos_financeiros ENABLE ROW LEVEL SECURITY;
-CREATE POLICY adm_contas ON public.contas FOR ALL USING (fn_meu_acesso(loja_id));
-CREATE POLICY adm_lf ON public.lancamentos_financeiros FOR ALL USING (fn_meu_acesso(loja_id));
+ALTER TABLE contas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lancamentos_financeiros ENABLE ROW LEVEL SECURITY;
+CREATE POLICY adm_contas ON contas FOR ALL USING (fn_meu_acesso(loja_id));
+CREATE POLICY adm_lf ON lancamentos_financeiros FOR ALL USING (fn_meu_acesso(loja_id));
