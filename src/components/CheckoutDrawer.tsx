@@ -216,7 +216,7 @@ export default function CheckoutDrawer({
   // Formas de pagamento conforme as flags da loja
   const aceitaOnline = loja.aceita_online !== false;
   const aceitaEntrega = loja.aceita_entrega !== false;
-  const cartaoOnlineConfigurado = !!loja.efi_payee_code?.trim();
+  const cartaoOnlineConfigurado = !!loja.efi_configurado;
   const metodosOnline: MetodoPgto[] = aceitaOnline
     ? ['PIX', ...(cartaoOnlineConfigurado ? (['CREDITO'] as MetodoPgto[]) : [])]
     : [];

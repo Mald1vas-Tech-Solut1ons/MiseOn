@@ -174,6 +174,23 @@ serve(async (req: Request) => {
           const taxaIfoodRetida = (valorBrutoIfood * taxaPct) + taxaFixa;
 
           // 3. Montar Pedido
+          // IDEMPOTÊNCIA (auditoria, achado 07): o iFood reenvia eventos quando
+          // não recebe acknowledgment — é comportamento normal, não exceção.
+          // Sem esta guarda, cada reenvio virava um pedido novo: a cozinha
+          // produzia duas vezes e a receita era contada duas vezes.
+          const { data: jaProcessado } = await supabase
+            .from('pedidos')
+            .select('id')
+            .eq('ifood_order_id', event.orderId)
+            .maybeSingle();
+
+          if (jaProcessado) {
+            reqLogger.info(`Pedido iFood ${event.orderId} já processado — evento ignorado.`, {
+              order_id: event.orderId, loja_id: lojaId,
+            });
+            continue;
+          }
+
           const isDelivery = order.orderType === 'DELIVERY';
           const { data: novoPedido, error: pedidoError } = await supabase
             .from('pedidos')
@@ -183,7 +200,9 @@ serve(async (req: Request) => {
               status: 'NOVO',
               origem: 'ifood',
               tipo_pedido: isDelivery ? 'DELIVERY' : 'RETIRADA_BALCAO',
-              subtotal: order.payments?.prepaid || order.payments?.pending || 0,
+              // `subTotal` é a soma dos itens. Antes usava payments.prepaid, que é
+              // um valor de PAGAMENTO — corrompia CMV e margem (achado 09).
+              subtotal: order.total?.subTotal ?? 0,
               taxa_entrega: order.total.deliveryFee || 0,
               desconto: order.total.discounts || 0,
               valor_total: valorBrutoIfood,
@@ -197,6 +216,14 @@ serve(async (req: Request) => {
             .select('id')
             .single();
 
+          // Corrida entre dois reenvios simultâneos: o índice único
+          // uniq_pedidos_ifood_order_id é a garantia dura.
+          if (pedidoError?.code === '23505') {
+            reqLogger.info(`Pedido iFood ${event.orderId} inserido em paralelo — evento ignorado.`, {
+              order_id: event.orderId, loja_id: lojaId,
+            });
+            continue;
+          }
           if (pedidoError || !novoPedido) throw pedidoError;
           const pedidoId = novoPedido.id;
 

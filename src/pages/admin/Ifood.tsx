@@ -41,7 +41,9 @@ export default function Ifood() {
   const carregarLoja = useCallback(async () => {
     const { data } = await supabase
       .from('lojas')
-      .select('plano_tipo, ifood_merchant_id, ifood_addon_ativo, ifood_taxa_pct, ifood_taxa_fixa')
+      // `plano_tipo` não existe no banco — a coluna é `plano`. Sem o alias este
+      // SELECT falhava e a tela de integração nunca carregava o merchant_id.
+      .select('plano_tipo:plano, ifood_merchant_id, ifood_addon_ativo, ifood_taxa_pct, ifood_taxa_fixa')
       .eq('id', lojaId)
       .single();
     if (data) {

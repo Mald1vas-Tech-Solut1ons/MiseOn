@@ -76,7 +76,9 @@ export interface Loja {
   cashback_pct?: number | null; // % do pedido creditado como saldo pro cliente (0 = desligado)
   meta_preparo_min?: number; // meta de tempo de preparo da cozinha (min), default 20
   pix_chave?: string;
-  efi_payee_code?: string; // habilita cartão de crédito online + split de cartão (Efí)
+  efi_payee_code?: string; // só no painel admin — NUNCA na vitrine (ver `lojas_publicas`)
+  /** Vem de `lojas_publicas`: diz se a loja aceita cartão online sem expor o payee_code. */
+  efi_configurado?: boolean;
   efi_titular_documento?: string | null; // CPF/CNPJ do titular da conta Efí (favorecido do split Pix)
   efi_conta?: string | null; // número da conta Efí do lojista (favorecido do split Pix)
   antecipacao_cartao?: boolean | null; // true = crédito processado na modalidade antecipada (~2 dias úteis, taxa maior)

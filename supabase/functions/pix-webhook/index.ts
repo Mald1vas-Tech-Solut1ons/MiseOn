@@ -124,13 +124,18 @@ Deno.serve(async (req) => {
     const bodyText = await req.text();
     
     // 1. VALIDAÇÃO DE ASSINATURA HMAC OBRIGATÓRIA
+    // Auditoria, achado 11: antes era `if (efiSecret)` — sem a env, a validação
+    // de assinatura sumia em silêncio. Segredo ausente é erro de configuração,
+    // não permissão para aceitar webhook não assinado.
     const efiSecret = Deno.env.get('EFI_WEBHOOK_SECRET');
-    if (efiSecret) {
-      const signature = req.headers.get('X-Efi-Signature');
-      if (!signature || !(await validarHmacSha256(bodyText, signature, efiSecret))) {
-        reqLogger.error('HMAC inválido ou ausente no webhook Efí.');
-        return Response.json({ error: 'Invalid signature' }, { status: 401 });
-      }
+    if (!efiSecret) {
+      reqLogger.error('EFI_WEBHOOK_SECRET não configurada — recusando webhook.');
+      return Response.json({ error: 'Webhook não configurado' }, { status: 500 });
+    }
+    const signature = req.headers.get('X-Efi-Signature');
+    if (!signature || !(await validarHmacSha256(bodyText, signature, efiSecret))) {
+      reqLogger.error('HMAC inválido ou ausente no webhook Efí.');
+      return Response.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     let payloadRaw;

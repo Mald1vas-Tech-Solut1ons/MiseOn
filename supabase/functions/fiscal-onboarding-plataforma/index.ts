@@ -17,7 +17,11 @@ const json = (data: any, init?: ResponseInit) => new Response(JSON.stringify(dat
   ...init
 });
 
-const SECRET_KEY = Deno.env.get('FISCAL_ENCRYPTION_SECRET') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || 'miseon-secret-fiscal-key-32chars!';
+// Auditoria, achado 11: mesmo fallback literal versionado da função irmã.
+const SECRET_KEY = Deno.env.get('FISCAL_ENCRYPTION_SECRET') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+if (!SECRET_KEY) {
+  throw new Error('FISCAL_ENCRYPTION_SECRET não configurada — recusando iniciar.');
+}
 
 async function encryptAES(text: string): Promise<string> {
   const enc = new TextEncoder();

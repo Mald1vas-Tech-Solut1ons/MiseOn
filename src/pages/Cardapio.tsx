@@ -160,7 +160,10 @@ export default function Cardapio() {
     if (!slug) return;
     localStorage.setItem('miseon_ultima_loja', slug);
     (async () => {
-      const { data: l } = await supabase.from('lojas').select('*').eq('slug', slug).single();
+      // `lojas_publicas`: projeção segura da loja (sem credencial fiscal, de
+      // pagamento ou de integração). A tabela `lojas` não é mais legível pela
+      // vitrine — ver migration 20260815200000.
+      const { data: l } = await supabase.from('lojas_publicas').select('*').eq('slug', slug).single();
       if (!l) return;
       setLoja(l);
       const [h, b, c, p, t, f, est] = await Promise.all([
@@ -1038,7 +1041,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
 
   const pagar = async () => {
     setErro('');
-    if (!loja.efi_payee_code?.trim()) {
+    if (!loja.efi_configurado) {
       return setErro('Cartão online indisponível para esta loja no momento.');
     }
     if (!tudoOk) {
@@ -1066,7 +1069,14 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
       // da plataforma (~2 dias úteis) — o token precisa ser gerado para ELA.
       const payeeAntecipado = (import.meta.env.VITE_MISEON_EFI_PAYEE_CODE_ANTECIPADO as string | undefined)?.trim();
       const payeePadrao = (import.meta.env.VITE_MISEON_EFI_PAYEE_CODE as string | undefined)?.trim();
-      const contaProcessadora = (loja.antecipacao_cartao && payeeAntecipado ? payeeAntecipado : payeePadrao) || loja.efi_payee_code!;
+      // A conta que PROCESSA é sempre da plataforma. O payee_code da loja entra
+      // só no repasse, dentro da edge function — e por isso não é mais exposto
+      // à vitrine (auditoria, achado 01). Sem a env da plataforma não há como
+      // tokenizar: falha explícita em vez de cair numa conta errada.
+      const contaProcessadora = loja.antecipacao_cartao && payeeAntecipado ? payeeAntecipado : payeePadrao;
+      if (!contaProcessadora) {
+        throw new Error('Pagamento com cartão indisponível no momento. Tente Pix ou pague na entrega.');
+      }
       const result = await EfiPay.CreditCard
         .setAccount(contaProcessadora)
         .setEnvironment(efiEnvironment)

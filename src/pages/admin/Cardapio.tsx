@@ -29,7 +29,10 @@ export default function CardapioAdmin() {
       supabase.from('insumos').select('*').eq('loja_id', lojaId).eq('ativo', true).order('nome'),
       supabase.rpc('fn_produtos_com_estoque', { p_loja_id: lojaId }),
       supabase.from('configuracoes_custo').select('*').eq('loja_id', lojaId).maybeSingle(),
-      supabase.from('lojas').select('plano_tipo, ifood_addon_ativo, ifood_taxa_pct, ifood_taxa_fixa').eq('id', lojaId).single(),
+      // A coluna é `plano`; `plano_tipo` nunca existiu e derrubava este SELECT
+      // inteiro (a tela ficava sem as taxas do iFood). Alias mantém o resto do
+      // código intacto.
+      supabase.from('lojas').select('plano_tipo:plano, ifood_addon_ativo, ifood_taxa_pct, ifood_taxa_fixa').eq('id', lojaId).single(),
     ]);
     const mapaEstoque = new Map<string, boolean>((est ?? []).map((e: any) => [e.produto_id, e.tem_estoque]));
     

@@ -5,33 +5,43 @@ import {
   CheckCircle2, Clock, QrCode as QrIcon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { Loja, Categoria, Produto, Pedido, fmt } from '../types';
+import { Loja, Categoria, Produto, fmt } from '../types';
 import MiseOnLoader from '../components/MiseOnLoader';
 
 type ModoExibicao = 'MENU_BOARD' | 'SENHAS' | 'BANNERS';
+
+/** Retorno de `fn_painel_tv_senhas`: o mínimo para chamar uma senha no balcão. */
+type SenhaTV = {
+  numero: number;
+  status: string;
+  primeiro_nome: string | null;
+  criado_em: string;
+};
 
 export default function PainelTV() {
   const { slug } = useParams<{ slug: string }>();
   const [loja, setLoja] = useState<Loja | null>(null);
   const [categorias, setCategorias] = useState<(Categoria & { produtos: Produto[] })[]>([]);
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [pedidos, setPedidos] = useState<SenhaTV[]>([]);
   const [carregando, setCarregando] = useState(true);
 
   // Modos e Controle de Tela
   const [modo, setModo] = useState<ModoExibicao>('MENU_BOARD');
   const [categoriaIndex, setCategoriaIndex] = useState(0);
   const [somAtivo, setSomAtivo] = useState(true);
-  const [ultimoChamado, setUltimoChamado] = useState<Pedido | null>(null);
+  const [ultimoChamado, setUltimoChamado] = useState<SenhaTV | null>(null);
   const [bannerChamadaVisivel, setBannerChamadaVisivel] = useState(false);
 
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  /** Senhas já anunciadas. `null` = ainda não carregou (não grita senha antiga). */
+  const prontosConhecidosRef = useRef<Set<number> | null>(null);
 
   // 1. Carregar dados da Loja e Cardápio
   const carregarDados = useCallback(async () => {
     if (!slug) return;
 
     const { data: lojaData } = await supabase
-      .from('lojas')
+      .from('lojas_publicas')
       .select('*')
       .eq('slug', slug)
       .single();
@@ -61,19 +71,12 @@ export default function PainelTV() {
       setCategorias(ativas);
     }
 
-    // Pedidos do Dia (PRONTO e PREPARANDO)
-    const hojeIso = new Date();
-    hojeIso.setHours(0, 0, 0, 0);
+    // Senhas do dia via RPC. A TV do balcão não loga, e `pedidos` não tem
+    // (nem deve ter) policy de SELECT público — a RPC devolve só número,
+    // status e primeiro nome. Ver migration 20260815202000.
+    const { data: peds } = await supabase.rpc('fn_painel_tv_senhas', { p_slug: slug });
 
-    const { data: peds } = await supabase
-      .from('pedidos')
-      .select('id, numero, identificador_cliente, status, criado_em')
-      .eq('loja_id', lojaData.id)
-      .gte('criado_em', hojeIso.toISOString())
-      .in('status', ['NOVO', 'ACEITO', 'PREPARANDO', 'PRONTO', 'EM_ROTA'])
-      .order('criado_em', { ascending: false });
-
-    if (peds) setPedidos(peds as Pedido[]);
+    if (peds) setPedidos(peds as SenhaTV[]);
     setCarregando(false);
   }, [slug]);
 
@@ -83,11 +86,11 @@ export default function PainelTV() {
   }, [carregarDados]);
 
   // 2. Falar chamada sonora
-  const falarPedido = useCallback((pedido: Pedido) => {
+  const falarPedido = useCallback((pedido: SenhaTV) => {
     if (!somAtivo || !synthRef.current) return;
     try {
       synthRef.current.cancel();
-      const nome = pedido.identificador_cliente ? `de ${pedido.identificador_cliente}` : '';
+      const nome = pedido.primeiro_nome ? `de ${pedido.primeiro_nome}` : '';
       const frase = `Atenção! Pedido número ${pedido.numero} ${nome} está pronto para retirada!`;
       const utterance = new SpeechSynthesisUtterance(frase);
       utterance.lang = 'pt-BR';
@@ -99,37 +102,43 @@ export default function PainelTV() {
     }
   }, [somAtivo]);
 
-  // 3. Realtime para atualizar pedidos e disparar chamada por voz
+  // 3. Atualização por polling. Realtime não serve aqui: a TV do balcão roda
+  // sem sessão, e o Realtime respeita RLS — nenhum evento de `pedidos`
+  // chegaria. 10s é folgado para uma tela de retirada.
   useEffect(() => {
-    if (!loja?.id) return;
+    if (!slug) return;
+    const timer = setInterval(carregarDados, 10_000);
+    return () => clearInterval(timer);
+  }, [slug, carregarDados]);
 
-    const canal = supabase
-      .channel(`tv-pedidos-${loja.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${loja.id}` },
-        (payload: any) => {
-          carregarDados();
+  // 4. Detecta transição para PRONTO comparando com o retrato anterior e
+  // dispara a chamada por voz (antes vinha do payload do Realtime).
+  useEffect(() => {
+    const prontosAgora = new Set(
+      pedidos.filter((p) => p.status === 'PRONTO').map((p) => p.numero),
+    );
 
-          // Se um pedido mudou para PRONTO
-          if (payload.new && payload.new.status === 'PRONTO' && payload.old?.status !== 'PRONTO') {
-            const ped = payload.new as Pedido;
-            setUltimoChamado(ped);
-            setBannerChamadaVisivel(true);
-            falarPedido(ped);
+    // Primeira carga só registra o estado: não grita senha antiga ao ligar a TV.
+    if (prontosConhecidosRef.current === null) {
+      prontosConhecidosRef.current = prontosAgora;
+      return;
+    }
 
-            setTimeout(() => {
-              setBannerChamadaVisivel(false);
-            }, 9000);
-          }
-        }
-      )
-      .subscribe();
+    const novos = pedidos.filter(
+      (p) => p.status === 'PRONTO' && !prontosConhecidosRef.current!.has(p.numero),
+    );
+    prontosConhecidosRef.current = prontosAgora;
 
-    return () => {
-      supabase.removeChannel(canal);
-    };
-  }, [loja?.id, carregarDados, falarPedido]);
+    if (!novos.length) return;
+
+    const chamado = novos[0];
+    setUltimoChamado(chamado);
+    setBannerChamadaVisivel(true);
+    falarPedido(chamado);
+
+    const t = setTimeout(() => setBannerChamadaVisivel(false), 9000);
+    return () => clearTimeout(t);
+  }, [pedidos, falarPedido]);
 
   // 4. Carrossel automático de categorias a cada 12s no modo MENU_BOARD
   useEffect(() => {
@@ -252,7 +261,7 @@ export default function PainelTV() {
                   🔔 PEDIDO PRONTO PARA RETIRADA
                 </span>
                 <h2 className="font-['Sora'] text-3xl font-black tracking-tight text-white">
-                  {ultimoChamado.identificador_cliente || 'Cliente'}
+                  {ultimoChamado.primeiro_nome || 'Cliente'}
                 </h2>
                 <p className="text-sm text-emerald-100 font-medium mt-0.5">Por favor, retire seu pedido no balcão de atendimento.</p>
               </div>
@@ -378,11 +387,11 @@ export default function PainelTV() {
                 <div className="space-y-2 max-h-48 overflow-hidden">
                   {pedidosProntos.slice(0, 4).map((p) => (
                     <div
-                      key={p.id}
+                      key={p.numero}
                       className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 text-xs font-bold text-emerald-400"
                     >
                       <span className="font-['Sora'] text-base">#{p.numero}</span>
-                      <span className="truncate max-w-[110px] text-white">{p.identificador_cliente}</span>
+                      <span className="truncate max-w-[110px] text-white">{p.primeiro_nome}</span>
                     </div>
                   ))}
                 </div>
@@ -410,11 +419,11 @@ export default function PainelTV() {
             <div className="grid grid-cols-3 gap-4 overflow-y-auto pr-2">
               {pedidosEmPreparo.map((p) => (
                 <div
-                  key={p.id}
+                  key={p.numero}
                   className="rounded-2xl border border-amber-500/20 bg-black/40 p-4 text-center space-y-1"
                 >
                   <span className="font-['Sora'] text-3xl font-black text-amber-400">#{p.numero}</span>
-                  <p className="text-xs text-slate-300 font-bold truncate">{p.identificador_cliente || 'Cliente'}</p>
+                  <p className="text-xs text-slate-300 font-bold truncate">{p.primeiro_nome || 'Cliente'}</p>
                 </div>
               ))}
             </div>
@@ -435,11 +444,11 @@ export default function PainelTV() {
             <div className="grid grid-cols-3 gap-4 overflow-y-auto pr-2">
               {pedidosProntos.map((p) => (
                 <div
-                  key={p.id}
+                  key={p.numero}
                   className="rounded-2xl border-2 border-emerald-400 bg-emerald-500/20 p-4 text-center space-y-1 shadow-[0_0_20px_rgba(16,185,129,0.3)] animate-pulse"
                 >
                   <span className="font-['Sora'] text-4xl font-black text-white">#{p.numero}</span>
-                  <p className="text-xs text-emerald-100 font-extrabold truncate">{p.identificador_cliente || 'Cliente'}</p>
+                  <p className="text-xs text-emerald-100 font-extrabold truncate">{p.primeiro_nome || 'Cliente'}</p>
                 </div>
               ))}
             </div>

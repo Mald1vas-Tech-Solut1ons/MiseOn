@@ -46,14 +46,32 @@ export default function ImageUpload({ lojaId, pasta, value, onChange, aspecto = 
   };
 
   const salvarImagemEditada = async (editedImageObject: any) => {
-    setIsEditorOpen(false); // Fecha o modal
-    setEnviando(true);
-    setErro('');
-    
     try {
-      // O editor retorna um base64. Vamos convertê-lo para Blob/File para upar no Supabase.
-      const res = await fetch(editedImageObject.imageBase64);
-      const blob = await res.blob();
+      setIsEditorOpen(false); // Fecha o modal
+      setEnviando(true);
+      setErro('');
+      
+      let blob: Blob;
+      if (!editedImageObject.imageBase64) {
+        throw new Error('O editor não retornou a imagem processada (imageBase64 vazio). Tente com uma imagem menor.');
+      }
+
+      try {
+        // Tenta usar fetch primeiro (mais rápido em navegadores modernos)
+        const res = await fetch(editedImageObject.imageBase64);
+        blob = await res.blob();
+      } catch {
+        // Fallback para atob() se o fetch falhar com base64 muito longo
+        const arr = editedImageObject.imageBase64.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        blob = new Blob([u8arr], { type: mime });
+      }
       
       const fileExt = editedImageObject.extension || 'jpg';
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
@@ -64,18 +82,19 @@ export default function ImageUpload({ lojaId, pasta, value, onChange, aspecto = 
         .upload(caminho, blob, { 
           cacheControl: '3600', 
           upsert: true,
-          contentType: editedImageObject.mimeType || 'image/jpeg' 
+          contentType: editedImageObject.mimeType || blob.type || 'image/jpeg' 
         });
         
       if (uploadError) throw uploadError;
       
       const { data } = supabase.storage.from('loja-assets').getPublicUrl(caminho);
-      // O ?v=timestamp força o navegador/CDN a baixar a foto nova e ignorar o cache da antiga
       onChange(`${data.publicUrl}?v=${new Date().getTime()}`);
     } catch (err: any) {
-      setErro('Erro ao salvar imagem editada: ' + err.message);
+      console.error('Erro ao salvar:', err);
+      setErro('Erro ao salvar imagem editada: ' + (err.message || 'Erro desconhecido'));
     } finally {
       setEnviando(false);
+      setIsEditorOpen(false);
     }
   };
 
@@ -147,6 +166,8 @@ export default function ImageUpload({ lojaId, pasta, value, onChange, aspecto = 
             savingPixelRatio={1}
             previewPixelRatio={1}
             defaultSavedImageName="miseon-image"
+            useBackendTranslations={false}
+            avoidChangesNotSavedAlertOnLeave={true}
             translations={{
               save: 'Salvar Imagem',
               adjust: 'Cortar / Girar',

@@ -79,7 +79,9 @@ export function SEO({
     }
 
     // 7. Meta Pixel Injection (Zero custo 3rd party, rastreamento nativo de anúncios)
-    if (metaPixelId && metaPixelId.trim()) {
+    // O id entra num <script> inline: última linha de defesa do achado 05 da
+    // auditoria. Qualquer coisa fora do formato é descartada em silêncio.
+    if (metaPixelId && /^[0-9]{15,16}$/.test(metaPixelId.trim())) {
       const pid = metaPixelId.trim();
       if (!document.getElementById('meta-pixel-script')) {
         const metaScript = document.createElement('script');
@@ -97,8 +99,8 @@ export function SEO({
       }
     }
 
-    // 8. Google Analytics 4 (GA4) Injection
-    if (ga4MeasurementId && ga4MeasurementId.trim()) {
+    // 8. Google Analytics 4 (GA4) Injection — mesma regra do Meta Pixel acima.
+    if (ga4MeasurementId && /^G-[A-Z0-9]{8,12}$/.test(ga4MeasurementId.trim())) {
       const gid = ga4MeasurementId.trim();
       if (!document.getElementById('ga4-script')) {
         const ga4Script = document.createElement('script');

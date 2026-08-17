@@ -155,7 +155,7 @@ export default function AcompanharPedido() {
 
     if (atual?.loja_id) {
       const { data: lojaData } = await supabase
-        .from('lojas')
+        .from('lojas_publicas')
         .select('slug, nome, logo_url, cor_primaria, cor_secundaria, cor_texto, cor_fundo_claro, cor_fundo_escuro, fonte, tema_cardapio')
         .eq('id', atual.loja_id)
         .maybeSingle();

@@ -599,10 +599,23 @@ function AnunciosTab({ lojaId }: { lojaId: string }) {
   }, [lojaId]);
 
   const salvar = async () => {
+    // Estes valores são injetados dentro de um <script> na vitrine. Sem validação
+    // de formato, um id "criativo" vira execução de JS arbitrário na sessão dos
+    // clientes (auditoria, achado 05). O banco tem CHECK equivalente.
+    const meta = pixelId.trim();
+    const ga4 = ga4Id.trim();
+
+    if (meta && !/^[0-9]{15,16}$/.test(meta)) {
+      return setMsg('O ID do Meta Pixel deve ter 15 ou 16 dígitos, só números.');
+    }
+    if (ga4 && !/^G-[A-Z0-9]{8,12}$/.test(ga4)) {
+      return setMsg('O ID do GA4 deve estar no formato G-XXXXXXXXXX.');
+    }
+
     setSalvando(true); setMsg('');
     const { error } = await supabase.from('lojas').update({
-      meta_pixel_id: pixelId.trim() || null,
-      ga4_measurement_id: ga4Id.trim() || null,
+      meta_pixel_id: meta || null,
+      ga4_measurement_id: ga4 || null,
     }).eq('id', lojaId);
 
     setSalvando(false);

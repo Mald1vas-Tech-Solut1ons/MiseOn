@@ -18,6 +18,36 @@ serve(async (req: Request) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // ── Autorização (auditoria, achado 03) ────────────────────────────────
+    // Antes: `lojaId` vinha cru do body e o update rodava com service_role, que
+    // ignora RLS. Qualquer um apontava a integração iFood de qualquer loja para
+    // a conta dele — e o lojaId é público, aparece na vitrine.
+    const authHeader = req.headers.get('Authorization') ?? '';
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Não autenticado.' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseAuth = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: caller } } = await supabaseAuth.auth.getUser();
+    if (!caller) {
+      return new Response(JSON.stringify({ error: 'Não autenticado.' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Só admin da própria loja liga/religa a integração.
+    const { data: ehAdmin } = await supabaseAuth.rpc('fn_sou_admin', { p_loja: lojaId });
+    if (ehAdmin !== true) {
+      return new Response(JSON.stringify({ error: 'Sem permissão para configurar esta loja.' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const clientId = Deno.env.get('IFOOD_CLIENT_ID');

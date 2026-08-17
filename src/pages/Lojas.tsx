@@ -69,8 +69,8 @@ export default function Lojas() {
     (async () => {
       const [{ data }, { data: faixas }] = await Promise.all([
         supabase
-        .from('lojas')
-        .select('id, slug, nome, descricao, logo_url, banner_url, endereco, cor_primaria, aceita_entrega, lat, lng, entrega_modo, entrega_taxa_base, entrega_taxa_km, entrega_raio_km, entrega_taxa_padrao')
+        .from('lojas_publicas')
+        .select('id, slug, nome, descricao, logo_url, banner_url, endereco, cor_primaria, aceita_entrega, lat, lng, entrega_modo, entrega_taxa_base, entrega_taxa_km, entrega_raio_km, entrega_taxa_padrao, frete_gratis_valor_minimo')
         .eq('ativo', true)
         .order('nome'),
         supabase.from('faixas_entrega').select('*').eq('ativo', true).order('ordem').order('km_ate'),

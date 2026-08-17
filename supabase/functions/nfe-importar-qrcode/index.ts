@@ -17,11 +17,25 @@ const erro = (msg: string, status = 400) => json({ error: msg }, { status });
 interface ItemNFCe {
   num_item: number;
   descricao: string;
+  /** EAN/GTIN real. Null quando a nota só traz o código interno do emitente. */
   gtin?: string | null;
+  /** cProd: código interno do mercado. Só é único DENTRO de um mesmo CNPJ. */
+  codigo_fornecedor?: string | null;
   qtd: number;
   unidade: string;
   valor_unitario: number;
   valor_total: number;
+}
+
+/** GTIN válido: 8, 12, 13 ou 14 dígitos com dígito verificador correto. */
+function ehGtinValido(codigo: string): boolean {
+  if (!/^\d+$/.test(codigo)) return false;
+  if (![8, 12, 13, 14].includes(codigo.length)) return false;
+  const digitos = codigo.split('').map(Number);
+  const dv = digitos.pop()!;
+  let soma = 0;
+  digitos.reverse().forEach((d, i) => { soma += d * (i % 2 === 0 ? 3 : 1); });
+  return (10 - (soma % 10)) % 10 === dv;
 }
 
 interface DadosNFCe {
@@ -97,7 +111,10 @@ function parseHtmlSefazSp(html: string, chave: string): DadosNFCe {
       const matchVlTotal = bloco.match(/class=["']valor["'][^>]*>([\d\.,]+)<\/span>/i) || bloco.match(/class=["']vItem["'][^>]*>([\d\.,]+)<\/span>/i);
 
       const nome = matchNome ? matchNome[1].replace(/<[^>]+>/g, '').trim() : `Item ${idx + 1}`;
-      const gtin = matchCod ? matchCod[1].trim() : null;
+      // "(Código: NNN)" é o cProd do emitente, NÃO um EAN. Só promove a gtin
+      // quando o número realmente passa na validação de GTIN.
+      const codigo = matchCod ? matchCod[1].trim() : null;
+      const gtin = codigo && ehGtinValido(codigo) ? codigo : null;
       const qtd = matchQtd ? parseFloat(matchQtd[1].replace(/\./g, '').replace(',', '.')) : 1;
       const un = matchUn ? matchUn[1].trim().toLowerCase() : 'un';
       const vlUnit = matchVlUnit ? parseFloat(matchVlUnit[1].replace(/\./g, '').replace(',', '.')) : 0;
@@ -108,6 +125,7 @@ function parseHtmlSefazSp(html: string, chave: string): DadosNFCe {
           num_item: idx + 1,
           descricao: nome,
           gtin,
+          codigo_fornecedor: codigo,
           qtd,
           unidade: un,
           valor_unitario: vlUnit,
@@ -154,6 +172,18 @@ Deno.serve(async (req) => {
     const info = extrairChave(entrada);
     if (!info) return erro('Chave ou URL da NFC-e inválida (deve conter 44 dígitos)');
 
+    // A consulta pública da SEFAZ exige o hash do QR Code — um HMAC calculado
+    // com o CSC do estabelecimento emitente. Não há como derivá-lo da chave,
+    // então a chave sozinha nunca vai resolver: a SEFAZ devolve
+    // "Hash QR Code inválido". Avisa direito em vez de repassar esse erro.
+    if (!url_qrcode) {
+      return erro(
+        'Só a chave de acesso não basta: a SEFAZ exige o código de segurança que vem dentro do QR Code. ' +
+        'Escaneie o QR Code impresso no cupom (ou cole a URL completa que ele contém).',
+        422,
+      );
+    }
+
     const supabaseAuth = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
@@ -162,9 +192,14 @@ Deno.serve(async (req) => {
     const { data: { user: caller } } = await supabaseAuth.auth.getUser();
     if (!caller) return erro('Não autenticado', 401);
 
-    const targetUrl = url_qrcode || `https://www.nfce.fazenda.sp.gov.br/qrcode?p=${info.chave}|2|1|1|000000`;
+    if (info.uf !== 'SP') {
+      return erro(
+        `Esta nota é de ${info.uf}. Por enquanto a importação automática lê apenas cupons de São Paulo.`,
+        422,
+      );
+    }
 
-    const resp = await fetch(targetUrl, {
+    const resp = await fetch(url_qrcode, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -180,7 +215,13 @@ Deno.serve(async (req) => {
     const dados = parseHtmlSefazSp(html, info.chave);
 
     if (dados.itens.length === 0) {
-      return erro('A SEFAZ respondeu, mas não foi possível extrair os produtos. Verifique se o QR Code da NFC-e é de São Paulo.', 422);
+      const motivo = html.match(/Erro\(s\):\s*-?\s*([^'<]+)/i)?.[1]?.trim();
+      return erro(
+        motivo
+          ? `A SEFAZ recusou a consulta: ${motivo}`
+          : 'A SEFAZ respondeu, mas nenhum produto foi encontrado na nota. O QR Code pode estar incompleto.',
+        422,
+      );
     }
 
     return json(dados);

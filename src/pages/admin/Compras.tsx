@@ -76,15 +76,21 @@ export default function Compras() {
     setConsultandoNota(true);
     try {
       const isUrl = entrada.includes('http://') || entrada.includes('https://');
+      if (!isUrl) {
+        alert(
+          'Só a chave de acesso não basta. A SEFAZ exige o código de segurança que fica dentro do QR Code, ' +
+          'e ele não pode ser deduzido da chave. Escaneie o QR Code impresso no cupom.'
+        );
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('nfe-importar-qrcode', {
-        body: {
-          url_qrcode: isUrl ? entrada : undefined,
-          chave_acesso: !isUrl ? entrada : undefined
-        }
+        body: { url_qrcode: entrada }
       });
 
-      if (error || !data || data.error) {
-        alert(`Erro ao consultar nota na SEFAZ: ${error?.message || data?.error || 'Verifique se o QR Code é de São Paulo.'}`);
+      const msgErro = (data as any)?.error;
+      if (error || !data || msgErro) {
+        alert(`Erro ao consultar nota na SEFAZ: ${msgErro || error?.message || 'Tente novamente.'}`);
       } else {
         setModalScannerAberto(false);
         setDadosNotaImportada(data);

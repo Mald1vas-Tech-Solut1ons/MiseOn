@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.6"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +13,26 @@ serve(async (req) => {
   }
 
   try {
+    // Auditoria, achado 06: sem isto a função era um proxy Gemini público.
+    // Só usuário autenticado com vínculo em alguma loja consome IA.
+    const authHeader = req.headers.get('Authorization') ?? ''
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Não autenticado.' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } },
+    )
+    const { data: { user } } = await supabaseAuth.auth.getUser()
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Não autenticado.' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const { nome, categoria } = await req.json()
     if (!nome) throw new Error('Nome do produto não fornecido.')
 

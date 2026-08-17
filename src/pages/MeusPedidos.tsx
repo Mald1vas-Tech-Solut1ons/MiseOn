@@ -112,7 +112,7 @@ export default function MeusPedidos() {
       setLogado(true);
 
       const { data: lojaData } = await supabase
-        .from('lojas')
+        .from('lojas_publicas')
         .select('id, slug, nome, logo_url, cor_primaria, cor_secundaria, cor_texto, cor_fundo_claro, cor_fundo_escuro, fonte, tema_cardapio')
         .eq('slug', slug)
         .maybeSingle();

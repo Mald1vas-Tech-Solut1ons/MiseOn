@@ -1,7 +1,9 @@
 
 [functions.magic-copy]
 enabled = true
-verify_jwt = false
+# Auditoria, achado 06: com verify_jwt = false isto era um proxy Gemini aberto
+# na internet — qualquer um rodava um loop e a conta vinha para a plataforma.
+verify_jwt = true
 import_map = "./functions/magic-copy/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx

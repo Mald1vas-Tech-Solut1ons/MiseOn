@@ -74,8 +74,10 @@ export function PainelBalanca() {
       const { data: userRes } = await supabase.auth.getUser();
       if (!userRes.user) return;
 
+      // A tabela é `usuarios_loja`; `membros_equipe` nunca existiu no banco, o
+      // que deixava o painel da balança sem loja e travado no loading.
       const { data: membro } = await supabase
-        .from('membros_equipe')
+        .from('usuarios_loja')
         .select('loja_id')
         .eq('user_id', userRes.user.id)
         .maybeSingle();

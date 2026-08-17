@@ -7,10 +7,22 @@ interface ItemLidoNFCe {
   num_item: number;
   descricao: string;
   gtin?: string | null;
+  codigo_fornecedor?: string | null;
   qtd: number;
   unidade: string;
   valor_unitario: number;
   valor_total: number;
+}
+
+/**
+ * Chave do De-Para. O código interno do mercado só é único dentro do CNPJ dele —
+ * sem esse escopo, o código 123 de dois mercados vira o mesmo insumo.
+ */
+function chaveDoItem(item: ItemLidoNFCe, cnpjEmitente?: string | null): string {
+  if (item.gtin) return `EAN_${item.gtin}`;
+  const cnpj = (cnpjEmitente || '').replace(/\D/g, '');
+  if (item.codigo_fornecedor && cnpj) return `CPROD_${cnpj}_${item.codigo_fornecedor}`;
+  return item.descricao.trim().toUpperCase();
 }
 
 interface DadosNotaNFCe {
@@ -72,7 +84,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
       });
 
       const novasLinhas: LinhaDePara[] = dadosNota.itens.map(item => {
-        const chaveChave = item.gtin ? `GTIN_${item.gtin}` : item.descricao.trim().toUpperCase();
+        const chaveChave = chaveDoItem(item, dadosNota.emitente?.cnpj);
 
         // 1. Nível 1: Match por Histórico
         const hist = mapaHistorico.get(chaveChave) || mapaHistorico.get(item.descricao.trim().toUpperCase());
@@ -203,7 +215,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
 
         if (!insumoIdFinal) continue;
 
-        const chaveItem = l.itemNota.gtin ? `GTIN_${l.itemNota.gtin}` : l.itemNota.descricao.trim().toUpperCase();
+        const chaveItem = chaveDoItem(l.itemNota, dadosNota.emitente?.cnpj);
 
         // Registro De-Para para guardar na memória da loja
         registrosDepara.push({
