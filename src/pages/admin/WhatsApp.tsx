@@ -2,8 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   MessageCircle, Loader2, Save, AlertTriangle, RefreshCw,
-  Unplug, Activity, Sparkles, Mail, PhoneOff,
-} from 'lucide-react';
+  Unplug, Activity, Sparkles, Mail, PhoneOff, QrCode } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../components/ui/Toast';
 import { MiseOnLoader } from '../../components/MiseOnLoader';
@@ -54,7 +53,23 @@ interface StatusResponse {
 const META_APP_ID = '1409543307655107';
 const META_CONFIG_ID = '1810926466545925'; // App Dashboard → WhatsApp → Cadastro incorporado
 const META_API_VERSION = 'v21.0';
-const META_EXTRAS = { setup: {}, featureType: '', sessionInfoVersion: '3' };
+// Dois caminhos oficiais do Embedded Signup, escolhidos pelo `featureType`:
+//
+//  • COEXISTENCIA ('whatsapp_business_app_onboarding'): o lojista lê um QR Code
+//    no WhatsApp Business do celular. O número CONTINUA funcionando no aparelho
+//    e passa a receber também pela API. Não exige chip dedicado nem apagar conta.
+//
+//  • CHIP DEDICADO (''): registro novo na Cloud API, confirmado por SMS. Exige
+//    que o número não esteja ativo no WhatsApp — é o caminho de produção puro,
+//    em que o número passa a ser só do atendimento automático.
+const extrasOnboarding = (featureType: string) => ({
+  setup: {},
+  featureType,
+  sessionInfoVersion: '3',
+});
+const FEATURE_COEXISTENCIA = 'whatsapp_business_app_onboarding';
+const FEATURE_CHIP_DEDICADO = '';
+const META_EXTRAS = extrasOnboarding(FEATURE_CHIP_DEDICADO);
 
 // Precisa estar em "URIs de redirecionamento OAuth válidos" no app da Meta.
 const redirectUri = () => `${window.location.origin}/admin/whatsapp`;
@@ -97,7 +112,7 @@ function carregarFbSdk(): Promise<any> {
 }
 
 // Plano B: mesmo fluxo, porém por redirect — volta em /admin/whatsapp?code=…
-const urlDialogOAuth = () =>
+const urlDialogOAuth = (featureType: string = FEATURE_CHIP_DEDICADO) =>
   `https://www.facebook.com/${META_API_VERSION}/dialog/oauth?` +
   new URLSearchParams({
     client_id: META_APP_ID,
@@ -105,7 +120,7 @@ const urlDialogOAuth = () =>
     response_type: 'code',
     override_default_response_type: 'true',
     redirect_uri: redirectUri(),
-    extras: JSON.stringify(META_EXTRAS),
+    extras: JSON.stringify(extrasOnboarding(featureType)),
   }).toString();
 
 // Mascara o número para exibição: "+1 555 ••••-1792"
@@ -310,7 +325,7 @@ export default function WhatsApp() {
   // e é o caminho que a Meta conclui até o "conta associada". Quando a opção for
   // ligada no painel, dá para voltar a usar `conectarPorPopup` abaixo.
   const conectarComFacebook = () => {
-    void conectarPorRedirect();
+    void conectarPorRedirect(FEATURE_COEXISTENCIA);
   };
 
   // Popup do Embedded Signup — só funciona com o JSSDK habilitado no app da Meta.
@@ -338,11 +353,11 @@ export default function WhatsApp() {
   // Saída de emergência: leva a página inteira para a Meta e volta em
   // /admin/whatsapp?code=… — nada de popup, nada de postMessage. Aqui dá para
   // esperar o registro da intenção, porque a navegação é nossa.
-  const conectarPorRedirect = async () => {
+  const conectarPorRedirect = async (featureType: string = FEATURE_CHIP_DEDICADO) => {
     try {
       await chamar({ acao: 'iniciar_conexao', loja_id: lojaId });
     } catch { /* sem a intenção o fluxo ainda funciona pelo `code` */ }
-    window.location.href = urlDialogOAuth();
+    window.location.href = urlDialogOAuth(featureType);
   };
 
   const testar = async () => {
@@ -547,30 +562,42 @@ export default function WhatsApp() {
               <div className="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
                 <MessageCircle size={26} className="text-emerald-300" />
               </div>
-              <h3 className="font-['Sora'] text-lg font-black text-white">Conectar com Facebook</h3>
+              <h3 className="font-['Sora'] text-lg font-black text-white">Conectar o WhatsApp da loja</h3>
               <p className="max-w-md text-sm leading-relaxed text-emerald-100/85">
-                A forma mais fácil: a Meta abre uma janela segura, você entra com a sua conta,
-                escolhe o número de WhatsApp da sua loja e pronto —
+                Processo oficial da Meta —
                 <b className="text-white"> sem criar conta de desenvolvedor e sem colar código nenhum</b>.
+                Escolha como quer conectar:
               </p>
+
               <button
                 onClick={conectarComFacebook}
                 disabled={finalizando}
                 className="mt-1 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-['Sora'] text-sm font-black text-emerald-950 shadow-xl transition hover:scale-105 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {finalizando ? <Loader2 size={17} className="animate-spin" /> : <MessageCircle size={17} />}
-                {finalizando ? 'Finalizando conexão…' : 'Conectar com Facebook'}
+                {finalizando ? <Loader2 size={17} className="animate-spin" /> : <QrCode size={17} />}
+                {finalizando ? 'Finalizando conexão…' : 'Usar o número que já está no celular'}
               </button>
-              <span className="text-[11px] text-emerald-200/70">
-                Processo oficial da Meta · leva menos de 2 minutos
-                {!sdkPronto && ' · abrindo na própria aba'}
+              <span className="max-w-md text-[11px] leading-relaxed text-emerald-200/80">
+                Você lê um <b className="text-emerald-100">QR Code</b> no WhatsApp Business do
+                aparelho. O número <b className="text-emerald-100">continua funcionando no celular</b>{' '}
+                e passa a receber também aqui. Não precisa de chip novo nem apagar conversa.
               </span>
+
+              <div className="my-1 h-px w-40 bg-emerald-300/20" />
+
               <button
-                onClick={conectarPorRedirect}
-                className="text-[11px] font-bold text-emerald-200/90 underline underline-offset-2 transition hover:text-white"
+                onClick={() => void conectarPorRedirect(FEATURE_CHIP_DEDICADO)}
+                disabled={finalizando}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3 font-['Sora'] text-sm font-black text-white backdrop-blur-md transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                A janela da Meta travou ou não fechou? Concluir sem janela extra
+                <MessageCircle size={16} />
+                Usar um chip dedicado só para o atendimento
               </button>
+              <span className="max-w-md text-[11px] leading-relaxed text-emerald-200/70">
+                Registro novo na Meta, confirmado por SMS. O número{' '}
+                <b className="text-emerald-100">não pode estar ativo no WhatsApp</b> e deixa de
+                funcionar no celular — passa a ser só do atendimento automático.
+              </span>
             </div>
           </div>
         )}

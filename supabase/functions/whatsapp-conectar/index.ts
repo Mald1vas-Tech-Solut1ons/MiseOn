@@ -98,11 +98,11 @@ async function concluirConexao(
   }
 
   const telRes = await fetch(
-    `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name`,
+    `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name,platform_type`,
     { headers: { Authorization: `Bearer ${SYS_TOKEN}` } },
   );
   const tel = await telRes.json().catch(() => ({}));
-  const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string }> =
+  const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string; platform_type?: string }> =
     tel?.data ?? [];
   if (!numeros.length) return { ok: false, detalhe: `WABA sem numeros: ${msgGraph(tel)}` };
 
@@ -121,9 +121,15 @@ async function concluirConexao(
     return { ok: false, detalhe: "este numero ja esta conectado a outra loja" };
   }
 
+  // Numero de COEXISTENCIA (platform_type SMB_APP) ja esta ativo no celular do
+  // lojista: chamar /register tentaria move-lo para a Cloud API e derrubaria o
+  // WhatsApp do aparelho. So registramos numero novo de Cloud API.
+  const ehCoexistencia = String(numero.platform_type ?? "") === "SMB_APP";
   const pin = gerarPin();
   let pinSalvo: string | null = null;
-  try {
+  if (ehCoexistencia) {
+    console.log(`concluirConexao: numero ${numero.id} e de coexistencia (SMB_APP) — sem register`);
+  } else try {
     const regRes = await fetch(`${GRAPH}/${numero.id}/register`, {
       method: "POST",
       headers: { Authorization: `Bearer ${SYS_TOKEN}`, "Content-Type": "application/json" },
@@ -801,10 +807,10 @@ serve(async (req) => {
       }
 
       // (c) descobre o número: sessionInfo primeiro, listagem da WABA como plano B
-      let numero: { id: string; display_phone_number?: string; verified_name?: string } | null = null;
+      let numero: { id: string; display_phone_number?: string; verified_name?: string; platform_type?: string } | null = null;
       if (phoneDoSession) {
         const numRes = await fetch(
-          `${GRAPH}/${phoneDoSession}?fields=id,display_phone_number,verified_name`,
+          `${GRAPH}/${phoneDoSession}?fields=id,display_phone_number,verified_name,platform_type`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const num = await numRes.json().catch(() => ({}));
@@ -820,11 +826,11 @@ serve(async (req) => {
       }
       if (!numero) {
         const telRes = await fetch(
-          `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name`,
+          `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name,platform_type`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const tel = await telRes.json().catch(() => ({}));
-        const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string }> =
+        const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string; platform_type?: string }> =
           tel?.data ?? [];
         if (!numeros.length) {
           console.error("trocar_codigo: WABA sem números:", JSON.stringify(tel));

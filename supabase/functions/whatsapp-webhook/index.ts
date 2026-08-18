@@ -100,11 +100,11 @@ async function concluirConexao(
 
   // (b) descobre o numero real da conta (o de teste +1 555 nunca vence)
   const telRes = await fetch(
-    `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name`,
+    `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name,platform_type`,
     { headers: { Authorization: `Bearer ${SYS_TOKEN}` } },
   );
   const tel = await telRes.json().catch(() => ({}));
-  const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string }> =
+  const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string; platform_type?: string }> =
     tel?.data ?? [];
   if (!numeros.length) {
     return { ok: false, detalhe: `WABA sem numeros: ${msgGraph(tel)}` };
@@ -116,7 +116,7 @@ async function concluirConexao(
     String(n.display_phone_number ?? "").replace(/\D/g, "").startsWith("1555");
   const reais = numeros.filter((n) => !ehTeste(n));
   if (!reais.length) {
-    return { ok: false, detalhe: "SO_NUMERO_DE_TESTE" };
+    return { ok: false, detalhe: "A conta criada na Meta ficou APENAS com o numero de teste (+1 555). O numero da loja nao foi vinculado. Use 'Usar o numero que ja esta no celular' para ler o QR Code no WhatsApp Business, ou um chip dedicado confirmado por SMS." };
   }
   const numero = reais[0];
 
@@ -131,9 +131,15 @@ async function concluirConexao(
   }
 
   // (d) registra o numero no Cloud API (melhor esforco — pode ja estar registrado)
+  // Numero de COEXISTENCIA (platform_type SMB_APP) ja esta ativo no celular do
+  // lojista: chamar /register tentaria move-lo para a Cloud API e derrubaria o
+  // WhatsApp do aparelho. So registramos numero novo de Cloud API.
+  const ehCoexistencia = String(numero.platform_type ?? "") === "SMB_APP";
   const pin = gerarPin();
   let pinSalvo: string | null = null;
-  try {
+  if (ehCoexistencia) {
+    console.log(`concluirConexao: numero ${numero.id} e de coexistencia (SMB_APP) — sem register`);
+  } else try {
     const regRes = await fetch(`${GRAPH}/${numero.id}/register`, {
       method: "POST",
       headers: { Authorization: `Bearer ${SYS_TOKEN}`, "Content-Type": "application/json" },
@@ -289,7 +295,7 @@ serve(async (req) => {
             const r = await concluirConexao(supabase, wabaId, pendente.loja_id);
             resultado = r.ok
               ? `OK: ${r.detalhe}`
-              : r.detalhe === "SO_NUMERO_DE_TESTE"
+              : r.detalhe === "A conta criada na Meta ficou APENAS com o numero de teste (+1 555). O numero da loja nao foi vinculado. Use 'Usar o numero que ja esta no celular' para ler o QR Code no WhatsApp Business, ou um chip dedicado confirmado por SMS."
                 ? "FALHOU: A conta do WhatsApp Business criada na Meta tem APENAS o numero de teste (+1 555). O numero real da loja nao foi adicionado — no assistente da Meta, no passo 'Adicionar um numero de telefone', digite o numero da loja e confirme o codigo que chega por SMS. Importante: esse numero nao pode estar ativo no WhatsApp comum."
                 : `FALHOU: ${r.detalhe}`;
             if (r.ok) {
