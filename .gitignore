@@ -38,3 +38,9 @@ cert/
 *.pem
 cert_base64.txt
 .trae-supabase-home/
+
+# Test artifacts and coverage
+.nyc_output/
+coverage/
+cypress/screenshots/
+cypress/videos/
