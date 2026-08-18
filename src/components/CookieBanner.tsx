@@ -18,10 +18,6 @@ export function CookieBanner() {
   const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).Cypress) {
-      return;
-    }
-
     const estado = obterConsentimento();
     if (estado.tipo === 'indefinido') {
       setVisivel(true);
@@ -53,7 +49,8 @@ export function CookieBanner() {
     };
   }, []);
 
-  if (!visivel) return null;
+  const isCypress = typeof window !== 'undefined' && ((window as any).Cypress || (import.meta as any).env?.VITE_CYPRESS === 'true');
+  if (isCypress || !visivel) return null;
 
   const handleAceitarTodos = () => {
     aceitarTodos();
