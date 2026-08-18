@@ -7,6 +7,7 @@ import { SAAS_PRICING } from '../../lib/efiInfo';
 import { BandeiraMark } from '../../components/ui';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
+import { getOptimizedImageUrl } from '../../lib/cdn';
 
 export default function Assinatura() {
   const { lojaId, lojaNome } = useOutletContext<CtxLoja>();
@@ -410,7 +411,7 @@ export default function Assinatura() {
                   ) : (
                      <div className="flex flex-col items-center w-full max-w-sm animate-in zoom-in-95">
                         <div className="p-4 bg-white rounded-2xl border-2 border-teal-500 shadow-xl shadow-teal-500/20 mb-6">
-                           <img src={qrCode} alt="QR Code Pix" className="w-56 h-56" />
+                           <img src={getOptimizedImageUrl(qrCode)} alt="QR Code Pix" className="w-56 h-56" />
                         </div>
                         
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Pix Copia e Cola</p>

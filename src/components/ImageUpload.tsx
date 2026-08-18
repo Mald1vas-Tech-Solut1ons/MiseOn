@@ -19,18 +19,27 @@ function parseAspect(aspecto: string): number | undefined {
   return undefined; // livre
 }
 
-/** Cria um canvas recortado e retorna como Blob. */
-async function getCroppedBlob(imageSrc: string, crop: Area, rotation: number): Promise<Blob> {
+/** Cria um canvas recortado, limita dimensões máximas (1600px) e retorna como Blob otimizado. */
+async function getCroppedBlob(imageSrc: string, crop: Area, rotation: number, maxWidth = 1600): Promise<Blob> {
   const img = await createImage(imageSrc);
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d')!;
-
   const rotRad = (rotation * Math.PI) / 180;
   const { width: bW, height: bH } = getRotatedSize(img.width, img.height, rotation);
 
-  canvas.width = crop.width;
-  canvas.height = crop.height;
+  let targetWidth = crop.width;
+  let targetHeight = crop.height;
+  if (targetWidth > maxWidth || targetHeight > maxWidth) {
+    const scale = Math.min(maxWidth / targetWidth, maxWidth / targetHeight);
+    targetWidth = Math.round(targetWidth * scale);
+    targetHeight = Math.round(targetHeight * scale);
+  }
 
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d')!;
+
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  ctx.scale(targetWidth / crop.width, targetHeight / crop.height);
   ctx.translate(crop.width / 2, crop.height / 2);
   ctx.translate(-crop.x - crop.width / 2, -crop.y - crop.height / 2);
   ctx.translate(bW / 2, bH / 2);
@@ -41,7 +50,7 @@ async function getCroppedBlob(imageSrc: string, crop: Area, rotation: number): P
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('Canvas toBlob falhou'))),
       'image/jpeg',
-      0.92,
+      0.88,
     );
   });
 }
@@ -133,7 +142,7 @@ export default function ImageUpload({
       const { error: uploadError } = await supabase.storage
         .from('loja-assets')
         .upload(caminho, blob, {
-          cacheControl: '3600',
+          cacheControl: '31536000, immutable',
           upsert: true,
           contentType: 'image/jpeg',
         });

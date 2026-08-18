@@ -285,7 +285,7 @@ export default function Cardapio() {
         description={`Cardápio digital e pedidos online de ${loja.nome}. Faça seu pedido pelo site ou WhatsApp. Endereço: ${loja.endereco || 'Atendimento local e delivery'}.`}
         keywords={`${loja.nome}, cardapio digital ${loja.nome}, pedir online ${loja.nome}, restaurante ${loja.nome}, delivery ${loja.nome}`}
         canonicalUrl={`https://miseon.app.br/${loja.slug}`}
-        ogImage={loja.logo_url || loja.banner_url || 'https://miseon.app.br/icon-512.png'}
+        ogImage={getOptimizedImageUrl(loja.logo_url || loja.banner_url || 'https://miseon.app.br/icon-512.png')}
         metaPixelId={loja.meta_pixel_id}
         ga4MeasurementId={loja.ga4_measurement_id}
         schemaJson={{
@@ -293,7 +293,7 @@ export default function Cardapio() {
           '@type': 'Restaurant',
           'name': loja.nome,
           'url': `https://miseon.app.br/${loja.slug}`,
-          'image': loja.logo_url || loja.banner_url || 'https://miseon.app.br/icon-512.png',
+          'image': getOptimizedImageUrl(loja.logo_url || loja.banner_url || 'https://miseon.app.br/icon-512.png'),
           'description': `Cardápio digital e pedidos online de ${loja.nome}.`,
           'address': {
             '@type': 'PostalAddress',

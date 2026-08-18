@@ -23,6 +23,7 @@ import { useToast } from '../../components/ui/Toast';
 import { tocarSom } from '../../lib/som';
 import { traduzirErro } from '../../lib/erros';
 import { createPedidoPedido, isErroColunaKdsAusente } from '../../lib/pedidos';
+import { getOptimizedImageUrl } from '../../lib/cdn';
 
 /* ─────────────────────────────────────────────────────────────
    PDV — Frente de balcão touch-first.
@@ -550,7 +551,7 @@ export default function PDV() {
             <h3 className="text-lg font-black dark:text-gray-100">Pix de {fmt(total)}</h3>
             <p className="mt-1 text-xs text-gray-500">Peça para o cliente apontar a câmera para o QR Code.</p>
             {pixInfo.qrImagem
-              ? <img src={pixInfo.qrImagem} alt="QR Code Pix" className="mx-auto mt-4 w-56 rounded-2xl border border-gray-200 dark:border-gray-700" />
+              ? <img src={getOptimizedImageUrl(pixInfo.qrImagem)} alt="QR Code Pix" className="mx-auto mt-4 w-56 rounded-2xl border border-gray-200 dark:border-gray-700" />
               : <p className="mt-4 break-all rounded-xl bg-gray-100 p-3 font-mono text-[10px] dark:bg-gray-800 dark:text-gray-200">{pixInfo.copiaECola}</p>}
             <p className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-gray-500">
               Aguardando o pagamento cair… confirma sozinho.

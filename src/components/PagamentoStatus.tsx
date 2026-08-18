@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase';
 import { tocarSom } from '../lib/som';
 import { Button, ProgressBar, SuccessCelebration } from './ui';
 
+import { getOptimizedImageUrl } from '../lib/cdn';
+
 export interface PixInfo {
   copia_e_cola: string;
   qr_imagem?: string;
@@ -196,7 +198,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
               {/* QR em card destacado */}
               <div className="rounded-2xl border-2 border-teal-500/70 bg-white p-4 shadow-lg shadow-teal-500/10 dark:bg-gray-950">
                 {pix.qr_imagem ? (
-                  <img src={pix.qr_imagem} alt="QR Code Pix" className="mx-auto h-52 w-52 object-contain" />
+                  <img src={getOptimizedImageUrl(pix.qr_imagem)} alt="QR Code Pix" className="mx-auto h-52 w-52 object-contain" />
                 ) : (
                   <div className="mx-auto flex h-52 w-52 items-center justify-center">
                     <Loader2 size={28} className="animate-spin text-teal-500" />
