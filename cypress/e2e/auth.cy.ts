@@ -20,8 +20,8 @@ describe('Autenticação', () => {
     // Testar Logout
     cy.contains('Minha Conta').click();
     
-    // Supondo que no modal de "Minha Conta" exista o botão Sair
-    cy.contains('Sair').click();
+    // No modal de "Minha Conta", o botão se chama "Sair da conta"
+    cy.contains('Sair da conta').click();
 
     // A UI deve voltar para "Entrar"
     cy.contains('Entrar').should('be.visible');
