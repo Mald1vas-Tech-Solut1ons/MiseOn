@@ -123,11 +123,14 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
 }
 
 
+import CookieBanner from './components/CookieBanner';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <I18nProvider>
       <ToastProvider>
         <BrowserRouter>
+          <CookieBanner />
           <ScreenTransition>
             <Suspense fallback={<PageLoader />}>
             <Routes>

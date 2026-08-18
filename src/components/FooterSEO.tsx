@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, MapPin, Mail, ShieldCheck, MessageCircle, CreditCard, Lock, Youtube } from 'lucide-react';
+import { Building2, MapPin, Mail, ShieldCheck, MessageCircle, CreditCard, Lock, Youtube, Cookie } from 'lucide-react';
 import MiseOnLogo from './MiseOnLogo';
+import { abrirGerenciadorCookies } from '../lib/cookieConsent';
 
 export function FooterSEO() {
   const nichos = [
@@ -172,7 +173,17 @@ export function FooterSEO() {
 
         {/* Direitos Autorais e Resumo SEO */}
         <div className="mt-8 border-t border-white/10 pt-6 text-center text-[11px] leading-relaxed text-slate-500">
-          <p>© {new Date().getFullYear()} MiseOn · Todos os direitos reservados. CNPJ 63.310.253/0001-81</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <p>© {new Date().getFullYear()} MiseOn · Todos os direitos reservados. CNPJ 63.310.253/0001-81</p>
+            <span className="text-slate-700">|</span>
+            <button
+              type="button"
+              onClick={abrirGerenciadorCookies}
+              className="inline-flex items-center gap-1 font-semibold text-slate-400 transition-colors hover:text-orange-400 hover:underline"
+            >
+              <Cookie size={12} className="text-orange-400" /> Gerenciar Cookies (LGPD)
+            </button>
+          </div>
           <p className="mt-1">
             MiseOn — Sistema para Hamburguerias, Lanchonetes, Pizzarias, Restaurantes e Deliveries. Cardápio Digital com QR Code, Integração iFood, Atendimento WhatsApp IA, KDS de Cozinha, PDV Frente de Caixa, Ficha Técnica e Emissão Fiscal NFC-e/NF-e.
           </p>

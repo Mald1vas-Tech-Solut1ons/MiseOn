@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { temPermissao, EVENT_COOKIE_UPDATED } from '../lib/cookieConsent';
 
 export interface SEOProps {
   title: string;
@@ -23,6 +24,23 @@ export function SEO({
   metaPixelId,
   ga4MeasurementId,
 }: SEOProps) {
+  const [consentState, setConsentState] = useState(() => ({
+    analiticos: temPermissao('analiticos'),
+    marketing: temPermissao('marketing'),
+  }));
+
+  useEffect(() => {
+    const handleConsentChange = () => {
+      setConsentState({
+        analiticos: temPermissao('analiticos'),
+        marketing: temPermissao('marketing'),
+      });
+    };
+
+    window.addEventListener(EVENT_COOKIE_UPDATED, handleConsentChange);
+    return () => window.removeEventListener(EVENT_COOKIE_UPDATED, handleConsentChange);
+  }, []);
+
   useEffect(() => {
     // 1. Atualizar Título da Página
     document.title = title;
@@ -78,10 +96,8 @@ export function SEO({
       scriptElement.textContent = JSON.stringify(schemaJson);
     }
 
-    // 7. Meta Pixel Injection (Zero custo 3rd party, rastreamento nativo de anúncios)
-    // O id entra num <script> inline: última linha de defesa do achado 05 da
-    // auditoria. Qualquer coisa fora do formato é descartada em silêncio.
-    if (metaPixelId && /^[0-9]{15,16}$/.test(metaPixelId.trim())) {
+    // 7. Meta Pixel Injection (Requer consentimento de marketing)
+    if (consentState.marketing && metaPixelId && /^[0-9]{15,16}$/.test(metaPixelId.trim())) {
       const pid = metaPixelId.trim();
       if (!document.getElementById('meta-pixel-script')) {
         const metaScript = document.createElement('script');
@@ -99,8 +115,8 @@ export function SEO({
       }
     }
 
-    // 8. Google Analytics 4 (GA4) Injection — mesma regra do Meta Pixel acima.
-    if (ga4MeasurementId && /^G-[A-Z0-9]{8,12}$/.test(ga4MeasurementId.trim())) {
+    // 8. Google Analytics 4 (GA4) Injection (Requer consentimento analítico)
+    if (consentState.analiticos && ga4MeasurementId && /^G-[A-Z0-9]{8,12}$/.test(ga4MeasurementId.trim())) {
       const gid = ga4MeasurementId.trim();
       if (!document.getElementById('ga4-script')) {
         const ga4Script = document.createElement('script');
@@ -120,7 +136,7 @@ export function SEO({
         document.head.appendChild(ga4ConfigScript);
       }
     }
-  }, [title, description, keywords, canonicalUrl, ogType, ogImage, schemaJson, metaPixelId, ga4MeasurementId]);
+  }, [title, description, keywords, canonicalUrl, ogType, ogImage, schemaJson, metaPixelId, ga4MeasurementId, consentState]);
 
   return null;
 }

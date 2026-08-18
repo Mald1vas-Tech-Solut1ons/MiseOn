@@ -1,7 +1,8 @@
-import { ShieldCheck, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Cookie } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SEO from '../../components/SEO';
 import { PAGE_META } from '../../data/pageMeta';
+import { abrirGerenciadorCookies } from '../../lib/cookieConsent';
 
 export default function Privacidade() {
   return (
@@ -138,12 +139,25 @@ export default function Privacidade() {
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">7. Cookies e Tecnologias Semelhantes</h2>
               <p>
-                Utilizamos cookies e armazenamento local estritamente necessários ao funcionamento da
-                plataforma (sessão de autenticação, preferências de tema e carrinho de compras no cardápio
-                digital). Não utilizamos cookies de rastreamento publicitário de terceiros. Você pode
-                gerenciar cookies nas configurações do seu navegador, ciente de que bloqueá-los pode
-                impedir o uso de partes essenciais da plataforma.
+                Utilizamos cookies e armazenamento local divididos em três categorias:
               </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                <li><strong>Essenciais:</strong> estritamente necessários para autenticação, sessão do carrinho e tema (sempre ativos).</li>
+                <li><strong>Analíticos:</strong> utilizados para estatísticas de navegação e aperfeiçoamento contínuo da plataforma (GA4).</li>
+                <li><strong>Marketing:</strong> utilizados para mensuração de anúncios e atribuição de conversões (Meta Pixel).</li>
+              </ul>
+              <p className="mt-3 text-sm">
+                Você pode gerenciar ou alterar suas preferências de cookies a qualquer momento utilizando o botão abaixo:
+              </p>
+              <div className="mt-4 rounded-xl border border-gray-200/80 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-800/50">
+                <button
+                  type="button"
+                  onClick={abrirGerenciadorCookies}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[var(--cor-primaria)] px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:brightness-110 active:scale-95"
+                >
+                  <Cookie size={16} /> Gerenciar Minhas Preferências de Cookies
+                </button>
+              </div>
             </section>
 
             <section>
