@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   MessageCircle, Loader2, Save, AlertTriangle, RefreshCw,
-  Unplug, Activity, Sparkles, Mail,
+  Unplug, Activity, Sparkles, Mail, PhoneOff,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../components/ui/Toast';
@@ -41,16 +41,71 @@ interface StatusResponse {
   eventos: EventoSaude[];
 }
 
-// Embedded Signup (Meta): fluxo self-service — o lojista conecta o WhatsApp
-// da loja SEM criar conta de desenvolvedor. config_id vem do app MiseOn
-// (App Dashboard → WhatsApp → Cadastro incorporado).
-const META_ONBOARD_URL =
-  'https://business.facebook.com/messaging/whatsapp/onboard/?' +
+/* ══════════════════════════════════════════════════════════════════
+   Embedded Signup (Meta) — Facebook Login for Business
+   ══════════════════════════════════════════════════════════════════
+   O lojista conecta o WhatsApp da loja SEM criar conta de desenvolvedor.
+   O SDK abre o popup oficial da Meta e devolve DUAS coisas:
+     • `code` no callback do FB.login → trocamos por token no servidor;
+     • `sessionInfo` via postMessage  → waba_id + phone_number_id.
+   Se o SDK não carregar (bloqueador de anúncios, rede corporativa), caímos
+   no dialog OAuth por redirect, que devolve o `code` na URL de volta.
+   ══════════════════════════════════════════════════════════════════ */
+const META_APP_ID = '1409543307655107';
+const META_CONFIG_ID = '1810926466545925'; // App Dashboard → WhatsApp → Cadastro incorporado
+const META_API_VERSION = 'v21.0';
+const META_EXTRAS = { setup: {}, featureType: '', sessionInfoVersion: '3' };
+
+// Precisa estar em "URIs de redirecionamento OAuth válidos" no app da Meta.
+const redirectUri = () => `${window.location.origin}/admin/whatsapp`;
+
+declare global {
+  interface Window { FB?: any }
+}
+
+// Dados que a Meta manda por postMessage durante o Embedded Signup.
+interface SessionInfo {
+  waba_id?: string;
+  phone_number_id?: string;
+}
+
+// Carrega o SDK do Facebook uma única vez e devolve o FB já inicializado.
+function carregarFbSdk(): Promise<any> {
+  if (window.FB) return Promise.resolve(window.FB);
+  return new Promise((resolve, reject) => {
+    const iniciar = () => {
+      if (!window.FB) return reject(new Error('SDK do Facebook indisponível.'));
+      window.FB.init({ appId: META_APP_ID, cookie: true, xfbml: false, version: META_API_VERSION });
+      resolve(window.FB);
+    };
+    const jaNoDom = document.getElementById('facebook-jssdk') as HTMLScriptElement | null;
+    if (jaNoDom) {
+      jaNoDom.addEventListener('load', iniciar);
+      jaNoDom.addEventListener('error', () => reject(new Error('SDK do Facebook não carregou.')));
+      return;
+    }
+    const script = document.createElement('script');
+    script.id = 'facebook-jssdk';
+    script.src = 'https://connect.facebook.net/pt_BR/sdk.js';
+    script.async = true;
+    script.defer = true;
+    script.crossOrigin = 'anonymous';
+    script.onload = iniciar;
+    script.onerror = () => reject(new Error('SDK do Facebook não carregou.'));
+    document.head.appendChild(script);
+  });
+}
+
+// Plano B: mesmo fluxo, porém por redirect — volta em /admin/whatsapp?code=…
+const urlDialogOAuth = () =>
+  `https://www.facebook.com/${META_API_VERSION}/dialog/oauth?` +
   new URLSearchParams({
-    app_id: '1409543307655107',
-    config_id: '1810926466545925',
-    extras: JSON.stringify({ version: 'v4', sessionInfoVersion: '3', featureType: 'whatsapp_business_app_onboarding' }),
-    redirect_uri: 'https://miseon.app.br/admin/whatsapp',
+    client_id: META_APP_ID,
+    config_id: META_CONFIG_ID,
+    response_type: 'code',
+    override_default_response_type: 'true',
+    redirect_uri: redirectUri(),
+    extras: JSON.stringify(META_EXTRAS),
   }).toString();
 
 // Mascara o número para exibição: "+1 555 ••••-1792"
@@ -73,6 +128,11 @@ export default function WhatsApp() {
   const [testando, setTestando] = useState(false);
   const [desconectando, setDesconectando] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
+  const [trocandoNumero, setTrocandoNumero] = useState(false);
+  const [devolvendo, setDevolvendo] = useState(false);
+  // sessionInfo do Embedded Signup: chega por postMessage ANTES do callback
+  // do FB.login, então guardamos em ref para mandar junto com o code.
+  const sessionInfo = useRef<SessionInfo>({});
 
   const [iaAtivo, setIaAtivo] = useState(false);
   const [templatesAtivo, setTemplatesAtivo] = useState(false);
@@ -124,7 +184,7 @@ export default function WhatsApp() {
       return;
     }
     setFinalizando(true);
-    chamar({ acao: 'trocar_codigo', loja_id: lojaId, code })
+    chamar({ acao: 'trocar_codigo', loja_id: lojaId, code, redirect_uri: redirectUri() })
       .then((data) => {
         toast(`WhatsApp conectado: ${data.verified_name ?? data.display_phone ?? 'número verificado'} 🎉`, 'sucesso');
       })
@@ -134,6 +194,68 @@ export default function WhatsApp() {
         await carregar();
       });
   }, [chamar, lojaId, carregar, toast]);
+
+  // A Meta publica o andamento do Embedded Signup por postMessage.
+  // É daqui que saem waba_id e phone_number_id do número recém-conectado.
+  useEffect(() => {
+    const aoReceber = (ev: MessageEvent) => {
+      if (!/^https:\/\/(www|web|business)\.facebook\.com$/.test(ev.origin)) return;
+      try {
+        const msg = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+        if (msg?.type !== 'WA_EMBEDDED_SIGNUP') return;
+        if (msg.event === 'FINISH' || msg.event === 'FINISH_ONLY_WABA' || msg.event === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING') {
+          sessionInfo.current = {
+            waba_id: msg.data?.waba_id,
+            phone_number_id: msg.data?.phone_number_id,
+          };
+        }
+      } catch { /* mensagem que não é do Embedded Signup */ }
+    };
+    window.addEventListener('message', aoReceber);
+    return () => window.removeEventListener('message', aoReceber);
+  }, []);
+
+  // Conectar com Facebook: popup do SDK e, se ele não carregar, redirect.
+  const conectarComFacebook = async () => {
+    setFinalizando(true);
+    sessionInfo.current = {};
+    let FB: any;
+    try {
+      FB = await carregarFbSdk();
+    } catch {
+      // sem SDK (bloqueador/rede) → fluxo por redirect, que volta com ?code=
+      window.location.href = urlDialogOAuth();
+      return;
+    }
+    try {
+      const resposta: any = await new Promise((resolve) => {
+        FB.login(resolve, {
+          config_id: META_CONFIG_ID,
+          response_type: 'code',
+          override_default_response_type: true,
+          extras: META_EXTRAS,
+        });
+      });
+      const code = resposta?.authResponse?.code;
+      if (!code) {
+        toast('Conexão cancelada na janela da Meta. Nada foi alterado.', 'erro');
+        return;
+      }
+      const data = await chamar({
+        acao: 'trocar_codigo',
+        loja_id: lojaId,
+        code,
+        ...sessionInfo.current,
+      });
+      toast(`WhatsApp conectado: ${data.verified_name ?? data.display_phone ?? 'número verificado'} 🎉`, 'sucesso');
+      setTrocandoNumero(false);
+      await carregar();
+    } catch (e) {
+      toast((e as Error).message, 'erro');
+    } finally {
+      setFinalizando(false);
+    }
+  };
 
   const testar = async () => {
     setTestando(true);
@@ -149,18 +271,52 @@ export default function WhatsApp() {
 
   const desconectar = async () => {
     const ok = window.confirm(
-      'Desconectar o WhatsApp desta loja?\n\nO atendimento automático para de responder imediatamente. Você poderá reconectar depois com as mesmas credenciais.'
+      `Desconectar o WhatsApp ${mascararTelefone(conexao?.display_phone ?? null)} desta loja?\n\n` +
+      '• A Meta para de entregar as mensagens deste número ao MiseOn;\n' +
+      '• o atendimento automático com IA é desligado na hora;\n' +
+      '• o número volta a ser só do dono — nada é respondido automaticamente.\n\n' +
+      'Você pode reconectar quando quiser pelo botão "Conectar com Facebook".'
     );
     if (!ok) return;
     setDesconectando(true);
     try {
-      await chamar({ acao: 'desconectar', loja_id: lojaId });
-      toast('WhatsApp desconectado.', 'sucesso');
+      const data = await chamar({ acao: 'desconectar', loja_id: lojaId });
+      setTrocandoNumero(false);
+      if (data?.desinscrito === false && data?.aviso) {
+        // desligou de verdade aqui, mas a Meta não confirmou a remoção do app
+        toast(data.aviso, 'erro');
+      } else {
+        toast('WhatsApp desconectado. Este número não recebe nem responde mais pelo MiseOn.', 'sucesso');
+      }
       await carregar();
     } catch (e) {
       toast('Erro ao desconectar: ' + (e as Error).message, 'erro');
     }
     setDesconectando(false);
+  };
+
+  // Devolver o número ao WhatsApp comum: desconectar sozinho não faz isso —
+  // enquanto o número estiver no Cloud API, o app normal recusa o cadastro.
+  const devolverNumero = async () => {
+    const numero = mascararTelefone(conexao?.display_phone ?? null);
+    const ok = window.confirm(
+      `Devolver o número ${numero} ao WhatsApp comum?\n\n` +
+      '• O número sai da conta do WhatsApp Business API na Meta;\n' +
+      '• o MiseOn para de receber e de responder por ele;\n' +
+      '• o dono do número volta a usar o WhatsApp normal (instalar o app e confirmar o SMS).\n\n' +
+      'Para usar este número no MiseOn de novo será preciso refazer a conexão do zero.'
+    );
+    if (!ok) return;
+    setDevolvendo(true);
+    try {
+      const data = await chamar({ acao: 'devolver_numero', loja_id: lojaId });
+      setTrocandoNumero(false);
+      toast(data?.proximo_passo ?? 'Número devolvido ao WhatsApp comum.', 'sucesso');
+      await carregar();
+    } catch (e) {
+      toast((e as Error).message, 'erro');
+    }
+    setDevolvendo(false);
   };
 
   const salvarConfig = async () => {
@@ -230,6 +386,11 @@ export default function WhatsApp() {
                       {new Date(conexao.conectado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   )}
+                  <p className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-500 dark:bg-white/5 dark:text-gray-400">
+                    <b>Desconectar</b> para o atendimento automático na hora, mas o número segue
+                    reservado ao WhatsApp Business API. Para o dono voltar a usá-lo no
+                    <b> WhatsApp comum</b>, use <b>Devolver número</b>.
+                  </p>
                   {conexao.ultimo_erro && (
                     <p className="mt-1 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:bg-red-900/20 dark:text-red-400">
                       Último erro: {conexao.ultimo_erro}
@@ -253,12 +414,28 @@ export default function WhatsApp() {
                   Testar conexão
                 </button>
                 <button
+                  onClick={() => setTrocandoNumero((v) => !v)}
+                  className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-black text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-200 dark:hover:bg-white/5"
+                >
+                  <MessageCircle size={15} />
+                  {trocandoNumero ? 'Cancelar troca' : 'Trocar de número'}
+                </button>
+                <button
                   onClick={desconectar}
-                  disabled={desconectando}
+                  disabled={desconectando || devolvendo}
                   className="flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-xs font-black text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900/40 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-900/10"
                 >
                   {desconectando ? <Loader2 size={15} className="animate-spin" /> : <Unplug size={15} />}
                   Desconectar
+                </button>
+                <button
+                  onClick={devolverNumero}
+                  disabled={devolvendo || desconectando}
+                  title="Remove o número da Meta para ele voltar a funcionar no WhatsApp comum"
+                  className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-black text-white shadow-md shadow-red-600/20 transition hover:bg-red-700 disabled:opacity-50"
+                >
+                  {devolvendo ? <Loader2 size={15} className="animate-spin" /> : <PhoneOff size={15} />}
+                  Devolver número
                 </button>
               </div>
             )}
@@ -275,7 +452,7 @@ export default function WhatsApp() {
         </div>
 
         {/* ── Conexão principal: Embedded Signup (Meta) ── */}
-        {status !== 'CONECTADO' && (
+        {(status !== 'CONECTADO' || trocandoNumero) && (
           <div className="relative overflow-hidden rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#052e16] p-6 shadow-lg">
             <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl" />
             <div className="relative flex flex-col items-center gap-3 text-center">
@@ -288,13 +465,14 @@ export default function WhatsApp() {
                 escolhe o número de WhatsApp da sua loja e pronto —
                 <b className="text-white"> sem criar conta de desenvolvedor e sem colar código nenhum</b>.
               </p>
-              <a
-                href={META_ONBOARD_URL}
-                className="mt-1 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-['Sora'] text-sm font-black text-emerald-950 shadow-xl transition hover:scale-105 hover:bg-emerald-50"
+              <button
+                onClick={conectarComFacebook}
+                disabled={finalizando}
+                className="mt-1 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-['Sora'] text-sm font-black text-emerald-950 shadow-xl transition hover:scale-105 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {finalizando ? <Loader2 size={17} className="animate-spin" /> : <MessageCircle size={17} />}
                 {finalizando ? 'Finalizando conexão…' : 'Conectar com Facebook'}
-              </a>
+              </button>
               <span className="text-[11px] text-emerald-200/70">
                 Processo oficial da Meta · leva menos de 2 minutos
               </span>

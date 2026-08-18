@@ -44,6 +44,13 @@ function gerarVerifyToken(): string {
   return `miseon-wa-${hex}`;
 }
 
+// PIN de 6 dígitos exigido pelo POST /{phone_number_id}/register do Cloud API
+function gerarPin(): string {
+  const n = new Uint32Array(1);
+  crypto.getRandomValues(n);
+  return String(n[0] % 1000000).padStart(6, "0");
+}
+
 // Extrai mensagem legível de um erro da Graph API
 function msgGraph(data: any): string {
   return data?.error?.message ?? "Erro desconhecido na API da Meta";
@@ -108,7 +115,7 @@ serve(async (req) => {
       if (!acesso) return erro("Você não tem acesso a esta loja", 403);
 
       // ações que alteram a conexão exigem admin da loja
-      if (["conectar", "atualizar_token", "desconectar", "testar", "trocar_codigo"].includes(acao) && acesso.papel !== "admin") {
+      if (["conectar", "atualizar_token", "desconectar", "devolver_numero", "testar", "trocar_codigo"].includes(acao) && acesso.papel !== "admin") {
         return erro("Só o admin da loja pode gerenciar a conexão do WhatsApp", 403);
       }
 
@@ -125,6 +132,84 @@ serve(async (req) => {
 
     const buscarConexao = () =>
       admin.from("whatsapp_conexoes").select("*").eq("loja_id", loja_id).maybeSingle();
+
+    // Desliga a loja de verdade — usado por `desconectar` e por `devolver_numero`:
+    //   1. a Meta para de entregar mensagens (DELETE /{waba}/subscribed_apps),
+    //      confirmado com um GET em vez de "melhor esforço" mudo;
+    //   2. a IA da loja é desligada (nada responde por nenhum canal);
+    //   3. a linha some de whatsapp_conexoes — sem ela o webhook descarta o
+    //      evento ("loja desconhecida") e o whatsapp-send recusa qualquer envio.
+    const desligarConexao = async (conexao: {
+      waba_id: string | null;
+      access_token: string;
+      phone_number_id: string;
+    }) => {
+      // (1) desinscreve o app da WABA — tenta com o token da loja e, se ele já
+      //     não valer, com o token de sistema da plataforma (quando existir).
+      const tokensParaTentar = [
+        conexao.access_token,
+        Deno.env.get("WHATSAPP_ACCESS_TOKEN") ?? "",
+      ].filter((t): t is string => !!t);
+
+      let desinscrito = false;
+      let detalheFalha = "";
+      for (const t of tokensParaTentar) {
+        try {
+          const delRes = await fetch(`${GRAPH}/${conexao.waba_id}/subscribed_apps`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${t}` },
+          });
+          const delData = await delRes.json().catch(() => ({}));
+          if (delRes.ok && delData?.success !== false) {
+            // confirma de fato: o app MiseOn não pode mais aparecer na lista
+            const listaRes = await fetch(`${GRAPH}/${conexao.waba_id}/subscribed_apps`, {
+              headers: { Authorization: `Bearer ${t}` },
+            });
+            const lista = await listaRes.json().catch(() => ({}));
+            const apps: Array<{ whatsapp_business_api_data?: { id?: string } }> = lista?.data ?? [];
+            const aindaInscrito = apps.some(
+              (a) => String(a?.whatsapp_business_api_data?.id ?? "") === META_APP_ID,
+            );
+            if (!listaRes.ok) {
+              // sem conseguir listar, confiamos no sucesso do DELETE
+              desinscrito = true;
+              break;
+            }
+            desinscrito = !aindaInscrito;
+            if (desinscrito) break;
+            detalheFalha = "a Meta aceitou o pedido mas o app continua inscrito na conta.";
+          } else {
+            detalheFalha = msgGraph(delData);
+          }
+        } catch (e) {
+          detalheFalha = String((e as Error)?.message ?? e);
+        }
+      }
+      if (!desinscrito) {
+        console.warn(`desligarConexao: WABA ${conexao.waba_id} não confirmou a desinscrição: ${detalheFalha}`);
+      }
+
+      // (2) desliga a automação da loja — nenhum canal responde sozinho
+      const { error: eLoja } = await admin
+        .from("lojas")
+        .update({ whatsapp_ia_ativo: false, whatsapp_templates_ativo: false })
+        .eq("id", loja_id);
+      if (eLoja) console.warn("desligarConexao: falha ao desligar a IA da loja:", eLoja.message);
+
+      // (3) apaga a conexão — a partir daqui o webhook descarta tudo desse número
+      const { error: eDel } = await admin
+        .from("whatsapp_conexoes")
+        .delete()
+        .eq("loja_id", loja_id);
+      if (eDel) throw eDel;
+
+      console.log(
+        `desligarConexao: loja ${loja_id} desligada — número ${conexao.phone_number_id}, ` +
+        `desinscrição na Meta: ${desinscrito ? "confirmada" : "NÃO confirmada"}`,
+      );
+
+      return { desinscrito, detalheFalha };
+    };
 
     // ── status ─────────────────────────────────────────────────────────────
     if (acao === "status") {
@@ -456,48 +541,124 @@ serve(async (req) => {
     }
 
     // ── desconectar ────────────────────────────────────────────────────────
+    // Para o atendimento na hora. O número continua registrado no Cloud API —
+    // para devolvê-lo ao WhatsApp comum existe a ação `devolver_numero`.
     if (acao === "desconectar") {
       const { data: conexao } = await buscarConexao();
-      if (!conexao) return json({ ok: true }); // já estava desconectado
+      if (!conexao) return json({ ok: true, desinscrito: true }); // já estava desconectado
 
-      // melhor esforço: desinscreve o app da WABA antes de apagar
-      try {
-        await fetch(`${GRAPH}/${conexao.waba_id}/subscribed_apps`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${conexao.access_token}` },
-        });
-      } catch (e) {
-        console.warn("desconectar: falha ao desinscrever da WABA (ignorado):", e);
+      const { desinscrito, detalheFalha } = await desligarConexao(conexao);
+
+      return json({
+        ok: true,
+        desinscrito,
+        aviso: desinscrito
+          ? null
+          : "O MiseOn parou de receber e de responder as mensagens deste número agora. " +
+            "Só não consegui confirmar com a Meta a remoção do app da conta do WhatsApp Business " +
+            `(${detalheFalha || "sem detalhe"}). Para remover também do lado da Meta: Configurações do ` +
+            "Business → Contas do WhatsApp → selecione a conta → Apps → remover o MiseOn.",
+      });
+    }
+
+    // ── devolver_numero ────────────────────────────────────────────────────
+    // Desconectar sozinho NÃO devolve o número ao WhatsApp comum: enquanto ele
+    // estiver registrado no Cloud API, o app normal recusa o cadastro. Aqui
+    // removemos o número da WABA (DELETE /{phone_number_id}) e só então
+    // desligamos a loja — assim o dono pode reinstalar o WhatsApp e registrar
+    // o número por SMS de novo.
+    if (acao === "devolver_numero") {
+      const { data: conexao } = await buscarConexao();
+      if (!conexao) return erro("Esta loja não tem nenhum número conectado.");
+
+      // (a) remove o número da conta do WhatsApp Business na Meta.
+      //     Se isto falhar não apagamos nada: o lojista precisa saber que o
+      //     número continua preso ao Cloud API.
+      const tokens = [
+        conexao.access_token,
+        Deno.env.get("WHATSAPP_ACCESS_TOKEN") ?? "",
+      ].filter((t): t is string => !!t);
+
+      let removido = false;
+      let detalhe = "";
+      for (const t of tokens) {
+        try {
+          const res = await fetch(`${GRAPH}/${conexao.phone_number_id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${t}` },
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data?.success !== false) {
+            removido = true;
+            break;
+          }
+          detalhe = msgGraph(data);
+        } catch (e) {
+          detalhe = String((e as Error)?.message ?? e);
+        }
       }
 
-      const { error: eDel } = await admin
-        .from("whatsapp_conexoes")
-        .delete()
-        .eq("loja_id", loja_id);
-      if (eDel) throw eDel;
+      if (!removido) {
+        console.error(
+          `devolver_numero: Meta recusou remover ${conexao.phone_number_id}: ${detalhe}`,
+        );
+        return erro(
+          "Não consegui remover o número da conta do WhatsApp Business na Meta, então parei " +
+          "aqui — a conexão continua como estava, sem meio-caminho. Você pode remover à mão em " +
+          "Configurações do Business → Contas do WhatsApp → Números de telefone → remover o número, " +
+          `e depois clicar em Desconectar. (Detalhe da Meta: ${detalhe})`,
+        );
+      }
 
-      return json({ ok: true });
+      // (b) número já saiu da WABA — agora desliga a loja
+      const { desinscrito } = await desligarConexao(conexao);
+
+      console.log(
+        `devolver_numero: loja ${loja_id} devolveu o número ${conexao.phone_number_id} ` +
+        `(${conexao.display_phone ?? "?"}) — desinscrição: ${desinscrito ? "confirmada" : "NÃO confirmada"}`,
+      );
+
+      return json({
+        ok: true,
+        removido: true,
+        desinscrito,
+        display_phone: conexao.display_phone ?? null,
+        proximo_passo:
+          "Número liberado do WhatsApp Business API. Para voltar a usá-lo no WhatsApp comum: " +
+          "instale o WhatsApp no celular, informe o número e confirme o código que chegar por SMS. " +
+          "Pode levar alguns minutos até a Meta liberar.",
+      });
     }
 
     // ── trocar_codigo (Embedded Signup — lojista clicou "Conectar com Facebook") ──
     // O webhook já existe no nível do APP MiseOn (configurado uma vez no painel
-    // da Meta); aqui só descobrimos WABA + número, inscrevemos o app na WABA
-    // e gravamos a conexão da loja.
+    // da Meta); aqui só descobrimos WABA + número, inscrevemos o app na WABA,
+    // registramos o número no Cloud API e gravamos a conexão da loja.
+    //
+    // phone_number_id/waba_id chegam do sessionInfo do Embedded Signup (fonte
+    // mais confiável). Sem eles — fluxo de redirect — caímos no debug_token +
+    // listagem de números da WABA.
     if (acao === "trocar_codigo") {
-      const { code } = body;
+      const { code, redirect_uri } = body;
+      const phoneDoSession = body.phone_number_id ? String(body.phone_number_id) : null;
+      const wabaDoSession = body.waba_id ? String(body.waba_id) : null;
       if (!code) return erro("Código de autorização ausente.");
       if (!META_APP_ID || !META_APP_SECRET) {
         console.error("trocar_codigo: META_APP_ID/META_APP_SECRET ausentes nos secrets.");
         return erro("A conexão com Facebook ainda não está habilitada. Fale com o suporte MiseOn.", 503);
       }
 
-      // (a) troca o code pelo access token da Meta
+      // (a) troca o code pelo access token da Meta.
+      //     No fluxo de REDIRECT a Meta exige o mesmo redirect_uri usado no
+      //     dialog; no fluxo do SDK (popup) o parâmetro não vai.
+      const paramsTroca: Record<string, string> = {
+        client_id: META_APP_ID,
+        client_secret: META_APP_SECRET,
+        code: String(code),
+      };
+      if (redirect_uri) paramsTroca.redirect_uri = String(redirect_uri);
       const trocaRes = await fetch(
-        `${GRAPH}/oauth/access_token?` + new URLSearchParams({
-          client_id: META_APP_ID,
-          client_secret: META_APP_SECRET,
-          code: String(code),
-        }),
+        `${GRAPH}/oauth/access_token?` + new URLSearchParams(paramsTroca),
       );
       const troca = await trocaRes.json().catch(() => ({}));
       if (!trocaRes.ok || !troca.access_token) {
@@ -510,46 +671,61 @@ serve(async (req) => {
       }
       const token = String(troca.access_token);
 
-      // (b) descobre a WABA autorizada via debug_token (granular scopes)
-      const dbgRes = await fetch(
-        `${GRAPH}/debug_token?input_token=${encodeURIComponent(token)}`,
-        { headers: { Authorization: `Bearer ${META_APP_ID}|${META_APP_SECRET}` } },
-      );
-      const dbg = await dbgRes.json().catch(() => ({}));
-      const scopes: Array<{ scope?: string; target_ids?: string[] }> = dbg?.data?.granular_scopes ?? [];
-      const wabaId = scopes
-        .filter((s) => String(s.scope ?? "").startsWith("whatsapp_business"))
-        .flatMap((s) => s.target_ids ?? [])[0];
+      // (b) descobre a WABA: sessionInfo primeiro, debug_token como plano B
+      let wabaId: string | null = wabaDoSession;
       if (!wabaId) {
-        console.error("trocar_codigo: nenhuma WABA nos granular_scopes:", JSON.stringify(scopes));
-        return erro(
-          "Não encontrei uma conta do WhatsApp Business autorizada. " +
-          "Refaça a conexão e autorize o acesso ao WhatsApp Business.",
+        const dbgRes = await fetch(
+          `${GRAPH}/debug_token?input_token=${encodeURIComponent(token)}`,
+          { headers: { Authorization: `Bearer ${META_APP_ID}|${META_APP_SECRET}` } },
         );
+        const dbg = await dbgRes.json().catch(() => ({}));
+        const scopes: Array<{ scope?: string; target_ids?: string[] }> = dbg?.data?.granular_scopes ?? [];
+        wabaId = scopes
+          .filter((s) => String(s.scope ?? "").startsWith("whatsapp_business"))
+          .flatMap((s) => s.target_ids ?? [])[0] ?? null;
+        if (!wabaId) {
+          console.error("trocar_codigo: nenhuma WABA nos granular_scopes:", JSON.stringify(scopes));
+          return erro(
+            "Não encontrei uma conta do WhatsApp Business autorizada. " +
+            "Refaça a conexão e autorize o acesso ao WhatsApp Business.",
+          );
+        }
       }
 
-      // (c) pega o número de telefone da WABA
-      const telRes = await fetch(
-        `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const tel = await telRes.json().catch(() => ({}));
-      const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string }> =
-        tel?.data ?? [];
-      if (!numeros.length) {
-        console.error("trocar_codigo: WABA sem números:", JSON.stringify(tel));
-        return erro("Sua conta do WhatsApp Business não tem um número registrado. Adicione um número e tente novamente.");
+      // (c) descobre o número: sessionInfo primeiro, listagem da WABA como plano B
+      let numero: { id: string; display_phone_number?: string; verified_name?: string } | null = null;
+      if (phoneDoSession) {
+        const numRes = await fetch(
+          `${GRAPH}/${phoneDoSession}?fields=id,display_phone_number,verified_name`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const num = await numRes.json().catch(() => ({}));
+        if (numRes.ok && num?.id) numero = num;
+        else console.warn("trocar_codigo: phone_number_id do sessionInfo não respondeu:", msgGraph(num));
       }
+      if (!numero) {
+        const telRes = await fetch(
+          `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const tel = await telRes.json().catch(() => ({}));
+        const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string }> =
+          tel?.data ?? [];
+        if (!numeros.length) {
+          console.error("trocar_codigo: WABA sem números:", JSON.stringify(tel));
+          return erro("Sua conta do WhatsApp Business não tem um número registrado. Adicione um número e tente novamente.");
+        }
 
-      // RN: nunca conectar o NÚMERO DE TESTE da Meta (+1 555-xxx) quando a WABA
-      // já tem um número real — o teste só existe no console de desenvolvedor.
-      const ehNumeroTeste = (n: { display_phone_number?: string }) =>
-        String(n.display_phone_number ?? "").replace(/\D/g, "").startsWith("1555");
-      const reais = numeros.filter((n) => !ehNumeroTeste(n));
-      if (reais.length > 1) {
-        console.warn("trocar_codigo: WABA com vários números reais — usando o primeiro:", JSON.stringify(reais));
+        // RN: nunca conectar o NÚMERO DE TESTE da Meta (+1 555-xxx) quando a WABA
+        // já tem um número real — o teste só existe no console de desenvolvedor.
+        const ehNumeroTeste = (n: { display_phone_number?: string }) =>
+          String(n.display_phone_number ?? "").replace(/\D/g, "").startsWith("1555");
+        const reais = numeros.filter((n) => !ehNumeroTeste(n));
+        if (reais.length > 1) {
+          console.warn("trocar_codigo: WABA com vários números reais — usando o primeiro:", JSON.stringify(reais));
+        }
+        numero = reais[0] ?? numeros[0];
       }
-      const numero = reais[0] ?? numeros[0];
 
       // (d) o número não pode estar conectado a outra loja (RN: 1 número = 1 loja)
       const { data: emUso } = await admin
@@ -573,7 +749,26 @@ serve(async (req) => {
         return erro(`A Meta não ativou o recebimento de mensagens. Tente novamente. (Detalhe da Meta: ${detalhe})`);
       }
 
-      // (f) grava a conexão já como CONECTADO
+      // (f) registra o número no Cloud API (melhor esforço).
+      //     Sem o register o envio falha com "Phone number not registered"; se o
+      //     número já estiver registrado a Meta devolve erro que não deve travar
+      //     a conexão — por isso só logamos o aviso.
+      const pin = gerarPin();
+      let pinSalvo: string | null = null;
+      try {
+        const regRes = await fetch(`${GRAPH}/${numero.id}/register`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ messaging_product: "whatsapp", pin }),
+        });
+        const regData = await regRes.json().catch(() => ({}));
+        if (regRes.ok && regData?.success === true) pinSalvo = pin;
+        else console.warn("trocar_codigo: register do número não concluiu:", msgGraph(regData));
+      } catch (e) {
+        console.warn("trocar_codigo: register do número falhou (ignorado):", e);
+      }
+
+      // (g) grava a conexão já como CONECTADO
       //     app_secret = segredo do app MiseOn: é ele que valida a assinatura
       //     X-Hub-Signature-256 dos webhooks (RN-04), pois o webhook é do nosso app.
       const { error: eUpsert } = await admin.from("whatsapp_conexoes").upsert({
@@ -581,14 +776,20 @@ serve(async (req) => {
         phone_number_id: String(numero.id),
         waba_id: String(wabaId),
         display_phone: numero.display_phone_number ?? null,
+        verified_name: numero.verified_name ?? null,
         access_token: token,
         app_secret: META_APP_SECRET,
         verify_token: gerarVerifyToken(), // compat: handshake já ocorre no nível do app
+        pin_registro: pinSalvo,
         status: "CONECTADO",
         conectado_em: new Date().toISOString(),
         ultimo_erro: null,
       });
       if (eUpsert) throw eUpsert;
+
+      console.log(
+        `trocar_codigo: loja ${loja_id} conectada — waba ${wabaId}, numero ${numero.id} (${numero.display_phone_number ?? "?"})`,
+      );
 
       return json({
         ok: true,
