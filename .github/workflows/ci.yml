@@ -36,8 +36,8 @@ jobs:
       - name: Deploy Vercel (produção)
         run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID || 'team_eEi5jUcSgsZDia5ES37Fa7YI' }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID || 'prj_jyG5U3oewYe3MLKVZTVngpIBvw7Y' }}
 
   deploy-edge-functions:
     needs: ci
