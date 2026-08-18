@@ -1,0 +1,5 @@
+-- Ver função aplicada em produção: fn_importar_nfce.
+-- Importa o cupom fiscal para o estoque em UMA transação: cria os insumos
+-- novos, lança a ENTRADA (que abre o lote PEPS), soma em quantidade_atual e
+-- grava o De-Para. Antes eram três idas soltas do navegador, sem ninguém somar
+-- o saldo — a nota "importava" e o estoque continuava igual.

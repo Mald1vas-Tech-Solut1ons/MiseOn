@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { ShoppingBag, ArrowRight, CheckCircle2, AlertTriangle, X, Loader2, Building2, Calendar, DollarSign } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, fmt } from '../../types';
+import { UNIDADES } from '../../lib/unidades';
 
 interface ItemLidoNFCe {
   num_item: number;
@@ -168,92 +169,56 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
     setSalvando(true);
 
     try {
-      // 1. Criar insumos marcados para criação rápida
-      const novosInserts = [];
-      for (let i = 0; i < linhas.length; i++) {
-        const l = linhas[i];
-        if (l.criarNovo || !l.insumoId) {
-          novosInserts.push({
-            loja_id: lojaId,
+      // Uma unica chamada transacional. Antes eram tres idas soltas (cria
+      // insumo, lanca movimentacao, grava De-Para) e qualquer falha no meio
+      // deixava insumo criado sem entrada de estoque. E faltava o passo que
+      // realmente importa: somar em insumos.quantidade_atual — sem ele a nota
+      // "importava" e o saldo continuava igual.
+      const itens = linhas
+        .map((l) => {
+          const insumoExistente = !l.criarNovo && l.insumoId ? l.insumoId : null;
+          return {
+            criar_novo: !insumoExistente,
+            insumo_id: insumoExistente,
             nome: l.nomeNovoInsumo.trim() || l.itemNota.descricao,
-            unidade_medida: l.unidadeInsumo || 'un',
-            quantidade_atual: 0,
-            estoque_minimo: 0,
-            preco_embalagem: l.itemNota.valor_total,
-            qtd_embalagem: l.itemNota.qtd * (l.fatorConversao || 1),
-            ativo: true
-          });
-        }
+            unidade: (insumoExistente ? porId.get(insumoExistente)?.unidade_medida : l.unidadeInsumo) || 'un',
+            qtd_nota: Number(l.itemNota.qtd) || 0,
+            fator: Number(l.fatorConversao) || 1,
+            custo_total: Number(l.itemNota.valor_total) || 0,
+            chave_depara: chaveDoItem(l.itemNota, dadosNota.emitente?.cnpj),
+            descricao_nota: l.itemNota.descricao,
+            gtin: l.itemNota.gtin || null,
+          };
+        })
+        .filter((i) => i.qtd_nota * i.fator > 0);
+
+      if (itens.length === 0) {
+        setErro('Nenhum item com quantidade válida para lançar.');
+        return;
       }
 
-      const novosCriadosMap = new Map<number, string>();
-      if (novosInserts.length > 0) {
-        const { data: criados, error: errCriar } = await supabase
-          .from('insumos')
-          .insert(novosInserts)
-          .select('id, nome');
-        
-        if (errCriar) throw errCriar;
-        
-        // Mapear IDs criados
-        let idxNovos = 0;
-        for (let i = 0; i < linhas.length; i++) {
-          if (linhas[i].criarNovo || !linhas[i].insumoId) {
-            novosCriadosMap.set(i, criados[idxNovos].id);
-            idxNovos++;
-          }
-        }
-      }
+      const { data: resultado, error: errImportar } = await supabase.rpc('fn_importar_nfce', {
+        p_loja_id: lojaId,
+        p_chave: dadosNota.chave || '',
+        p_emitente: dadosNota.emitente?.razao_social || '',
+        p_itens: itens,
+      });
 
-      // 2. Gravar De-Para e Entradas de Estoque
-      const registrosDepara = [];
-      const lancamentosEstoque = [];
+      if (errImportar) throw errImportar;
 
-      for (let i = 0; i < linhas.length; i++) {
-        const l = linhas[i];
-        const insumoIdFinal = l.criarNovo ? novosCriadosMap.get(i)! : l.insumoId;
+      const lancados = (resultado as { itens_lancados?: number } | null)?.itens_lancados ?? itens.length;
+      const criados = (resultado as { insumos_criados?: number } | null)?.insumos_criados ?? 0;
+      const avisoDepara = criados > 0 ? ` ${criados} insumo(s) criado(s).` : '';
 
-        if (!insumoIdFinal) continue;
-
-        const chaveItem = chaveDoItem(l.itemNota, dadosNota.emitente?.cnpj);
-
-        // Registro De-Para para guardar na memória da loja
-        registrosDepara.push({
-          loja_id: lojaId,
-          chave_item_fornecedor: chaveItem,
-          descricao_nota: l.itemNota.descricao,
-          gtin_nota: l.itemNota.gtin || null,
-          insumo_id: insumoIdFinal,
-          fator_conversao: l.fatorConversao || 1
-        });
-
-        // Entrar com o estoque real na unidade do insumo
-        const qtdBaseEntrada = Number(l.itemNota.qtd) * (l.fatorConversao || 1);
-
-        lancamentosEstoque.push({
-          loja_id: lojaId,
-          insumo_id: insumoIdFinal,
-          tipo: 'ENTRADA',
-          quantidade: qtdBaseEntrada,
-          custo_total: l.itemNota.valor_total,
-          observacao: `Importado via NFC-e ${dadosNota.chave.slice(0, 10)}... (${dadosNota.emitente.razao_social})`
-        });
-      }
-
-      // Upsert do histórico De-Para
-      if (registrosDepara.length > 0) {
-        await supabase.from('compras_depara_itens').upsert(registrosDepara, { onConflict: 'loja_id,chave_item_fornecedor' });
-      }
-
-      // Lançar movimentações de estoque (dispara trigger de PEPS e atualiza quantidade_atual)
-      for (const mov of lancamentosEstoque) {
-        await supabase.from('movimentacoes_estoque').insert(mov);
-      }
-
-      onSucesso(`Importação concluída! ${linhas.length} itens lançados no estoque.`);
+      onSucesso(`Importação concluída! ${lancados} itens lançados no estoque.${avisoDepara}`);
     } catch (e) {
       console.error(e);
-      setErro(e instanceof Error ? e.message : 'Falha ao processar importação da nota.');
+      // Erro do Supabase é objeto simples, não Error: com `instanceof` a tela
+      // mostrava sempre "Falha ao processar" e escondia a causa real.
+      const detalhe =
+        (e as { message?: string; hint?: string; details?: string } | null)?.message ??
+        (typeof e === 'string' ? e : '');
+      setErro(detalhe ? `Falha ao importar: ${detalhe}` : 'Falha ao processar importação da nota.');
     } finally {
       setSalvando(false);
     }
@@ -308,6 +273,18 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                   const insumoSelecionado = porId.get(l.insumoId);
                   const qtdFinal = l.itemNota.qtd * (l.fatorConversao || 1);
                   const custoUnitFinal = qtdFinal > 0 ? l.itemNota.valor_total / qtdFinal : 0;
+                  // A unidade de destino é escolha do lojista: ao criar insumo
+                  // novo, a que ele selecionou; ao vincular, a do insumo dele.
+                  const unidadeDestino = l.criarNovo ? (l.unidadeInsumo || 'un') : (insumoSelecionado?.unidade_medida || 'un');
+                  const unidadeNota = l.itemNota.unidade || 'un';
+                  const mesmaUnidade = unidadeNota.toLowerCase() === unidadeDestino.toLowerCase();
+                  // A unidade impressa na nota (bd, fr, pct...) nem sempre está
+                  // no catálogo. Sem isso ela some da lista e o lojista perde a
+                  // informação de como a compra realmente veio.
+                  const opcoesUnidade = UNIDADES.some(u => u.codigo.toLowerCase() === unidadeNota.toLowerCase())
+                    ? UNIDADES.map(u => ({ codigo: u.codigo, rotulo: u.rotulo }))
+                    : [{ codigo: unidadeNota, rotulo: `${unidadeNota} — como veio na nota` },
+                       ...UNIDADES.map(u => ({ codigo: u.codigo, rotulo: u.rotulo }))];
 
                   return (
                     <div key={i} className={`rounded-xl border p-4 transition-all ${l.confiancaMatch === 'ALTA' ? 'border-emerald-200 bg-emerald-50/30 dark:border-emerald-900/30 dark:bg-emerald-900/10' : l.criarNovo ? 'border-blue-200 bg-blue-50/30 dark:border-blue-900/30 dark:bg-blue-900/10' : 'border-amber-200 bg-amber-50/30 dark:border-amber-900/30 dark:bg-amber-900/10'}`}>
@@ -360,9 +337,8 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                             </select>
                           </div>
 
-                          {/* Se for criar novo */}
-                          {l.criarNovo ? (
-                            <div className="flex gap-2">
+                          {l.criarNovo && (
+                            <div className="flex gap-2 mb-2">
                               <input
                                 value={l.nomeNovoInsumo}
                                 onChange={e => atualizarLinha(i, { nomeNovoInsumo: e.target.value })}
@@ -372,32 +348,41 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               <select
                                 value={l.unidadeInsumo}
                                 onChange={e => atualizarLinha(i, { unidadeInsumo: e.target.value })}
-                                className="w-24 p-2 rounded-lg border border-blue-300 dark:border-blue-800 text-xs dark:bg-gray-950 dark:text-gray-100 font-bold"
+                                title="Como você quer controlar este item no estoque"
+                                className="w-40 p-2 rounded-lg border border-blue-300 dark:border-blue-800 text-xs dark:bg-gray-950 dark:text-gray-100 font-bold"
                               >
-                                <option value="un">Un (un)</option>
-                                <option value="kg">Kg (kg)</option>
-                                <option value="g">Gramas (g)</option>
-                                <option value="L">Litros (L)</option>
-                                <option value="ml">ml</option>
+                                {opcoesUnidade.map(u => (
+                                  <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>
+                                ))}
                               </select>
                             </div>
-                          ) : (
-                            /* Fator de conversão */
-                            <div className="flex items-center gap-3 bg-white dark:bg-gray-950 p-2 rounded-lg border border-gray-200 dark:border-gray-800 text-xs">
-                              <span className="text-gray-500 font-medium">1 {l.itemNota.unidade} rende quantos {insumoSelecionado?.unidade_medida || 'un'}?</span>
-                              <input
-                                type="number"
-                                min="0.001"
-                                step="any"
-                                value={l.fatorConversao}
-                                onChange={e => atualizarLinha(i, { fatorConversao: parseFloat(e.target.value) || 1 })}
-                                className="w-20 p-1 rounded border border-gray-300 dark:border-gray-700 text-center font-bold dark:bg-gray-900 dark:text-gray-100"
-                              />
-                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                                = {qtdFinal} {insumoSelecionado?.unidade_medida || 'un'} ({fmt(custoUnitFinal)}/{insumoSelecionado?.unidade_medida || 'un'})
-                              </span>
-                            </div>
                           )}
+
+                          {/*
+                            Conversão da unidade da nota para a unidade de uso —
+                            agora também ao criar insumo novo. O mercado vende
+                            bandeja de ovo e tomate por quilo; quem decide se
+                            aquilo vira unidade, grama ou porção é o lojista, não
+                            o sistema.
+                          */}
+                          <div className="flex flex-wrap items-center gap-2 bg-white dark:bg-gray-950 p-2 rounded-lg border border-gray-200 dark:border-gray-800 text-xs">
+                            <span className="text-gray-500 font-medium">
+                              {mesmaUnidade
+                                ? `Entra direto em ${unidadeDestino}. Ajuste se 1 ${unidadeNota} render outra quantidade:`
+                                : `1 ${unidadeNota} rende quantos ${unidadeDestino}?`}
+                            </span>
+                            <input
+                              type="number"
+                              min="0.001"
+                              step="any"
+                              value={l.fatorConversao}
+                              onChange={e => atualizarLinha(i, { fatorConversao: parseFloat(e.target.value) || 1 })}
+                              className="w-20 p-1 rounded border border-gray-300 dark:border-gray-700 text-center font-bold dark:bg-gray-900 dark:text-gray-100"
+                            />
+                            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                              = {Number(qtdFinal.toFixed(3))} {unidadeDestino} ({fmt(custoUnitFinal)}/{unidadeDestino})
+                            </span>
+                          </div>
                         </div>
 
                       </div>

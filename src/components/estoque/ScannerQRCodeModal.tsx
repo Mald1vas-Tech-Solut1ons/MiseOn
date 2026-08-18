@@ -3,6 +3,56 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { QrCode, Camera, Keyboard, X, ArrowRight, Loader2, AlertCircle, Image as ImageIcon, Zap, ZapOff } from 'lucide-react';
 import { temDetectorNativo, lerQrDeImagem, lerQrDeVideo, type EtapaLeitura } from '../../lib/lerQrCode';
 
+/**
+ * Abre a câmera tentando do pedido mais rico ao mais simples.
+ *
+ * Pedir 1920x1080 de cara é ótimo para ler QR denso, mas há aparelho que recusa
+ * a combinação inteira (OverconstrainedError) em vez de negociar — e aí a tela
+ * dizia só "não consegui abrir a câmera", com a câmera perfeitamente disponível.
+ */
+async function abrirCamera(): Promise<MediaStream> {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error('SEM_SUPORTE');
+  }
+
+  const pedidos: MediaStreamConstraints[] = [
+    { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } } },
+    { video: { facingMode: { ideal: 'environment' } } },
+    { video: true },
+  ];
+
+  let ultimoErro: unknown;
+  for (const pedido of pedidos) {
+    try {
+      return await navigator.mediaDevices.getUserMedia(pedido);
+    } catch (e) {
+      ultimoErro = e;
+      // Permissão negada não melhora com pedido mais simples: para aqui.
+      if ((e as DOMException)?.name === 'NotAllowedError') break;
+    }
+  }
+  throw ultimoErro;
+}
+
+/** Traduz a falha da câmera em instrução acionável, em vez de "deu erro". */
+function explicarErroCamera(erro: unknown): string {
+  const nome = (erro as DOMException)?.name ?? (erro as Error)?.message;
+  switch (nome) {
+    case 'NotAllowedError':
+      return 'A permissão da câmera está bloqueada para este site. Abra o cadeado ao lado do endereço, ' +
+        'libere a Câmera e toque em "Câmera" de novo. Enquanto isso, a aba "Foto" funciona normalmente.';
+    case 'NotFoundError':
+    case 'OverconstrainedError':
+      return 'Não encontrei uma câmera disponível neste aparelho. Use a aba "Foto".';
+    case 'NotReadableError':
+      return 'A câmera está ocupada por outro aplicativo. Feche o outro app e tente de novo, ou use a aba "Foto".';
+    case 'SEM_SUPORTE':
+      return 'Este navegador não libera a câmera para páginas. Use a aba "Foto".';
+    default:
+      return 'Não consegui abrir a câmera. Use a aba "Foto": funciona com uma imagem já salva na galeria.';
+  }
+}
+
 const TEXTO_ETAPA: Record<EtapaLeitura, string> = {
   lendo: 'Procurando o QR Code na imagem...',
   ampliando: 'Ampliando a imagem...',
@@ -28,6 +78,9 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
   const [lanternaLigada, setLanternaLigada] = useState(false);
   const [temLanterna, setTemLanterna] = useState(false);
   const [usandoNativo, setUsandoNativo] = useState(false);
+  // Contador de reabertura: muda para o efeito rodar de novo depois que a
+  // pessoa libera a permissao da camera sem sair da tela.
+  const [tentativa, setTentativa] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -55,13 +108,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
       // o quadro inteiro em resolução cheia — sem recorte, sem redimensionar.
       if (temDetectorNativo()) {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { ideal: 'environment' },
-              width: { ideal: 1920 },
-              height: { ideal: 1080 },
-            },
-          });
+          const stream = await abrirCamera();
           if (cancelado) {
             stream.getTracks().forEach((t) => t.stop());
             return;
@@ -83,6 +130,14 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
           return;
         } catch (err) {
           console.warn('Câmera nativa indisponível:', err);
+          // Permissão bloqueada, câmera ocupada ou ausente: o html5-qrcode vai
+          // esbarrar no mesmo obstáculo. Mostra logo o motivo e o que fazer,
+          // em vez de gastar segundos numa segunda tentativa fadada a falhar.
+          const nome = (err as DOMException)?.name;
+          if (nome === 'NotAllowedError' || nome === 'NotReadableError' || nome === 'NotFoundError') {
+            setErroCamera(explicarErroCamera(err));
+            return;
+          }
         }
       }
 
@@ -111,9 +166,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
         );
       } catch (err) {
         console.warn('Câmera indisponível:', err);
-        setErroCamera(
-          'Não consegui abrir a câmera. Use "Foto do cupom": funciona a partir de uma imagem já salva.',
-        );
+        setErroCamera(explicarErroCamera(err));
       }
     };
 
@@ -128,7 +181,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
       if (fallbackRef.current?.isScanning) fallbackRef.current.stop().catch(() => {});
       fallbackRef.current = null;
     };
-  }, [modo, carregando, onLido]);
+  }, [modo, carregando, onLido, tentativa]);
 
   const alternarLanterna = async () => {
     const trilha = streamRef.current?.getVideoTracks()[0];
@@ -225,9 +278,17 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
               <div className="rounded-xl bg-amber-50 p-4 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-900/40 text-center">
                 <AlertCircle size={28} className="mx-auto text-amber-600 dark:text-amber-400 mb-2" />
                 <p className="text-xs text-amber-800 dark:text-amber-300 font-medium mb-3">{erroCamera}</p>
-                <button onClick={() => setModo('FOTO')} className="bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-amber-700">
-                  Ler a partir de uma foto
-                </button>
+                <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                  <button onClick={() => setModo('FOTO')} className="bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-amber-700">
+                    Ler a partir de uma foto
+                  </button>
+                  <button
+                    onClick={() => setTentativa((n) => n + 1)}
+                    className="border border-amber-600 text-amber-700 dark:text-amber-300 font-bold text-xs px-4 py-2 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                  >
+                    Tentar a câmera de novo
+                  </button>
+                </div>
               </div>
             ) : (
               <div>
