@@ -4,6 +4,11 @@
 -- Idempotente onde possível; seguro para rodar em produção.
 -- ============================================================
 
+-- Garante que cliente_user_id e clientes.user_id existam (criadas oficialmente
+-- em 20260721, mas referenciadas nas policies e RPCs abaixo)
+ALTER TABLE public.pedidos ADD COLUMN IF NOT EXISTS cliente_user_id uuid;
+ALTER TABLE public.clientes ADD COLUMN IF NOT EXISTS user_id uuid;
+
 -- ── [2] Preço é autoridade do SERVIDOR ──────────────────────
 -- O browser insere subtotal/desconto/valor_total livremente (INSERT
 -- público). Esta função recalcula tudo a partir dos PREÇOS REAIS de

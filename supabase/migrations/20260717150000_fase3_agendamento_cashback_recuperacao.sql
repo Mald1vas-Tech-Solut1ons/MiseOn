@@ -2,6 +2,10 @@
 -- MiseOn — Fase 3: Agendamento, Cashback e Recuperação de Vendas
 -- ============================================================
 
+-- Garante que clientes.user_id exista (criada oficialmente em 20260721,
+-- mas referenciada nas policies de cashback abaixo)
+ALTER TABLE public.clientes ADD COLUMN IF NOT EXISTS user_id uuid;
+
 -- ── 1. AGENDAMENTO ──────────────────────────────────────────
 -- `pedidos.agendado_para` e `lojas.aceita_agendamento` já existem desde o
 -- schema base. Falta só a antecedência mínima (quanto tempo de prep a

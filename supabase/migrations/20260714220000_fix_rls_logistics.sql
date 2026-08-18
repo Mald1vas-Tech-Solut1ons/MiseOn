@@ -28,6 +28,9 @@ CREATE POLICY "Entregadores atualizam suas rotas"
     USING (auth.uid() IN (SELECT user_id FROM public.entregadores WHERE id = entregador_id));
 
 -- 3. Adiciona permissão para clientes verem seus próprios pedidos (Live Tracking)
+-- Garante que a coluna cliente_user_id exista antes de usá-la na policy
+ALTER TABLE public.pedidos ADD COLUMN IF NOT EXISTS cliente_user_id uuid;
+
 -- O cliente_user_id precisa ser capaz de ler a rota_id
 DROP POLICY IF EXISTS "Clientes leem rotas de seus pedidos" ON public.rotas_entrega;
 CREATE POLICY "Clientes leem rotas de seus pedidos"
