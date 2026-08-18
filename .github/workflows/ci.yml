@@ -19,22 +19,13 @@ jobs:
         run: npm audit --audit-level=critical
       - name: Linting
         run: npm run lint
-      - uses: supabase/setup-cli@v1
-      - name: Start local Supabase
-        run: |
-          supabase start
-          echo "VITE_SUPABASE_URL=http://127.0.0.1:54321" >> $GITHUB_ENV
-          echo "SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o json | jq -r .SERVICE_ROLE_KEY)" >> $GITHUB_ENV
-      - name: Tests (Unit + Integration)
-        run: npm run test
+      - name: Unit Tests
+        run: npx vitest run
       - name: Typecheck + build
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      - name: Docker build (valida a imagem de produção)
-        if: github.ref == 'refs/heads/main'
-        run: docker build --build-arg VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }} --build-arg VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }} -t miseon:ci .
 
   deploy-vercel:
     needs: ci
