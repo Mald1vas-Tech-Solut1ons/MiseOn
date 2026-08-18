@@ -32,8 +32,10 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
-  const { pathname } = new URL(req.url);
-  const caminho = pathname.replace(/^\/img\//, '');
+  // O caminho chega por query (?p=), e nao como rota: o vercel.json reescreve
+  // /img/<caminho> para ca. Rota catch-all com colchetes no nome do arquivo nao
+  // foi servida por este projeto — caia no fallback da SPA em vez da funcao.
+  const caminho = new URL(req.url).searchParams.get('p') ?? '';
 
   // Impede que o caminho escape do bucket publico ou vire outro host.
   if (!caminho || caminho.includes('..') || caminho.startsWith('/')) {
