@@ -171,6 +171,28 @@ export default function WhatsApp() {
 
   useEffect(() => { setTimeout(carregar, 0); }, [carregar]);
 
+  // Quando o popup não devolve o `code`, a conexão NÃO está perdida: a Meta
+  // avisa o servidor por webhook (account_update) e ele fecha sozinho. Aqui só
+  // observamos o status até isso acontecer, em vez de acusar erro na cara do
+  // lojista com a conta já compartilhada do lado da Meta.
+  const aguardarConexaoDoServidor = useCallback(async (): Promise<boolean> => {
+    for (let tentativa = 0; tentativa < 24; tentativa++) {
+      await new Promise((r) => setTimeout(r, 5000));
+      try {
+        const data: StatusResponse = await chamar({ acao: 'status', loja_id: lojaId });
+        if (data.conexao?.status === 'CONECTADO') {
+          setConexao(data.conexao);
+          setEventos(data.eventos ?? []);
+          setIaAtivo(data.loja?.whatsapp_ia_ativo ?? false);
+          setTemplatesAtivo(data.loja?.whatsapp_templates_ativo ?? false);
+          setSaudacao(data.loja?.whatsapp_saudacao ?? '');
+          return true;
+        }
+      } catch { /* rede instável: tenta de novo no próximo ciclo */ }
+    }
+    return false;
+  }, [chamar, lojaId]);
+
   // Retorno do Embedded Signup: a Meta redireciona para /admin/whatsapp?code=...
   // O code é de uso único e expira rápido — trocamos por token imediatamente.
   useEffect(() => {
@@ -186,15 +208,24 @@ export default function WhatsApp() {
     }
     setFinalizando(true);
     chamar({ acao: 'trocar_codigo', loja_id: lojaId, code, redirect_uri: redirectUri() })
-      .then((data) => {
+      .then(async (data) => {
         toast(`WhatsApp conectado: ${data.verified_name ?? data.display_phone ?? 'número verificado'} 🎉`, 'sucesso');
-      })
-      .catch((e) => toast((e as Error).message, 'erro'))
-      .finally(async () => {
         setFinalizando(false);
         await carregar();
+      })
+      .catch(async (e) => {
+        // `code` expirado ou recusado: a conta já pode estar compartilhada do
+        // lado da Meta, então damos ao webhook a chance de fechar a conexão.
+        toast('Finalizando pelo servidor…', 'info');
+        const conectou = await aguardarConexaoDoServidor();
+        setFinalizando(false);
+        if (conectou) toast('WhatsApp conectado! 🎉', 'sucesso');
+        else {
+          toast((e as Error).message, 'erro');
+          await carregar();
+        }
       });
-  }, [chamar, lojaId, carregar, toast]);
+  }, [chamar, lojaId, carregar, toast, aguardarConexaoDoServidor]);
 
   // A Meta publica o andamento do Embedded Signup por postMessage.
   // É daqui que saem waba_id e phone_number_id do número recém-conectado.
@@ -228,8 +259,18 @@ export default function WhatsApp() {
   const finalizarLogin = useCallback(async (resposta: any) => {
     const code = resposta?.authResponse?.code;
     if (!code) {
+      // A janela pode ter fechado DEPOIS de a conta já ter sido compartilhada.
+      // Damos ao webhook a chance de confirmar antes de declarar cancelamento.
+      toast('Conferindo com a Meta se a conta foi compartilhada…', 'info');
+      const conectou = await aguardarConexaoDoServidor();
       setFinalizando(false);
-      toast('Conexão cancelada na janela da Meta. Nada foi alterado.', 'erro');
+      setTrocandoNumero(!conectou && trocandoNumero);
+      toast(
+        conectou
+          ? 'WhatsApp conectado! 🎉'
+          : 'A conexão não foi concluída na janela da Meta. Nada foi alterado.',
+        conectou ? 'sucesso' : 'erro',
+      );
       return;
     }
     try {
@@ -242,21 +283,34 @@ export default function WhatsApp() {
       toast(`WhatsApp conectado: ${data.verified_name ?? data.display_phone ?? 'número verificado'} 🎉`, 'sucesso');
       setTrocandoNumero(false);
       await carregar();
-    } catch (e) {
-      toast((e as Error).message, 'erro');
-    } finally {
       setFinalizando(false);
+    } catch (e) {
+      // A troca do `code` falhou (expirado, redirect_uri, rede). O compartilhamento
+      // do lado da Meta continua valendo, então esperamos o webhook fechar.
+      toast('Finalizando pelo servidor…', 'info');
+      const conectou = await aguardarConexaoDoServidor();
+      setFinalizando(false);
+      if (conectou) {
+        setTrocandoNumero(false);
+        toast('WhatsApp conectado! 🎉', 'sucesso');
+      } else {
+        toast((e as Error).message, 'erro');
+      }
     }
-  }, [chamar, lojaId, carregar, toast]);
+  }, [chamar, lojaId, carregar, toast, aguardarConexaoDoServidor, trocandoNumero]);
 
   // Conectar com Facebook — SEM await antes do FB.login (ver comentário acima).
   const conectarComFacebook = () => {
     if (!window.FB) {
       // SDK bloqueado ou ainda carregando: vai pelo redirect, que não depende
       // de popup nem de comunicação entre janelas.
-      window.location.href = urlDialogOAuth();
+      void conectarPorRedirect();
       return;
     }
+    // Registra a INTENÇÃO de conectar sem await: o FB.login precisa continuar
+    // dentro do gesto do clique. É esta linha que deixa o servidor concluir a
+    // conexão sozinho (pelo webhook da Meta) se o popup morrer no caminho.
+    void chamar({ acao: 'iniciar_conexao', loja_id: lojaId }).catch(() => { /* o popup segue */ });
     sessionInfo.current = {};
     setFinalizando(true);
     window.FB.login((resposta: any) => { void finalizarLogin(resposta); }, {
@@ -268,8 +322,12 @@ export default function WhatsApp() {
   };
 
   // Saída de emergência: leva a página inteira para a Meta e volta em
-  // /admin/whatsapp?code=… — nada de popup, nada de postMessage.
-  const conectarPorRedirect = () => {
+  // /admin/whatsapp?code=… — nada de popup, nada de postMessage. Aqui dá para
+  // esperar o registro da intenção, porque a navegação é nossa.
+  const conectarPorRedirect = async () => {
+    try {
+      await chamar({ acao: 'iniciar_conexao', loja_id: lojaId });
+    } catch { /* sem a intenção o fluxo ainda funciona pelo `code` */ }
     window.location.href = urlDialogOAuth();
   };
 

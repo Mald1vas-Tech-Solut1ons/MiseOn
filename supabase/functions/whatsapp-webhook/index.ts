@@ -53,6 +53,118 @@ async function assinaturaValida(
   return diff === 0;
 }
 
+// ── Conclusão automática da conexão (Embedded Signup à prova do navegador) ──
+// A Meta avisa por account_update/PARTNER_ADDED assim que o lojista compartilha
+// a conta. Se houver uma intenção de conexão registrada (whatsapp_conexoes_pendentes),
+// fechamos a conexão aqui — sem depender de o popup devolver o `code`.
+const GRAPH = "https://graph.facebook.com/v21.0";
+const META_APP_SECRET = Deno.env.get("META_APP_SECRET") ?? "";
+const SYS_TOKEN = Deno.env.get("WHATSAPP_ACCESS_TOKEN") ?? "";
+
+function msgGraph(data: any): string {
+  return data?.error?.message ?? "erro desconhecido na Graph API";
+}
+
+function gerarVerifyToken(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return "miseon-wa-" + Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function gerarPin(): string {
+  const n = new Uint32Array(1);
+  crypto.getRandomValues(n);
+  return String(n[0] % 1000000).padStart(6, "0");
+}
+
+// Fecha a conexão da loja usando o token permanente do System User da plataforma.
+// Devolve sempre um detalhe legível — nada aqui falha em silêncio.
+async function concluirConexao(
+  supabase: any,
+  wabaId: string,
+  lojaId: string,
+): Promise<{ ok: boolean; detalhe: string; display?: string | null }> {
+  if (!SYS_TOKEN) {
+    return { ok: false, detalhe: "WHATSAPP_ACCESS_TOKEN nao configurado nos secrets" };
+  }
+
+  // (a) inscreve o app do MiseOn na WABA — sem isto a Meta nao entrega mensagens
+  const subRes = await fetch(`${GRAPH}/${wabaId}/subscribed_apps`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${SYS_TOKEN}` },
+  });
+  const subData = await subRes.json().catch(() => ({}));
+  if (!subRes.ok || subData?.success !== true) {
+    return { ok: false, detalhe: `subscribed_apps falhou: ${msgGraph(subData)}` };
+  }
+
+  // (b) descobre o numero real da conta (o de teste +1 555 nunca vence)
+  const telRes = await fetch(
+    `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name`,
+    { headers: { Authorization: `Bearer ${SYS_TOKEN}` } },
+  );
+  const tel = await telRes.json().catch(() => ({}));
+  const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string }> =
+    tel?.data ?? [];
+  if (!numeros.length) {
+    return { ok: false, detalhe: `WABA sem numeros: ${msgGraph(tel)}` };
+  }
+  const ehTeste = (n: { display_phone_number?: string }) =>
+    String(n.display_phone_number ?? "").replace(/\D/g, "").startsWith("1555");
+  const numero = numeros.filter((n) => !ehTeste(n))[0] ?? numeros[0];
+
+  // (c) RN: um numero pertence a uma loja so
+  const { data: emUso } = await supabase
+    .from("whatsapp_conexoes")
+    .select("loja_id")
+    .eq("phone_number_id", String(numero.id))
+    .maybeSingle();
+  if (emUso && emUso.loja_id !== lojaId) {
+    return { ok: false, detalhe: "este numero ja esta conectado a outra loja" };
+  }
+
+  // (d) registra o numero no Cloud API (melhor esforco — pode ja estar registrado)
+  const pin = gerarPin();
+  let pinSalvo: string | null = null;
+  try {
+    const regRes = await fetch(`${GRAPH}/${numero.id}/register`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${SYS_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ messaging_product: "whatsapp", pin }),
+    });
+    const regData = await regRes.json().catch(() => ({}));
+    if (regRes.ok && regData?.success === true) pinSalvo = pin;
+    else console.warn("concluirConexao: register nao concluiu:", msgGraph(regData));
+  } catch (e) {
+    console.warn("concluirConexao: register falhou (ignorado):", e);
+  }
+
+  // (e) grava a conexao — token do System User: permanente, nao expira em 24h
+  const { error: eUpsert } = await supabase.from("whatsapp_conexoes").upsert({
+    loja_id: lojaId,
+    phone_number_id: String(numero.id),
+    waba_id: String(wabaId),
+    display_phone: numero.display_phone_number ?? null,
+    verified_name: numero.verified_name ?? null,
+    access_token: SYS_TOKEN,
+    app_secret: META_APP_SECRET,
+    verify_token: gerarVerifyToken(),
+    pin_registro: pinSalvo,
+    status: "CONECTADO",
+    conectado_em: new Date().toISOString(),
+    ultimo_erro: null,
+  });
+  if (eUpsert) return { ok: false, detalhe: `falha ao gravar a conexao: ${eUpsert.message}` };
+
+  await supabase.from("whatsapp_conexoes_pendentes").delete().eq("loja_id", lojaId);
+
+  return {
+    ok: true,
+    detalhe: `conectado ao numero ${numero.display_phone_number ?? numero.id}`,
+    display: numero.display_phone_number ?? null,
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -124,16 +236,66 @@ serve(async (req) => {
     if (!phoneNumberId) {
       // Eventos de conta (account_update / PARTNER_ADDED do Embedded Signup) não
       // trazem phone_number_id — mas trazem o waba_id da conta recém-compartilhada.
-      // Guardamos o payload: é com ele que o suporte conclui a conexão quando o
-      // popup da Meta não devolve o `code`.
-      const wabaId = payload?.entry?.[0]?.id ?? null;
-      await supabase.from("whatsapp_eventos_meta").insert({
-        waba_id: wabaId ? String(wabaId) : null,
-        campo: change?.field ? String(change.field) : null,
-        payload,
-      });
-      console.log(`Evento de conta sem phone_number_id registrado — waba_id: ${wabaId ?? "?"}`);
-      return json({ ok: true, descartado: "sem phone_number_id" });
+      // É por aqui que a conexão se fecha quando o popup da Meta não devolve o
+      // `code` (aba fechada, popup bloqueado, code expirado).
+      const wabaId = payload?.entry?.[0]?.id ? String(payload.entry[0].id) : null;
+      const campo = change?.field ? String(change.field) : null;
+
+      // Assinatura: o evento é do APP MiseOn, então valida com o app_secret dele.
+      // Sem isso qualquer um poderia forjar um PARTNER_ADDED e sequestrar a
+      // conexão de uma loja que está com uma intenção pendente.
+      const assinaturaConta = req.headers.get("x-hub-signature-256");
+      const assinaturaOk = await assinaturaValida(rawBody, assinaturaConta, META_APP_SECRET);
+      if (!assinaturaOk) {
+        console.warn(`Evento de conta com assinatura inválida — waba_id: ${wabaId ?? "?"}`);
+        return json({ error: "assinatura inválida" }, 401);
+      }
+
+      const { data: evento } = await supabase
+        .from("whatsapp_eventos_meta")
+        .insert({ waba_id: wabaId, campo, payload })
+        .select("id")
+        .maybeSingle();
+
+      // Casa o evento com a intenção de conexão mais recente (janela de 1h).
+      let resultado = "sem waba_id no evento";
+      if (wabaId) {
+        const limite = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+        const { data: pendente } = await supabase
+          .from("whatsapp_conexoes_pendentes")
+          .select("loja_id")
+          .gte("criado_em", limite)
+          .order("criado_em", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (!pendente) {
+          resultado = "nenhuma conexão pendente na janela de 1h";
+        } else {
+          try {
+            const r = await concluirConexao(supabase, wabaId, pendente.loja_id);
+            resultado = r.ok ? `OK: ${r.detalhe}` : `FALHOU: ${r.detalhe}`;
+            if (r.ok) {
+              console.log(`Conexão concluída pelo webhook — loja ${pendente.loja_id}: ${r.detalhe}`);
+            } else {
+              console.error(`Conclusão automática falhou (loja ${pendente.loja_id}): ${r.detalhe}`);
+            }
+          } catch (e) {
+            resultado = `ERRO: ${String((e as Error)?.message ?? e)}`;
+            console.error("Conclusão automática lançou exceção:", e);
+          }
+        }
+      }
+
+      if (evento?.id) {
+        await supabase
+          .from("whatsapp_eventos_meta")
+          .update({ processado_em: new Date().toISOString(), resultado })
+          .eq("id", evento.id);
+      }
+
+      console.log(`Evento de conta (${campo ?? "?"}) waba_id ${wabaId ?? "?"} — ${resultado}`);
+      return json({ ok: true, resultado });
     }
 
     const { data: conexao, error: conexaoErr } = await supabase

@@ -19,6 +19,9 @@ const WEBHOOK_URL =
 // São segredos da PLATAFORMA (não do lojista): ficam nos secrets da function.
 const META_APP_ID = Deno.env.get("META_APP_ID") ?? "";
 const META_APP_SECRET = Deno.env.get("META_APP_SECRET") ?? "";
+// Token permanente do System User da plataforma: e ele que fecha a conexao
+// quando o popup da Meta nao devolve o `code`.
+const SYS_TOKEN = Deno.env.get("WHATSAPP_ACCESS_TOKEN") ?? "";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -73,6 +76,89 @@ async function validarToken(phoneNumberId: string, accessToken: string) {
   };
 }
 
+// Fecha a conexão de uma loja a partir de uma WABA já compartilhada com o app,
+// usando o token permanente do System User. É o mesmo caminho que o webhook
+// percorre — aqui ele fica disponível como recuperação manual (`reconciliar`).
+async function concluirConexao(
+  admin: any,
+  wabaId: string,
+  lojaId: string,
+): Promise<{ ok: boolean; detalhe: string; display?: string | null }> {
+  if (!SYS_TOKEN) {
+    return { ok: false, detalhe: "WHATSAPP_ACCESS_TOKEN nao configurado nos secrets" };
+  }
+
+  const subRes = await fetch(`${GRAPH}/${wabaId}/subscribed_apps`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${SYS_TOKEN}` },
+  });
+  const subData = await subRes.json().catch(() => ({}));
+  if (!subRes.ok || subData?.success !== true) {
+    return { ok: false, detalhe: `subscribed_apps falhou: ${msgGraph(subData)}` };
+  }
+
+  const telRes = await fetch(
+    `${GRAPH}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name`,
+    { headers: { Authorization: `Bearer ${SYS_TOKEN}` } },
+  );
+  const tel = await telRes.json().catch(() => ({}));
+  const numeros: Array<{ id: string; display_phone_number?: string; verified_name?: string }> =
+    tel?.data ?? [];
+  if (!numeros.length) return { ok: false, detalhe: `WABA sem numeros: ${msgGraph(tel)}` };
+
+  const ehTeste = (n: { display_phone_number?: string }) =>
+    String(n.display_phone_number ?? "").replace(/\D/g, "").startsWith("1555");
+  const numero = numeros.filter((n) => !ehTeste(n))[0] ?? numeros[0];
+
+  const { data: emUso } = await admin
+    .from("whatsapp_conexoes")
+    .select("loja_id")
+    .eq("phone_number_id", String(numero.id))
+    .maybeSingle();
+  if (emUso && emUso.loja_id !== lojaId) {
+    return { ok: false, detalhe: "este numero ja esta conectado a outra loja" };
+  }
+
+  const pin = gerarPin();
+  let pinSalvo: string | null = null;
+  try {
+    const regRes = await fetch(`${GRAPH}/${numero.id}/register`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${SYS_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ messaging_product: "whatsapp", pin }),
+    });
+    const regData = await regRes.json().catch(() => ({}));
+    if (regRes.ok && regData?.success === true) pinSalvo = pin;
+    else console.warn("concluirConexao: register nao concluiu:", msgGraph(regData));
+  } catch (e) {
+    console.warn("concluirConexao: register falhou (ignorado):", e);
+  }
+
+  const { error: eUpsert } = await admin.from("whatsapp_conexoes").upsert({
+    loja_id: lojaId,
+    phone_number_id: String(numero.id),
+    waba_id: String(wabaId),
+    display_phone: numero.display_phone_number ?? null,
+    verified_name: numero.verified_name ?? null,
+    access_token: SYS_TOKEN,
+    app_secret: META_APP_SECRET,
+    verify_token: gerarVerifyToken(),
+    pin_registro: pinSalvo,
+    status: "CONECTADO",
+    conectado_em: new Date().toISOString(),
+    ultimo_erro: null,
+  });
+  if (eUpsert) return { ok: false, detalhe: `falha ao gravar a conexao: ${eUpsert.message}` };
+
+  await admin.from("whatsapp_conexoes_pendentes").delete().eq("loja_id", lojaId);
+
+  return {
+    ok: true,
+    detalhe: `conectado ao numero ${numero.display_phone_number ?? numero.id}`,
+    display: numero.display_phone_number ?? null,
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -115,7 +201,7 @@ serve(async (req) => {
       if (!acesso) return erro("Você não tem acesso a esta loja", 403);
 
       // ações que alteram a conexão exigem admin da loja
-      if (["conectar", "atualizar_token", "desconectar", "devolver_numero", "testar", "trocar_codigo"].includes(acao) && acesso.papel !== "admin") {
+      if (["conectar", "atualizar_token", "desconectar", "devolver_numero", "testar", "trocar_codigo", "iniciar_conexao", "reconciliar"].includes(acao) && acesso.papel !== "admin") {
         return erro("Só o admin da loja pode gerenciar a conexão do WhatsApp", 403);
       }
 
@@ -807,6 +893,8 @@ serve(async (req) => {
       });
       if (eUpsert) throw eUpsert;
 
+      await admin.from("whatsapp_conexoes_pendentes").delete().eq("loja_id", loja_id);
+
       console.log(
         `trocar_codigo: loja ${loja_id} conectada — waba ${wabaId}, numero ${numero.id} (${numero.display_phone_number ?? "?"})`,
       );
@@ -816,6 +904,56 @@ serve(async (req) => {
         display_phone: numero.display_phone_number ?? null,
         verified_name: numero.verified_name ?? null,
       });
+    }
+
+    // ── iniciar_conexao ────────────────────────────────────────────────────
+    // Registra a INTENÇÃO de conectar antes de o popup da Meta abrir. É esta
+    // linha que o webhook usa para saber de quem é a conta que a Meta acabou de
+    // compartilhar — por isso a conexão se fecha mesmo se o popup morrer.
+    if (acao === "iniciar_conexao") {
+      const { error: ePend } = await admin
+        .from("whatsapp_conexoes_pendentes")
+        .upsert({ loja_id, user_id: caller.id, criado_em: new Date().toISOString() });
+      if (ePend) throw ePend;
+      console.log(`iniciar_conexao: loja ${loja_id} aguardando compartilhamento da Meta`);
+      return json({ ok: true });
+    }
+
+    // ── reconciliar ────────────────────────────────────────────────────────
+    // Rede de segurança manual: pega o evento de conta mais recente que a Meta
+    // mandou (últimas 24h) e fecha a conexão desta loja com ele. Serve para
+    // quando o webhook chegou antes de existir a intenção pendente.
+    if (acao === "reconciliar") {
+      const wabaInformada = body.waba_id ? String(body.waba_id) : null;
+      let wabaId = wabaInformada;
+
+      if (!wabaId) {
+        const limite = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const { data: evento } = await admin
+          .from("whatsapp_eventos_meta")
+          .select("waba_id, criado_em")
+          .not("waba_id", "is", null)
+          .gte("criado_em", limite)
+          .order("criado_em", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        wabaId = evento?.waba_id ?? null;
+      }
+
+      if (!wabaId) {
+        return erro(
+          "A Meta ainda não avisou sobre nenhuma conta compartilhada nas últimas 24h. " +
+          "Clique em 'Conectar com Facebook' e conclua o compartilhamento.",
+        );
+      }
+
+      const r = await concluirConexao(admin, wabaId, loja_id);
+      if (!r.ok) {
+        console.error(`reconciliar: loja ${loja_id}, waba ${wabaId}: ${r.detalhe}`);
+        return erro(`Não consegui concluir a conexão. (Detalhe: ${r.detalhe})`);
+      }
+      console.log(`reconciliar: loja ${loja_id} conectada — ${r.detalhe}`);
+      return json({ ok: true, display_phone: r.display ?? null });
     }
 
     return erro(`Ação desconhecida: ${acao}`);
