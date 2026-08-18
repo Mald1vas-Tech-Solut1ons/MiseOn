@@ -82,15 +82,32 @@ const handler = async (req: Request, ctx: { user: any, supabase: any }, body: z.
 
     const { data: pedido } = await supabaseAdmin
       .from('pedidos')
-      .select('id, numero, valor_total, loja_id, telefone_contato, cep, logradouro, numero_endereco, complemento, bairro, cidade, uf, lojas(efi_payee_code, antecipacao_cartao), itens_pedido(nome_produto, preco_unitario, quantidade)')
+      .select('id, numero, valor_total, cliente_id, loja_id, telefone_contato, cep, logradouro, numero_endereco, complemento, bairro, cidade, uf, lojas(efi_payee_code, antecipacao_cartao), itens_pedido(nome_produto, preco_unitario, quantidade)')
       .eq('id', pedido_id)
       .single();
     if (!pedido) return json({ error: 'pedido não encontrado' }, { status: 404 });
 
+    // Validação de Autorização / Ownership do pedido:
+    if (ctx.user && ctx.user.role !== 'service_role' && ctx.user.role !== 'anon') {
+      const isClienteDono = pedido.cliente_id && pedido.cliente_id === ctx.user.id;
+      if (!isClienteDono) {
+        const { data: vinculo } = await supabaseAdmin
+          .from('usuarios_loja')
+          .select('papel')
+          .eq('user_id', ctx.user.id)
+          .eq('loja_id', pedido.loja_id)
+          .maybeSingle();
+        if (!vinculo) {
+          return json({ error: 'Acesso não autorizado para este pedido' }, { status: 403 });
+        }
+      }
+    }
+
     const { data: totalReal, error: erroRecalc } = await supabaseAdmin.rpc('fn_recalcular_pedido', { p_pedido_id: pedido_id });
-    if (erroRecalc) return json({ error: 'Falha ao validar o valor do pedido', detail: erroRecalc }, { status: 500 });
+    if (erroRecalc) return json({ error: 'Falha ao validar o valor do pedido', detail: String((erroRecalc as any)?.message ?? erroRecalc) }, { status: 500 });
     const valorCobrancaCentavos = Math.round(Number(totalReal) * 100);
     if (!(valorCobrancaCentavos > 0)) return json({ error: 'Valor do pedido inválido para cobrança.' }, { status: 400 });
+
 
     const querAntecipado = !!(pedido as any).lojas?.antecipacao_cartao;
     const antecipadoDisponivel = !!(Deno.env.get('EFI_ANTECIPADO_CLIENT_ID') && Deno.env.get('EFI_ANTECIPADO_CLIENT_SECRET'));

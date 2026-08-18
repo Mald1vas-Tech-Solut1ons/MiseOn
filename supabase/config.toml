@@ -1,12 +1,7 @@
 
 [functions.magic-copy]
 enabled = true
-# Auditoria, achado 06: com verify_jwt = false isto era um proxy Gemini aberto
-# na internet — qualquer um rodava um loop e a conta vinha para a plataforma.
 verify_jwt = true
-import_map = "./functions/magic-copy/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/magic-copy/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
@@ -14,14 +9,15 @@ entrypoint = "./functions/magic-copy/index.ts"
 
 [functions.ai-gerar-descricao]
 enabled = true
-verify_jwt = false
+verify_jwt = true
 import_map = "./functions/ai-gerar-descricao/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/ai-gerar-descricao/index.ts"
-# Specifies static files to be bundled with the function. Supports glob patterns.
-# For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/ai-gerar-descricao/*.html" ]
+
+[functions.pix-criar-cobranca]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/pix-criar-cobranca/index.ts"
+
 
 [functions.whatsapp-webhook]
 enabled = true

@@ -99,12 +99,15 @@ function checkRateLimit(ip: string): boolean {
   return state.count <= MAX_REQ_PER_SEC;
 }
 
+import { checkRateLimit } from '../_shared/rate-limit.ts';
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   
-  // Rate limiting (429 Too Many Requests)
+  // Rate limiting (max 10 req por minuto por IP)
   const clientIp = req.headers.get('x-forwarded-for') || 'unknown';
-  if (!checkRateLimit(clientIp)) {
+  const rl = checkRateLimit(`pix:${clientIp}`, { windowMs: 60000, maxRequests: 10 });
+  if (!rl.allowed) {
     return json({ error: 'Too Many Requests' }, { status: 429 });
   }
 
@@ -112,7 +115,7 @@ Deno.serve(async (req) => {
     const { pedido_id } = await req.json();
     if (!pedido_id) return json({ error: 'pedido_id obrigatório' }, { status: 400 });
 
-    // service role: roda no servidor, ignora RLS
+    // service role: roda no servidor, ignora RLS para leitura segura do pedido
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -120,16 +123,45 @@ Deno.serve(async (req) => {
 
     const { data: pedido } = await supabase
       .from('pedidos')
-      .select('id, numero, valor_total, identificador_cliente, loja_id, lojas(nome, efi_titular_documento, efi_conta)')
+      .select('id, numero, valor_total, identificador_cliente, cliente_id, loja_id, status, lojas(nome, efi_titular_documento, efi_conta)')
       .eq('id', pedido_id)
       .single();
     if (!pedido) return json({ error: 'pedido não encontrado' }, { status: 404 });
+
+    // Validação de Autorização/Ownership:
+    // Se o cabeçalho Authorization trouxer o token do usuário autenticado,
+    // verificamos se o usuário pertence à loja ou se é o cliente dono do pedido.
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '').trim();
+      const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+      const userClient = createClient(Deno.env.get('SUPABASE_URL')!, supabaseAnonKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      });
+      const { data: { user: authUser } } = await userClient.auth.getUser();
+      if (authUser && authUser.role !== 'anon') {
+        // Usuário logado: deve ser dono do pedido (cliente_id) ou ter acesso à loja
+        const isClienteDono = pedido.cliente_id && pedido.cliente_id === authUser.id;
+        if (!isClienteDono) {
+          const { data: vinculo } = await supabase
+            .from('usuarios_loja')
+            .select('papel')
+            .eq('user_id', authUser.id)
+            .eq('loja_id', pedido.loja_id)
+            .maybeSingle();
+          if (!vinculo) {
+            // Nem cliente dono do pedido, nem operador/admin da loja
+            return json({ error: 'Acesso não autorizado para este pedido' }, { status: 403 });
+          }
+        }
+      }
+    }
 
     // SEGURANÇA: o total é recalculado no servidor a partir dos preços reais
     // (produtos/opções/cupom) — o valor que o browser gravou NÃO é confiável.
     // fn_recalcular_pedido também corrige os totais gravados no pedido.
     const { data: totalReal, error: erroRecalc } = await supabase.rpc('fn_recalcular_pedido', { p_pedido_id: pedido_id });
-    if (erroRecalc) return json({ error: 'Falha ao validar o valor do pedido', detail: erroRecalc }, { status: 500 });
+    if (erroRecalc) return json({ error: 'Falha ao validar o valor do pedido', detail: String(erroRecalc?.message || erroRecalc) }, { status: 500 });
     const valorCobranca = Number(totalReal);
     if (!(valorCobranca > 0)) return json({ error: 'Valor do pedido inválido para cobrança Pix.' }, { status: 400 });
 
@@ -162,7 +194,7 @@ Deno.serve(async (req) => {
 
     const res = await efiFetch(creds, `/v2/cob/${txid}`, { method: 'PUT', body: JSON.stringify(body) }, token);
     const charge = await res.json();
-    if (!charge.txid) throw new Error(`Efí cobrança falhou: ${JSON.stringify(charge)}`);
+    if (!charge.txid) throw new Error(`Efí cobrança falhou: ${charge.mensagem || charge.nome || 'Erro desconhecido'}`);
 
     // REPASSE AO LOJISTA (Split Pix) — best-effort: se falhar, a cobrança continua
     // válida e paga na conta da plataforma (repasse manual), sem travar o checkout.
@@ -195,14 +227,14 @@ Deno.serve(async (req) => {
         const cfgId = cfg?.id ?? cfg?.identificador ?? cfg?.split_config_id;
         if (cfgId) {
           const vinc = await efiFetch(creds, `/v2/gn/split/cob/${charge.txid}/vinculo/${cfgId}`, { method: 'PUT' }, token);
-          splitStatus = vinc.ok ? 'vinculado' : `vinculo_falhou:${JSON.stringify(await vinc.json())}`.slice(0, 400);
+          splitStatus = vinc.ok ? 'vinculado' : 'vinculo_falhou';
         } else {
-          splitStatus = `config_sem_id:${JSON.stringify(cfg)}`.slice(0, 400);
-          console.error('Split: config sem id ->', JSON.stringify(cfg));
+          splitStatus = 'config_sem_id';
+          console.error('Split: config sem id');
         }
       } catch (splitErr) {
-        splitStatus = `erro:${String(splitErr)}`.slice(0, 400);
-        console.error('Split falhou (cobrança segue válida):', String(splitErr));
+        splitStatus = 'erro_split';
+        console.error('Split falhou:', String((splitErr as Error)?.message ?? splitErr));
       }
     }
 
@@ -228,7 +260,8 @@ Deno.serve(async (req) => {
       split_status: splitStatus,
     });
   } catch (e) {
-    console.error(e);
-    return json({ error: String(e) }, { status: 500 });
+    console.error('Erro na função pix-criar-cobranca:', String((e as Error)?.message ?? e));
+    return json({ error: String((e as Error)?.message ?? e) }, { status: 500 });
   }
 });
+

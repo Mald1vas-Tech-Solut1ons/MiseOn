@@ -2,6 +2,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
+import { checkRateLimit } from '../_shared/rate-limit.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -10,6 +12,16 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
+  }
+
+  // Rate Limiting (máx 10 por min)
+  const clientIp = req.headers.get('x-forwarded-for') || 'unknown';
+  const rl = checkRateLimit(`ai-desc:${clientIp}`, { windowMs: 60000, maxRequests: 10 });
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ error: 'Limite de requisições excedido. Tente novamente em breve.' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 429,
+    });
   }
 
   try {
@@ -26,6 +38,7 @@ serve(async (req) => {
     
     const { data: { user }, error: userError } = await admin.auth.getUser(jwt);
     if (userError || !user) throw new Error('Sessão de usuário expirada ou inválida. Recarregue a página e faça login novamente.');
+
 
     const groqKey = Deno.env.get('GROQ_API_KEY');
     if (!groqKey) {
