@@ -50,7 +50,17 @@ serve(async (req) => {
       (nome_categoria ? `O produto é da categoria: ${nome_categoria}. ` : '') +
       `A descrição deve ser curta (no máximo 3 linhas), direta, sem emojis exagerados, focando em texturas, sabores e desejo. Não use aspas na resposta.`;
 
-    const modelos = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'];
+    // Modelos em ordem de preferencia. O Groq aposenta modelo sem aviso, entao a
+    // lista mistura geracoes e o GROQ_MODEL permite fixar um sem novo deploy.
+    const modelos = [
+      Deno.env.get('GROQ_MODEL') ?? '',
+      'llama-3.3-70b-versatile',
+      'llama-3.1-8b-instant',
+      'openai/gpt-oss-120b',
+      'openai/gpt-oss-20b',
+      'meta-llama/llama-4-scout-17b-16e-instruct',
+      'qwen/qwen3-32b',
+    ].filter(Boolean);
     let respostaTexto = '';
     let ultimoErro = '';
 

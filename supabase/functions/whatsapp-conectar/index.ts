@@ -375,7 +375,7 @@ serve(async (req) => {
             method: "POST",
             headers: { "Authorization": `Bearer ${groqKey}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-              model: "llama-3.3-70b-versatile",
+              model: Deno.env.get("GROQ_MODEL") ?? "llama-3.1-8b-instant",
               messages: [
                 { role: "system", content: "Responda apenas: OK" },
                 { role: "user", content: "Teste de diagnóstico." },
@@ -426,7 +426,7 @@ serve(async (req) => {
         problemas.push("GROQ_API_KEY ausente: vá em Supabase Dashboard → Edge Functions → Secrets e adicione GROQ_API_KEY com sua chave do Groq.");
       }
       if (groqKey && resultados.groq_status === "ERRO") {
-        problemas.push("GROQ_API_KEY inválida ou expirada: gere uma nova chave em console.groq.com e atualize o secret.");
+        problemas.push(`Groq recusou a chamada: ${resultados.groq_resposta}. Se falar em modelo inexistente, defina o secret GROQ_MODEL com um modelo ativo (console.groq.com/docs/models); se falar em chave, gere uma nova em console.groq.com.`);
       }
       if (conexaoDiag?.status !== "CONECTADO") {
         problemas.push(`WhatsApp não está CONECTADO (status: ${resultados.conexao_status}).`);

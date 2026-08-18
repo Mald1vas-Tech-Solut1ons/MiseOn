@@ -14,6 +14,60 @@ function erro(msg: string, status = 400) {
   return new Response(JSON.stringify({ error: msg }), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 }
 
+// ── Modelos do Groq ────────────────────────────────────────────────────────
+// NUNCA fixar um modelo só: o Groq aposenta modelo sem aviso e a IA emudece —
+// foi o que derrubou o atendimento (`llama-3.3-70b-versatile` decommissioned).
+// Tentamos em ordem e seguimos para o próximo quando o modelo não existe mais.
+// GROQ_MODEL permite fixar um preferido por env, sem precisar de deploy.
+const MODELOS_GROQ = [
+  Deno.env.get("GROQ_MODEL") ?? "",
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+  "openai/gpt-oss-120b",
+  "openai/gpt-oss-20b",
+  "meta-llama/llama-4-scout-17b-16e-instruct",
+  "qwen/qwen3-32b",
+].filter((m) => !!m);
+
+// Erro que significa "troque de modelo" em vez de "desista"
+function modeloIndisponivel(msg: string): boolean {
+  const m = msg.toLowerCase();
+  return m.includes("does not exist") || m.includes("decommission") ||
+         m.includes("not found") || m.includes("no longer supported") ||
+         m.includes("has been deprecated");
+}
+
+// Chama o Groq caindo para o próximo modelo quando o atual não existe mais.
+async function chamarGroq(
+  groqKey: string,
+  corpo: Record<string, unknown>,
+): Promise<{ texto: string; modelo: string }> {
+  let ultimoErro = "nenhum modelo configurado";
+  for (const modelo of MODELOS_GROQ) {
+    const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ ...corpo, model: modelo }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (resp.ok && !data.error) {
+      const texto = data.choices?.[0]?.message?.content?.trim();
+      if (texto) {
+        if (modelo !== MODELOS_GROQ[0]) {
+          console.warn(`Groq: modelo preferido indisponível — respondido por "${modelo}"`);
+        }
+        return { texto, modelo };
+      }
+      ultimoErro = "resposta vazia";
+      continue;
+    }
+    ultimoErro = String(data.error?.message ?? resp.status);
+    if (!modeloIndisponivel(ultimoErro)) break; // erro real (chave, cota): não adianta trocar
+    console.warn(`Groq: modelo "${modelo}" indisponível — tentando o próximo`);
+  }
+  throw new Error(`Groq: ${ultimoErro}`);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
 
@@ -234,25 +288,14 @@ COMO RESPONDER AS DUVIDAS E ATENDER:
       content: m.conteudo,
     }));
 
-    // ── 9. Chama Groq (LLaMA 3.3 70B Versatile) ───────────────────────────
-    const groqResp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "system", content: system }, ...historico],
-        temperature: 0.65,
-        max_tokens: 500,
-      }),
+    // ── 9. Chama Groq (com fallback de modelo) ────────────────────────────
+    const { texto: textoIa } = await chamarGroq(groqKey, {
+      messages: [{ role: "system", content: system }, ...historico],
+      temperature: 0.65,
+      max_tokens: 500,
     });
 
-    const groqData = await groqResp.json().catch(() => ({}));
-    if (!groqResp.ok || groqData.error) {
-      throw new Error(`Groq: ${groqData.error?.message ?? groqResp.status}`);
-    }
-
-    let resposta = groqData.choices?.[0]?.message?.content?.trim();
-    if (!resposta) throw new Error("Resposta vazia do Groq.");
+    let resposta = textoIa;
 
     if (temAlergia) {
       resposta += "\n\n⚠️ *Atenção:* Mencionou restrição alimentar — um atendente humano assume agora por segurança.";
