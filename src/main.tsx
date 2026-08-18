@@ -89,7 +89,21 @@ function PageLoader() {
   return <BrandLoader title="CARREGANDO MISEON..." />;
 }
 
-registerSW({ immediate: true });
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    updateSW(true);
+  },
+});
+
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.update().catch(() => {});
+    }
+  });
+}
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
