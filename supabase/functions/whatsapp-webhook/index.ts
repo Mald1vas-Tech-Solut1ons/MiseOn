@@ -109,9 +109,16 @@ async function concluirConexao(
   if (!numeros.length) {
     return { ok: false, detalhe: `WABA sem numeros: ${msgGraph(tel)}` };
   }
+  // RN: o numero de teste da Meta (+1 555) so fala com destinatarios cadastrados
+  // no console de desenvolvedor. Conectar com ele daria um "CONECTADO" mentiroso:
+  // a loja nao receberia nenhuma mensagem de cliente de verdade.
   const ehTeste = (n: { display_phone_number?: string }) =>
     String(n.display_phone_number ?? "").replace(/\D/g, "").startsWith("1555");
-  const numero = numeros.filter((n) => !ehTeste(n))[0] ?? numeros[0];
+  const reais = numeros.filter((n) => !ehTeste(n));
+  if (!reais.length) {
+    return { ok: false, detalhe: "SO_NUMERO_DE_TESTE" };
+  }
+  const numero = reais[0];
 
   // (c) RN: um numero pertence a uma loja so
   const { data: emUso } = await supabase
@@ -238,7 +245,13 @@ serve(async (req) => {
       // trazem phone_number_id — mas trazem o waba_id da conta recém-compartilhada.
       // É por aqui que a conexão se fecha quando o popup da Meta não devolve o
       // `code` (aba fechada, popup bloqueado, code expirado).
-      const wabaId = payload?.entry?.[0]?.id ? String(payload.entry[0].id) : null;
+      // O waba_id fica em value.waba_info.waba_id. `entry[0].id` NAO serve:
+      // nos eventos de account_update ele traz o ID do Business do app, e usa-lo
+      // fazia todo POST /{id}/subscribed_apps falhar com "does not exist".
+      const wabaInfo = value?.waba_info ?? {};
+      const wabaId = wabaInfo?.waba_id
+        ? String(wabaInfo.waba_id)
+        : (payload?.entry?.[0]?.id ? String(payload.entry[0].id) : null);
       const campo = change?.field ? String(change.field) : null;
 
       // Assinatura: o evento é do APP MiseOn, então valida com o app_secret dele.
@@ -274,7 +287,11 @@ serve(async (req) => {
         } else {
           try {
             const r = await concluirConexao(supabase, wabaId, pendente.loja_id);
-            resultado = r.ok ? `OK: ${r.detalhe}` : `FALHOU: ${r.detalhe}`;
+            resultado = r.ok
+              ? `OK: ${r.detalhe}`
+              : r.detalhe === "SO_NUMERO_DE_TESTE"
+                ? "FALHOU: A conta do WhatsApp Business criada na Meta tem APENAS o numero de teste (+1 555). O numero real da loja nao foi adicionado — no assistente da Meta, no passo 'Adicionar um numero de telefone', digite o numero da loja e confirme o codigo que chega por SMS. Importante: esse numero nao pode estar ativo no WhatsApp comum."
+                : `FALHOU: ${r.detalhe}`;
             if (r.ok) {
               console.log(`Conexão concluída pelo webhook — loja ${pendente.loja_id}: ${r.detalhe}`);
             } else {

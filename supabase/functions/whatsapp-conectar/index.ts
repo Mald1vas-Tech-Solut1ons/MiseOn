@@ -108,7 +108,9 @@ async function concluirConexao(
 
   const ehTeste = (n: { display_phone_number?: string }) =>
     String(n.display_phone_number ?? "").replace(/\D/g, "").startsWith("1555");
-  const numero = numeros.filter((n) => !ehTeste(n))[0] ?? numeros[0];
+  const reais = numeros.filter((n) => !ehTeste(n));
+  if (!reais.length) return { ok: false, detalhe: "A conta do WhatsApp Business criada na Meta tem APENAS o numero de teste (+1 555). O numero real da loja nao foi adicionado — no assistente da Meta, no passo 'Adicionar um numero de telefone', digite o numero da loja e confirme o codigo que chega por SMS. Importante: esse numero nao pode estar ativo no WhatsApp comum." };
+  const numero = reais[0];
 
   const { data: emUso } = await admin
     .from("whatsapp_conexoes")
@@ -806,8 +808,15 @@ serve(async (req) => {
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const num = await numRes.json().catch(() => ({}));
-        if (numRes.ok && num?.id) numero = num;
-        else console.warn("trocar_codigo: phone_number_id do sessionInfo não respondeu:", msgGraph(num));
+        const numEhTeste = String(num?.display_phone_number ?? "")
+          .replace(/\D/g, "")
+          .startsWith("1555");
+        if (numRes.ok && num?.id && !numEhTeste) numero = num;
+        else if (numEhTeste) {
+          console.warn("trocar_codigo: sessionInfo trouxe número de teste — ignorando e listando a WABA");
+        } else {
+          console.warn("trocar_codigo: phone_number_id do sessionInfo não respondeu:", msgGraph(num));
+        }
       }
       if (!numero) {
         const telRes = await fetch(
@@ -830,7 +839,13 @@ serve(async (req) => {
         if (reais.length > 1) {
           console.warn("trocar_codigo: WABA com vários números reais — usando o primeiro:", JSON.stringify(reais));
         }
-        numero = reais[0] ?? numeros[0];
+        // Nunca conectar com o numero de teste: daria um CONECTADO mentiroso,
+        // porque ele so troca mensagens com destinatarios cadastrados no console.
+        if (!reais.length) {
+          console.error("trocar_codigo: WABA só tem número de teste:", JSON.stringify(numeros));
+          return erro("A conta do WhatsApp Business criada na Meta tem APENAS o numero de teste (+1 555). O numero real da loja nao foi adicionado — no assistente da Meta, no passo 'Adicionar um numero de telefone', digite o numero da loja e confirme o codigo que chega por SMS. Importante: esse numero nao pode estar ativo no WhatsApp comum.");
+        }
+        numero = reais[0];
       }
 
       // (d) o número não pode estar conectado a outra loja (RN: 1 número = 1 loja)
