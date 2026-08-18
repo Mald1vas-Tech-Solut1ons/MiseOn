@@ -487,7 +487,7 @@ export default function Loja() {
   );
 
   return (
-    <div className="p-4">
+    <div className="p-4 pb-28 lg:pb-4">
       <div className="mb-4 flex items-center gap-2">
         <Store size={20} className="text-[var(--cor-primaria)]" />
         <h2 className="text-lg font-bold">Configurar Loja</h2>
