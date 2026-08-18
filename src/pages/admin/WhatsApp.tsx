@@ -145,7 +145,6 @@ export default function WhatsApp() {
   const [finalizando, setFinalizando] = useState(false);
   const [trocandoNumero, setTrocandoNumero] = useState(false);
   const [devolvendo, setDevolvendo] = useState(false);
-  const [sdkPronto, setSdkPronto] = useState(false);
   // sessionInfo do Embedded Signup: chega por postMessage ANTES do callback
   // do FB.login, então guardamos em ref para mandar junto com o code.
   const sessionInfo = useRef<SessionInfo>({});
@@ -267,7 +266,9 @@ export default function WhatsApp() {
   // abre, mas perde o vínculo com a janela que o abriu — a tela final da Meta
   // fica aberta para sempre e o callback com o `code` nunca chega.
   useEffect(() => {
-    carregarFbSdk().then(() => setSdkPronto(true)).catch(() => setSdkPronto(false));
+    // Quem checa a disponibilidade é o próprio clique (window.FB), então aqui
+    // basta disparar o carregamento e engolir a falha.
+    carregarFbSdk().catch(() => {});
   }, []);
 
   // Recebe o `code` do popup e fecha a conexão no servidor.
