@@ -7,6 +7,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { Loja, Categoria, Produto, fmt } from '../types';
 import MiseOnLoader from '../components/MiseOnLoader';
+import { getOptimizedImageUrl } from '../lib/cdn';
 
 type ModoExibicao = 'MENU_BOARD' | 'SENHAS' | 'BANNERS';
 
@@ -189,7 +190,7 @@ export default function PainelTV() {
       <header className="flex items-center justify-between border-b border-white/10 pb-4 z-20">
         <div className="flex items-center gap-4">
           {loja.logo_url ? (
-            <img src={loja.logo_url} alt={loja.nome} className="h-12 w-12 rounded-2xl object-cover border border-white/20 shadow-lg" />
+            <img src={getOptimizedImageUrl(loja.logo_url)} alt={loja.nome} className="h-12 w-12 rounded-2xl object-cover border border-white/20 shadow-lg" />
           ) : (
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FC5B24] font-black text-white text-xl shadow-lg">
               {loja.nome.charAt(0)}
@@ -316,7 +317,7 @@ export default function PainelTV() {
                     <div>
                       {produto.imagem_url ? (
                         <img
-                          src={produto.imagem_url}
+                          src={getOptimizedImageUrl(produto.imagem_url)}
                           alt={produto.nome}
                           className="h-36 w-full rounded-2xl object-cover mb-4 border border-white/10 shadow-md group-hover:scale-[1.02] transition-transform"
                         />

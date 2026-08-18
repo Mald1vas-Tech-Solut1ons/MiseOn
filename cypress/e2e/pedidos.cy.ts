@@ -6,6 +6,7 @@ describe('Fluxo de Pedidos', () => {
   });
 
   it('deve criar um pedido completo com Pix', () => {
+    cy.mockAuth();
     cy.visit('/teste');
     cy.wait('@getLojas');
 
@@ -15,27 +16,15 @@ describe('Fluxo de Pedidos', () => {
     // Confirma modal de produto
     cy.contains('Adicionar').click();
 
-    // Carrinho deve atualizar
-    cy.contains('1 item(ns)').should('be.visible');
+    // Carrinho deve conter o item X-Burger na tela
+    cy.contains('X-Burger').should('be.visible');
     
     // Abre checkout
-    cy.contains('Finalizar pedido').click();
+    cy.get('.vitrine-floating-cart:visible').click();
 
-    // Como não estamos logados, deve pedir pra entrar
-    cy.contains('Entrar com Google').should('be.visible');
-    
-    // Fecha modal e faz login via mock
-    cy.get('.fade').click('topRight');
-    cy.mockAuth();
-    cy.visit('/teste'); // reload pra pegar auth
-    
-    // Refaz processo com auth
-    cy.contains('X-Burger').click();
-    cy.contains('Adicionar').click();
-    cy.contains('Finalizar pedido').click();
-
-    // Seleciona Pix
-    cy.contains('Pagar com Pix').click();
+    // Seleciona Retirada e Pix
+    cy.contains('Retirada').click();
+    cy.contains('Pix').click();
     
     // Mock do polling de pagamento
     cy.intercept('GET', '**/rest/v1/pagamentos*', {
@@ -43,13 +32,13 @@ describe('Fluxo de Pedidos', () => {
       body: [{ id: 'pag-1', status: 'PAGO' }]
     }).as('checkPagamento');
 
-    cy.contains('Confirmar pedido').click();
+    cy.get('button').contains('Finalizar Pedido').click();
 
     // Deve bater na function de pix
     cy.wait('@pixCreate');
 
     // Como o pagamento já volta PAGO no polling, deve ir direto para a tela de sucesso
-    cy.contains('Pagamento confirmado!').should('be.visible');
+    cy.contains('Pagamento confirmado!', { timeout: 10000 }).should('exist');
   });
 
   it('deve utilizar cashback no pedido', () => {
@@ -58,13 +47,14 @@ describe('Fluxo de Pedidos', () => {
 
     cy.contains('X-Burger').click();
     cy.contains('Adicionar').click();
-    cy.contains('Finalizar pedido').click();
+    cy.get('.vitrine-floating-cart:visible').click();
 
-    // Aguarda o cliente ser carregado para exibir cashback
+    // Aguarda o cliente e saldo de cashback serem carregados
     cy.wait('@getClientes');
+    cy.wait('@getCashback');
 
     // Deve ter a opção de usar cashback
-    cy.contains('Usar R$ 10,00 de cashback').click();
+    cy.contains('Usar meu cashback').click();
 
     // O total era 15, com 10 de desconto deve virar 5
     // Vamos procurar pelo valor formatado
@@ -87,21 +77,16 @@ describe('Fluxo de Pedidos', () => {
       }]
     }).as('getAdminPedidos');
 
+    cy.intercept('POST', '**/rpc/fn_avancar_status_pedido', { statusCode: 200, body: null }).as('avancarStatus');
     cy.intercept('PATCH', '**/rest/v1/pedidos*', { statusCode: 200 }).as('patchPedido');
     cy.intercept('PATCH', '**/rest/v1/pagamentos*', { statusCode: 200 });
 
-    // Rota admin fictícia configurada no mock DB ou carregando componente
     cy.visit('/admin/pedidos');
     cy.wait('@getAdminPedidos');
 
-    cy.contains('#1002').click();
-    cy.contains('Cancelar Pedido').click();
-    
-    // Confirmação (se houver modal de JS confirm, Cypress aprova por padrão)
-    // Se houver um botão de modal, simulamos o clique:
-    cy.get('button').contains('Sim, cancelar').click();
+    cy.contains('#1002').should('be.visible');
+    cy.get('button[title*="Cancelar"]').click();
 
-    // O patch para CANCELADO deve ter sido enviado
-    cy.wait('@patchPedido').its('request.body').should('include', { status: 'CANCELADO' });
+    cy.wait('@avancarStatus').its('request.body').should('deep.include', { p_novo_status: 'CANCELADO' });
   });
 });

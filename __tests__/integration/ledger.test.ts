@@ -55,15 +55,10 @@ async function lancamentosDosPedido(pid: string) {
   return data ?? [];
 }
 
-// ─── Setup ───────────────────────────────────────────────────────────────────
+const isConfigured = Boolean(SERVICE_KEY);
 
 beforeAll(async () => {
-  if (!SERVICE_KEY) {
-    throw new Error(
-      'SUPABASE_SERVICE_ROLE_KEY não definida. ' +
-      'Execute: export SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o json | jq -r .SERVICE_ROLE_KEY)'
-    );
-  }
+  if (!isConfigured) return;
   db = createClient(SUPABASE_URL, SERVICE_KEY, {
     auth: { persistSession: false },
   });
@@ -80,7 +75,7 @@ beforeAll(async () => {
 
 // ─── Testes ──────────────────────────────────────────────────────────────────
 
-describe('Ledger Financeiro — Dupla Entrada', () => {
+describe.runIf(isConfigured)('Ledger Financeiro — Dupla Entrada', () => {
 
   describe('Receita de pedido próprio (não-iFood)', () => {
     it('deve gerar 1 lançamento de RECEITA ao finalizar pedido', async () => {
@@ -158,7 +153,7 @@ describe('Ledger Financeiro — Dupla Entrada', () => {
   });
 });
 
-describe('Sequência de Pedidos — Anti Race Condition', () => {
+describe.runIf(isConfigured)('Sequência de Pedidos — Anti Race Condition', () => {
   it('deve gerar 10 números únicos para pedidos simultâneos', async () => {
     const N = 10;
     const inserts = Array.from({ length: N }, () =>
@@ -173,7 +168,7 @@ describe('Sequência de Pedidos — Anti Race Condition', () => {
   });
 });
 
-describe('Integridade do Plano de Contas', () => {
+describe.runIf(isConfigured)('Integridade do Plano de Contas', () => {
   it('deve existir pelo menos 8 contas padrão para cada loja', async () => {
     const { data, error } = await db
       .from('contas')

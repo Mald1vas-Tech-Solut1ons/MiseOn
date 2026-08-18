@@ -3,7 +3,9 @@ import coverageTask from '@cypress/code-coverage/task';
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:5173',
+    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:4173',
+    viewportWidth: 1280,
+    viewportHeight: 800,
     setupNodeEvents(on, config) {
       coverageTask(on, config);
       return config;

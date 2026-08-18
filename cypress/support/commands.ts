@@ -28,16 +28,42 @@ Cypress.Commands.add('mockAuth', (userId = '00000000-0000-0000-0000-000000000000
   };
 
   cy.window().then((win) => {
-    // VITE_SUPABASE_URL might be undefined in tests, so we use a generic matching for the storage key
-    // Usually it's sb-<project-ref>-auth-token
-    // Let's just set it for any project ref we can guess, or better, we can inject window.Cypress auth mock
-    win.localStorage.setItem('sb-placeholder-auth-token', JSON.stringify(session));
-    // Since our app uses 'placeholder-anon-key', we can assume the project ref is 'placeholder'
+    const sessionStr = JSON.stringify(session);
+    win.localStorage.setItem('sb-placeholder-auth-token', sessionStr);
+    win.localStorage.setItem('sb-zzuxklwhaoisuuvndtfw-auth-token', sessionStr);
+    win.localStorage.setItem('sb-uvthidnqmezmmdrteqks-auth-token', sessionStr);
+    
+    // Set for any project ref from env if available
+    const envUrl = Cypress.env('VITE_SUPABASE_URL') || '';
+    const match = /https:\/\/([^.]+)\.supabase\.co/.exec(envUrl);
+    if (match?.[1]) {
+      win.localStorage.setItem(`sb-${match[1]}-auth-token`, sessionStr);
+    }
   });
 
-  // Intercept the auth endpoint to return the user
-  cy.intercept('GET', '**/auth/v1/user', {
+  // Intercept all Supabase Auth endpoints so SDK never makes real network calls
+  cy.intercept('GET', '**/auth/v1/user*', {
     statusCode: 200,
     body: session.user,
   }).as('getUser');
+
+  cy.intercept('POST', '**/auth/v1/token*', {
+    statusCode: 200,
+    body: session,
+  }).as('postToken');
+
+  cy.intercept('GET', '**/auth/v1/session*', {
+    statusCode: 200,
+    body: session,
+  }).as('getSession');
+
+  cy.intercept('POST', '**/auth/v1/signout*', {
+    statusCode: 204,
+    body: {},
+  }).as('postSignout');
+
+  cy.intercept('POST', '**/auth/v1/logout*', {
+    statusCode: 204,
+    body: {},
+  }).as('postLogout');
 });

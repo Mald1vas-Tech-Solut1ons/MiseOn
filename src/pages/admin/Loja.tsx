@@ -6,6 +6,7 @@ import { PALETA_CORES, PALETA_FUNDO_POR_TEMA, isLightColor, fonteFamilia, obterF
 import ColorSwatchPicker from '../../components/ColorSwatchPicker';
 import FontPicker from '../../components/FontPicker';
 import ImageUpload from '../../components/ImageUpload';
+import { getOptimizedImageUrl } from '../../lib/cdn';
 import { FiscalOnboarding } from '../../components/admin/FiscalOnboarding';
 import { IfoodOnboarding } from '../../components/admin/IfoodOnboarding';
 import type { CtxLoja } from './AdminLayout';
@@ -530,15 +531,15 @@ export default function Loja() {
         }}
       >
         <div className="w-full aspect-[21/9] bg-gray-100" style={{
-          backgroundImage: form.banner_url ? `url(${form.banner_url})` : undefined,
+          backgroundImage: form.banner_url ? `url(${getOptimizedImageUrl(form.banner_url)})` : undefined,
           backgroundSize: 'cover', backgroundPosition: 'center',
         }} />
         <div className="flex items-center gap-3 p-3" style={{ background: tokensPreview.surface }}>
           {form.logo_url
-            ? <img src={form.logo_url} alt="" className="h-14 w-14 rounded-full border object-cover" />
+            ? <img src={getOptimizedImageUrl(form.logo_url)} alt="" className="h-14 w-14 rounded-full border object-cover" />
             : (
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white" style={{ background: form.cor_primaria }}>
-                {form.nome.trim() ? form.nome.trim()[0].toUpperCase() : '?'}
+                { (form.nome || '').trim() ? (form.nome || '').trim()[0].toUpperCase() : '?'}
               </div>
             )}
           <div className="min-w-0">

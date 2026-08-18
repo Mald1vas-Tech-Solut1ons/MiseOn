@@ -25,10 +25,10 @@ let lojaId: string;
 const insumosCriados: string[] = [];
 const produtosCriados: string[] = [];
 
+const isConfigured = Boolean(SUPABASE_URL && SERVICE_KEY);
+
 beforeAll(async () => {
-  if (!SUPABASE_URL || !SERVICE_KEY) {
-    throw new Error('VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY precisam estar no ambiente.');
-  }
+  if (!isConfigured) return;
   db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
   const { data: loja, error } = await db.from('lojas').select('id').limit(1).single();
@@ -37,6 +37,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  if (!isConfigured) return;
   if (produtosCriados.length) await db.from('produtos').delete().in('id', produtosCriados);
   if (insumosCriados.length) await db.from('insumos').delete().in('id', insumosCriados);
 });
@@ -98,7 +99,7 @@ async function calcular(linhas: Array<{ insumo_id: string; quantidade: number }>
   };
 }
 
-describe('Motor de cálculo nutricional — NUT-05/06/07', () => {
+describe.runIf(isConfigured)('Motor de cálculo nutricional — NUT-05/06/07', () => {
   describe('Preparo aninhado em 3 níveis', () => {
     it('normaliza cada nível pelo próprio rendimento (produto → molho → massa → farinha)', async () => {
       // Muitos inserts sequenciais de setup (rede real, não banco local) —

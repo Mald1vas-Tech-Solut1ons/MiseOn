@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { Categoria, Produto, Insumo, EstacaoPreparo, TipoVenda, fmt } from '../../types';
 import ImageUpload from '../../components/ImageUpload';
 import type { CtxLoja } from './AdminLayout';
+import { getOptimizedImageUrl } from '../../lib/cdn';
 
 type Tab = 'produtos' | 'categorias';
 
@@ -141,7 +142,7 @@ export default function CardapioAdmin() {
             {visiveis.map((p) => (
               <div key={p.id} className={`flex items-center gap-3 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm dark:bg-gray-900 dark:border dark:border-gray-800 ${!p.disponivel ? 'opacity-50' : ''}`}>
                 {p.imagem_url
-                  ? <img src={p.imagem_url} className="h-14 w-14 shrink-0 rounded-lg object-cover" alt="" />
+                  ? <img src={getOptimizedImageUrl(p.imagem_url)} className="h-14 w-14 shrink-0 rounded-lg object-cover" alt="" />
                   : <div className="h-14 w-14 shrink-0 rounded-lg bg-gray-100" />}
                 <div className="min-w-0 flex-1">
                   <p className="flex items-center gap-1.5 truncate text-sm font-medium dark:text-gray-100">

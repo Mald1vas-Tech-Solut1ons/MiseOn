@@ -3,6 +3,7 @@ import { Upload, Loader2, X, Image as ImageIcon, AlertCircle, RotateCw, ZoomIn, 
 import { supabase } from '../lib/supabase';
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
+import { getOptimizedImageUrl } from '../lib/cdn';
 
 /* ─────────────────────────────────────────────────────────────
    ImageUpload com react-easy-crop (React 19 compatível)
@@ -155,7 +156,7 @@ export default function ImageUpload({
 
       <div className={`relative overflow-hidden rounded-xl border-2 border-dashed bg-gray-50 dark:bg-gray-800 ${value ? 'border-transparent' : 'border-gray-300 dark:border-gray-700'} ${aspecto}`}>
         {value ? (
-          <img src={value} className="h-full w-full object-cover" alt="Upload preview" />
+          <img src={getOptimizedImageUrl(value)} className="h-full w-full object-cover" alt="Upload preview" />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-gray-400">
             <ImageIcon size={24} className="opacity-50" />

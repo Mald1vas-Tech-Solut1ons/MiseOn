@@ -12,6 +12,38 @@ export const mockSupabase = () => {
     }]
   }).as('getLojas');
 
+  cy.intercept('GET', '**/rest/v1/lojas_publicas*', {
+    statusCode: 200,
+    body: {
+      id: 'mock-loja-1',
+      nome: 'Loja Teste',
+      slug: 'teste',
+      cor_primaria: '#FF0000',
+      aberto_manual: true,
+      pedido_minimo: 0,
+      endereco: 'Rua de Teste, 123'
+    }
+  }).as('getLojas');
+
+  cy.intercept('GET', '**/rest/v1/usuarios_loja*', {
+    statusCode: 200,
+    body: [{
+      loja_id: 'mock-loja-1',
+      papel: 'admin',
+      lojas: {
+        nome: 'Loja Teste',
+        cor_primaria: '#FF0000',
+        cor_secundaria: '#0000FF',
+        slug: 'teste',
+        criado_em: new Date().toISOString(),
+        status_assinatura: 'ativa',
+        trial_termina_em: null,
+        segmento_negocio: 'restaurante',
+        modulos_ativos: {}
+      }
+    }]
+  }).as('getUsuariosLoja');
+
   cy.intercept('GET', '**/rest/v1/horarios_funcionamento*', { body: [] });
   cy.intercept('GET', '**/rest/v1/banners_destaque*', { body: [] });
   cy.intercept('GET', '**/rest/v1/categorias*', { 
@@ -37,18 +69,31 @@ export const mockSupabase = () => {
   });
   
   cy.intercept('GET', '**/rest/v1/clientes*', {
-    body: [{ id: 'client-1', user_id: '00000000-0000-0000-0000-000000000000', saldo_cashback: 10.00 }]
+    body: [{ id: 'client-1', user_id: '00000000-0000-0000-0000-000000000000', nome: 'Test User', telefone: '11999999999', saldo_cashback: 10.00 }]
   }).as('getClientes');
+
+  cy.intercept('POST', '**/rest/v1/clientes*', {
+    statusCode: 200,
+    body: { id: 'client-1' }
+  });
+
+  cy.intercept('GET', '**/rest/v1/cashback_saldos*', {
+    body: [{ saldo: 10.00 }]
+  }).as('getCashback');
+
+  cy.intercept('POST', '**/rpc/fn_usar_cashback', {
+    body: true
+  });
 
   // Checkout POSTs
   cy.intercept('POST', '**/rest/v1/pedidos*', {
     statusCode: 201,
-    body: [{ id: 'pedido-1', numero: 1001 }]
+    body: { id: 'pedido-1', numero: 1001 }
   }).as('createPedido');
 
-  cy.intercept('POST', '**/rest/v1/pedido_itens*', {
+  cy.intercept('POST', '**/rest/v1/itens_pedido*', {
     statusCode: 201,
-    body: []
+    body: { id: 'item-1' }
   });
 
   cy.intercept('POST', '**/rest/v1/pagamentos*', {

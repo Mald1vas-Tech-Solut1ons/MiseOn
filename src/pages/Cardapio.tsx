@@ -22,6 +22,7 @@ import ThemeToggle from '../components/ThemeToggle';
 import ChatInterface from '../components/chat/ChatInterface';
 import MiseOnLoader from '../components/MiseOnLoader';
 import SEO from '../components/SEO';
+import { getOptimizedImageUrl } from '../lib/cdn';
 
 const guardarUltimoPedido = (slug: string | undefined, pedidoId: string, numero: number) => {
   if (!slug) return;
@@ -275,7 +276,7 @@ export default function Cardapio() {
 
   if (!loja) return <CardapioSkeleton />;
 
-  const iniciais = loja.nome.trim() ? loja.nome.trim()[0].toUpperCase() : '?';
+  const iniciais = (loja.nome || '').trim() ? (loja.nome || '').trim()[0].toUpperCase() : '?';
 
   return (
     <div className="loja-marca min-h-screen pb-28 lg:pb-16">
@@ -314,7 +315,7 @@ export default function Cardapio() {
           className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80"
           style={{ background: `linear-gradient(135deg, ${loja.cor_primaria}, ${loja.cor_secundaria})` }}
         >
-          {loja.banner_url && <img src={loja.banner_url} className="h-full w-full object-cover" alt="" />}
+          {loja.banner_url && <img src={getOptimizedImageUrl(loja.banner_url)} className="h-full w-full object-cover" alt="" />}
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/25" />
           <div className="absolute left-3 top-3 sm:left-6 sm:top-6">
             <Link
@@ -347,7 +348,7 @@ export default function Cardapio() {
           <div className="absolute inset-x-0 bottom-0">
             <div className="mx-auto flex max-w-6xl items-end gap-4 px-4 pb-4 sm:px-6 sm:pb-6">
               {loja.logo_url
-                ? <img src={loja.logo_url} className="h-16 w-16 shrink-0 rounded-2xl border-2 border-white/40 object-cover shadow-xl sm:h-24 sm:w-24" alt="" />
+                ? <img src={getOptimizedImageUrl(loja.logo_url)} className="h-16 w-16 shrink-0 rounded-2xl border-2 border-white/40 object-cover shadow-xl sm:h-24 sm:w-24" alt="" />
                 : <div
                     className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border-2 border-white/40 text-2xl font-bold shadow-xl backdrop-blur-sm sm:h-24 sm:w-24 sm:text-4xl"
                     style={{ background: loja.cor_primaria, color: isLightColor(loja.cor_primaria) ? '#111827' : '#ffffff' }}
@@ -409,11 +410,11 @@ export default function Cardapio() {
               <div key={b.id} className="shrink-0 snap-center flex w-72 flex-col gap-2 sm:w-96">
                 {b.link_redirecionamento ? (
                   <a href={b.link_redirecionamento} target="_blank" rel="noreferrer" className="vitrine-card block w-full rounded-[22px]">
-                    <img src={b.imagem_url} alt={b.titulo ?? ''} className="vitrine-card-media h-32 w-full object-cover sm:h-40" />
+                    <img src={getOptimizedImageUrl(b.imagem_url)} alt={b.titulo ?? ''} className="vitrine-card-media h-32 w-full object-cover sm:h-40" />
                   </a>
                 ) : (
                   <div className="vitrine-card rounded-[22px]">
-                    <img src={b.imagem_url} alt={b.titulo ?? ''} className="vitrine-card-media h-32 w-full object-cover sm:h-40" />
+                    <img src={getOptimizedImageUrl(b.imagem_url)} alt={b.titulo ?? ''} className="vitrine-card-media h-32 w-full object-cover sm:h-40" />
                   </div>
                 )}
                 {b.titulo && (
@@ -733,7 +734,7 @@ function ModalProduto({ produto, onClose, onAdd }: {
             <div className="flex w-full snap-x snap-mandatory overflow-x-auto hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {imgs.map((url, i) => (
                 <div key={i} className="min-w-full snap-center bg-black/20 flex items-center justify-center">
-                  <img src={url} className="max-h-80 w-full object-contain" alt={`${produto.nome} - foto ${i+1}`} />
+                  <img src={getOptimizedImageUrl(url)} className="max-h-80 w-full object-contain" alt={`${produto.nome} - foto ${i+1}`} />
                 </div>
               ))}
             </div>
@@ -906,7 +907,7 @@ const MaisPedidoCard = memo(({ p, onClick }: { p: Produto; onClick: () => void }
   <button onClick={() => p.tem_estoque !== false && onClick()}
     disabled={p.tem_estoque === false}
     className={`vitrine-card relative w-40 shrink-0 rounded-[24px] p-2.5 text-left ${p.tem_estoque === false ? 'opacity-50' : ''}`}>
-    {p.imagem_url && <img src={p.imagem_url} className="vitrine-card-media mb-2 h-24 w-full rounded-2xl object-cover" alt="" />}
+    {p.imagem_url && <img src={getOptimizedImageUrl(p.imagem_url)} className="vitrine-card-media mb-2 h-24 w-full rounded-2xl object-cover" alt="" />}
     {p.tem_estoque === false && (
       <span className="absolute right-3 top-3 rounded-full bg-gray-800 px-2 py-0.5 text-[9px] font-bold text-white">ESGOTADO</span>
     )}
@@ -929,7 +930,7 @@ const ProdutoCard = memo(({ p, onClick }: { p: Produto; onClick: () => void }) =
   <button onClick={() => p.tem_estoque !== false && onClick()}
     disabled={p.tem_estoque === false}
     className={`vitrine-card flex w-full gap-3 rounded-[24px] p-2.5 text-left ${p.tem_estoque === false ? 'opacity-50' : ''}`}>
-    {p.imagem_url && <img src={p.imagem_url} className="vitrine-card-media h-24 w-24 shrink-0 rounded-2xl object-cover" alt="" />}
+    {p.imagem_url && <img src={getOptimizedImageUrl(p.imagem_url)} className="vitrine-card-media h-24 w-24 shrink-0 rounded-2xl object-cover" alt="" />}
     <div className="min-w-0 flex-1 py-3 pr-3">
       <p className="flex flex-wrap items-center gap-2 font-bold" style={{ color: 'var(--cor-texto)' }}>
         {p.nome}

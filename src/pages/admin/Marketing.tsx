@@ -9,6 +9,7 @@ import { Cupom, Banner, Cliente, CarrinhoAbandonado, MetodoPgto, fmt } from '../
 import ImageUpload from '../../components/ImageUpload';
 import CrmClientes from '../../components/admin/CrmClientes';
 import type { CtxLoja } from './AdminLayout';
+import { getOptimizedImageUrl } from '../../lib/cdn';
 
 type Tab = 'cupons' | 'banners' | 'cashback' | 'recuperacao' | 'anuncios' | 'disparos' | 'emails' | 'crm';
 
@@ -332,7 +333,7 @@ function BannersTab({ lojaId }: { lojaId: string }) {
           <h3 className="text-sm font-bold text-gray-900 dark:text-white">Banners do Carrossel da Vitrine</h3>
           {banners.map((b, idx) => (
             <div key={b.id} className={`flex items-center gap-3 rounded-2xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm ${b.is_ativo === false ? 'opacity-50' : ''}`}>
-              <img src={b.imagem_url} className="h-16 w-28 shrink-0 rounded-xl object-cover" alt="" />
+              <img src={getOptimizedImageUrl(b.imagem_url)} className="h-16 w-28 shrink-0 rounded-xl object-cover" alt="" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-gray-900 dark:text-white">{b.titulo || '(sem título)'}</p>
                 <p className="truncate text-xs text-gray-400">{b.link_redirecionamento || 'Sem link externo'}</p>

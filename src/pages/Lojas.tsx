@@ -10,6 +10,7 @@ import { MiseOnLoader } from '../components/MiseOnLoader';
 import type { FaixaEntrega } from '../types';
 import { geocode, lojaAtendeDistancia, type LatLng } from '../lib/geo';
 import { carregarLocalizacaoCliente, enderecoParaLabel, enderecoParaQuery, salvarLocalizacaoCliente } from '../lib/localizacao-cliente';
+import { getOptimizedImageUrl } from '../lib/cdn';
 
 interface LojaResumo {
   id: string;
@@ -251,13 +252,10 @@ export default function Lojas() {
                 <span aria-hidden className="absolute left-0 top-0 h-full w-1 origin-top scale-y-0 transition-transform duration-300 group-hover:scale-y-100"
                   style={{ background: l.cor_primaria }} />
                 {/* wash sutil na cor da loja */}
-                <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  style={{ background: `linear-gradient(100deg, ${l.cor_primaria}14, transparent 60%)` }} />
-
                 {l.logo_url
-                  ? <img src={l.logo_url} className="h-16 w-16 shrink-0 rounded-xl object-cover shadow-lg transition-transform duration-300 group-hover:scale-105" alt="" />
+                  ? <img src={getOptimizedImageUrl(l.logo_url)} className="h-16 w-16 shrink-0 rounded-xl object-cover shadow-lg transition-transform duration-300 group-hover:scale-105" alt="" />
                   : <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl text-2xl font-black text-white shadow-lg transition-transform duration-300 group-hover:scale-105" style={{ background: l.cor_primaria }}>
-                      {l.nome.trim()[0]?.toUpperCase()}
+                      {(l.nome || '').trim()[0]?.toUpperCase()}
                     </div>}
                 <div className="relative z-10 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">

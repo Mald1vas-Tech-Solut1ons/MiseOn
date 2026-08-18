@@ -5,6 +5,7 @@ import type { EnderecoCliente, Pedido, FavoritoCliente } from '../types';
 import EnderecoMixin, { EnderecoFormData } from './EnderecoMixin';
 import { fmt } from '../types';
 import { PreferenceCenter } from './PreferenceCenter';
+import { getOptimizedImageUrl } from '../lib/cdn';
 
 type Aba = 'DADOS' | 'ENDERECOS' | 'PEDIDOS' | 'FAVORITOS' | 'COMUNICACAO';
 
@@ -438,7 +439,7 @@ export default function ModalMinhaConta({
                       <div key={f.id} className="flex items-center justify-between rounded-xl border p-3 dark:border-gray-800 dark:bg-gray-950">
                         <div className="flex items-center gap-3">
                           {f.produto?.imagem_url ? (
-                            <img src={f.produto.imagem_url} alt="" className="h-12 w-12 rounded-lg object-cover" />
+                            <img src={getOptimizedImageUrl(f.produto.imagem_url)} alt="" className="h-12 w-12 rounded-lg object-cover" />
                           ) : (
                             <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800" />
                           )}

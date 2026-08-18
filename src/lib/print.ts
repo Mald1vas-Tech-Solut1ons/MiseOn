@@ -1,4 +1,5 @@
 import { Pedido, ItemPedido, Insumo, Loja, fmt } from '../types';
+import { getOptimizedImageUrl } from './cdn';
 
 type PrintTemplate = 'COMANDA_COZINHA' | 'OS_PRODUCAO' | 'VIA_ENTREGADOR' | 'RECIBO_CLIENTE' | 'ETIQUETA_VALIDADE' | 'CONTA_MESA';
 
@@ -134,7 +135,7 @@ const pedidoPago = (p: Pedido) => !!p.pagamentos?.some((pg) => pg.status === 'PA
 /** Cabeçalho com a identidade da loja (logo + nome; e dados comerciais se `comercial`). */
 function cabecalhoLoja(o: PrintOptions, subtitulo: string, comercial = false): string {
   const nome = o.loja?.nome || o.lojaNome || 'MiseOn';
-  const logo = o.loja?.logo_url ? `<img class="logo" src="${esc(o.loja.logo_url)}" alt="" />` : '';
+  const logo = o.loja?.logo_url ? `<img class="logo" src="${esc(getOptimizedImageUrl(o.loja.logo_url))}" alt="" />` : '';
   const tel = o.loja?.telefone || o.loja?.whatsapp;
   const linhasComerciais = comercial ? [
     o.loja?.razao_social ? `<div class="sm uppercase">${esc(o.loja.razao_social)}</div>` : '',

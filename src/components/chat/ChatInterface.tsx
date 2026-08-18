@@ -3,6 +3,7 @@ import { Send, X, MessageSquare, Sparkles, User, CheckCheck } from 'lucide-react
 import { useChat } from '../../hooks/useChat';
 import { Loja } from '../../types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { getOptimizedImageUrl } from '../../lib/cdn';
 
 interface ChatInterfaceProps {
   loja: Loja;
@@ -122,7 +123,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
           <div className="relative">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/20">
               {loja.logo_url ? (
-                <img src={loja.logo_url} alt="Logo" className="h-full w-full rounded-full object-cover" />
+                <img src={getOptimizedImageUrl(loja.logo_url)} alt="Logo" className="h-full w-full rounded-full object-cover" />
               ) : (
                 <User size={22} className="text-white drop-shadow-sm" />
               )}
