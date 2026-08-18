@@ -19,10 +19,10 @@ describe('Autenticação', () => {
     cy.contains('Minha Conta').should('be.visible');
 
     // Testar Logout
-    cy.contains('Minha Conta').click();
+    cy.contains('button', 'Minha Conta').click();
     
-    // No modal de "Minha Conta", o botão se chama "Sair da conta"
-    cy.contains('Sair da conta').click();
+    // Aguarda o modal carregar os dados assíncronos e exibir o botão "Sair da conta"
+    cy.contains('Sair da conta', { timeout: 10000 }).should('be.visible').click();
 
     // A UI deve voltar para "Entrar"
     cy.contains('Entrar').should('be.visible');
