@@ -1,29 +1,41 @@
 /**
- * Redireciona URLs públicas do Supabase Storage para uma CDN de borda, para
- * zerar o consumo de Egress de leitura do Supabase.
+ * Serve imagens do Supabase Storage pela borda, em vez de buscar na origem a
+ * cada acesso — o que fazia todo visitante virar egress pago no Supabase.
  *
- * O host da CDN vem de VITE_CDN_HOST. Sem essa variável, a URL original do
- * Supabase é devolvida intacta — a imagem carrega, só sem o cache de borda.
+ * A URL publica do Storage vira /img/<caminho> no proprio dominio, atendido
+ * pela função em api/img.ts com cache de um ano. O dominio ja esta atras do
+ * Cloudflare, entao a partir do primeiro acesso a imagem sai da borda
+ * (medido em producao: cf-cache-status HIT).
  *
- * Isso é proposital: apontar para um host que não resolve no DNS derruba TODAS
- * as imagens do site de uma vez (foi o que aconteceu quando o código cravava
- * cdn.miseon.app.br, subdomínio que nunca existiu). Só ative a variável depois
- * que o DNS do subdomínio estiver de pé e servindo /storage/v1/object/public/.
+ * Por que no proprio dominio e nao num subdominio: a primeira versao disto
+ * apontava para cdn.miseon.app.br, que nunca existiu no DNS, e derrubou todas
+ * as imagens do site de uma vez. Aqui nao ha host novo para dar errado.
  *
- * @param url URL da imagem (pode ser pública do Supabase, externa ou vazia)
- * @returns URL na CDN quando configurada, ou a URL intacta
+ * VITE_CDN_HOST continua disponivel para apontar para uma CDN externa no dia
+ * em que existir uma; sem ela, usa o proprio dominio.
+ *
+ * @param url URL da imagem (publica do Supabase, externa ou vazia)
+ * @returns URL servida pela borda, ou a URL intacta se for externa/nula
  */
 const CDN_HOST = (import.meta.env?.VITE_CDN_HOST as string | undefined)?.replace(/\/+$/, '');
 
+const PREFIXO_STORAGE = /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/public\//;
+
 export function getOptimizedImageUrl(url?: string | null): string {
   if (!url) return '';
+  if (!PREFIXO_STORAGE.test(url)) return url;
 
-  if (CDN_HOST && url.includes('.supabase.co/storage/v1/object/public/')) {
-    return url.replace(
-      /https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/public\//,
-      `${CDN_HOST}/storage/v1/object/public/`
-    );
-  }
+  const caminho = url.replace(PREFIXO_STORAGE, '');
 
-  return url;
+  if (CDN_HOST) return `${CDN_HOST}/storage/v1/object/public/${caminho}`;
+
+  // Absoluta de proposito: este helper tambem alimenta og:image, e crawler de
+  // rede social nao resolve caminho relativo.
+  const base = typeof window !== 'undefined' ? window.location.origin : '';
+
+  // /img e uma funcao da Vercel: nao existe no vite dev nem no vite preview.
+  // Em maquina local a imagem vem direto do Supabase, senao quebraria o dev.
+  if (!base || /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|$)/.test(base)) return url;
+
+  return `${base}/img/${caminho}`;
 }

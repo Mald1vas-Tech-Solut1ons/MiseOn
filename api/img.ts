@@ -38,7 +38,7 @@ export default async function handler(req: Request): Promise<Response> {
   const caminho = new URL(req.url).searchParams.get('p') ?? '';
 
   // Impede que o caminho escape do bucket publico ou vire outro host.
-  if (!caminho || caminho.includes('..') || caminho.startsWith('/')) {
+  if (!caminho || caminho.includes('..') || caminho.startsWith('/') || caminho.includes('://')) {
     return new Response('Caminho invalido', { status: 400 });
   }
 
@@ -52,9 +52,11 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   if (!resposta.ok) {
-    // Erro da origem nao pode ficar preso na borda por um ano.
-    return new Response(resposta.status === 404 ? 'Imagem nao encontrada' : 'Erro na origem', {
-      status: resposta.status === 404 ? 404 : 502,
+    // O Storage devolve 400 para objeto inexistente, nao 404 — os dois viram
+    // 404 aqui. Erro da origem nao pode ficar preso na borda por um ano.
+    const ausente = resposta.status === 404 || resposta.status === 400;
+    return new Response(ausente ? 'Imagem nao encontrada' : 'Erro na origem', {
+      status: ausente ? 404 : 502,
       headers: { 'Cache-Control': 'public, max-age=60' },
     });
   }
