@@ -1,46 +1,51 @@
 /**
  * Testes do parser da consulta pública de NFC-e.
  *
- * Existe porque a versão anterior só reconhecia o layout "padrão nacional"
- * (txtTit / Qtd.: / UN:) e, contra São Paulo — que usa fixo-prod-serv-* —
- * devolvia zero item em toda nota, sempre com a mesma mensagem genérica.
- * Sem teste, isso passou despercebido.
+ * O HTML abaixo reproduz a página que a SEFAZ-SP realmente devolveu para o
+ * cupom do TENDA ATACADO (chave 3526...3325), incluindo as pegadinhas que
+ * derrubaram as versões anteriores do parser:
+ *
+ *   • os itens vêm em <tr id="Item + 1">, com espaços e sinal de mais, e não
+ *     em <tr id="Item1"> como o código dividia;
+ *   • a página escreve "Qtde.:" — o código procurava "Qtd.:";
+ *   • descrição, código, quantidade e valores ficam em <span> separados, então
+ *     o texto precisa ser lido com fronteira entre elementos.
  */
 import { describe, it, expect } from 'vitest';
 import { extrairChave, parseHtmlSefazSp } from '../supabase/functions/nfe-importar-qrcode/parser';
 
 const CHAVE = '35260801157555004878651070001051029721313325';
 
-/** Recorte fiel do layout da SEFAZ-SP: tabela de itens com as classes do portal. */
-const HTML_SP = `
+const item = (n: number, nome: string, codigo: string, qtd: string, un: string, unit: string, total: string) => `
+<tr id="Item + ${n}">
+  <td class="txtTit2">
+    <span class="txtTit2">${nome}</span>
+    <span class="RCod">(Código:  ${codigo} )</span><br>
+    <span class="Rqtd"><strong>Qtde.:</strong>${qtd}</span>
+    <span class="RUN"><strong>UN: </strong>${un}</span>
+    <span class="RvlUnit"><strong>Vl. Unit.:</strong>&nbsp;&nbsp;${unit}</span>
+  </td>
+  <td class="txtTit noWrap"><span class="txtTit">Vl. Total</span><span class="valor">${total}</span></td>
+</tr>`;
+
+const HTML_REAL = `
 <html><body>
-  <div class="txtTopo">SUPERMERCADO TESTE LTDA</div>
-  <div>CNPJ: 01.157.555/0048-78</div>
-  <div>Emissão: 04/08/2026 18:43:08</div>
-  <table class="toggle">
-    <tr>
-      <td class="fixo-prod-serv-numero"><span>1</span></td>
-      <td class="fixo-prod-serv-descricao"><span>DETERG LIQ MINUANO NEUTRO (Código: 356115)</span></td>
-      <td class="fixo-prod-serv-qtd"><span>1,000</span></td>
-      <td class="fixo-prod-serv-uc"><span>FR</span></td>
-      <td class="fixo-prod-serv-vb"><span>2,39</span></td>
-    </tr>
-    <tr>
-      <td class="fixo-prod-serv-numero"><span>2</span></td>
-      <td class="fixo-prod-serv-descricao"><span>APP1 OVOS EXTRA BRANCO PV (Código: 956228)</span></td>
-      <td class="fixo-prod-serv-qtd"><span>2,000</span></td>
-      <td class="fixo-prod-serv-uc"><span>BD</span></td>
-      <td class="fixo-prod-serv-vb"><span>19,80</span></td>
-    </tr>
-    <tr>
-      <td class="fixo-prod-serv-numero"><span>3</span></td>
-      <td class="fixo-prod-serv-descricao"><span>ARROZ TIPO 1 PACOTE 5KG</span></td>
-      <td class="fixo-prod-serv-qtd"><span>1,000</span></td>
-      <td class="fixo-prod-serv-uc"><span>PC</span></td>
-      <td class="fixo-prod-serv-vb"><span>1.234,56</span></td>
-    </tr>
-  </table>
-  <span class="txtMax">457,49</span>
+<div id="avisos"></div>
+<div class="txtTopo">TENDA ATACADO LTDA (VL GALVAO)</div>
+<div class="text">CNPJ: 01.157.555/0048-78</div>
+<div class="text">AVENIDA PEDRO DE SOUZA LOPES , 900 , , VILA GALVAO , GUARULHOS , SP</div>
+<table id="tabResult">
+${item(1, 'TOMATE SALADA kg', '2410', '1,022', 'kg', '6,99', '7,14')}
+${item(2, 'SALSA un', '188891', '1', 'UN', '3,99', '3,99')}
+${item(3, 'APP1 PEITO FGO CONG C OSSO Kg', '2717', '2,446', 'kg', '10,9', '26,66')}
+${item(4, 'CARNE MOIDA SUINA CONG PAMPLONA 500g', '942469', '1', 'UN', '9,89', '9,89')}
+${item(5, 'LING CALABRESA APIM RESF BRAGANCA Kg', '3036', '0,582', 'kg', '15,93', '9,27')}
+${item(6, 'BISC REC TODDY CHOC 130g', '7891962057019', '3', 'UN', '2,49', '7,47')}
+</table>
+<div id="totalNota">
+  <div><span class="totalNumb txtMax">Valor total R$</span><span class="totalNumb txtMax">457,49</span></div>
+  <div><span>Emissão: </span><span>04/08/2026 18:43:08</span></div>
+</div>
 </body></html>`;
 
 describe('extrairChave', () => {
@@ -58,47 +63,54 @@ describe('extrairChave', () => {
   });
 });
 
-describe('parseHtmlSefazSp — layout de São Paulo', () => {
-  const dados = parseHtmlSefazSp(HTML_SP, CHAVE);
+describe('parseHtmlSefazSp — página real da SEFAZ-SP', () => {
+  const dados = parseHtmlSefazSp(HTML_REAL, CHAVE);
 
   it('deve encontrar todos os itens da nota', () => {
-    expect(dados.itens).toHaveLength(3);
+    expect(dados.itens).toHaveLength(6);
   });
 
-  it('deve ler descrição, quantidade, unidade e valor de cada item', () => {
-    expect(dados.itens[1]).toMatchObject({
-      num_item: 2,
-      descricao: 'APP1 OVOS EXTRA BRANCO PV',
-      qtd: 2,
-      unidade: 'bd',
-      valor_total: 19.8,
-      valor_unitario: 9.9,
+  it('deve ler o primeiro item exatamente como a SEFAZ mostra', () => {
+    expect(dados.itens[0]).toMatchObject({
+      descricao: 'TOMATE SALADA kg',
+      codigo_fornecedor: '2410',
+      qtd: 1.022,
+      unidade: 'kg',
+      valor_unitario: 6.99,
+      valor_total: 7.14,
     });
   });
 
-  it('deve separar o código do mercado da descrição', () => {
-    expect(dados.itens[0].codigo_fornecedor).toBe('356115');
-    expect(dados.itens[0].descricao).toBe('DETERG LIQ MINUANO NEUTRO');
+  it('deve ler item vendido por peso, com decimal de três casas', () => {
+    expect(dados.itens[4]).toMatchObject({
+      descricao: 'LING CALABRESA APIM RESF BRAGANCA Kg',
+      qtd: 0.582,
+      unidade: 'kg',
+      valor_total: 9.27,
+    });
+  });
+
+  it('deve manter a descrição sem misturar item vizinho', () => {
+    expect(dados.itens[1].descricao).toBe('SALSA un');
+    expect(dados.itens[3].descricao).toBe('CARNE MOIDA SUINA CONG PAMPLONA 500g');
   });
 
   it('não deve tratar código interno do mercado como EAN', () => {
-    // 356115 não é GTIN válido: virar "gtin" faria o De-Para casar produtos
-    // de mercados diferentes que usam o mesmo número interno.
-    expect(dados.itens.every((i) => i.gtin === null)).toBe(true);
+    // 2410 e 942469 são códigos do Tenda, não GTIN. Se virassem gtin, o De-Para
+    // casaria produtos de mercados diferentes que reusam o mesmo número.
+    expect(dados.itens[0].gtin).toBeNull();
+    expect(dados.itens[3].gtin).toBeNull();
   });
 
-  it('deve interpretar número brasileiro com milhar e decimal', () => {
-    expect(dados.itens[2].valor_total).toBe(1234.56);
+  it('deve reconhecer EAN de verdade quando o código for um GTIN válido', () => {
+    expect(dados.itens[5].gtin).toBe('7891962057019');
   });
 
-  it('deve ler emitente, CNPJ e data de emissão', () => {
-    expect(dados.emitente.razao_social).toBe('SUPERMERCADO TESTE LTDA');
+  it('deve ler emitente, CNPJ, total e data de emissão', () => {
+    expect(dados.emitente.razao_social).toBe('TENDA ATACADO LTDA (VL GALVAO)');
     expect(dados.emitente.cnpj).toBe('01.157.555/0048-78');
-    expect(dados.data_emissao).toBe('2026-08-04T18:43:08Z');
-  });
-
-  it('deve devolver o valor total da nota', () => {
     expect(dados.valor_total).toBe(457.49);
+    expect(dados.data_emissao).toBe('2026-08-04T18:43:08Z');
   });
 });
 

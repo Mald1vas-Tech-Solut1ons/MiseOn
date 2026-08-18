@@ -69,43 +69,65 @@ export function numeroBr(valor: string | undefined): number {
 }
 
 /**
- * Layout da consulta pública da SEFAZ-SP (ASP.NET). A tabela de itens usa as
- * classes fixo-prod-serv-numero / -descricao / -qtd / -uc / -vb, confirmadas nos
- * CSS publicados pelo próprio portal. É diferente do layout "padrão nacional"
- * (txtTit / Qtd.: / UN: / Vl. Unit.) que outros estados usam — o parser antigo
- * só conhecia esse segundo, por isso nunca achava item nenhum em SP.
+ * Transforma a página em texto com fronteira visível entre elementos.
+ *
+ * Sem essa fronteira, "TOMATE SALADA kg" e "(Código: 2410)" — que vivem em
+ * spans vizinhos — grudam com o item seguinte e a descrição sai contaminada.
  */
-export function parseItensLayoutSp(h: string): ItemNFCe[] {
+function textoComSeparador(html: string): string {
+  return texto(
+    html
+      .replace(/<\/(td|tr|span|div|p|table|h1|h2|h3|h4|li)>/gi, ' | ')
+      .replace(/<br\s*\/?>/gi, ' | ')
+  );
+}
+
+/**
+ * Extrai os itens do DANFE da consulta pública.
+ *
+ * Trabalha sobre o TEXTO da página, não sobre nomes de classe nem ids. Motivo:
+ * as duas tentativas anteriores morreram em detalhe de marcação — uma dividia
+ * os itens por `<tr id="Item1">` quando o portal gera `id="Item + 1"`, e
+ * procurava "Qtd.:" quando a página escreve "Qtde.:"; a outra apostou nas
+ * classes fixo-prod-serv-*, que pertencem a outra tela do mesmo portal. O texto
+ * visível é estável e é o que o lojista enxerga:
+ *
+ *   TOMATE SALADA kg (Código: 2410 ) Qtde.:1,022 UN: kg Vl. Unit.: 6,99 Vl. Total 7,14
+ */
+export function parseItens(html: string): ItemNFCe[] {
+  const plano = textoComSeparador(html);
+
+  // Campos separados por poucos caracteres de "cola" (espaço, |, rótulo curto),
+  // nunca o bastante para atravessar o item seguinte.
+  const regexItem =
+    /([^|]{2,120}?)\s*\|?\s*\(\s*C[óo]digo:\s*(\d+)\s*\)[\s\S]{0,40}?Qtde?\.?:\s*([\d.,]+)[\s\S]{0,40}?UN:?\s*([A-Za-zÀ-ÿ]{1,6})[\s\S]{0,40}?Vl\.?\s*Unit\.?:?\s*([\d.,]+)[\s\S]{0,120}?Vl\.?\s*Total\s*\|?\s*([\d.,]+)/gi;
+
   const itens: ItemNFCe[] = [];
-  const linhas = h.split(/<tr[^>]*>/i);
+  let achado: RegExpExecArray | null;
 
-  for (const linha of linhas) {
-    if (!/fixo-prod-serv-numero/i.test(linha)) continue;
+  while ((achado = regexItem.exec(plano)) !== null) {
+    const [, descricaoBruta, codigo, qtdTexto, unidade, unitTexto, totalTexto] = achado;
 
-    const celula = (classe: string) =>
-      linha.match(new RegExp(`<td[^>]*class=["'][^"']*${classe}[^"']*["'][^>]*>([\\s\\S]*?)</td>`, 'i'))?.[1];
-
-    const descricao = texto(celula('fixo-prod-serv-descricao') ?? '');
+    // A descrição arrasta o rabo do item anterior; corta no último separador.
+    const descricao = descricaoBruta.split('|').pop()!.trim().replace(/^\d+\s+/, '');
     if (!descricao) continue;
 
-    const numero = parseInt(texto(celula('fixo-prod-serv-numero') ?? ''), 10);
-    const qtd = numeroBr(texto(celula('fixo-prod-serv-qtd') ?? '').match(/[\d.,]+/)?.[0]);
-    const unidade = texto(celula('fixo-prod-serv-uc') ?? '').replace(/[^A-Za-zÀ-ÿ0-9]/g, '') || 'un';
-    const valorTotal = numeroBr(texto(celula('fixo-prod-serv-vb') ?? '').match(/[\d.,]+/)?.[0]);
-
-    // Cupom traz o código interno do mercado junto da descrição, entre parênteses
-    // ou no início. Só vira gtin se passar na validação de GTIN.
-    const codigo = descricao.match(/\(C[óo]digo:\s*(\d+)\)/i)?.[1] ?? descricao.match(/^(\d{4,14})\s/)?.[1] ?? null;
+    const qtd = numeroBr(qtdTexto);
+    const valorUnitario = numeroBr(unitTexto);
+    const valorTotal = numeroBr(totalTexto);
 
     itens.push({
-      num_item: Number.isFinite(numero) ? numero : itens.length + 1,
-      descricao: descricao.replace(/\(C[óo]digo:\s*\d+\)/i, '').trim(),
-      gtin: codigo && ehGtinValido(codigo) ? codigo : null,
+      num_item: itens.length + 1,
+      descricao,
+      // "(Código: N)" é o cProd do emitente, não um EAN. Só vira gtin quando
+      // passa na validação — senão o De-Para casaria produtos de mercados
+      // diferentes que reusam o mesmo número interno.
+      gtin: ehGtinValido(codigo) ? codigo : null,
       codigo_fornecedor: codigo,
       qtd: qtd || 1,
-      unidade: unidade.toLowerCase(),
-      valor_unitario: qtd > 0 ? Number((valorTotal / qtd).toFixed(4)) : valorTotal,
-      valor_total: valorTotal,
+      unidade: (unidade || 'un').toLowerCase(),
+      valor_unitario: valorUnitario || (qtd > 0 ? Number((valorTotal / qtd).toFixed(4)) : valorTotal),
+      valor_total: valorTotal || qtd * valorUnitario,
     });
   }
 
@@ -114,94 +136,26 @@ export function parseItensLayoutSp(h: string): ItemNFCe[] {
 
 export function parseHtmlSefazSp(html: string, chave: string): DadosNFCe {
   const h = html.replace(/\r?\n|\r/g, ' ');
+  const plano = textoComSeparador(h);
 
-  // 1. Razão Social
-  let razaoSocial = 'Supermercado / Fornecedor';
-  const matchRazao = h.match(/class=["']txtTopo["'][^>]*>(.*?)<\/div>/i) ||
-                     h.match(/class=["']txtBox font-bold["'][^>]*>(.*?)<\/div>/i) ||
-                     h.match(/<div id=["']conteudo["'][^>]*>[\s\S]*?<div[^>]*class=["']txtCenter["'][^>]*>(.*?)<\/div>/i);
-  if (matchRazao && matchRazao[1]) {
-    razaoSocial = matchRazao[1].replace(/<[^>]+>/g, '').trim() || razaoSocial;
-  }
+  const itens = parseItens(h);
 
-  // 2. CNPJ
-  let cnpj: string | null = null;
-  const matchCnpj = h.match(/CNPJ:\s*([\d\.\/\-]+)/i);
-  if (matchCnpj) cnpj = matchCnpj[1].trim();
+  // Razão social: o rótulo em destaque no topo, ou o texto logo antes do CNPJ.
+  const porClasse = texto(h.match(/class=["'][^"']*txtTopo[^"']*["'][^>]*>([\s\S]*?)</i)?.[1] ?? '');
+  const antesDoCnpj = plano.match(/\|\s*([^|]{4,90}?)\s*\|\s*CNPJ:/i)?.[1]?.trim();
+  const razaoSocial = porClasse || antesDoCnpj || 'Supermercado / Fornecedor';
 
-  // 3. Valor Total Nota
-  let valorTotalNota = 0;
-  const matchTotal = h.match(/txtMax[^>]*>([\d\.,]+)<\/span>/i) ||
-                     h.match(/totalNota[^>]*>([\d\.,]+)</i) ||
-                     h.match(/vLtn[^>]*>([\d\.,]+)</i);
-  if (matchTotal) {
-    valorTotalNota = parseFloat(matchTotal[1].replace(/\./g, '').replace(',', '.')) || 0;
-  }
+  const cnpj = plano.match(/CNPJ:\s*([\d./-]{14,20})/i)?.[1]?.trim() ?? null;
 
-  // 4. Data Emissão
+  const totalTexto =
+    plano.match(/Valor\s+total\s*(?:R\$)?\s*\|?\s*([\d.,]+)/i)?.[1] ??
+    h.match(/txtMax[^>]*>\s*([\d.,]+)/i)?.[1];
+
   let dataEmissao: string | null = null;
-  const matchData = h.match(/Emiss[aã]o:\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i);
+  const matchData = plano.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})/);
   if (matchData) {
-    const [d, m, y, h, min, s] = matchData[1].split(/[\/\s:]/);
-    dataEmissao = `${y}-${m}-${d}T${h}:${min}:${s}Z`;
-  }
-
-  // 5. Itens
-  const itens: ItemNFCe[] = [];
-  // Layout de SP primeiro: é o estado que esta função atende hoje.
-  const itensSp = parseItensLayoutSp(h);
-  if (itensSp.length > 0) itens.push(...itensSp);
-
-  const blocosItens = itens.length === 0 ? h.split(/<tr id=["']Item\d+["']/i).slice(1) : [];
-
-  if (blocosItens.length > 0) {
-    blocosItens.forEach((bloco, idx) => {
-      const matchNome = bloco.match(/class=["']txtTit["'][^>]*>(.*?)<\/span>/i);
-      const matchCod = bloco.match(/\(C[oó]digo:\s*(\d+)\)/i);
-      const matchQtd = bloco.match(/Qtd\.:\s*<\/span>\s*<strong[^>]*>([\d\.,]+)<\/strong>/i) || bloco.match(/Qtd\.:\s*([\d\.,]+)/i);
-      const matchUn = bloco.match(/UN:\s*<\/span>\s*<strong[^>]*>([^<]+)<\/strong>/i) || bloco.match(/UN:\s*([A-Za-z0-9]+)/i);
-      const matchVlUnit = bloco.match(/Vl\.\s*Unit\.:\s*<\/span>\s*<strong[^>]*>([\d\.,]+)<\/strong>/i) || bloco.match(/Vl\.\s*Unit\.:\s*([\d\.,]+)/i);
-      const matchVlTotal = bloco.match(/class=["']valor["'][^>]*>([\d\.,]+)<\/span>/i) || bloco.match(/class=["']vItem["'][^>]*>([\d\.,]+)<\/span>/i);
-
-      const nome = matchNome ? matchNome[1].replace(/<[^>]+>/g, '').trim() : `Item ${idx + 1}`;
-      // "(Código: NNN)" é o cProd do emitente, NÃO um EAN. Só promove a gtin
-      // quando o número realmente passa na validação de GTIN.
-      const codigo = matchCod ? matchCod[1].trim() : null;
-      const gtin = codigo && ehGtinValido(codigo) ? codigo : null;
-      const qtd = matchQtd ? parseFloat(matchQtd[1].replace(/\./g, '').replace(',', '.')) : 1;
-      const un = matchUn ? matchUn[1].trim().toLowerCase() : 'un';
-      const vlUnit = matchVlUnit ? parseFloat(matchVlUnit[1].replace(/\./g, '').replace(',', '.')) : 0;
-      const vlTotal = matchVlTotal ? parseFloat(matchVlTotal[1].replace(/\./g, '').replace(',', '.')) : (qtd * vlUnit);
-
-      if (nome) {
-        itens.push({
-          num_item: idx + 1,
-          descricao: nome,
-          gtin,
-          codigo_fornecedor: codigo,
-          qtd,
-          unidade: un,
-          valor_unitario: vlUnit,
-          valor_total: vlTotal
-        });
-      }
-    });
-  } else if (itens.length === 0) {
-    // Fallback: Regex genérica sobre tabela simples
-    const regexLinha = /<span class="txtTit">([^<]+)<\/span>[\s\S]*?Qtd\.:\s*<strong[^>]*>([\d\.,]+)<\/strong>[\s\S]*?UN:\s*<strong[^>]*>([^<]+)<\/strong>[\s\S]*?Vl\.\s*Unit\.:\s*<strong[^>]*>([\d\.,]+)<\/strong>[\s\S]*?<span class="valor">([\d\.,]+)<\/span>/gi;
-    let match;
-    let idx = 1;
-    while ((match = regexLinha.exec(h)) !== null) {
-      itens.push({
-        num_item: idx++,
-        descricao: match[1].trim(),
-        gtin: null,
-        qtd: parseFloat(match[2].replace(/\./g, '').replace(',', '.')),
-        unidade: match[3].trim().toLowerCase(),
-        valor_unitario: parseFloat(match[4].replace(/\./g, '').replace(',', '.')),
-        valor_total: parseFloat(match[5].replace(/\./g, '').replace(',', '.'))
-      });
-    }
+    const [, d, m, a, hh, mm, ss] = matchData;
+    dataEmissao = `${a}-${m}-${d}T${hh}:${mm}:${ss}Z`;
   }
 
   return {
@@ -209,8 +163,7 @@ export function parseHtmlSefazSp(html: string, chave: string): DadosNFCe {
     uf: 'SP',
     emitente: { razao_social: razaoSocial, cnpj },
     data_emissao: dataEmissao,
-    valor_total: valorTotalNota || itens.reduce((acc, i) => acc + i.valor_total, 0),
-    itens
+    valor_total: numeroBr(totalTexto) || itens.reduce((acc, i) => acc + i.valor_total, 0),
+    itens,
   };
 }
-

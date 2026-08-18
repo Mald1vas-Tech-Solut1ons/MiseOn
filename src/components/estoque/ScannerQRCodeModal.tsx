@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { QrCode, Camera, Keyboard, X, ArrowRight, Loader2, AlertCircle, Image as ImageIcon, Zap, ZapOff } from 'lucide-react';
+import { temDetectorNativo, lerQrDeImagem, lerQrDeVideo, type EtapaLeitura } from '../../lib/lerQrCode';
+
+const TEXTO_ETAPA: Record<EtapaLeitura, string> = {
+  lendo: 'Procurando o QR Code na imagem...',
+  ampliando: 'Ampliando a imagem...',
+  realcando: 'Realçando o contraste...',
+  varrendo: 'Varrendo a foto por partes...',
+};
 
 interface Props {
   onFechar: () => void;
@@ -10,106 +18,123 @@ interface Props {
 
 type Modo = 'CAMERA' | 'FOTO' | 'DIGITACAO';
 
-/**
- * QR Code de cupom fiscal é denso (uns 60x60 módulos, contra 25x25 de um QR de
- * link comum) e vem impresso pequeno em papel térmico. Isso exige três coisas
- * que a configuração padrão do html5-qrcode não dá:
- *
- *   1. resolução alta — a padrão (640x480) não separa os módulos;
- *   2. janela de leitura grande — o qrbox RECORTA o frame antes de decodificar,
- *      então uma janela de 250px joga fora justamente a resolução conquistada;
- *   3. decodificador nativo (BarcodeDetector) quando o aparelho tiver, que lê
- *      QR denso e desfocado muito melhor que o decodificador em JavaScript.
- */
-const CONFIG_LEITURA = {
-  fps: 10,
-  // 85% do menor lado: cupom precisa de área, não de mira pequena.
-  qrbox: (larguraVisivel: number, alturaVisivel: number) => {
-    const lado = Math.floor(Math.min(larguraVisivel, alturaVisivel) * 0.85);
-    return { width: lado, height: lado };
-  },
-  videoConstraints: {
-    facingMode: 'environment',
-    width: { ideal: 1920 },
-    height: { ideal: 1080 },
-    // Foco contínuo: sem isso a câmera fixa o foco no papel inteiro e o QR
-    // fica borrado justamente de perto, que é onde ele precisa ser lido.
-    focusMode: 'continuous',
-  } as unknown as MediaTrackConstraints,
-  experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-};
-
 export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Props) {
   const [modo, setModo] = useState<Modo>('CAMERA');
   const [chaveManual, setChaveManual] = useState('');
   const [erroCamera, setErroCamera] = useState<string | null>(null);
   const [erroFoto, setErroFoto] = useState<string | null>(null);
   const [lendoFoto, setLendoFoto] = useState(false);
+  const [etapa, setEtapa] = useState<EtapaLeitura | null>(null);
   const [lanternaLigada, setLanternaLigada] = useState(false);
   const [temLanterna, setTemLanterna] = useState(false);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [usandoNativo, setUsandoNativo] = useState(false);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const pararLeituraRef = useRef<(() => void) | null>(null);
+  const fallbackRef = useRef<Html5Qrcode | null>(null);
   const inputFotoRef = useRef<HTMLInputElement | null>(null);
-  const containerId = 'reader-nfce-qrcode';
+  const containerFallbackId = 'reader-nfce-fallback';
 
   useEffect(() => {
-    if (modo !== 'CAMERA') return;
+    if (modo !== 'CAMERA' || carregando) return;
 
     let cancelado = false;
 
-    const iniciarCamera = async () => {
-      try {
-        setErroCamera(null);
-        const scanner = new Html5Qrcode(containerId, {
-          verbose: false,
-          // Só QR: não desperdiça frame procurando código de barras 1D.
-          formatsToSupport: [0],
-          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-        });
-        scannerRef.current = scanner;
+    const entregar = (valor: string) => {
+      if (cancelado) return;
+      cancelado = true;
+      if (navigator.vibrate) navigator.vibrate(100);
+      onLido(valor);
+    };
 
+    const iniciar = async () => {
+      setErroCamera(null);
+
+      // Caminho principal: mesma API que o app de câmera do celular usa, sobre
+      // o quadro inteiro em resolução cheia — sem recorte, sem redimensionar.
+      if (temDetectorNativo()) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+            },
+          });
+          if (cancelado) {
+            stream.getTracks().forEach((t) => t.stop());
+            return;
+          }
+          streamRef.current = stream;
+          setUsandoNativo(true);
+
+          const video = videoRef.current;
+          if (video) {
+            video.srcObject = stream;
+            video.setAttribute('playsinline', 'true');
+            await video.play().catch(() => {});
+            pararLeituraRef.current = lerQrDeVideo(video, entregar);
+          }
+
+          const trilha = stream.getVideoTracks()[0];
+          const capacidades = trilha?.getCapabilities?.() as { torch?: boolean } | undefined;
+          if (capacidades?.torch) setTemLanterna(true);
+          return;
+        } catch (err) {
+          console.warn('Câmera nativa indisponível:', err);
+        }
+      }
+
+      // Alternativa para aparelho sem BarcodeDetector (hoje, iPhone).
+      try {
+        setUsandoNativo(false);
+        const scanner = new Html5Qrcode(containerFallbackId, { verbose: false });
+        fallbackRef.current = scanner;
         await scanner.start(
           { facingMode: 'environment' },
-          CONFIG_LEITURA,
-          (textoLido) => {
-            if (cancelado) return;
-            cancelado = true;
-            if (navigator.vibrate) navigator.vibrate(100);
-            scanner.stop().catch(() => {});
-            onLido(textoLido);
+          {
+            fps: 10,
+            qrbox: (l: number, a: number) => {
+              const lado = Math.floor(Math.min(l, a) * 0.9);
+              return { width: lado, height: lado };
+            },
+            videoConstraints: {
+              facingMode: 'environment',
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+              focusMode: 'continuous',
+            } as unknown as MediaTrackConstraints,
           },
-          () => {
-            // Frame sem QR: silencioso, acontece dezenas de vezes por segundo.
-          }
+          entregar,
+          () => {},
         );
-
-        // Lanterna ajuda muito em papel térmico desbotado e luz fraca.
-        const capacidades = scanner.getRunningTrackCapabilities?.() as { torch?: boolean } | undefined;
-        if (!cancelado && capacidades?.torch) setTemLanterna(true);
       } catch (err) {
         console.warn('Câmera indisponível:', err);
         setErroCamera(
-          'Não foi possível acessar a câmera. Use "Foto do cupom" para ler o QR Code a partir de uma imagem.'
+          'Não consegui abrir a câmera. Use "Foto do cupom": funciona a partir de uma imagem já salva.',
         );
       }
     };
 
-    iniciarCamera();
+    void iniciar();
 
     return () => {
       cancelado = true;
-      const scanner = scannerRef.current;
-      if (scanner?.isScanning) scanner.stop().catch(() => {});
-      scannerRef.current = null;
+      pararLeituraRef.current?.();
+      pararLeituraRef.current = null;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+      if (fallbackRef.current?.isScanning) fallbackRef.current.stop().catch(() => {});
+      fallbackRef.current = null;
     };
-  }, [modo, onLido]);
+  }, [modo, carregando, onLido]);
 
   const alternarLanterna = async () => {
-    const scanner = scannerRef.current;
-    if (!scanner) return;
+    const trilha = streamRef.current?.getVideoTracks()[0];
+    if (!trilha) return;
     try {
-      // `torch` existe nos navegadores móveis, mas ainda não na tipagem padrão
-      // de MediaTrackConstraintSet — daí o cast.
-      await scanner.applyVideoConstraints({
+      await trilha.applyConstraints({
         advanced: [{ torch: !lanternaLigada }],
       } as unknown as MediaTrackConstraints);
       setLanternaLigada((v) => !v);
@@ -119,28 +144,30 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
   };
 
   /**
-   * Leitura por imagem. Costuma resolver o cupom que a câmera ao vivo não pega:
-   * a foto congela o quadro no melhor foco, sem depender de mão firme.
+   * Leitura por imagem: resolve o cupom que a câmera ao vivo não pega, porque a
+   * foto congela o melhor foco. Usa o detector nativo na imagem em resolução
+   * cheia e, se preciso, insiste com ampliação e binarização.
    */
   const lerDeArquivo = async (arquivo: File) => {
     setErroFoto(null);
     setLendoFoto(true);
+    setEtapa('lendo');
     try {
-      const scanner = new Html5Qrcode(containerId, {
-        verbose: false,
-        formatsToSupport: [0],
-        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-      });
-      const texto = await scanner.scanFile(arquivo, false);
-      onLido(texto);
+      const valor = await lerQrDeImagem(arquivo, setEtapa);
+      if (valor) {
+        onLido(valor);
+        return;
+      }
+      setErroFoto(
+        'Não achei o QR Code nessa imagem. Tire outra foto com o cupom esticado sobre uma superfície ' +
+          'plana, com o QR ocupando boa parte do quadro e sem sombra em cima dele.',
+      );
     } catch (err) {
       console.warn('Falha ao ler QR da imagem:', err);
-      setErroFoto(
-        'Não consegui achar o QR Code nessa imagem. Tire a foto de perto, só do quadrado do QR, ' +
-          'com o cupom esticado e boa luz — sem pegar o restante do cupom.'
-      );
+      setErroFoto('Não consegui abrir essa imagem. Tente uma foto em JPG ou PNG.');
     } finally {
       setLendoFoto(false);
+      setEtapa(null);
     }
   };
 
@@ -164,13 +191,13 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
           <X size={20} />
         </button>
 
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-4 pr-8">
           <div className="rounded-xl bg-orange-100 p-2.5 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
             <QrCode size={22} />
           </div>
           <div>
-            <h3 className="font-black text-lg text-gray-900 dark:text-gray-100">Escanear Cupom Fiscal (NFC-e)</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Importação automática sem digitação manual</p>
+            <h3 className="font-black text-base leading-tight text-gray-900 dark:text-gray-100">Escanear Cupom Fiscal</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Importação sem digitação manual</p>
           </div>
         </div>
 
@@ -179,10 +206,10 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
             <Camera size={14} /> Câmera
           </button>
           <button onClick={() => setModo('FOTO')} className={classeAba('FOTO')}>
-            <ImageIcon size={14} /> Foto do cupom
+            <ImageIcon size={14} /> Foto
           </button>
           <button onClick={() => setModo('DIGITACAO')} className={classeAba('DIGITACAO')}>
-            <Keyboard size={14} /> Colar URL
+            <Keyboard size={14} /> URL
           </button>
         </div>
 
@@ -190,7 +217,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Loader2 size={36} className="animate-spin text-orange-600 mb-3" />
             <p className="font-bold text-sm text-gray-900 dark:text-gray-100">Consultando nota na SEFAZ SP...</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Buscando itens, quantidades e valores em tempo real.</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Buscando itens, quantidades e valores.</p>
           </div>
         ) : modo === 'CAMERA' ? (
           <div>
@@ -204,10 +231,19 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
               </div>
             ) : (
               <div>
-                <div id={containerId} className="overflow-hidden rounded-xl border-2 border-dashed border-orange-300 bg-black min-h-[280px]" />
-                <div className="mt-3 flex items-center justify-between gap-2">
+                <div className="relative overflow-hidden rounded-xl border-2 border-dashed border-orange-300 bg-black">
+                  <video
+                    ref={videoRef}
+                    className={usandoNativo ? 'block max-h-[320px] w-full object-cover' : 'hidden'}
+                    muted
+                    playsInline
+                  />
+                  <div id={containerFallbackId} className={usandoNativo ? 'hidden' : 'min-h-[280px]'} />
+                </div>
+                <div className="mt-3 flex items-start justify-between gap-2">
                   <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                    Encoste a câmera no QR Code, a uns 10 cm, com o cupom esticado.
+                    Encoste no QR Code do cupom, a uns 10 cm, com o papel esticado.
+                    {usandoNativo && <span className="block text-emerald-600 dark:text-emerald-400">Leitor do próprio aparelho ativo.</span>}
                   </p>
                   {temLanterna && (
                     <button
@@ -224,18 +260,26 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
           </div>
         ) : modo === 'FOTO' ? (
           <div className="space-y-4">
-            <div id={containerId} className="hidden" />
-            <div className="rounded-xl border-2 border-dashed border-orange-300 dark:border-orange-900/50 p-6 text-center">
-              <ImageIcon size={30} className="mx-auto text-orange-500 mb-2" />
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-                Tire uma foto <strong>só do quadrado do QR Code</strong>, bem de perto e com o cupom esticado.
-                Costuma funcionar quando a câmera ao vivo não pega.
-              </p>
+            <div id={containerFallbackId} className="hidden" />
+            <div className="rounded-xl border-2 border-dashed border-orange-300 dark:border-orange-900/50 p-5">
+              <div className="mb-4 flex items-start gap-2">
+                <ImageIcon size={22} className="mt-0.5 shrink-0 text-orange-500" />
+                <div>
+                  <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Como fotografar</p>
+                  <ol className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-gray-600 dark:text-gray-400">
+                    <li><strong>1.</strong> Deixe o cupom esticado sobre uma mesa, sem dobra no QR.</li>
+                    <li><strong>2.</strong> Fotografe de cima, a uns 15 cm, com o QR no meio do quadro.</li>
+                    <li><strong>3.</strong> Evite sombra da própria mão e reflexo em cima do código.</li>
+                  </ol>
+                  <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-500">
+                    Serve foto da galeria, inclusive uma que você já tirou antes.
+                  </p>
+                </div>
+              </div>
               <input
                 ref={inputFotoRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 className="hidden"
                 onChange={(e) => {
                   const arquivo = e.target.files?.[0];
@@ -248,9 +292,12 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
                 disabled={lendoFoto}
                 className="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl shadow-md transition disabled:opacity-50"
               >
-                {lendoFoto ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
-                {lendoFoto ? 'Lendo a imagem...' : 'Escolher / tirar foto'}
+                {lendoFoto ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}
+                {lendoFoto ? 'Lendo...' : 'Escolher foto do cupom'}
               </button>
+              {lendoFoto && etapa && (
+                <p className="mt-2 text-center text-[11px] text-gray-500 dark:text-gray-400">{TEXTO_ETAPA[etapa]}</p>
+              )}
             </div>
             {erroFoto && (
               <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-900/40">
@@ -273,9 +320,9 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
                 className="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-xs font-mono focus:border-orange-500 focus:outline-none"
               />
               <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                Precisa ser a URL de dentro do QR Code, com o trecho <code className="font-mono">?p=</code> e as
-                barras verticais. A chave de 44 dígitos sozinha não serve: a SEFAZ exige o código de segurança
-                que só existe no QR.
+                Dica: leia o QR com a câmera do próprio celular, copie o endereço que abrir e cole aqui.
+                A chave de 44 dígitos sozinha não serve — a SEFAZ exige o código de segurança que só
+                existe dentro do QR.
               </p>
             </div>
             <button
