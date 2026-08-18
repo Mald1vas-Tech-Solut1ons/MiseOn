@@ -299,11 +299,24 @@ export default function WhatsApp() {
     }
   }, [chamar, lojaId, carregar, toast, aguardarConexaoDoServidor, trocandoNumero]);
 
-  // Conectar com Facebook — SEM await antes do FB.login (ver comentário acima).
+  // Conectar com Facebook — vai pelo REDIRECT, não pelo popup do JS SDK.
+  //
+  // Motivo: o app da MiseOn está com "Iniciar sessão com o SDK do Javascript"
+  // DESLIGADO no painel da Meta. Com o SDK carregado, o FB.login abre um popup
+  // que morre na hora com "A opção JSSDK não está ativada" e nunca devolve o
+  // `code` — nada chega ao servidor e a tela segue DESCONECTADO.
+  //
+  // O dialog OAuth por redirect (client_id + config_id) não depende dessa opção
+  // e é o caminho que a Meta conclui até o "conta associada". Quando a opção for
+  // ligada no painel, dá para voltar a usar `conectarPorPopup` abaixo.
   const conectarComFacebook = () => {
+    void conectarPorRedirect();
+  };
+
+  // Popup do Embedded Signup — só funciona com o JSSDK habilitado no app da Meta.
+  // Mantido porque é a experiência melhor (não tira o lojista do painel).
+  const conectarPorPopup = () => {
     if (!window.FB) {
-      // SDK bloqueado ou ainda carregando: vai pelo redirect, que não depende
-      // de popup nem de comunicação entre janelas.
       void conectarPorRedirect();
       return;
     }
@@ -320,6 +333,7 @@ export default function WhatsApp() {
       extras: META_EXTRAS,
     });
   };
+  void conectarPorPopup;
 
   // Saída de emergência: leva a página inteira para a Meta e volta em
   // /admin/whatsapp?code=… — nada de popup, nada de postMessage. Aqui dá para
