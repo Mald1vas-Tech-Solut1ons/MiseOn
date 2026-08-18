@@ -1,4 +1,18 @@
 
+# ── iFood ──────────────────────────────────────────────────────────────────
+# O iFood bate no webhook sem nenhum JWT do Supabase → verify_jwt = false é OBRIGATÓRIO.
+# Sem isso a função retorna 401 e o iFood marca o webhook como falho.
+[functions.ifood-webhook]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ifood-webhook/index.ts"
+
+# A autenticação do lojista é feita dentro da função (fn_sou_admin) → pode exigir JWT.
+[functions.ifood-auth]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ifood-auth/index.ts"
+
 [functions.magic-copy]
 enabled = true
 verify_jwt = true
