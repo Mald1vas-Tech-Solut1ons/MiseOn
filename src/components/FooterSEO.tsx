@@ -179,6 +179,8 @@ export function FooterSEO() {
             <button
               type="button"
               onClick={abrirGerenciadorCookies}
+              title="Gerenciar preferências de privacidade e cookies (LGPD)"
+              aria-label="Gerenciar preferências de privacidade e cookies (LGPD)"
               className="inline-flex items-center gap-1 font-semibold text-slate-400 transition-colors hover:text-orange-400 hover:underline"
             >
               <Cookie size={12} className="text-orange-400" /> Gerenciar Cookies (LGPD)
