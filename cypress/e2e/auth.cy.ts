@@ -8,6 +8,7 @@ describe('Autenticação', () => {
   it('deve simular login e exibir "Minha Conta"', () => {
     cy.visit('/teste');
     cy.wait('@getLojas');
+    cy.dismissCookieBanner();
 
     // Ao invés de clicar no botão e sair da página (OAuth redirect), 
     // nós injetamos o mock de autenticação e recarregamos.

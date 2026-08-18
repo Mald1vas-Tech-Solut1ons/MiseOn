@@ -4,9 +4,18 @@ declare global {
   namespace Cypress {
     interface Chainable {
       mockAuth(userId?: string): Chainable<void>;
+      dismissCookieBanner(): Chainable<void>;
     }
   }
 }
+
+Cypress.Commands.add('dismissCookieBanner', () => {
+  cy.get('body').then(($body) => {
+    if ($body.text().includes('Sua Privacidade Importa (LGPD)')) {
+      cy.contains('Aceitar Todos').click();
+    }
+  });
+});
 
 Cypress.Commands.add('mockAuth', (userId = '00000000-0000-0000-0000-000000000000') => {
   const session = {

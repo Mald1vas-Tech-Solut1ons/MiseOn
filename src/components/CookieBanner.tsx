@@ -49,8 +49,7 @@ export function CookieBanner() {
     };
   }, []);
 
-  const isCypress = typeof window !== 'undefined' && ((window as any).Cypress || (import.meta as any).env?.VITE_CYPRESS === 'true');
-  if (isCypress || !visivel) return null;
+  if (!visivel) return null;
 
   const handleAceitarTodos = () => {
     aceitarTodos();

@@ -9,6 +9,7 @@ describe('Fluxo de Pedidos', () => {
     cy.mockAuth();
     cy.visit('/teste');
     cy.wait('@getLojas');
+    cy.dismissCookieBanner();
 
     // Clica no produto
     cy.contains('X-Burger').click();
@@ -44,6 +45,8 @@ describe('Fluxo de Pedidos', () => {
   it('deve utilizar cashback no pedido', () => {
     cy.mockAuth();
     cy.visit('/teste');
+    cy.wait('@getLojas');
+    cy.dismissCookieBanner();
 
     cy.contains('X-Burger').click();
     cy.contains('Adicionar').click();
@@ -83,6 +86,7 @@ describe('Fluxo de Pedidos', () => {
 
     cy.visit('/admin/pedidos');
     cy.wait('@getAdminPedidos');
+    cy.dismissCookieBanner();
 
     cy.contains('#1002').should('be.visible');
     cy.get('button[title*="Cancelar"]').click();

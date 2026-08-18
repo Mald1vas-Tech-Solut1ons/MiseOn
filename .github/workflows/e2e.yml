@@ -28,7 +28,6 @@ jobs:
           VITE_SUPABASE_URL: 'https://placeholder.supabase.co'
           VITE_SUPABASE_ANON_KEY: 'placeholder'
           CYPRESS_E2E: 'true'
-          VITE_CYPRESS: 'true'
           CYPRESS_BASE_URL: 'http://localhost:4173'
 
       - name: Check Coverage
