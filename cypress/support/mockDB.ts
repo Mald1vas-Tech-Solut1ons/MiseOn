@@ -72,6 +72,10 @@ export const mockSupabase = () => {
     body: [{ id: 'client-1', user_id: '00000000-0000-0000-0000-000000000000', nome: 'Test User', telefone: '11999999999', saldo_cashback: 10.00 }]
   }).as('getClientes');
 
+  cy.intercept('GET', '**/rest/v1/enderecos_cliente*', { body: [] });
+  cy.intercept('GET', '**/rest/v1/favoritos_cliente*', { body: [] });
+  cy.intercept('GET', '**/rest/v1/pedidos*', { body: [] });
+
   cy.intercept('POST', '**/rest/v1/clientes*', {
     statusCode: 200,
     body: { id: 'client-1' }
