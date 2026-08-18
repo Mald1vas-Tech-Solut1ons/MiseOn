@@ -5,6 +5,8 @@
  * - Essenciais: Autenticação, carrinho, tema e segurança (sempre ativas/obrigatórias).
  * - Analíticos: Estatísticas de navegação, relatórios de tráfego (Google Analytics 4).
  * - Marketing: Rastreamento de conversões e campanhas (Meta Pixel / Facebook Ads).
+ *
+ * Em conformidade com a ANPD e diretrizes de privacidade do MiseOn.
  */
 
 export type TipoConsentimento = 'indefinido' | 'aceito_todos' | 'apenas_essenciais' | 'personalizado';
