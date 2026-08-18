@@ -1,4 +1,22 @@
 /// <reference types="vite-plugin-pwa/client" />
+
+// Global WebSocket URL sanitizer: prevents stray %0A or trailing newlines in any WebSocket URL
+if (typeof window !== 'undefined' && window.WebSocket) {
+  const NativeWebSocket = window.WebSocket;
+  function CustomWebSocket(this: WebSocket, url: string | URL, protocols?: string | string[]) {
+    const cleanUrl = typeof url === 'string'
+      ? url.replace(/%0[aAdD]/g, '').replace(/[\r\n\t\0\s]+/g, '')
+      : url;
+    return new (NativeWebSocket as any)(cleanUrl, protocols);
+  }
+  CustomWebSocket.prototype = NativeWebSocket.prototype;
+  CustomWebSocket.CONNECTING = NativeWebSocket.CONNECTING;
+  CustomWebSocket.OPEN = NativeWebSocket.OPEN;
+  CustomWebSocket.CLOSING = NativeWebSocket.CLOSING;
+  CustomWebSocket.CLOSED = NativeWebSocket.CLOSED;
+  window.WebSocket = CustomWebSocket as any;
+}
+
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
