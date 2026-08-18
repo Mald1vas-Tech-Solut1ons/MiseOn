@@ -130,6 +130,7 @@ export default function WhatsApp() {
   const [finalizando, setFinalizando] = useState(false);
   const [trocandoNumero, setTrocandoNumero] = useState(false);
   const [devolvendo, setDevolvendo] = useState(false);
+  const [sdkPronto, setSdkPronto] = useState(false);
   // sessionInfo do Embedded Signup: chega por postMessage ANTES do callback
   // do FB.login, então guardamos em ref para mandar junto com o code.
   const sessionInfo = useRef<SessionInfo>({});
@@ -215,32 +216,23 @@ export default function WhatsApp() {
     return () => window.removeEventListener('message', aoReceber);
   }, []);
 
-  // Conectar com Facebook: popup do SDK e, se ele não carregar, redirect.
-  const conectarComFacebook = async () => {
-    setFinalizando(true);
-    sessionInfo.current = {};
-    let FB: any;
-    try {
-      FB = await carregarFbSdk();
-    } catch {
-      // sem SDK (bloqueador/rede) → fluxo por redirect, que volta com ?code=
-      window.location.href = urlDialogOAuth();
+  // O SDK é carregado ANTES do clique, de propósito: o FB.login precisa rodar
+  // dentro do próprio gesto do usuário. Chamado depois de um await, o popup até
+  // abre, mas perde o vínculo com a janela que o abriu — a tela final da Meta
+  // fica aberta para sempre e o callback com o `code` nunca chega.
+  useEffect(() => {
+    carregarFbSdk().then(() => setSdkPronto(true)).catch(() => setSdkPronto(false));
+  }, []);
+
+  // Recebe o `code` do popup e fecha a conexão no servidor.
+  const finalizarLogin = useCallback(async (resposta: any) => {
+    const code = resposta?.authResponse?.code;
+    if (!code) {
+      setFinalizando(false);
+      toast('Conexão cancelada na janela da Meta. Nada foi alterado.', 'erro');
       return;
     }
     try {
-      const resposta: any = await new Promise((resolve) => {
-        FB.login(resolve, {
-          config_id: META_CONFIG_ID,
-          response_type: 'code',
-          override_default_response_type: true,
-          extras: META_EXTRAS,
-        });
-      });
-      const code = resposta?.authResponse?.code;
-      if (!code) {
-        toast('Conexão cancelada na janela da Meta. Nada foi alterado.', 'erro');
-        return;
-      }
       const data = await chamar({
         acao: 'trocar_codigo',
         loja_id: lojaId,
@@ -255,6 +247,30 @@ export default function WhatsApp() {
     } finally {
       setFinalizando(false);
     }
+  }, [chamar, lojaId, carregar, toast]);
+
+  // Conectar com Facebook — SEM await antes do FB.login (ver comentário acima).
+  const conectarComFacebook = () => {
+    if (!window.FB) {
+      // SDK bloqueado ou ainda carregando: vai pelo redirect, que não depende
+      // de popup nem de comunicação entre janelas.
+      window.location.href = urlDialogOAuth();
+      return;
+    }
+    sessionInfo.current = {};
+    setFinalizando(true);
+    window.FB.login((resposta: any) => { void finalizarLogin(resposta); }, {
+      config_id: META_CONFIG_ID,
+      response_type: 'code',
+      override_default_response_type: true,
+      extras: META_EXTRAS,
+    });
+  };
+
+  // Saída de emergência: leva a página inteira para a Meta e volta em
+  // /admin/whatsapp?code=… — nada de popup, nada de postMessage.
+  const conectarPorRedirect = () => {
+    window.location.href = urlDialogOAuth();
   };
 
   const testar = async () => {
@@ -475,7 +491,14 @@ export default function WhatsApp() {
               </button>
               <span className="text-[11px] text-emerald-200/70">
                 Processo oficial da Meta · leva menos de 2 minutos
+                {!sdkPronto && ' · abrindo na própria aba'}
               </span>
+              <button
+                onClick={conectarPorRedirect}
+                className="text-[11px] font-bold text-emerald-200/90 underline underline-offset-2 transition hover:text-white"
+              >
+                A janela da Meta travou ou não fechou? Concluir sem janela extra
+              </button>
             </div>
           </div>
         )}

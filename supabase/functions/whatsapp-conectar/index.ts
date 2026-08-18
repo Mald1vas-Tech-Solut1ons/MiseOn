@@ -649,27 +649,47 @@ serve(async (req) => {
       }
 
       // (a) troca o code pelo access token da Meta.
-      //     No fluxo de REDIRECT a Meta exige o mesmo redirect_uri usado no
-      //     dialog; no fluxo do SDK (popup) o parâmetro não vai.
-      const paramsTroca: Record<string, string> = {
-        client_id: META_APP_ID,
-        client_secret: META_APP_SECRET,
-        code: String(code),
-      };
-      if (redirect_uri) paramsTroca.redirect_uri = String(redirect_uri);
-      const trocaRes = await fetch(
-        `${GRAPH}/oauth/access_token?` + new URLSearchParams(paramsTroca),
-      );
-      const troca = await trocaRes.json().catch(() => ({}));
-      if (!trocaRes.ok || !troca.access_token) {
-        const detalhe = msgGraph(troca);
-        console.error("trocar_codigo: falha na troca do código:", detalhe);
-        return erro(
-          "A Meta recusou a autorização. Tente conectar novamente — se persistir, fale com o suporte. " +
-          `(Detalhe da Meta: ${detalhe})`,
+      //     O redirect_uri precisa ser IDÊNTICO ao usado para obter o code:
+      //     obrigatório no fluxo de redirect, proibido no popup do SDK. Como o
+      //     painel do lojista pode estar com uma versão antiga em cache (e não
+      //     mandar o campo), tentamos as variações em vez de falhar por isso.
+      const tentativasRedirect: Array<string | null> = [];
+      if (redirect_uri) tentativasRedirect.push(String(redirect_uri));
+      tentativasRedirect.push(null); // popup do SDK
+      for (const padrao of ["https://miseon.app.br/admin/whatsapp", "https://www.miseon.app.br/admin/whatsapp"]) {
+        if (!tentativasRedirect.includes(padrao)) tentativasRedirect.push(padrao);
+      }
+
+      let token = "";
+      let detalheTroca = "";
+      for (const tentativa of tentativasRedirect) {
+        const paramsTroca: Record<string, string> = {
+          client_id: META_APP_ID,
+          client_secret: META_APP_SECRET,
+          code: String(code),
+        };
+        if (tentativa) paramsTroca.redirect_uri = tentativa;
+        const trocaRes = await fetch(
+          `${GRAPH}/oauth/access_token?` + new URLSearchParams(paramsTroca),
+        );
+        const troca = await trocaRes.json().catch(() => ({}));
+        if (trocaRes.ok && troca.access_token) {
+          token = String(troca.access_token);
+          console.log(`trocar_codigo: code trocado com redirect_uri=${tentativa ?? "(nenhum)"}`);
+          break;
+        }
+        detalheTroca = msgGraph(troca);
+        console.warn(
+          `trocar_codigo: troca falhou com redirect_uri=${tentativa ?? "(nenhum)"}: ${detalheTroca}`,
         );
       }
-      const token = String(troca.access_token);
+      if (!token) {
+        console.error("trocar_codigo: nenhuma variação de redirect_uri funcionou:", detalheTroca);
+        return erro(
+          "A Meta recusou a autorização. Tente conectar novamente — se persistir, fale com o suporte. " +
+          `(Detalhe da Meta: ${detalheTroca})`,
+        );
+      }
 
       // (b) descobre a WABA: sessionInfo primeiro, debug_token como plano B
       let wabaId: string | null = wabaDoSession;

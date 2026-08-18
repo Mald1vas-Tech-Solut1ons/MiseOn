@@ -122,7 +122,17 @@ serve(async (req) => {
     const phoneNumberId: string | undefined = value?.metadata?.phone_number_id;
 
     if (!phoneNumberId) {
-      console.log("POST sem phone_number_id — descartado");
+      // Eventos de conta (account_update / PARTNER_ADDED do Embedded Signup) não
+      // trazem phone_number_id — mas trazem o waba_id da conta recém-compartilhada.
+      // Guardamos o payload: é com ele que o suporte conclui a conexão quando o
+      // popup da Meta não devolve o `code`.
+      const wabaId = payload?.entry?.[0]?.id ?? null;
+      await supabase.from("whatsapp_eventos_meta").insert({
+        waba_id: wabaId ? String(wabaId) : null,
+        campo: change?.field ? String(change.field) : null,
+        payload,
+      });
+      console.log(`Evento de conta sem phone_number_id registrado — waba_id: ${wabaId ?? "?"}`);
       return json({ ok: true, descartado: "sem phone_number_id" });
     }
 
