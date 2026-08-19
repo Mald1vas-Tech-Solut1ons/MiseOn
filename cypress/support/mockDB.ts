@@ -89,11 +89,20 @@ export const mockSupabase = () => {
     body: true
   });
 
-  // Checkout POSTs
+  // Checkout: o pedido inteiro nasce numa transacao no banco
+  // (fn_criar_pedido_completo). Antes o drawer fazia sete POSTs sequenciais e o
+  // mock precisava interceptar cada tabela; agora e uma chamada so.
+  cy.intercept('POST', '**/rpc/fn_criar_pedido_completo', {
+    statusCode: 200,
+    body: { pedido_id: 'pedido-1', numero: 1001, valor_total: 15 }
+  }).as('createPedido');
+
+  // Os POSTs de tabela seguem mockados: o PDV e o fluxo de mesa ainda escrevem
+  // direto, e sem isto uma chamada real vazaria para o Supabase de placeholder.
   cy.intercept('POST', '**/rest/v1/pedidos*', {
     statusCode: 201,
     body: { id: 'pedido-1', numero: 1001 }
-  }).as('createPedido');
+  });
 
   cy.intercept('POST', '**/rest/v1/itens_pedido*', {
     statusCode: 201,
