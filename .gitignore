@@ -44,3 +44,9 @@ cert_base64.txt
 coverage/
 cypress/screenshots/
 cypress/videos/
+
+# Backup logico do banco (scripts/qa/backup-logico.mjs).
+# Contem a base INTEIRA: dados de cliente, token do WhatsApp, credencial de
+# pagamento. Nunca versionar. Guarde fora do repositorio, criptografado.
+backups/
+*.json.gz
