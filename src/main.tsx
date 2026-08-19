@@ -209,6 +209,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/sistema-para-pizzaria"     element={<NicheLandingPage forcedSlug="sistema-para-pizzaria" />} />
               <Route path="/sistema-para-restaurantes" element={<NicheLandingPage forcedSlug="sistema-para-restaurantes" />} />
               <Route path="/sistema-para-restaurante-por-quilo" element={<NicheLandingPage forcedSlug="sistema-para-restaurante-por-quilo" />} />
+              <Route path="/sistema-para-bar"          element={<NicheLandingPage forcedSlug="sistema-para-bar" />} />
+              <Route path="/sistema-para-dark-kitchen" element={<NicheLandingPage forcedSlug="sistema-para-dark-kitchen" />} />
               <Route path="/integracao-ifood"          element={<NicheLandingPage forcedSlug="integracao-ifood" />} />
               <Route path="/cardapio-qr-code"          element={<NicheLandingPage forcedSlug="cardapio-qr-code" />} />
               <Route path="/api-whatsapp-restaurantes" element={<NicheLandingPage forcedSlug="api-whatsapp-restaurantes" />} />

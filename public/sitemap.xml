@@ -102,6 +102,16 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://miseon.app.br/sistema-para-bar</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://miseon.app.br/sistema-para-dark-kitchen</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://miseon.app.br/integracao-ifood</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>

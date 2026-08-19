@@ -3,7 +3,7 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import {
   ChefHat, UtensilsCrossed, Boxes, ShoppingBag, QrCode,
   MessageCircle, ShieldCheck, BarChart3, Bike, Wallet, Sparkles,
-  ArrowRight, Check, X, ChevronDown, Menu as MenuIcon
+  ArrowRight, Check, X, ChevronDown, Menu as MenuIcon, ScanLine, HeartPulse
 } from 'lucide-react';
 import { LANDING_PAGES_DATA } from '../../data/landingPagesData';
 import SEO from '../../components/SEO';
@@ -22,6 +22,10 @@ const ICON_MAP: Record<string, any> = {
   Bike,
   Wallet,
   Sparkles,
+  // Sem o nome no mapa, o card cai no icone generico e a feature perde
+  // identidade visual — o componente nao quebra, so fica sem sinal.
+  ScanLine,
+  HeartPulse,
 };
 
 interface NicheLandingPageProps {

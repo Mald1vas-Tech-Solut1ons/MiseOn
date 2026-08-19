@@ -68,6 +68,8 @@ export const PUBLIC_ROUTES = [
   { path: '/sistema-para-pizzaria', changefreq: 'weekly', priority: 0.9 },
   { path: '/sistema-para-restaurantes', changefreq: 'weekly', priority: 0.9 },
   { path: '/sistema-para-restaurante-por-quilo', changefreq: 'weekly', priority: 0.9 },
+  { path: '/sistema-para-bar', changefreq: 'weekly', priority: 0.9 },
+  { path: '/sistema-para-dark-kitchen', changefreq: 'weekly', priority: 0.9 },
   { path: '/integracao-ifood', changefreq: 'weekly', priority: 0.9 },
   { path: '/cardapio-qr-code', changefreq: 'weekly', priority: 0.9 },
   { path: '/api-whatsapp-restaurantes', changefreq: 'weekly', priority: 0.9 },
