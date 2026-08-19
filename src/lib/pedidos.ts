@@ -16,16 +16,6 @@ export interface CreatePedidoParams {
   carrinho: ItemCarrinho[];
 }
 
-// A coluna pedidos.etapa_kds_atual depende da migration
-// supabase/migrations/20260724010000_kds_etapas_kanban.sql. Enquanto ela não
-// estiver aplicada no banco, o PostgREST falha com PGRST204 / "schema cache".
-// Nesse caso refazemos a operação SEM o campo KDS para não quebrar o fluxo.
-export function isErroColunaKdsAusente(err: { code?: string; message?: string } | null): boolean {
-  if (!err) return false;
-  const msg = String(err.message ?? '').toLowerCase();
-  return err.code === 'PGRST204' || msg.includes('schema cache');
-}
-
 export async function createPedidoPedido(dados: CreatePedidoParams) {
   const temCozinha = dados.carrinho.some(
     (i) => i.produto.estacao_preparo === 'COZINHA' || !i.produto.estacao_preparo
@@ -48,15 +38,10 @@ export async function createPedidoPedido(dados: CreatePedidoParams) {
     enviado_cozinha_em: temCozinha ? new Date().toISOString() : null,
   };
 
-  let { data: ped, error: e1 } = await supabase.from('pedidos').insert({
+  const { data: ped, error: e1 } = await supabase.from('pedidos').insert({
     ...baseInsert,
     etapa_kds_atual: 'etapa_fila',
   }).select('id, numero').single();
-
-  // Fallback: banco ainda sem a coluna etapa_kds_atual (migration KDS Kanban pendente)
-  if (e1 && isErroColunaKdsAusente(e1)) {
-    ({ data: ped, error: e1 } = await supabase.from('pedidos').insert(baseInsert).select('id, numero').single());
-  }
 
   if (e1 || !ped) throw e1 ?? new Error('Falha ao criar o pedido');
 

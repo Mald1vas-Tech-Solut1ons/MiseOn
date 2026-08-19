@@ -22,7 +22,7 @@ import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
 import { useToast } from '../../components/ui/Toast';
 import { tocarSom } from '../../lib/som';
 import { traduzirErro } from '../../lib/erros';
-import { createPedidoPedido, isErroColunaKdsAusente } from '../../lib/pedidos';
+import { createPedidoPedido } from '../../lib/pedidos';
 import { getOptimizedImageUrl } from '../../lib/cdn';
 
 /* ─────────────────────────────────────────────────────────────
@@ -241,15 +241,10 @@ export default function PDV() {
           estacao_atual: temCozinha ? 'COZINHA' : 'BALCAO',
           enviado_cozinha_em: temCozinha ? new Date().toISOString() : null,
         };
-        // etapa_kds_atual depende da migration 20260724010000_kds_etapas_kanban.sql;
-        // se o banco ainda não tem a coluna (schema cache / PGRST204), refaz sem ela
-        let { error: eUpd } = await supabase.from('pedidos').update({
+        const { error: eUpd } = await supabase.from('pedidos').update({
           ...atualizacaoCozinha,
           etapa_kds_atual: 'etapa_fila',
         }).eq('id', ped.id);
-        if (isErroColunaKdsAusente(eUpd)) {
-          ({ error: eUpd } = await supabase.from('pedidos').update(atualizacaoCozinha).eq('id', ped.id));
-        }
         if (eUpd) console.error('Falha ao enviar pedido à cozinha:', eUpd);
         if (!temCozinha) {
           // Bypass completo pra revenda direta de balcão: o cliente já pegou a Coca-Cola e pagou
