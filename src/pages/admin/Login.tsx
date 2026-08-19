@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import MiseOnLogo from '../../components/MiseOnLogo';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Mail, KeyRound, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -66,7 +66,9 @@ export default function Login() {
         
         <div className="p-8 pb-6 text-center">
           <div className="flex justify-center mb-6">
-            <MiseOnLogo size={160} />
+            <Link to="/" className="transition hover:scale-105 active:scale-95">
+              <MiseOnLogo size={160} />
+            </Link>
           </div>
           <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Bem-vindo de volta</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Entre para gerenciar sua operação</p>
