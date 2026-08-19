@@ -42,6 +42,11 @@ jobs:
           wait-on: 'http://localhost:4173'
           wait-on-timeout: 180
           record: false
+          # Relatorio em arquivo para o passo de diagnostico abaixo conseguir
+          # ler o motivo da falha. Sem isto o erro fica so no log do Actions,
+          # que exige autenticacao para baixar — e quem precisa consertar nem
+          # sempre tem esse acesso.
+          command: npx cypress run --reporter json --reporter-options output=cypress-report.json
         env:
           VITE_SUPABASE_URL: 'https://placeholder.supabase.co'
           VITE_SUPABASE_ANON_KEY: 'placeholder'
@@ -61,6 +66,29 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # O `--reporter json` do passo acima grava o resultado em arquivo, mas
+      # troca o reporter padrao: o log do Actions perde a lista legivel de
+      # testes que falharam. Estes dois passos devolvem a informacao — um
+      # imprime as falhas no proprio log, o outro publica o relatorio como
+      # artefato. Sem eles o relatorio e gerado e ninguem consegue ler.
+      - name: Resumo das falhas no log
+        if: failure()
+        run: |
+          if [ -f cypress-report.json ]; then
+            node -e "const r=require('./cypress-report.json'); const f=r.failures||[]; if(!f.length){console.log('Nenhuma falha no relatorio.');} f.forEach(t=>{console.log('FALHOU: '+t.fullTitle); console.log('        '+((t.err&&t.err.message)||'sem mensagem'));});"
+          else
+            echo "cypress-report.json nao foi gerado."
+          fi
+
+      - name: Guardar relatorio do Cypress
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-report
+          path: cypress-report.json
           if-no-files-found: ignore
           retention-days: 7
 
