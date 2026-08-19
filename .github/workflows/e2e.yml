@@ -14,29 +14,73 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm install --legacy-peer-deps
-      
+
+      # A instalação das dependências fica por conta da action do Cypress, de
+      # propósito. Antes havia um `npm install --legacy-peer-deps` aqui antes
+      # dela — e é a causa clássica de "All jobs have failed" neste setup:
+      #
+      #   · o npm instala o PACOTE do cypress, mas o BINÁRIO (o Electron que
+      #     roda os testes) vem de um postinstall que baixa para ~/.cache/Cypress;
+      #   · o `cache: npm` do setup-node guarda ~/.npm, NÃO guarda esse binário;
+      #   · a action, vendo node_modules já pronto, pula a própria instalação —
+      #     que é justamente quem faria o cache e a verificação do binário.
+      #
+      #   Resultado: "the Cypress binary is missing", falhando cedo e derrubando
+      #   o job inteiro. O build e os testes em si estão sadios — verificado
+      #   rodando tsc, vite build, prerender, sitemap e os 4 specs contra o
+      #   commit exato que o CI reprovou: tudo passa.
+      #
+      # `install-command` usa `npm ci` para bater com o ci.yml e ser
+      # reproduzível (o `npm install --legacy-peer-deps` resolvia versões
+      # diferentes das do lockfile a cada execução).
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
         with:
+          install-command: npm ci --no-fund
           build: npm run build
           start: npm run preview
           wait-on: 'http://localhost:4173'
-          wait-on-timeout: 120
+          wait-on-timeout: 180
           record: false
         env:
           VITE_SUPABASE_URL: 'https://placeholder.supabase.co'
           VITE_SUPABASE_ANON_KEY: 'placeholder'
           CYPRESS_E2E: 'true'
           CYPRESS_BASE_URL: 'http://localhost:4173'
+          # Liga a instrumentação de cobertura só aqui. No build de produção
+          # ela fica desligada — ver vite.config.ts. O nome é CYPRESS_COVERAGE
+          # porque é essa env que o vite-plugin-istanbul lê quando
+          # `cypress: true`.
+          CYPRESS_COVERAGE: 'true'
 
+      # Diagnóstico: sem isto, um teste que quebra no CI e passa local não
+      # deixa nada para olhar depois.
+      - name: Guardar screenshots das falhas
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # Gate de cobertura REAL (sem `|| true`).
+      #
+      # Estava em 80% com `|| true` — nunca reprovava, e nem media: a
+      # instrumentacao nao chegava no bundle buildado, entao o nyc rodava sobre
+      # zero dado. Corrigido o `forceBuildInstrument`, a cobertura verdadeira
+      # apareceu: ~36% de statements, ~39% de linhas.
+      #
+      # O limite abaixo fica logo abaixo do medido em 19/08/2026. Nao e uma
+      # meta — e uma catraca: impede que a cobertura CAIA sem alguem perceber.
+      # Suba estes numeros conforme escrever mais teste.
       - name: Check Coverage
-        run: |
-          npx nyc check-coverage --lines 80 --functions 80 --branches 80 --statements 80 || true
-          
+        run: npx nyc check-coverage --lines 35 --functions 25 --branches 24 --statements 33
+
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: coverage-report
           path: coverage/
+          if-no-files-found: ignore

@@ -6,7 +6,10 @@ import tseslint from 'typescript-eslint';
 import react from 'eslint-plugin-react';
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'cypress', 'supabase'] },
+  // `coverage` e `.nyc_output` são saída gerada pelo istanbul: lintar aquilo
+  // enche o relatório de aviso sobre código de terceiros e esconde o que é
+  // seu. `.dist` é build antigo pelo mesmo motivo.
+  { ignores: ['dist', '.dist', 'node_modules', 'cypress', 'supabase', 'coverage', '.nyc_output'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

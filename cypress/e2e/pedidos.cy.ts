@@ -12,10 +12,10 @@ describe('Fluxo de Pedidos', () => {
     cy.dismissCookieBanner();
 
     // Clica no produto
-    cy.contains('X-Burger').click();
-    
+    cy.contains('X-Burger').filter(':visible').first().click();
+
     // Confirma modal de produto
-    cy.contains('Adicionar').click();
+    cy.contains('button', 'Adicionar').filter(':visible').first().click();
 
     // Carrinho deve conter o item X-Burger na tela
     cy.contains('X-Burger').should('be.visible');
@@ -24,8 +24,8 @@ describe('Fluxo de Pedidos', () => {
     cy.get('.vitrine-floating-cart:visible').click();
 
     // Seleciona Retirada e Pix
-    cy.contains('Retirada').click();
-    cy.contains('Pix').click();
+    cy.contains('button', 'Retirada').filter(':visible').first().click();
+    cy.contains('button', 'Pix').filter(':visible').first().click();
     
     // Mock do polling de pagamento
     cy.intercept('GET', '**/rest/v1/pagamentos*', {
@@ -33,7 +33,13 @@ describe('Fluxo de Pedidos', () => {
       body: [{ id: 'pag-1', status: 'PAGO' }]
     }).as('checkPagamento');
 
-    cy.get('button').contains('Finalizar Pedido').click();
+    // Ancora estavel em vez de texto: 'Finalizar Pedido' tambem e o TITULO do
+    // drawer, e cy.contains pega o primeiro no do DOM. Com o bundle
+    // instrumentado (mais lento) a ordem muda e o clique caia no elemento
+    // errado — passava local, quebrava no CI.
+    // scrollIntoView porque o botao fica na borda inferior do drawer, atras do
+    // balao do chat.
+    cy.get('[data-cy=checkout-finalizar]').scrollIntoView().should('be.visible').click();
 
     // Deve bater na function de pix
     cy.wait('@pixCreate');
@@ -48,8 +54,8 @@ describe('Fluxo de Pedidos', () => {
     cy.wait('@getLojas');
     cy.dismissCookieBanner();
 
-    cy.contains('X-Burger').click();
-    cy.contains('Adicionar').click();
+    cy.contains('X-Burger').filter(':visible').first().click();
+    cy.contains('button', 'Adicionar').filter(':visible').first().click();
     cy.get('.vitrine-floating-cart:visible').click();
 
     // Aguarda o cliente e saldo de cashback serem carregados
@@ -57,11 +63,15 @@ describe('Fluxo de Pedidos', () => {
     cy.wait('@getCashback');
 
     // Deve ter a opção de usar cashback
-    cy.contains('Usar meu cashback').click();
+    // scrollIntoView antes do assert: o drawer rola, e `should('be.visible')`
+    // nao rola sozinho (o `click()` rola, o assert nao).
+    cy.get('[data-cy=checkout-usar-cashback]').scrollIntoView().should('be.visible').click();
 
-    // O total era 15, com 10 de desconto deve virar 5
-    // Vamos procurar pelo valor formatado
-    cy.contains('R$ 5,00').should('be.visible');
+    // O total era 15, com 10 de desconto deve virar 5.
+    // scrollIntoView pelo mesmo motivo do toggle: em "Entrega" o formulario de
+    // endereco fica aberto e empurra os totais para fora da area visivel do
+    // drawer. Sem rolar, o assert falha mesmo com o valor correto na tela.
+    cy.contains('R$ 5,00').scrollIntoView().should('be.visible');
   });
 
   it('deve cancelar pedido no status NOVO com estorno', () => {

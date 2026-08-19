@@ -3,7 +3,24 @@
  *
  * Objetivo: Validar o SLA de produção sob carga de pico realista.
  *
- * Cenários:
+ * ATENCAO — este script esta OBSOLETO desde a blindagem de 19/08/2026 e vai
+ * dar falso negativo se rodado como esta:
+ *
+ *   - Cenario 1 bate em `pix-webhook` sem assinatura HMAC. A funcao valida
+ *     X-Efi-Signature e responde 401 em tudo: mede rejeicao, nao capacidade.
+ *   - Cenario 2 cria pedido como ANONIMO. A policy `cria_pedido_cliente_ou_staff`
+ *     agora exige cliente logado (ou staff da loja) — tudo volta 403.
+ *
+ * Enquanto ninguem reescrever com um JWT de cliente real e assinatura valida,
+ * use `node scripts/qa/carga-pedidos.mjs <concorrencia> <total>`, que ja roda
+ * autenticado e verifica o que realmente importa: numero de pedido duplicado.
+ *
+ * Medido em 19/08/2026 (200 pedidos, 25 em paralelo, contra producao):
+ *   leitura de cardapio  p50 322ms  p95 763ms  p99 951ms  0 erros
+ *   criacao de pedido    p50 324ms  p95 696ms  p99 712ms  0 erros
+ *   numeros de pedido    200 gerados, 200 distintos, 0 duplicados
+ *
+ * Cenários originais:
  *  1. Webhook Pix — 200 req/s por 30s → latência p95 < 800ms, erros < 0.1%
  *  2. Criação de pedidos — 50 req/s por 60s → números únicos, sem race condition
  *  3. Finalização de pedidos — 30 req/s → sem duplicata no ledger

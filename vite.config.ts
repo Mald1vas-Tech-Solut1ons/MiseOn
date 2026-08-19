@@ -8,9 +8,23 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    // Instrumentação de cobertura, ligada por CYPRESS_COVERAGE=true.
+    //
+    // Antes: `requireEnv: false` e sem `forceBuildInstrument`. Esse par não
+    // instrumentava nada no `vite build` — o plugin só age em `serve` a menos
+    // que `forceBuildInstrument` esteja ligado. Como o E2E roda contra
+    // `vite preview` (bundle buildado), a cobertura NUNCA foi coletada: daí o
+    // aviso "has no coverage information" e o `|| true` no `nyc
+    // check-coverage`, que deixava o gate de 80% puramente decorativo.
+    //
+    // O nome da env é CYPRESS_COVERAGE e não VITE_COVERAGE: com
+    // `cypress: true`, é essa que o plugin lê (dist/index.mjs, configResolved).
+    //
+    // Produção e `npm run dev` continuam sem contador — só o job de E2E liga.
     istanbul({
       cypress: true,
-      requireEnv: false,
+      requireEnv: true,
+      forceBuildInstrument: process.env.CYPRESS_COVERAGE === 'true',
     }),
     VitePWA({
       registerType: 'autoUpdate',
