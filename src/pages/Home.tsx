@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  QrCode, ClipboardList, ChefHat, Bike, Boxes, Wallet,
+  QrCode, ClipboardList, ChefHat, Bike, Boxes, Wallet, ScanLine,
   MessageCircle, ShieldCheck, ArrowRight, Check, Sparkles,
   Menu as MenuIcon, X, UtensilsCrossed, Megaphone, ShoppingBag,
   Mail, ChevronDown, Headset, BarChart3, Star, Quote, BadgeCheck, Scale,
@@ -75,6 +75,13 @@ const RECURSOS = [
     texto: 'Balcão e salão no mesmo sistema: comanda por mesa/assento, pedido direto na tela da cozinha e fechamento de conta sem confusão.',
     cor: 'text-amber-500',
     fundo: 'bg-amber-500/10',
+  },
+  {
+    icone: ScanLine,
+    titulo: 'Estoque pelo Cupom do Mercado (NFC-e)',
+    texto: 'Voltou da compra? Escaneie o QR Code do cupom e o sistema lê a nota na SEFAZ: produto, quantidade e custo. Você confere, escolhe o que entra e dá entrada de tudo de uma vez — sem digitar item por item.',
+    cor: 'text-orange-500',
+    fundo: 'bg-orange-500/10',
   },
   {
     icone: Boxes,
@@ -222,6 +229,11 @@ const SUPORTE_CANAIS = [
 ];
 
 const FAQ = [
+  {
+    pergunta: 'Preciso cadastrar item por item quando volto do mercado?',
+    resposta:
+      'Não. Escaneie o QR Code do cupom fiscal (NFC-e) com a câmera do celular — ou envie uma foto dele — e o MiseOn consulta a nota na SEFAZ e traz a lista completa: descrição, quantidade, unidade e custo de cada item. Na conferência você desmarca o que não é da cozinha, ajusta a conversão (uma bandeja de ovos vira 20 unidades) e dá entrada de todos de uma vez. Na compra seguinte no mesmo mercado, o reconhecimento já é automático — e a mesma nota nunca entra duas vezes.',
+  },
   {
     pergunta: 'Preciso comprar ou instalar algum equipamento?',
     resposta:
