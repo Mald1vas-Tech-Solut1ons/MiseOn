@@ -93,7 +93,7 @@ async function sendFailureEmail(orderId: string, lojaNome: string, errorMessage:
       }),
     });
   } catch (err) {
-    logger.warn('Falha ao enviar email de alerta', err);
+    logger.warn('Falha ao enviar email de alerta', { context: { erro: String(err) } });
   }
 }
 
@@ -136,7 +136,7 @@ serve(async (req: Request) => {
   const ipOrigem = ipDaRequisicao(req);
   const rl = await checkRateLimit(`ifood:${ipOrigem}`, { windowMs: 60_000, maxRequests: 120 });
   if (!rl.allowed) {
-    reqLogger.warn('Rate limit atingido no webhook iFood', { ip: ipOrigem });
+    reqLogger.warn('Rate limit atingido no webhook iFood', { context: { ip: ipOrigem } });
     // 429 e não 200: aqui queremos que o iFood reenvie o evento depois.
     return new Response('Too Many Requests', { status: 429, headers: corsHeaders });
   }
@@ -146,7 +146,7 @@ serve(async (req: Request) => {
     try { rawBody = await req.json(); } catch { rawBody = null; }
 
     // LOG TEMPORÁRIO: mostrar payload bruto para debug (remover após homologação)
-    reqLogger.info('RAW_PAYLOAD recebido', { raw: JSON.stringify(rawBody).slice(0, 500) });
+    reqLogger.info('RAW_PAYLOAD recebido', { context: { raw: JSON.stringify(rawBody).slice(0, 500) } });
 
     // iFood "Testar conexão" envia um objeto único; eventos reais chegam como array.
     // Normalizar para array em ambos os casos.
@@ -164,7 +164,7 @@ serve(async (req: Request) => {
 
     const events = validation.data;
     reqLogger.info(`Webhook processando ${events.length} evento(s)`, {
-      codes: events.map((e) => e.code).join(','),
+      context: { codes: events.map((e) => e.code).join(',') },
     });
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -217,7 +217,7 @@ serve(async (req: Request) => {
               continue;
             }
           } catch (e) {
-            reqLogger.warn(`Evento ${code} descartado: falha ao confirmar ${orderId} no iFood`, e);
+            reqLogger.warn(`Evento ${code} descartado: falha ao confirmar ${orderId} no iFood`, { context: { erro: String(e) } });
             continue;
           }
         }
@@ -226,143 +226,59 @@ serve(async (req: Request) => {
         if (code === 'PLC') {
           const order = await getOrderDetails(orderId, token);
 
-          const { data: loja } = await supabase
-            .from('lojas')
-            .select('id, nome, ifood_taxa_pct, ifood_taxa_fixa')
-            .eq('ifood_merchant_id', order.merchant?.id)
-            .single();
+          // Cliente, pedido, itens e pagamentos numa transacao so.
+          //
+          // Antes eram quatro escritas sequenciais daqui. Timeout da Edge
+          // Function ou queda no meio deixava pedido sem item — e logo abaixo
+          // o confirmOrder() avisava o iFood que tinhamos aceitado um pedido
+          // que o banco guardou pela metade. O laco de itens e o insert de
+          // pagamentos ainda por cima ignoravam o retorno, entao a perda era
+          // silenciosa.
+          //
+          // O pagamento, alias, NUNCA entrava quando o meio nao era PIX nem
+          // dinheiro: o codigo mandava metodo 'IFOOD' e o enum metodo_pgto nao
+          // tinha esse valor. Conferido no banco antes de mexer: zero pedidos
+          // de iFood tinham pagamento. Enum corrigido em 20260819172900.
+          const { data: dadosCriacao, error: erroCriacao } = await supabase.rpc('fn_ifood_criar_pedido', {
+            p_order_id: orderId,
+            p_order: order,
+          });
 
-          if (!loja) {
-            reqLogger.warn(`Loja iFood ${order.merchant?.id} não encontrada no MiseOn.`);
+          // O client tipa retorno de RPC como `{}`; o formato real vem da funcao.
+          const criado = dadosCriacao as {
+            status?: 'criado' | 'ja_existe' | 'loja_nao_encontrada';
+            merchant?: string; loja?: string; numero?: number;
+            pedido_id?: string; itens?: number; pagamentos?: number;
+          } | null;
+
+          if (erroCriacao) {
+            reqLogger.error(`PLC: falha ao criar pedido ${orderId}`, erroCriacao);
+            await sendFailureEmail(orderId, lojaNomeFallback, erroCriacao.message);
             continue;
           }
-          lojaNomeFallback = loja.nome;
 
-          // Idempotência: verificar se já foi processado
-          const { data: jaProcessado } = await supabase
-            .from('pedidos')
-            .select('id')
-            .eq('ifood_order_id', orderId)
-            .maybeSingle();
+          if (criado?.status === 'loja_nao_encontrada') {
+            reqLogger.warn(`Loja iFood ${criado.merchant} nao encontrada no MiseOn.`);
+            continue;
+          }
 
-          if (jaProcessado) {
-            reqLogger.info(`Pedido iFood ${orderId} já processado — ignorando.`);
-            // Confirmar mesmo assim para garantir que o iFood sabe que recebemos
+          lojaNomeFallback = criado?.loja ?? lojaNomeFallback;
+
+          if (criado?.status === 'ja_existe') {
+            reqLogger.info(`Pedido iFood ${orderId} ja processado — confirmando mesmo assim.`);
             await confirmOrder(orderId, token);
             continue;
           }
 
-          // Cliente (com respeito à LGPD)
-          let telefoneLimpo = (order.customer?.phone?.number || '').replace(/\D/g, '');
-          const validPhoneRegex = /^[1-9]{2}9?[0-9]{8}$/;
-          if (!telefoneLimpo || !validPhoneRegex.test(telefoneLimpo)) {
-            telefoneLimpo = `IFOOD_${order.customer?.id || order.displayId || orderId}`;
-          }
-
-          let clienteId: string | null = null;
-          if (telefoneLimpo) {
-            const { data: clienteExistente } = await supabase
-              .from('clientes')
-              .select('id')
-              .eq('loja_id', loja.id)
-              .eq('telefone', telefoneLimpo)
-              .single();
-
-            if (clienteExistente) {
-              clienteId = clienteExistente.id;
-            } else {
-              const { data: novoCli } = await supabase
-                .from('clientes')
-                .insert({ loja_id: loja.id, nome: order.customer?.name || 'Cliente iFood', telefone: telefoneLimpo })
-                .select('id')
-                .single();
-              if (novoCli) clienteId = novoCli.id;
-            }
-          }
-
-          // Cálculo de repasse
-          const valorBrutoIfood = order.total?.orderAmount || 0;
-          const taxaPct = Number(loja.ifood_taxa_pct || 0) / 100;
-          const taxaFixa = Number(loja.ifood_taxa_fixa || 0);
-          const taxaIfoodRetida = (valorBrutoIfood * taxaPct) + taxaFixa;
-
-          const isDelivery = order.orderType === 'DELIVERY';
-
-          const { data: novoPedido, error: pedidoError } = await supabase
-            .from('pedidos')
-            .insert({
-              loja_id: loja.id,
-              cliente_id: clienteId,
-              status: 'NOVO',
-              origem: 'ifood',
-              tipo_pedido: isDelivery ? 'DELIVERY' : 'RETIRADA_BALCAO',
-              subtotal: order.total?.subTotal ?? 0,
-              taxa_entrega: order.total?.deliveryFee || 0,
-              desconto: order.total?.discounts || 0,
-              valor_total: valorBrutoIfood,
-              observacao: order.observations || null,
-              numero: Number(order.displayId) || 0,
-              identificador_cliente: order.customer?.name || 'iFood',
-              ifood_order_id: orderId,
-              valor_bruto_ifood: valorBrutoIfood,
-              taxa_ifood_retida: taxaIfoodRetida,
-            })
-            .select('id')
-            .single();
-
-          // Race condition protection (unique index)
-          if ((pedidoError as any)?.code === '23505') {
-            reqLogger.info(`Pedido iFood ${orderId} inserido em paralelo — ignorando.`);
-            await confirmOrder(orderId, token);
-            continue;
-          }
-          if (pedidoError || !novoPedido) throw pedidoError;
-
-          const pedidoId = novoPedido.id;
-
-          // Itens
-          const { data: produtosLoja } = await supabase
-            .from('produtos')
-            .select('id, pdv_code')
-            .eq('loja_id', loja.id);
-
-          for (const item of (order.items || [])) {
-            const produtoMatch = produtosLoja?.find((p: any) => p.pdv_code === item.externalCode);
-            await supabase.from('itens_pedido').insert({
-              pedido_id: pedidoId,
-              produto_id: produtoMatch?.id || null,
-              quantidade: item.quantity,
-              preco_unitario: item.unitPrice,
-              observacao: item.observations || null,
-              nome_produto: item.name,
-            });
-          }
-
-          // Pagamentos
-          if (order.payments?.methods && order.payments.methods.length > 0) {
-            const pagamentos = order.payments.methods.map((m: any) => ({
-              pedido_id: pedidoId,
-              metodo: m.method === 'PIX' ? 'PIX' : m.method === 'CASH' ? 'DINHEIRO' : 'IFOOD',
-              valor_pago: m.value,
-              status: m.prepaid ? 'PAGO' : 'PENDENTE',
-              data_pagamento: m.prepaid ? new Date().toISOString() : null,
-            }));
-            await supabase.from('pagamentos').insert(pagamentos);
-          } else {
-            await supabase.from('pagamentos').insert({
-              pedido_id: pedidoId,
-              metodo: 'IFOOD',
-              valor_pago: valorBrutoIfood,
-              status: 'PAGO',
-              data_pagamento: new Date().toISOString(),
-            });
-          }
-
-          // ✅ CONFIRMAR PEDIDO AUTOMATICAMENTE (obrigatório — SLA 8 min)
+          // Confirmar e obrigatorio (SLA de 8 min do iFood), e so acontece
+          // depois que o pedido inteiro ja esta comitado.
           await confirmOrder(orderId, token);
 
-          reqLogger.info(`PLC processado: pedido #${order.displayId} (${orderId}) → loja ${loja.nome}`, {
-            order_id: orderId, loja_id: loja.id,
+          reqLogger.info(`PLC processado: pedido #${criado?.numero} (${orderId}) → loja ${criado?.loja}`, {
+            context: {
+              order_id: orderId, pedido_id: criado?.pedido_id,
+              itens: criado?.itens, pagamentos: criado?.pagamentos,
+            },
           });
         }
 
@@ -373,7 +289,7 @@ serve(async (req: Request) => {
             .update({ status: 'ACEITO' })
             .eq('ifood_order_id', orderId);
 
-          if (error) reqLogger.warn(`CFR: falha ao atualizar status ${orderId}`, error);
+          if (error) reqLogger.warn(`CFR: falha ao atualizar status ${orderId}`, { context: { erro: error.message } });
           else reqLogger.info(`CFR: pedido ${orderId} → ACEITO`);
         }
 
@@ -384,7 +300,7 @@ serve(async (req: Request) => {
             .update({ status: 'PRONTO' })
             .eq('ifood_order_id', orderId);
 
-          if (error) reqLogger.warn(`RTP: falha ao atualizar status ${orderId}`, error);
+          if (error) reqLogger.warn(`RTP: falha ao atualizar status ${orderId}`, { context: { erro: error.message } });
           else reqLogger.info(`RTP: pedido ${orderId} → PRONTO`);
         }
 
@@ -395,7 +311,7 @@ serve(async (req: Request) => {
             .update({ status: 'EM_ROTA' })
             .eq('ifood_order_id', orderId);
 
-          if (error) reqLogger.warn(`DSP: falha ao atualizar status ${orderId}`, error);
+          if (error) reqLogger.warn(`DSP: falha ao atualizar status ${orderId}`, { context: { erro: error.message } });
           else reqLogger.info(`DSP: pedido ${orderId} → EM_ROTA`);
         }
 
@@ -406,7 +322,7 @@ serve(async (req: Request) => {
             .update({ status: 'FINALIZADO' })
             .eq('ifood_order_id', orderId);
 
-          if (error) reqLogger.warn(`CON: falha ao atualizar status ${orderId}`, error);
+          if (error) reqLogger.warn(`CON: falha ao atualizar status ${orderId}`, { context: { erro: error.message } });
           else reqLogger.info(`CON: pedido ${orderId} → FINALIZADO`);
         }
 
@@ -430,7 +346,7 @@ serve(async (req: Request) => {
             })
             .eq('ifood_order_id', orderId);
 
-          if (error) reqLogger.warn(`CAN: falha ao atualizar status ${orderId}`, error);
+          if (error) reqLogger.warn(`CAN: falha ao atualizar status ${orderId}`, { context: { erro: error.message } });
           else reqLogger.info(`CAN: pedido ${orderId} → CANCELADO (motivo: ${reasons?.[0]?.description})`);
         }
 

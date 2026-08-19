@@ -66,10 +66,13 @@ export async function checkRateLimit(
 
     if (error) throw error;
 
-    const resetEm = data?.reset_em ? Date.parse(data.reset_em) : Date.now() + windowMs;
+    // O client tipa retorno de RPC como `{}`; o formato real vem da funcao.
+    const r = data as { permitido?: boolean; restante?: number; reset_em?: string } | null;
+
+    const resetEm = r?.reset_em ? Date.parse(r.reset_em) : Date.now() + windowMs;
     return {
-      allowed: data?.permitido !== false,
-      remaining: Number(data?.restante ?? 0),
+      allowed: r?.permitido !== false,
+      remaining: Number(r?.restante ?? 0),
       resetMs: Math.max(0, resetEm - Date.now()),
     };
   } catch (e) {
