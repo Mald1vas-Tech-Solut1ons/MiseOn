@@ -79,7 +79,7 @@ const RECURSOS = [
   {
     icone: ScanLine,
     titulo: 'Estoque pelo Cupom do Mercado (NFC-e)',
-    texto: 'Voltou da compra? Escaneie o QR Code do cupom e o sistema lê a nota na SEFAZ: produto, quantidade e custo. Você confere, escolhe o que entra e dá entrada de tudo de uma vez — sem digitar item por item.',
+    texto: 'A compra inteira entra no estoque com um scan do cupom fiscal. O MiseOn lê a nota na SEFAZ, traz produto, quantidade e custo real, e aprende o vínculo de cada item — a segunda compra no mesmo mercado já cai reconhecida.',
     cor: 'text-orange-500',
     fundo: 'bg-orange-500/10',
   },
@@ -139,6 +139,7 @@ const PLATAFORMA = [
   {
     grupo: 'Gerir',
     itens: [
+      'Entrada de estoque escaneando o cupom fiscal do mercado (NFC-e)',
       'Estoque com baixa automática por lote PEPS',
       'Inteligência Preditiva de Compras (Ordem no WhatsApp)',
       'Ficha técnica, alergênicos e CMV real por prato',
@@ -1334,6 +1335,96 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ 6.55 SEÇÃO ENTRADA DE ESTOQUE PELO CUPOM FISCAL ══════════
+           Vem ANTES do módulo de estoque 3D de propósito: primeiro o visitante
+           entende como o estoque ENTRA (a objeção que faz gente desistir de
+           sistema de gestão), depois vê o que o MiseOn faz com ele. */}
+      <section id="estoque-nfce" className="relative scroll-mt-24 overflow-hidden bg-gradient-to-br from-[#1a0f02] via-[#2b1503] to-[#0B1120] py-20 sm:py-24 border-t border-white/10">
+        <div className="pointer-events-none absolute -left-16 -top-16 h-72 w-72 rounded-full bg-orange-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -right-10 h-64 w-64 rounded-full bg-amber-400/10 blur-3xl" />
+
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-orange-200 backdrop-blur-md">
+                <ScanLine size={13} /> Leitura de NFC-e direto na SEFAZ
+              </span>
+              <h2 className="mt-5 font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                Você comprou.{' '}
+                <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">
+                  O estoque já sabe.
+                </span>
+              </h2>
+              <p className="mt-5 text-base leading-relaxed text-orange-100/85">
+                Todo sistema de gestão morre no mesmo ponto: alguém precisa sentar e cadastrar item por item.
+                É por isso que a maioria dos restaurantes desiste do controle de estoque na segunda semana.
+              </p>
+              <p className="mt-4 text-base leading-relaxed text-orange-100/85">
+                No MiseOn, você volta do mercado e <b className="text-white">escaneia o QR Code do cupom fiscal</b>.
+                O sistema busca a nota na SEFAZ e traz a compra inteira — produto, quantidade, unidade e o
+                custo real de cada item. Você confere, ajusta o que quiser e dá entrada de tudo de uma vez.
+              </p>
+
+              <div className="mt-6 grid gap-2.5 sm:grid-cols-3">
+                {[
+                  { n: '1', t: 'Escaneie', d: 'QR Code do cupom, pela câmera ou por foto' },
+                  { n: '2', t: 'Confira', d: 'Desmarque o que não é da cozinha' },
+                  { n: '3', t: 'Pronto', d: 'Estoque, custo e lote atualizados' },
+                ].map((p) => (
+                  <div key={p.n} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+                    <div className="font-['Sora'] text-2xl font-black text-orange-400">{p.n}</div>
+                    <div className="mt-1 text-sm font-bold text-white">{p.t}</div>
+                    <div className="mt-0.5 text-[11px] leading-snug text-orange-100/60">{p.d}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8">
+                <Link
+                  to="/cadastre-se"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-['Sora'] text-sm font-bold text-orange-950 shadow-xl transition hover:scale-105 hover:bg-orange-50"
+                >
+                  Quero parar de digitar estoque <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-3">
+              {[
+                {
+                  t: 'A compra inteira, de uma vez',
+                  d: 'Cupom de mercado com dezenas de itens entra em um scan. Cada linha vem com descrição, quantidade, unidade e o valor que você realmente pagou — lido da nota oficial, não digitado.',
+                },
+                {
+                  t: 'Você manda no que entra',
+                  d: 'Comprou algo pessoal junto? Desmarque. Comprou ovo em bandeja e usa em unidade? Diga que 1 bandeja rende 20 — e o estoque entra em unidade, do jeito que a sua cozinha trabalha.',
+                },
+                {
+                  t: 'Na segunda compra, ele já sabe',
+                  d: 'O MiseOn guarda o vínculo entre o código daquele mercado e o seu insumo. A próxima nota do mesmo fornecedor cai reconhecida — o trabalho de conferência só diminui.',
+                },
+                {
+                  t: 'A mesma nota nunca entra duas vezes',
+                  d: 'Escaneou de novo sem lembrar? Ele avisa a data em que aquela nota já foi lançada, em vez de dobrar seu estoque em silêncio e estragar o seu CMV.',
+                },
+                {
+                  t: 'Custo real, CMV honesto',
+                  d: 'Cada entrada abre um lote PEPS com o preço daquela compra. Quando o preço da carne sobe, o custo do seu prato sobe junto — sem você refazer conta nenhuma.',
+                },
+              ].map((c) => (
+                <div key={c.t} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
+                  <ScanLine size={20} className="mt-0.5 shrink-0 text-orange-300" />
+                  <div>
+                    <h3 className="font-['Sora'] text-sm font-bold text-white">{c.t}</h3>
+                    <p className="mt-1 text-[13px] leading-relaxed text-orange-100/70">{c.d}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
