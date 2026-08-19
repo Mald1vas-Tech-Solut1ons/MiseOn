@@ -3,7 +3,10 @@ import { createPortal } from 'react-dom';
 import { supabase } from '../lib/supabase';
 import { X, Mail, Lock } from 'lucide-react';
 
+import { useI18n } from '../contexts/I18nContext';
+
 export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const { tDynamic } = useI18n();
   const [modo, setModo] = useState<'LOGIN' | 'CADASTRO' | 'MAGIC_LINK'>('LOGIN');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -32,14 +35,14 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
     if (modo === 'CADASTRO') {
       const { error } = await supabase.auth.signUp({ email, password: senha });
       if (error) setErro(error.message);
-      else setSucesso('Conta criada! Verifique seu e-mail para confirmar (se necessário) ou faça login.');
+      else setSucesso(tDynamic('Conta criada! Verifique seu e-mail para confirmar (se necessário) ou faça login.'));
     } else if (modo === 'MAGIC_LINK') {
       const { error } = await supabase.auth.signInWithOtp({ email });
       if (error) setErro(error.message);
-      else setSucesso('Enviamos um link de acesso mágico para o seu e-mail!');
+      else setSucesso(tDynamic('Enviamos um link de acesso mágico para o seu e-mail!'));
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-      if (error) setErro('E-mail ou senha inválidos.');
+      if (error) setErro(tDynamic('E-mail ou senha inválidos.'));
       else onClose(); // sucesso, fecha o modal e o Cardapio.tsx pega o user
     }
     setCarregando(false);
@@ -61,10 +64,10 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
         </button>
 
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {modo === 'LOGIN' ? 'Acesse sua conta' : modo === 'CADASTRO' ? 'Crie sua conta' : 'Acesso rápido'}
+          {modo === 'LOGIN' ? tDynamic('Acesse sua conta') : modo === 'CADASTRO' ? tDynamic('Crie sua conta') : tDynamic('Acesso rápido')}
         </h2>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {modo === 'LOGIN' ? 'Bem-vindo de volta! Faça login para continuar.' : modo === 'CADASTRO' ? 'Cadastre-se para comprar mais rápido.' : 'Receba um link mágico por e-mail para entrar na hora.'}
+          {modo === 'LOGIN' ? tDynamic('Bem-vindo de volta! Faça login para continuar.') : modo === 'CADASTRO' ? tDynamic('Cadastre-se para comprar mais rápido.') : tDynamic('Receba um link mágico por e-mail para entrar na hora.')}
         </p>
 
         {erro && <div className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-400">{erro}</div>}
@@ -79,7 +82,7 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Seu e-mail"
+              placeholder={tDynamic('Seu e-mail')}
               className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white dark:focus:border-blue-500"
             />
           </div>
@@ -92,7 +95,7 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
                 minLength={6}
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-                placeholder="Sua senha"
+                placeholder={tDynamic('Sua senha')}
                 className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white dark:focus:border-blue-500"
               />
             </div>
@@ -103,7 +106,7 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
             disabled={carregando}
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3.5 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
           >
-            {carregando ? 'Aguarde...' : modo === 'LOGIN' ? 'Entrar' : modo === 'CADASTRO' ? 'Cadastrar' : 'Enviar Link Mágico'}
+            {carregando ? tDynamic('Aguarde...') : modo === 'LOGIN' ? tDynamic('Entrar') : modo === 'CADASTRO' ? tDynamic('Cadastrar') : tDynamic('Enviar Link Mágico')}
           </button>
         </form>
 
@@ -112,13 +115,13 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
             onClick={() => { setModo('MAGIC_LINK'); setErro(''); setSucesso(''); }}
             className="mt-4 w-full text-center text-sm font-medium text-[var(--cor-primaria)] hover:underline"
           >
-            Esqueci a senha ou acessar sem senha
+            {tDynamic('Esqueci a senha ou acessar sem senha')}
           </button>
         )}
 
         <div className="my-6 flex items-center gap-3 text-xs text-gray-400">
           <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800"></div>
-          OU
+          {tDynamic('OU')}
           <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800"></div>
         </div>
 
@@ -132,16 +135,16 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
           </svg>
-          Continuar com Google
+          {tDynamic('Continuar com Google')}
         </button>
 
         <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-          {modo === 'LOGIN' ? 'Ainda não tem conta? ' : 'Já tem uma conta? '}
+          {modo === 'LOGIN' ? tDynamic('Ainda não tem conta? ') : tDynamic('Já tem uma conta? ')}
           <button
             onClick={() => { setModo(modo === 'LOGIN' ? 'CADASTRO' : 'LOGIN'); setErro(''); setSucesso(''); }}
             className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
           >
-            {modo === 'LOGIN' ? 'Criar agora' : 'Faça login'}
+            {modo === 'LOGIN' ? tDynamic('Criar agora') : tDynamic('Faça login')}
           </button>
         </div>
       </div>

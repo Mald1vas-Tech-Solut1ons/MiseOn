@@ -13,7 +13,7 @@ interface BlogPostProps {
 }
 
 export default function BlogPost({ forcedSlug }: BlogPostProps) {
-  const { t } = useI18n();
+  const { t, tDynamic } = useI18n();
   const params = useParams<{ slug?: string }>();
   const slug = forcedSlug || params.slug || '';
   const post = BLOG_POSTS.find((p) => p.slug === slug);
@@ -167,19 +167,19 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span className="rounded-full bg-[#FC5B24]/20 border border-[#FC5B24]/40 px-3 py-1 text-xs font-bold text-orange-300">
-              {post.category}
+              {tDynamic(post.category)}
             </span>
             <span className="flex items-center gap-1 text-xs text-slate-300">
-              <Clock size={13} /> {post.readTime}
+              <Clock size={13} /> {tDynamic(post.readTime)}
             </span>
           </div>
 
           <h1 className="mt-4 font-['Sora'] text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-            {post.title}
+            {tDynamic(post.title)}
           </h1>
 
           <p className="mt-4 text-base text-slate-300 leading-relaxed sm:text-lg">
-            {post.description}
+            {tDynamic(post.description)}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-between border-t border-white/10 pt-6">

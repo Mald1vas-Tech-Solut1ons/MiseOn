@@ -3,8 +3,8 @@ import { ShoppingBag, Store, Bike, ArrowRight, ChefHat } from 'lucide-react';
 import MiseOnLogo from '../components/MiseOnLogo';
 import SEO from '../components/SEO';
 import { PAGE_META } from '../data/pageMeta';
-
 import LanguageToggle from '../components/LanguageToggle';
+import { useI18n } from '../contexts/I18nContext';
 
 /**
  * Hall de Acesso — separa claramente as modalidades de entrada.
@@ -23,38 +23,40 @@ interface Porta {
   secundario?: { label: string; href: string };
 }
 
-const PORTAS: Porta[] = [
-  {
-    icon: <ShoppingBag size={28} />,
-    titulo: 'Sou Cliente',
-    sub: 'Quero pedir',
-    desc: 'Veja o universo de lojas e monte seu pedido sem app. Para finalizar a compra e receber em casa, você entra com Google ou e-mail em segundos.',
-    href: '/lojas',
-    cta: 'Ver lojas',
-    cor: '#FC5B24',
-  },
-  {
-    icon: <Store size={28} />,
-    titulo: 'Lojista & Equipe',
-    sub: 'Assinante e time',
-    desc: 'Entrada do assinante e da equipe que ele cadastra — cozinha, auxiliar, balcão e admin — cada um com o seu nível de acesso ao painel (pedidos, estoque, entregas, financeiro).',
-    href: '/admin/login',
-    cta: 'Entrar no painel',
-    cor: '#0A5CC4',
-    secundario: { label: 'Ainda não tenho loja — criar agora', href: '/cadastre-se' },
-  },
-  {
-    icon: <Bike size={28} />,
-    titulo: 'Sou Entregador',
-    sub: 'Parceiro de entrega',
-    desc: 'Também é um parceiro cadastrado pelo restaurante, mas com app próprio: suas rotas, navegação com GPS e chat com o cliente. O login é criado pelo restaurante.',
-    href: '/entregador/login',
-    cta: 'Abrir app do entregador',
-    cor: '#22c55e',
-  },
-];
-
 export default function Acesso() {
+  const { tDynamic } = useI18n();
+
+  const PORTAS: Porta[] = [
+    {
+      icon: <ShoppingBag size={28} />,
+      titulo: tDynamic('Sou Cliente'),
+      sub: tDynamic('Quero pedir'),
+      desc: tDynamic('Veja o universo de lojas e monte seu pedido sem app. Para finalizar a compra e receber em casa, você entra com Google ou e-mail em segundos.'),
+      href: '/lojas',
+      cta: tDynamic('Ver lojas'),
+      cor: '#FC5B24',
+    },
+    {
+      icon: <Store size={28} />,
+      titulo: tDynamic('Lojista & Equipe'),
+      sub: tDynamic('Assinante e time'),
+      desc: tDynamic('Entrada do assinante e da equipe que ele cadastra — cozinha, auxiliar, balcão e admin — cada um com o seu nível de acesso ao painel (pedidos, estoque, entregas, financeiro).'),
+      href: '/admin/login',
+      cta: tDynamic('Entrar no painel'),
+      cor: '#0A5CC4',
+      secundario: { label: tDynamic('Ainda não tenho loja — criar agora'), href: '/cadastre-se' },
+    },
+    {
+      icon: <Bike size={28} />,
+      titulo: tDynamic('Sou Entregador'),
+      sub: tDynamic('Parceiro de entrega'),
+      desc: tDynamic('Também é um parceiro cadastrado pelo restaurante, mas com app próprio: suas rotas, navegação com GPS e chat com o cliente. O login é criado pelo restaurante.'),
+      href: '/entregador/login',
+      cta: tDynamic('Abrir app do entregador'),
+      cor: '#22c55e',
+    },
+  ];
+
   return (
     <div style={{ background: '#070C18', color: '#EAF1FB', fontFamily: "'Inter', sans-serif" }} className="min-h-screen">
       <SEO {...PAGE_META['/acesso']} />
@@ -69,13 +71,13 @@ export default function Acesso() {
         <div className="text-center mb-10">
           <div style={{ border: '1px solid rgba(252,91,36,0.4)', background: 'rgba(252,91,36,0.1)', color: '#FC5B24', fontFamily: "'Sora', sans-serif" }}
             className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold tracking-wider uppercase">
-            <ChefHat size={13} /> Como você quer entrar?
+            <ChefHat size={13} /> {tDynamic('Como você quer entrar?')}
           </div>
           <h1 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Escolha o seu acesso
+            {tDynamic('Escolha o seu acesso')}
           </h1>
           <p style={{ color: 'rgba(234,241,251,0.6)' }} className="mt-3 max-w-xl mx-auto text-sm sm:text-base">
-            Uma conta, vários papéis. Você pode ser cliente e lojista ao mesmo tempo — cada porta é independente e seus dados nunca se misturam.
+            {tDynamic('Uma conta, vários papéis. Você pode ser cliente e lojista ao mesmo tempo — cada porta é independente e seus dados nunca se misturam.')}
           </p>
         </div>
 
@@ -108,7 +110,7 @@ export default function Acesso() {
         </div>
 
         <p className="mt-10 text-center text-xs" style={{ color: 'rgba(234,241,251,0.35)' }}>
-          <Link to="/" className="hover:text-white transition">← Voltar para o início</Link>
+          <Link to="/" className="hover:text-white transition">← {tDynamic('Voltar para o início')}</Link>
         </p>
       </div>
     </div>

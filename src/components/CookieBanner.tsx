@@ -10,7 +10,10 @@ import {
   EVENT_COOKIE_UPDATED,
 } from '../lib/cookieConsent';
 
+import { useI18n } from '../contexts/I18nContext';
+
 export function CookieBanner() {
+  const { tDynamic } = useI18n();
   const [visivel, setVisivel] = useState(false);
   const [modo, setModo] = useState<'resumido' | 'personalizado'>('resumido');
 
@@ -84,20 +87,19 @@ export function CookieBanner() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-['Sora'] text-base font-bold text-gray-900 dark:text-white">
-                    Sua Privacidade Importa (LGPD)
+                    {tDynamic('Sua Privacidade Importa (LGPD)')}
                   </h3>
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                     <ShieldCheck size={12} /> LGPD OK
                   </span>
                 </div>
                 <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-300 sm:text-sm">
-                  Utilizamos cookies essenciais para o funcionamento seguro do cardápio e autenticação.
-                  Com sua permissão, também podemos usar cookies analíticos e de marketing para otimizar sua experiência.{' '}
+                  {tDynamic('Utilizamos cookies essenciais para o funcionamento seguro do cardápio e autenticação. Com sua permissão, também podemos usar cookies analíticos e de marketing para otimizar sua experiência.')}{' '}
                   <Link
                     to="/privacidade"
                     className="font-medium text-[var(--cor-secundaria)] underline hover:text-[var(--cor-primaria)]"
                   >
-                    Política de Privacidade
+                    {tDynamic('Política de Privacidade')}
                   </Link>
                   .
                 </p>
@@ -110,21 +112,21 @@ export function CookieBanner() {
                 onClick={() => setModo('personalizado')}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
               >
-                <Settings size={14} /> Personalizar
+                <Settings size={14} /> {tDynamic('Personalizar')}
               </button>
               <button
                 type="button"
                 onClick={handleAceitarEssenciais}
                 className="rounded-xl border border-gray-300 px-4 py-2.5 text-xs font-semibold text-gray-800 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
               >
-                Apenas Essenciais
+                {tDynamic('Apenas Essenciais')}
               </button>
               <button
                 type="button"
                 onClick={handleAceitarTodos}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 transition hover:brightness-110 active:scale-95"
               >
-                Aceitar Todos <ArrowRight size={14} />
+                {tDynamic('Aceitar Todos')} <ArrowRight size={14} />
               </button>
             </div>
           </div>
@@ -138,10 +140,10 @@ export function CookieBanner() {
                 </div>
                 <div>
                   <h3 className="font-['Sora'] text-base font-bold text-gray-900 dark:text-white">
-                    Gerenciador de Preferências de Cookies
+                    {tDynamic('Gerenciador de Preferências de Cookies')}
                   </h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Escolha quais categorias de dados você permite processar nesta sessão.
+                    {tDynamic('Escolha quais categorias de dados você permite processar nesta sessão.')}
                   </p>
                 </div>
               </div>
@@ -159,14 +161,14 @@ export function CookieBanner() {
               <div className="rounded-2xl border border-emerald-500/30 bg-emerald-50/40 p-4 dark:bg-emerald-950/10">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                    <Lock size={14} /> Essenciais
+                    <Lock size={14} /> {tDynamic('Essenciais')}
                   </span>
                   <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-                    Obrigatório
+                    {tDynamic('Obrigatório')}
                   </span>
                 </div>
                 <p className="mt-2 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
-                  Necessários para navegação, login, sessão ativa e funcionamento do carrinho. Não podem ser desativados.
+                  {tDynamic('Necessários para navegação, login, sessão ativa e funcionamento do carrinho. Não podem ser desativados.')}
                 </p>
               </div>
 
@@ -174,7 +176,7 @@ export function CookieBanner() {
               <div className="rounded-2xl border border-gray-200 p-4 dark:border-gray-800 dark:bg-gray-900/50">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-gray-900 dark:text-white">
-                    Analíticos (GA4)
+                    {tDynamic('Analíticos (GA4)')}
                   </span>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input
@@ -187,7 +189,7 @@ export function CookieBanner() {
                   </label>
                 </div>
                 <p className="mt-2 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
-                  Ajudam a entender quais produtos são mais acessados para melhorar o desempenho do cardápio.
+                  {tDynamic('Ajudam a entender quais produtos são mais acessados para melhorar o desempenho do cardápio.')}
                 </p>
               </div>
 
@@ -195,7 +197,7 @@ export function CookieBanner() {
               <div className="rounded-2xl border border-gray-200 p-4 dark:border-gray-800 dark:bg-gray-900/50">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-gray-900 dark:text-white">
-                    Marketing (Meta Pixel)
+                    {tDynamic('Marketing (Meta Pixel)')}
                   </span>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input
@@ -208,7 +210,7 @@ export function CookieBanner() {
                   </label>
                 </div>
                 <p className="mt-2 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
-                  Permitem mensurar o retorno de anúncios do Instagram/Facebook e exibir ofertas relevantes.
+                  {tDynamic('Permitem mensurar o retorno de anúncios do Instagram/Facebook e exibir ofertas relevantes.')}
                 </p>
               </div>
             </div>
@@ -219,14 +221,14 @@ export function CookieBanner() {
                 onClick={() => setModo('resumido')}
                 className="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
-                Voltar
+                {tDynamic('Voltar')}
               </button>
               <button
                 type="button"
                 onClick={handleSalvarPersonalizado}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-6 py-2.5 text-xs font-bold text-white shadow-md transition hover:brightness-110 active:scale-95"
               >
-                <Check size={14} /> Salvar Minhas Preferências
+                <Check size={14} /> {tDynamic('Salvar Minhas Preferências')}
               </button>
             </div>
           </div>

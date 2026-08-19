@@ -3,6 +3,8 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { KeyRound, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
 import MiseOnLogo from '../components/MiseOnLogo';
 import { supabase } from '../lib/supabase';
+import LanguageToggle from '../components/LanguageToggle';
+import { useI18n } from '../contexts/I18nContext';
 
 type Estado = 'verificando' | 'formulario' | 'invalido' | 'sucesso';
 
@@ -18,6 +20,7 @@ const LOGIN_POR_PORTAL: Record<string, string> = {
 };
 
 export default function RedefinirSenha() {
+  const { tDynamic } = useI18n();
   const [params] = useSearchParams();
   const portal = params.get('portal') ?? 'admin';
   const loginUrl = LOGIN_POR_PORTAL[portal] ?? '/admin/login';
@@ -73,12 +76,15 @@ export default function RedefinirSenha() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 dark:bg-gray-950">
       <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-gray-900">
+        <div className="p-4 pb-0 flex justify-end">
+          <LanguageToggle variant="pill" />
+        </div>
         <div className="p-8 pb-6 text-center">
           <div className="mb-6 flex justify-center">
             <MiseOnLogo size={160} />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Redefinir senha
+            {tDynamic('Redefinir senha')}
           </h1>
         </div>
 

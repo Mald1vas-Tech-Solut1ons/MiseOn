@@ -6,6 +6,7 @@ import MiseOnLogo from '../components/MiseOnLogo';
 import LanguageToggle from '../components/LanguageToggle';
 import SEO from '../components/SEO';
 import { PAGE_META } from '../data/pageMeta';
+import { useI18n } from '../contexts/I18nContext';
 
 interface VideoItem {
   id: string;
@@ -94,6 +95,7 @@ const DEPOIMENTOS_FUTUROS = [
 ];
 
 export default function Videos() {
+  const { t, tDynamic } = useI18n();
   // /videos, /depoimentos e /demonstracao renderizam este mesmo componente.
   // Título varia por rota para intenção de busca distinta, mas o canonical
   // sempre aponta para /videos — evita conteúdo duplicado nos três URLs.
@@ -189,10 +191,10 @@ export default function Videos() {
               <MiseOnLogo size={130} />
             </Link>
             <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
-              <Link to="/" className="transition hover:text-white">Início</Link>
-              <Link to="/sobre" className="transition hover:text-white">Sobre Nós</Link>
-              <Link to="/videos" className="text-orange-400 font-bold border-b-2 border-orange-500 pb-1">Vídeos &amp; Depoimentos</Link>
-              <Link to="/contato" className="transition hover:text-white">Contato</Link>
+              <Link to="/" className="transition hover:text-white">{t('nav.home')}</Link>
+              <Link to="/sobre" className="transition hover:text-white">{tDynamic('Sobre Nós')}</Link>
+              <Link to="/videos" className="text-orange-400 font-bold border-b-2 border-orange-500 pb-1">{t('nav.videos')}</Link>
+              <Link to="/contato" className="transition hover:text-white">{tDynamic('Contato')}</Link>
             </nav>
           </div>
 
@@ -202,13 +204,13 @@ export default function Videos() {
               to="/acesso"
               className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 transition"
             >
-              Área do Cliente
+              {t('nav.entrar')}
             </Link>
             <Link
               to="/cadastre-se"
               className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-orange-500/20 hover:scale-105 transition-all"
             >
-              Criar Conta Grátis
+              {t('nav.cadastrar')}
             </Link>
           </div>
         </div>
@@ -220,14 +222,14 @@ export default function Videos() {
         
         <div className="relative mx-auto max-w-4xl px-4">
           <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 text-xs font-bold text-orange-400 backdrop-blur-md mb-6">
-            <Sparkles size={14} /> Galeria Oficial de Vídeos &amp; Demonstrações
+            <Sparkles size={14} /> {tDynamic('Galeria Oficial de Vídeos & Demonstrações')}
           </div>
 
           <h1 className="font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
-            MiseOn em Ação: Assista e Comprove
+            {tDynamic('MiseOn em Ação: Assista e Comprove')}
           </h1>
           <p className="mt-4 text-base text-slate-300 sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Veja como a nossa arquitetura de software transforma a operação de restaurantes, lanchonetes e deliveries com velocidade, inteligência de margem e estabilidade.
+            {tDynamic('Veja como a nossa arquitetura de software transforma a operação de restaurantes, lanchonetes e deliveries com velocidade, inteligência de margem e estabilidade.')}
           </p>
         </div>
       </section>

@@ -4,8 +4,12 @@ import { ArrowLeft, Building2, Code2, Cpu, MapPin, ShieldCheck, Sparkles, Trophy
 import { SEO } from '../../components/SEO';
 import FooterSEO from '../../components/FooterSEO';
 import MiseOnLogo from '../../components/MiseOnLogo';
+import LanguageToggle from '../../components/LanguageToggle';
+import { useI18n } from '../../contexts/I18nContext';
 
 export default function Sobre() {
+  const { tDynamic } = useI18n();
+
   return (
     <div className="min-h-screen bg-[#070C18] font-sans text-slate-200 selection:bg-orange-500 selection:text-white">
       <SEO
@@ -45,12 +49,15 @@ export default function Sobre() {
             <MiseOnLogo size={130} />
           </Link>
 
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft size={16} /> Voltar ao Início
-          </Link>
+          <div className="flex items-center gap-4">
+            <LanguageToggle variant="pill" />
+            <Link
+              to="/"
+              className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors"
+            >
+              <ArrowLeft size={16} /> {tDynamic('Voltar ao Início')}
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -107,26 +114,26 @@ export default function Sobre() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
                 <Zap size={22} className="text-orange-400" />
-                <h3 className="mt-3 font-['Sora'] text-sm font-bold text-white">Tempo Real Nativo</h3>
-                <p className="mt-1 text-xs text-slate-400">Atualização instantânea entre PDV, comanda de salão e tela da cozinha (KDS).</p>
+                <h3 className="mt-3 font-['Sora'] text-sm font-bold text-white">{tDynamic('Tempo Real Nativo')}</h3>
+                <p className="mt-1 text-xs text-slate-400">{tDynamic('Atualização instantânea entre PDV, comanda de salão e tela da cozinha (KDS).')}</p>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
                 <Cpu size={22} className="text-emerald-400" />
-                <h3 className="mt-3 font-['Sora'] text-sm font-bold text-white">IA Oficial Meta</h3>
-                <p className="mt-1 text-xs text-slate-400">Conexão oficial via WhatsApp Cloud API com respostas em tempo real.</p>
+                <h3 className="mt-3 font-['Sora'] text-sm font-bold text-white">{tDynamic('IA Oficial Meta')}</h3>
+                <p className="mt-1 text-xs text-slate-400">{tDynamic('Conexão oficial via WhatsApp Cloud API com respostas em tempo real.')}</p>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
                 <ShieldCheck size={22} className="text-blue-400" />
-                <h3 className="mt-3 font-['Sora'] text-sm font-bold text-white">FocusNFe & Efí</h3>
-                <p className="mt-1 text-xs text-slate-400">Emissão fiscal NFC-e homologada e conciliação bancária via Pix direto.</p>
+                <h3 className="mt-3 font-['Sora'] text-sm font-bold text-white">{tDynamic('FocusNFe & Efí')}</h3>
+                <p className="mt-1 text-xs text-slate-400">{tDynamic('Emissão fiscal NFC-e homologada e conciliação bancária via Pix direto.')}</p>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
                 <Trophy size={22} className="text-amber-400" />
-                <h3 className="mt-3 font-['Sora'] text-sm font-bold text-white">SLA Superior</h3>
-                <p className="mt-1 text-xs text-slate-400">Infraestrutura em nuvem escalável com taxa de disponibilidade de 99.9%.</p>
+                <h3 className="mt-3 font-['Sora'] text-sm font-bold text-white">{tDynamic('SLA Superior')}</h3>
+                <p className="mt-1 text-xs text-slate-400">{tDynamic('Infraestrutura em nuvem escalável com taxa de disponibilidade de 99.9%.')}</p>
               </div>
             </div>
 

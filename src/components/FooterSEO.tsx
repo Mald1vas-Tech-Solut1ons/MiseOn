@@ -7,30 +7,30 @@ import { abrirGerenciadorCookies } from '../lib/cookieConsent';
 import { useI18n } from '../contexts/I18nContext';
 
 export function FooterSEO() {
-  const { t } = useI18n();
+  const { t, tDynamic } = useI18n();
 
   const nichos = [
-    { title: 'Restaurantes por Quilo (R$/kg)', href: '/sistema-para-restaurante-por-quilo' },
-    { title: 'Sistema para Hamburgueria', href: '/sistema-para-hamburgueria' },
-    { title: 'Sistema para Lanchonete', href: '/sistema-para-lanchonete' },
-    { title: 'Sistema para Pizzaria', href: '/sistema-para-pizzaria' },
-    { title: 'Sistema para Restaurantes', href: '/sistema-para-restaurantes' },
+    { title: tDynamic('Restaurantes por Quilo (R$/kg)'), href: '/sistema-para-restaurante-por-quilo' },
+    { title: tDynamic('Sistema para Hamburgueria'), href: '/sistema-para-hamburgueria' },
+    { title: tDynamic('Sistema para Lanchonete'), href: '/sistema-para-lanchonete' },
+    { title: tDynamic('Sistema para Pizzaria'), href: '/sistema-para-pizzaria' },
+    { title: tDynamic('Sistema para Restaurantes'), href: '/sistema-para-restaurantes' },
   ];
 
   const funcionalidades = [
-    { title: 'Integração iFood Nativa', href: '/integracao-ifood' },
-    { title: 'Cardápio Digital QR Code', href: '/cardapio-qr-code' },
-    { title: 'Atendimento WhatsApp com IA', href: '/api-whatsapp-restaurantes' },
-    { title: 'Gestão Fiscal NFC-e / NF-e', href: '/gestao-fiscal-nfe' },
+    { title: tDynamic('Integração iFood Nativa'), href: '/integracao-ifood' },
+    { title: tDynamic('Cardápio Digital QR Code'), href: '/cardapio-qr-code' },
+    { title: tDynamic('Atendimento WhatsApp com IA'), href: '/api-whatsapp-restaurantes' },
+    { title: tDynamic('Gestão Fiscal NFC-e / NF-e'), href: '/gestao-fiscal-nfe' },
   ];
 
   const legal = [
     { title: t('nav.blog'), href: '/blog' },
-    { title: 'Sobre Nós', href: '/sobre' },
+    { title: tDynamic('Sobre Nós'), href: '/sobre' },
     { title: t('nav.videos'), href: '/videos' },
-    { title: 'Contato & Suporte', href: '/contato' },
-    { title: 'Termos de Uso', href: '/termos' },
-    { title: 'Política de Privacidade', href: '/privacidade' },
+    { title: tDynamic('Contato & Suporte'), href: '/contato' },
+    { title: tDynamic('Termos de Uso'), href: '/termos' },
+    { title: tDynamic('Política de Privacidade'), href: '/privacidade' },
     { title: t('nav.cadastrar'), href: '/cadastre-se' },
     { title: t('nav.entrar'), href: '/acesso' },
   ];
@@ -48,10 +48,10 @@ export function FooterSEO() {
               <MiseOnLogo size={140} />
             </Link>
             <p className="text-xs leading-relaxed text-slate-400">
-              O MiseOn é a plataforma completa para simplificar e organizar a gestão de restaurantes, hamburguerias, pizzarias, lanchonetes e deliveries em um único painel.
+              {tDynamic('O MiseOn é a plataforma completa para simplificar e organizar a gestão de restaurantes, hamburguerias, pizzarias, lanchonetes e deliveries em um único painel.')}
             </p>
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
-              <ShieldCheck size={16} /> Plataforma Segura & Certificada
+              <ShieldCheck size={16} /> {tDynamic('Plataforma Segura & Certificada')}
             </div>
             <div className="pt-1">
               <LanguageToggle variant="dropdown" />

@@ -11,7 +11,7 @@ import { useI18n } from '../contexts/I18nContext';
 const CATEGORIAS = ['Todas', 'Gestão Financeira', 'Operação & KDS', 'Tecnologia & IA', 'Engenharia de Cardápio'] as const;
 
 export default function Blog() {
-  const { t } = useI18n();
+  const { t, tDynamic } = useI18n();
   const [busca, setBusca] = useState('');
   const [categoriaSel, setCategoriaSel] = useState<string>('Todas');
 
@@ -124,7 +124,7 @@ export default function Blog() {
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20'
                 }`}
               >
-                {cat === 'Todas' ? t('blog.todasCategorias') : cat}
+                {cat === 'Todas' ? t('blog.todasCategorias') : tDynamic(cat)}
               </button>
             );
           })}
@@ -140,17 +140,17 @@ export default function Blog() {
               <div className="grid gap-8 lg:grid-cols-3">
                 <div className="lg:col-span-2">
                   <span className="inline-block rounded-full bg-orange-500/10 px-3 py-1 text-[11px] font-bold text-[#FC5B24]">
-                    {destaque.category}
+                    {tDynamic(destaque.category)}
                   </span>
                   <h2 className="mt-3 font-['Sora'] text-2xl font-extrabold text-gray-900 group-hover:text-[#FC5B24] sm:text-3xl dark:text-white transition-colors">
-                    <Link to={`/blog/${destaque.slug}`}>{destaque.title}</Link>
+                    <Link to={`/blog/${destaque.slug}`}>{tDynamic(destaque.title)}</Link>
                   </h2>
                   <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-slate-300">
-                    {destaque.summary}
+                    {tDynamic(destaque.summary)}
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-slate-400">
                     <span className="flex items-center gap-1 font-semibold"><User size={14} /> {destaque.author.name}</span>
-                    <span className="flex items-center gap-1"><Clock size={14} /> {destaque.readTime}</span>
+                    <span className="flex items-center gap-1"><Clock size={14} /> {tDynamic(destaque.readTime)}</span>
                   </div>
                 </div>
 
@@ -158,7 +158,7 @@ export default function Blog() {
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-orange-400">{t('blog.visaoPratica')}</span>
                     <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                      {destaque.description}
+                      {tDynamic(destaque.description)}
                     </p>
                   </div>
                   <Link
@@ -210,23 +210,23 @@ export default function Blog() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
                     <span className="absolute bottom-3 left-3 rounded-full bg-[#FC5B24] px-3 py-0.5 text-[10px] font-bold text-white shadow-md">
-                      {post.category}
+                      {tDynamic(post.category)}
                     </span>
                   </div>
 
                   <div className="p-6 flex flex-col flex-1 justify-between">
                     <div>
                       <div className="flex items-center justify-between text-[11px] text-slate-400 mb-2">
-                        <span className="flex items-center gap-1"><Clock size={12} /> {post.readTime}</span>
+                        <span className="flex items-center gap-1"><Clock size={12} /> {tDynamic(post.readTime)}</span>
                         <span>{post.publishedAt}</span>
                       </div>
 
                       <h3 className="font-['Sora'] text-base font-bold leading-snug text-gray-900 group-hover:text-[#FC5B24] dark:text-white transition-colors">
-                        <Link to={`/blog/${post.slug}`}>{post.title}</Link>
+                        <Link to={`/blog/${post.slug}`}>{tDynamic(post.title)}</Link>
                       </h3>
 
                       <p className="mt-2 text-xs leading-relaxed text-gray-600 line-clamp-3 dark:text-slate-300">
-                        {post.description}
+                        {tDynamic(post.description)}
                       </p>
                     </div>
 

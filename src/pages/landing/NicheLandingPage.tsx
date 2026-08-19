@@ -36,7 +36,7 @@ interface NicheLandingPageProps {
 }
 
 export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) {
-  const { t } = useI18n();
+  const { t, tDynamic } = useI18n();
   const params = useParams<{ slug?: string }>();
   const slug = forcedSlug || params.slug || '';
   const data = LANDING_PAGES_DATA[slug];
@@ -168,18 +168,18 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
         <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-orange-300 backdrop-blur-md">
             <Sparkles size={14} className="text-orange-400" />
-            {data.badge}
+            {tDynamic(data.badge)}
           </span>
 
           <h1 className="mx-auto mt-6 font-['Sora'] text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-            {data.h1Title}{' '}
+            {tDynamic(data.h1Title)}{' '}
             <span className="bg-gradient-to-r from-[#FF8A5C] via-[#FC5B24] to-[#6B9EFF] bg-clip-text text-transparent">
-              {data.h1Highlight}
+              {tDynamic(data.h1Highlight)}
             </span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-3xl text-base leading-relaxed text-slate-300 sm:text-lg">
-            {data.subheadline}
+            {tDynamic(data.subheadline)}
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -187,13 +187,13 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
               to="/cadastre-se"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105 sm:w-auto"
             >
-              Criar Minha Conta Grátis <ArrowRight size={18} />
+              {tDynamic('Criar Minha Conta Grátis')} <ArrowRight size={18} />
             </Link>
             <a
               href="#comparativo"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-8 py-4 font-['Sora'] text-base font-bold text-white backdrop-blur-md transition hover:bg-white/15 sm:w-auto"
             >
-              Ver Diferenciais
+              {tDynamic('Ver Diferenciais')}
             </a>
           </div>
 
@@ -201,8 +201,8 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
           <div className="mt-14 grid gap-4 sm:grid-cols-3">
             {data.heroMetrics.map((metric, idx) => (
               <div key={idx} className="rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md text-left">
-                <p className="font-['Sora'] text-2xl font-extrabold text-white">{metric.value}</p>
-                <p className="mt-1 text-xs text-slate-300 font-medium">{metric.label}</p>
+                <p className="font-['Sora'] text-2xl font-extrabold text-white">{tDynamic(metric.value)}</p>
+                <p className="mt-1 text-xs text-slate-300 font-medium">{tDynamic(metric.label)}</p>
               </div>
             ))}
           </div>
@@ -213,12 +213,12 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
       <section id="comparativo" className="scroll-mt-24 py-20 bg-white dark:bg-transparent">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">Dores & Solução</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic('Dores & Solução')}</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold text-gray-900 sm:text-4xl dark:text-white">
-              {data.painPointsTitle}
+              {tDynamic(data.painPointsTitle)}
             </h2>
             <p className="mt-3 text-base text-gray-600 dark:text-slate-300">
-              {data.painPointsSubtitle}
+              {tDynamic(data.painPointsSubtitle)}
             </p>
           </div>
 

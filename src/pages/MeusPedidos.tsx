@@ -8,6 +8,7 @@ import { fonteFamilia, obterFundoLojaPorTema, obterTokensLoja } from '../lib/per
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import MiseOnLoader from '../components/MiseOnLoader';
+import { useI18n } from '../contexts/I18nContext';
 
 const STATUS_LABEL: Record<StatusPedido, string> = {
   NOVO: 'Recebido',
@@ -54,6 +55,7 @@ function descricaoStatus(pedido: Pedido) {
 }
 
 export default function MeusPedidos() {
+  const { tDynamic } = useI18n();
   const { slug } = useParams();
   const [logado, setLogado] = useState<boolean | null>(null);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -215,8 +217,8 @@ export default function MeusPedidos() {
             <ChevronLeft size={18} />
           </Link>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--cor-texto-fraco)' }}>Central do cliente</p>
-            <h1 className="font-black" style={{ color: 'var(--cor-texto)' }}>Meus pedidos</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--cor-texto-fraco)' }}>{tDynamic('Central do cliente')}</p>
+            <h1 className="font-black" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Meus pedidos')}</h1>
           </div>
           </div>
           <div className="flex items-center gap-2">

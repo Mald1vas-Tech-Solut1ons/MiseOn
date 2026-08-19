@@ -5,8 +5,11 @@ import SEO from '../components/SEO';
 import { PAGE_META } from '../data/pageMeta';
 
 import LanguageToggle from '../components/LanguageToggle';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function CadastreSuaLoja() {
+  const { tDynamic } = useI18n();
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4 py-10 bg-transparent">
       <SEO {...PAGE_META['/cadastre-se']} />
@@ -22,26 +25,26 @@ export default function CadastreSuaLoja() {
         <div className="mb-8 flex flex-col items-center justify-center text-center relative z-10">
           <MiseOnLogo size={150} className="mb-4" />
           <span className="mb-3 inline-flex rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-emerald-400">
-            ✨ 30 Dias Grátis · Sem Cartão
+            ✨ {tDynamic('30 Dias Grátis · Sem Cartão')}
           </span>
-          <h1 className="text-xl font-bold dark:text-white" style={{ fontFamily: "'Sora', sans-serif" }}>Cadastre sua loja na MiseOn</h1>
+          <h1 className="text-xl font-bold dark:text-white" style={{ fontFamily: "'Sora', sans-serif" }}>{tDynamic('Cadastre sua loja na MiseOn')}</h1>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Cardápio digital, WhatsApp IA, PDV, entregas e controle de estoque com 30 dias de uso liberado sem compromisso.
+            {tDynamic('Cardápio digital, WhatsApp IA, PDV, entregas e controle de estoque com 30 dias de uso liberado sem compromisso.')}
           </p>
         </div>
 
         <div className="relative z-10 space-y-3">
           <p className="text-center text-xs text-gray-400">
-            Entre com sua conta e, em seguida, conte pra gente sobre o seu negócio — é rapidinho e já deixa sua loja pronta.
+            {tDynamic('Entre com sua conta e, em seguida, conte pra gente sobre o seu negócio — é rapidinho e já deixa sua loja pronta.')}
           </p>
           <Link to="/admin/login"
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] hover:bg-[var(--cor-primaria-hover)] transition-colors py-3.5 text-sm font-semibold text-white shadow-lg">
-            Criar minha loja agora <ArrowRight size={16} />
+            {tDynamic('Criar minha loja agora')} <ArrowRight size={16} />
           </Link>
         </div>
 
         <Link to="/" className="mt-6 block text-center text-xs text-gray-400 hover:text-white transition-colors relative z-10">
-          Voltar para o início
+          {tDynamic('Voltar para o início')}
         </Link>
       </div>
     </div>

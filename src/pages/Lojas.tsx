@@ -13,6 +13,7 @@ import { carregarLocalizacaoCliente, enderecoParaLabel, enderecoParaQuery, salva
 import { getOptimizedImageUrl } from '../lib/cdn';
 
 import LanguageToggle from '../components/LanguageToggle';
+import { useI18n } from '../contexts/I18nContext';
 
 interface LojaResumo {
   id: string;
@@ -34,6 +35,7 @@ interface LojaResumo {
 }
 
 export default function Lojas() {
+  const { tDynamic } = useI18n();
   const [lojas, setLojas] = useState<LojaResumo[]>([]);
   const [faixasEntrega, setFaixasEntrega] = useState<FaixaEntrega[]>([]);
   const [busca, setBusca] = useState('');
@@ -170,8 +172,8 @@ export default function Lojas() {
           </div>
         </div>
 
-        <h1 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight">Lojas na MiseOn</h1>
-        <p style={{ color: 'rgba(234,241,251,0.6)' }} className="mt-1 mb-5 text-sm">Escolha uma loja e peça direto pelo cardápio, sem app.</p>
+        <h1 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight">{tDynamic('Lojas na MiseOn')}</h1>
+        <p style={{ color: 'rgba(234,241,251,0.6)' }} className="mt-1 mb-5 text-sm">{tDynamic('Escolha uma loja e peça direto pelo cardápio, sem app.')}</p>
 
         <div
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)' }}
@@ -179,11 +181,11 @@ export default function Lojas() {
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#FC5B24]">Cobertura inteligente de entrega</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#FC5B24]">{tDynamic('Cobertura inteligente de entrega')}</p>
               <p className="mt-1 text-sm font-semibold text-white">
                 {user
-                  ? (localizacaoCliente ? 'Mostrando restaurantes que atendem sua localização' : 'Ative sua localização para filtrar restaurantes por raio de entrega')
-                  : 'Faça login para filtrar automaticamente restaurantes que atendem sua região'}
+                  ? (localizacaoCliente ? tDynamic('Mostrando restaurantes que atendem sua localização') : tDynamic('Ative sua localização para filtrar restaurantes por raio de entrega'))
+                  : tDynamic('Faça login para filtrar automaticamente restaurantes que atendem sua região')}
               </p>
               {labelLocalizacao && (
                 <p className="mt-1 text-xs" style={{ color: 'rgba(234,241,251,0.6)' }}>

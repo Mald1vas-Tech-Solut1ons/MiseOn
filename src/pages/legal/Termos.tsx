@@ -2,24 +2,31 @@ import { FileText, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SEO from '../../components/SEO';
 import { PAGE_META } from '../../data/pageMeta';
+import LanguageToggle from '../../components/LanguageToggle';
+import { useI18n } from '../../contexts/I18nContext';
 
 export default function Termos() {
+  const { tDynamic } = useI18n();
+
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-[#070C18] dark:text-[#EAF1FB]">
       <SEO {...PAGE_META['/termos']} />
       <div className="mx-auto max-w-3xl">
-        <Link
-          to="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-gray-500 transition hover:text-[var(--cor-primaria)] dark:text-gray-400"
-        >
-          <ArrowLeft size={16} /> Voltar para a página inicial
-        </Link>
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 transition hover:text-[var(--cor-primaria)] dark:text-gray-400"
+          >
+            <ArrowLeft size={16} /> {tDynamic('Voltar para a página inicial')}
+          </Link>
+          <LanguageToggle variant="pill" />
+        </div>
 
         <div className="overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-gray-900">
           <div className="bg-[var(--cor-primaria)] px-8 py-10 text-center text-white">
             <FileText size={48} className="mx-auto mb-4 opacity-90" />
-            <h1 className="font-['Sora'] text-3xl font-extrabold">Termos de Uso e Serviço</h1>
-            <p className="mt-2 text-white/80">Última atualização: 22 de julho de 2026</p>
+            <h1 className="font-['Sora'] text-3xl font-extrabold">{tDynamic('Termos de Uso e Serviço')}</h1>
+            <p className="mt-2 text-white/80">{tDynamic('Última atualização: 22 de julho de 2026')}</p>
           </div>
 
           <div className="space-y-8 p-8 text-gray-600 sm:p-12 dark:text-gray-300">
