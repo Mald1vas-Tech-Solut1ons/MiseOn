@@ -5,10 +5,13 @@ import { BLOG_POSTS } from '../data/blogData';
 import SEO from '../components/SEO';
 import FooterSEO from '../components/FooterSEO';
 import MiseOnLogo from '../components/MiseOnLogo';
+import LanguageToggle from '../components/LanguageToggle';
+import { useI18n } from '../contexts/I18nContext';
 
 const CATEGORIAS = ['Todas', 'Gestão Financeira', 'Operação & KDS', 'Tecnologia & IA', 'Engenharia de Cardápio'] as const;
 
 export default function Blog() {
+  const { t } = useI18n();
   const [busca, setBusca] = useState('');
   const [categoriaSel, setCategoriaSel] = useState<string>('Todas');
 
@@ -59,9 +62,10 @@ export default function Blog() {
             <MiseOnLogo size={132} />
           </Link>
           <div className="flex items-center gap-4 text-sm font-semibold">
-            <Link to="/" className="text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white">Home</Link>
+            <Link to="/" className="text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white">{t('nav.home')}</Link>
+            <LanguageToggle variant="pill" />
             <Link to="/cadastre-se" className="rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-5 py-2 text-xs font-bold text-white shadow-md">
-              Testar 30 Dias Grátis
+              {t('nav.testar30d')}
             </Link>
           </div>
         </div>
@@ -75,15 +79,18 @@ export default function Blog() {
         <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-orange-300 backdrop-blur-md">
             <BookOpen size={14} className="text-orange-400" />
-            Conhecimento de Especialistas em Food Service
+            {t('blog.badge')}
           </span>
 
           <h1 className="mx-auto mt-6 font-['Sora'] text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-            Blog MiseOn: <span className="bg-gradient-to-r from-[#FF8A5C] via-[#FC5B24] to-[#6B9EFF] bg-clip-text text-transparent">Engenharia, CMV & Tecnologia</span>
+            {t('blog.heroTitle')}
+            <span className="bg-gradient-to-r from-[#FF8A5C] via-[#FC5B24] to-[#6B9EFF] bg-clip-text text-transparent">
+              {t('blog.heroHighlight')}
+            </span>
           </h1>
 
           <p className="mx-auto mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">
-            Artigos profundos e sem enrolação sobre gestão de custos, automação de cozinha, regras operacionais e o futuro da tecnologia no food service.
+            {t('blog.heroSubtitle')}
           </p>
 
           {/* Busca */}
@@ -94,7 +101,7 @@ export default function Blog() {
                 type="text"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                placeholder="Busque por tema (ex: CMV, KDS, WhatsApp, Perda de Cocção)..."
+                placeholder={t('blog.buscaPlaceholder')}
                 className="w-full rounded-full border border-white/20 bg-white/10 py-3.5 pl-12 pr-4 text-sm text-white placeholder-slate-400 outline-none backdrop-blur-md focus:border-[#FC5B24]"
               />
             </div>
@@ -117,7 +124,7 @@ export default function Blog() {
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20'
                 }`}
               >
-                {cat}
+                {cat === 'Todas' ? t('blog.todasCategorias') : cat}
               </button>
             );
           })}
@@ -128,7 +135,7 @@ export default function Blog() {
       {!busca && categoriaSel === 'Todas' && destaque && (
         <section className="py-12">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#FC5B24]">Artigo em Destaque</p>
+            <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#FC5B24]">{t('blog.artigoDestaque')}</p>
             <div className="group overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
               <div className="grid gap-8 lg:grid-cols-3">
                 <div className="lg:col-span-2">
@@ -149,16 +156,16 @@ export default function Blog() {
 
                 <div className="flex flex-col justify-between rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0B1120] to-[#111a33] p-6 text-white">
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-orange-400">Visão Prática</span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-orange-400">{t('blog.visaoPratica')}</span>
                     <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                      Entenda como aplicar a valoração de preparos PEPS e proteger a margem real do seu restaurante.
+                      {destaque.description}
                     </p>
                   </div>
                   <Link
                     to={`/blog/${destaque.slug}`}
                     className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#FC5B24] px-5 py-3 font-['Sora'] text-xs font-bold text-white shadow-lg transition hover:scale-105"
                   >
-                    Ler Artigo Completo <ArrowRight size={14} />
+                    {t('blog.lerArtigoCompleto')} <ArrowRight size={14} />
                   </Link>
                 </div>
               </div>
@@ -172,16 +179,16 @@ export default function Blog() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex items-center justify-between mb-8">
             <h2 className="font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">
-              {busca ? `Resultados para "${busca}"` : 'Artigos Recentes'}
+              {busca ? `${t('blog.resultadosPara')} "${busca}"` : t('blog.artigosRecentes')}
             </h2>
-            <span className="text-xs font-semibold text-slate-400">{postsFiltrados.length} artigo(s) encontrado(s)</span>
+            <span className="text-xs font-semibold text-slate-400">{postsFiltrados.length} {t('blog.artigosEncontrados')}</span>
           </div>
 
           {postsFiltrados.length === 0 ? (
             <div className="py-16 text-center text-slate-400">
-              <p className="text-base font-semibold">Nenhum artigo encontrado para a busca selecionada.</p>
+              <p className="text-base font-semibold">{t('blog.nenhumEncontrado')}</p>
               <button onClick={() => { setBusca(''); setCategoriaSel('Todas'); }} className="mt-3 text-xs font-bold text-[#FC5B24] underline">
-                Limpar filtros
+                {t('blog.limparFiltros')}
               </button>
             </div>
           ) : (
@@ -226,7 +233,7 @@ export default function Blog() {
                     <div className="mt-6 pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between">
                       <span className="text-[11px] font-semibold text-slate-400">{post.author.name}</span>
                       <Link to={`/blog/${post.slug}`} className="flex items-center gap-1 text-xs font-bold text-[#FC5B24] group-hover:translate-x-1 transition-transform">
-                        Ler Artigo <ArrowRight size={13} />
+                        {t('blog.lerArtigo')} <ArrowRight size={13} />
                       </Link>
                     </div>
                   </div>
@@ -245,17 +252,17 @@ export default function Blog() {
               🚀 Coloque a Engenharia MiseOn na sua loja
             </span>
             <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold">
-              Pronto para ter controle absoluto de CMV, Estoque e KDS?
+              {t('blog.ctaTitulo')}
             </h2>
             <p className="mt-3 text-sm text-slate-300 max-w-2xl mx-auto">
-              Teste o MiseOn por 30 dias sem custos e sem cartão de crédito. Custeio PEPS, WhatsApp IA, iFood oficial e PDV balcão liberados.
+              {t('blog.ctaSub')}
             </p>
             <div className="mt-8 flex justify-center">
               <Link
                 to="/cadastre-se"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105"
               >
-                Cadastrar Loja Grátis <ArrowRight size={18} />
+                {t('blog.ctaBotao')} <ArrowRight size={18} />
               </Link>
             </div>
           </div>

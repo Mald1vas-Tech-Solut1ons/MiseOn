@@ -2,9 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, MapPin, Mail, ShieldCheck, MessageCircle, CreditCard, Lock, Youtube, Cookie } from 'lucide-react';
 import MiseOnLogo from './MiseOnLogo';
+import LanguageToggle from './LanguageToggle';
 import { abrirGerenciadorCookies } from '../lib/cookieConsent';
+import { useI18n } from '../contexts/I18nContext';
 
 export function FooterSEO() {
+  const { t } = useI18n();
+
   const nichos = [
     { title: 'Restaurantes por Quilo (R$/kg)', href: '/sistema-para-restaurante-por-quilo' },
     { title: 'Sistema para Hamburgueria', href: '/sistema-para-hamburgueria' },
@@ -21,14 +25,14 @@ export function FooterSEO() {
   ];
 
   const legal = [
-    { title: 'Blog do Restaurante', href: '/blog' },
+    { title: t('nav.blog'), href: '/blog' },
     { title: 'Sobre Nós', href: '/sobre' },
-    { title: 'Vídeos & Demonstrações', href: '/videos' },
+    { title: t('nav.videos'), href: '/videos' },
     { title: 'Contato & Suporte', href: '/contato' },
     { title: 'Termos de Uso', href: '/termos' },
     { title: 'Política de Privacidade', href: '/privacidade' },
-    { title: 'Cadastrar Minha Loja', href: '/cadastre-se' },
-    { title: 'Área do Cliente', href: '/acesso' },
+    { title: t('nav.cadastrar'), href: '/cadastre-se' },
+    { title: t('nav.entrar'), href: '/acesso' },
   ];
 
   return (
@@ -49,6 +53,9 @@ export function FooterSEO() {
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
               <ShieldCheck size={16} /> Plataforma Segura & Certificada
             </div>
+            <div className="pt-1">
+              <LanguageToggle variant="dropdown" />
+            </div>
             <a
               href="https://www.youtube.com/@MiseOnSISTEMA--CozinhasProfiss"
               target="_blank"
@@ -64,7 +71,7 @@ export function FooterSEO() {
           {/* Coluna 2: Soluções por Nicho */}
           <div>
             <h3 className="font-['Sora'] text-xs font-bold uppercase tracking-wider text-orange-400">
-              Soluções por Nicho
+              {t('nav.solucoes')}
             </h3>
             <ul className="mt-4 space-y-2.5 text-xs font-medium">
               {nichos.map((item) => (
@@ -83,7 +90,7 @@ export function FooterSEO() {
           {/* Coluna 3: Funcionalidades Principais */}
           <div>
             <h3 className="font-['Sora'] text-xs font-bold uppercase tracking-wider text-blue-400">
-              Funcionalidades
+              {t('nav.funcionalidades')}
             </h3>
             <ul className="mt-4 space-y-2.5 text-xs font-medium">
               {funcionalidades.map((item) => (

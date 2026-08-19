@@ -4,6 +4,8 @@ import MiseOnLogo from '../components/MiseOnLogo';
 import SEO from '../components/SEO';
 import { PAGE_META } from '../data/pageMeta';
 
+import LanguageToggle from '../components/LanguageToggle';
+
 /**
  * Hall de Acesso — separa claramente as modalidades de entrada.
  * Uma identidade (um login) pode ter vários papéis; aqui o usuário escolhe
@@ -59,9 +61,10 @@ export default function Acesso() {
       {/* Glow */}
       <div style={{ background: 'radial-gradient(circle, rgba(10,92,196,0.30) 0%, transparent 70%)', width: 600, height: 600, borderRadius: '50%', position: 'absolute', top: -180, left: '50%', transform: 'translateX(-55%)', pointerEvents: 'none' }} />
 
-      <div className="relative z-10 mx-auto max-w-5xl px-6 py-14">
-        <div className="flex justify-center mb-2">
-          <Link to="/" className="filter drop-shadow-[0_0_12px_rgba(255,255,255,0.25)]"><MiseOnLogo size={150} /></Link>
+      <div className="relative z-10 mx-auto max-w-5xl px-6 py-10">
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/" className="filter drop-shadow-[0_0_12px_rgba(255,255,255,0.25)]"><MiseOnLogo size={140} /></Link>
+          <LanguageToggle variant="pill" />
         </div>
         <div className="text-center mb-10">
           <div style={{ border: '1px solid rgba(252,91,36,0.4)', background: 'rgba(252,91,36,0.1)', color: '#FC5B24', fontFamily: "'Sora', sans-serif" }}

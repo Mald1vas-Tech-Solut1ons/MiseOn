@@ -9,6 +9,7 @@ import { LANDING_PAGES_DATA } from '../../data/landingPagesData';
 import SEO from '../../components/SEO';
 import FooterSEO from '../../components/FooterSEO';
 import MiseOnLogo from '../../components/MiseOnLogo';
+import LanguageToggle from '../../components/LanguageToggle';
 
 const ICON_MAP: Record<string, any> = {
   ChefHat,
@@ -118,6 +119,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
           </div>
 
           <div className="hidden items-center gap-3 lg:flex">
+            <LanguageToggle variant="pill" />
             <Link
               to="/acesso"
               className="rounded-full px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10"

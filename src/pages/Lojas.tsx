@@ -12,6 +12,8 @@ import { geocode, lojaAtendeDistancia, type LatLng } from '../lib/geo';
 import { carregarLocalizacaoCliente, enderecoParaLabel, enderecoParaQuery, salvarLocalizacaoCliente } from '../lib/localizacao-cliente';
 import { getOptimizedImageUrl } from '../lib/cdn';
 
+import LanguageToggle from '../components/LanguageToggle';
+
 interface LojaResumo {
   id: string;
   slug: string;
@@ -162,7 +164,10 @@ export default function Lojas() {
           <Link to="/" style={{ color: 'rgba(234,241,251,0.6)' }} className="flex items-center gap-1 text-sm font-medium transition hover:text-white">
             <ChevronLeft size={16} /> Início
           </Link>
-          <Link to="/"><MiseOnLogo size={110} /></Link>
+          <div className="flex items-center gap-3">
+            <LanguageToggle variant="minimal" />
+            <Link to="/"><MiseOnLogo size={110} /></Link>
+          </div>
         </div>
 
         <h1 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight">Lojas na MiseOn</h1>

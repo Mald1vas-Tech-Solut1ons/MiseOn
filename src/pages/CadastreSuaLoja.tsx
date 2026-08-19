@@ -4,6 +4,8 @@ import MiseOnLogo from '../components/MiseOnLogo';
 import SEO from '../components/SEO';
 import { PAGE_META } from '../data/pageMeta';
 
+import LanguageToggle from '../components/LanguageToggle';
+
 export default function CadastreSuaLoja() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4 py-10 bg-transparent">
@@ -12,6 +14,10 @@ export default function CadastreSuaLoja() {
         {/* Glow de fundo */}
         <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-[var(--cor-primaria)] opacity-10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-[var(--cor-secundaria)] opacity-10 blur-3xl" />
+
+        <div className="mb-4 flex justify-end relative z-10">
+          <LanguageToggle variant="pill" />
+        </div>
 
         <div className="mb-8 flex flex-col items-center justify-center text-center relative z-10">
           <MiseOnLogo size={150} className="mb-4" />

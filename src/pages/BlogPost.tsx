@@ -5,12 +5,15 @@ import { BLOG_POSTS } from '../data/blogData';
 import SEO from '../components/SEO';
 import FooterSEO from '../components/FooterSEO';
 import MiseOnLogo from '../components/MiseOnLogo';
+import LanguageToggle from '../components/LanguageToggle';
+import { useI18n } from '../contexts/I18nContext';
 
 interface BlogPostProps {
   forcedSlug?: string;
 }
 
 export default function BlogPost({ forcedSlug }: BlogPostProps) {
+  const { t } = useI18n();
   const params = useParams<{ slug?: string }>();
   const slug = forcedSlug || params.slug || '';
   const post = BLOG_POSTS.find((p) => p.slug === slug);
@@ -70,7 +73,6 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
     },
   ];
 
-  // Formatador simples para renderizar seções e listas em HTML limpo
   const renderContent = (content: string) => {
     const lines = content.split('\n');
     const elements: React.ReactNode[] = [];
@@ -150,10 +152,11 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
           </Link>
           <div className="flex items-center gap-4 text-sm font-semibold">
             <Link to="/blog" className="flex items-center gap-1 text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white">
-              <ArrowLeft size={16} /> Voltar ao Blog
+              <ArrowLeft size={16} /> {t('blog.voltarBlog')}
             </Link>
+            <LanguageToggle variant="pill" />
             <Link to="/cadastre-se" className="rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-5 py-2 text-xs font-bold text-white shadow-md">
-              Testar 30 Dias Grátis
+              {t('nav.testar30d')}
             </Link>
           </div>
         </div>
@@ -215,7 +218,7 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
             {/* Box de Resumo executivo */}
             <div className="mb-8 rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5 text-gray-900 dark:text-slate-200">
               <p className="text-xs font-black uppercase tracking-wider text-[#FC5B24] flex items-center gap-1.5">
-                <Bookmark size={14} /> Resumo Executivo
+                <Bookmark size={14} /> {t('blog.resumoExecutivo')}
               </p>
               <p className="mt-2 text-sm leading-relaxed font-medium">
                 {post.summary}
@@ -244,23 +247,23 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
               💡 Aplique esta engenharia no seu restaurante
             </span>
             <h3 className="mt-3 font-['Sora'] text-2xl font-bold">
-              Elimine os vazamentos de estoque e otimize seu KDS hoje
+              {t('blog.ctaTitulo')}
             </h3>
             <p className="mt-2 text-xs text-slate-300 leading-relaxed max-w-2xl">
-              O MiseOn entrega custeio PEPS automático, perda de cocção em buffet, atendimento via IA no WhatsApp e balcão integrado.
+              {t('blog.ctaSub')}
             </p>
             <Link
               to="/cadastre-se"
               className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-6 py-3 font-['Sora'] text-xs font-bold text-white shadow-lg transition hover:scale-105"
             >
-              Criar Loja Grátis (30 Dias) <ArrowRight size={15} />
+              {t('blog.ctaBotao')} <ArrowRight size={15} />
             </Link>
           </div>
 
           {/* ARTIGOS RELACIONADOS */}
           <div className="mt-16">
             <h3 className="font-['Sora'] text-xl font-bold text-gray-900 dark:text-white mb-6">
-              Continue Lendo (Artigos Relacionados)
+              {t('blog.continueLendo')}
             </h3>
             <div className="grid gap-6 sm:grid-cols-3">
               {postsRelacionados.map((rel) => (
@@ -274,7 +277,7 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
                     {rel.title}
                   </h4>
                   <span className="mt-4 flex items-center gap-1 text-xs font-bold text-[#FC5B24]">
-                    Ler artigo <ArrowRight size={12} />
+                    {t('blog.lerArtigo')} <ArrowRight size={12} />
                   </span>
                 </Link>
               ))}

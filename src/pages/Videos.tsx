@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Play, Pause, Volume2, VolumeX, Maximize2, Sparkles, Video, Star, Quote, CheckCircle2 } from 'lucide-react';
 import { FooterSEO } from '../components/FooterSEO';
 import MiseOnLogo from '../components/MiseOnLogo';
+import LanguageToggle from '../components/LanguageToggle';
 import SEO from '../components/SEO';
 import { PAGE_META } from '../data/pageMeta';
 
@@ -196,6 +197,7 @@ export default function Videos() {
           </div>
 
           <div className="flex items-center gap-3">
+            <LanguageToggle variant="pill" />
             <Link
               to="/acesso"
               className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 transition"
