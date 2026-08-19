@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 // Fonte única de verdade das rotas públicas de marketing — usada tanto pelo
 // prerender (scripts/prerender.mjs) quanto pela geração do sitemap
 // (scripts/generate-sitemap.mjs). Antes, o sitemap.xml era mantido à mão e
@@ -5,6 +7,39 @@
 //
 // Ao adicionar uma página de marketing nova em src/main.tsx, adicione aqui
 // também — os dois scripts derivam tudo deste array.
+
+
+/**
+ * Slugs dos artigos, lidos direto de src/data/blogData.ts.
+ *
+ * Antes esta lista era escrita à mão, e envelhecia calada: o blog chegou a
+ * onze artigos com apenas quatro no sitemap — sete textos invisíveis para o
+ * Google, incluindo os publicados no mesmo dia. Como o arquivo de dados é
+ * TypeScript e estes scripts são Node puro, a leitura é por texto: basta o
+ * campo `slug` no formato que o arquivo já usa.
+ */
+function rotasDoBlog() {
+  const arquivo = new URL('../src/data/blogData.ts', import.meta.url);
+  let conteudo = '';
+  try {
+    conteudo = readFileSync(arquivo, 'utf-8');
+  } catch {
+    return [];
+  }
+
+  const slugs = [...conteudo.matchAll(/^\s{4}slug:\s*'([^']+)'/gm)].map((m) => m[1]);
+  const unicos = [...new Set(slugs)];
+
+  if (unicos.length === 0) {
+    throw new Error('Nenhum artigo encontrado em blogData.ts — o formato do arquivo mudou?');
+  }
+
+  return unicos.map((slug) => ({
+    path: `/blog/${slug}`,
+    changefreq: 'monthly',
+    priority: 0.8,
+  }));
+}
 
 export const PUBLIC_ROUTES = [
   // A home É prerenderizada, em dist/index.html, com H1 real e visível.
@@ -76,10 +111,8 @@ export const PUBLIC_ROUTES = [
   { path: '/gestao-fiscal-nfe', changefreq: 'weekly', priority: 0.9 },
   { path: '/gestao-de-estoque-3d', changefreq: 'weekly', priority: 0.8 },
   { path: '/blog', changefreq: 'daily', priority: 0.9 },
-  { path: '/blog/evolucao-do-cmv-do-caderno-ao-custeio-peps-3d', changefreq: 'monthly', priority: 0.8 },
-  { path: '/blog/o-fim-do-papel-na-cozinha-kds-kanban-operacional', changefreq: 'monthly', priority: 0.8 },
-  { path: '/blog/ia-no-whatsapp-do-restaurante-atendimento-oficial-meta-vs-bots-amadores', changefreq: 'monthly', priority: 0.8 },
-  { path: '/blog/verdade-sobre-venda-por-quilo-perda-coccao-peso-inteligente', changefreq: 'monthly', priority: 0.8 },
+  // Os posts entram automaticamente logo abaixo — ver ROTAS_DO_BLOG.
+  ...rotasDoBlog(),
 ];
 
 // Rotas que renderizam o MESMO componente/conteúdo de uma rota acima
