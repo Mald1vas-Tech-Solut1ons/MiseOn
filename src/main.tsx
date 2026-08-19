@@ -114,12 +114,33 @@ const updateSW = registerSW({
   },
 });
 
+/**
+ * Mantém o app na versão publicada, mesmo com cache de borda no caminho.
+ *
+ * O sw.js é servido com Cache-Control de 4 horas (a borda sobrescreve o
+ * max-age=0 que o projeto define), então o navegador podia continuar rodando o
+ * app antigo por horas depois de um deploy — e o lojista via bug já corrigido,
+ * sem ter como saber que era versão velha.
+ *
+ * A checagem abaixo roda ao abrir, ao voltar o foco da aba e a cada 15 minutos.
+ * `registration.update()` busca o script do service worker ignorando o cache
+ * HTTP, então não depende do TTL da borda. Quando encontra versão nova, o
+ * onNeedRefresh acima aplica e recarrega.
+ */
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const registration of registrations) {
-      registration.update().catch(() => {});
-    }
+  const procurarAtualizacao = () => {
+    navigator.serviceWorker.getRegistrations().then((registros) => {
+      for (const registro of registros) registro.update().catch(() => {});
+    }).catch(() => {});
+  };
+
+  procurarAtualizacao();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') procurarAtualizacao();
   });
+
+  window.setInterval(procurarAtualizacao, 15 * 60 * 1000);
 }
 
 

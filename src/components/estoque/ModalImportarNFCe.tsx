@@ -209,7 +209,10 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
             criar_novo: !insumoExistente,
             insumo_id: insumoExistente,
             nome: l.nomeNovoInsumo.trim() || l.itemNota.descricao,
-            unidade: (insumoExistente ? porId.get(insumoExistente)?.unidade_medida : l.unidadeInsumo) || 'un',
+            unidade: l.unidadeInsumo || porId.get(insumoExistente ?? '')?.unidade_medida || 'un',
+            // Troca de unidade de insumo existente: a RPC so aplica com saldo
+            // zerado, senao o saldo antigo passaria a significar outra coisa.
+            trocar_unidade: !!insumoExistente && l.unidadeInsumo !== porId.get(insumoExistente)?.unidade_medida,
             qtd_nota: Number(l.itemNota.qtd) || 0,
             fator: Number(l.fatorConversao) || 1,
             custo_total: Number(l.itemNota.valor_total) || 0,
@@ -371,12 +374,15 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                   const custoUnitFinal = qtdFinal > 0 ? l.itemNota.valor_total / qtdFinal : 0;
                   // A unidade de destino é escolha do lojista: ao criar insumo
                   // novo, a que ele selecionou; ao vincular, a do insumo dele.
-                  const unidadeDestino = l.criarNovo ? (l.unidadeInsumo || 'un') : (insumoSelecionado?.unidade_medida || 'un');
+                  const unidadeDestino = l.unidadeInsumo || insumoSelecionado?.unidade_medida || 'un';
                   const unidadeNota = l.itemNota.unidade || 'un';
                   const mesmaUnidade = unidadeNota.toLowerCase() === unidadeDestino.toLowerCase();
                   // A unidade impressa na nota (bd, fr, pct...) nem sempre está
                   // no catálogo. Sem isso ela some da lista e o lojista perde a
                   // informação de como a compra realmente veio.
+                  const saldoDoInsumo = Number(insumoSelecionado?.quantidade_atual ?? 0);
+                  const unidadeTrocada = !l.criarNovo && !!insumoSelecionado
+                    && l.unidadeInsumo !== insumoSelecionado.unidade_medida;
                   const opcoesUnidade = UNIDADES.some(u => u.codigo.toLowerCase() === unidadeNota.toLowerCase())
                     ? UNIDADES.map(u => ({ codigo: u.codigo, rotulo: u.rotulo }))
                     : [{ codigo: unidadeNota, rotulo: `${unidadeNota} — como veio na nota` },
@@ -447,7 +453,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                             </select>
                           </div>
 
-                          {l.criarNovo && (
+                          {l.criarNovo ? (
                             <div className="flex gap-2 mb-2">
                               <input
                                 value={l.nomeNovoInsumo}
@@ -465,6 +471,42 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                                   <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>
                                 ))}
                               </select>
+                            </div>
+                          ) : (
+                            /*
+                              Vincular a insumo existente nao pode significar
+                              aceitar a unidade dele calada. Tomate cadastrado
+                              em "rodela" nao obriga a compra em quilo a virar
+                              rodela — quem manda na unidade e o dono da
+                              cozinha, aqui tambem.
+                            */
+                            <div className="mb-2 flex flex-wrap items-center gap-2">
+                              <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                                Controlar no estoque em:
+                              </span>
+                              <select
+                                value={l.unidadeInsumo}
+                                onChange={e => atualizarLinha(i, { unidadeInsumo: e.target.value })}
+                                disabled={saldoDoInsumo > 0}
+                                title={saldoDoInsumo > 0
+                                  ? 'Zere o saldo deste insumo para poder trocar a unidade'
+                                  : 'Unidade em que este insumo passa a ser controlado'}
+                                className="w-44 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs dark:bg-gray-950 dark:text-gray-100 font-bold disabled:opacity-60"
+                              >
+                                {opcoesUnidade.map(u => (
+                                  <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>
+                                ))}
+                              </select>
+                              {saldoDoInsumo > 0 && unidadeTrocada && (
+                                <span className="text-[10px] text-amber-600 dark:text-amber-400">
+                                  tem {saldoDoInsumo} {insumoSelecionado?.unidade_medida} em estoque — zere antes de trocar
+                                </span>
+                              )}
+                              {saldoDoInsumo === 0 && unidadeTrocada && (
+                                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                                  o insumo passa a ser controlado em {l.unidadeInsumo}
+                                </span>
+                              )}
                             </div>
                           )}
 
