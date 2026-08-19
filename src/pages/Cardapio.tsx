@@ -14,7 +14,7 @@ import {
   Loja, Banner, Categoria, Produto, TaxaEntrega, FaixaEntrega, ItemCarrinho,
   HorarioFuncionamento, MetodoPgto, Mesa, fmt, fmtQtd, precoItem,
 } from '../types';
-import { fonteFamilia, isLightColor, obterFundoLojaPorTema, obterTokensLoja } from '../lib/personalizacao';
+import { fonteFamilia, isLightColor, obterFundoLojaPorTema, obterTokensLoja, corLegivelSobre } from '../lib/personalizacao';
 import { aplicarTema, obterTemaPreferido, type PreferenciaTema } from '../lib/tema';
 import CheckoutDrawer from '../components/CheckoutDrawer';
 import PagamentoStatus, { type PixInfo } from '../components/PagamentoStatus';
@@ -231,6 +231,15 @@ export default function Cardapio() {
     const tokens = obterTokensLoja(fundo, temaCliente, loja.cor_texto || loja.cor_primaria || '#FC5B24');
     raiz.style.setProperty('--cor-fundo', fundo);
     raiz.style.setProperty('--cor-primaria', loja.cor_primaria || '#FC5B24');
+    // Mesma cor da marca, mas corrigida para ser LEGIVEL como texto sobre
+    // este fundo. O lojista escolhe primaria e fundo sem nenhuma trava, e
+    // combinacoes como vermelho sobre marrom deixavam o PRECO em 3.04:1 —
+    // abaixo do minimo 4.5:1 da WCAG AA. Botao continua usando --cor-primaria
+    // (texto branco por cima); isto vale para texto sobre o fundo da loja.
+    raiz.style.setProperty(
+      '--cor-primaria-texto',
+      corLegivelSobre(loja.cor_primaria || '#FC5B24', fundo),
+    );
     raiz.style.setProperty('--cor-secundaria', loja.cor_secundaria || '#0A5CC4');
     raiz.style.setProperty('--fonte-loja', fonteFamilia(loja.fonte));
     raiz.style.setProperty('--cor-texto', tokens.texto);
@@ -391,7 +400,7 @@ export default function Cardapio() {
       {mesaAtual && (
         <div className="mx-auto -mt-px max-w-6xl px-4 pt-3 sm:px-6">
           <div className="flex items-center gap-2.5 rounded-2xl border px-4 py-3 shadow-sm" style={{ background: 'var(--cor-destaque)', borderColor: 'var(--cor-borda)' }}>
-            <UtensilsCrossed size={18} style={{ color: 'var(--cor-primaria)' }} className="shrink-0" />
+            <UtensilsCrossed size={18} style={{ color: 'var(--cor-primaria-texto)' }} className="shrink-0" />
             <p className="text-sm font-semibold" style={{ color: 'var(--cor-texto)' }}>
               {tDynamic('Você está pedindo da')} <b>{tDynamic('Mesa')} {mesaAtual.numero}</b>{mesaAtual.nome ? ` (${mesaAtual.nome})` : ''} — {tDynamic('sem precisar de login. A conta fecha no final com o garçom.')}
             </p>
@@ -552,7 +561,7 @@ export default function Cardapio() {
                             <>
                               <button onClick={() => i.quantidade > 1 ? setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade - 1 } : x)) : setCarrinho(carrinho.filter((_, y) => y !== idx))} className="transition-colors hover:text-red-500" style={{ color: 'var(--cor-texto-suave)' }}><Minus size={14} /></button>
                               <span className="w-4 text-center text-xs font-bold" style={{ color: 'var(--cor-texto)' }}>{i.quantidade}</span>
-                              <button onClick={() => setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade + 1 } : x))} className="transition-colors hover:text-[var(--cor-primaria)]" style={{ color: 'var(--cor-texto-suave)' }}><Plus size={14} /></button>
+                              <button onClick={() => setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade + 1 } : x))} className="transition-colors hover:text-[var(--cor-primaria-texto)]" style={{ color: 'var(--cor-texto-suave)' }}><Plus size={14} /></button>
                             </>
                           )}
                         </div>
@@ -679,7 +688,7 @@ export default function Cardapio() {
                   {pedidoTotal !== null && (
                     <div className="flex items-center justify-between border-t border-[var(--cor-borda)] pt-2">
                       <span className="font-semibold text-[var(--cor-texto)] dark:text-[var(--cor-texto-claro)]">Total</span>
-                      <span className="text-base font-black text-[var(--cor-primaria)]">{fmt(pedidoTotal)}</span>
+                      <span className="text-base font-black text-[var(--cor-primaria-texto)]">{fmt(pedidoTotal)}</span>
                     </div>
                   )}
                 </div>
@@ -930,7 +939,7 @@ const MaisPedidoCard = memo(({ p, onClick }: { p: Produto; onClick: () => void }
     )}
     <p className="line-clamp-2 text-sm font-bold" style={{ color: 'var(--cor-texto)' }}>{p.nome}</p>
     <div className="mt-2 flex items-center justify-between">
-      <p className="text-sm font-black text-[var(--cor-primaria)]">
+      <p className="text-sm font-black text-[var(--cor-primaria-texto)]">
         {p.tipo_venda === 'POR_PESO' ? `${fmt(Number(p.preco_por_quilo || 0))}/kg` : fmt(Number(p.preco))}
       </p>
       <span className="vitrine-card-cta inline-flex items-center gap-1 text-[11px] font-semibold">
@@ -959,7 +968,7 @@ const ProdutoCard = memo(({ p, onClick }: { p: Produto; onClick: () => void }) =
       </p>
       {p.descricao && <p className="line-clamp-2 text-xs" style={{ color: 'var(--cor-texto-suave)' }}>{p.descricao}</p>}
       <div className="mt-2 flex items-center justify-between gap-3">
-        <p className="font-black text-[var(--cor-primaria)]">
+        <p className="font-black text-[var(--cor-primaria-texto)]">
           {p.tipo_venda === 'POR_PESO' ? `${fmt(Number(p.preco_por_quilo || 0))}/kg` : fmt(Number(p.preco))}
         </p>
         <span className="vitrine-card-cta inline-flex items-center gap-1 text-xs font-semibold">
@@ -1148,7 +1157,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
       invalido(k, ok)
         ? 'border-red-400 focus:border-red-500 dark:border-red-500/60'
         : 'border-gray-200 focus:border-[var(--cor-primaria)] dark:border-gray-700'
-    }${!invalido(k, ok) && k === proximo ? ' campo-proximo' : ''}`;
+    }${!invalido(k, ok) && k === proximo ? ' campo-próximo' : ''}`;
   const rotuloCls = 'mb-0.5 block text-[11px] font-semibold text-gray-500 dark:text-gray-400';
 
   // Portal no body: garante que o fixed se refira à janela mesmo com
@@ -1165,7 +1174,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
             <Lock size={15} className="text-emerald-500" /> Pagamento seguro
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-black" style={{ color: 'var(--cor-primaria)' }}>{fmt(info.total)}</span>
+            <span className="text-sm font-black" style={{ color: 'var(--cor-primaria-texto)' }}>{fmt(info.total)}</span>
             <button onClick={onFechar} className="rounded-full p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"><X size={18} /></button>
           </div>
         </div>

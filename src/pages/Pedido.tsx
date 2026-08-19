@@ -9,7 +9,7 @@ import { supabase } from '../lib/supabase';
 import { fmt, type Loja, type Pedido, type StatusPedido } from '../types';
 import { tocarSom } from '../lib/som';
 import { aplicarTema, obterTemaPreferido, type PreferenciaTema } from '../lib/tema';
-import { fonteFamilia, obterFundoLojaPorTema, obterTokensLoja } from '../lib/personalizacao';
+import { fonteFamilia, obterFundoLojaPorTema, obterTokensLoja, corLegivelSobre } from '../lib/personalizacao';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import MiseOnLoader from '../components/MiseOnLoader';
@@ -190,6 +190,15 @@ export default function AcompanharPedido() {
     const tokens = obterTokensLoja(fundo, temaCliente, loja.cor_texto || loja.cor_primaria || '#FC5B24');
     raiz.style.setProperty('--cor-fundo', fundo);
     raiz.style.setProperty('--cor-primaria', loja.cor_primaria || '#FC5B24');
+    // Mesma cor da marca, mas corrigida para ser LEGIVEL como texto sobre
+    // este fundo. O lojista escolhe primaria e fundo sem nenhuma trava, e
+    // combinacoes como vermelho sobre marrom deixavam o PRECO em 3.04:1 —
+    // abaixo do minimo 4.5:1 da WCAG AA. Botao continua usando --cor-primaria
+    // (texto branco por cima); isto vale para texto sobre o fundo da loja.
+    raiz.style.setProperty(
+      '--cor-primaria-texto',
+      corLegivelSobre(loja.cor_primaria || '#FC5B24', fundo),
+    );
     raiz.style.setProperty('--cor-secundaria', loja.cor_secundaria || '#0A5CC4');
     raiz.style.setProperty('--fonte-loja', fonteFamilia(loja.fonte));
     raiz.style.setProperty('--cor-texto', tokens.texto);
@@ -379,7 +388,7 @@ export default function AcompanharPedido() {
         <div className="rounded-3xl border p-4 shadow-sm" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-2xl p-2.5" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-primaria)' }}>
+              <div className="mt-0.5 rounded-2xl p-2.5" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-primaria-texto)' }}>
                 <Sparkles size={18} />
               </div>
               <div>
@@ -468,7 +477,7 @@ export default function AcompanharPedido() {
                     </div>
                     <div className="pt-1">
                       <p className="font-bold" style={{ color: concluida ? 'var(--cor-texto)' : 'var(--cor-texto-fraco)' }}>{tDynamic(etapa.label)}</p>
-                      {atual && <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--cor-primaria)' }}>{tDynamic('Etapa atual')}</p>}
+                      {atual && <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--cor-primaria-texto)' }}>{tDynamic('Etapa atual')}</p>}
                     </div>
                   </div>
                 );
@@ -546,7 +555,7 @@ export default function AcompanharPedido() {
               )}
               <div className="flex items-center justify-between pt-1 text-base font-black" style={{ color: 'var(--cor-texto)' }}>
                 <span>Total</span>
-                <span style={{ color: 'var(--cor-primaria)' }}>{fmt(Number(pedido.valor_total))}</span>
+                <span style={{ color: 'var(--cor-primaria-texto)' }}>{fmt(Number(pedido.valor_total))}</span>
               </div>
             </div>
 
@@ -568,7 +577,7 @@ export default function AcompanharPedido() {
 
           <section className="rounded-3xl border p-4 shadow-sm" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
             <div className="flex items-start gap-3">
-              <div className="rounded-2xl p-2.5" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-primaria)' }}>
+              <div className="rounded-2xl p-2.5" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-primaria-texto)' }}>
                 <ShieldCheck size={18} />
               </div>
               <div>

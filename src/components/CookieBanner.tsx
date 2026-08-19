@@ -97,7 +97,13 @@ export function CookieBanner() {
                   {tDynamic('Utilizamos cookies essenciais para o funcionamento seguro do cardápio e autenticação. Com sua permissão, também podemos usar cookies analíticos e de marketing para otimizar sua experiência.')}{' '}
                   <Link
                     to="/privacidade"
-                    className="font-medium text-[var(--cor-secundaria)] underline hover:text-[var(--cor-primaria)]"
+                    /* Cor de sistema, nao da marca: este banner tem fundo proprio
+                       (branco no claro, #0B132B no escuro) e aparece por cima do
+                       tema de qualquer loja. Usando --cor-secundaria, uma loja com
+                       secundaria preta (#000000) deixava este link com contraste
+                       1.14:1 sobre o fundo escuro — um aviso legal de LGPD
+                       ilegivel. Azul do sistema passa em ambos os temas. */
+                    className="font-medium text-blue-700 underline decoration-2 underline-offset-2 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
                   >
                     {tDynamic('Política de Privacidade')}
                   </Link>

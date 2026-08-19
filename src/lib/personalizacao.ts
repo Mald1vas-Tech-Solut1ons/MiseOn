@@ -158,6 +158,67 @@ export function misturarCores(origem: string, destino: string, pesoDestino: numb
   );
 }
 
+/**
+ * Luminância relativa da WCAG 2.x. Diferente de isLightColor(), que usa uma
+ * média ponderada simples: aqui cada canal passa pela curva sRGB antes de
+ * entrar na conta, que é o que a norma exige para calcular contraste.
+ */
+function luminanciaRelativa(hex: string) {
+  const rgb = hexParaRgb(hex);
+  if (!rgb) return 0;
+  const canal = (v: number) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * canal(rgb.r) + 0.7152 * canal(rgb.g) + 0.0722 * canal(rgb.b);
+}
+
+/** Razão de contraste WCAG entre duas cores (1 = idênticas, 21 = preto/branco). */
+export function contrasteEntre(corA: string, corB: string) {
+  const a = luminanciaRelativa(normalizarHex(corA) ?? '#000000');
+  const b = luminanciaRelativa(normalizarHex(corB) ?? '#FFFFFF');
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+/**
+ * Devolve a cor da marca ajustada até ficar legível sobre o fundo informado.
+ *
+ * Por que existe: o lojista escolhe cor_primaria e cor de fundo livremente no
+ * painel, e nada impedia combinações ilegíveis. O Lanche do Paulista ficou com
+ * preço vermelho (#EF4444) sobre marrom (#4E350A) — contraste 3.04:1, abaixo do
+ * mínimo 4.5:1 da WCAG AA. Quem perde é o cliente final tentando ler o PREÇO.
+ *
+ * Só mexe na luminosidade: matiz e saturação são preservados, então a cor
+ * continua sendo reconhecidamente a da marca — apenas clareia (sobre fundo
+ * escuro) ou escurece (sobre fundo claro) até passar do limiar. Se nem o
+ * extremo resolver, devolve o melhor que conseguiu.
+ */
+export function corLegivelSobre(corMarca: string, fundo: string, alvo = 4.5) {
+  const base = normalizarHex(corMarca) ?? '#FC5B24';
+  const bg = normalizarHex(fundo) ?? '#FFFFFF';
+  if (contrasteEntre(base, bg) >= alvo) return base;
+
+  const rgb = hexParaRgb(base);
+  if (!rgb) return base;
+  const hsl = rgbParaHsl(rgb.r, rgb.g, rgb.b);
+  const clarear = !isLightColor(bg);
+
+  let melhor = base;
+  let melhorRazao = contrasteEntre(base, bg);
+
+  for (let passo = 1; passo <= 20; passo++) {
+    const l = clarear
+      ? Math.min(100, hsl.l + passo * 4)
+      : Math.max(0, hsl.l - passo * 4);
+    const c = hslParaRgb(hsl.h, hsl.s, l);
+    const hex = rgbParaHex(c.r, c.g, c.b);
+    const razao = contrasteEntre(hex, bg);
+    if (razao > melhorRazao) { melhor = hex; melhorRazao = razao; }
+    if (razao >= alvo) return hex;
+  }
+  return melhor;
+}
+
 export function obterTokensLoja(fundo: string, tema: TemaLoja, corBase = '#FC5B24') {
   const fundoClaro = isLightColor(fundo);
   const base = normalizarHex(corBase) ?? '#FC5B24';

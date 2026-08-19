@@ -4,7 +4,7 @@ import { Bike, ChevronLeft, Clock3, Compass, LogIn, Package, Sparkles, Wallet } 
 import { supabase } from '../lib/supabase';
 import { fmt, type Loja, type Pedido, type StatusPedido } from '../types';
 import { aplicarTema, obterTemaPreferido, type PreferenciaTema } from '../lib/tema';
-import { fonteFamilia, obterFundoLojaPorTema, obterTokensLoja } from '../lib/personalizacao';
+import { fonteFamilia, obterFundoLojaPorTema, obterTokensLoja, corLegivelSobre } from '../lib/personalizacao';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import MiseOnLoader from '../components/MiseOnLoader';
@@ -83,6 +83,15 @@ export default function MeusPedidos() {
     const tokens = obterTokensLoja(fundo, temaCliente, loja.cor_texto || loja.cor_primaria || '#FC5B24');
     raiz.style.setProperty('--cor-fundo', fundo);
     raiz.style.setProperty('--cor-primaria', loja.cor_primaria || '#FC5B24');
+    // Mesma cor da marca, mas corrigida para ser LEGIVEL como texto sobre
+    // este fundo. O lojista escolhe primaria e fundo sem nenhuma trava, e
+    // combinacoes como vermelho sobre marrom deixavam o PRECO em 3.04:1 —
+    // abaixo do minimo 4.5:1 da WCAG AA. Botao continua usando --cor-primaria
+    // (texto branco por cima); isto vale para texto sobre o fundo da loja.
+    raiz.style.setProperty(
+      '--cor-primaria-texto',
+      corLegivelSobre(loja.cor_primaria || '#FC5B24', fundo),
+    );
     raiz.style.setProperty('--cor-secundaria', loja.cor_secundaria || '#0A5CC4');
     raiz.style.setProperty('--fonte-loja', fonteFamilia(loja.fonte));
     raiz.style.setProperty('--cor-texto', tokens.texto);
@@ -255,7 +264,7 @@ export default function MeusPedidos() {
             <section className="rounded-3xl border p-5 shadow-sm" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
-                  <div className="rounded-2xl p-2.5" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-primaria)' }}>
+                  <div className="rounded-2xl p-2.5" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-primaria-texto)' }}>
                     <Sparkles size={18} />
                   </div>
                   <div>
@@ -275,7 +284,7 @@ export default function MeusPedidos() {
 
             {saldoCashback > 0 && (
               <section className="flex items-center gap-3 rounded-3xl border p-4 shadow-sm" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
-                <div className="rounded-2xl p-2.5" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-primaria)' }}>
+                <div className="rounded-2xl p-2.5" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-primaria-texto)' }}>
                   <Wallet size={18} />
                 </div>
                 <div>
@@ -287,7 +296,7 @@ export default function MeusPedidos() {
 
             <section>
               <div className="mb-3 flex items-center gap-2">
-                <Bike size={18} className="text-[var(--cor-primaria)]" />
+                <Bike size={18} className="text-[var(--cor-primaria-texto)]" />
                 <h2 className="font-bold" style={{ color: 'var(--cor-texto)' }}>Em andamento</h2>
               </div>
               {ativos.length === 0 ? (
@@ -315,7 +324,7 @@ export default function MeusPedidos() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-black" style={{ color: 'var(--cor-primaria)' }}>{fmt(Number(pedido.valor_total))}</p>
+                          <p className="font-black" style={{ color: 'var(--cor-primaria-texto)' }}>{fmt(Number(pedido.valor_total))}</p>
                           <span className="mt-3 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-texto)' }}>
                             {pedido.status === 'EM_ROTA' ? 'Acompanhar ao vivo' : 'Ver detalhes'}
                           </span>
@@ -329,7 +338,7 @@ export default function MeusPedidos() {
 
             <section>
               <div className="mb-3 flex items-center gap-2">
-                <Package size={18} className="text-[var(--cor-primaria)]" />
+                <Package size={18} className="text-[var(--cor-primaria-texto)]" />
                 <h2 className="font-bold" style={{ color: 'var(--cor-texto)' }}>Histórico</h2>
               </div>
               {historico.length === 0 ? (

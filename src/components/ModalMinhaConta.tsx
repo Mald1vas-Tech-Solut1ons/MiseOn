@@ -64,7 +64,7 @@ export default function ModalMinhaConta({
       .single();
 
     if (error || !data?.id) {
-      throw new Error(error?.message || tDynamic('Nao foi possivel identificar o cliente para salvar os dados.'));
+      throw new Error(error?.message || tDynamic('Não foi possível identificar o cliente para salvar os dados.'));
     }
 
     setClienteId(data.id);
@@ -237,7 +237,7 @@ export default function ModalMinhaConta({
               onClick={() => setAbaAtiva(aba)}
               className={`flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
                 abaAtiva === aba 
-                  ? 'border-[var(--cor-primaria)] text-[var(--cor-primaria)]' 
+                  ? 'border-[var(--cor-primaria)] text-[var(--cor-primaria-texto)]' 
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
@@ -254,7 +254,7 @@ export default function ModalMinhaConta({
         {/* Corpo scrollável */}
         <div className="flex-1 overflow-y-auto p-6">
           {carregando ? (
-            <div className="mt-20 flex justify-center text-[var(--cor-primaria)]">
+            <div className="mt-20 flex justify-center text-[var(--cor-primaria-texto)]">
               <Loader2 className="animate-spin" size={32} />
             </div>
           ) : (
@@ -331,14 +331,14 @@ export default function ModalMinhaConta({
                           {enderecos.map(end => (
                             <div key={end.id} className="relative rounded-xl border p-4 dark:border-gray-800 dark:bg-gray-950">
                               <div className="flex items-start gap-3">
-                                <MapPin className={`mt-0.5 shrink-0 ${end.padrao ? 'text-[var(--cor-primaria)]' : 'text-gray-400'}`} size={18} />
+                                <MapPin className={`mt-0.5 shrink-0 ${end.padrao ? 'text-[var(--cor-primaria-texto)]' : 'text-gray-400'}`} size={18} />
                                 <div>
                                   <p className="text-sm font-semibold dark:text-white">
                                     {end.logradouro}, {end.numero} {end.complemento && `(${end.complemento})`}
                                   </p>
                                   <p className="text-xs text-gray-500 dark:text-gray-400">{end.bairro} - {end.cidade}/{end.uf}</p>
                                   {end.padrao && (
-                                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--cor-primaria)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--cor-primaria)]">
+                                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--cor-primaria)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--cor-primaria-texto)]">
                                       <CheckCircle2 size={10} /> {tDynamic('Endereço Padrão')}
                                     </span>
                                   )}
@@ -346,7 +346,7 @@ export default function ModalMinhaConta({
                               </div>
                               <div className="mt-3 flex gap-2">
                                 {!end.padrao && (
-                                  <button onClick={() => tornarPadrao(end.id)} disabled={salvando} className="text-xs font-semibold text-gray-500 hover:text-[var(--cor-primaria)] dark:text-gray-400">
+                                  <button onClick={() => tornarPadrao(end.id)} disabled={salvando} className="text-xs font-semibold text-gray-500 hover:text-[var(--cor-primaria-texto)] dark:text-gray-400">
                                     {tDynamic('Tornar padrão')}
                                   </button>
                                 )}
@@ -418,7 +418,7 @@ export default function ModalMinhaConta({
                         </div>
                         <div className="mt-3 flex items-center justify-between pt-2">
                           <span className="text-xs text-gray-500">{new Date(p.criado_em).toLocaleDateString()}</span>
-                          <span className="font-bold text-[var(--cor-primaria)]">{fmt(Number(p.valor_total))}</span>
+                          <span className="font-bold text-[var(--cor-primaria-texto)]">{fmt(Number(p.valor_total))}</span>
                         </div>
                       </div>
                     ))
@@ -441,7 +441,7 @@ export default function ModalMinhaConta({
                           )}
                           <div>
                             <p className="text-sm font-bold dark:text-white">{f.produto?.nome}</p>
-                            <p className="text-xs font-semibold text-[var(--cor-primaria)]">{fmt(Number(f.produto?.preco))}</p>
+                            <p className="text-xs font-semibold text-[var(--cor-primaria-texto)]">{fmt(Number(f.produto?.preco))}</p>
                           </div>
                         </div>
                         <button onClick={() => deletarFavorito(f.id)} disabled={salvando} className="p-2 text-gray-400 hover:text-red-500">

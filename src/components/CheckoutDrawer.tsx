@@ -266,7 +266,7 @@ export default function CheckoutDrawer({
     if (quando === 'AGENDADO' && (!diaAgendado || !horaAgendada)) return setErro('Escolha o dia e o horário do agendamento.');
     if (!nome.trim() || !telefone.trim()) return setErro('Preencha nome e telefone.');
     if (tipo === 'DELIVERY' && (!enderecoObj?.logradouro || !enderecoObj?.numero))
-      return setErro('Preencha o endereco completo com numero.');
+      return setErro('Preencha o endereco completo com número.');
     if (foraDeArea)
       return setErro('Seu endereco esta fora da area de entrega desta loja.');
     if (subtotal < Number(loja.pedido_minimo))
@@ -384,7 +384,7 @@ export default function CheckoutDrawer({
         {/* ── Header fixo ── */}
         <div className="flex shrink-0 items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4">
           <div className="flex items-center gap-2">
-            <ShoppingBag size={20} className="text-[var(--cor-primaria)]" />
+            <ShoppingBag size={20} className="text-[var(--cor-primaria-texto)]" />
             <span data-cy="checkout-titulo" className="text-base font-black dark:text-white">{tDynamic('Finalizar Pedido')}</span>
           </div>
           <button
@@ -428,7 +428,7 @@ export default function CheckoutDrawer({
                     <span className="w-4 text-center text-xs font-bold dark:text-gray-200">{item.quantidade}</span>
                     <button
                       onClick={() => setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade + 1 } : x))}
-                      className="text-gray-400 hover:text-[var(--cor-primaria)] transition-colors"
+                      className="text-gray-400 hover:text-[var(--cor-primaria-texto)] transition-colors"
                     >
                       <Plus size={13} />
                     </button>
@@ -479,7 +479,7 @@ export default function CheckoutDrawer({
                         onClick={() => setTipo(t)}
                         className={`flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-bold transition-all ${
                           tipo === t
-                            ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria)]'
+                            ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria-texto)]'
                             : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                         }`}
                       >
@@ -498,11 +498,11 @@ export default function CheckoutDrawer({
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       <button onClick={() => setQuando('AGORA')}
-                        className={`rounded-xl border-2 py-3 text-sm font-bold transition-all ${quando === 'AGORA' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria)]' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
+                        className={`rounded-xl border-2 py-3 text-sm font-bold transition-all ${quando === 'AGORA' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria-texto)]' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
                         Agora
                       </button>
                       <button onClick={() => setQuando('AGENDADO')}
-                        className={`rounded-xl border-2 py-3 text-sm font-bold transition-all ${quando === 'AGENDADO' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria)]' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
+                        className={`rounded-xl border-2 py-3 text-sm font-bold transition-all ${quando === 'AGENDADO' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria-texto)]' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
                         Agendar
                       </button>
                     </div>
@@ -599,7 +599,7 @@ export default function CheckoutDrawer({
                             <span className="text-sm font-semibold dark:text-gray-200">
                               ~{entrega.distanciaKm} km da loja{entrega.faixaNome ? ` · ${entrega.faixaNome}` : ''}
                             </span>
-                            <span className={`text-sm font-black ${foraDeArea ? 'text-red-600 dark:text-red-400' : 'text-[var(--cor-primaria)]'}`}>
+                            <span className={`text-sm font-black ${foraDeArea ? 'text-red-600 dark:text-red-400' : 'text-[var(--cor-primaria-texto)]'}`}>
                               {foraDeArea ? 'Fora da área' : fmt(taxa)}
                             </span>
                           </div>
@@ -652,7 +652,7 @@ export default function CheckoutDrawer({
                       value={codCupom}
                       onChange={(e) => setCodCupom(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && aplicarCupom()}
-                      placeholder="Codigo do cupom"
+                      placeholder="Código do cupom"
                       className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm uppercase outline-none focus:border-[var(--cor-primaria)] focus:bg-white dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                     />
                     <button
@@ -679,7 +679,7 @@ export default function CheckoutDrawer({
                     }`}
                   >
                     <span className="flex items-center gap-2">
-                      <Wallet size={16} style={{ color: 'var(--cor-primaria)' }} />
+                      <Wallet size={16} style={{ color: 'var(--cor-primaria-texto)' }} />
                       <span>
                         <span className="block text-sm font-bold dark:text-gray-100">Usar meu cashback</span>
                         <span className="block text-[11px] text-gray-400">Você tem {fmt(saldoCashback)} de saldo nesta loja</span>
@@ -711,7 +711,7 @@ export default function CheckoutDrawer({
                           <button key={m} onClick={() => setMetodo(m)}
                             className={`rounded-xl border py-3 text-xs font-bold transition-all ${
                               metodo === m
-                                ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria)]'
+                                ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria-texto)]'
                                 : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                             }`}>
                             {ROTULO_PGTO[m]}
@@ -729,7 +729,7 @@ export default function CheckoutDrawer({
                           <button key={m} onClick={() => setMetodo(m)}
                             className={`rounded-xl border py-3 text-xs font-bold transition-all ${
                               metodo === m
-                                ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria)]'
+                                ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria-texto)]'
                                 : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                             }`}>
                             {ROTULO_PGTO[m]}
@@ -771,14 +771,14 @@ export default function CheckoutDrawer({
                     </div>
                   )}
                   {cashbackAplicado > 0 && (
-                    <div className="flex justify-between text-sm font-semibold" style={{ color: 'var(--cor-primaria)' }}>
+                    <div className="flex justify-between text-sm font-semibold" style={{ color: 'var(--cor-primaria-texto)' }}>
                       <span className="flex items-center gap-1"><Wallet size={12} /> Cashback usado</span>
                       <span>-{fmt(cashbackAplicado)}</span>
                     </div>
                   )}
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between">
                     <span className="text-base font-black dark:text-white">Total</span>
-                    <span className="text-base font-black" style={{ color: 'var(--cor-primaria)' }}>
+                    <span className="text-base font-black" style={{ color: 'var(--cor-primaria-texto)' }}>
                       {fmt(total)}
                     </span>
                   </div>
@@ -816,7 +816,7 @@ export default function CheckoutDrawer({
                   {enviando
                     ? 'Processando...'
                     : foraDeArea
-                    ? 'Bairro nao atendido'
+                    ? 'Bairro não atendido'
                     : quando === 'AGENDADO' && diaAgendado && horaAgendada
                     ? `Agendar para ${diasDisponiveis.find((d) => d.data === diaAgendado)?.label} ${horaAgendada} - ${fmt(total)}`
                     : `Finalizar Pedido - ${fmt(total)}`}

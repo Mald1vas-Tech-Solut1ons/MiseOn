@@ -13,6 +13,10 @@
   --miseon-painel: #0B1120;
   --miseon-nevoa: #EAF1FB;
   --cor-primaria: #FC5B24;
+  /* Cor da marca corrigida para uso como TEXTO sobre o fundo vigente.
+     As telas do cliente (cardapio, pedido, meus pedidos) recalculam este
+     valor por loja em tempo de render; aqui fica so o padrao do sistema. */
+  --cor-primaria-texto: #FC5B24;
   --cor-primaria-hover: #E34A1B;
   --cor-secundaria: #0A5CC4;
   --cor-fundo-escuro: #070C18;
