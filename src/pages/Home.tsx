@@ -414,8 +414,8 @@ export default function Home() {
   return (
     <div className="min-h-screen scroll-smooth bg-[#F4F7FA] font-sans text-gray-900 selection:bg-[#FC5B24] selection:text-white dark:bg-[#070C18] dark:text-[#EAF1FB]">
       <SEO
-        title="MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares"
-        description="MiseOn: sistema de gestão e automação para restaurantes, hamburguerias, pizzarias e bares. Cardápio digital QR Code, KDS, comanda eletrônica e iFood."
+        title="MiseOn | Sistema de Gestão para Food Service e Restaurantes"
+        description="MiseOn: sistema de gestão para todo o food service — hamburgueria, pizzaria, lanchonete, restaurante à la carte, buffet por quilo, bar e dark kitchen. Cardápio digital, KDS, estoque pelo cupom fiscal e iFood."
         keywords="sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardapio digital qr code, integracao ifood, whatsapp ia restaurante"
         canonicalUrl="https://miseon.app.br/"
         schemaJson={{
@@ -2126,7 +2126,7 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md">
             <h2 className="font-['Sora'] text-2xl font-extrabold text-white">
-              Sobre o Sistema MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares
+              Sobre o Sistema MiseOn | Sistema de Gestão para Food Service e Restaurantes
             </h2>
             <div className="mt-4 space-y-4 text-sm leading-relaxed text-slate-300">
               <p>

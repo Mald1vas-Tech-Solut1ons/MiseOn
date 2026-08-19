@@ -33,7 +33,7 @@ export const DICIONARIO = {
 
     // Hero
     'hero.badge': 'PLATAFORMA COMPLETA PARA RESTAURANTES',
-    'hero.title': 'MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares —',
+    'hero.title': 'MiseOn | Sistema de Gestão para Food Service e Restaurantes —',
     'hero.titleHighlight': 'do cardápio ao WhatsApp',
     'hero.subtitle': 'O MiseOn é o sistema de gestão que coloca o seu cardápio digital, os pedidos, a cozinha, as entregas, o estoque e o financeiro no mesmo painel — com uma inteligência artificial que atende seus clientes no WhatsApp.',
     'hero.ctaPrincipal': 'Cadastrar minha loja grátis',

@@ -34,13 +34,13 @@ export const PAGE_META: Record<string, PageMeta> = {
   // técnica conhecida de spam. Conteúdo dentro de <noscript> ele também não
   // conta. A única coisa que resolve é H1 de verdade no HTML servido.
   '/': {
-    title: 'MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares',
+    title: 'MiseOn | Sistema de Gestão para Food Service e Restaurantes',
     description:
-      'MiseOn: sistema de gestão e automação para restaurantes, hamburguerias, pizzarias e bares. Cardápio digital QR Code, KDS, comanda eletrônica e iFood.',
+      'MiseOn: sistema de gestão para todo o food service — hamburgueria, pizzaria, lanchonete, restaurante à la carte, buffet por quilo, bar e dark kitchen. Cardápio digital, KDS, estoque pelo cupom fiscal e iFood.',
     keywords:
       'sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardapio digital qr code, integracao ifood, whatsapp ia restaurante',
     canonicalUrl: `${BASE}/`,
-    h1: 'MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares — do cardápio ao WhatsApp',
+    h1: 'MiseOn | Sistema de gestão para food service — da hamburgueria ao buffet por quilo',
   },
 
   '/acesso': {

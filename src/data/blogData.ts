@@ -30,7 +30,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: 'Tecnologia & IA',
     publishedAt: '2026-08-15',
     readTime: '7 min de leitura',
-    coverImage: '/blog-covers/smart-tv-cover.png',
+    coverImage: '/blog-covers/smart-tv-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -100,7 +100,7 @@ Eleve a experiência visual do seu restaurante hoje mesmo com a tecnologia nativ
     category: 'Tecnologia & IA',
     publishedAt: '2026-08-15',
     readTime: '9 min de leitura',
-    coverImage: '/blog-covers/whatsapp-ia-cover.png',
+    coverImage: '/blog-covers/whatsapp-ia-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -172,7 +172,7 @@ Inicie hoje a transição do seu delivery para o canal próprio e recupere o con
     category: 'Gestão Financeira',
     publishedAt: '2026-08-15',
     readTime: '10 min de leitura',
-    coverImage: '/blog-covers/cmv-peps-cover.png',
+    coverImage: '/blog-covers/cmv-peps-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -238,7 +238,7 @@ Ao final do mês, a tela de **Financeiro & DRE** do MiseOn gera a Demonstração
     category: 'Engenharia de Cardápio',
     publishedAt: '2026-08-15',
     readTime: '8 min de leitura',
-    coverImage: '/blog-covers/peso-quilo-cover.png',
+    coverImage: '/blog-covers/peso-quilo-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -296,7 +296,7 @@ O cliente percebe o saldo acumulado como um incentivo exclusivo da sua loja, gar
     category: 'Operação & KDS',
     publishedAt: '2026-08-15',
     readTime: '7 min de leitura',
-    coverImage: '/blog-covers/cmv-peps-cover.png',
+    coverImage: '/blog-covers/cmv-peps-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -355,7 +355,7 @@ Sua cozinha ganha agilidade, seu estoque opera sem perdas e seu caixa preserva a
     category: 'Gestão Financeira',
     publishedAt: '2026-07-28',
     readTime: '8 min de leitura',
-    coverImage: '/blog-covers/cmv-peps-cover.png',
+    coverImage: '/blog-covers/cmv-peps-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -426,7 +426,7 @@ A diferença entre um restaurante que estagna e um grupo gastronômico que escal
     category: 'Operação & KDS',
     publishedAt: '2026-07-28',
     readTime: '6 min de leitura',
-    coverImage: '/blog-covers/kds-kanban-cover.png',
+    coverImage: '/blog-covers/kds-kanban-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -485,7 +485,7 @@ A transição para a cozinha digital não é mais um luxo futurista — é a inf
     category: 'Tecnologia & IA',
     publishedAt: '2026-07-28',
     readTime: '7 min de leitura',
-    coverImage: '/blog-covers/whatsapp-ia-cover.png',
+    coverImage: '/blog-covers/whatsapp-ia-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -549,7 +549,7 @@ Proteger o canal de atendimento mais valioso da sua loja com tecnologia oficial 
     category: 'Engenharia de Cardápio',
     publishedAt: '2026-07-28',
     readTime: '9 min de leitura',
-    coverImage: '/blog-covers/peso-quilo-cover.png',
+    coverImage: '/blog-covers/peso-quilo-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
