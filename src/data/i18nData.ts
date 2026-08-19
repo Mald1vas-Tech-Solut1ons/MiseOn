@@ -64,7 +64,7 @@ export const DICIONARIO = {
 
     // Faixa de Recursos Globais
     'recursos.faixaTitulo': 'Tudo o que a sua operação precisa, em um só painel',
-    'recursos.cardapio': 'Cardápio & QR Code',
+    'recursos.cardápio': 'Cardápio & QR Code',
     'recursos.whatsapp': 'WhatsApp com IA',
     'recursos.ifood': 'Integração iFood',
     'recursos.pdv': 'PDV & Comandas',
@@ -116,7 +116,7 @@ export const DICIONARIO = {
     'admin.estoque': 'Estoque & CMV',
     'admin.financeiro': 'DRE Gerencial',
     'admin.crm': 'CRM & Cashback',
-    'admin.configuracoes': 'Configurações',
+    'admin.configurações': 'Configurações',
     'admin.perfil': 'Minha Conta',
     'admin.sair': 'Sair do Sistema',
 
@@ -196,7 +196,7 @@ export const DICIONARIO = {
 
     // Faixa de Recursos Globais
     'recursos.faixaTitulo': 'Everything your operation needs, in a single dashboard',
-    'recursos.cardapio': 'Menu & QR Code',
+    'recursos.cardápio': 'Menu & QR Code',
     'recursos.whatsapp': 'AI WhatsApp',
     'recursos.ifood': 'iFood Integration',
     'recursos.pdv': 'POS & Orders',
@@ -248,7 +248,7 @@ export const DICIONARIO = {
     'admin.estoque': 'Inventory & COGS',
     'admin.financeiro': 'Financial P&L / DRE',
     'admin.crm': 'CRM & Cashback',
-    'admin.configuracoes': 'Settings',
+    'admin.configurações': 'Settings',
     'admin.perfil': 'My Account',
     'admin.sair': 'Sign Out',
 
@@ -340,7 +340,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   // Recursos Principais da Home
   'Menu Board 4K & Chamada por Voz na TV': '4K Menu Board & Voice Calling on TV',
   'SENHA CHAMADA EM VOZ': 'SPOKEN ORDER CALLING',
-  'SALAO E BALCAO': 'DINING ROOM & COUNTER',
+  'SALÃO E BALCÃO': 'DINING ROOM & COUNTER',
   'Transforme qualquer Smart TV do salão em um painel noturno 4K rotativo com chamada de senhas por voz sintetizada em viva-voz.': 'Turn any Smart TV in your dining room into a 4K rotating menu board with synthesized voice order calling.',
 
   'Comanda por Voz no Celular': 'Voice Ordering on Mobile',
@@ -354,17 +354,17 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Algoritmo que analisa o giro real dos últimos 30 dias, projeta o consumo para 7 dias e gera a Ordem de Compra em 1-Clique via WhatsApp do fornecedor.': 'Algorithm that analyzes 30-day turnover, forecasts 7-day consumption and generates a 1-Click Purchase Order via supplier WhatsApp.',
 
   'Cardápio Digital com QR Code': 'QR Code Digital Menu',
-  'ZERO COMISSAO': 'ZERO COMMISSION',
+  'ZERO COMISSÃO': 'ZERO COMMISSION',
   'VENDA DIRETA': 'DIRECT SALES',
   'Sua loja no ar com link próprio e QR Code para mesas e balcão. Fotos, adicionais e preços sempre atualizados — sem imprimir nada.': 'Your online store with custom link and QR Code for tables and counter. Photos, add-ons and prices always updated — with zero printing.',
 
   'Cozinha (KDS Kanban)': 'Kitchen Display System (KDS Kanban)',
   'COZINHA SEM PAPEL': 'PAPERLESS KITCHEN',
-  'PRODUCAO': 'PRODUCTION',
+  'PRODUÇÃO': 'PRODUCTION',
   'Tela de produção sem papel: a cozinha vê a fila por estações (Cozinha, Bar, Confeitaria), marca o preparo e o balcão acompanha tudo em tempo real.': 'Paperless production screen: kitchen staff tracks station queues (Kitchen, Bar, Bakery) and counter staff tracks progress in real time.',
 
   'Dark Kitchen (Delivery Apenas)': 'Dark Kitchen (Delivery Only)',
-  'OPERACAO SEM SALAO': 'GHOST KITCHEN OPERATION',
+  'OPERAÇÃO SEM SALÃO': 'GHOST KITCHEN OPERATION',
   'PERFIL DE NEGOCIO': 'BUSINESS PROFILE',
   'Opere múltiplas marcas virtuais no mesmo restaurante compartilhando a mesma cozinha física e a mesma baixa de estoque PEPS.': 'Operate multiple virtual brands from the same physical kitchen with unified FIFO inventory deduction.',
 
@@ -374,14 +374,14 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Cálculo de frete por distância (Taxa Base + R$/km + Raio máximo), Live GPS Tracking do entregador e visualização no mapa.': 'Distance-based delivery fee calculation (Base Fee + R$/km + Max Radius), Live GPS Driver Tracking and map display.',
 
   'PDV, Mesas 3D e Comandas': 'POS, 3D Tables & Mobile Ordering',
-  'SALAO E BALCAO NO MESMO CAIXA': 'UNIFIED HALL & COUNTER POS',
+  'SALÃO E BALCÃO NO MESMO CAIXA': 'UNIFIED HALL & COUNTER POS',
   'ATENDIMENTO': 'SERVICE',
   'Balcão e salão no mesmo sistema: comanda por mesa/assento, pedido direto na tela da cozinha e fechamento de conta sem confusão.': 'Counter and dining room in one OS: order by table/seat, direct routing to kitchen display and seamless check splitting.',
 
   'Tabela Nutricional por Ficha Técnica': 'Nutritional Facts by Recipe Sheet',
   'NUTRICAO SEM NUTRICIONISTA': 'NUTRITION MADE EASY',
   'DIFERENCIAL RARO': 'UNIQUE FEATURE',
-  'O valor nutricional do prato sai da propria ficha tecnica: o sistema soma os insumos e calcula. Voce alimenta o insumo fotografando o rotulo, lendo o codigo de barras ou deixando a IA estimar — e cada numero carrega a origem do dado.': 'Nutritional values calculated directly from recipe sheets: scan label photos, barcodes or let AI estimate — with full data lineage.',
+  'O valor nutricional do prato sai da própria ficha técnica: o sistema soma os insumos e calcula. Você alimenta o insumo fotografando o rótulo, lendo o código de barras ou deixando a IA estimar — e cada número carrega a origem do dado.': 'Nutritional values calculated directly from recipe sheets: scan label photos, barcodes or let AI estimate — with full data lineage.',
 
   'Estoque pelo Cupom do Mercado (NFC-e)': 'Receipt Inventory Import (NFC-e)',
   'COMPRA INTEIRA EM 1 SCAN': 'FULL INVENTORY 1-SCAN',

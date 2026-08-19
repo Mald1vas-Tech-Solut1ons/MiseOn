@@ -43,12 +43,12 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     category: 'nicho',
     seo: {
       title: 'Sistema para Bar e Pub | Comanda, Mesa e Fechamento de Conta — MiseOn',
-      description: 'Sistema de gestao para bares e pubs: comanda por mesa, divisao de conta, controle de caixa por turno, estoque de bebidas com dose e custo real por drink.',
-      keywords: 'sistema para bar, sistema para pub, comanda eletronica bar, controle de estoque bebidas, pdv para bar, gestao de bar',
+      description: 'Sistema de gestão para bares e pubs: comanda por mesa, divisao de conta, controle de caixa por turno, estoque de bebidas com dose e custo real por drink.',
+      keywords: 'sistema para bar, sistema para pub, comanda eletronica bar, controle de estoque bebidas, pdv para bar, gestão de bar',
       canonicalUrl: 'https://miseon.app.br/sistema-para-bar',
     },
     badge: 'Comanda, Mesa e Caixa por Turno',
-    h1Title: 'O bar cheio nao pode parar',
+    h1Title: 'O bar cheio não pode parar',
     h1Highlight: 'na hora de fechar a conta',
     subheadline: 'Comanda aberta por mesa, pedido que cai direto na copa e conta fechada sem fila no caixa. O estoque de bebidas baixa a cada rodada, com o custo real de cada dose.',
     heroMetrics: [
@@ -57,7 +57,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       { label: 'Caixa', value: 'Por turno' },
     ],
     painPointsTitle: 'O que trava um bar na noite cheia',
-    painPointsSubtitle: 'Nao e falta de cliente. E o atrito entre salao, copa e caixa:',
+    painPointsSubtitle: 'Não e falta de cliente. E o atrito entre salão, copa e caixa:',
     painPoints: [
       {
         semMiseOn: 'Comanda de papel rasurada, com rodada anotada em cima de rodada.',
@@ -65,24 +65,24 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         semMiseOn: 'Fila no caixa na hora do fechamento, porque alguem precisa somar tudo na mao.',
-        comMiseOn: 'Conta fechada na hora, com o total ja calculado e o pagamento no proprio painel.',
+        comMiseOn: 'Conta fechada na hora, com o total ja calculado e o pagamento no próprio painel.',
       },
       {
         semMiseOn: 'Garrafa que some sem ninguem saber se foi venda, quebra ou cortesia.',
-        comMiseOn: 'Cada venda baixa a bebida do estoque; perda e cortesia entram como movimento proprio.',
+        comMiseOn: 'Cada venda baixa a bebida do estoque; perda e cortesia entram como movimento próprio.',
       },
       {
         semMiseOn: 'Custo do drink no chute, sem saber quanto de destilado e de insumo saiu.',
-        comMiseOn: 'Ficha tecnica do drink com dose exata e custo pelo lote PEPS.',
+        comMiseOn: 'Ficha técnica do drink com dose exata e custo pelo lote PEPS.',
       },
     ],
-    featuresTitle: 'Feito para a operacao de bar',
-    featuresSubtitle: 'Os recursos que sustentam salao cheio, copa rapida e caixa fechado sem susto:',
+    featuresTitle: 'Feito para a operação de bar',
+    featuresSubtitle: 'Os recursos que sustentam salão cheio, copa rapida e caixa fechado sem susto:',
     features: [
       {
         iconName: 'UtensilsCrossed',
-        title: 'Comanda por Mesa com Salao 3D',
-        description: 'Mapa do salao com mesa livre, ocupada ou fechando conta. A comanda fica aberta e recebe rodada por rodada.',
+        title: 'Comanda por Mesa com Salão 3D',
+        description: 'Mapa do salão com mesa livre, ocupada ou fechando conta. A comanda fica aberta e recebe rodada por rodada.',
         tag: 'Salao',
       },
       {
@@ -95,30 +95,30 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         iconName: 'ScanLine',
         title: 'Estoque pelo Cupom do Mercado',
         description: 'Escaneie o QR Code da nota da compra e as bebidas entram no estoque com quantidade e custo real, sem digitar item por item.',
-        tag: 'NFC-e Automatica',
+        tag: 'NFC-e Automática',
       },
       {
         iconName: 'Wallet',
         title: 'Caixa por Turno e Pix na Conta',
-        description: 'Abertura e fechamento de turno com conferencia de dinheiro. Pix cai direto na conta do bar, com conciliacao automatica.',
+        description: 'Abertura e fechamento de turno com conferência de dinheiro. Pix cai direto na conta do bar, com conciliação automática.',
         tag: 'Financeiro',
       },
     ],
     businessRules: {
       title: 'Como o MiseOn se comporta num bar',
-      description: 'Regras que valem na pratica durante o servico:',
+      description: 'Regras que valem na prática durante o serviço:',
       items: [
-        'Comanda permanece aberta na mesa ate o fechamento, aceitando novas rodadas a qualquer momento.',
+        'Comanda permanece aberta na mesa até o fechamento, aceitando novas rodadas a qualquer momento.',
         'Cada lancamento registra hora e responsavel, o que resolve discussao de conta no fim da noite.',
-        'A baixa de estoque acontece na venda, usando a ficha tecnica do drink ou o item direto no caso da garrafa.',
-        'Perda, quebra e cortesia sao movimentos separados da venda, para nao contaminar o CMV.',
+        'A baixa de estoque acontece na venda, usando a ficha técnica do drink ou o item direto no caso da garrafa.',
+        'Perda, quebra e cortesia sao movimentos separados da venda, para não contaminar o CMV.',
         'O fechamento de turno separa dinheiro, cartao e Pix, e aponta a diferenca de caixa quando existe.',
       ],
     },
     faqs: [
       {
         pergunta: 'Da para controlar a dose de destilado?',
-        resposta: 'Sim. O drink e cadastrado com ficha tecnica: cada componente entra com a quantidade que realmente vai no copo. A venda baixa essa quantidade do estoque e o custo sai pelo lote PEPS, com o preco que voce pagou na ultima compra.',
+        resposta: 'Sim. O drink e cadastrado com ficha técnica: cada componente entra com a quantidade que realmente vai no copo. A venda baixa essa quantidade do estoque e o custo sai pelo lote PEPS, com o preço que você pagou na última compra.',
       },
       {
         pergunta: 'Como fica a conta quando a mesa quer dividir?',
@@ -126,7 +126,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         pergunta: 'Preciso cadastrar cada bebida na mao?',
-        resposta: 'Nao. Ao voltar da compra, escaneie o QR Code do cupom fiscal: o sistema le a nota na SEFAZ e traz os itens com quantidade e custo. Voce confere, desmarca o que nao entra e da entrada de tudo de uma vez.',
+        resposta: 'Não. Ao voltar da compra, escaneie o QR Code do cupom fiscal: o sistema le a nota na SEFAZ e traz os itens com quantidade e custo. Você confere, desmarca o que não entra e da entrada de tudo de uma vez.',
       },
     ],
   },
@@ -136,59 +136,59 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     category: 'nicho',
     seo: {
       title: 'Sistema para Dark Kitchen | Delivery, iFood e CMV Real — MiseOn',
-      description: 'Sistema de gestao para dark kitchen e cozinha exclusiva de delivery: pedidos do iFood e do canal proprio na mesma tela, KDS de producao, estoque e CMV por prato.',
-      keywords: 'sistema para dark kitchen, cozinha delivery, gestao dark kitchen, sistema delivery proprio, kds delivery, cmv dark kitchen',
+      description: 'Sistema de gestão para dark kitchen e cozinha exclusiva de delivery: pedidos do iFood e do canal próprio na mesma tela, KDS de produção, estoque e CMV por prato.',
+      keywords: 'sistema para dark kitchen, cozinha delivery, gestão dark kitchen, sistema delivery próprio, kds delivery, cmv dark kitchen',
       canonicalUrl: 'https://miseon.app.br/sistema-para-dark-kitchen',
     },
-    badge: 'Operacao 100% Delivery',
-    h1Title: 'Cozinha sem salao precisa de',
-    h1Highlight: 'margem, nao de mesa',
-    subheadline: 'Sem salao para diluir custo, a dark kitchen vive de duas coisas: volume de pedido e CMV sob controle. O MiseOn junta iFood e canal proprio numa tela so, e mostra o custo real de cada prato.',
+    badge: 'Operação 100% Delivery',
+    h1Title: 'Cozinha sem salão precisa de',
+    h1Highlight: 'margem, não de mesa',
+    subheadline: 'Sem salão para diluir custo, a dark kitchen vive de duas coisas: volume de pedido e CMV sob controle. O MiseOn junta iFood e canal próprio numa tela so, e mostra o custo real de cada prato.',
     heroMetrics: [
-      { label: 'Canais', value: 'iFood + proprio' },
-      { label: 'Comissao no canal proprio', value: 'Zero' },
+      { label: 'Canais', value: 'iFood + próprio' },
+      { label: 'Comissão no canal próprio', value: 'Zero' },
       { label: 'Custo por prato', value: 'Real (PEPS)' },
     ],
     painPointsTitle: 'O que corroi a margem de uma dark kitchen',
-    painPointsSubtitle: 'Sem salao, cada ponto de margem perdido aparece direto no resultado:',
+    painPointsSubtitle: 'Sem salão, cada ponto de margem perdido aparece direto no resultado:',
     painPoints: [
       {
         semMiseOn: 'Um tablet por marketplace, cada um apitando de um jeito.',
-        comMiseOn: 'Pedidos do iFood e do canal proprio na mesma fila, com selo de origem.',
+        comMiseOn: 'Pedidos do iFood e do canal próprio na mesma fila, com selo de origem.',
       },
       {
-        semMiseOn: 'Comissao de marketplace em 100% do faturamento, sem canal proprio nenhum.',
-        comMiseOn: 'Cardapio digital com link e QR proprios, sem comissao por pedido.',
+        semMiseOn: 'Comissão de marketplace em 100% do faturamento, sem canal próprio nenhum.',
+        comMiseOn: 'Cardápio digital com link e QR próprios, sem comissão por pedido.',
       },
       {
-        semMiseOn: 'Preco de venda definido por comparacao com o concorrente, sem saber o custo.',
-        comMiseOn: 'CMV por prato calculado pela ficha tecnica, com o custo do lote que entrou.',
+        semMiseOn: 'Preço de venda definido por comparacao com o concorrente, sem saber o custo.',
+        comMiseOn: 'CMV por prato calculado pela ficha técnica, com o custo do lote que entrou.',
       },
       {
         semMiseOn: 'Insumo que acaba no meio do pico e derruba o item em todos os canais.',
-        comMiseOn: 'O cardapio consulta a ficha tecnica e sinaliza o que ficou sem insumo.',
+        comMiseOn: 'O cardápio consulta a ficha técnica e sinaliza o que ficou sem insumo.',
       },
     ],
     featuresTitle: 'O que a cozinha de delivery precisa ter',
-    featuresSubtitle: 'Producao, canais e custo tratados como uma coisa so:',
+    featuresSubtitle: 'Produção, canais e custo tratados como uma coisa so:',
     features: [
       {
         iconName: 'ShoppingBag',
-        title: 'iFood e Canal Proprio na Mesma Fila',
-        description: 'Integracao nativa com iFood: o pedido entra no mesmo painel do seu cardapio proprio, com selo de origem para separar o faturamento.',
+        title: 'iFood e Canal Próprio na Mesma Fila',
+        description: 'Integração nativa com iFood: o pedido entra no mesmo painel do seu cardápio próprio, com selo de origem para separar o faturamento.',
         tag: 'Multicanal',
       },
       {
         iconName: 'ChefHat',
-        title: 'KDS de Producao sem Papel',
-        description: 'Fila por etapa com tempo correndo em cada ficha e estacoes separadas por tipo de preparo.',
+        title: 'KDS de Produção sem Papel',
+        description: 'Fila por etapa com tempo correndo em cada ficha e estações separadas por tipo de preparo.',
         tag: 'Producao',
       },
       {
         iconName: 'ScanLine',
         title: 'Estoque pelo Cupom do Mercado',
         description: 'A compra de insumo entra no estoque escaneando o QR Code da nota, com custo real de cada item — sem digitacao.',
-        tag: 'NFC-e Automatica',
+        tag: 'NFC-e Automática',
       },
       {
         iconName: 'BarChart3',
@@ -198,28 +198,28 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
     ],
     businessRules: {
-      title: 'Como o MiseOn trata uma operacao sem salao',
+      title: 'Como o MiseOn trata uma operação sem salão',
       description: 'O painel se ajusta ao negocio que so entrega:',
       items: [
-        'O perfil Dark Kitchen tira mesa e balcao da frente de quem so opera delivery.',
-        'Pedidos de marketplace e do canal proprio convivem na mesma fila de producao, sem retranscricao.',
-        'O faturamento fica separado por origem, para voce comparar quanto custa cada canal.',
-        'A baixa de estoque acontece por ficha tecnica, independente do canal que originou o pedido.',
-        'Entregas proprias tem taxa por faixa de distancia e acompanhamento da rota ao vivo.',
+        'O perfil Dark Kitchen tira mesa e balcão da frente de quem so opera delivery.',
+        'Pedidos de marketplace e do canal próprio convivem na mesma fila de produção, sem retranscricao.',
+        'O faturamento fica separado por origem, para você comparar quanto custa cada canal.',
+        'A baixa de estoque acontece por ficha técnica, independente do canal que originou o pedido.',
+        'Entregas próprias tem taxa por faixa de distancia e acompanhamento da rota ao vivo.',
       ],
     },
     faqs: [
       {
-        pergunta: 'Consigo operar iFood e cardapio proprio ao mesmo tempo?',
-        resposta: 'Sim, e essa e a ideia. O pedido do iFood entra no mesmo painel do seu cardapio proprio, com selo de origem. Voce mantem o volume do marketplace e desenvolve o canal sem comissao ao mesmo tempo, comparando o resultado de cada um.',
+        pergunta: 'Consigo operar iFood e cardápio próprio ao mesmo tempo?',
+        resposta: 'Sim, e essa e a ideia. O pedido do iFood entra no mesmo painel do seu cardápio próprio, com selo de origem. Você mantem o volume do marketplace e desenvolve o canal sem comissão ao mesmo tempo, comparando o resultado de cada um.',
       },
       {
         pergunta: 'Como sei se estou ganhando dinheiro em cada prato?',
-        resposta: 'Pela ficha tecnica. Cada prato tem seus insumos e quantidades; o custo sai do lote que realmente entrou no estoque (metodo PEPS). Com o preco de venda, o sistema mostra a margem por prato — e o DRE mostra o resultado depois do custo fixo.',
+        resposta: 'Pela ficha técnica. Cada prato tem seus insumos e quantidades; o custo sai do lote que realmente entrou no estoque (metodo PEPS). Com o preço de venda, o sistema mostra a margem por prato — e o DRE mostra o resultado depois do custo fixo.',
       },
       {
-        pergunta: 'Preciso de equipamento especifico?',
-        resposta: 'Nao. O MiseOn roda no navegador do computador, tablet ou celular que voce ja tem. A cozinha usa uma tela comum como KDS e o cardapio digital dispensa impressao.',
+        pergunta: 'Preciso de equipamento específico?',
+        resposta: 'Não. O MiseOn roda no navegador do computador, tablet ou celular que você ja tem. A cozinha usa uma tela comum como KDS e o cardápio digital dispensa impressão.',
       },
     ],
   },
@@ -230,7 +230,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     seo: {
       title: 'Sistema para Hamburgueria | KDS, iFood e Ficha Técnica — MiseOn',
       description: 'O sistema para hamburgueria completo: controle de adicionais, KDS na chapa, baixa de insumos no estoque por Ficha Técnica, iFood e Pix direto na sua conta.',
-      keywords: 'sistema para hamburgueria, gestao hamburgueria, kds chapa hamburgueria, cardapio digital hamburgueria, ficha tecnica blend',
+      keywords: 'sistema para hamburgueria, gestão hamburgueria, kds chapa hamburgueria, cardápio digital hamburgueria, ficha técnica blend',
       canonicalUrl: 'https://miseon.app.br/sistema-para-hamburgueria',
     },
     badge: 'Hamburguerias e Smashes',
@@ -269,7 +269,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         iconName: 'ScanLine',
         title: 'Estoque pelo Cupom do Mercado',
         description: 'Escaneie o QR Code da nota da compra e os itens entram no estoque com quantidade e custo real, sem digitar produto por produto.',
-        tag: 'NFC-e Automatica',
+        tag: 'NFC-e Automática',
       },
 
       {
@@ -346,7 +346,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     seo: {
       title: 'Sistema para Lanchonete | PDV Balcão, Comandas e Estoque — MiseOn',
       description: 'Sistema para lanchonetes: PDV de balcão rápido, comandas de mesas, controle de estoque, ficha técnica e Pix direto na conta. Teste grátis!',
-      keywords: 'sistema para lanchonete, pdv balcao lanchonete, comanda lanchonete, cardapio digital lanchonete',
+      keywords: 'sistema para lanchonete, pdv balcão lanchonete, comanda lanchonete, cardápio digital lanchonete',
       canonicalUrl: 'https://miseon.app.br/sistema-para-lanchonete',
     },
     badge: 'Lanchonetes e Casas de Salgados',
@@ -381,7 +381,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         iconName: 'ScanLine',
         title: 'Estoque pelo Cupom do Mercado',
         description: 'Escaneie o QR Code da nota da compra e os itens entram no estoque com quantidade e custo real, sem digitar produto por produto.',
-        tag: 'NFC-e Automatica',
+        tag: 'NFC-e Automática',
       },
 
       {
@@ -442,7 +442,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     seo: {
       title: 'Sistema para Pizzaria | Comandas, KDS de Forno e Delivery — MiseOn',
       description: 'Sistema para pizzaria completo: controle de comandas, KDS de forno e montagem, taxa de entrega por raio/bairro, iFood e Pix direto na conta.',
-      keywords: 'sistema para pizzaria, gestao pizzaria, kds forno pizza, delivery pizzaria, cardapio digital pizzaria',
+      keywords: 'sistema para pizzaria, gestão pizzaria, kds forno pizza, delivery pizzaria, cardápio digital pizzaria',
       canonicalUrl: 'https://miseon.app.br/sistema-para-pizzaria',
     },
     badge: 'Pizzarias e Deliveries de Pizza',
@@ -481,7 +481,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         iconName: 'ScanLine',
         title: 'Estoque pelo Cupom do Mercado',
         description: 'Escaneie o QR Code da nota da compra e os itens entram no estoque com quantidade e custo real, sem digitar produto por produto.',
-        tag: 'NFC-e Automatica',
+        tag: 'NFC-e Automática',
       },
 
       {
@@ -553,7 +553,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     seo: {
       title: 'Sistema para Restaurantes | Comanda Eletrônica, Mesas e Fiscal — MiseOn',
       description: 'Sistema completo para restaurantes: comanda eletrônica no celular do garçom, gestão de mesas, autoatendimento QR Code, DRE e NFC-e. Experimente!',
-      keywords: 'sistema para restaurante, comanda eletronica garcom, gestao de mesas restaurante, emissao nfce restaurante, ficha tecnica cmv',
+      keywords: 'sistema para restaurante, comanda eletronica garçom, gestão de mesas restaurante, emissão nfce restaurante, ficha técnica cmv',
       canonicalUrl: 'https://miseon.app.br/sistema-para-restaurantes',
     },
     badge: 'Restaurantes, Bares e Gastronomia',
@@ -588,7 +588,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         iconName: 'ScanLine',
         title: 'Estoque pelo Cupom do Mercado',
         description: 'Escaneie o QR Code da nota da compra e os itens entram no estoque com quantidade e custo real, sem digitar produto por produto.',
-        tag: 'NFC-e Automatica',
+        tag: 'NFC-e Automática',
       },
 
       {
@@ -649,7 +649,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     seo: {
       title: 'Integração iFood para Restaurantes | Sincronia Total — MiseOn',
       description: 'Integração iFood nativa para restaurantes: sincronize cardápio, aceite pedidos automaticamente, controle estoque unificado e use 1 só KDS.',
-      keywords: 'integracao ifood restaurante, sincronizar cardapio ifood, kds unificado ifood, sistema integrado com ifood',
+      keywords: 'integração ifood restaurante, sincronizar cardápio ifood, kds unificado ifood, sistema integrado com ifood',
       canonicalUrl: 'https://miseon.app.br/integracao-ifood',
     },
     badge: 'Integração Oficial iFood',
@@ -684,7 +684,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         iconName: 'ScanLine',
         title: 'Estoque pelo Cupom do Mercado',
         description: 'Escaneie o QR Code da nota da compra e os itens entram no estoque com quantidade e custo real, sem digitar produto por produto.',
-        tag: 'NFC-e Automatica',
+        tag: 'NFC-e Automática',
       },
 
       {
@@ -745,7 +745,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     seo: {
       title: 'Cardápio Digital QR Code Sem Taxas para Restaurantes — MiseOn',
       description: 'Crie seu cardápio digital com QR Code e link próprio. Sem comissões por pedido, atualização em tempo real e Pix direto na sua conta. Comece já!',
-      keywords: 'cardapio digital qr code, cardapio online sem taxa, cardapio para mesa, cardapio digital restaurante',
+      keywords: 'cardápio digital qr code, cardápio online sem taxa, cardápio para mesa, cardápio digital restaurante',
       canonicalUrl: 'https://miseon.app.br/cardapio-qr-code',
     },
     badge: 'Cardápio Digital Sem Taxas',
@@ -834,7 +834,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     seo: {
       title: 'Atendimento por WhatsApp com IA para Restaurantes — MiseOn',
       description: 'Automatize seu WhatsApp com a API Oficial da Meta e IA. Responda dúvidas com dados reais da loja e envie o link do cardápio!',
-      keywords: 'whatsapp ia restaurante, robo whatsapp delivery, atendimento automatico whatsapp comida, api oficial whatsapp meta',
+      keywords: 'whatsapp ia restaurante, robo whatsapp delivery, atendimento automático whatsapp comida, api oficial whatsapp meta',
       canonicalUrl: 'https://miseon.app.br/api-whatsapp-restaurantes',
     },
     badge: 'API Oficial Meta Verified',
@@ -923,7 +923,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     seo: {
       title: 'Emissor Fiscal NFC-e e NF-e para Restaurantes — MiseOn',
       description: 'Emissão de Nota Fiscal Eletrônica (NFC-e e NF-e) para restaurantes. Integração nativa com FocusNFe, suporte a certificado A1 e exportação para contabilidade.',
-      keywords: 'emissao nfce restaurante, sistema fiscal delivery, emissor nota fiscal restaurante, focusnfe restaurante',
+      keywords: 'emissão nfce restaurante, sistema fiscal delivery, emissor nota fiscal restaurante, focusnfe restaurante',
       canonicalUrl: 'https://miseon.app.br/gestao-fiscal-nfe',
     },
     badge: 'Módulo Fiscal FocusNFe Nativo',
@@ -958,7 +958,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         iconName: 'ScanLine',
         title: 'Estoque pelo Cupom do Mercado',
         description: 'Escaneie o QR Code da nota da compra e os itens entram no estoque com quantidade e custo real, sem digitar produto por produto.',
-        tag: 'NFC-e Automatica',
+        tag: 'NFC-e Automática',
       },
 
       {
@@ -1058,7 +1058,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         iconName: 'ScanLine',
         title: 'Estoque pelo Cupom do Mercado',
         description: 'Escaneie o QR Code da nota da compra e os itens entram no estoque com quantidade e custo real, sem digitar produto por produto.',
-        tag: 'NFC-e Automatica',
+        tag: 'NFC-e Automática',
       },
 
       {

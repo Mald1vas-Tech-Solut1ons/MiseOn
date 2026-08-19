@@ -40,7 +40,7 @@ export const BLOG_POSTS: BlogPost[] = [
     seo: {
       title: 'Dark Kitchens & Hamburguerias Multi-Marcas: Operação & KDS — MiseOn',
       description: 'Saiba como rodar múltiplas marcas virtuais de hamburgueria e delivery no mesmo espaço físico com KDS unificado e controle de estoque por PEPS.',
-      keywords: 'dark kitchen brasil, hamburgueria delivery kds, sistema multi marcas delivery, comanda digital hamburgueria, gestao de dark kitchen',
+      keywords: 'dark kitchen brasil, hamburgueria delivery kds, sistema multi marcas delivery, comanda digital hamburgueria, gestão de dark kitchen',
       canonicalUrl: 'https://miseon.app.br/blog/dark-kitchen-hamburgueria-gestao-multi-marcas-logistica-delivery',
     },
     summary: 'Operar uma Dark Kitchen ou hamburgueria de alto volume exige máxima eficiência por metro quadrado. Veja como integrar múltiplas marcas no mesmo estoque de pães e carnes, rotear pedidos para praças distintas e zerar o tempo de embalagem com o KDS MiseOn.',
@@ -115,7 +115,7 @@ Com o MiseOn, sua Dark Kitchen ganha escala de multinacional com a simplicidade 
     seo: {
       title: 'Engenharia para Pizzarias: Pedidos Meio a Meio, KDS & CMV — MiseOn',
       description: 'Aprenda a controlar o CMV de pizzas meio a meio, separar praças no KDS de pizzaria e gerenciar estoques de massa de longa fermentação no MiseOn.',
-      keywords: 'kds pizzaria, pizza meio a meio cmv, sistema para pizzaria, ficha tecnica pizza, forno a lenha kds',
+      keywords: 'kds pizzaria, pizza meio a meio cmv, sistema para pizzaria, ficha técnica pizza, forno a lenha kds',
       canonicalUrl: 'https://miseon.app.br/blog/engenharia-de-pizzarias-kds-sabores-meio-a-meio-forno-alta-temperatura',
     },
     summary: 'Pizzarias possuem uma das operações mais complexas do food service devido à customização extrema de pizzas meio a meio, bordas recheadas e sincronização de tempo de forno. Descubra como o KDS especializado do MiseOn elimina erros na montagem e garante a margem de cada fatia.',
@@ -188,7 +188,7 @@ Com tecnologia direcionada para os desafios reais da pizzaria, sua operação ga
     seo: {
       title: 'Smart TV no Restaurante: Menu Board 4K & Chamada por Voz — MiseOn',
       description: 'Descubra como conectar a Smart TV do salão ao KDS da cozinha. Exiba seu cardápio em 4K e chame pedidos por voz sintetizada automaticamente.',
-      keywords: 'tv restaurante cardapio, digital menu board, chamada de senhas tv, kds cozinha tv, comanda eletronica tv salao',
+      keywords: 'tv restaurante cardápio, digital menu board, chamada de senhas tv, kds cozinha tv, comanda eletronica tv salão',
       canonicalUrl: 'https://miseon.app.br/blog/como-transformar-smart-tv-salao-menu-board-4k-chamada-por-voz',
     },
     summary: 'Restaurantes modernos estão substituindo placas impressas por Smart TVs integradas ao KDS. Veja como configurar o painel 2-em-1 do MiseOn com cardápio 4K, QR Code de mesa e chamada de senhas por voz sintetizada.',
@@ -258,7 +258,7 @@ Eleve a experiência visual do seu restaurante hoje mesmo com a tecnologia nativ
     seo: {
       title: 'Como Criar uma Máquina de Vendas no WhatsApp Sem Pagar Comissões — MiseOn',
       description: 'Aprenda a rastrear vendas do WhatsApp com Meta Pixel, token de atribuição e IA consultiva LLaMA 3.3 sem pagar comissões por pedido.',
-      keywords: 'vendas whatsapp restaurante, pixel meta cardapio, atribuicao pedidos whatsapp, delivery sem comissao, gestao vendas whatsapp',
+      keywords: 'vendas whatsapp restaurante, pixel meta cardápio, atribuicao pedidos whatsapp, delivery sem comissão, gestão vendas whatsapp',
       canonicalUrl: 'https://miseon.app.br/blog/estrategia-whatsapp-atribuicao-pixel-meta-vendas-sem-comissao',
     },
     summary: 'Restaurantes chegam a pagar 27% de comissão por pedido em marketplaces de delivery. Aprenda a transformar seu WhatsApp próprio em um canal direto com IA consultiva, token de atribuição e rastreamento Meta Pixel para dobrar a margem de lucro.',
@@ -396,7 +396,7 @@ Ao final do mês, a tela de **Financeiro & DRE** do MiseOn gera a Demonstração
     seo: {
       title: 'Engenharia de Cardápio: Aumente o Ticket Médio em 28% — MiseOn',
       description: 'Aprenda a aplicar a Engenharia de Cardápio no seu restaurante. Classifique pratos na Matriz de BCG gastronômica e automatize o upsell digital.',
-      keywords: 'engenharia de cardapio, matriz bcg restaurante, aumentar ticket medio delivery, upsell cardapio digital, precificacao pratos comida',
+      keywords: 'engenharia de cardápio, matriz bcg restaurante, aumentar ticket medio delivery, upsell cardápio digital, precificacao pratos comida',
       canonicalUrl: 'https://miseon.app.br/blog/engenharia-de-cardapio-combos-upsell-lucratividade',
     },
     summary: 'Aumentar o faturamento do restaurante não exige necessariamente atrair mais clientes. Aplicando os 4 quadrantes da Engenharia de Cardápio e disparando complementos estratégicos no checkout, o ticket médio cresce até 28% de forma imediata.',
@@ -454,7 +454,7 @@ O cliente percebe o saldo acumulado como um incentivo exclusivo da sua loja, gar
     seo: {
       title: 'Gestão de Compras e Suprimentos no Food Service — MiseOn',
       description: 'Descubra como o módulo de compras e fornecedores do MiseOn calcula a sugestão de pedido por giro e evita capital parado no estoque do restaurante.',
-      keywords: 'gestao de compras restaurante, fornecedores comida, controle de suprimentos food service, estoque minimo insumos, ordem de compra whatsapp',
+      keywords: 'gestão de compras restaurante, fornecedores comida, controle de suprimentos food service, estoque mínimo insumos, ordem de compra whatsapp',
       canonicalUrl: 'https://miseon.app.br/blog/gestao-de-suprimentos-compras-peps-fornecedores',
     },
     summary: 'Comprar de menos paralisa a cozinha no meio do pico de vendas; comprar de mais queima capital de giro e gera perdas por validade. Saiba como o módulo de Suprimentos do MiseOn equilibra esse ciclo com precisão matemática.',
@@ -513,7 +513,7 @@ Sua cozinha ganha agilidade, seu estoque opera sem perdas e seu caixa preserva a
     seo: {
       title: 'A Evolução do CMV no Food Service: Do Caderno ao Custeio PEPS — MiseOn',
       description: 'Entenda a evolução do Custo de Mercadoria Vendida (CMV) no food service. Descubra como o custeio PEPS e a perda de cocção protegem a margem de restaurantes.',
-      keywords: 'cmv restaurante, custeio peps restaurante, ficha tecnica alimentos, perda de coccao comida, calculo cmv hamburgueria',
+      keywords: 'cmv restaurante, custeio peps restaurante, ficha técnica alimentos, perda de coccao comida, calculo cmv hamburgueria',
       canonicalUrl: 'https://miseon.app.br/blog/evolucao-do-cmv-do-caderno-ao-custeio-peps-3d',
     },
     summary: 'Historicamente, restaurantes calculavam suas margens com base no preço de compra bruto dos ingredientes. A revolução do custeio PEPS (Primeiro a Entrar, Primeiro a Sair) e o tratamento da perda de cocção transformaram a gestão financeira gastronômica moderna.',
@@ -584,7 +584,7 @@ A diferença entre um restaurante que estagna e um grupo gastronômico que escal
     seo: {
       title: 'O Fim do Papel na Cozinha: Como o KDS Kanban Transforma a Operação — MiseOn',
       description: 'Descubra como telas digitais de cozinha (KDS) com colunas Kanban reduzem o tempo de preparo, eliminam erros de pedidos e organizam praças de produção.',
-      keywords: 'kds cozinha, kitchen display system, cozinha sem papel, gestao de cozinha restaurante, kanban producao comida',
+      keywords: 'kds cozinha, kitchen display system, cozinha sem papel, gestão de cozinha restaurante, kanban produção comida',
       canonicalUrl: 'https://miseon.app.br/blog/o-fim-do-papel-na-cozinha-kds-kanban-operacional',
     },
     summary: 'A comanda de papel engordurada e perdida na chapa é o maior gargalo das cozinhas de alta demanda. A adoção de monitores digitais KDS com Kanban por etapas revoluciona o tempo de entrega e a comunicação entre balcão e produção.',
@@ -643,7 +643,7 @@ A transição para a cozinha digital não é mais um luxo futurista — é a inf
     seo: {
       title: 'IA no WhatsApp do Restaurante: Oficial Meta vs Bots Amadores — MiseOn',
       description: 'Entenda os riscos de banimento em sistemas paralelos de WhatsApp e descubra como a IA conectada à API Oficial da Meta atende restaurantes sem errar.',
-      keywords: 'whatsapp ia restaurante, api oficial whatsapp meta, robo whatsapp delivery, atendimento automatico delivery, whatsapp business cloud api',
+      keywords: 'whatsapp ia restaurante, api oficial whatsapp meta, robo whatsapp delivery, atendimento automático delivery, whatsapp business cloud api',
       canonicalUrl: 'https://miseon.app.br/blog/ia-no-whatsapp-do-restaurante-atendimento-oficial-meta-vs-bots-amadores',
     },
     summary: 'O WhatsApp se tornou o principal canal de vendas diretas do delivery no Brasil. Contudo, utilizar "automações paralelas" com emuladores de celular coloca a operação em risco iminente de banimento definitivo do número da loja.',

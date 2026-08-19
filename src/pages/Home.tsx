@@ -24,12 +24,12 @@ const RECURSOS = [
     icone: Tv,
     titulo: 'Menu Board 4K & Chamada por Voz na TV',
     detalhes: [
-      'Chamada da senha falada em voz alta pela propria TV',
+      'Chamada da senha falada em voz alta pela própria TV',
       'Painel de senhas do dia, sem login e sem app na TV',
       'Basta abrir o link da loja numa Smart TV comum',
     ],
     metrica: 'SENHA CHAMADA EM VOZ',
-    badge: 'SALAO E BALCAO',
+    badge: 'SALÃO E BALCÃO',
     texto: 'Transforme qualquer Smart TV do salão em um painel noturno 4K rotativo com chamada de senhas por voz sintetizada em viva-voz.',
     cor: 'text-purple-400',
     fundo: 'bg-purple-500/10',
@@ -38,9 +38,9 @@ const RECURSOS = [
     icone: Mic,
     titulo: 'Comanda por Voz no Celular',
     detalhes: [
-      'O atendente fala e o proprio aparelho transcreve',
-      'O sistema casa o que foi dito com os itens do seu cardapio',
-      'Voce confere na tela antes de mandar para a comanda',
+      'O atendente fala e o próprio aparelho transcreve',
+      'O sistema casa o que foi dito com os itens do seu cardápio',
+      'Você confere na tela antes de mandar para a comanda',
     ],
     metrica: 'PEDIDO SEM DIGITAR',
     badge: 'MAOS LIVRES',
@@ -52,8 +52,8 @@ const RECURSOS = [
     icone: ShoppingCart,
     titulo: 'Inteligência Preditiva de Compras',
     detalhes: [
-      'Sugestao pelo giro real dos ultimos 30 dias, nao pelo minimo esquecido',
-      'Projeta a cobertura do estoque ate a proxima entrega',
+      'Sugestão pelo giro real dos últimos 30 dias, não pelo mínimo esquecido',
+      'Projeta a cobertura do estoque até a próxima entrega',
       'Ordem de compra pronta para enviar ao fornecedor',
     ],
     metrica: 'COMPRA NA MEDIDA',
@@ -66,11 +66,11 @@ const RECURSOS = [
     icone: QrCode,
     titulo: 'Cardápio Digital com QR Code',
     detalhes: [
-      'Link e QR proprios, com a sua marca — sem comissao por pedido',
-      'O cardapio consulta a ficha tecnica e sabe o que ainda tem insumo',
+      'Link e QR próprios, com a sua marca — sem comissão por pedido',
+      'O cardápio consulta a ficha técnica e sabe o que ainda tem insumo',
       'Cliente pede pelo navegador, sem instalar aplicativo',
     ],
-    metrica: 'ZERO COMISSAO',
+    metrica: 'ZERO COMISSÃO',
     badge: 'VENDA DIRETA',
     texto: 'Sua loja no ar com link próprio e QR Code para mesas e balcão. Fotos, adicionais e preços sempre atualizados — sem imprimir nada.',
     cor: 'text-orange-500',
@@ -81,11 +81,11 @@ const RECURSOS = [
     titulo: 'Cozinha (KDS Kanban)',
     detalhes: [
       'Pedidos em colunas por etapa, com o tempo correndo em cada ficha',
-      'Estacoes de preparo separadas por tipo de producao',
+      'Estações de preparo separadas por tipo de produção',
       'Tempo medio por etapa para achar o gargalo da cozinha',
     ],
     metrica: 'COZINHA SEM PAPEL',
-    badge: 'PRODUCAO',
+    badge: 'PRODUÇÃO',
     texto: 'Tela de produção sem papel: a cozinha vê a fila por estações (Cozinha, Bar, Confeitaria), marca o preparo e o balcão acompanha tudo em tempo real.',
     cor: 'text-red-500',
     fundo: 'bg-red-500/10',
@@ -94,11 +94,11 @@ const RECURSOS = [
     icone: Store,
     titulo: 'Dark Kitchen (Delivery Apenas)',
     detalhes: [
-      'Perfil de operacao sem salao: o painel se ajusta ao delivery',
-      'Sem mesa e sem balcao atravancando a tela de quem so entrega',
+      'Perfil de operação sem salão: o painel se ajusta ao delivery',
+      'Sem mesa e sem balcão atravancando a tela de quem so entrega',
       'Mesmo estoque, mesmo KDS e mesmo financeiro',
     ],
-    metrica: 'OPERACAO SEM SALAO',
+    metrica: 'OPERAÇÃO SEM SALÃO',
     badge: 'PERFIL DE NEGOCIO',
     texto: 'Opere múltiplas marcas virtuais no mesmo restaurante compartilhando a mesma cozinha física e a mesma baixa de estoque PEPS.',
     cor: 'text-indigo-400',
@@ -110,7 +110,7 @@ const RECURSOS = [
     detalhes: [
       'Taxa por faixa de distancia, calculada pelo km real da entrega',
       'Rota do entregador acompanhada ao vivo',
-      'Distancia media e volume por faixa no painel',
+      'Distancia média e volume por faixa no painel',
     ],
     metrica: 'TAXA POR DISTANCIA',
     badge: 'DELIVERY',
@@ -122,11 +122,11 @@ const RECURSOS = [
     icone: UtensilsCrossed,
     titulo: 'PDV, Mesas 3D e Comandas',
     detalhes: [
-      'Salao desenhado em 3D: mesa livre, ocupada ou fechando conta',
+      'Salão desenhado em 3D: mesa livre, ocupada ou fechando conta',
       'Caixa com abertura e fechamento de turno',
-      'Mesmo caixa do delivery, do balcao e do salao',
+      'Mesmo caixa do delivery, do balcão e do salão',
     ],
-    metrica: 'SALAO E BALCAO NO MESMO CAIXA',
+    metrica: 'SALÃO E BALCÃO NO MESMO CAIXA',
     badge: 'ATENDIMENTO',
     texto: 'Balcão e salão no mesmo sistema: comanda por mesa/assento, pedido direto na tela da cozinha e fechamento de conta sem confusão.',
     cor: 'text-amber-500',
@@ -136,13 +136,13 @@ const RECURSOS = [
     icone: HeartPulse,
     titulo: 'Tabela Nutricional por Ficha Técnica',
     detalhes: [
-      'Le o rotulo pela foto, pelo codigo de barras ou estima com IA',
+      'Le o rótulo pela foto, pelo código de barras ou estima com IA',
       'Bases de referencia USDA, TBCA e IBGE/POF por tras do calculo',
-      'Cada valor mostra de onde veio — rotulo, base cientifica ou estimativa',
+      'Cada valor mostra de onde veio — rótulo, base cientifica ou estimativa',
     ],
     metrica: 'NUTRICAO SEM NUTRICIONISTA',
     badge: 'DIFERENCIAL RARO',
-    texto: 'O valor nutricional do prato sai da propria ficha tecnica: o sistema soma os insumos e calcula. Voce alimenta o insumo fotografando o rotulo, lendo o codigo de barras ou deixando a IA estimar — e cada numero carrega a origem do dado.',
+    texto: 'O valor nutricional do prato sai da própria ficha técnica: o sistema soma os insumos e calcula. Você alimenta o insumo fotografando o rótulo, lendo o código de barras ou deixando a IA estimar — e cada número carrega a origem do dado.',
     cor: 'text-rose-400',
     fundo: 'bg-rose-500/10',
   },
@@ -151,8 +151,8 @@ const RECURSOS = [
     titulo: 'Estoque pelo Cupom do Mercado (NFC-e)',
     detalhes: [
       'A nota inteira em um scan, lida na SEFAZ — sem digitar item por item',
-      'Voce escolhe o que entra e como converte (1 bandeja = 20 unidades)',
-      'Aprende o codigo de cada mercado e recusa nota ja lancada',
+      'Você escolhe o que entra e como converte (1 bandeja = 20 unidades)',
+      'Aprende o código de cada mercado e recusa nota ja lancada',
     ],
     metrica: 'COMPRA INTEIRA EM 1 SCAN',
     badge: 'EXCLUSIVO MISEON',
@@ -165,7 +165,7 @@ const RECURSOS = [
     titulo: 'Estoque com Ficha Técnica & CMV',
     detalhes: [
       'Cada venda baixa os ingredientes pela ficha do prato',
-      'Custo pelo lote PEPS: o CMV segue o preco que voce pagou',
+      'Custo pelo lote PEPS: o CMV segue o preço que você pagou',
       'Desmonte de peca inteira com rateio de custo por corte',
     ],
     metrica: 'CMV REAL POR PRATO',
@@ -178,9 +178,9 @@ const RECURSOS = [
     icone: Wallet,
     titulo: 'Financeiro com Pix (Efí) & DRE',
     detalhes: [
-      'Pix cai na conta da sua loja, com conciliacao automatica',
+      'Pix cai na conta da sua loja, com conciliação automática',
       'DRE com margem de contribuicao e lucro liquido reais',
-      'Custo fixo e variavel separados, por periodo',
+      'Custo fixo e variável separados, por período',
     ],
     metrica: 'LUCRO SEM PLANILHA',
     badge: 'FINANCEIRO',
@@ -192,7 +192,7 @@ const RECURSOS = [
     icone: Megaphone,
     titulo: 'Marketing, Meta Pixel & Cashback',
     detalhes: [
-      'CRM com analise RFM: quem sumiu, quem volta e quem gasta mais',
+      'CRM com análise RFM: quem sumiu, quem volta e quem gasta mais',
       'Cashback, cupons e banners de vitrine na sua mao',
       'Meta Pixel e GA4 medindo cada pedido, com recuperacao de venda',
     ],
@@ -416,7 +416,7 @@ export default function Home() {
       <SEO
         title="MiseOn | Sistema de Gestão para Food Service e Restaurantes"
         description="MiseOn: sistema de gestão para todo o food service — hamburgueria, pizzaria, lanchonete, restaurante à la carte, buffet por quilo, bar e dark kitchen. Cardápio digital, KDS, estoque pelo cupom fiscal e iFood."
-        keywords="sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardapio digital qr code, integracao ifood, whatsapp ia restaurante"
+        keywords="sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardápio digital qr code, integração ifood, whatsapp ia restaurante"
         canonicalUrl="https://miseon.app.br/"
         schemaJson={{
           '@context': 'https://schema.org',

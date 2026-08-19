@@ -38,7 +38,7 @@ export const PAGE_META: Record<string, PageMeta> = {
     description:
       'MiseOn: sistema de gestão para todo o food service — hamburgueria, pizzaria, lanchonete, restaurante à la carte, buffet por quilo, bar e dark kitchen. Cardápio digital, KDS, estoque pelo cupom fiscal e iFood.',
     keywords:
-      'sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardapio digital qr code, integracao ifood, whatsapp ia restaurante',
+      'sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardápio digital qr code, integração ifood, whatsapp ia restaurante',
     canonicalUrl: `${BASE}/`,
     h1: 'MiseOn | Sistema de gestão para food service — da hamburgueria ao buffet por quilo',
   },
@@ -132,7 +132,7 @@ export const PAGE_META: Record<string, PageMeta> = {
     title: 'Estoque, Compras e Desmonte de Insumos com Custo Real — MiseOn',
     description:
       'Controle de compras com fornecedor, marca e recebimento parcial; desmonte de insumos com rateio de custo PEPS; inventário em qualquer unidade e mapa 3D do capital parado na cozinha.',
-    keywords: 'controle de compras restaurante, gestao de fornecedores food service, desmonte de insumos, rendimento de desossa, inventario de estoque restaurante, estoque 3d restaurante, ficha tecnica restaurante, custeio peps comida',
+    keywords: 'controle de compras restaurante, gestão de fornecedores food service, desmonte de insumos, rendimento de desossa, inventario de estoque restaurante, estoque 3d restaurante, ficha técnica restaurante, custeio peps comida',
     canonicalUrl: `${BASE}/gestao-de-estoque-3d`,
     h1: 'Gestão de Estoque Físico, Fichas Técnicas e Observabilidade 3D em Tempo Real',
   },
@@ -140,7 +140,7 @@ export const PAGE_META: Record<string, PageMeta> = {
     title: 'Blog MiseOn | Engenharia, CMV & Tecnologia para Food Service',
     description:
       'Artigos especializados para donos de restaurantes, hamburguerias e pizzarias. Estudos profundos sobre CMV real, Ficha Técnica, KDS sem papel e IA no WhatsApp.',
-    keywords: 'blog restaurante, cmv food service, kds producao, ficha tecnica hamburgueria, whatsapp ia delivery',
+    keywords: 'blog restaurante, cmv food service, kds produção, ficha técnica hamburgueria, whatsapp ia delivery',
     canonicalUrl: `${BASE}/blog`,
     h1: 'Blog MiseOn: Engenharia, CMV & Tecnologia para Food Service',
   },

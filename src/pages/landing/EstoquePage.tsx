@@ -93,7 +93,7 @@ export default function EstoquePage() {
       <SEO
         title="Estoque, Compras e Desmonte de Insumos com Custo Real — MiseOn"
         description="Controle de compras com fornecedor, marca e recebimento parcial; desmonte de insumos com rateio de custo PEPS; inventário em qualquer unidade e mapa 3D do capital parado na cozinha."
-        keywords="controle de compras restaurante, gestao de fornecedores food service, desmonte de insumos, rendimento de desossa, inventario de estoque restaurante, estoque 3d restaurante, ficha tecnica restaurante, custeio peps comida"
+        keywords="controle de compras restaurante, gestão de fornecedores food service, desmonte de insumos, rendimento de desossa, inventario de estoque restaurante, estoque 3d restaurante, ficha técnica restaurante, custeio peps comida"
         canonicalUrl="https://miseon.app.br/gestao-de-estoque-3d"
         schemaJson={schemaJson}
       />

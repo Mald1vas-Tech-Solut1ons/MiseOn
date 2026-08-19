@@ -50,7 +50,7 @@ export default function Blog() {
       <SEO
         title="Blog MiseOn | Engenharia, CMV & Tecnologia para Food Service"
         description="Conteúdo especializado para donos de restaurantes, hamburguerias e pizzarias. Artigos sobre CMV real, Ficha Técnica, KDS sem papel e IA no WhatsApp."
-        keywords="blog restaurante, cmv food service, kds producao, ficha tecnica hamburgueria, whatsapp ia delivery, gestao de pizzaria"
+        keywords="blog restaurante, cmv food service, kds produção, ficha técnica hamburgueria, whatsapp ia delivery, gestão de pizzaria"
         canonicalUrl="https://miseon.app.br/blog"
         schemaJson={schemaJson}
       />
