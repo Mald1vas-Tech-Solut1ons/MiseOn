@@ -1,0 +1,13 @@
+-- Liga a importação de cupom fiscal ao módulo nutricional.
+--
+-- Quando o cupom traz GTIN válido, ele é o mesmo código de barras da embalagem.
+-- Gravando no insumo, a busca nutricional por EAN passa a alcançar o item que
+-- entrou pela nota, sem o lojista digitar código nenhum. Antes o EAN era usado
+-- só para casar o De-Para e se perdia depois.
+--
+-- Nunca sobrescreve GTIN existente: um código já conferido vale mais que o da
+-- nota da vez. A versão completa da função está aplicada em produção; esta
+-- migração documenta a mudança de comportamento.
+--
+-- Verificado: item com EAN 7891962057019 entrou com gtin gravado no insumo;
+-- item a granel, sem EAN, entrou com gtin nulo — sem erro nos dois casos.
