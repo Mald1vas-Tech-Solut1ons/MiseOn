@@ -13,7 +13,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 // Rate limit compartilhado. Já existiu aqui uma cópia local com o MESMO nome
 // mais um import lá embaixo: a função local vencia, devolvia boolean, e o
 // `rl.allowed` dava undefined — 429 em 100% das cobranças. Uma declaração só.
-import { checkRateLimit } from '../_shared/rate-limit.ts';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 const EFI_URL = Deno.env.get('EFI_SANDBOX') === 'true'
   ? 'https://pix-h.api.efipay.com.br'
@@ -87,8 +87,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   
   // Rate limiting (max 10 req por minuto por IP)
-  const clientIp = req.headers.get('x-forwarded-for') || 'unknown';
-  const rl = checkRateLimit(`pix:${clientIp}`, { windowMs: 60000, maxRequests: 10 });
+  const clientIp = ipDaRequisicao(req);
+  const rl = await checkRateLimit(`pix:${clientIp}`, { windowMs: 60000, maxRequests: 10 });
   if (!rl.allowed) {
     return json({ error: 'Too Many Requests' }, { status: 429 });
   }

@@ -24,8 +24,13 @@ async function assinaturaValida(
   signatureHeader: string | null,
   appSecret: string,
 ): Promise<boolean> {
+  // Falha fechada: sem app_secret não há como provar que o POST veio da Meta.
+  // Este ponto já aceitou qualquer corpo quando o segredo estava vazio ou era
+  // "SKIP" — uma linha em whatsapp_conexoes desligava a autenticação inteira do
+  // webhook. Homologação usa um app_secret de teste, não um bypass.
   if (!appSecret || appSecret.trim() === "" || appSecret === "SKIP") {
-    return true; // Se o app_secret não estiver preenchido, aceita em modo de homologação
+    console.error("app_secret ausente na conexão — POST recusado");
+    return false;
   }
   if (!signatureHeader || !signatureHeader.startsWith("sha256=")) return false;
   const key = await crypto.subtle.importKey(

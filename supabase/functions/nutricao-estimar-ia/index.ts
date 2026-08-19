@@ -104,14 +104,14 @@ Regras rígidas:
   branco cozido, composição geral semelhante entre marcas").`;
 }
 
-import { checkRateLimit } from '../_shared/rate-limit.ts';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
   // Rate Limiting (máx 10 por min)
-  const clientIp = req.headers.get('x-forwarded-for') || 'unknown';
-  const rl = checkRateLimit(`nutr-ia:${clientIp}`, { windowMs: 60000, maxRequests: 10 });
+  const clientIp = ipDaRequisicao(req);
+  const rl = await checkRateLimit(`nutr-ia:${clientIp}`, { windowMs: 60000, maxRequests: 10 });
   if (!rl.allowed) return erro('Limite de requisições excedido. Tente novamente em breve.', 429);
 
   try {

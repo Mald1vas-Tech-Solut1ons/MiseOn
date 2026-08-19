@@ -1,7 +1,7 @@
 // chat-ai-reception — IA de atendimento consultiva e humanizada WhatsApp/Site do MiseOn
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { checkRateLimit, ipDaRequisicao } from "../_shared/rate-limit.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -83,8 +83,8 @@ serve(async (req) => {
   const ehChamadaInterna =
     (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim() === serviceKey;
   if (!ehChamadaInterna) {
-    const ip = req.headers.get("x-forwarded-for") ?? "desconhecido";
-    const rl = checkRateLimit(`chat-ia:${ip}`, { windowMs: 60_000, maxRequests: 20 });
+    const ip = ipDaRequisicao(req);
+    const rl = await checkRateLimit(`chat-ia:${ip}`, { windowMs: 60_000, maxRequests: 20 });
     if (!rl.allowed) return erro("Muitas mensagens em sequência. Aguarde um instante.", 429);
   }
 

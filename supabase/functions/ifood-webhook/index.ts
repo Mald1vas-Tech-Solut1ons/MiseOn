@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.6';
 import { z } from 'npm:zod';
 import { logger } from '../_shared/logger.ts';
-import { checkRateLimit } from '../_shared/rate-limit.ts';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -133,8 +133,8 @@ serve(async (req: Request) => {
   // No lugar dela, TODO evento é confirmado contra a API do iFood antes de
   // agir (ver "AUTENTICIDADE DO EVENTO" no laço abaixo) — orderId forjado não
   // existe lá e o evento é descartado.
-  const ipOrigem = req.headers.get('x-forwarded-for') ?? 'desconhecido';
-  const rl = checkRateLimit(`ifood:${ipOrigem}`, { windowMs: 60_000, maxRequests: 120 });
+  const ipOrigem = ipDaRequisicao(req);
+  const rl = await checkRateLimit(`ifood:${ipOrigem}`, { windowMs: 60_000, maxRequests: 120 });
   if (!rl.allowed) {
     reqLogger.warn('Rate limit atingido no webhook iFood', { ip: ipOrigem });
     // 429 e não 200: aqui queremos que o iFood reenvie o evento depois.

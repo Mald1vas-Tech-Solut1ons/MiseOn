@@ -44,3 +44,24 @@ verify_jwt = true
 [functions.whatsapp-conectar]
 enabled = true
 verify_jwt = true
+
+# ── Entradas que faltavam ──────────────────────────────────────────────────
+# Estas três funções existiam em produção mas não constavam aqui. Como o
+# default do CLI é verify_jwt = true, um `functions deploy` passaria a exigir
+# JWT em pix-webhook (a Efí chama sem JWT) e em chat-ai-reception, derrubando
+# a confirmação de pagamento e o chat da vitrine. Valores conferidos contra o
+# que está ATIVO em produção antes de escrever.
+[functions.pix-webhook]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/pix-webhook/index.ts"
+
+[functions.chat-ai-reception]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/chat-ai-reception/index.ts"
+
+[functions.nutricao-estimar-ia]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/nutricao-estimar-ia/index.ts"
