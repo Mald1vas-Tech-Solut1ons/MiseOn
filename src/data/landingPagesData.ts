@@ -64,7 +64,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         comMiseOn: 'Comanda digital por mesa: cada rodada entra com hora, item e quem lancou.',
       },
       {
-        semMiseOn: 'Fila no caixa na hora do fechamento, porque alguem precisa somar tudo na mao.',
+        semMiseOn: 'Fila no caixa na hora do fechamento, porque alguém precisa somar tudo na mão.',
         comMiseOn: 'Conta fechada na hora, com o total ja calculado e o pagamento no próprio painel.',
       },
       {
@@ -125,7 +125,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         resposta: 'A comanda mostra todos os itens lancados na mesa e o fechamento permite receber em mais de uma forma de pagamento, registrando cada parte no caixa do turno.',
       },
       {
-        pergunta: 'Preciso cadastrar cada bebida na mao?',
+        pergunta: 'Preciso cadastrar cada bebida na mão?',
         resposta: 'Não. Ao voltar da compra, escaneie o QR Code do cupom fiscal: o sistema le a nota na SEFAZ e traz os itens com quantidade e custo. Você confere, desmarca o que não entra e da entrada de tudo de uma vez.',
       },
     ],
@@ -193,7 +193,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         iconName: 'BarChart3',
         title: 'CMV por Prato e DRE Gerencial',
-        description: 'Custo real por prato pelo metodo PEPS e DRE com margem de contribuicao, custo fixo e lucro liquido.',
+        description: 'Custo real por prato pelo método PEPS e DRE com margem de contribuição, custo fixo e lucro líquido.',
         tag: 'Margem',
       },
     ],
