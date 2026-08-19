@@ -73,7 +73,26 @@ Deno.serve(async (req) => {
     const { data: config } = await supabase
       .from('configuracoes_fiscais_plataforma').select('*').eq('id', true).maybeSingle();
 
-    const pronta = config?.habilita_nfse && config?.certificado_status === 'valido';
+    // Trava de emissao.
+    //
+    // Era `habilita_nfse && certificado_status === 'valido'` — e o certificado
+    // NUNCA e enviado a Focus nesta chamada: a autenticacao e o
+    // FOCUS_API_TOKEN via Basic, e o certificado, quando exigido, fica no
+    // painel da Focus. Ou seja, `certificado_status` era um flag local que nao
+    // correspondia a exigencia nenhuma da API — e bloqueava a emissao sozinho.
+    //
+    // Para MEI na NFS-e Nacional isso e especialmente errado: o Emissor
+    // Nacional aceita MEI sem certificado A1. O payload abaixo ja manda tudo o
+    // que esse caso precisa (codigo_ibge, cnpj, codigo_opcao_simples_nacional
+    // = 2 para MEI, codigo_tributacao_nacional, aliquota) e em momento algum
+    // pede inscricao municipal.
+    //
+    // A trava passa a ser o que de fato importa: o operador ligou a emissao
+    // (`habilita_nfse`) e existe CNPJ do prestador. Certificado so e cobrado
+    // fora do regime MEI, onde a Focus costuma exigi-lo.
+    const ehMei = String(config?.regime_tributario ?? '').toUpperCase() === 'MEI';
+    const certificadoOk = ehMei || config?.certificado_status === 'valido';
+    const pronta = !!config?.habilita_nfse && !!config?.cnpj && certificadoOk;
     if (!pronta) {
       await supabase.from('faturas_assinatura')
         .update({ nfse_status: 'pendente_configuracao' })

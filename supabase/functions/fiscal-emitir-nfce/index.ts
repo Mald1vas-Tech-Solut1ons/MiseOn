@@ -37,6 +37,33 @@ Deno.serve(async (req) => {
 
     if (errPed || !pedido) return json({ error: 'Pedido não encontrado' }, { status: 404 });
 
+    // ── AUTORIZAÇÃO ────────────────────────────────────────────────────────
+    // Esta função emite documento fiscal REAL na SEFAZ, em nome do CNPJ do
+    // lojista. Não tinha checagem nenhuma: aceitava `pedido_id` de qualquer
+    // loja e emitia. Nota fiscal indevida é problema tributário do lojista,
+    // não bug de tela — então só quem opera aquela loja pode disparar.
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const bearer = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!bearer) return json({ error: 'Não autorizado' }, { status: 401 });
+
+    if (bearer !== Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')) {
+      const supabaseUser = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_ANON_KEY')!,
+        { global: { headers: { Authorization: `Bearer ${bearer}` } } },
+      );
+      const { data: { user } } = await supabaseUser.auth.getUser();
+      if (!user) return json({ error: 'Não autorizado' }, { status: 401 });
+
+      const { data: vinculo } = await supabase
+        .from('usuarios_loja')
+        .select('papel')
+        .eq('user_id', user.id)
+        .eq('loja_id', pedido.loja_id)
+        .maybeSingle();
+      if (!vinculo) return json({ error: 'Sem acesso a esta loja' }, { status: 403 });
+    }
+
     const isProd = pedido.lojas.nfe_ambiente === 'producao';
     const baseUrl = isProd ? 'https://api.focusnfe.com.br/v2/nfce' : 'https://homologacao.focusnfe.com.br/v2/nfce';
     const token = isProd ? TOKEN_PROD : TOKEN_HOMOLOG;

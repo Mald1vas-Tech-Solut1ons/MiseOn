@@ -73,16 +73,68 @@ Deno.serve(async (req) => {
     const notif = await res.json().catch(() => ({}));
     const itens: any[] = Array.isArray(notif?.data) ? notif.data : (notif?.data ? [notif.data] : []);
 
+    // Nada se perde: cada item recebido vira uma linha em
+    // `assinatura_eventos_efi` com o payload cru, reconhecido ou não. Antes,
+    // um formato inesperado caía num `continue` silencioso — a Efí registrava
+    // o pagamento e do nosso lado não sobrava nem a fatura nem a NFS-e do
+    // assinante, sem nenhum rastro de que a notificação chegou.
+    const registrarEvento = async (
+      item: any,
+      situacao: 'reconhecido' | 'nao_reconhecido' | 'ignorado' | 'duplicado',
+      extra: { subscription_id?: string | null; charge_id?: string | null; status_lido?: string | null; fatura_id?: string | null; observacao?: string } = {},
+    ) => {
+      try {
+        const { error } = await supabase.from('assinatura_eventos_efi').insert({
+          notification_token: notificationToken,
+          payload_bruto: item ?? {},
+          situacao,
+          subscription_id: extra.subscription_id ?? null,
+          charge_id: extra.charge_id ?? null,
+          status_lido: extra.status_lido ?? null,
+          fatura_id: extra.fatura_id ?? null,
+          observacao: extra.observacao ?? null,
+        });
+        if (error) console.error('Falha ao registrar evento de assinatura:', error);
+      } catch (e) {
+        console.error('Falha ao registrar evento de assinatura:', e);
+      }
+    };
+
+    if (!itens.length) {
+      await registrarEvento(notif, 'nao_reconhecido',
+        { observacao: 'Notificação sem `data` interpretável — conferir formato contra o painel da Efí.' });
+    }
+
     for (const item of itens) {
-      const subscriptionId = item?.subscription_id ?? item?.subscription?.id ?? item?.identifiers?.subscription_id;
+      // Nomes de campo ainda não confirmados contra tráfego real: aceitamos as
+      // variações conhecidas e, se nenhuma casar, o payload fica guardado.
+      const subscriptionId = item?.subscription_id ?? item?.subscription?.id ?? item?.identifiers?.subscription_id
+        ?? item?.subscription?.subscription_id ?? item?.data?.subscription_id;
       const chargeId = String(item?.charge_id ?? item?.identifiers?.charge_id ?? item?.id ?? `${subscriptionId}-${item?.created_at ?? Date.now()}`);
-      const status = String(item?.status ?? '').toLowerCase();
-      if (!subscriptionId || !STATUS_PAGO.has(status)) continue;
+      const status = String(item?.status ?? item?.status?.current ?? '').toLowerCase();
+
+      if (!subscriptionId) {
+        await registrarEvento(item, 'nao_reconhecido',
+          { charge_id: chargeId, status_lido: status,
+            observacao: 'subscription_id não encontrado no payload — fatura NÃO gerada, precisa de conferência manual.' });
+        continue;
+      }
+      if (!STATUS_PAGO.has(status)) {
+        await registrarEvento(item, 'ignorado',
+          { subscription_id: String(subscriptionId), charge_id: chargeId, status_lido: status,
+            observacao: 'Status não é de pagamento concluído.' });
+        continue;
+      }
 
       // Idempotência: se já registramos esta cobrança, não duplica.
       const { data: jaExiste } = await supabase
         .from('faturas_assinatura').select('id').eq('efi_charge_id', chargeId).maybeSingle();
-      if (jaExiste) continue;
+      if (jaExiste) {
+        await registrarEvento(item, 'duplicado',
+          { subscription_id: String(subscriptionId), charge_id: chargeId, status_lido: status,
+            fatura_id: jaExiste.id, observacao: 'Cobranca ja registrada anteriormente.' });
+        continue;
+      }
 
       // Encontra a loja pela última fatura desta subscription (criada em
       // saas-assinar na cobrança inicial, ou por uma renovação anterior).
@@ -95,6 +147,9 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (!faturaAnterior?.loja_id) {
         console.error(`Webhook assinatura: subscription ${subscriptionId} sem fatura anterior vinculada; ignorando.`);
+        await registrarEvento(item, 'nao_reconhecido',
+          { subscription_id: String(subscriptionId), charge_id: chargeId, status_lido: status,
+            observacao: 'Pagamento reconhecido, mas nenhuma fatura anterior aponta para esta subscription — nao da para saber a loja. Exige vinculo manual.' });
         continue;
       }
 
@@ -130,11 +185,17 @@ Deno.serve(async (req) => {
       }).select('id').single();
 
       if (!eFatura && fatura?.id) {
+        await registrarEvento(item, 'reconhecido',
+          { subscription_id: String(subscriptionId), charge_id: chargeId, status_lido: status,
+            fatura_id: fatura.id, observacao: 'Renovacao registrada e NFS-e acionada.' });
         await supabase.functions.invoke('fiscal-emitir-nfse', { body: { fatura_id: fatura.id } }).catch((e) => {
           console.error('Falha ao acionar emissão de NFS-e na renovação (não bloqueia):', e);
         });
       } else if (eFatura) {
         console.error('Falha ao registrar fatura de renovação:', eFatura);
+        await registrarEvento(item, 'nao_reconhecido',
+          { subscription_id: String(subscriptionId), charge_id: chargeId, status_lido: status,
+            observacao: 'Pagamento reconhecido mas o INSERT da fatura falhou: ' + String(eFatura?.message ?? eFatura) });
       }
     }
 

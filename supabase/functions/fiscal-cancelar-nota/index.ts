@@ -54,6 +54,20 @@ serve(async (req) => {
       return json({ error: 'Nota fiscal não encontrada' }, { status: 404 });
     }
 
+    // Autenticar não basta: era preciso conferir que o usuário é da loja DONA
+    // da nota. Sem isso, qualquer pessoa logada na plataforma cancelava nota
+    // fiscal de qualquer restaurante — e cancelamento indevido na SEFAZ tem
+    // prazo e consequência fiscal, não dá para "desfazer" depois.
+    const { data: vinculoNota } = await supabaseAdmin
+      .from('usuarios_loja')
+      .select('papel')
+      .eq('user_id', user.id)
+      .eq('loja_id', nota.loja_id)
+      .maybeSingle();
+    if (!vinculoNota) {
+      return json({ error: 'Sem acesso a esta loja' }, { status: 403 });
+    }
+
     const isProd = nota.ambiente === 'producao';
     const isNfce = nota.tipo === 'NFCE';
     const baseUrl = isNfce
