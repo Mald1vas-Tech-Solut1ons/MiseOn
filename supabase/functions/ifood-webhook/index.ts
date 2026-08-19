@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.6';
 import { z } from 'npm:zod';
 import { logger } from '../_shared/logger.ts';
+import { checkRateLimit } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -121,6 +122,25 @@ serve(async (req: Request) => {
 
   const reqLogger = logger.withContext({ req_id: crypto.randomUUID() });
 
+  // Endpoint aberto por necessidade: o iFood chama sem JWT do Supabase, então
+  // verify_jwt=false não tem alternativa. O que dá para fazer sem arriscar a
+  // integração é limitar a vazão — cada evento aqui dispara chamadas à API do
+  // iFood (busca do pedido), e sem freio um terceiro queima a cota da conta.
+  //
+  // Validação de assinatura continua fora DE PROPÓSITO: o esquema do iFood
+  // precisa ser conferido contra tráfego real antes de virar bloqueio, senão o
+  // risco vira pedido deixando de entrar em produção sem ninguém perceber.
+  // No lugar dela, TODO evento é confirmado contra a API do iFood antes de
+  // agir (ver "AUTENTICIDADE DO EVENTO" no laço abaixo) — orderId forjado não
+  // existe lá e o evento é descartado.
+  const ipOrigem = req.headers.get('x-forwarded-for') ?? 'desconhecido';
+  const rl = checkRateLimit(`ifood:${ipOrigem}`, { windowMs: 60_000, maxRequests: 120 });
+  if (!rl.allowed) {
+    reqLogger.warn('Rate limit atingido no webhook iFood', { ip: ipOrigem });
+    // 429 e não 200: aqui queremos que o iFood reenvie o evento depois.
+    return new Response('Too Many Requests', { status: 429, headers: corsHeaders });
+  }
+
   try {
     let rawBody: unknown;
     try { rawBody = await req.json(); } catch { rawBody = null; }
@@ -172,6 +192,35 @@ serve(async (req: Request) => {
 
       try {
         const token = await getToken();
+
+        // ── AUTENTICIDADE DO EVENTO ───────────────────────────────────────
+        // Este endpoint e aberto por necessidade (o iFood chama sem JWT do
+        // Supabase) e nao valida assinatura. Antes, so o PLC consultava a API
+        // do iFood; CFR/RTP/DSP/CON mudavam o status do pedido confiando
+        // apenas no orderId do corpo, e o CAN chegava a chamar a API real de
+        // cancelamento. Ou seja: quem tivesse um orderId valido conseguia
+        // finalizar pedido (creditando cashback e lancando receita no ledger)
+        // ou CANCELAR de verdade um pedido no iFood.
+        //
+        // A correcao usa o proprio iFood como autenticador: antes de agir,
+        // busca o pedido na API deles. orderId forjado nao existe la e a
+        // chamada falha, entao o evento e descartado. Custa uma requisicao a
+        // mais por evento — volume de webhook do iFood comporta.
+        //
+        // PLC ja fazia isso logo abaixo (precisa do pedido inteiro), entao so
+        // os demais codigos entram aqui.
+        if (code !== 'PLC') {
+          try {
+            const confere = await getOrderDetails(orderId, token);
+            if (!confere?.id && !confere?.displayId) {
+              reqLogger.warn(`Evento ${code} descartado: iFood nao reconhece ${orderId}`);
+              continue;
+            }
+          } catch (e) {
+            reqLogger.warn(`Evento ${code} descartado: falha ao confirmar ${orderId} no iFood`, e);
+            continue;
+          }
+        }
 
         // ── PLC: Novo Pedido ────────────────────────────────────────────────
         if (code === 'PLC') {

@@ -20,6 +20,12 @@ interface LojaIfood {
   ifood_addon_ativo: boolean;
   ifood_taxa_pct: number;
   ifood_taxa_fixa: number;
+  ifood_sync_cardapio: boolean;
+  ifood_sync_preco_auto: boolean;
+  ifood_sync_disponibilidade: boolean;
+  ifood_sync_status_pedido: boolean;
+  ifood_pausar_sem_estoque: boolean;
+  ifood_confirmar_automatico: boolean;
 }
 
 const LIMIAR: LojaIfood = {
@@ -28,6 +34,12 @@ const LIMIAR: LojaIfood = {
   ifood_addon_ativo: false,
   ifood_taxa_pct: 0,
   ifood_taxa_fixa: 0,
+  ifood_sync_cardapio: false,
+  ifood_sync_preco_auto: false,
+  ifood_sync_disponibilidade: false,
+  ifood_sync_status_pedido: false,
+  ifood_pausar_sem_estoque: false,
+  ifood_confirmar_automatico: true,
 };
 
 export default function Ifood() {
@@ -43,7 +55,7 @@ export default function Ifood() {
       .from('lojas')
       // `plano_tipo` não existe no banco — a coluna é `plano`. Sem o alias este
       // SELECT falhava e a tela de integração nunca carregava o merchant_id.
-      .select('plano_tipo:plano, ifood_merchant_id, ifood_addon_ativo, ifood_taxa_pct, ifood_taxa_fixa')
+      .select('plano_tipo:plano, ifood_merchant_id, ifood_addon_ativo, ifood_taxa_pct, ifood_taxa_fixa, ifood_sync_cardapio, ifood_sync_preco_auto, ifood_sync_disponibilidade, ifood_sync_status_pedido, ifood_pausar_sem_estoque, ifood_confirmar_automatico')
       .eq('id', lojaId)
       .single();
     if (data) {
@@ -53,6 +65,12 @@ export default function Ifood() {
         ifood_addon_ativo: data.ifood_addon_ativo ?? false,
         ifood_taxa_pct: Number(data.ifood_taxa_pct ?? 0),
         ifood_taxa_fixa: Number(data.ifood_taxa_fixa ?? 0),
+        ifood_sync_cardapio: data.ifood_sync_cardapio ?? false,
+        ifood_sync_preco_auto: data.ifood_sync_preco_auto ?? false,
+        ifood_sync_disponibilidade: data.ifood_sync_disponibilidade ?? false,
+        ifood_sync_status_pedido: data.ifood_sync_status_pedido ?? false,
+        ifood_pausar_sem_estoque: data.ifood_pausar_sem_estoque ?? false,
+        ifood_confirmar_automatico: data.ifood_confirmar_automatico ?? true,
       });
     }
     setCarregando(false);
@@ -63,6 +81,18 @@ export default function Ifood() {
   // Adaptador para o IfoodOnboarding (componente compartilhado com Configurações da Loja)
   const setValor = (campo: keyof LojaIfood, valor: any) =>
     setLoja((l) => ({ ...l, [campo]: valor }));
+
+  /** Preferencia salva no toque, sem botao: sao interruptores, nao formulario.
+   *  Estado otimista com rollback — se o banco recusar, a chave volta. */
+  const alternarPreferencia = async (campo: keyof LojaIfood, valor: boolean) => {
+    const anterior = loja[campo];
+    setLoja((l) => ({ ...l, [campo]: valor }));
+    const { error } = await supabase.from('lojas').update({ [campo]: valor }).eq('id', lojaId);
+    if (error) {
+      setLoja((l) => ({ ...l, [campo]: anterior }));
+      toast('Não deu para salvar: ' + error.message, 'erro');
+    }
+  };
 
   const salvarTaxas = async () => {
     setSalvandoTaxas(true);
@@ -158,7 +188,58 @@ export default function Ifood() {
             onSuccess={carregarLoja}
           />
           {conectado && (
-            <div className="mx-auto max-w-xl">
+            <div className="mx-auto max-w-xl space-y-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+              <div>
+                <p className="text-sm font-black text-gray-900 dark:text-white">O que o MiseOn controla no iFood</p>
+                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  Cada item é independente. Tudo começa desligado — nada é alterado no seu iFood sem você ligar aqui.
+                </p>
+              </div>
+
+              {([
+                ['ifood_addon_ativo', 'Integração ativa',
+                 'Interruptor geral. Desligado, nada é enviado nem recebido.'],
+                ['ifood_confirmar_automatico', 'Confirmar pedido automaticamente',
+                 'O iFood exige confirmação em até 8 minutos. Desligado, você confirma na mão e assume o prazo.'],
+                ['ifood_sync_status_pedido', 'Avançar o pedido no iFood',
+                 'Marcou "em preparo" ou despachou aqui? O cliente vê no app dele. Desligado, ele fica sem acompanhamento.'],
+                ['ifood_sync_cardapio', 'Enviar cardápio para o iFood',
+                 'Categorias e itens daqui passam a alimentar o cardápio de lá. Desligado, você mantém os dois na mão.'],
+                ['ifood_sync_preco_auto', 'Sincronizar preço',
+                 'Preço alterado aqui vai para o iFood. Muitos lojistas cobram mais lá por causa da comissão — nesse caso, deixe desligado.'],
+                ['ifood_sync_disponibilidade', 'Sincronizar disponibilidade',
+                 'Pausar um item aqui pausa lá também.'],
+                ['ifood_pausar_sem_estoque', 'Pausar quando o estoque acabar',
+                 'Insumo zerou na ficha técnica? O item sai do ar no iFood sozinho, antes de alguém pedir o que não tem.'],
+              ] as [keyof LojaIfood, string, string][]).map(([campo, titulo, ajuda]) => {
+                const ligado = !!loja[campo];
+                const bloqueado = campo !== 'ifood_addon_ativo' && !loja.ifood_addon_ativo;
+                return (
+                  <button
+                    key={campo}
+                    onClick={() => !bloqueado && alternarPreferencia(campo, !ligado)}
+                    disabled={bloqueado}
+                    className={`flex w-full items-start justify-between gap-3 rounded-xl border p-3 text-left transition ${
+                      bloqueado
+                        ? 'cursor-not-allowed border-gray-200 opacity-45 dark:border-gray-800'
+                        : ligado
+                        ? 'border-red-500 bg-red-50 dark:border-red-500/40 dark:bg-red-500/10'
+                        : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50'
+                    }`}
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-sm font-bold text-gray-900 dark:text-gray-100">{titulo}</span>
+                      <span className="mt-0.5 block text-[11px] leading-snug text-gray-500 dark:text-gray-400">{ajuda}</span>
+                    </span>
+                    <span className={`mt-0.5 flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors ${
+                      ligado ? 'bg-red-600' : 'bg-gray-300 dark:bg-gray-600'
+                    }`}>
+                      <span className={`h-5 w-5 rounded-full bg-white shadow transition-transform ${ligado ? 'translate-x-5' : ''}`} />
+                    </span>
+                  </button>
+                );
+              })}
+
               <button
                 onClick={salvarTaxas}
                 disabled={salvandoTaxas}
