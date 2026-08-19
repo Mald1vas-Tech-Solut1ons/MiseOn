@@ -99,6 +99,7 @@ const Churn            = lazy(() => import('./pages/superadmin/Churn'));
 const Auditoria        = lazy(() => import('./pages/superadmin/Auditoria'));
 const FiscalPlataforma = lazy(() => import('./pages/superadmin/FiscalPlataforma'));
 const WhatsAppPlataforma = lazy(() => import('./pages/superadmin/WhatsAppPlataforma'));
+const SuperErros       = lazy(() => import('./pages/superadmin/Erros'));
 
 import { BrandLoader } from './components/BrandLoader';
 import { I18nProvider } from './contexts/I18nContext';
@@ -145,6 +146,11 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
 
 
 import CookieBanner from './components/CookieBanner';
+import { instalarMonitorDeErros } from './lib/monitorErros';
+
+// Antes de montar a arvore: erro que estoura no proprio render inicial
+// tambem precisa ser capturado.
+instalarMonitorDeErros();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -197,6 +203,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <Route path="auditoria"  element={<Auditoria />} />
                 <Route path="fiscal"     element={<FiscalPlataforma />} />
                 <Route path="whatsapp"   element={<WhatsAppPlataforma />} />
+                <Route path="erros"      element={<SuperErros />} />
               </Route>
 
               {/* ── Entregador ── */}

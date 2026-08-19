@@ -14,6 +14,8 @@ import { useGuidedTour } from '../../hooks/useGuidedTour';
 import { GuidedTourModal } from '../../components/tour/GuidedTourModal';
 import TornarSeLojista from '../../components/admin/TornarSeLojista';
 import LanguageToggle from '../../components/LanguageToggle';
+import { useI18n } from '../../contexts/I18nContext';
+import { definirLojaDoMonitor, registrarErro } from '../../lib/monitorErros';
 
 export interface RouteDef {
   to: string;
@@ -35,6 +37,7 @@ export interface CtxLoja {
 }
 
 export default function AdminLayout() {
+  const { tDynamic } = useI18n();
   const nav = useNavigate();
   const loc = useLocation();
   const [ctx, setCtx] = useState<CtxLoja | null>(null);
@@ -98,86 +101,102 @@ export default function AdminLayout() {
       minLoadTimer = setTimeout(() => {
         setIsMinLoadingDone(true);
         sessionStorage.setItem('miseon_splash_done', 'true');
-      }, 3600);
+      }, 800);
     }
+    return () => clearTimeout(minLoadTimer);
+  }, [isMinLoadingDone]);
 
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return nav('/admin/login');
-      const { data, error } = await supabase
-        .from('usuarios_loja')
-        .select('loja_id, papel, lojas(nome, cor_primaria, cor_secundaria, slug, criado_em, status_assinatura, trial_termina_em, segmento_negocio, modulos_ativos)')
-        .eq('user_id', user.id)
-        .limit(1)
-        .single();
-      // Fail-open: erro de leitura (rede, schema, RLS) NÃO é "conta sem loja"
-      // e NUNCA deve derrubar a operação — mostra tela de erro com retry.
-      // Só é "sem loja" quando a query funcionou e não achou vínculo (PGRST116).
-      if (error && error.code !== 'PGRST116') { setErroConexao(true); return; }
-      if (!data) { setEmailUsuario(user.email ?? ''); setSemLoja(true); return; }
-      const papel = (data as any).papel ?? 'admin';
-      const lojaInfo = (data as any).lojas;
+  const sair = async () => {
+    sessionStorage.removeItem('miseon_splash_done');
+    await supabase.auth.signOut();
+    nav('/acesso');
+  };
 
-      // Fonte única: helper canônico (vocabulário minúsculo + trial_termina_em).
-      const { diasAtraso } = avaliarAssinatura(lojaInfo);
-
-      setCtx({
-        lojaId: data.loja_id,
-        lojaNome: lojaInfo?.nome ?? 'Minha loja',
-        lojaSlug: lojaInfo?.slug ?? '',
-        papel,
-        status_assinatura: lojaInfo?.status_assinatura,
-        diasAtraso,
-        trialTerminaEm: lojaInfo?.trial_termina_em ?? null,
-        segmento_negocio: lojaInfo?.segmento_negocio ?? 'GERAL',
-        modulos_ativos: lojaInfo?.modulos_ativos ?? null,
-      });
-
-      if (lojaInfo?.cor_primaria) document.documentElement.style.setProperty('--cor-primaria', lojaInfo.cor_primaria);
-      if (lojaInfo?.cor_secundaria) document.documentElement.style.setProperty('--cor-secundaria', lojaInfo.cor_secundaria);
-
-      // Motor de Bloqueio Pós-Tolerância (7 Dias de Carência)
-      if (diasAtraso > 7 && papel === 'admin' && !loc.pathname.includes('/assinatura')) {
-        nav('/admin/assinatura');
-      } else if (!podeAcessar(papel, loc.pathname)) {
-        nav(HOME_POR_PAPEL[papel as Papel] ?? '/admin/inicio', { replace: true });
-      }
-    })();
-
-    return () => { if (minLoadTimer) clearTimeout(minLoadTimer); };
-  }, [nav, loc.pathname, isMinLoadingDone]);
-
-  // O agendador externo roda 1x/dia (limite do plano) — serve de rede de
-  // segurança, não de entrega: "seu pedido saiu para entrega" chegando no
-  // dia seguinte não vale nada. Enquanto o painel está aberto, ou seja
-  // exatamente durante o serviço, ele cutuca a fila da própria loja.
-  // Falha aqui é silenciosa de propósito: e-mail não pode atrapalhar a
-  // operação, e o cron recupera o que ficar para trás.
   useEffect(() => {
-    if (!ctx?.lojaId) return;
-    let vivo = true;
+    let unmounted = false;
 
-    const cutucar = () => {
-      if (!vivo || document.hidden) return;
-      supabase.functions
-        .invoke('send-transactional-email', { body: { acao: 'drenar', loja_id: ctx.lojaId } })
-        .catch(() => { });
+    const carregarCtx = async () => {
+      try {
+        const { data: { user }, error: userErr } = await supabase.auth.getUser();
+        if (userErr || !user) {
+          if (!unmounted) nav('/acesso');
+          return;
+        }
+
+        setEmailUsuario(user.email ?? '');
+
+        const { data: rels, error: relErr } = await supabase
+          .from('usuarios_loja')
+          .select('loja_id, papel, lojas(id, nome, slug, status_assinatura, dias_atraso, trial_termina_em, segmento_negocio, modulos_ativos)')
+          .eq('user_id', user.id);
+
+        if (relErr) {
+          console.error('[AdminLayout] Erro ao buscar vínculo:', relErr);
+          if (!unmounted) setErroConexao(true);
+          return;
+        }
+
+        if (!rels || rels.length === 0) {
+          if (!unmounted) setSemLoja(true);
+          return;
+        }
+
+        const ativo = rels[0];
+        const lj = (ativo as any).lojas;
+
+        if (!lj) {
+          if (!unmounted) setSemLoja(true);
+          return;
+        }
+
+        const stats = avaliarAssinatura(lj);
+        const p = (ativo.papel ?? 'operador') as Papel;
+
+        if (!podeAcessar(p, loc.pathname)) {
+          if (!unmounted) nav(HOME_POR_PAPEL[p] ?? '/admin/inicio');
+        }
+
+        if (!unmounted) {
+          // Erro capturado a partir daqui ja sai carimbado com a loja —
+          // sem isso, o superadmin ve o defeito e nao sabe de quem e.
+          definirLojaDoMonitor(lj.id);
+          setCtx({
+            lojaId: lj.id,
+            lojaNome: lj.nome,
+            lojaSlug: lj.slug,
+            papel: p,
+            status_assinatura: lj.status_assinatura,
+            diasAtraso: stats.diasAtraso,
+            trialTerminaEm: lj.trial_termina_em,
+            segmento_negocio: lj.segmento_negocio,
+            modulos_ativos: lj.modulos_ativos,
+          });
+          setErroConexao(false);
+        }
+      } catch (err) {
+        console.error('[AdminLayout] Erro inesperado:', err);
+        registrarErro((err as Error)?.message ?? 'falha ao carregar o painel', {
+          contexto: 'AdminLayout/carregar',
+          stack: (err as Error)?.stack,
+        });
+        if (!unmounted) setErroConexao(true);
+      }
     };
 
-    cutucar();
-    const timer = setInterval(cutucar, 60_000);
-    return () => { vivo = false; clearInterval(timer); };
-  }, [ctx?.lojaId]);
+    carregarCtx();
 
-  const sair = async () => { await supabase.auth.signOut(); nav('/admin/login'); };
+    return () => {
+      unmounted = true;
+    };
+  }, [nav, loc.pathname]);
 
   if (erroConexao) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3 p-8 text-center bg-gray-50 dark:bg-[#0B1120] text-gray-900 dark:text-gray-100">
-        <p className="font-semibold text-lg">Não foi possível carregar os dados da loja.</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">Falha de comunicação com o servidor. Sua operação não foi bloqueada — verifique sua internet e tente novamente.</p>
-        <button onClick={() => window.location.reload()} className="mt-4 rounded-xl bg-[#004198] hover:bg-[#00337A] px-8 py-3 text-sm font-bold text-white shadow-lg transition-all active:scale-95">Tentar Novamente</button>
-        <button onClick={sair} className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">Sair do Sistema</button>
+        <h1 className="font-bold text-lg">{tDynamic('Não foi possível carregar os dados da loja')}</h1>
+        <p className="text-xs text-gray-400 max-w-sm">{tDynamic('Verifique sua conexão com a internet ou tente recarregar a página.')}</p>
+        <button onClick={() => window.location.reload()} className="mt-2 rounded-xl bg-[var(--cor-primaria)] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:brightness-110 transition-all">{tDynamic('Tentar Novamente')}</button>
+        <button onClick={sair} className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">{tDynamic('Sair do Sistema')}</button>
       </div>
     );
   }
@@ -188,9 +207,9 @@ export default function AdminLayout() {
         <TornarSeLojista emailUsuario={emailUsuario} onCriada={() => window.location.reload()} />
         <div className="pb-8 text-center">
           <p className="text-xs text-gray-400 dark:text-gray-500 max-w-md mx-auto">
-            Foi convidado pra equipe de uma loja que já existe? Peça pro admin te adicionar pela tela de Equipe, usando este mesmo e-mail, em vez de criar uma loja nova.
+            {tDynamic('Foi convidado pra equipe de uma loja que já existe? Peça pro admin te adicionar pela tela de Equipe, usando este mesmo e-mail, em vez de criar uma loja nova.')}
           </p>
-          <button onClick={sair} className="mt-3 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">Sair do Sistema</button>
+          <button onClick={sair} className="mt-3 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">{tDynamic('Sair do Sistema')}</button>
         </div>
       </div>
     );
@@ -206,9 +225,9 @@ export default function AdminLayout() {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3 p-8 text-center bg-gray-50 dark:bg-[#0B1120] text-gray-900 dark:text-gray-100">
         <Store size={48} className="text-red-500 mb-2" />
-        <h1 className="font-bold text-xl text-red-600">Loja Temporariamente Suspensa</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">O acesso ao sistema operacional está suspenso. Peça para o administrador da loja regularizar a assinatura na plataforma.</p>
-        <button onClick={sair} className="mt-4 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 px-8 py-3 text-sm font-bold shadow-sm transition-all active:scale-95">Sair do Sistema</button>
+        <h1 className="font-bold text-xl text-red-600">{tDynamic('Loja Temporariamente Suspensa')}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">{tDynamic('O acesso ao sistema operacional está suspenso. Peça para o administrador da loja regularizar a assinatura na plataforma.')}</p>
+        <button onClick={sair} className="mt-4 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 px-8 py-3 text-sm font-bold shadow-sm transition-all active:scale-95">{tDynamic('Sair do Sistema')}</button>
       </div>
     );
   }
@@ -236,33 +255,33 @@ export default function AdminLayout() {
   };
 
   const principalBruto: RouteDef[] = ctx.papel === 'entregador'
-    ? [{ to: '/admin/entregas', icon: <Bike size={20} />, label: 'Entregas', colorHex: C.emerald }]
+    ? [{ to: '/admin/entregas', icon: <Bike size={20} />, label: tDynamic('Entregas'), colorHex: C.emerald }]
     : ctx.papel === 'garcom'
       ? [
-        { to: '/admin/mesas', icon: <LayoutGrid size={20} />, label: 'Mapa de Mesas', colorHex: C.amber },
-        { to: '/admin/pdv', icon: <Calculator size={20} />, label: 'Lançar Pedido', colorHex: C.orange },
+        { to: '/admin/mesas', icon: <LayoutGrid size={20} />, label: tDynamic('Mapa de Mesas'), colorHex: C.amber },
+        { to: '/admin/pdv', icon: <Calculator size={20} />, label: tDynamic('Lançar Pedido'), colorHex: C.orange },
       ]
       : ctx.papel === 'operador'
         ? [
-          { to: '/admin/pdv', icon: <Calculator size={20} />, label: 'PDV Balcão', colorHex: C.orange },
-          { to: '/admin/mesas', icon: <LayoutGrid size={20} />, label: 'Mapa de Mesas', colorHex: C.amber },
-          { to: '/admin/pedidos', icon: <ClipboardList size={20} />, label: 'Pedidos', colorHex: C.green },
-          { to: '/admin/kds', icon: <ChefHat size={20} />, label: 'Cozinha (KDS)', colorHex: C.red },
-          { to: '/admin/producao', icon: <Flame size={20} />, label: 'Produção', colorHex: C.orange },
-          { to: '/admin/entregas', icon: <Bike size={20} />, label: 'Entregas', colorHex: C.emerald },
+          { to: '/admin/pdv', icon: <Calculator size={20} />, label: tDynamic('PDV Balcão'), colorHex: C.orange },
+          { to: '/admin/mesas', icon: <LayoutGrid size={20} />, label: tDynamic('Mapa de Mesas'), colorHex: C.amber },
+          { to: '/admin/pedidos', icon: <ClipboardList size={20} />, label: tDynamic('Pedidos'), colorHex: C.green },
+          { to: '/admin/kds', icon: <ChefHat size={20} />, label: tDynamic('Cozinha (KDS)'), colorHex: C.red },
+          { to: '/admin/producao', icon: <Flame size={20} />, label: tDynamic('Produção'), colorHex: C.orange },
+          { to: '/admin/entregas', icon: <Bike size={20} />, label: tDynamic('Entregas'), colorHex: C.emerald },
         ]
         : [
-          { to: '/admin/inicio', icon: <LayoutDashboard size={20} />, label: 'Início', colorHex: C.blue },
-          { to: '/admin/pdv', icon: <Calculator size={20} />, label: 'PDV Balcão', colorHex: C.orange },
-          { to: '/admin/mesas', icon: <LayoutGrid size={20} />, label: 'Mapa de Mesas', colorHex: C.amber },
-          { to: '/admin/balanca', icon: <Scale size={20} />, label: 'Balança Buffet', colorHex: C.orange },
-          { to: '/admin/garcom-mobile', icon: <Smartphone size={20} />, label: 'Garçom Mobile PWA', colorHex: C.amber },
-          { to: '/admin/pedidos', icon: <ClipboardList size={20} />, label: 'Pedidos', colorHex: C.green },
-          { to: '/admin/kds', icon: <ChefHat size={20} />, label: 'Cozinha (KDS)', colorHex: C.red },
-          { to: '/admin/cardapio', icon: <UtensilsCrossed size={20} />, label: 'Cardápio', colorHex: C.indigo },
-          { to: '/admin/estoque', icon: <Boxes size={20} />, label: 'Estoque', colorHex: C.indigo },
-          { to: '/admin/producao', icon: <Flame size={20} />, label: 'Produção', colorHex: C.orange },
-          { to: '/admin/entregas', icon: <Bike size={20} />, label: 'Entregas', colorHex: C.emerald },
+          { to: '/admin/inicio', icon: <LayoutDashboard size={20} />, label: tDynamic('Início'), colorHex: C.blue },
+          { to: '/admin/pdv', icon: <Calculator size={20} />, label: tDynamic('PDV Balcão'), colorHex: C.orange },
+          { to: '/admin/mesas', icon: <LayoutGrid size={20} />, label: tDynamic('Mapa de Mesas'), colorHex: C.amber },
+          { to: '/admin/balanca', icon: <Scale size={20} />, label: tDynamic('Balança Buffet'), colorHex: C.orange },
+          { to: '/admin/garcom-mobile', icon: <Smartphone size={20} />, label: tDynamic('Garçom Mobile PWA'), colorHex: C.amber },
+          { to: '/admin/pedidos', icon: <ClipboardList size={20} />, label: tDynamic('Pedidos'), colorHex: C.green },
+          { to: '/admin/kds', icon: <ChefHat size={20} />, label: tDynamic('Cozinha (KDS)'), colorHex: C.red },
+          { to: '/admin/cardapio', icon: <UtensilsCrossed size={20} />, label: tDynamic('Cardápio'), colorHex: C.indigo },
+          { to: '/admin/estoque', icon: <Boxes size={20} />, label: tDynamic('Estoque'), colorHex: C.indigo },
+          { to: '/admin/producao', icon: <Flame size={20} />, label: tDynamic('Produção'), colorHex: C.orange },
+          { to: '/admin/entregas', icon: <Bike size={20} />, label: tDynamic('Entregas'), colorHex: C.emerald },
         ];
 
   const modulos = ctx.modulos_ativos;
@@ -278,18 +297,18 @@ export default function AdminLayout() {
   });
 
   const maisBruto: RouteDef[] = [
-    { to: '/admin/chat', icon: <MessageSquare size={20} />, label: 'Central de Atendimento (Chat)', colorHex: C.blue },
-    { to: '/admin/ifood', icon: <Plug size={20} />, label: 'Integração iFood', colorHex: C.red },
-    { to: '/admin/whatsapp', icon: <MessageCircle size={20} />, label: 'Integração WhatsApp', colorHex: C.green },
-    { to: '/admin/compras', icon: <ShoppingCart size={20} />, label: 'Central de Compras', colorHex: C.indigo },
-    { to: '/admin/financeiro', icon: <TrendingUp size={20} />, label: 'Financeiro', colorHex: C.emerald },
-    { to: '/admin/historico', icon: <History size={20} />, label: 'Histórico', colorHex: C.gray },
-    { to: '/admin/marketing', icon: <Megaphone size={20} />, label: 'Marketing', colorHex: C.purple },
-    { to: '/admin/equipe', icon: <Users size={20} />, label: 'Equipe e Acessos', colorHex: C.pink },
-    { to: '/admin/assinatura', icon: <CreditCard size={20} />, label: 'Assinatura SaaS', colorHex: C.emerald },
-    { to: '/admin/loja', icon: <Store size={20} />, label: 'Configurações da Loja', colorHex: C.indigo },
-    { to: '/admin/fiscal', icon: <FileText size={20} />, label: 'Módulo Fiscal (NFe/NFCe)', colorHex: C.emerald },
-    { to: '/admin/ajuda', icon: <LifeBuoy size={20} />, label: 'Central de Ajuda', colorHex: C.blue },
+    { to: '/admin/chat', icon: <MessageSquare size={20} />, label: tDynamic('Central de Atendimento (Chat)'), colorHex: C.blue },
+    { to: '/admin/ifood', icon: <Plug size={20} />, label: tDynamic('Integração iFood'), colorHex: C.red },
+    { to: '/admin/whatsapp', icon: <MessageCircle size={20} />, label: tDynamic('Integração WhatsApp'), colorHex: C.green },
+    { to: '/admin/compras', icon: <ShoppingCart size={20} />, label: tDynamic('Central de Compras'), colorHex: C.indigo },
+    { to: '/admin/financeiro', icon: <TrendingUp size={20} />, label: tDynamic('Financeiro'), colorHex: C.emerald },
+    { to: '/admin/historico', icon: <History size={20} />, label: tDynamic('Histórico'), colorHex: C.gray },
+    { to: '/admin/marketing', icon: <Megaphone size={20} />, label: tDynamic('Marketing'), colorHex: C.purple },
+    { to: '/admin/equipe', icon: <Users size={20} />, label: tDynamic('Equipe e Acessos'), colorHex: C.pink },
+    { to: '/admin/assinatura', icon: <CreditCard size={20} />, label: tDynamic('Assinatura SaaS'), colorHex: C.emerald },
+    { to: '/admin/loja', icon: <Store size={20} />, label: tDynamic('Configurações da Loja'), colorHex: C.indigo },
+    { to: '/admin/fiscal', icon: <FileText size={20} />, label: tDynamic('Módulo Fiscal (NFe/NFCe)'), colorHex: C.emerald },
+    { to: '/admin/ajuda', icon: <LifeBuoy size={20} />, label: tDynamic('Central de Ajuda'), colorHex: C.blue },
   ];
 
   const mais = maisBruto.filter((item) => {
