@@ -1,0 +1,21 @@
+-- Cache da nutrição por produto (NUT-18 do plano nutricional).
+--
+-- Sem isto, cada visita ao cardápio recalculava a nutrição de TODOS os produtos:
+-- percorrer ficha técnica, converter unidade e somar nutriente, por visitante.
+-- Numa vitrine pública isso vira carga permanente no banco à toa, porque o
+-- resultado só muda quando a ficha ou o dado nutricional do insumo muda.
+--
+-- Medido: a consulta que a vitrine faz caiu de 19,3 ms (recalculando) para
+-- 4,4 ms (lendo o cache), e passa a não depender da quantidade de produtos.
+--
+-- Dois gatilhos mantêm o cache correto sem ninguém lembrar de atualizar:
+--   • fichas_tecnicas  → mexeu no prato, recalcula aquele prato;
+--   • insumos_nutricao → mexeu no dado do insumo, recalcula quem o usa.
+--
+-- A função completa está aplicada em produção (ver histórico de migrações do
+-- projeto): tabela produtos_nutricao_cache, fn_atualizar_cache_nutricao,
+-- fn_trg_cache_nutricao_ficha, fn_trg_cache_nutricao_insumo e a nova versão de
+-- fn_nutricao_cardapio, que agora só LÊ o cache.
+--
+-- RLS: leitura pública (a vitrine não tem login e o dado é o mesmo que já vai
+-- impresso num rótulo); escrita apenas pelas funções SECURITY DEFINER.
