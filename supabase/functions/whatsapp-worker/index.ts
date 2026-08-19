@@ -102,6 +102,20 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+  // ── AUTORIZACAO ────────────────────────────────────────────────────────
+  // Esta funcao drena a fila do WhatsApp: chama a IA (custo de inferencia no
+  // Groq) e o envio pela Graph API. Estava aberta — respondia
+  // {"ok":true,"processados":0} para qualquer POST sem credencial. Com um
+  // loja_id no corpo, um terceiro forcava a drenagem da fila de uma loja
+  // especifica em laco, queimando cota e reprocessando evento.
+  //
+  // Chamadores legitimos: whatsapp-webhook (service role) e o pg_cron de
+  // varredura. Nenhum humano chama isto pelo browser.
+  const bearer = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+  if (bearer !== supabaseServiceKey) {
+    return json({ error: "Nao autorizado" }, 401);
+  }
+
   let lojaFiltro: string | null = null;
   try {
     const body = await req.json();

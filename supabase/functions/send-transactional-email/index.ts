@@ -48,6 +48,11 @@ const REMETENTE_NOME = Deno.env.get('EMAIL_FROM_NAME') ?? 'MiseOn';
 // estrago é disparar e-mails já aprovados — a service role key daria o
 // banco inteiro. Por isso o agendador não conhece a service key.
 const EMAIL_WORKER_TOKEN = Deno.env.get('EMAIL_WORKER_TOKEN');
+// Segundo token, de mesmo privilegio, usado pelo drenador que roda DENTRO
+// do banco (pg_cron + pg_net). Existe separado para nao ser preciso copiar
+// o token do Vercel para o Vault: cada agendador tem o seu, e revogar um
+// nao derruba o outro. Nenhum dos dois e a service role key.
+const EMAIL_WORKER_TOKEN_DB = Deno.env.get('EMAIL_WORKER_TOKEN_DB');
 
 /** Comparação em tempo constante: não revela o segredo pelo tempo de resposta. */
 function tokenConfere(recebido: string | null, esperado: string) {
@@ -285,10 +290,14 @@ Deno.serve(async (req) => {
       // Token ausente na configuração e token errado respondem igual:
       // a diferença revelaria o estado do serviço a quem sonda de fora.
       // O motivo real fica só no log.
-      if (!EMAIL_WORKER_TOKEN) {
-        console.error('EMAIL_WORKER_TOKEN não definido — drenagem desabilitada.');
+      if (!EMAIL_WORKER_TOKEN && !EMAIL_WORKER_TOKEN_DB) {
+        console.error('Nenhum token de worker definido — drenagem desabilitada.');
       }
-      if (!EMAIL_WORKER_TOKEN || !tokenConfere(req.headers.get('x-worker-token'), EMAIL_WORKER_TOKEN)) {
+      const recebido = req.headers.get('x-worker-token');
+      const aceito =
+        (!!EMAIL_WORKER_TOKEN && tokenConfere(recebido, EMAIL_WORKER_TOKEN)) ||
+        (!!EMAIL_WORKER_TOKEN_DB && tokenConfere(recebido, EMAIL_WORKER_TOKEN_DB));
+      if (!aceito) {
         return json({ error: 'Não autorizado' }, 401);
       }
     }

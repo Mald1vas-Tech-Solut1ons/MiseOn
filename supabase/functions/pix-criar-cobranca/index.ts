@@ -10,6 +10,10 @@
 // A confirmação chega via pix-webhook.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+// Rate limit compartilhado. Já existiu aqui uma cópia local com o MESMO nome
+// mais um import lá embaixo: a função local vencia, devolvia boolean, e o
+// `rl.allowed` dava undefined — 429 em 100% das cobranças. Uma declaração só.
+import { checkRateLimit } from '../_shared/rate-limit.ts';
 
 const EFI_URL = Deno.env.get('EFI_SANDBOX') === 'true'
   ? 'https://pix-h.api.efipay.com.br'
@@ -79,28 +83,6 @@ async function getToken(creds: EfiCreds): Promise<string> {
   return data.access_token;
 }
 
-// Rate limiting map (persiste na mesma instância/isolate do Edge Function)
-const rateLimit = new Map<string, { count: number; resetAt: number }>();
-const MAX_REQ_PER_SEC = 6;
-const WINDOW_MS = 1000;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const state = rateLimit.get(ip) ?? { count: 0, resetAt: now + WINDOW_MS };
-  
-  if (now > state.resetAt) {
-    state.count = 1;
-    state.resetAt = now + WINDOW_MS;
-  } else {
-    state.count++;
-  }
-  
-  rateLimit.set(ip, state);
-  return state.count <= MAX_REQ_PER_SEC;
-}
-
-import { checkRateLimit } from '../_shared/rate-limit.ts';
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   
@@ -123,7 +105,7 @@ Deno.serve(async (req) => {
 
     const { data: pedido } = await supabase
       .from('pedidos')
-      .select('id, numero, valor_total, identificador_cliente, cliente_id, loja_id, status, lojas(nome, efi_titular_documento, efi_conta)')
+      .select('id, numero, valor_total, identificador_cliente, cliente_id, cliente_user_id, loja_id, status, lojas(nome, efi_titular_documento, efi_conta)')
       .eq('id', pedido_id)
       .single();
     if (!pedido) return json({ error: 'pedido não encontrado' }, { status: 404 });
@@ -140,8 +122,14 @@ Deno.serve(async (req) => {
       });
       const { data: { user: authUser } } = await userClient.auth.getUser();
       if (authUser && authUser.role !== 'anon') {
-        // Usuário logado: deve ser dono do pedido (cliente_id) ou ter acesso à loja
-        const isClienteDono = pedido.cliente_id && pedido.cliente_id === authUser.id;
+        // Usuário logado: dono do pedido ou operador/admin da loja.
+        //
+        // O campo é `cliente_user_id` (FK para auth.users). Aqui comparava-se
+        // `cliente_id`, que é o id da linha em `clientes` — outro espaço de
+        // ids, nunca igual ao do usuário autenticado. Resultado: TODO cliente
+        // logado caía no 403 e não conseguia pagar por Pix. Só passava quem
+        // por acaso também era da equipe da loja.
+        const isClienteDono = !!pedido.cliente_user_id && pedido.cliente_user_id === authUser.id;
         if (!isClienteDono) {
           const { data: vinculo } = await supabase
             .from('usuarios_loja')

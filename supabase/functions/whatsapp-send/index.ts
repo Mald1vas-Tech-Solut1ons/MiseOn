@@ -50,6 +50,36 @@ serve(async (req) => {
       return json({ error: "texto ou template é obrigatório" }, 400);
     }
 
+    // ── AUTORIZAÇÃO ────────────────────────────────────────────────────────
+    // Esta função dispara mensagem pelo número VERIFICADO do lojista. Ficou um
+    // tempo sem checagem nenhuma (verify_jwt=false + nenhuma validação no
+    // corpo) e, como `loja_id` é público via `lojas_publicas`, qualquer um na
+    // internet mandava WhatsApp em nome do restaurante — caminho curto para a
+    // Meta banir o número. Dois chamadores legítimos, e só eles:
+    //   1. service role  — chamada function-to-function (chat-ai-reception).
+    //   2. JWT de usuário — precisa ter vínculo com a loja (usuarios_loja).
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (!bearer) return json({ error: "Não autorizado" }, 401);
+
+    const ehServiceRole = bearer === supabaseServiceKey;
+
+    if (!ehServiceRole) {
+      const supabaseUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        global: { headers: { Authorization: `Bearer ${bearer}` } },
+      });
+      const { data: { user } } = await supabaseUser.auth.getUser();
+      if (!user) return json({ error: "Não autorizado" }, 401);
+
+      const { data: vinculo } = await supabase
+        .from("usuarios_loja")
+        .select("papel")
+        .eq("user_id", user.id)
+        .eq("loja_id", loja_id)
+        .maybeSingle();
+      if (!vinculo) return json({ error: "Sem acesso a esta loja" }, 403);
+    }
+
     // Marca a conexão como ERRO com a causa legível — a tela Integração
     // WhatsApp lê status + ultimo_erro e mostra o semáforo vermelho.
     const marcarErro = async (motivo: string) => {
@@ -71,7 +101,9 @@ serve(async (req) => {
       return json({ error: "WhatsApp não conectado nesta loja" }, 400);
     }
 
-    const tokenFinal = (access_token && String(access_token).trim() !== "")
+    // O override de token só vale para chamada interna (service role). Vindo do
+    // browser seria um jeito de usar esta função como proxy de envio arbitrário.
+    const tokenFinal = (ehServiceRole && access_token && String(access_token).trim() !== "")
       ? String(access_token).trim()
       : conexao.access_token;
 

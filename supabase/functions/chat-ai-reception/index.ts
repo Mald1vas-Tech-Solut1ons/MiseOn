@@ -1,6 +1,7 @@
 // chat-ai-reception — IA de atendimento consultiva e humanizada WhatsApp/Site do MiseOn
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -74,6 +75,18 @@ serve(async (req) => {
   const supabaseUrl  = Deno.env.get("SUPABASE_URL")!;
   const serviceKey   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const groqKey      = Deno.env.get("GROQ_API_KEY");
+
+  // Rate limit por IP. Esta função é aberta de propósito (chat da vitrine é
+  // anônimo) e cada chamada custa uma inferência no Groq — sem freio, um
+  // script simples torra a cota e a fatura de IA. A chamada interna do
+  // whatsapp-worker vem com service role e passa sem limite.
+  const ehChamadaInterna =
+    (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim() === serviceKey;
+  if (!ehChamadaInterna) {
+    const ip = req.headers.get("x-forwarded-for") ?? "desconhecido";
+    const rl = checkRateLimit(`chat-ia:${ip}`, { windowMs: 60_000, maxRequests: 20 });
+    if (!rl.allowed) return erro("Muitas mensagens em sequência. Aguarde um instante.", 429);
+  }
 
   if (!groqKey) {
     console.error("GROQ_API_KEY ausente");

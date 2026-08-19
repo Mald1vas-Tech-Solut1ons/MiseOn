@@ -92,6 +92,32 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
+    // ── AUTORIZAÇÃO ────────────────────────────────────────────────────────
+    // Esta função ativa a assinatura da loja e emite fatura + NFS-e. Aceitava
+    // `loja_id` do corpo sem verificar quem chamava — qualquer um ativava (ou
+    // mexia na cobrança de) uma loja alheia. Só admin da própria loja passa.
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const bearer = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!bearer) return json({ error: 'Não autorizado' }, { status: 401 });
+
+    const supabaseUser = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: `Bearer ${bearer}` } } },
+    );
+    const { data: { user: usuario } } = await supabaseUser.auth.getUser();
+    if (!usuario) return json({ error: 'Não autorizado' }, { status: 401 });
+
+    const { data: vinculo } = await supabase
+      .from('usuarios_loja')
+      .select('papel')
+      .eq('user_id', usuario.id)
+      .eq('loja_id', loja_id)
+      .maybeSingle();
+    if (vinculo?.papel !== 'admin') {
+      return json({ error: 'Só o administrador da loja pode assinar.' }, { status: 403 });
+    }
+
     // Endereço do tomador (cadastro do onboarding) — a Efí exige endereço de
     // cobrança no fluxo de cobrança única (one-step); a assinatura recorrente
     // não exige, mas usamos o mesmo dado pra manter a fatura consistente.
@@ -199,8 +225,18 @@ Deno.serve(async (req) => {
       chargeIdReal = `sub-${subscriptionId}-${Date.now()}`;
     }
 
-    // Atualiza o banco de dados da loja
-    const novoVencimento = new Date();
+    // Atualiza o banco de dados da loja.
+    // Renovação ESTENDE o vencimento a partir da data atual quando ela ainda
+    // está no futuro — antes contava sempre a partir de hoje, então quem
+    // renovava adiantado perdia os dias que ainda tinha pagos.
+    const { data: lojaAtual } = await supabase
+      .from('lojas').select('trial_termina_em').eq('id', loja_id).maybeSingle();
+    const vencimentoVigente = lojaAtual?.trial_termina_em
+      ? new Date(lojaAtual.trial_termina_em)
+      : null;
+    const agora = new Date();
+    const base = vencimentoVigente && vencimentoVigente > agora ? vencimentoVigente : agora;
+    const novoVencimento = new Date(base);
     novoVencimento.setMonth(novoVencimento.getMonth() + (ehAnual ? 12 : 1));
 
     const { error: updErr } = await supabase.from('lojas').update({
