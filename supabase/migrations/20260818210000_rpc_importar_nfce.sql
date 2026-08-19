@@ -9,7 +9,8 @@ CREATE OR REPLACE FUNCTION public.fn_importar_nfce(
   p_loja_id UUID,
   p_chave TEXT,
   p_emitente TEXT,
-  p_itens JSONB
+  p_itens JSONB,
+  p_repetir BOOLEAN DEFAULT false
 ) RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER

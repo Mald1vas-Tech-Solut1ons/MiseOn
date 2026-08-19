@@ -40,6 +40,8 @@ interface DadosNotaNFCe {
 
 interface LinhaDePara {
   itemNota: ItemLidoNFCe;
+  /** Cupom de mercado mistura insumo com item pessoal. O lojista decide. */
+  importar: boolean;
   insumoId: string; // '' se novo insumo
   criarNovo: boolean;
   nomeNovoInsumo: string;
@@ -61,6 +63,9 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
   const [carregandoMatch, setCarregandoMatch] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  // Nota já lançada antes: só repete com confirmação explícita do lojista.
+  const [podeRepetir, setPodeRepetir] = useState(false);
+  const [repetirNota, setRepetirNota] = useState(false);
 
   // Mapa rápido de insumos existentes por ID
   const porId = useMemo(() => new Map(insumosExistentes.map(i => [i.id, i])), [insumosExistentes]);
@@ -93,6 +98,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
           const ins = porId.get(hist.insumo_id)!;
           return {
             itemNota: item,
+            importar: true,
             insumoId: hist.insumo_id,
             criarNovo: false,
             nomeNovoInsumo: item.descricao,
@@ -108,6 +114,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
           if (matchEan) {
             return {
               itemNota: item,
+              importar: true,
               insumoId: matchEan.id,
               criarNovo: false,
               nomeNovoInsumo: item.descricao,
@@ -128,6 +135,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         if (matchNome) {
           return {
             itemNota: item,
+            importar: true,
             insumoId: matchNome.id,
             criarNovo: false,
             nomeNovoInsumo: item.descricao,
@@ -140,6 +148,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         // 4. Se não achou nenhum match, sugere criar novo insumo
         return {
           itemNota: item,
+          importar: true,
           insumoId: '',
           criarNovo: true,
           nomeNovoInsumo: item.descricao,
@@ -155,6 +164,24 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
 
     executarAutoMatch();
   }, [lojaId, dadosNota, insumosExistentes, porId]);
+
+  const marcados = useMemo(() => linhas.filter((l) => l.importar), [linhas]);
+  const totalMarcado = useMemo(
+    () => marcados.reduce((acc, l) => acc + (Number(l.itemNota.valor_total) || 0), 0),
+    [marcados],
+  );
+  const contagem = useMemo(() => ({
+    alta: linhas.filter((l) => l.confiancaMatch === 'ALTA').length,
+    media: linhas.filter((l) => l.confiancaMatch === 'MEDIA').length,
+    novos: linhas.filter((l) => l.criarNovo).length,
+  }), [linhas]);
+
+  const marcarTodos = (valor: boolean) =>
+    setLinhas((prev) => prev.map((l) => ({ ...l, importar: valor })));
+
+  /** Atalho para quem só quer repor o que já controla, sem inflar o cadastro. */
+  const marcarSomenteConhecidos = () =>
+    setLinhas((prev) => prev.map((l) => ({ ...l, importar: !l.criarNovo })));
 
   const atualizarLinha = (index: number, patch: Partial<LinhaDePara>) => {
     setLinhas(prev => {
@@ -175,6 +202,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
       // realmente importa: somar em insumos.quantidade_atual — sem ele a nota
       // "importava" e o saldo continuava igual.
       const itens = linhas
+        .filter((l) => l.importar)
         .map((l) => {
           const insumoExistente = !l.criarNovo && l.insumoId ? l.insumoId : null;
           return {
@@ -193,7 +221,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         .filter((i) => i.qtd_nota * i.fator > 0);
 
       if (itens.length === 0) {
-        setErro('Nenhum item com quantidade válida para lançar.');
+        setErro('Nenhum item marcado para importar. Marque ao menos um item da nota.');
         return;
       }
 
@@ -202,15 +230,40 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         p_chave: dadosNota.chave || '',
         p_emitente: dadosNota.emitente?.razao_social || '',
         p_itens: itens,
+        p_repetir: repetirNota,
       });
 
       if (errImportar) throw errImportar;
 
-      const lancados = (resultado as { itens_lancados?: number } | null)?.itens_lancados ?? itens.length;
-      const criados = (resultado as { insumos_criados?: number } | null)?.insumos_criados ?? 0;
-      const avisoDepara = criados > 0 ? ` ${criados} insumo(s) criado(s).` : '';
+      const r = resultado as {
+        ja_importada?: boolean;
+        importado_em?: string;
+        itens_lancados?: number;
+        insumos_criados?: number;
+        insumos_reaproveitados?: number;
+      } | null;
 
-      onSucesso(`Importação concluída! ${lancados} itens lançados no estoque.${avisoDepara}`);
+      // Cupom já lançado antes: não duplica nada por conta própria. Duplicar
+      // estoque em silêncio estraga o CMV e ninguém percebe na hora.
+      if (r?.ja_importada) {
+        const quando = r.importado_em ? new Date(r.importado_em).toLocaleString('pt-BR') : 'antes';
+        setErro(
+          `Esta nota já foi importada em ${quando}. Nada foi lançado agora. ` +
+          'Se você realmente quer lançar de novo, marque "importar mesmo assim" abaixo.',
+        );
+        setPodeRepetir(true);
+        return;
+      }
+
+      const lancados = r?.itens_lancados ?? itens.length;
+      const criados = r?.insumos_criados ?? 0;
+      const reaproveitados = r?.insumos_reaproveitados ?? 0;
+      const detalhes = [
+        criados > 0 ? `${criados} insumo(s) novo(s)` : '',
+        reaproveitados > 0 ? `${reaproveitados} vinculado(s) a insumo já existente` : '',
+      ].filter(Boolean).join(', ');
+
+      onSucesso(`Importação concluída! ${lancados} itens lançados no estoque${detalhes ? ` — ${detalhes}` : ''}.`);
     } catch (e) {
       console.error(e);
       // Erro do Supabase é objeto simples, não Error: com `instanceof` a tela
@@ -263,9 +316,52 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
             </div>
           ) : (
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Itens Reconhecidos ({linhas.length})</p>
-                <p className="text-[11px] text-gray-400">Vincule os produtos da nota aos insumos da cozinha</p>
+              {/*
+                Barra de controle. Cupom de mercado vem com dezenas de linhas e
+                mistura insumo da cozinha com compra pessoal — revisar item a
+                item no celular é justamente o trabalho que a importação
+                deveria eliminar. Daqui o lojista resolve tudo em dois toques.
+              */}
+              <div className="mb-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/40 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-gray-600 dark:text-gray-300">
+                    {marcados.length} de {linhas.length} itens marcados
+                    <span className="ml-2 font-medium text-gray-400">·</span>
+                    <span className="ml-2 font-black text-emerald-600 dark:text-emerald-400">{fmt(totalMarcado)}</span>
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() => marcarTodos(true)}
+                      className="rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1 text-[11px] font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900"
+                    >
+                      Marcar todos
+                    </button>
+                    <button
+                      onClick={() => marcarTodos(false)}
+                      className="rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1 text-[11px] font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900"
+                    >
+                      Desmarcar todos
+                    </button>
+                    <button
+                      onClick={marcarSomenteConhecidos}
+                      title="Deixa marcados só os itens que já existem no seu estoque"
+                      className="rounded-lg border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                    >
+                      Só os já cadastrados
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500 dark:text-gray-400">
+                  <span><b className="text-emerald-600 dark:text-emerald-400">{contagem.alta}</b> reconhecidos automaticamente</span>
+                  <span><b className="text-amber-600 dark:text-amber-400">{contagem.media}</b> por sugestão de nome</span>
+                  <span><b className="text-blue-600 dark:text-blue-400">{contagem.novos}</b> vão virar insumo novo</span>
+                </div>
+                {totalMarcado < dadosNota.valor_total - 0.01 && (
+                  <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                    Desmarcado: {fmt(dadosNota.valor_total - totalMarcado)} — itens que não entram no estoque
+                    (compra pessoal, material de limpeza, o que você decidir).
+                  </p>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -292,15 +388,29 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                         
                         {/* Item da Nota */}
                         <div className="md:col-span-5">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            {l.confiancaMatch === 'ALTA' && <span className="rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black px-1.5 py-0.5">AUTO MATCH</span>}
-                            {l.confiancaMatch === 'MEDIA' && <span className="rounded-full bg-amber-100 text-amber-700 text-[9px] font-black px-1.5 py-0.5">SUGESTÃO</span>}
-                            {l.criarNovo && <span className="rounded-full bg-blue-100 text-blue-700 text-[9px] font-black px-1.5 py-0.5">+ NOVO INSUMO</span>}
+                          <div className="flex items-start gap-2.5">
+                            <input
+                              type="checkbox"
+                              checked={l.importar}
+                              onChange={e => atualizarLinha(i, { importar: e.target.checked })}
+                              aria-label={`Importar ${l.itemNota.descricao}`}
+                              className="mt-1 h-4 w-4 shrink-0 accent-emerald-600"
+                            />
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                                {l.confiancaMatch === 'ALTA' && <span className="rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black px-1.5 py-0.5">AUTO MATCH</span>}
+                                {l.confiancaMatch === 'MEDIA' && <span className="rounded-full bg-amber-100 text-amber-700 text-[9px] font-black px-1.5 py-0.5">SUGESTÃO</span>}
+                                {l.criarNovo && <span className="rounded-full bg-blue-100 text-blue-700 text-[9px] font-black px-1.5 py-0.5">+ NOVO INSUMO</span>}
+                                {!l.importar && <span className="rounded-full bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400 text-[9px] font-black px-1.5 py-0.5">FORA DA IMPORTAÇÃO</span>}
+                              </div>
+                              <p className={`font-bold text-sm ${l.importar ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 line-through dark:text-gray-600'}`}>
+                                {l.itemNota.descricao}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Nota: <b>{l.itemNota.qtd} {l.itemNota.unidade}</b> · Total: <b>{fmt(l.itemNota.valor_total)}</b>
+                              </p>
+                            </div>
                           </div>
-                          <p className="font-bold text-sm text-gray-900 dark:text-gray-100">{l.itemNota.descricao}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Nota: <b>{l.itemNota.qtd} {l.itemNota.unidade}</b> · Total: <b>{fmt(l.itemNota.valor_total)}</b>
-                          </p>
                         </div>
 
                         {/* Seta */}
@@ -401,18 +511,41 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         </div>
 
         {/* Rodapé com Ação */}
-        <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 p-4 bg-white dark:bg-gray-900 flex items-center justify-between">
-          <div>
-            <p className="text-[10px] uppercase font-bold text-gray-400">Total da Nota Importada</p>
-            <p className="text-xl font-black text-gray-900 dark:text-gray-100">{fmt(dadosNota.valor_total)}</p>
+        <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 p-4 bg-white dark:bg-gray-900">
+          {podeRepetir && (
+            <label className="mb-3 flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-[11px] text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
+              <input
+                type="checkbox"
+                checked={repetirNota}
+                onChange={e => setRepetirNota(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-amber-600"
+              />
+              <span>
+                <b>Importar mesmo assim.</b> Esta nota já foi lançada antes — marcar isto soma tudo de novo
+                ao estoque. Use só se a primeira importação foi desfeita.
+              </span>
+            </label>
+          )}
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] uppercase font-bold text-gray-400">
+                {marcados.length === linhas.length ? 'Total da nota' : 'Total selecionado'}
+              </p>
+              <p className="text-xl font-black text-gray-900 dark:text-gray-100">{fmt(totalMarcado)}</p>
+              {marcados.length !== linhas.length && (
+                <p className="text-[10px] text-gray-400">nota inteira: {fmt(dadosNota.valor_total)}</p>
+              )}
+            </div>
+            <button
+              onClick={confirmarImportacao}
+              disabled={salvando || carregandoMatch || marcados.length === 0}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg transition disabled:opacity-50"
+            >
+              {salvando
+                ? <><Loader2 size={16} className="animate-spin" /> Lançando no Estoque...</>
+                : <><CheckCircle2 size={18} /> Dar entrada em {marcados.length} {marcados.length === 1 ? 'item' : 'itens'}</>}
+            </button>
           </div>
-          <button
-            onClick={confirmarImportacao}
-            disabled={salvando || carregandoMatch}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition disabled:opacity-50"
-          >
-            {salvando ? <><Loader2 size={16} className="animate-spin" /> Lançando no Estoque...</> : <><CheckCircle2 size={18} /> Confirmar e Dar Entrada</>}
-          </button>
         </div>
 
       </div>
