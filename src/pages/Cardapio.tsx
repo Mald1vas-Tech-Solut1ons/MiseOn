@@ -23,6 +23,7 @@ import ChatInterface from '../components/chat/ChatInterface';
 import MiseOnLoader from '../components/MiseOnLoader';
 import SEO from '../components/SEO';
 import { getOptimizedImageUrl } from '../lib/cdn';
+import TabelaNutricional, { type NutricaoProduto } from '../components/cardapio/TabelaNutricional';
 
 const guardarUltimoPedido = (slug: string | undefined, pedidoId: string, numero: number) => {
   if (!slug) return;
@@ -101,6 +102,9 @@ export default function Cardapio() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
+  // Nutrição por produto, indexada por id. Vazio quando a loja ainda não tem
+  // ficha técnica com dado nutricional — e aí nenhuma tabela é exibida.
+  const [nutricao, setNutricao] = useState<Map<string, NutricaoProduto>>(new Map());
   const [taxas, setTaxas] = useState<TaxaEntrega[]>([]);
   const [faixasDistancia, setFaixasDistancia] = useState<FaixaEntrega[]>([]);
   const [busca, setBusca] = useState('');
@@ -167,7 +171,7 @@ export default function Cardapio() {
       const { data: l } = await supabase.from('lojas_publicas').select('*').eq('slug', slug).single();
       if (!l) return;
       setLoja(l);
-      const [h, b, c, p, t, f, est] = await Promise.all([
+      const [h, b, c, p, t, f, est, nut] = await Promise.all([
         supabase.from('horarios_funcionamento').select('*').eq('loja_id', l.id),
         supabase.from('banners_destaque').select('*').eq('loja_id', l.id).order('ordem_exibicao'),
         supabase.from('categorias').select('*').eq('loja_id', l.id).order('ordem'),
@@ -175,6 +179,10 @@ export default function Cardapio() {
         supabase.from('taxas_entrega').select('*').eq('loja_id', l.id),
         supabase.from('faixas_entrega').select('*').eq('loja_id', l.id).eq('ativo', true).order('ordem').order('km_ate'),
         supabase.rpc('fn_produtos_com_estoque', { p_loja_id: l.id }),
+        // Nutrição do cardápio inteiro numa chamada. O motor calcula pela ficha
+        // técnica e a função só devolve o que tem cobertura suficiente, então
+        // produto sem dado simplesmente não aparece com tabela.
+        supabase.rpc('fn_nutricao_cardapio', { p_loja_id: l.id }),
       ]);
       setHorarios(h.data ?? []);
       setBanners(b.data ?? []);
@@ -183,6 +191,7 @@ export default function Cardapio() {
       // ainda alcançam pra fazer o produto — os dois juntos decidem se aparece pra compra
       const mapaEstoque = new Map<string, boolean>((est.data ?? []).map((e: any) => [e.produto_id, e.tem_estoque]));
       setProdutos((p.data ?? []).map((prod: Produto) => ({ ...prod, tem_estoque: mapaEstoque.get(prod.id) ?? true })));
+      setNutricao(new Map(((nut.data as NutricaoProduto[]) ?? []).map((n) => [n.produto_id, n])));
       setTaxas(t.data ?? []);
       setFaixasDistancia((f.data as FaixaEntrega[]) ?? []);
       document.title = `${l.nome} — Peça online`;
@@ -576,7 +585,7 @@ export default function Cardapio() {
       )}
 
       {produtoAberto && (
-        <ModalProduto produto={produtoAberto} onClose={() => setProdutoAberto(null)} onAdd={addAoCarrinho} />
+        <ModalProduto produto={produtoAberto} nutricao={nutricao.get(produtoAberto.id)} onClose={() => setProdutoAberto(null)} onAdd={addAoCarrinho} />
       )}
       
       {checkoutAberto && mesaAtual && (
@@ -698,8 +707,9 @@ export default function Cardapio() {
 }
 
 // ── Modal do produto (opções/extras + observação) ───────────
-function ModalProduto({ produto, onClose, onAdd }: {
+function ModalProduto({ produto, nutricao, onClose, onAdd }: {
   produto: Produto;
+  nutricao?: NutricaoProduto;
   onClose: () => void;
   onAdd: (i: ItemCarrinho) => void;
 }) {
@@ -766,6 +776,7 @@ function ModalProduto({ produto, onClose, onAdd }: {
             <button onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
           </div>
           {produto.descricao && <p className="mt-1 whitespace-pre-line text-sm text-gray-500 dark:text-gray-400">{produto.descricao}</p>}
+          {nutricao && <TabelaNutricional dados={nutricao} />}
 
           {grupos.map((g) => (
             <div key={g.id} className="mt-4">
