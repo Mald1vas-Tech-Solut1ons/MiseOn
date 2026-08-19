@@ -52,14 +52,20 @@ export default defineConfig({
     rollupOptions: {
       output: {
         /**
-         * Estratégia de code-splitting por domínio de responsabilidade:
-         *  • vendor-react    → React core (estável, cache longo)
-         *  • vendor-supabase → Supabase JS (tamanho fixo)
-         *  • vendor-charts   → Recharts (pesado, raramente atualizado)
-         *  • vendor-maps     → Leaflet + react-leaflet (só carrega na tela de Entregas)
-         *  • vendor-canvas   → Konva + react-konva (só no editor de mesas)
-         *  • vendor-editor   → react-filerobot-image-editor (só no cardápio)
-         *  • vendor-misc     → Restante de dependências externas
+         * Só três buckets manuais, e por um motivo: cache.
+         *
+         * O catch-all `return 'vendor-libs'` que existia aqui jogava recharts,
+         * leaflet, three e todo o resto num único chunk de 1,77 MB. Como esse
+         * chunk é compartilhado por mais de uma entrada, o Vite o promovia a
+         * `modulepreload` no index.html — ou seja, o cliente que só abre o
+         * cardápio baixava o Three.js que existe apenas para EstoqueRastreio3D
+         * (admin). O splitting por rota (60 `lazy()`) era anulado no vendor.
+         *
+         * Sem o catch-all, o Rollup resolve sozinho: dependência importada por
+         * um único chunk lazy vai PARA DENTRO dele; dependência compartilhada
+         * vira chunk comum carregado sob demanda, não no boot. Os três buckets
+         * abaixo continuam manuais porque são usados em toda rota e mudam de
+         * versão raramente — separá-los preserva o cache no CDN entre deploys.
          */
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
@@ -75,17 +81,16 @@ export default defineConfig({
           if (['react', 'react-dom', 'react-router', 'react-router-dom', 'scheduler'].includes(pkg)) {
             return 'vendor-react';
           }
-          // Supabase → atualizado raramente, isolado para não contaminar outros chunks
+          // Supabase → presente em toda rota, atualizado raramente
           if (pkg.startsWith('@supabase')) {
             return 'vendor-supabase';
           }
-          // Ícones → grande mas puro (sem imports cruzados), cache independente
+          // Ícones → usados em toda tela, sem imports cruzados, cache independente
           if (pkg === 'lucide-react') {
             return 'vendor-icons';
           }
-          // Todos os demais vendor (recharts, leaflet, konva, filerobot, d3…)
-          // em um único bucket para evitar qualquer referência circular entre eles.
-          return 'vendor-libs';
+          // Todo o resto: decisão do Rollup, que sabe quem é lazy e quem não é.
+          return undefined;
         },
       },
     },
