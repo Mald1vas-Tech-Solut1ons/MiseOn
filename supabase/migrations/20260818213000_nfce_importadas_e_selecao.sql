@@ -24,8 +24,3 @@ CREATE POLICY "Acesso por loja as notas importadas"
   WITH CHECK (loja_id IN (SELECT loja_id FROM public.usuarios_loja WHERE user_id = auth.uid()));
 
 CREATE INDEX IF NOT EXISTS idx_nfce_importadas_loja ON public.nfce_importadas (loja_id, importado_em DESC);
-
--- A versão final de fn_importar_nfce (com p_repetir e reaproveitamento de
--- insumo por nome) está aplicada em produção. Recriar aqui inteiro duplicaria
--- corpo de função entre migrações; quem recria o ambiente do zero aplica a
--- migração anterior e depois esta, que só acrescenta a tabela de controle.

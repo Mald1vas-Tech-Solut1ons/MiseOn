@@ -5,6 +5,9 @@
 -- insumo criado sem entrada de estoque. Pior: ninguém atualizava
 -- insumos.quantidade_atual, então o saldo nunca mexia — a nota "importava" e o
 -- estoque continuava igual. Aqui o caminho é o mesmo de fn_receber_compra.
+--
+-- Depende da tabela nfce_importadas (migração 20260818213000), usada para não
+-- lançar o mesmo cupom duas vezes.
 CREATE OR REPLACE FUNCTION public.fn_importar_nfce(
   p_loja_id UUID,
   p_chave TEXT,
@@ -19,17 +22,31 @@ AS $$
 DECLARE
   v_item        JSONB;
   v_insumo      UUID;
+  v_nome        TEXT;
   v_qtd_base    NUMERIC;
   v_custo       NUMERIC;
   v_fator       NUMERIC;
   v_qtd_nota    NUMERIC;
   v_motivo      TEXT;
   v_criados     INTEGER := 0;
+  v_reusados    INTEGER := 0;
   v_entradas    INTEGER := 0;
   v_total       NUMERIC := 0;
+  v_ja          TIMESTAMPTZ;
 BEGIN
   IF NOT public.fn_tem_papel(p_loja_id, ARRAY['admin','operador']) THEN
     RAISE EXCEPTION 'Sem permissão para importar notas nesta loja.';
+  END IF;
+
+  -- Cupom já lançado: recusa por padrão. Duplicar estoque em silêncio é pior
+  -- que dar trabalho — o lojista só descobriria pelo CMV torto semanas depois.
+  IF NULLIF(p_chave, '') IS NOT NULL AND NOT p_repetir THEN
+    SELECT importado_em INTO v_ja
+    FROM public.nfce_importadas WHERE loja_id = p_loja_id AND chave = p_chave;
+
+    IF v_ja IS NOT NULL THEN
+      RETURN jsonb_build_object('ja_importada', true, 'importado_em', v_ja, 'itens_lancados', 0);
+    END IF;
   END IF;
 
   v_motivo := 'Importado do cupom fiscal'
@@ -42,22 +59,31 @@ BEGIN
     v_fator    := COALESCE(NULLIF((v_item->>'fator')::NUMERIC, 0), 1);
     v_qtd_base := v_qtd_nota * v_fator;
     v_custo    := NULLIF((v_item->>'custo_total')::NUMERIC, 0);
+    v_nome     := COALESCE(NULLIF(btrim(v_item->>'nome'), ''), 'Item do cupom');
 
     IF v_qtd_base <= 0 THEN CONTINUE; END IF;
 
-    -- Insumo novo quando o lojista não vinculou a um existente.
     IF COALESCE((v_item->>'criar_novo')::BOOLEAN, false) OR (v_item->>'insumo_id') IS NULL THEN
-      INSERT INTO public.insumos (loja_id, nome, unidade_medida, quantidade_atual,
-                                  estoque_minimo, preco_embalagem, qtd_embalagem, ativo)
-      VALUES (p_loja_id,
-              COALESCE(NULLIF(v_item->>'nome', ''), 'Item do cupom'),
-              COALESCE(NULLIF(v_item->>'unidade', ''), 'un'),
-              0, 0,
-              COALESCE(v_custo, 0),
-              GREATEST(v_qtd_base, 0.0001),
-              true)
-      RETURNING id INTO v_insumo;
-      v_criados := v_criados + 1;
+      -- Antes de criar, procura um insumo ativo com o mesmo nome. A tabela tem
+      -- unicidade por (loja, nome) — sem esta busca, um único item repetido do
+      -- cadastro derrubava a importação inteira com erro de chave duplicada, e
+      -- o lojista perdia os 53 itens por causa de um.
+      SELECT id INTO v_insumo
+      FROM   public.insumos
+      WHERE  loja_id = p_loja_id AND lower(btrim(nome)) = lower(v_nome) AND ativo
+      LIMIT  1;
+
+      IF v_insumo IS NULL THEN
+        INSERT INTO public.insumos (loja_id, nome, unidade_medida, quantidade_atual,
+                                    estoque_minimo, preco_embalagem, qtd_embalagem, ativo)
+        VALUES (p_loja_id, v_nome,
+                COALESCE(NULLIF(v_item->>'unidade', ''), 'un'),
+                0, 0, COALESCE(v_custo, 0), GREATEST(v_qtd_base, 0.0001), true)
+        RETURNING id INTO v_insumo;
+        v_criados := v_criados + 1;
+      ELSE
+        v_reusados := v_reusados + 1;
+      END IF;
     ELSE
       v_insumo := (v_item->>'insumo_id')::UUID;
       -- Confere que o insumo é mesmo desta loja: o id vem do navegador.
@@ -102,13 +128,24 @@ BEGIN
     v_total := v_total + COALESCE(v_custo, 0);
   END LOOP;
 
+  IF NULLIF(p_chave, '') IS NOT NULL AND v_entradas > 0 THEN
+    INSERT INTO public.nfce_importadas (loja_id, chave, emitente, itens_lancados, valor_total, importado_por)
+    VALUES (p_loja_id, p_chave, NULLIF(p_emitente, ''), v_entradas, v_total, auth.uid())
+    ON CONFLICT (loja_id, chave) DO UPDATE
+      SET itens_lancados = public.nfce_importadas.itens_lancados + EXCLUDED.itens_lancados,
+          valor_total    = COALESCE(public.nfce_importadas.valor_total, 0) + COALESCE(EXCLUDED.valor_total, 0),
+          importado_em   = now();
+  END IF;
+
   RETURN jsonb_build_object(
+    'ja_importada', false,
     'itens_lancados', v_entradas,
     'insumos_criados', v_criados,
+    'insumos_reaproveitados', v_reusados,
     'total', v_total
   );
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.fn_importar_nfce(UUID, TEXT, TEXT, JSONB) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.fn_importar_nfce(UUID, TEXT, TEXT, JSONB) TO authenticated;
+REVOKE ALL ON FUNCTION public.fn_importar_nfce(UUID, TEXT, TEXT, JSONB, BOOLEAN) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.fn_importar_nfce(UUID, TEXT, TEXT, JSONB, BOOLEAN) TO authenticated;
