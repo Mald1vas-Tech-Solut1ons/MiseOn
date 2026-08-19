@@ -24,6 +24,154 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'dark-kitchen-hamburgueria-gestao-multi-marcas-logistica-delivery',
+    title: 'Dark Kitchens e Hamburguerias de Escala: Como Operar Multi-Marcas no Mesmo Estoque com KDS Centralizado',
+    description: 'Guia avançado de engenharia de delivery: gestão de múltiplas marcas virtuais, unificação de insumos em chapa de alta produção e roteamento de despacho sem erros.',
+    category: 'Operação & KDS',
+    publishedAt: '2026-08-18',
+    readTime: '10 min de leitura',
+    coverImage: '/blog-covers/dark-kitchen-burger-cover.jpg',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Dark Kitchen', 'Hamburgueria', 'Multi-Marcas', 'KDS Centralizado', 'Delivery de Escala'],
+    seo: {
+      title: 'Dark Kitchens & Hamburguerias Multi-Marcas: Operação & KDS — MiseOn',
+      description: 'Saiba como rodar múltiplas marcas virtuais de hamburgueria e delivery no mesmo espaço físico com KDS unificado e controle de estoque por PEPS.',
+      keywords: 'dark kitchen brasil, hamburgueria delivery kds, sistema multi marcas delivery, comanda digital hamburgueria, gestao de dark kitchen',
+      canonicalUrl: 'https://miseon.app.br/blog/dark-kitchen-hamburgueria-gestao-multi-marcas-logistica-delivery',
+    },
+    summary: 'Operar uma Dark Kitchen ou hamburgueria de alto volume exige máxima eficiência por metro quadrado. Veja como integrar múltiplas marcas no mesmo estoque de pães e carnes, rotear pedidos para praças distintas e zerar o tempo de embalagem com o KDS MiseOn.',
+    content: `
+# Dark Kitchens e Hamburguerias de Escala: Operação Multi-Marcas com KDS Centralizado
+
+O modelo de **Dark Kitchen** (ou *Ghost Kitchen*) revolucionou a economia do food service ao permitir que donos de restaurantes operem 2, 3 ou até 5 marcas virtuais distintas a partir da mesma estrutura física de cozinha.
+
+Você pode ter uma marca focada em **Smash Burgers ultra-baratos**, outra marca premium de **Hambúrgueres Artesanais de 200g** e uma terceira de **Porções e Batatas Recheadas**, todas compartilhando a mesma chapa, a mesma fritadeira e a mesma equipe.
+
+Contudo, sem uma engenharia de sistemas robusta, o modelo multi-marcas rapidamente descamba para o caos: **embalagens trocadas, motoboys com pedidos errados e colapso no estoque**.
+
+Neste artigo, mostramos como a arquitetura do **MiseOn** viabiliza o controle absoluto de operações multi-marcas e hamburguerias de alta velocidade.
+
+---
+
+## 1. O Princípio dos Insumos Compartilhados (Unificação de Estoque)
+
+O segredo financeiro de uma Dark Kitchen bem-sucedida é o **compartilhamento de insumos base**.
+
+Em vez de comprar 5 tipos de queijo e 4 tipos de batata para marcas diferentes:
+- As marcas compartilham o mesmo pão brioche, a mesma maionese da casa e o mesmo blend de carne bovina.
+- Cada marca diferencia seu produto final pelo **molho especial, topping exclusivo e embalagem personalizada**.
+
+No **MiseOn**:
+- O estoque de insumos (ex: *Lote de Blend de Carne 160g*) é **único e centralizado**.
+- Quando entra um pedido da *Marca A (Burger Classic)* ou da *Marca B (Smash King)*, a Ficha Técnica deduz do **mesmo saldo de carne no estoque PEPS**.
+- O gestor enxerga o consumo consolidado por insumo e o faturamento individual por marca no DRE.
+
+---
+
+## 2. Roteamento Inteligente de Pedidos no KDS Central
+
+Na chapa durante o pico das 21h de domingo, o chapeiro não pode ficar olhando para 3 celulares ou 4 impressoras térmicas diferentes cuspindo papel.
+
+O **KDS Multi-Marcas do MiseOn** unifica todas as origens em um único painel central inteligente:
+
+1. **Badge de Identificação de Marca**: Cada card de pedido no KDS exibe a cor e o logotipo da marca de origem (*ex: 🔴 Smash Burger Co. | 🔵 Smash & Shake*).
+2. **Agrupamento por Praça de Produção**:
+   - **Chapa**: Recebe apenas as carnes que devem ir para a grelha/chapa com a gramatura e ponto indicados.
+   - **Fritadeira**: Recebe as porções de batata, anéis de cebola e nugggets.
+   - **Montagem & Embalagem**: Exibe o pedido completo e a embalagem exata (Saco Kraft da Marca A ou Caixa Premium da Marca B).
+
+---
+
+## 3. Gestão do Tempo de Despacho e Atribuição de Entregadores
+
+Em uma Dark Kitchen, o cliente não está vendo a cozinha. A única experiência dele é a velocidade e a temperatura em que o lanche chega na casa dele.
+
+O MiseOn integra a esteira de despacho:
+- **Status em Tempo Real**: Assim que a embalagem recebe o lacre, o operador toca no botão **"PRONTO PARA EXPEDIÇÃO"**.
+- **Notificação Automática via WhatsApp**: O cliente e o motoboy cadastrado recebem a mensagem: *"Seu pedido da Burger Co. está pronto e saindo para entrega com o entregador Marcos!"*.
+- **Controle de Tempo de Balcão**: Se a embalagem fica mais de 5 minutos aguardando retirada na bancada de expedição, a tela de expedição acende um alerta visual para o gerente intervir.
+
+Com o MiseOn, sua Dark Kitchen ganha escala de multinacional com a simplicidade de um software intuitivo feito para o dia a dia gastronômico.
+`,
+  },
+  {
+    slug: 'engenharia-de-pizzarias-kds-sabores-meio-a-meio-forno-alta-temperatura',
+    title: 'Engenharia para Pizzarias: Como Gerenciar Pedidos Meio a Meio, Tempo de Forno e Fichas Técnicas de Massas',
+    description: 'Guia definitivo de operação para pizzarias: controle de CMV em pizzas de sabores mistos, gestão de bordas recheadas, KDS para praça de forno e lote de longa fermentação.',
+    category: 'Operação & KDS',
+    publishedAt: '2026-08-18',
+    readTime: '9 min de leitura',
+    coverImage: '/blog-covers/pizzaria-kds-forno-cover.jpg',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Pizzaria', 'KDS Forno', 'Sabores Meio a Meio', 'Longa Fermentação', 'CMV Pizzaria'],
+    seo: {
+      title: 'Engenharia para Pizzarias: Pedidos Meio a Meio, KDS & CMV — MiseOn',
+      description: 'Aprenda a controlar o CMV de pizzas meio a meio, separar praças no KDS de pizzaria e gerenciar estoques de massa de longa fermentação no MiseOn.',
+      keywords: 'kds pizzaria, pizza meio a meio cmv, sistema para pizzaria, ficha tecnica pizza, forno a lenha kds',
+      canonicalUrl: 'https://miseon.app.br/blog/engenharia-de-pizzarias-kds-sabores-meio-a-meio-forno-alta-temperatura',
+    },
+    summary: 'Pizzarias possuem uma das operações mais complexas do food service devido à customização extrema de pizzas meio a meio, bordas recheadas e sincronização de tempo de forno. Descubra como o KDS especializado do MiseOn elimina erros na montagem e garante a margem de cada fatia.',
+    content: `
+# Engenharia para Pizzarias: Como Gerenciar Pedidos Meio a Meio, Tempo de Forno e Fichas Técnicas
+
+A operação de uma pizzaria de alto volume é uma verdadeira corrida contra o relógio. Entre o momento em que o cliente faz o pedido no WhatsApp ou no balcão e a hora em que a caixa quente chega à mesa ou ao motoboy, a massa passa por uma sequência precisa de etapas: **boleamento, abertura, molho, recheio, forno a 400°C e expedição**.
+
+O grande gargalo histórico das pizzarias está em duas palavras que tiram o sono de qualquer dono: **"Meio a Meio"**.
+
+Neste artigo, explicamos como a engenharia de software especializada em food service do **MiseOn** resolve o cálculo de CMV fracionado de pizzas mistas, automatiza a praça de forno no KDS e controla lotes de massa de longa fermentação.
+
+---
+
+## 1. O Desafio Math-CMV das Pizzas Meio a Meio
+
+Em sistemas legados de restaurante, o cadastro de uma pizza meio a meio era feito como um item "genérico" ou cobrando sempre o valor do sabor mais caro sem dar baixa correta no estoque.
+
+Isso gerava dois grandes problemas:
+1. **Furo de Estoque Inevitável**: Se o cliente pede 1/2 Pepperoni (insumo caro) e 1/2 Muçarela (insumo médio), a baixa no estoque precisa ser de **exactos 50% da gramatura de pepperoni** e **50% da gramatura de muçarela**.
+2. **Distorção do Custo Real da Fatia**: Quando o cliente adiciona borda recheada de Catupiry ou Vulcão de Cheddar, o custo do insumo salta significativamente.
+
+No **MiseOn**, a Ficha Técnica de Pizzas é nativamente **fracionada por fatias e setores**:
+- A base (massa + molho de tomate pelati + orégano) é abatida integralmente (1 unidade).
+- Cada metade deduz proporcionalmente as proteínas, queijos e temperos específicos.
+- A borda recheada baixa o lote de requeijão ou cream cheese pelo peso exato de aplicação.
+
+---
+
+## 2. KDS com Separação de Praças: Montagem vs. Forneiro
+
+Uma pizzaria de alta demanda não pode depender de um papel colado no balcão de montagem. Se o forneiro não sabe exatamente a ordem de entrada das pizzas no forno, o tempo de assado fica descompensado.
+
+O KDS do MiseOn separa as telas de produção por **Praças Específicas**:
+
+1. **Tela 1 — Praça de Montagem (Pizzaiolo)**: Exibe a lista de pizzas com marcação clara de sabores (ex: *Lado A: Calabresa com Cebola | Lado B: Marguerita Especial*), além da borda escolhida e observações ("Massa bem assada", "Sem azeitona").
+2. **Tela 2 — Praça de Forno (Forneiro)**: Quando o pizzaiolo finaliza a montagem e toca na tela, o pedido avança instantaneamente para a tela do Forneiro.
+   - O forneiro visualiza o tempo de permanência no forno (ex: 3 minutos a 420°C).
+   - O temporizador pisca em verde para "Em assamento" e emite alerta sonoro no tempo exato de retirar a pizza com a pá.
+3. **Tela 3 — Expedição & Corte**: Onde a pizza é cortada na mesa inox, recebe os azeites e lacres de segurança e é colocada na caixa correta para o entregador.
+
+---
+
+## 3. Lotes de Massa de Longa Fermentação e Maturação (Fermento PEPS)
+
+Pizzarias modernas trabalham com fermentação natural (Levain, Massa Madre) ou maturação de 24h a 72h na geladeira.
+
+O módulo de **Preparos e Lotes do MiseOn** permite registrar a produção da massa base:
+- Ao produzir um saco de 25 kg de farinha tipo 00 italiana, água, sal e fermento, o sistema gera o lote de **120 bolas de massa de 350g**.
+- Cada bola de massa recebe seu custo PEPS individualizado acumulando a farinha e a energia de refrigeração.
+- Se uma bola passa da data limite de maturação e precisa ser descartada, a perda é registrada como descarte técnico no DRE, mantendo a precisão total do CMV.
+
+Com tecnologia direcionada para os desafios reais da pizzaria, sua operação ganha velocidade nos picos de fim de semana e mantém a margem de lucro protegida em cada fatia.
+`,
+  },
+  {
     slug: 'como-transformar-smart-tv-salao-menu-board-4k-chamada-por-voz',
     title: 'Como Transformar Qualquer Smart TV em um Menu Board 4K com Chamada de Pedidos por Voz em Viva-Voz',
     description: 'Guia prático para eliminar filas no balcão e modernizar o salão: aprenda a conectar a Smart TV do restaurante ao KDS da cozinha com alertas sonoros e QR Code de autoatendimento.',
@@ -286,7 +434,7 @@ Quando o cliente seleciona um hambúrguer ou uma refeição no Cardápio Digital
 
 Para fechar o ciclo de retenção, o MiseOn devolve 5% a 10% do valor do pedido em **Cashback** para ser utilizado na próxima compra.
 
-O cliente percebe o saldo acumulado como um incentivo exclusivo da sua loja, garantindo que no próximo fim de semana ele peça novamente direto no seu site em vez de procurar alternativas nos aplicativos concorrentes.
+O cliente percebe o saldo acumulado como um incentivo exclusivo da sua loja, garantindo que no próximo fim de semana ele peça novamente direto no seu site em vez de procurar alternatives nos aplicativos concorrentes.
 `,
   },
   {
@@ -605,154 +753,6 @@ O MiseOn ajusta a contagem inteligível: 0,35 kg lançado na balança conta como
 - O **Custo Médio de Prato** servido no almoço.
 
 Com dados reais e precisão decimal, o restaurante por quilo elimina os vazamentos invisíveis e garante a lucratividade em cada prato servido.
-`,
-  },
-  {
-    slug: 'engenharia-de-pizzarias-kds-sabores-meio-a-meio-forno-alta-temperatura',
-    title: 'Engenharia para Pizzarias: Como Gerenciar Pedidos Meio a Meio, Tempo de Forno e Fichas Técnicas de Massas',
-    description: 'Guia definitivo de operação para pizzarias: controle de CMV em pizzas de sabores mistos, gestão de bordas recheadas, KDS para praça de forno e lote de longa fermentação.',
-    category: 'Operação & KDS',
-    publishedAt: '2026-08-18',
-    readTime: '9 min de leitura',
-    coverImage: '/blog-covers/pizzaria-kds-forno-cover.jpg',
-    author: {
-      name: 'Rafael Maldivas',
-      role: 'Head de Engenharia e Arquitetura do MiseOn',
-      avatar: '/icon-192.png',
-    },
-    tags: ['Pizzaria', 'KDS Forno', 'Sabores Meio a Meio', 'Longa Fermentação', 'CMV Pizzaria'],
-    seo: {
-      title: 'Engenharia para Pizzarias: Pedidos Meio a Meio, KDS & CMV — MiseOn',
-      description: 'Aprenda a controlar o CMV de pizzas meio a meio, separar praças no KDS de pizzaria e gerenciar estoques de massa de longa fermentação no MiseOn.',
-      keywords: 'kds pizzaria, pizza meio a meio cmv, sistema para pizzaria, ficha tecnica pizza, forno a lenha kds',
-      canonicalUrl: 'https://miseon.app.br/blog/engenharia-de-pizzarias-kds-sabores-meio-a-meio-forno-alta-temperatura',
-    },
-    summary: 'Pizzarias possuem uma das operações mais complexas do food service devido à customização extrema de pizzas meio a meio, bordas recheadas e sincronização de tempo de forno. Descubra como o KDS especializado do MiseOn elimina erros na montagem e garante a margem de cada fatia.',
-    content: `
-# Engenharia para Pizzarias: Como Gerenciar Pedidos Meio a Meio, Tempo de Forno e Fichas Técnicas
-
-A operação de uma pizzaria de alto volume é uma verdadeira corrida contra o relógio. Entre o momento em que o cliente faz o pedido no WhatsApp ou no balcão e a hora em que a caixa quente chega à mesa ou ao motoboy, a massa passa por uma sequência precisa de etapas: **boleamento, abertura, molho, recheio, forno a 400°C e expedição**.
-
-O grande gargalo histórico das pizzarias está em duas palavras que tiram o sono de qualquer dono: **"Meio a Meio"**.
-
-Neste artigo, explicamos como a engenharia de software especializada em food service do **MiseOn** resolve o cálculo de CMV fracionado de pizzas mistas, automatiza a praça de forno no KDS e controla lotes de massa de longa fermentação.
-
----
-
-## 1. O Desafio Math-CMV das Pizzas Meio a Meio
-
-Em sistemas legados de restaurante, o cadastro de uma pizza meio a meio era feito como um item "genérico" ou cobrando sempre o valor do sabor mais caro sem dar baixa correta no estoque.
-
-Isso gerava dois grandes problemas:
-1. **Furo de Estoque Inevitável**: Se o cliente pede 1/2 Pepperoni (insumo caro) e 1/2 Muçarela (insumo médio), a baixa no estoque precisa ser de **exactos 50% da gramatura de pepperoni** e **50% da gramatura de muçarela**.
-2. **Distorção do Custo Real da Fatia**: Quando o cliente adiciona borda recheada de Catupiry ou Vulcão de Cheddar, o custo do insumo salta significativamente.
-
-No **MiseOn**, a Ficha Técnica de Pizzas é nativamente **fracionada por fatias e setores**:
-- A base (massa + molho de tomate pelati + orégano) é abatida integralmente (1 unidade).
-- Cada metade deduz proporcionalmente as proteínas, queijos e temperos específicos.
-- A borda recheada baixa o lote de requeijão ou cream cheese pelo peso exato de aplicação.
-
----
-
-## 2. KDS com Separação de Praças: Montagem vs. Forneiro
-
-Uma pizzaria de alta demanda não pode depender de um papel colado no balcão de montagem. Se o forneiro não sabe exatamente a ordem de entrada das pizzas no forno, o tempo de assado fica descompensado.
-
-O KDS do MiseOn separa as telas de produção por **Praças Específicas**:
-
-1. **Tela 1 — Praça de Montagem (Pizzaiolo)**: Exibe a lista de pizzas com marcação clara de sabores (ex: *Lado A: Calabresa com Cebola | Lado B: Marguerita Especial*), além da borda escolhida e observações ("Massa bem assada", "Sem azeitona").
-2. **Tela 2 — Praça de Forno (Forneiro)**: Quando o pizzaiolo finaliza a montagem e toca na tela, o pedido avança instantaneamente para a tela do Forneiro.
-   - O forneiro visualiza o tempo de permanência no forno (ex: 3 minutos a 420°C).
-   - O temporizador pisca em verde para "Em assamento" e emite alerta sonoro no tempo exato de retirar a pizza com a pá.
-3. **Tela 3 — Expedição & Corte**: Onde a pizza é cortada na mesa inox, recebe os azeites e lacres de segurança e é colocada na caixa correta para o entregador.
-
----
-
-## 3. Lotes de Massa de Longa Fermentação e Maturação (Fermento PEPS)
-
-Pizzarias modernas trabalham com fermentação natural (Levain, Massa Madre) ou maturação de 24h a 72h na geladeira.
-
-O módulo de **Preparos e Lotes do MiseOn** permite registrar a produção da massa base:
-- Ao produzir um saco de 25 kg de farinha tipo 00 italiana, água, sal e fermento, o sistema gera o lote de **120 bolas de massa de 350g**.
-- Cada bola de massa recebe seu custo PEPS individualizado acumulando a farinha e a energia de refrigeração.
-- Se uma bola passa da data limite de maturação e precisa ser descartada, a perda é registrada como descarte técnico no DRE, mantendo a precisão total do CMV.
-
-Com tecnologia direcionada para os desafios reais da pizzaria, sua operação ganha velocidade nos picos de fim de semana e mantém a margem de lucro protegida em cada fatia.
-`,
-  },
-  {
-    slug: 'dark-kitchen-hamburgueria-gestao-multi-marcas-logistica-delivery',
-    title: 'Dark Kitchens e Hamburguerias de Escala: Como Operar Multi-Marcas no Mesmo Estoque com KDS Centralizado',
-    description: 'Guia avançado de engenharia de delivery: gestão de múltiplas marcas virtuais, unificação de insumos em chapa de alta produção e roteamento de despacho sem erros.',
-    category: 'Operação & KDS',
-    publishedAt: '2026-08-18',
-    readTime: '10 min de leitura',
-    coverImage: '/blog-covers/dark-kitchen-burger-cover.jpg',
-    author: {
-      name: 'Rafael Maldivas',
-      role: 'Head de Engenharia e Arquitetura do MiseOn',
-      avatar: '/icon-192.png',
-    },
-    tags: ['Dark Kitchen', 'Hamburgueria', 'Multi-Marcas', 'KDS Centralizado', 'Delivery de Escala'],
-    seo: {
-      title: 'Dark Kitchens & Hamburguerias Multi-Marcas: Operação & KDS — MiseOn',
-      description: 'Saiba como rodar múltiplas marcas virtuais de hamburgueria e delivery no mesmo espaço físico com KDS unificado e controle de estoque por PEPS.',
-      keywords: 'dark kitchen brasil, hamburgueria delivery kds, sistema multi marcas delivery, comanda digital hamburgueria, gestao de dark kitchen',
-      canonicalUrl: 'https://miseon.app.br/blog/dark-kitchen-hamburgueria-gestao-multi-marcas-logistica-delivery',
-    },
-    summary: 'Operar uma Dark Kitchen ou hamburgueria de alto volume exige máxima eficiência por metro quadrado. Veja como integrar múltiplas marcas no mesmo estoque de pães e carnes, rotear pedidos para praças distintas e zerar o tempo de embalagem com o KDS MiseOn.',
-    content: `
-# Dark Kitchens e Hamburguerias de Escala: Operação Multi-Marcas com KDS Centralizado
-
-O modelo de **Dark Kitchen** (ou *Ghost Kitchen*) revolucionou a economia do food service ao permitir que donos de restaurantes operem 2, 3 ou até 5 marcas virtuais distintas a partir da mesma estrutura física de cozinha.
-
-Você pode ter uma marca focada em **Smash Burgers ultra-baratos**, outra marca premium de **Hambúrgueres Artesanais de 200g** e uma terceira de **Porções e Batatas Recheadas**, todas compartilhando a mesma chapa, a mesma fritadeira e a mesma equipe.
-
-Contudo, sem uma engenharia de sistemas robusta, o modelo multi-marcas rapidamente descamba para o caos: **embalagens trocadas, motoboys com pedidos errados e colapso no estoque**.
-
-Neste artigo, mostramos como a arquitetura do **MiseOn** viabiliza o controle absoluto de operações multi-marcas e hamburguerias de alta velocidade.
-
----
-
-## 1. O Princípio dos Insumos Compartilhados (Unificação de Estoque)
-
-O segredo financeiro de uma Dark Kitchen bem-sucedida é o **compartilhamento de insumos base**.
-
-Em vez de comprar 5 tipos de queijo e 4 tipos de batata para marcas diferentes:
-- As marcas compartilham o mesmo pão brioche, a mesma maionese da casa e o mesmo blend de carne bovina.
-- Cada marca diferencia seu produto final pelo **molho especial, topping exclusivo e embalagem personalizada**.
-
-No **MiseOn**:
-- O estoque de insumos (ex: *Lote de Blend de Carne 160g*) é **único e centralizado**.
-- Quando entra um pedido da *Marca A (Burger Classic)* ou da *Marca B (Smash King)*, a Ficha Técnica deduz do **mesmo saldo de carne no estoque PEPS**.
-- O gestor enxerga o consumo consolidado por insumo e o faturamento individual por marca no DRE.
-
----
-
-## 2. Roteamento Inteligente de Pedidos no KDS Central
-
-Na chapa durante o pico das 21h de domingo, o chapeiro não pode ficar olhando para 3 celulares ou 4 impressoras térmicas diferentes cuspindo papel.
-
-O **KDS Multi-Marcas do MiseOn** unifica todas as origens em um único painel central inteligente:
-
-1. **Badge de Identificação de Marca**: Cada card de pedido no KDS exibe a cor e o logotipo da marca de origem (*ex: 🔴 Smash Burger Co. | 🔵 Smash & Shake*).
-2. **Agrupamento por Praça de Produção**:
-   - **Chapa**: Recebe apenas as carnes que devem ir para a grelha/chapa com a gramatura e ponto indicados.
-   - **Fritadeira**: Recebe as porções de batata, anéis de cebola e nugggets.
-   - **Montagem & Embalagem**: Exibe o pedido completo e a embalagem exata (Saco Kraft da Marca A ou Caixa Premium da Marca B).
-
----
-
-## 3. Gestão do Tempo de Despacho e Atribuição de Entregadores
-
-Em uma Dark Kitchen, o cliente não está vendo a cozinha. A única experiência dele é a velocidade e a temperatura em que o lanche chega na casa dele.
-
-O MiseOn integra a esteira de despacho:
-- **Status em Tempo Real**: Assim que a embalagem recebe o lacre, o operador toca no botão **"PRONTO PARA EXPEDIÇÃO"**.
-- **Notificação Automática via WhatsApp**: O cliente e o motoboy cadastrado recebem a mensagem: *"Seu pedido da Burger Co. está pronto e saindo para entrega com o entregador Marcos!"*.
-- **Controle de Tempo de Balcão**: Se a embalagem fica mais de 5 minutos aguardando retirada na bancada de expedição, a tela de expedição acende um alerta visual para o gerente intervir.
-
-Com o MiseOn, sua Dark Kitchen ganha escala de multinacional com a simplicidade de um software intuitivo feito para o dia a dia gastronômico.
 `,
   },
 ];

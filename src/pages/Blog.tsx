@@ -12,7 +12,11 @@ export default function Blog() {
   const [busca, setBusca] = useState('');
   const [categoriaSel, setCategoriaSel] = useState<string>('Todas');
 
-  const postsFiltrados = BLOG_POSTS.filter((post) => {
+  const postsOrdenados = [...BLOG_POSTS].sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+  );
+
+  const postsFiltrados = postsOrdenados.filter((post) => {
     const bateCategoria = categoriaSel === 'Todas' || post.category === categoriaSel;
     const termo = busca.toLowerCase().trim();
     const bateBusca =
@@ -23,7 +27,7 @@ export default function Blog() {
     return bateCategoria && bateBusca;
   });
 
-  const destaque = BLOG_POSTS[0];
+  const destaque = postsOrdenados[0];
 
   const schemaJson = {
     '@context': 'https://schema.org',
@@ -193,6 +197,9 @@ export default function Blog() {
                       alt={post.title}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/blog-covers/smart-tv-cover.jpg';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
                     <span className="absolute bottom-3 left-3 rounded-full bg-[#FC5B24] px-3 py-0.5 text-[10px] font-bold text-white shadow-md">

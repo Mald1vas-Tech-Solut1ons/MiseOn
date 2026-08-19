@@ -199,6 +199,9 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
               src={post.coverImage}
               alt={post.title}
               className="h-64 sm:h-96 w-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/blog-covers/smart-tv-cover.jpg';
+              }}
             />
           </div>
         </div>
