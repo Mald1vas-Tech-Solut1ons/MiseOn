@@ -20,6 +20,7 @@ import { GarcomMesaDrawer } from '../../components/mesas3d/GarcomMesaDrawer';
 import { EditorLayout3DModal } from '../../components/mesas3d/EditorLayout3DModal';
 import { ModalDivisaoProdutoCaixa } from '../../components/mesas/ModalDivisaoProdutoCaixa';
 import type { ItemPedido } from '../../types';
+import { useI18n } from '../../contexts/I18nContext';
 
 /* ─────────────────────────────────────────────────────────────
    Mapa de Mesas — visão do salão para o garçom/gerente.
@@ -57,6 +58,7 @@ const novaMesaSchema = z.object({
 });
 
 export default function Mesas() {
+  const { tDynamic } = useI18n();
   const { lojaId, lojaSlug } = useOutletContext<CtxLoja>();
   const [loja, setLoja] = useState<Loja | null>(null);
   const [mesas, setMesas] = useState<MesaComComanda[]>([]);
@@ -382,10 +384,10 @@ export default function Mesas() {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-black dark:text-gray-100">
-            <Box size={22} className="text-orange-500" /> Mapa do Salão & Assentos 3D
+            <Box size={22} className="text-orange-500" /> {tDynamic('Mapa do Salão & Assentos 3D')}
           </h2>
           <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-            {ocupadas.length} ocupada{ocupadas.length !== 1 ? 's' : ''} · {livres.length} livre{livres.length !== 1 ? 's' : ''}
+            {ocupadas.length} {tDynamic('ocupada')}{ocupadas.length !== 1 ? 's' : ''} · {livres.length} {tDynamic('livre')}{livres.length !== 1 ? 's' : ''}
           </p>
         </div>
 
@@ -400,7 +402,7 @@ export default function Mesas() {
                   : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
-              <Box size={14} /> Salão 3D
+              <Box size={14} /> {tDynamic('Salão 3D')}
             </button>
             <button
               onClick={() => setViewModo('GRADE')}
@@ -410,7 +412,7 @@ export default function Mesas() {
                   : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
-              <LayoutGrid size={14} /> Grade 2D
+              <LayoutGrid size={14} /> {tDynamic('Grade 2D')}
             </button>
           </div>
 
@@ -424,20 +426,20 @@ export default function Mesas() {
                     : 'border-gray-200 bg-white text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300'
                 }`}
               >
-                <Move size={14} /> {modoEdicao3D ? 'Arraste Ativo' : 'Mover Mesas'}
+                <Move size={14} /> {modoEdicao3D ? tDynamic('Arraste Ativo') : tDynamic('Mover Mesas')}
               </button>
 
               <button
                 onClick={() => setModalEditorLayout(true)}
                 className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-600 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
               >
-                <SlidersHorizontal size={14} /> Ajustar Salão
+                <SlidersHorizontal size={14} /> {tDynamic('Ajustar Salão')}
               </button>
             </>
           )}
 
           <button onClick={() => setModalNovaMesa(true)} className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-4 py-2 text-sm font-bold text-white shadow-md transition hover:brightness-110">
-            <Plus size={16} /> Nova mesa
+            <Plus size={16} /> {tDynamic('Nova mesa')}
           </button>
         </div>
       </div>

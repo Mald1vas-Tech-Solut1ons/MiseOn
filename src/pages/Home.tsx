@@ -631,8 +631,8 @@ export default function Home() {
                         <ShoppingBag size={18} />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-rose-400">Integração iFood</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">Fila única na cozinha e estoque</p>
+                        <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-rose-400">{tDynamic("Integração iFood")}</p>
+                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic("Fila única na cozinha e estoque")}</p>
                       </div>
                     </Link>
                     <Link
@@ -644,8 +644,8 @@ export default function Home() {
                         <QrCode size={18} />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-orange-400">Cardápio QR Code</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">Autoatendimento direto na mesa sem taxas</p>
+                        <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-orange-400">{tDynamic("Cardápio QR Code")}</p>
+                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic("Autoatendimento direto na mesa sem taxas")}</p>
                       </div>
                     </Link>
                     <Link
@@ -657,7 +657,7 @@ export default function Home() {
                         <ShieldCheck size={18} />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-blue-400">Emissão Fiscal NFC-e</p>
+                        <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-blue-400">{tDynamic("Emissão Fiscal NFC-e")}</p>
                         <p className="text-[11px] text-gray-500 dark:text-slate-400">FocusNFe nativo e integrado</p>
                       </div>
                     </Link>
@@ -671,7 +671,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-purple-400">Estoque 3D & Preparos</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">Fichas técnicas, lotes e gráfico 3D</p>
+                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic("Fichas técnicas, lotes e gráfico 3D")}</p>
                       </div>
                     </Link>
                   </div>
@@ -1142,11 +1142,11 @@ export default function Home() {
               <FlipCard
                 key={i}
                 icone={r.icone}
-                titulo={tDynamic(r.titulo)}
-                resumo={tDynamic(r.texto)}
-                detalhes={r.detalhes.map((d) => tDynamic(d))}
-                metrica={tDynamic(r.metrica)}
-                badge={tDynamic(r.badge)}
+                titulo={r.titulo}
+                resumo={r.texto}
+                detalhes={r.detalhes}
+                metrica={r.metrica}
+                badge={r.badge}
                 corTexto={r.cor}
                 corFundo="bg-[#0B1120]/90"
                 corBorda="border-white/10"
@@ -1237,36 +1237,36 @@ export default function Home() {
               <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
                 <MessageCircle size={20} className="mt-0.5 shrink-0 text-emerald-300" />
                 <div>
-                  <p className="text-sm font-bold text-white">Responde com dados reais</p>
+                  <p className="text-sm font-bold text-white">{tDynamic('Responde com dados reais')}</p>
                   <p className="mt-0.5 text-xs leading-relaxed text-emerald-100/70">
-                    Preço, ingredientes, taxa de entrega e horário vêm do seu cadastro. Nunca inventa valor nem desconto.
+                    {tDynamic('Preço, ingredientes, taxa de entrega e horário vêm do seu cadastro. Nunca inventa valor nem desconto.')}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
                 <QrCode size={20} className="mt-0.5 shrink-0 text-emerald-300" />
                 <div>
-                  <p className="text-sm font-bold text-white">Manda o link do cardápio</p>
+                  <p className="text-sm font-bold text-white">{tDynamic('Manda o link do cardápio')}</p>
                   <p className="mt-0.5 text-xs leading-relaxed text-emerald-100/70">
-                    Na hora de pedir, o cliente monta o carrinho no seu site com preço real — a IA não fecha pedido sozinha.
+                    {tDynamic('Na hora de pedir, o cliente monta o carrinho no seu site com preço real — a IA não fecha pedido sozinha.')}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
                 <ClipboardList size={20} className="mt-0.5 shrink-0 text-emerald-300" />
                 <div>
-                  <p className="text-sm font-bold text-white">Pedido cai no painel</p>
+                  <p className="text-sm font-bold text-white">{tDynamic('Pedido cai no painel')}</p>
                   <p className="mt-0.5 text-xs leading-relaxed text-emerald-100/70">
-                    Chega como "Novo", com selo WhatsApp. Você aceita como qualquer pedido — decisão sempre sua.
+                    {tDynamic('Chega como "Novo", com selo WhatsApp. Você aceita como qualquer pedido — decisão sempre sua.')}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
                 <ShieldCheck size={20} className="mt-0.5 shrink-0 text-emerald-300" />
                 <div>
-                  <p className="text-sm font-bold text-white">Seguro por desenho</p>
+                  <p className="text-sm font-bold text-white">{tDynamic('Seguro por desenho')}</p>
                   <p className="mt-0.5 text-xs leading-relaxed text-emerald-100/70">
-                    Assunto de saúde, como alergias, chama você na hora. E você pode desligar a IA quando quiser.
+                    {tDynamic('Assunto de saúde, como alergias, chama você na hora. E você pode desligar a IA quando quiser.')}
                   </p>
                 </div>
               </div>
@@ -1283,26 +1283,26 @@ export default function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-amber-400 backdrop-blur-md">
               <Sparkles size={14} className="text-amber-400" />
-              Por Que o MiseOn é Infinitamente Superior
+              {tDynamic('Por Que o MiseOn é Infinitamente Superior')}
             </span>
             <h2 className="mt-5 font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-              "Todo sistema te diz quanto você vendeu.{' '}
+              "{tDynamic('Todo sistema te diz quanto você vendeu.')}{' '}
               <span className="bg-gradient-to-r from-[#FF8A5C] via-[#FC5B24] to-[#6B9EFF] bg-clip-text text-transparent">
-                O MiseOn é o único que te mostra quanto sobrou no bolso
+                {tDynamic('O MiseOn é o único que te mostra quanto sobrou no bolso')}
               </span>
-               — e por quê."
+              {' '}{tDynamic('— e por quê.')}"
             </h2>
             <p className="mt-5 text-base leading-relaxed text-slate-300 sm:text-lg">
-              Enquanto concorrentes te vendem robôs travados por botões que apenas disparam links secos e seguram o seu dinheiro por semanas, o MiseOn entrega um ecossistema completo de vendas, inteligência de IA e gestão financeira real.
+              {tDynamic('Enquanto concorrentes te vendem robôs travados por botões que apenas disparam links secos e seguram o seu dinheiro por semanas, o MiseOn entrega um ecossistema completo de vendas, inteligência de IA e gestão financeira real.')}
             </p>
           </div>
 
           {/* Tabela Comparativa de Alta Conversão */}
           <div className="mt-14 overflow-hidden rounded-3xl border border-white/15 bg-white/5 shadow-2xl backdrop-blur-xl">
             <div className="grid grid-cols-12 bg-[#0F172A]/90 p-4 sm:p-6 text-xs font-black uppercase tracking-wider text-slate-400 border-b border-white/10">
-              <div className="col-span-5 sm:col-span-4">Recurso & Inteligência</div>
-              <div className="col-span-3 sm:col-span-4 text-center text-rose-400">Sistemas Tradicionais</div>
-              <div className="col-span-4 text-center text-emerald-400 font-extrabold">MiseOn (Onda 2026)</div>
+              <div className="col-span-5 sm:col-span-4">{tDynamic('Recurso & Inteligência')}</div>
+              <div className="col-span-3 sm:col-span-4 text-center text-rose-400">{tDynamic('Sistemas Tradicionais')}</div>
+              <div className="col-span-4 text-center text-emerald-400 font-extrabold">{tDynamic('MiseOn (Onda 2026)')}</div>
             </div>
 
             <div className="divide-y divide-white/10 text-xs sm:text-sm">
@@ -1347,13 +1347,13 @@ export default function Home() {
                 <div key={idx} className={`grid grid-cols-12 items-center p-4 sm:p-6 transition hover:bg-white/5 ${row.destaque ? 'bg-white/[0.02]' : ''}`}>
                   <div className="col-span-5 sm:col-span-4 font-bold text-white flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#FC5B24]" />
-                    {row.recurso}
+                    {tDynamic(row.recurso)}
                   </div>
                   <div className="col-span-3 sm:col-span-4 text-center text-slate-400 text-xs sm:text-sm px-2">
-                    {row.concorrente}
+                    {tDynamic(row.concorrente)}
                   </div>
                   <div className="col-span-4 text-center font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-2.5 sm:p-3 text-xs sm:text-sm shadow-inner">
-                    ✨ {row.miseon}
+                    ✨ {tDynamic(row.miseon)}
                   </div>
                 </div>
               ))}
@@ -1365,7 +1365,7 @@ export default function Home() {
               to="/cadastre-se"
               className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-extrabold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105 hover:brightness-110"
             >
-              Quero o Sistema Mais Completo do Mercado <ArrowRight size={18} />
+              {tDynamic('Quero o Sistema Mais Completo do Mercado')} <ArrowRight size={18} />
             </Link>
           </div>
         </div>
@@ -1379,29 +1379,29 @@ export default function Home() {
             <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
               <div>
                 <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-1.5 text-xs font-extrabold uppercase tracking-widest text-emerald-300">
-                  <Scale size={14} /> Fim do Desperdício no Buffet
+                  <Scale size={14} /> {tDynamic('Fim do Desperdício no Buffet')}
                 </span>
                 <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-                  Seu restaurante a quilo vendendo com{' '}
+                  {tDynamic('Seu restaurante a quilo vendendo com')}{' '}
                   <span className="bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
-                    Peso Inteligente
+                    {tDynamic('Peso Inteligente')}
                   </span>
                 </h2>
                 <p className="mt-4 text-base leading-relaxed text-slate-300">
-                  Chega de perder dinheiro no buffet por falta de controle de estoque. Com a tecnologia de peso do MiseOn, cada grama servida no prato baixa exatamente a proporção de insumos cadastrada na Ficha Técnica.
+                  {tDynamic('Chega de perder dinheiro no buffet por falta de controle de estoque. Com a tecnologia de peso do MiseOn, cada grama servida no prato baixa exatamente a proporção de insumos cadastrada na Ficha Técnica.')}
                 </p>
                 <div className="mt-6 space-y-3">
                   <div className="flex items-start gap-3 text-sm text-slate-200">
                     <Check size={18} className="mt-0.5 shrink-0 text-emerald-400 font-bold" />
-                    <span><b>Baixa Exata de Estoque:</b> 0.350kg no prato = baixa proporcional exata no estoque de insumos.</span>
+                    <span><b>{tDynamic('Baixa Exata de Estoque:')}</b> {tDynamic('0.350kg no prato = baixa proporcional exata no estoque de insumos.')}</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm text-slate-200">
                     <Check size={18} className="mt-0.5 shrink-0 text-emerald-400 font-bold" />
-                    <span><b>Preço R$/kg Flexível:</b> Atualize o valor por quilo sempre que a carne ou insumos oscilarem.</span>
+                    <span><b>{tDynamic('Preço R$/kg Flexível:')}</b> {tDynamic('Atualize o valor por quilo sempre que a carne ou insumos oscilarem.')}</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm text-slate-200">
                     <Check size={18} className="mt-0.5 shrink-0 text-emerald-400 font-bold" />
-                    <span><b>Operação Híbrida:</b> Prato por quilo + marmitas a peso + bebidas unitárias no mesmo caixa.</span>
+                    <span><b>{tDynamic('Operação Híbrida:')}</b> {tDynamic('Prato por quilo + marmitas a peso + bebidas unitárias no mesmo caixa.')}</span>
                   </div>
                 </div>
                 <div className="mt-8">
@@ -1409,26 +1409,26 @@ export default function Home() {
                     to="/sistema-para-restaurante-por-quilo"
                     className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-8 py-4 font-['Sora'] text-sm font-extrabold text-slate-950 shadow-lg shadow-emerald-500/25 transition hover:scale-105 hover:bg-emerald-400"
                   >
-                    Conhecer Módulo por Quilo <ArrowRight size={18} />
+                    {tDynamic('Conhecer Módulo por Quilo')} <ArrowRight size={18} />
                   </Link>
                 </div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/40 p-6 backdrop-blur-md">
                 <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
-                  <span className="text-xs font-bold uppercase text-emerald-400">Simulação de Venda por Peso</span>
+                  <span className="text-xs font-bold uppercase text-emerald-400">{tDynamic('Simulação de Venda por Peso')}</span>
                   <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">PDV Express</span>
                 </div>
                 <div className="space-y-3 text-xs">
                   <div className="flex justify-between rounded-xl bg-white/5 p-3">
-                    <span className="font-semibold text-slate-200">Feijoada por Quilo (R$ 69,90/kg)</span>
+                    <span className="font-semibold text-slate-200">{tDynamic('Feijoada por Quilo (R$ 69,90/kg)')}</span>
                     <span className="font-mono font-bold text-emerald-400">0,420 kg</span>
                   </div>
                   <div className="flex justify-between rounded-xl bg-white/5 p-3">
-                    <span className="font-semibold text-slate-200">Baixa automática em estoque</span>
-                    <span className="font-mono text-slate-300">-126g Feijão / -84g Carne</span>
+                    <span className="font-semibold text-slate-200">{tDynamic('Baixa automática em estoque')}</span>
+                    <span className="font-mono text-slate-300">-126g {tDynamic('Feijão')} / -84g {tDynamic('Carne')}</span>
                   </div>
                   <div className="flex justify-between border-t border-white/10 pt-3 text-sm font-bold text-white">
-                    <span>Subtotal Prato</span>
+                    <span>{tDynamic('Subtotal Prato')}</span>
                     <span className="text-emerald-400">R$ 29,35</span>
                   </div>
                 </div>
@@ -1450,29 +1450,27 @@ export default function Home() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-orange-200 backdrop-blur-md">
-                <ScanLine size={13} /> Leitura de NFC-e direto na SEFAZ
+                <ScanLine size={13} /> {tDynamic('Leitura de NFC-e direto na SEFAZ')}
               </span>
               <h2 className="mt-5 font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-                Você comprou.{' '}
+                {tDynamic('Você comprou.')}{' '}
                 <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">
-                  O estoque já sabe.
+                  {tDynamic('O estoque já sabe.')}
                 </span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-orange-100/85">
-                Todo sistema de gestão morre no mesmo ponto: alguém precisa sentar e cadastrar item por item.
-                É por isso que a maioria dos restaurantes desiste do controle de estoque na segunda semana.
+                {tDynamic('Todo sistema de gestão morre no mesmo ponto: alguém precisa sentar e cadastrar item por item. É por isso que a maioria dos restaurantes desiste do controle de estoque na segunda semana.')}
               </p>
               <p className="mt-4 text-base leading-relaxed text-orange-100/85">
-                No MiseOn, você volta do mercado e <b className="text-white">escaneia o QR Code do cupom fiscal</b>.
-                O sistema busca a nota na SEFAZ e traz a compra inteira — produto, quantidade, unidade e o
-                custo real de cada item. Você confere, ajusta o que quiser e dá entrada de tudo de uma vez.
+                {tDynamic('No MiseOn, você volta do mercado e')} <b className="text-white">{tDynamic('escaneia o QR Code do cupom fiscal')}</b>.
+                {tDynamic('O sistema busca a nota na SEFAZ e traz a compra inteira — produto, quantidade, unidade e o custo real de cada item. Você confere, ajusta o que quiser e dá entrada de tudo de uma vez.')}
               </p>
 
               <div className="mt-6 grid gap-2.5 sm:grid-cols-3">
                 {[
-                  { n: '1', t: 'Escaneie', d: 'QR Code do cupom, pela câmera ou por foto' },
-                  { n: '2', t: 'Confira', d: 'Desmarque o que não é da cozinha' },
-                  { n: '3', t: 'Pronto', d: 'Estoque, custo e lote atualizados' },
+                  { n: '1', t: tDynamic('Escaneie'), d: tDynamic('QR Code do cupom, pela câmera ou por foto') },
+                  { n: '2', t: tDynamic('Confira'), d: tDynamic('Desmarque o que não é da cozinha') },
+                  { n: '3', t: tDynamic('Pronto'), d: tDynamic('Estoque, custo e lote atualizados') },
                 ].map((p) => (
                   <div key={p.n} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                     <div className="font-['Sora'] text-2xl font-black text-orange-400">{p.n}</div>
@@ -1487,7 +1485,7 @@ export default function Home() {
                   to="/cadastre-se"
                   className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-['Sora'] text-sm font-bold text-orange-950 shadow-xl transition hover:scale-105 hover:bg-orange-50"
                 >
-                  Quero parar de digitar estoque <ArrowRight size={16} />
+                  {tDynamic('Quero parar de digitar estoque')} <ArrowRight size={16} />
                 </Link>
               </div>
             </div>
@@ -1495,24 +1493,24 @@ export default function Home() {
             <div className="grid gap-3">
               {[
                 {
-                  t: 'A compra inteira, de uma vez',
-                  d: 'Cupom de mercado com dezenas de itens entra em um scan. Cada linha vem com descrição, quantidade, unidade e o valor que você realmente pagou — lido da nota oficial, não digitado.',
+                  t: tDynamic('A compra inteira, de uma vez'),
+                  d: tDynamic('Cupom de mercado com dezenas de itens entra em um scan. Cada linha vem com descrição, quantidade, unidade e o valor que você realmente pagou — lido da nota oficial, não digitado.'),
                 },
                 {
-                  t: 'Você manda no que entra',
-                  d: 'Comprou algo pessoal junto? Desmarque. Comprou ovo em bandeja e usa em unidade? Diga que 1 bandeja rende 20 — e o estoque entra em unidade, do jeito que a sua cozinha trabalha.',
+                  t: tDynamic('Você manda no que entra'),
+                  d: tDynamic('Comprou algo pessoal junto? Desmarque. Comprou ovo em bandeja e usa em unidade? Diga que 1 bandeja rende 20 — e o estoque entra em unidade, do jeito que a sua cozinha trabalha.'),
                 },
                 {
-                  t: 'Na segunda compra, ele já sabe',
-                  d: 'O MiseOn guarda o vínculo entre o código daquele mercado e o seu insumo. A próxima nota do mesmo fornecedor cai reconhecida — o trabalho de conferência só diminui.',
+                  t: tDynamic('Na segunda compra, ele já sabe'),
+                  d: tDynamic('O MiseOn guarda o vínculo entre o código daquele mercado e o seu insumo. A próxima nota do mesmo fornecedor cai reconhecida — o trabalho de conferência só diminui.'),
                 },
                 {
-                  t: 'A mesma nota nunca entra duas vezes',
-                  d: 'Escaneou de novo sem lembrar? Ele avisa a data em que aquela nota já foi lançada, em vez de dobrar seu estoque em silêncio e estragar o seu CMV.',
+                  t: tDynamic('A mesma nota nunca entra duas vezes'),
+                  d: tDynamic('Escaneou de novo sem lembrar? Ele avisa a data em que aquela nota já foi lançada, em vez de dobrar seu estoque em silêncio e estragar o seu CMV.'),
                 },
                 {
-                  t: 'Custo real, CMV honesto',
-                  d: 'Cada entrada abre um lote PEPS com o preço daquela compra. Quando o preço da carne sobe, o custo do seu prato sobe junto — sem você refazer conta nenhuma.',
+                  t: tDynamic('Custo real, CMV honesto'),
+                  d: tDynamic('Cada entrada abre um lote PEPS com o preço daquela compra. Quando o preço da carne sobe, o custo do seu prato sobe junto — sem você refazer conta nenhuma.'),
                 },
               ].map((c) => (
                 <div key={c.t} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15">
@@ -1564,20 +1562,20 @@ export default function Home() {
                   </h3>
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-slate-300">
-                  Cadastre insumos por categoria (<i>Ingrediente, Revenda Direta, Embalagem, Limpeza</i>) e atribua o setor físico (<i>Geladeira, Freezer, Dispensa, Armário</i>).
+                  Cadastre insumos por categoria (<i>Ingrediente, Revenda Direta, Embalagem, Limpeza</i>{tDynamic(") e atribua o setor físico (")}<i>{tDynamic("Geladeira, Freezer, Dispensa, Armário")}</i>).
                 </p>
                 <div className="mt-4 space-y-2 rounded-2xl bg-black/40 p-4 text-xs">
                   <div className="flex items-center justify-between text-slate-200">
-                    <span>Unidade de Compra:</span>
+                    <span>{tDynamic("Unidade de Compra:")}</span>
                     <span className="font-bold text-blue-300">Pacote / Fardo / Caixa</span>
                   </div>
                   <div className="flex items-center justify-between text-slate-200 border-t border-white/10 pt-2">
-                    <span>Conversão de Uso:</span>
+                    <span>{tDynamic("Conversão de Uso:")}</span>
                     <span className="font-bold text-emerald-400">Gramas (g) / ML / Fatias</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-amber-300 border-t border-white/10 pt-2">
                     <AlertTriangle size={13} className="shrink-0" />
-                    <span>Alerta automático de estoque crítico/risco.</span>
+                    <span>{tDynamic("Alerta automático de estoque crítico/risco.")}</span>
                   </div>
                 </div>
               </div>
@@ -1600,15 +1598,15 @@ export default function Home() {
                 </p>
                 <div className="mt-4 space-y-2 rounded-2xl bg-black/40 p-4 text-xs">
                   <div className="flex items-center justify-between text-slate-200">
-                    <span>Produção por Lote:</span>
-                    <span className="font-bold text-orange-300">Ordens de Serviço (OS)</span>
+                    <span>{tDynamic("Produção por Lote:")}</span>
+                    <span className="font-bold text-orange-300">{tDynamic("Ordens de Serviço (OS)")}</span>
                   </div>
                   <div className="flex items-center justify-between text-slate-200 border-t border-white/10 pt-2">
-                    <span>Controle de Validade:</span>
-                    <span className="font-bold text-white">Horas / Dias com Timer</span>
+                    <span>{tDynamic("Controle de Validade:")}</span>
+                    <span className="font-bold text-white">{tDynamic("Horas / Dias com Timer")}</span>
                   </div>
                   <div className="flex items-center justify-between text-[#FF4D4D] border-t border-white/10 pt-2 font-bold">
-                    <span>Sinalização de Risco:</span>
+                    <span>{tDynamic("Sinalização de Risco:")}</span>
                     <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px]">LOTE VENCIDO</span>
                   </div>
                 </div>
@@ -1636,12 +1634,12 @@ export default function Home() {
                     <span className="font-mono font-bold text-emerald-400">R$ Total Mapeado</span>
                   </div>
                   <div className="flex items-center justify-between text-slate-200 border-t border-white/10 pt-2">
-                    <span>Maior Alocação:</span>
-                    <span className="font-bold text-purple-300">Custo unitário por Lote</span>
+                    <span>{tDynamic("Maior Alocação:")}</span>
+                    <span className="font-bold text-purple-300">{tDynamic("Custo unitário por Lote")}</span>
                   </div>
                   <div className="flex items-center justify-between text-slate-200 border-t border-white/10 pt-2">
                     <span>Rastreabilidade:</span>
-                    <span className="font-bold text-blue-300">Esteiras 3D por Setor</span>
+                    <span className="font-bold text-blue-300">{tDynamic("Esteiras 3D por Setor")}</span>
                   </div>
                 </div>
               </div>
@@ -1702,7 +1700,7 @@ export default function Home() {
       <section className="bg-white py-20 sm:py-24 dark:bg-transparent">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">Histórias reais</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic("Histórias reais")}</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
               De quem já tentou de tudo, ou estava apenas começando
             </h2>
@@ -1809,12 +1807,12 @@ export default function Home() {
                 <div className="mt-8 flex flex-col">
                   {planoAnual ? (
                     <div className="flex items-center gap-3 mb-1">
-                      <span className="text-sm font-medium text-slate-500 line-through">R$ 169,90/mês</span>
+                      <span className="text-sm font-medium text-slate-500 line-through">{tDynamic("R$ 169,90/mês")}</span>
                       <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold tracking-wider text-emerald-400 uppercase">Economize R$ 240,00/ano</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-bold text-emerald-400">Pix com 5% OFF: R$ 161,40/mês</span>
+                      <span className="text-xs font-bold text-emerald-400">{tDynamic("Pix com 5% OFF: R$ 161,40/mês")}</span>
                     </div>
                   )}
                   <div className="flex items-baseline gap-1">
@@ -1836,7 +1834,7 @@ export default function Home() {
                     Testar 30 Dias Grátis <ArrowRight size={18} />
                   </Link>
                   <p className="mt-4 text-center text-[11px] font-medium text-slate-400">
-                    <strong className="text-slate-200">Sem cartão no cadastro.</strong> Tolerância de 7 dias pós-vencimento.
+                    <strong className="text-slate-200">{tDynamic("Sem cartão no cadastro.")}</strong> Tolerância de 7 dias pós-vencimento.
                   </p>
                 </div>
               </div>
@@ -1855,10 +1853,10 @@ export default function Home() {
                       <ChefHat size={16} className="text-emerald-400" /> Operação e Vendas
                     </h5>
                     <ul className="space-y-2.5 text-xs text-slate-400">
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">PDV Frente de Caixa</strong> inteligente</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">Cardápio QR Code</strong> p/ mesas</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">Integração iFood</strong> nativa</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">Gestão de Comandas</strong> na palma</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("PDV Frente de Caixa")}</strong> inteligente</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Cardápio QR Code")}</strong> p/ mesas</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Integração iFood")}</strong> nativa</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Gestão de Comandas")}</strong> na palma</span></li>
                     </ul>
                   </div>
 
@@ -1868,10 +1866,10 @@ export default function Home() {
                       <MessageCircle size={16} className="text-blue-400" /> IA e Delivery
                     </h5>
                     <ul className="space-y-2.5 text-xs text-slate-400">
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">Robô WhatsApp</strong> (API Oficial Meta)</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">Cardápio Online</strong> livre de taxas</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">Impressão Automática</strong> de pedidos</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">Cozinha KDS</strong> em telas</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Robô WhatsApp")}</strong> (API Oficial Meta)</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Cardápio Online")}</strong> {tDynamic("livre de taxas")}</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Impressão Automática")}</strong> {tDynamic("de pedidos")}</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">Cozinha KDS</strong> {tDynamic("em telas")}</span></li>
                     </ul>
                   </div>
 
@@ -1881,10 +1879,10 @@ export default function Home() {
                       <Boxes size={16} className="text-orange-400" /> Estoque e Precisão
                     </h5>
                     <ul className="space-y-2.5 text-xs text-slate-400">
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-orange-500/70 mt-0.5" /> <span><strong className="text-slate-300">Ficha Técnica</strong> avançada (CMV)</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-orange-500/70 mt-0.5" /> <span><strong className="text-slate-300">Baixa automática</strong> por venda</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-orange-500/70 mt-0.5" /> <span><strong className="text-slate-300">Controle de Lotes</strong> e PEPs</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-orange-500/70 mt-0.5" /> <span><strong className="text-slate-300">Visualização 3D</strong> do espaço</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-orange-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Ficha Técnica")}</strong> {tDynamic("avançada (CMV)")}</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-orange-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Baixa automática")}</strong> {tDynamic("por venda")}</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-orange-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Controle de Lotes")}</strong> e PEPs</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-orange-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Visualização 3D")}</strong> {tDynamic("do espaço")}</span></li>
                     </ul>
                   </div>
 
@@ -1894,10 +1892,10 @@ export default function Home() {
                       <Wallet size={16} className="text-indigo-400" /> Controle e Equipe
                     </h5>
                     <ul className="space-y-2.5 text-xs text-slate-400">
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">Pix Automático (Efí)</strong> direto na conta</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">Caixa e Relatórios</strong> analíticos</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">Usuários Ilimitados</strong> com permissões</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">Atendimento Humano</strong> prioritário</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Pix Automático (Efí)")}</strong> direto na conta</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Caixa e Relatórios")}</strong> {tDynamic("analíticos")}</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Usuários Ilimitados")}</strong> {tDynamic("com permissões")}</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">Atendimento Humano</strong> {tDynamic("prioritário")}</span></li>
                     </ul>
                   </div>
                 </div>
@@ -1938,7 +1936,7 @@ export default function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
               <div>
-                <span className="text-[10px] font-black uppercase text-[#FC5B24]">Gestão Financeira</span>
+                <span className="text-[10px] font-black uppercase text-[#FC5B24]">{tDynamic("Gestão Financeira")}</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
                   A Evolução do CMV: Do Caderno ao Custeio PEPS 3D
                 </h3>
@@ -1953,7 +1951,7 @@ export default function Home() {
 
             <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
               <div>
-                <span className="text-[10px] font-black uppercase text-blue-400">Operação & KDS</span>
+                <span className="text-[10px] font-black uppercase text-blue-400">{tDynamic("Operação & KDS")}</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
                   O Fim do Papel na Cozinha com KDS Kanban
                 </h3>
@@ -1983,7 +1981,7 @@ export default function Home() {
 
             <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
               <div>
-                <span className="text-[10px] font-black uppercase text-amber-400">Restaurante por Quilo</span>
+                <span className="text-[10px] font-black uppercase text-amber-400">{tDynamic("Restaurante por Quilo")}</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
                   Perda de Cocção & Peso Inteligente no Buffet
                 </h3>

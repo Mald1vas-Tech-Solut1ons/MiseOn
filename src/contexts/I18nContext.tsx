@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Idioma, DICIONARIO, ChaveDicionario, tDynamic } from '../data/i18nData';
 
 export type { Idioma, ChaveDicionario };
@@ -35,19 +35,30 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     document.documentElement.lang = idioma;
   }, [idioma]);
 
-  const t = (chave: ChaveDicionario): string => {
-    return DICIONARIO[idioma]?.[chave] || DICIONARIO['pt-BR']?.[chave] || chave;
-  };
-
-  const traduzirDinamico = (texto: string): string => {
-    return tDynamic(texto, idioma);
-  };
-
-  return (
-    <I18nContext.Provider value={{ idioma, setIdioma, t, tDynamic: traduzirDinamico }}>
-      {children}
-    </I18nContext.Provider>
+  // `t` e `tDynamic` entram em array de dependência de useEffect/useCallback
+  // pelas telas (PainelTV, por exemplo). Recriadas a cada render do provider,
+  // mudavam de identidade toda vez e reexecutavam esses efeitos sem motivo —
+  // no Painel de TV isso chega a repetir a chamada de voz da senha.
+  // Com useCallback, só mudam quando o idioma muda de verdade.
+  const t = useCallback(
+    (chave: ChaveDicionario): string =>
+      DICIONARIO[idioma]?.[chave] || DICIONARIO['pt-BR']?.[chave] || chave,
+    [idioma],
   );
+
+  const traduzirDinamico = useCallback(
+    (texto: string): string => tDynamic(texto, idioma),
+    [idioma],
+  );
+
+  // O value também precisa ser estável: um objeto novo a cada render faz todo
+  // consumidor do contexto re-renderizar, mesmo sem troca de idioma.
+  const valor = useMemo(
+    () => ({ idioma, setIdioma, t, tDynamic: traduzirDinamico }),
+    [idioma, t, traduzirDinamico],
+  );
+
+  return <I18nContext.Provider value={valor}>{children}</I18nContext.Provider>;
 };
 
 export const useI18n = () => useContext(I18nContext);

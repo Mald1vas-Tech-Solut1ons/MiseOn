@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { X, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -36,6 +36,8 @@ import { getOptimizedImageUrl } from '../../lib/cdn';
    na hora, a conta fecha depois no Mapa de Mesas.
    ───────────────────────────────────────────────────────────── */
 
+import { useI18n } from '../../contexts/I18nContext';
+
 type EtapaVenda = 'CARRINHO' | 'PAGANDO' | 'PIX_AGUARDANDO' | 'SUCESSO';
 type ModoPDV = 'BALCAO' | 'MESA';
 
@@ -50,6 +52,7 @@ interface VendaConcluida {
 }
 
 export default function PDV() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const toast = useToast();
 
@@ -92,7 +95,7 @@ export default function PDV() {
   useRealtimeNotifications({ lojaId, contexto: 'PDV', modoPdv: modo });
 
   /* ── carregamento ── */
-  const carregarCatalogo = async () => {
+  const carregarCatalogo = useCallback(async () => {
     const [{ data: prods }, { data: cats }, { data: lj }, { data: mesasData }] = await Promise.all([
       supabase.from('produtos').select('*, grupos_opcoes(*, opcoes(*))').eq('loja_id', lojaId).eq('disponivel', true).order('ordem'),
       supabase.from('categorias').select('id, nome').eq('loja_id', lojaId).eq('ativo', true).order('ordem'),
@@ -103,9 +106,9 @@ export default function PDV() {
     setCategorias(cats ?? []);
     setLoja((lj as Loja) ?? null);
     setMesas((mesasData as Mesa[]) ?? []);
-  };
+  }, [lojaId]);
 
-  const carregarCaixa = async () => {
+  const carregarCaixa = useCallback(async () => {
     const { data: t } = await supabase.from('caixa_turnos').select('*')
       .eq('loja_id', lojaId).eq('status', 'ABERTO').order('aberto_em', { ascending: false }).limit(1).maybeSingle();
     const turnoAtual = (t as CaixaTurno) ?? null;
@@ -126,15 +129,14 @@ export default function PDV() {
       return s + (pago ? Number(p.valor_total) : 0);
     }, 0);
     setDinheiroTurno(soma);
-  };
+  }, [lojaId]);
 
-   
   useEffect(() => {
     setTimeout(() => {
       carregarCatalogo();
       carregarCaixa();
     }, 0);
-  }, [lojaId]);
+  }, [lojaId, carregarCatalogo, carregarCaixa]);
 
   /* ── derivados ── */
   const produtosVisiveis = useMemo(() => {
@@ -362,7 +364,7 @@ export default function PDV() {
       clearTimeout(timeoutLimpeza);
       supabase.removeChannel(canal); 
     };
-  }, [etapa, pixInfo?.pedidoId]);
+  }, [etapa, pixInfo, carregarCaixa, toast, venda]);
 
   const imprimirVenda = async (template: 'COMANDA_COZINHA' | 'RECIBO_CLIENTE') => {
     if (!venda) return;
@@ -430,7 +432,7 @@ export default function PDV() {
   if (turno === undefined) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <MiseOnLoader status="Abrindo o PDV..." rows={2} />
+        <MiseOnLoader status={tDynamic('Abrindo o PDV...')} rows={2} />
       </div>
     );
   }
@@ -449,7 +451,7 @@ export default function PDV() {
         modo={modo}
         setModo={(m) => {
           setModo(m);
-          toast(m === 'BALCAO' ? 'Modo Balcão ativado' : 'Modo Mesa ativado', 'info');
+          toast(m === 'BALCAO' ? tDynamic('Modo Balcão ativado') : tDynamic('Modo Mesa ativado'), 'info');
         }}
         turno={turno}
         dinheiroGaveta={dinheiroGaveta}
@@ -459,7 +461,7 @@ export default function PDV() {
 
       {pedidoMesaOk && (
         <div className="flex items-center justify-between gap-2 border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/15 dark:text-emerald-400">
-          <span className="flex items-center gap-1.5"><Check size={13} /> Pedido #{pedidoMesaOk.numero} enviado para a Mesa {pedidoMesaOk.mesaNumero}!</span>
+          <span className="flex items-center gap-1.5"><Check size={13} /> {tDynamic('Pedido')} #{pedidoMesaOk.numero} {tDynamic('enviado para a Mesa')} {pedidoMesaOk.mesaNumero}!</span>
           <button onClick={() => setPedidoMesaOk(null)}><X size={13} /></button>
         </div>
       )}
@@ -467,10 +469,10 @@ export default function PDV() {
       {modo === 'MESA' && (
         <div className="border-b border-gray-200 bg-white px-4 py-2.5 dark:border-gray-800 dark:bg-gray-900">
           {mesas.length === 0 ? (
-            <p className="text-xs text-gray-400">Nenhuma mesa cadastrada ainda — crie mesas no Mapa de Mesas.</p>
+            <p className="text-xs text-gray-400">{tDynamic('Nenhuma mesa cadastrada ainda — crie mesas no Mapa de Mesas.')}</p>
           ) : (
             <div className="flex items-center gap-2 overflow-x-auto">
-              <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-gray-400">Mesa:</span>
+              <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-gray-400">{tDynamic('Mesa:')}</span>
               {mesas.map((m) => (
                 <button key={m.id} onClick={() => setMesaSelecionada(m)}
                   className={`shrink-0 rounded-full border-2 px-3.5 py-1.5 text-xs font-black transition ${mesaSelecionada?.id === m.id ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)] text-white' : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'}`}>

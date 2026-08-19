@@ -8,6 +8,7 @@ import {
 import { supabase } from '../../lib/supabase';
 import { fmt, type Pedido, type ProducaoPreparo } from '../../types';
 import type { CtxLoja } from './AdminLayout';
+import { useI18n } from '../../contexts/I18nContext';
 
 interface DadosDia {
   pedidosHoje: Pedido[];
@@ -42,6 +43,7 @@ function saudacao() {
 }
 
 export default function Dashboard() {
+  const { tDynamic } = useI18n();
   const ctx = useOutletContext<CtxLoja>();
   const { lojaId, lojaNome, lojaSlug, papel } = ctx;
   const [dados, setDados] = useState<DadosDia | null>(null);
@@ -247,20 +249,20 @@ export default function Dashboard() {
       {/* ── KPIs do dia ── */}
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><DollarSign size={12} /> Vendas hoje</p>
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><DollarSign size={12} /> {tDynamic('Vendas hoje')}</p>
           <p className="mt-1.5 text-xl font-black dark:text-gray-100">{fmt(resumo.faturamento)}</p>
         </div>
         <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><ShoppingBag size={12} /> Pedidos hoje</p>
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><ShoppingBag size={12} /> {tDynamic('Pedidos hoje')}</p>
           <p className="mt-1.5 text-xl font-black dark:text-gray-100">{resumo.qtd}</p>
         </div>
         <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><Ticket size={12} /> Ticket médio</p>
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><Ticket size={12} /> {tDynamic('Ticket médio')}</p>
           <p className="mt-1.5 text-xl font-black dark:text-gray-100">{fmt(resumo.ticket)}</p>
         </div>
         <Link to="/admin/pedidos" className="group rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-[var(--cor-primaria)]/40 dark:border-gray-800 dark:bg-gray-900">
           <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400">
-            <Flame size={12} /> Em andamento
+            <Flame size={12} /> {tDynamic('Em andamento')}
             {resumo.abertos > 0 && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />}
           </p>
           <p className="mt-1.5 flex items-center gap-2 text-xl font-black dark:text-gray-100">

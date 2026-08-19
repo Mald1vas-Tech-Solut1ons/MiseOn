@@ -22,6 +22,7 @@ import ModalNutricaoInsumo from '../../components/estoque/ModalNutricaoInsumo';
 import ScannerQRCodeModal from '../../components/estoque/ScannerQRCodeModal';
 import ModalImportarNFCe from '../../components/estoque/ModalImportarNFCe';
 import { BarChart3, QrCode } from 'lucide-react';
+import { useI18n } from '../../contexts/I18nContext';
 
 // Só insumo que vira comida tem tabela nutricional — álcool em gel,
 // uniforme e material de escritório não entram (mesmo critério do
@@ -30,6 +31,7 @@ const TIPOS_COM_NUTRICAO: readonly TipoItem[] = ['INGREDIENTE', 'PREPARO', 'REVE
 const ehTipoComNutricao = (tipo?: TipoItem) => !!tipo && TIPOS_COM_NUTRICAO.includes(tipo);
 
 export default function Estoque() {
+  const { tDynamic } = useI18n();
   const { lojaId, segmento_negocio, modulos_ativos } = useOutletContext<CtxLoja>();
   const isBuffet = segmento_negocio === 'SELF_SERVICE' || modulos_ativos?.balanca === true;
   const [tab, setTab] = useState<'insumos' | 'preparos' | 'custo3d' | 'rastreio3d'>('insumos');
@@ -484,33 +486,33 @@ export default function Estoque() {
     <div className="p-4 max-w-4xl mx-auto pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
          <div className="flex items-center gap-3">
-            <h2 className="font-black text-2xl dark:text-gray-100">Estoque Geral</h2>
+            <h2 className="font-black text-2xl dark:text-gray-100">{tDynamic('Estoque Geral')}</h2>
              {isBuffet && (
                <button
                  onClick={() => setModalBuffetAberto(true)}
                  className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md hover:brightness-110 transition"
                >
-                 <Scale size={15} /> Reposição de Cubas (Buffet)
+                 <Scale size={15} /> {tDynamic('Reposição de Cubas (Buffet)')}
                </button>
              )}
              {tab === 'insumos' && (
                <>
                  <button onClick={() => setInventarioAberto(true)}
                    className="flex items-center gap-1.5 rounded-xl border border-purple-200 px-3.5 py-1.5 text-xs font-bold text-purple-600 transition-colors hover:bg-purple-50 dark:border-purple-900/50 dark:text-purple-400 dark:hover:bg-purple-900/20">
-                   <ClipboardCheck size={15} /> Inventário
+                   <ClipboardCheck size={15} /> {tDynamic('Inventário')}
                  </button>
                  <button onClick={() => setTransformando(null)}
                    className="flex items-center gap-1.5 rounded-xl border border-orange-200 px-3.5 py-1.5 text-xs font-bold text-orange-600 transition-colors hover:bg-orange-50 dark:border-orange-900/50 dark:text-orange-400 dark:hover:bg-orange-900/20">
-                   <Scissors size={15} /> Monta / Desmonta
+                   <Scissors size={15} /> {tDynamic('Monta / Desmonta')}
                  </button>
                </>
              )}
          </div>
          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shadow-inner">
-           <button data-tour="tour-estoque-aba-insumos" onClick={() => setTab('insumos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'insumos' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Matérias-Primas</button>
-           <button data-tour="tour-estoque-aba-preparos" onClick={() => setTab('preparos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'preparos' ? 'bg-white dark:bg-gray-900 shadow-sm text-orange-600 dark:text-orange-500' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Receitas & Preparos</button>
-           <button data-tour="tour-estoque-aba-3d" onClick={() => setTab('custo3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'custo3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Custo 3D</button>
-           <button data-tour="tour-estoque-aba-rastreio3d" onClick={() => setTab('rastreio3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'rastreio3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-emerald-600 dark:text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>Rastreio 3D</button>
+           <button data-tour="tour-estoque-aba-insumos" onClick={() => setTab('insumos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'insumos' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Matérias-Primas')}</button>
+           <button data-tour="tour-estoque-aba-preparos" onClick={() => setTab('preparos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'preparos' ? 'bg-white dark:bg-gray-900 shadow-sm text-orange-600 dark:text-orange-500' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Receitas & Preparos')}</button>
+           <button data-tour="tour-estoque-aba-3d" onClick={() => setTab('custo3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'custo3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Custo 3D')}</button>
+           <button data-tour="tour-estoque-aba-rastreio3d" onClick={() => setTab('rastreio3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'rastreio3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-emerald-600 dark:text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Rastreio 3D')}</button>
          </div>
       </div>
 
@@ -553,17 +555,17 @@ export default function Estoque() {
       <div className="mb-6 rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 p-4 text-white shadow-lg shadow-orange-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <p className="flex items-center gap-2 font-black text-lg">
-            <QrCode size={22} className="animate-bounce" /> Importar Cupom de Mercado (NFC-e SP)
+            <QrCode size={22} className="animate-bounce" /> {tDynamic('Importar Cupom de Mercado (NFC-e SP)')}
           </p>
           <p className="text-xs text-orange-100 mt-0.5">
-            Escaneie o QR Code do cupom fiscal e lance 15 compras de supermercado em menos de 5 segundos no estoque.
+            {tDynamic('Escaneie o QR Code do cupom fiscal e lance 15 compras de supermercado em menos de 5 segundos no estoque.')}
           </p>
         </div>
         <button
           onClick={() => setModalScannerAberto(true)}
           className="shrink-0 flex items-center gap-2 bg-white text-orange-600 hover:bg-orange-50 font-black text-sm px-5 py-3 rounded-xl shadow-md transition-all hover:scale-105"
         >
-          <QrCode size={18} /> Escanear Nota Fiscal
+          <QrCode size={18} /> {tDynamic('Escanear Nota Fiscal')}
         </button>
       </div>
 
@@ -573,22 +575,22 @@ export default function Estoque() {
            <div className="flex items-center gap-3">
              <p className="text-sm font-bold flex items-center gap-2 dark:text-gray-100">
                {editando ? <Pencil size={18} className="text-blue-500" /> : <Calculator size={18} className="text-[var(--cor-primaria)]" />} 
-               {editando ? 'Editar Insumo' : 'Cadastrar Insumo'}
+               {editando ? tDynamic('Editar Insumo') : tDynamic('Cadastrar Insumo')}
              </p>
              <div className="flex rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
                <button type="button" onClick={() => setModoCadastro('RAPIDO')}
                  className={`rounded px-3 py-1 text-xs font-bold transition-all ${modoCadastro === 'RAPIDO' ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
-                 ⚡ Rápido (Direto)
+                 ⚡ {tDynamic('Rápido (Direto)')}
                </button>
                <button type="button" onClick={() => setModoCadastro('AVANCADO')}
                  className={`rounded px-3 py-1 text-xs font-bold transition-all ${modoCadastro === 'AVANCADO' ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
-                 ⚙️ Conversão de Embalagem
+                 ⚙️ {tDynamic('Conversão de Embalagem')}
                </button>
              </div>
            </div>
            {editando && (
              <button onClick={cancelarEdicao} className="text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-               Cancelar Edição
+               {tDynamic('Cancelar Edição')}
              </button>
            )}
         </div>
@@ -597,11 +599,11 @@ export default function Estoque() {
            {/* Linha 1: Dados básicos */}
            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <label data-tour="tour-estoque-campo-nome" className="block">
-                 <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Nome do Insumo / Produto</span>
-                 <input id="input-nome-insumo" className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 focus:border-[var(--cor-primaria)] focus:outline-none transition-colors" placeholder="ex: Queijo Mussarela, Coca-Cola Lata" value={nome} onChange={e => setNome(e.target.value)} />
+                 <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{tDynamic('Nome do Insumo / Produto')}</span>
+                 <input id="input-nome-insumo" className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 focus:border-[var(--cor-primaria)] focus:outline-none transition-colors" placeholder={tDynamic('ex: Queijo Mussarela, Coca-Cola Lata')} value={nome} onChange={e => setNome(e.target.value)} />
               </label>
               <label className="block">
-                 <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Categoria</span>
+                 <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{tDynamic('Categoria')}</span>
                  <select className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 focus:border-[var(--cor-primaria)] focus:outline-none"
                    value={isNovaCategoria ? 'nova' : categoriaInsumo}
                    onChange={e => {
@@ -613,14 +615,14 @@ export default function Estoque() {
                      }
                    }}>
                    {categoriasUnicas.map(cat => (
-                     <option key={cat} value={cat}>{cat}</option>
+                     <option key={cat} value={cat}>{tDynamic(cat)}</option>
                    ))}
-                   <option value="nova" className="font-bold text-orange-600">+ Cadastrar Nova Categoria...</option>
+                   <option value="nova" className="font-bold text-orange-600">+ {tDynamic('Cadastrar Nova Categoria...')}</option>
                  </select>
                  {isNovaCategoria && (
                    <div className="mt-2 animate-in fade-in slide-in-from-top-1">
                      <input className="w-full rounded-xl border border-orange-300 bg-orange-50/50 dark:bg-orange-900/10 p-3 text-sm dark:border-orange-800/50 dark:text-gray-100 focus:border-orange-500 focus:outline-none"
-                       placeholder="Digite o nome da nova categoria..."
+                       placeholder={tDynamic('Digite o nome da nova categoria...')}
                        value={nomeNovaCategoria}
                        onChange={e => setNomeNovaCategoria(e.target.value)}
                        autoFocus
@@ -629,16 +631,16 @@ export default function Estoque() {
                  )}
               </label>
               <label className="block">
-                 <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Setor de Armazenamento</span>
+                 <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{tDynamic('Setor de Armazenamento')}</span>
                  <select className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 focus:border-[var(--cor-primaria)] focus:outline-none"
                    value={setor}
                    onChange={e => setSetor(e.target.value)}>
                    {OPCOES_SETOR.map(op => (
-                     <option key={op.valor} value={op.valor}>{op.rotulo}</option>
+                     <option key={op.valor} value={op.valor}>{tDynamic(op.rotulo)}</option>
                    ))}
                  </select>
                  <span className="mt-1 block text-[10px] text-gray-400 dark:text-gray-500">
-                   Onde o item fica guardado — usado no Rastreio 3D.
+                   {tDynamic('Onde o item fica guardado — usado no Rastreio 3D.')}
                  </span>
               </label>
            </div>

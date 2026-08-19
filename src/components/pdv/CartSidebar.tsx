@@ -4,6 +4,7 @@ import { fmt, fmtQtd, precoItem } from '../../types';
 import type { CartSidebarProps, ClientePDV } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { maskTelefone } from '../../lib/mascaras';
+import { useI18n } from '../../contexts/I18nContext';
 
 export function CartSidebar({
   lojaId, carrinho, limparVenda, mudarQtd, removerItem,
@@ -12,6 +13,7 @@ export function CartSidebar({
   subtotal, descontoNum, total, erro, modo, turno,
   mesaSelecionada, enviandoMesa, setEtapa, setMetodo, setErro, enviarParaMesa
 }: CartSidebarProps) {
+  const { tDynamic } = useI18n();
   const [dropdownAberto, setDropdownAberto] = useState(false);
   const [sugestoes, setSugestoes] = useState<ClientePDV[]>([]);
   const [buscando, setBuscando] = useState(false);
@@ -140,12 +142,12 @@ export function CartSidebar({
   return (
     <div className="flex w-[340px] shrink-0 flex-col border-l border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
-        <p className="flex items-center gap-2 text-sm font-black dark:text-gray-100"><ShoppingCart size={16} /> Venda atual</p>
-        {carrinho.length > 0 && <button onClick={limparVenda} className="text-xs font-bold text-red-500">Limpar</button>}
+        <p className="flex items-center gap-2 text-sm font-black dark:text-gray-100"><ShoppingCart size={16} /> {tDynamic('Venda atual')}</p>
+        {carrinho.length > 0 && <button onClick={limparVenda} className="text-xs font-bold text-red-500">{tDynamic('Limpar')}</button>}
       </div>
 
       <div className="flex-1 overflow-y-auto p-3">
-        {carrinho.length === 0 && <p className="py-10 text-center text-sm text-gray-400">Toque nos produtos<br />para adicionar.</p>}
+        {carrinho.length === 0 && <p className="py-10 text-center text-sm text-gray-400">{tDynamic('Toque nos produtos')}<br />{tDynamic('para adicionar.')}</p>}
         <div className="space-y-2">
           {carrinho.map((item, idx) => (
             <div key={idx} className="rounded-xl border border-gray-100 p-2.5 dark:border-gray-800">
@@ -192,7 +194,7 @@ export function CartSidebar({
               onFocus={() => {
                 if (sugestoes.length > 0 || nomeCliente.trim().length >= 2) setDropdownAberto(true);
               }}
-              placeholder="Buscar ou cadastrar cliente..."
+              placeholder={tDynamic('Buscar ou cadastrar cliente...')}
               className={`w-full rounded-xl border p-2 pr-8 text-xs font-medium dark:bg-gray-950 dark:text-gray-100 transition-all ${
                 clienteSelecionado
                   ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 font-bold'
@@ -204,7 +206,7 @@ export function CartSidebar({
                 type="button"
                 onClick={desmarcarCliente}
                 className="absolute right-2 text-emerald-600 hover:text-red-500"
-                title="Remover cliente"
+                title={tDynamic('Remover cliente')}
               >
                 <X size={14} />
               </button>
@@ -219,14 +221,14 @@ export function CartSidebar({
           {clienteSelecionado && (clienteSelecionado.saldoCashback ?? 0) > 0 && (
             <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-2 flex items-center justify-between text-xs animate-in fade-in">
               <span className="flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400">
-                <Wallet size={13} /> Cashback: {fmt(clienteSelecionado.saldoCashback ?? 0)}
+                <Wallet size={13} /> {tDynamic('Cashback:')} {fmt(clienteSelecionado.saldoCashback ?? 0)}
               </span>
               <button
                 type="button"
                 onClick={aplicarCashback}
                 className="rounded-lg bg-emerald-600 px-2 py-0.5 text-[10px] font-black text-white hover:bg-emerald-700 shadow-sm"
               >
-                Usar
+                {tDynamic('Usar')}
               </button>
             </div>
           )}
@@ -245,7 +247,7 @@ export function CartSidebar({
                     <p className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1">
                       <UserCheck size={12} className="text-emerald-500" /> {c.nome}
                     </p>
-                    <p className="text-[10px] text-gray-400">{c.telefone || 'Sem telefone'}</p>
+                    <p className="text-[10px] text-gray-400">{c.telefone || tDynamic('Sem telefone')}</p>
                   </div>
                   {(c.saldoCashback ?? 0) > 0 && (
                     <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-black text-emerald-600 dark:text-emerald-400">
@@ -264,7 +266,7 @@ export function CartSidebar({
                 }}
                 className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--cor-primaria)]/50 p-2 text-xs font-bold text-[var(--cor-primaria)] hover:bg-[var(--cor-primaria)]/10 transition-colors mt-1"
               >
-                <UserPlus size={14} /> Cadastrar "{nomeCliente.trim() || 'Novo Cliente'}"
+                <UserPlus size={14} /> {tDynamic('Cadastrar')} "{nomeCliente.trim() || tDynamic('Novo Cliente')}"
               </button>
             </div>
           )}
@@ -276,7 +278,7 @@ export function CartSidebar({
             onChange={(e) => {
               const value = e.target.value;
               if (value.startsWith('-')) {
-                setErro('Valor não pode ser negativo');
+                setErro(tDynamic('Valor não pode ser negativo'));
                 return;
               }
               const clean = value.replace(/[^\d,]/g, '').replace(/,+/g, ',');
@@ -287,24 +289,24 @@ export function CartSidebar({
                 setDesconto(clean);
               }
             }}
-            placeholder="Desconto R$"
+            placeholder={tDynamic('Desconto R$')}
             className="rounded-xl border border-gray-200 p-2 text-xs dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" 
           />
         </div>
-        <div className="mb-1 flex justify-between text-xs text-gray-500"><span>Subtotal</span><span>{fmt(subtotal)}</span></div>
-        {descontoNum > 0 && <div className="mb-1 flex justify-between text-xs text-green-600"><span>Desconto</span><span>-{fmt(descontoNum)}</span></div>}
-        <div className="mb-3 flex justify-between text-lg font-black dark:text-gray-100"><span>Total</span><span className="text-[var(--cor-primaria)]">{fmt(total)}</span></div>
+        <div className="mb-1 flex justify-between text-xs text-gray-500"><span>{tDynamic('Subtotal')}</span><span>{fmt(subtotal)}</span></div>
+        {descontoNum > 0 && <div className="mb-1 flex justify-between text-xs text-green-600"><span>{tDynamic('Desconto')}</span><span>-{fmt(descontoNum)}</span></div>}
+        <div className="mb-3 flex justify-between text-lg font-black dark:text-gray-100"><span>{tDynamic('Total')}</span><span className="text-[var(--cor-primaria)]">{fmt(total)}</span></div>
         {erro && modo === 'MESA' && <p className="mb-2 text-center text-xs font-semibold text-red-500">{erro}</p>}
         {modo === 'BALCAO' ? (
           <button disabled={carrinho.length === 0 || !turno} onClick={() => { setEtapa('PAGANDO'); setMetodo(null); setErro(''); }}
             className="w-full rounded-2xl bg-[var(--cor-primaria)] py-4 text-base font-black text-white shadow-lg transition active:scale-[0.98] disabled:opacity-40">
-            {turno ? `Cobrar ${fmt(total)}` : 'Abra o caixa para vender'}
+            {turno ? `${tDynamic('Cobrar')} ${fmt(total)}` : tDynamic('Abra o caixa para vender')}
           </button>
         ) : (
           <button disabled={carrinho.length === 0 || !mesaSelecionada || enviandoMesa} onClick={enviarParaMesa}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] py-4 text-base font-black text-white shadow-lg transition active:scale-[0.98] disabled:opacity-40">
             {enviandoMesa && <Loader2 size={16} className="animate-spin" />}
-            {!mesaSelecionada ? 'Selecione uma mesa' : enviandoMesa ? 'Enviando…' : `Enviar para a Mesa ${mesaSelecionada.numero}`}
+            {!mesaSelecionada ? tDynamic('Selecione uma mesa') : enviandoMesa ? tDynamic('Enviando…') : `${tDynamic('Enviar para a Mesa')} ${mesaSelecionada.numero}`}
           </button>
         )}
       </div>

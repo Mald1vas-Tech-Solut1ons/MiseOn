@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RotateCw, CheckCircle2, ArrowRight, type LucideIcon } from 'lucide-react';
+import { useI18n } from '../../contexts/I18nContext';
 
 export interface FlipCardProps {
   icone: LucideIcon;
@@ -26,6 +27,7 @@ export default function FlipCard({
   corBorda,
   linkCta = '/cadastre-se',
 }: FlipCardProps) {
+  const { tDynamic } = useI18n();
   const [virado, setVirado] = useState(false);
 
   return (
@@ -50,24 +52,24 @@ export default function FlipCard({
                 <Icon size={26} />
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white/90 border border-white/10">
-                {badge}
+                {tDynamic(badge)}
               </span>
             </div>
 
             <h3 className="font-['Sora'] text-xl font-black tracking-tight text-white">
-              {titulo}
+              {tDynamic(titulo)}
             </h3>
 
             <p className="text-xs text-slate-300 leading-relaxed line-clamp-3">
-              {resumo}
+              {tDynamic(resumo)}
             </p>
           </div>
 
           <div className="flex items-center justify-between border-t border-white/10 pt-3">
             <span className="text-[11px] font-bold text-orange-400 flex items-center gap-1">
-              <RotateCw size={12} className="animate-spin" /> Virar card para detalhes
+              <RotateCw size={12} className="animate-spin" /> {tDynamic('Virar card para detalhes')}
             </span>
-            <span className="font-['Sora'] text-xs font-black text-white">{metrica}</span>
+            <span className="font-['Sora'] text-xs font-black text-white">{tDynamic(metrica)}</span>
           </div>
         </div>
 
@@ -78,20 +80,20 @@ export default function FlipCard({
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-orange-400 flex items-center gap-1">
-                <Icon size={14} /> REGRAS DE NEGÓCIO
+                <Icon size={14} /> {tDynamic('REGRAS DE NEGÓCIO')}
               </span>
-              <span className="text-[11px] font-mono font-bold text-emerald-400">{metrica}</span>
+              <span className="text-[11px] font-mono font-bold text-emerald-400">{tDynamic(metrica)}</span>
             </div>
 
             <h4 className="font-['Sora'] text-sm font-bold text-white">
-              {titulo}
+              {tDynamic(titulo)}
             </h4>
 
             <ul className="space-y-2">
               {detalhes.map((detalhe, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-slate-300 leading-tight">
                   <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-emerald-400" />
-                  <span>{detalhe}</span>
+                  <span>{tDynamic(detalhe)}</span>
                 </li>
               ))}
             </ul>
@@ -102,7 +104,7 @@ export default function FlipCard({
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#FC5B24] py-2.5 text-xs font-black text-white shadow-lg shadow-[#FC5B24]/30 hover:brightness-110 transition-all mt-2"
             onClick={(e) => e.stopPropagation()}
           >
-            Ativar Módulo <ArrowRight size={14} />
+            {tDynamic('Ativar Módulo')} <ArrowRight size={14} />
           </a>
         </div>
       </div>

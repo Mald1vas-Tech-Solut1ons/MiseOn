@@ -5,8 +5,10 @@ import { supabase } from '../../lib/supabase';
 import { SEO } from '../../components/SEO';
 import FooterSEO from '../../components/FooterSEO';
 import MiseOnLogo from '../../components/MiseOnLogo';
+import { useI18n } from '../../contexts/I18nContext';
 
 export default function Contato() {
+  const { tDynamic } = useI18n();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -18,7 +20,7 @@ export default function Contato() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim() || !whatsapp.trim()) {
-      setErro('Por favor, preencha seu nome e WhatsApp.');
+      setErro(tDynamic('Por favor, preencha seu nome e WhatsApp.'));
       return;
     }
 
@@ -91,7 +93,7 @@ export default function Contato() {
             to="/"
             className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors"
           >
-            <ArrowLeft size={16} /> Voltar ao Início
+            <ArrowLeft size={16} /> {tDynamic('Voltar ao Início')}
           </Link>
         </div>
       </header>
@@ -99,14 +101,14 @@ export default function Contato() {
       <main className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400">
-            <MessageCircle size={14} /> Atendimento Direto
+            <MessageCircle size={14} /> {tDynamic('Atendimento Direto')}
           </span>
 
           <h1 className="mt-4 font-['Sora'] text-3xl font-extrabold text-white sm:text-5xl">
-            Fale com a nossa equipe
+            {tDynamic('Fale com a nossa equipe')}
           </h1>
           <p className="mt-4 text-base text-slate-300">
-            Estamos prontos para atender você. Tire suas dúvidas sobre planos, integrações ou solicite suporte para a sua loja.
+            {tDynamic('Estamos prontos para atender você. Tire suas dúvidas sobre planos, integrações ou solicite suporte para a sua loja.')}
           </p>
         </div>
 
@@ -114,13 +116,13 @@ export default function Contato() {
           
           {/* Form de Mensagem */}
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-md">
-            <h2 className="font-['Sora'] text-xl font-bold text-white mb-2">Envie uma Mensagem</h2>
-            <p className="text-xs text-slate-400 mb-6">Preencha o formulário abaixo e retornaremos em breve.</p>
+            <h2 className="font-['Sora'] text-xl font-bold text-white mb-2">{tDynamic('Envie uma Mensagem')}</h2>
+            <p className="text-xs text-slate-400 mb-6">{tDynamic('Preencha o formulário abaixo e retornaremos em breve.')}</p>
 
             {sucesso && (
               <div className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/15 p-4 text-emerald-300 text-xs font-bold">
                 <CheckCircle2 size={20} className="shrink-0 text-emerald-400" />
-                <span>Mensagem enviada com sucesso! Nossa equipe entrará em contato em breve pelo seu WhatsApp.</span>
+                <span>{tDynamic('Mensagem enviada com sucesso! Nossa equipe entrará em contato em breve pelo seu WhatsApp.')}</span>
               </div>
             )}
 
@@ -132,7 +134,7 @@ export default function Contato() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Seu Nome / Responsável *</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">{tDynamic('Seu Nome / Responsável *')}</label>
                 <input
                   type="text"
                   required
@@ -145,7 +147,7 @@ export default function Contato() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">WhatsApp com DDD *</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">{tDynamic('WhatsApp com DDD *')}</label>
                   <input
                     type="tel"
                     required
@@ -157,7 +159,7 @@ export default function Contato() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">E-mail (opcional)</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">{tDynamic('E-mail (opcional)')}</label>
                   <input
                     type="email"
                     placeholder="seuemail@loja.com"
@@ -169,10 +171,10 @@ export default function Contato() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Sua Mensagem / Dúvida</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">{tDynamic('Sua Mensagem / Dúvida')}</label>
                 <textarea
                   rows={4}
-                  placeholder="Como podemos ajudar o seu estabelecimento?"
+                  placeholder={tDynamic('Como podemos ajudar o seu estabelecimento?')}
                   value={mensagem}
                   onChange={(e) => setMensagem(e.target.value)}
                   className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
@@ -184,7 +186,7 @@ export default function Contato() {
                 disabled={enviando}
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 py-3 text-sm font-bold text-white shadow-lg transition hover:brightness-110 disabled:opacity-50"
               >
-                <Send size={16} /> {enviando ? 'Enviando mensagem...' : 'Enviar Mensagem'}
+                <Send size={16} /> {enviando ? tDynamic('Enviando mensagem...') : tDynamic('Enviar Mensagem')}
               </button>
             </form>
           </div>
@@ -199,12 +201,12 @@ export default function Contato() {
                   <MessageCircle size={24} />
                 </div>
                 <div>
-                  <h3 className="font-['Sora'] text-base font-bold text-white">Atendimento via WhatsApp</h3>
-                  <p className="text-xs text-emerald-300 mt-0.5">Resposta rápida em horário comercial</p>
+                  <h3 className="font-['Sora'] text-base font-bold text-white">{tDynamic('Atendimento via WhatsApp')}</h3>
+                  <p className="text-xs text-emerald-300 mt-0.5">{tDynamic('Resposta rápida em horário comercial')}</p>
                 </div>
               </div>
               <p className="mt-4 text-xs text-slate-300 leading-relaxed">
-                Fale diretamente com nossa equipe comercial e suporte pelo WhatsApp.
+                {tDynamic('Fale diretamente com nossa equipe comercial e suporte pelo WhatsApp.')}
               </p>
               <div className="mt-4">
                 <a
@@ -213,7 +215,7 @@ export default function Contato() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-white hover:bg-emerald-600 transition"
                 >
-                  <MessageCircle size={16} /> Iniciar Conversa no WhatsApp
+                  <MessageCircle size={16} /> {tDynamic('Iniciar Conversa no WhatsApp')}
                 </a>
               </div>
             </div>
@@ -225,18 +227,18 @@ export default function Contato() {
                   <Mail size={24} />
                 </div>
                 <div>
-                  <h3 className="font-['Sora'] text-base font-bold text-white">Canais de E-mail</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Canais diretos para solicitações formais</p>
+                  <h3 className="font-['Sora'] text-base font-bold text-white">{tDynamic('Canais de E-mail')}</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">{tDynamic('Canais diretos para solicitações formais')}</p>
                 </div>
               </div>
 
               <div className="space-y-2 text-xs text-slate-300">
                 <div className="flex items-center gap-2">
-                  <strong className="text-white">Comercial & Parcerias:</strong>
+                  <strong className="text-white">{tDynamic('Comercial & Parcerias:')}</strong>
                   <a href="mailto:contato@miseon.app.br" className="text-blue-400 hover:underline">contato@miseon.app.br</a>
                 </div>
                 <div className="flex items-center gap-2">
-                  <strong className="text-white">Suporte Técnico:</strong>
+                  <strong className="text-white">{tDynamic('Suporte Técnico:')}</strong>
                   <a href="mailto:suporte@miseon.app.br" className="text-blue-400 hover:underline">suporte@miseon.app.br</a>
                 </div>
               </div>
@@ -246,11 +248,11 @@ export default function Contato() {
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md space-y-3">
               <div className="flex items-center gap-3">
                 <Building2 size={20} className="text-orange-400" />
-                <h3 className="font-['Sora'] text-sm font-bold text-white">Dados Jurídicos da Empresa</h3>
+                <h3 className="font-['Sora'] text-sm font-bold text-white">{tDynamic('Dados Jurídicos da Empresa')}</h3>
               </div>
 
               <div className="text-xs text-slate-300 space-y-1 font-mono">
-                <p><strong>Razão Social:</strong> MiseOn Tecnologia e Soluções para Food Service</p>
+                <p><strong>{tDynamic('Razão Social:')}</strong> MiseOn Tecnologia e Soluções para Food Service</p>
                 <p><strong>CNPJ:</strong> 63.310.253/0001-81</p>
                 <p className="flex items-center gap-1 font-sans text-slate-400 mt-2">
                   <MapPin size={14} className="text-orange-400" /> Manaus / AM — Brasil

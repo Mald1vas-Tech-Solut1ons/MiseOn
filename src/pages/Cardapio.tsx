@@ -26,6 +26,8 @@ import SEO from '../components/SEO';
 import { getOptimizedImageUrl } from '../lib/cdn';
 import TabelaNutricional, { type NutricaoProduto } from '../components/cardapio/TabelaNutricional';
 
+import { useI18n } from '../contexts/I18nContext';
+
 const guardarUltimoPedido = (slug: string | undefined, pedidoId: string, numero: number) => {
   if (!slug) return;
   localStorage.setItem(`miseon_ultimo_pedido_${slug}`, JSON.stringify({
@@ -56,9 +58,7 @@ const marcarCarrinhoRecuperado = async (lojaId: string, user: User) => {
   } catch { /* idem */ }
 };
 
-
-
-// ── Loja aberta? (horário automático + override manual) ─────
+// ── Loja aberta? (horário automático + override manual) ──────────
 // Horário que vira a noite (ex.: sábado 10:00–00:50, fecha já domingo de
 // madrugada) precisa ser checado contra a linha de ONTEM também — senão às
 // 00:50 de domingo a função só olha a linha de domingo e mostra "fechado".
@@ -90,6 +90,7 @@ const ROTULO_METODO: Record<MetodoPgto, string> = {
 };
 
 export default function Cardapio() {
+  const { tDynamic } = useI18n();
   const { slug } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -392,7 +393,7 @@ export default function Cardapio() {
           <div className="flex items-center gap-2.5 rounded-2xl border px-4 py-3 shadow-sm" style={{ background: 'var(--cor-destaque)', borderColor: 'var(--cor-borda)' }}>
             <UtensilsCrossed size={18} style={{ color: 'var(--cor-primaria)' }} className="shrink-0" />
             <p className="text-sm font-semibold" style={{ color: 'var(--cor-texto)' }}>
-              Você está pedindo da <b>Mesa {mesaAtual.numero}</b>{mesaAtual.nome ? ` (${mesaAtual.nome})` : ''} — sem precisar de login. A conta fecha no final com o garçom.
+              {tDynamic('Você está pedindo da')} <b>{tDynamic('Mesa')} {mesaAtual.numero}</b>{mesaAtual.nome ? ` (${mesaAtual.nome})` : ''} — {tDynamic('sem precisar de login. A conta fecha no final com o garçom.')}
             </p>
           </div>
         </div>
@@ -400,14 +401,14 @@ export default function Cardapio() {
       {mesaErro && (
         <div className="mx-auto -mt-px max-w-6xl px-4 pt-3 sm:px-6">
           <div className="flex items-center gap-2.5 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-            <X size={18} className="shrink-0" /> Essa mesa não foi encontrada — chame um garçom para te ajudar.
+            <X size={18} className="shrink-0" /> {tDynamic('Essa mesa não foi encontrada — chame um garçom para te ajudar.')}
           </div>
         </div>
       )}
       {pedidoMesaSucesso && (
         <div className="mx-auto -mt-px max-w-6xl px-4 pt-3 sm:px-6">
           <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400">
-            <span className="flex items-center gap-2.5"><PartyPopper size={18} className="shrink-0" /> Pedido #{pedidoMesaSucesso} enviado! A cozinha já está preparando.</span>
+            <span className="flex items-center gap-2.5"><PartyPopper size={18} className="shrink-0" /> {tDynamic('Pedido')} #{pedidoMesaSucesso} {tDynamic('enviado! A cozinha já está preparando.')}</span>
             <button onClick={() => setPedidoMesaSucesso(null)} className="shrink-0"><X size={16} /></button>
           </div>
         </div>
@@ -445,7 +446,7 @@ export default function Cardapio() {
               <Search size={16} style={{ color: 'var(--cor-texto-fraco)' }} />
               <input
                 type="text"
-                placeholder="Buscar no cardápio…"
+                placeholder={tDynamic('Buscar no cardápio…')}
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 className="w-full bg-transparent text-sm font-semibold outline-none"

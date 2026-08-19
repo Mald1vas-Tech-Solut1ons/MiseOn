@@ -9,6 +9,7 @@ import {
 import SEO from '../../components/SEO';
 import FooterSEO from '../../components/FooterSEO';
 import MiseOnLogo from '../../components/MiseOnLogo';
+import { useI18n } from '../../contexts/I18nContext';
 
 const IMG_CADASTRO = '/images/estoque/media__1784862998553.png';
 const IMG_PEPS     = '/images/estoque/media__1784863023804.png';
@@ -58,6 +59,7 @@ const FAQS = [
 ];
 
 export default function EstoquePage() {
+  const { tDynamic } = useI18n();
   const [menuAberto, setMenuAberto] = useState(false);
   const [faqAberto, setFaqAberto] = useState<number | null>(null);
 
@@ -138,7 +140,7 @@ export default function EstoquePage() {
               <a href="#preparos" onClick={() => setMenuAberto(false)} className="py-2">2. Receitas & Preparos</a>
               <a href="#compras" onClick={() => setMenuAberto(false)} className="py-2">3. Compras & Desmonte</a>
               <a href="#observabilidade-3d" onClick={() => setMenuAberto(false)} className="py-2">4. Observabilidade 3D</a>
-              <a href="#faq" onClick={() => setMenuAberto(false)} className="py-2">Ajuda & Dúvidas</a>
+              <a href="#faq" onClick={() => setMenuAberto(false)} className="py-2">{tDynamic("Ajuda & Dúvidas")}</a>
               <Link to="/cadastre-se" className="mt-2 rounded-xl bg-[var(--cor-primaria)] p-3 text-center text-white font-bold">
                 Cadastrar Minha Loja
               </Link>
@@ -208,11 +210,11 @@ export default function EstoquePage() {
                 <div className="flex items-start gap-3.5 rounded-2xl border border-orange-400/30 bg-orange-500/10 p-4 backdrop-blur-md">
                   <ScanLine className="mt-1 text-orange-400 shrink-0" size={20} />
                   <div>
-                    <h4 className="font-bold text-white text-sm">Entrada pelo QR Code do cupom do mercado</h4>
+                    <h4 className="font-bold text-white text-sm">{tDynamic("Entrada pelo QR Code do cupom do mercado")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Voltou da compra com o cupom na mão? Escaneie o <b>QR Code da NFC-e</b> e o MiseOn lê a nota
+                      Voltou da compra com o cupom na mão? Escaneie o <b>{tDynamic("QR Code da NFC-e")}</b> e o MiseOn lê a nota
                       direto na SEFAZ: produto, quantidade e custo de cada item. Você confere, escolhe o que entra e
-                      dá entrada de tudo de uma vez — <i>sem digitar produto por produto</i>. Na segunda compra no mesmo
+                      dá entrada de tudo de uma vez — <i>{tDynamic("sem digitar produto por produto")}</i>. Na segunda compra no mesmo
                       mercado, ele já lembra a que insumo cada item pertence.
                     </p>
                   </div>
@@ -221,9 +223,9 @@ export default function EstoquePage() {
                 <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                   <Layers className="mt-1 text-blue-400 shrink-0" size={20} />
                   <div>
-                    <h4 className="font-bold text-white text-sm">Categorias & Setores Físicos de Alocação</h4>
+                    <h4 className="font-bold text-white text-sm">{tDynamic("Categorias & Setores Físicos de Alocação")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Classifique insumos como <i>Ingrediente, Revenda Direta, Embalagem ou Limpeza</i> e defina onde ficam armazenados (<i>Geladeira, Freezer, Dispensa ou Armário</i>).
+                      Classifique insumos como <i>Ingrediente, Revenda Direta, Embalagem ou Limpeza</i> e defina onde ficam armazenados (<i>{tDynamic("Geladeira, Freezer, Dispensa ou Armário")}</i>).
                     </p>
                   </div>
                 </div>
@@ -231,9 +233,9 @@ export default function EstoquePage() {
                 <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                   <RefreshCw className="mt-1 text-emerald-400 shrink-0" size={20} />
                   <div>
-                    <h4 className="font-bold text-white text-sm">Conversão Automática de Unidade</h4>
+                    <h4 className="font-bold text-white text-sm">{tDynamic("Conversão Automática de Unidade")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Compro em <b>Pacote (pct)</b> por R$ 50,00 ➔ Rende <b>2000 Gramas (g)</b>. O sistema calcula a grama a R$ 0,025/g e faz a baixa automática em cada venda.
+                      Compro em <b>Pacote (pct)</b> {tDynamic("por R$ 50,00 ➔ Rende")} <b>2000 Gramas (g)</b>. O sistema calcula a grama a R$ 0,025/g e faz a baixa automática em cada venda.
                     </p>
                   </div>
                 </div>
@@ -241,9 +243,9 @@ export default function EstoquePage() {
                 <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                   <AlertTriangle className="mt-1 text-amber-400 shrink-0" size={20} />
                   <div>
-                    <h4 className="font-bold text-white text-sm">Custeio PEPS & Alerta de Estoque Crítico</h4>
+                    <h4 className="font-bold text-white text-sm">{tDynamic("Custeio PEPS & Alerta de Estoque Crítico")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Método <b>PEPS (Primeiro que entra, primeiro que sai)</b> para garantir que a baixa use sempre o custo do lote mais antigo. Alerta automático de reabastecimento de risco!
+                      Método <b>{tDynamic("PEPS (Primeiro que entra, primeiro que sai)")}</b> para garantir que a baixa use sempre o custo do lote mais antigo. Alerta automático de reabastecimento de risco!
                     </p>
                   </div>
                 </div>
@@ -310,7 +312,7 @@ export default function EstoquePage() {
                 <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                   <FlaskConical className="mt-1 text-orange-400 shrink-0" size={20} />
                   <div>
-                    <h4 className="font-bold text-white text-sm">Ficha Técnica por Lote de Produção</h4>
+                    <h4 className="font-bold text-white text-sm">{tDynamic("Ficha Técnica por Lote de Produção")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
                       Defina quantos porções/unidades 1 lote rende (ex: <i>1800g de carne moída rende 10 hambúrgueres de 180g</i>). O sistema calcula o custo exato da porção individual!
                     </p>
@@ -320,7 +322,7 @@ export default function EstoquePage() {
                 <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                   <ShieldCheck className="mt-1 text-emerald-400 shrink-0" size={20} />
                   <div>
-                    <h4 className="font-bold text-white text-sm">Controle de Validade de Lotes Produzidos</h4>
+                    <h4 className="font-bold text-white text-sm">{tDynamic("Controle de Validade de Lotes Produzidos")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
                       Atribua a validade em horas ou dias (<i>24h, 2 dias, 3 dias, 5 dias</i>). Cada lote produzido ganha uma marcação temporal com alerta automático em caso de vencimento.
                     </p>
@@ -330,7 +332,7 @@ export default function EstoquePage() {
                 <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                   <Sparkles className="mt-1 text-amber-400 shrink-0" size={20} />
                   <div>
-                    <h4 className="font-bold text-white text-sm">Execução de Ordens de Serviço (OS)</h4>
+                    <h4 className="font-bold text-white text-sm">{tDynamic("Execução de Ordens de Serviço (OS)")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
                       Um toque no botão <b>"Produzir"</b> consome a matéria-prima bruta do estoque e incrementa imediatamente o saldo de lotes prontos na cozinha.
                     </p>
@@ -369,7 +371,7 @@ export default function EstoquePage() {
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-400">
                 <ClipboardCheck size={20} />
               </div>
-              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">Conferência de entrega</h3>
+              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">{tDynamic("Conferência de entrega")}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
                 Marca, lote, validade, preço pago e nota fiscal item a item. Veio menos? Veio outro
                 produto? Não veio? Tudo é registrado — e o estoque entra numa transação só, nunca pela metade.
@@ -380,7 +382,7 @@ export default function EstoquePage() {
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-400/10 text-blue-400">
                 <Scale size={20} />
               </div>
-              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">Entre na unidade que quiser</h3>
+              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">{tDynamic("Entre na unidade que quiser")}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
                 Comprou o quilo, chegou em cabeça, usa em dente. Você digita na unidade que tem na mão e o
                 sistema converte. Unidade nova? Ele pergunta o rendimento uma vez e nunca mais esquece.
@@ -391,7 +393,7 @@ export default function EstoquePage() {
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-400/10 text-amber-400">
                 <TrendingDown size={20} />
               </div>
-              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">Lista que pensa</h3>
+              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">{tDynamic("Lista que pensa")}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
                 A sugestão lê o giro real dos últimos 30 dias e soma o prazo de entrega do fornecedor.
                 Se o item acaba antes da mercadoria chegar, a tela avisa antes de você descobrir na panela.
@@ -515,7 +517,7 @@ export default function EstoquePage() {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
               <div className="flex items-center gap-2 text-red-400 font-bold text-sm">
                 <BarChart3 size={18} />
-                <span>Maior Custo Unitário</span>
+                <span>{tDynamic("Maior Custo Unitário")}</span>
               </div>
               <p className="mt-2 text-xs text-slate-300 leading-relaxed">
                 Identificação instantânea dos itens de maior impacto financeiro por unidade comprada para tomada de decisão em compras.
@@ -525,7 +527,7 @@ export default function EstoquePage() {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
                 <Layers size={18} />
-                <span>Maior Alocação</span>
+                <span>{tDynamic("Maior Alocação")}</span>
               </div>
               <p className="mt-2 text-xs text-slate-300 leading-relaxed">
                 Sinalização dos insumos que concentram a maior fatia do capital da empresa no momento.
@@ -539,7 +541,7 @@ export default function EstoquePage() {
       <section id="faq" className="scroll-mt-24 py-20 border-t border-white/10 bg-[#070C18]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="text-center">
-            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">Guia de Ajuda & FAQ</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic("Guia de Ajuda & FAQ")}</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold text-white">
               Dúvidas Frequentes sobre a Engenharia de Estoque
             </h2>

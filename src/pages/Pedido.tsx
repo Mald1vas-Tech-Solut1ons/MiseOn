@@ -13,6 +13,7 @@ import { fonteFamilia, obterFundoLojaPorTema, obterTokensLoja } from '../lib/per
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import MiseOnLoader from '../components/MiseOnLoader';
+import { useI18n } from '../contexts/I18nContext';
 
 const ETAPAS_DELIVERY: { status: StatusPedido; label: string; icon: ReactNode }[] = [
   { status: 'NOVO', label: 'Recebido', icon: <Clock size={16} /> },
@@ -100,6 +101,7 @@ function MapUpdater({ posicao }: { posicao: { lat: number; lng: number } }) {
 }
 
 export default function AcompanharPedido() {
+  const { tDynamic } = useI18n();
   const { id } = useParams();
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [loja, setLoja] = useState<Partial<Loja> | null>(null);
@@ -310,7 +312,7 @@ export default function AcompanharPedido() {
   if (!pedido) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#F4F7FA] dark:bg-[#070C18]">
-        <MiseOnLoader status="Carregando acompanhamento do pedido..." rows={2} />
+        <MiseOnLoader status={tDynamic('Carregando acompanhamento do pedido...')} rows={2} />
       </div>
     );
   }
@@ -326,8 +328,8 @@ export default function AcompanharPedido() {
         <div className="mx-auto max-w-4xl">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/75">Acompanhamento em tempo real</p>
-              <h1 className="mt-2 text-3xl font-black">Pedido #{pedido.numero}</h1>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/75">{tDynamic('Acompanhamento em tempo real')}</p>
+              <h1 className="mt-2 text-3xl font-black">{tDynamic('Pedido')} #{pedido.numero}</h1>
               <p className="mt-1 text-sm text-white/85">{pedido.identificador_cliente}</p>
             </div>
             <div className="flex items-center gap-2">
@@ -336,7 +338,7 @@ export default function AcompanharPedido() {
                 to="/lojas"
                 className="rounded-full border border-white/20 bg-black/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/20"
               >
-                <span className="inline-flex items-center gap-2"><Compass size={14} /> Hall de lojas</span>
+                <span className="inline-flex items-center gap-2"><Compass size={14} /> {tDynamic('Hall de lojas')}</span>
               </Link>
               <ThemeToggle className="rounded-full border border-white/20 bg-black/10 p-2 text-white backdrop-blur-sm transition hover:bg-black/20" />
               {loja?.slug && (
@@ -344,7 +346,7 @@ export default function AcompanharPedido() {
                   to={`/${loja.slug}/meus-pedidos`}
                   className="rounded-full border border-white/20 bg-black/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/20"
                 >
-                  Meus pedidos
+                  {tDynamic('Meus pedidos')}
                 </Link>
               )}
             </div>
@@ -353,13 +355,13 @@ export default function AcompanharPedido() {
           <div className="mt-6 rounded-3xl border border-white/15 bg-black/10 p-5 backdrop-blur-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-white/70">Status atual</p>
-                <p className="mt-1 text-xl font-black">{STATUS_LABEL[pedido.status]}</p>
-                <p className="mt-2 max-w-2xl text-sm text-white/80">{mensagemPrincipal(pedido, !!pedido.rota_id)}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-white/70">{tDynamic('Status atual')}</p>
+                <p className="mt-1 text-xl font-black">{tDynamic(STATUS_LABEL[pedido.status])}</p>
+                <p className="mt-2 max-w-2xl text-sm text-white/80">{tDynamic(mensagemPrincipal(pedido, !!pedido.rota_id))}</p>
               </div>
               {!cancelado && (
                 <div className="min-w-[120px] rounded-2xl bg-white/10 px-4 py-3 text-center">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/65">Progresso</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/65">{tDynamic('Progresso')}</p>
                   <p className="mt-1 text-2xl font-black">{progresso}%</p>
                 </div>
               )}
@@ -465,8 +467,8 @@ export default function AcompanharPedido() {
                       )}
                     </div>
                     <div className="pt-1">
-                      <p className="font-bold" style={{ color: concluida ? 'var(--cor-texto)' : 'var(--cor-texto-fraco)' }}>{etapa.label}</p>
-                      {atual && <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--cor-primaria)' }}>Etapa atual</p>}
+                      <p className="font-bold" style={{ color: concluida ? 'var(--cor-texto)' : 'var(--cor-texto-fraco)' }}>{tDynamic(etapa.label)}</p>
+                      {atual && <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--cor-primaria)' }}>{tDynamic('Etapa atual')}</p>}
                     </div>
                   </div>
                 );

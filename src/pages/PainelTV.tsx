@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import {
   Tv, Volume2, VolumeX, Maximize2, Sparkles, ShoppingBag,
   CheckCircle2, Clock, QrCode as QrIcon
@@ -9,10 +9,10 @@ import { Loja, Categoria, Produto, fmt } from '../types';
 import MiseOnLoader from '../components/MiseOnLoader';
 import { getOptimizedImageUrl } from '../lib/cdn';
 import LanguageToggle from '../components/LanguageToggle';
+import { useI18n } from '../contexts/I18nContext';
 
 type ModoExibicao = 'MENU_BOARD' | 'SENHAS' | 'BANNERS';
 
-/** Retorno de `fn_painel_tv_senhas`: o mínimo para chamar uma senha no balcão. */
 type SenhaTV = {
   numero: number;
   status: string;
@@ -21,7 +21,13 @@ type SenhaTV = {
 };
 
 export default function PainelTV() {
+  const { tDynamic } = useI18n();
   const { slug } = useParams<{ slug: string }>();
+  // Token do painel: a TV do balcao roda sem login, entao o controle de
+  // acesso vai na URL. Loja sem token configurado continua abrindo so pelo
+  // slug (compatibilidade com TV ja instalada).
+  const [searchParams] = useSearchParams();
+  const painelToken = searchParams.get('token');
   const [loja, setLoja] = useState<Loja | null>(null);
   const [categorias, setCategorias] = useState<(Categoria & { produtos: Produto[] })[]>([]);
   const [pedidos, setPedidos] = useState<SenhaTV[]>([]);
@@ -35,8 +41,11 @@ export default function PainelTV() {
   const [bannerChamadaVisivel, setBannerChamadaVisivel] = useState(false);
 
   const synthRef = useRef<SpeechSynthesis | null>(null);
-  /** Senhas já anunciadas. `null` = ainda não carregou (não grita senha antiga). */
   const prontosConhecidosRef = useRef<Set<number> | null>(null);
+
+  useEffect(() => {
+    synthRef.current = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
+  }, []);
 
   // 1. Carregar dados da Loja e Cardápio
   const carregarDados = useCallback(async () => {
@@ -55,7 +64,6 @@ export default function PainelTV() {
 
     setLoja(lojaData as Loja);
 
-    // Categorias e Produtos
     const { data: cats } = await supabase
       .from('categorias')
       .select('*, produtos(*)')
@@ -76,51 +84,58 @@ export default function PainelTV() {
     // Senhas do dia via RPC. A TV do balcão não loga, e `pedidos` não tem
     // (nem deve ter) policy de SELECT público — a RPC devolve só número,
     // status e primeiro nome. Ver migration 20260815202000.
-    const { data: peds } = await supabase.rpc('fn_painel_tv_senhas', { p_slug: slug });
+    const { data: peds, error: erroSenhas } = await supabase.rpc('fn_painel_tv_senhas', {
+      p_slug: slug,
+      p_token: painelToken,
+    });
+    if (erroSenhas) {
+      // Token ausente ou errado: a TV mostra o cardapio, mas sem senhas.
+      console.error('Painel de senhas:', erroSenhas.message);
+    }
 
     if (peds) setPedidos(peds as SenhaTV[]);
     setCarregando(false);
-  }, [slug]);
+  }, [slug, painelToken]);
 
   useEffect(() => {
     carregarDados();
-    synthRef.current = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
+    // 10s, não 5s: a TV do balcão fica ligada o dia inteiro e o polling é o
+    // único caminho aqui (sem sessão, o Realtime respeita RLS e nada chega).
+    // Dobrar a frequência dobrava a carga sem melhorar nada para quem retira.
+    const interval = setInterval(carregarDados, 10_000);
+    return () => clearInterval(interval);
   }, [carregarDados]);
 
   // 2. Falar chamada sonora
-  const falarPedido = useCallback((pedido: SenhaTV) => {
+  const falarPedido = useCallback((senha: SenhaTV) => {
     if (!somAtivo || !synthRef.current) return;
-    try {
-      synthRef.current.cancel();
-      const nome = pedido.primeiro_nome ? `de ${pedido.primeiro_nome}` : '';
-      const frase = `Atenção! Pedido número ${pedido.numero} ${nome} está pronto para retirada!`;
-      const utterance = new SpeechSynthesisUtterance(frase);
-      utterance.lang = 'pt-BR';
-      utterance.rate = 1.0;
-      utterance.pitch = 1.1;
-      synthRef.current.speak(utterance);
-    } catch {
-      // Ignora falha de áudio
-    }
-  }, [somAtivo]);
 
-  // 3. Atualização por polling. Realtime não serve aqui: a TV do balcão roda
-  // sem sessão, e o Realtime respeita RLS — nenhum evento de `pedidos`
-  // chegaria. 10s é folgado para uma tela de retirada.
-  useEffect(() => {
-    if (!slug) return;
-    const timer = setInterval(carregarDados, 10_000);
-    return () => clearInterval(timer);
-  }, [slug, carregarDados]);
+    synthRef.current.cancel();
+
+    const nomeFormatado = senha.primeiro_nome ? `, ${senha.primeiro_nome}` : '';
+    const texto = `${tDynamic('Senha')} ${senha.numero}${nomeFormatado}, ${tDynamic('por favor retirar no balcão')}`;
+
+    const utterance = new SpeechSynthesisUtterance(texto);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    synthRef.current.speak(utterance);
+  }, [somAtivo, tDynamic]);
 
   // 4. Detecta transição para PRONTO comparando com o retrato anterior e
-  // dispara a chamada por voz (antes vinha do payload do Realtime).
+  // dispara a chamada por voz. `prontosConhecidosRef === null` significa
+  // "ainda não carregou": a primeira carga só registra o estado, para a TV não
+  // sair gritando senha antiga assim que é ligada.
   useEffect(() => {
     const prontosAgora = new Set(
       pedidos.filter((p) => p.status === 'PRONTO').map((p) => p.numero),
     );
 
-    // Primeira carga só registra o estado: não grita senha antiga ao ligar a TV.
+    // A inicialização do retrato vem ANTES de qualquer saída antecipada: com o
+    // `if (!pedidos.length) return` no topo, uma loja que abre sem pedido
+    // nenhum deixava o ref em null, e o primeiro lote a chegar já pronto era
+    // anunciado como se tivesse acabado de sair da cozinha.
     if (prontosConhecidosRef.current === null) {
       prontosConhecidosRef.current = prontosAgora;
       return;
@@ -142,7 +157,7 @@ export default function PainelTV() {
     return () => clearTimeout(t);
   }, [pedidos, falarPedido]);
 
-  // 4. Carrossel automático de categorias a cada 12s no modo MENU_BOARD
+  // 4. Carrossel automático
   useEffect(() => {
     if (modo !== 'MENU_BOARD' || categorias.length <= 1) return;
 
@@ -164,7 +179,7 @@ export default function PainelTV() {
   if (carregando) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-[#070C18] text-white">
-        <MiseOnLoader status="Iniciando Cardápio Digital para TV..." rows={2} />
+        <MiseOnLoader status={tDynamic("Iniciando Cardápio Digital para TV...")} rows={2} />
       </div>
     );
   }
@@ -173,8 +188,8 @@ export default function PainelTV() {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#070C18] text-white p-6 text-center">
         <Tv size={48} className="text-orange-500 mb-4" />
-        <h1 className="text-2xl font-bold">Loja não encontrada</h1>
-        <p className="text-sm text-slate-400 mt-2">Verifique o endereço digitado no navegador da TV.</p>
+        <h1 className="text-2xl font-bold">{tDynamic('Loja não encontrada')}</h1>
+        <p className="text-sm text-slate-400 mt-2">{tDynamic('Verifique o endereço digitado no navegador da TV.')}</p>
       </div>
     );
   }
@@ -187,7 +202,6 @@ export default function PainelTV() {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-[#050811] text-white font-['Inter'] select-none flex flex-col justify-between p-6 sm:p-8">
-      {/* ══════════ TOP BAR: BARRA SUPERIOR E CONTROLES ══════════ */}
       <header className="flex items-center justify-between border-b border-white/10 pb-4 z-20">
         <div className="flex items-center gap-4">
           {loja.logo_url ? (
@@ -201,17 +215,15 @@ export default function PainelTV() {
             <h1 className="font-['Sora'] text-2xl font-black tracking-tight text-white flex items-center gap-2">
               {loja.nome}
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/30">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> AO VIVO
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> {tDynamic('AO VIVO')}
               </span>
             </h1>
-            <p className="text-xs text-slate-400 font-medium">Cardápio Digital & Chamada de Pedidos no Balcão</p>
+            <p className="text-xs text-slate-400 font-medium">{tDynamic('Cardápio Digital & Chamada de Pedidos no Balcão')}</p>
           </div>
         </div>
 
-        {/* Botoes de controle no topo */}
         <div className="flex items-center gap-3">
           <LanguageToggle variant="minimal" />
-          {/* Seletor de Modo */}
           <div className="flex items-center rounded-xl bg-white/5 border border-white/10 p-1">
             <button
               onClick={() => setModo('MENU_BOARD')}
@@ -219,7 +231,7 @@ export default function PainelTV() {
                 modo === 'MENU_BOARD' ? 'bg-[#FC5B24] text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Cardápio 4K
+              {tDynamic('Cardápio 4K')}
             </button>
             <button
               onClick={() => setModo('SENHAS')}
@@ -227,7 +239,7 @@ export default function PainelTV() {
                 modo === 'SENHAS' ? 'bg-[#FC5B24] text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Painel de Senhas ({pedidosProntos.length})
+              {tDynamic('Painel de Senhas')} ({pedidosProntos.length})
             </button>
           </div>
 

@@ -453,6 +453,100 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'API Oficial Meta': 'Official Meta API',
   'Conexão SSL 256-bit': '256-bit SSL Connection',
   'MiseOn — Sistema para Hamburguerias, Lanchonetes, Pizzarias, Restaurantes e Deliveries. Cardápio Digital com QR Code, Integração iFood, Atendimento WhatsApp IA, KDS de Cozinha, PDV Frente de Caixa, Ficha Técnica e Emissão Fiscal NFC-e/NF-e.': 'MiseOn — Restaurant, Burger Joint, Pizzeria, Diner & Dark Kitchen Operating System. QR Code Digital Menu, iFood Integration, AI WhatsApp Assistant, Kitchen KDS, POS, Recipe Sheet & Automated Tax Invoices.',
+  'O MiseOn é a plataforma completa para simplificar e organizar a gestão de restaurantes, hamburguerias, pizzarias, lanchonetes e deliveries em um único painel.': 'MiseOn is the complete platform to simplify and organize the management of restaurants, burger joints, pizzerias, diners & fast casual, and deliveries in a single dashboard.',
+  'Por Que o MiseOn é Infinitamente Superior': 'Why MiseOn is Infinitely Superior',
+  'Todo sistema te diz quanto você vendeu.': 'Every system tells you how much you sold.',
+  'O MiseOn é o único que te mostra quanto sobrou no bolso': 'MiseOn is the only one that shows you how much profit was left in your pocket',
+  '— e por quê.': '— and why.',
+  'Enquanto concorrentes te vendem robôs travados por botões que apenas disparam links secos e seguram o seu dinheiro por semanas, o MiseOn entrega um ecossistema completo de vendas, inteligência de IA e gestão financeira real.': 'While competitors sell you cold button-locked bots that just send static links and hold your funds for weeks, MiseOn delivers a complete ecosystem of sales, AI intelligence, and real financial management.',
+  'Recurso & Inteligência': 'Feature & Intelligence',
+  'Sistemas Tradicionais': 'Traditional Systems',
+  'MiseOn (Onda 2026)': 'MiseOn (2026 Wave)',
+  'Atendimento WhatsApp': 'WhatsApp Support',
+  'Robô frio travado em botões com link seco': 'Cold bot stuck on buttons with static link',
+  'IA Consultiva LLaMA 3.3 70B (Tira dúvidas nutricionais, faz vendas e sugere pratos)': 'Consultative LLaMA 3.3 70B AI (Answers nutritional questions, makes sales, and suggests dishes)',
+  'Atribuição de Vendas': 'Sales Attribution',
+  'Não sabe de qual conversa ou anúncio veio o pedido': 'Does not track which conversation or ad brought the order',
+  'Token atômico ?wa= exclusivo por conversa com vínculo direto ao pedido': 'Atomic ?wa= token exclusive per chat with direct link to the order',
+  'Rastreio Meta Pixel & GA4': 'Meta Pixel & GA4 Tracking',
+  'Sem integração nativa com seus anúncios do Instagram': 'No native integration with your Instagram ads',
+  'Eventos AddToCart e Purchase nativos sem custos extras de API': 'Native AddToCart and Purchase events without extra API costs',
+  'Apuração do Custo Real (CMV)': 'Real COGS Calculation',
+  'Apenas estimativas genéricas ou sem controle de lote': 'Only generic estimates or no batch control',
+  'Ficha Técnica Recursiva + PEPS Auditável com baixa exata por grama': 'Recursive Recipe Sheet + Auditable FIFO with exact gram deduction',
+  'DRE & Lucro Líquido Real': 'P&L (DRE) & Net Profit',
+  'Relatório simples de faturamento bruto': 'Simple gross revenue report',
+  'Contabilidade de Dupla Entrada (Ledger) com DRE mensal automatizado': 'Double-Entry Accounting (Ledger) with automated monthly P&L',
+  'Recebimento de Vendas (Pix)': 'Sales Payment Collection (Pix)',
+  'Taxas intermediárias e retenção por 14 a 30 dias': 'Intermediary fees and 14-30 day payouts',
+  'Split Bancário Direto na Conta Efí do lojista com liquidação rápida': 'Direct Bank Split to merchant Efí account with fast settlement',
+  'Quero o Sistema Mais Completo do Mercado': 'I Want the Most Complete System on the Market',
+  'Responde com dados reais': 'Responds with Real Data',
+  'Preço, ingredientes, taxa de entrega e horário vêm do seu cadastro. Nunca inventa valor nem desconto.': 'Prices, ingredients, delivery fees, and business hours come from your database. Never hallucinates prices or discounts.',
+  'Manda o link do cardápio': 'Sends Digital Menu Link',
+  'Na hora de pedir, o cliente monta o carrinho no seu site com preço real — a IA não fecha pedido sozinha.': 'When ordering, the customer builds their cart on your site with real prices — AI never closes orders automatically.',
+  'Pedido cai no painel': 'Orders Drop on Dashboard',
+  'Chega como "Novo", com selo WhatsApp. Você aceita como qualquer pedido — decisão sempre sua.': 'Arrives marked "New" with WhatsApp badge. You accept like any order — final decision is always yours.',
+  'Seguro por desenho': 'Secure by Design',
+  'Assunto de saúde, como alergias, chama você na hora. E você pode desligar a IA quando quiser.': 'Health-related topics like allergies immediately alert you. And you can turn off AI anytime.',
+  'Virar card para detalhes': 'Flip card for details',
+  'REGRAS DE NEGÓCIO': 'BUSINESS RULES',
+  'Ativar Módulo': 'Enable Module',
+
+  // Admin: KDS Cozinha
+  'KDS Kanban Cozinha': 'Kitchen KDS Kanban',
+  'Colunas Trello': 'Kanban Columns',
+  'hoje': 'today',
+  'sem dados hoje': 'no data today',
+  'meta': 'target',
+  'Indicadores por Etapa': 'Stage Metrics',
+  'Personalizar Etapas': 'Customize Stages',
+  'Tela cheia': 'Full screen',
+  'na etapa:': 'in stage:',
+  'Preparo Cozinha': 'Kitchen Prep',
+  'Revenda / Balcão': 'Direct Resale / Counter',
+  'DIRETO': 'DIRECT',
+  'Devolvido ao balcão': 'Returned to counter',
+  'Toque →': 'Tap →',
+
+  // Admin: Estoque & Ficha Técnica
+  'Estoque Geral': 'General Inventory',
+  'Reposição de Cubas (Buffet)': 'Buffet Pan Refill',
+  'Inventário': 'Inventory Audit',
+  'Monta / Desmonta': 'Assembly / Disassembly',
+  'Matérias-Primas': 'Raw Materials',
+  'Receitas & Preparos': 'Recipes & Preparations',
+  'Custo 3D': '3D Costing',
+  'Rastreio 3D': '3D Tracking',
+  'Importar Cupom de Mercado (NFC-e SP)': 'Import Grocery Receipt (NFC-e)',
+  'Escaneie o QR Code do cupom fiscal e lance 15 compras de supermercado em menos de 5 segundos no estoque.': 'Scan receipt QR Code and import 15 grocery items into stock in under 5 seconds.',
+  'Escanear Nota Fiscal': 'Scan Tax Receipt',
+  'Editar Insumo': 'Edit Ingredient',
+  'Cadastrar Insumo': 'Register Ingredient',
+  'Rápido (Direto)': 'Fast (Direct)',
+  'Conversão de Embalagem': 'Package Conversion',
+  'Cancelar Edição': 'Cancel Editing',
+  'Nome do Insumo / Produto': 'Ingredient / Product Name',
+  'ex: Queijo Mussarela, Coca-Cola Lata': 'eg: Mozzarella Cheese, Coke Can',
+  'Categoria': 'Category',
+  'Cadastrar Nova Categoria...': 'Register New Category...',
+  'Digite o nome da nova categoria...': 'Type new category name...',
+  'Setor de Armazenamento': 'Storage Sector',
+  'Onde o item fica guardado — usado no Rastreio 3D.': 'Where item is stored — used in 3D Tracking.',
+
+  // Admin: Financeiro & DRE
+  'Ao vivo': 'Live',
+  'Extrato de Vendas': 'Sales Statement',
+  'Margens': 'Margins',
+  'DRE Gerencial': 'P&L Statement',
+  'Custos Operacionais': 'Operational Costs',
+  'Faturamento': 'Revenue',
+  'Taxas Entrega': 'Delivery Fees',
+  'Lucro estimado': 'Estimated Profit',
+  'Ticket médio': 'Average Ticket',
+  'Carregando inteligência financeira...': 'Loading financial intelligence...',
+  'Erro ao salvar custos.': 'Error saving costs.',
+  'Custos atualizados com sucesso!': 'Costs updated successfully!',
 };
 
 const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
@@ -716,15 +810,178 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'fechado': 'closed',
   'Abre às': 'Opens at',
   'Fecha às': 'Closes at',
+  'Acompanhamento em tempo real': 'Real-time tracking',
+  'Hall de lojas': 'Store directory',
+  'Status atual': 'Current status',
+  'Progresso': 'Progress',
+  'Pronto para sair': 'Ready for dispatch',
+  'Pronto para retirada': 'Ready for pickup',
+  'Enviar para a Mesa': 'Send to Table',
+  'Seu nome (opcional)': 'Your name (optional)',
+  'Observação (opcional)': 'Notes (optional)',
+  'A conta é fechada pelo garçom no final — não é preciso pagar agora.': 'The bill is settled by the waiter at the end — no payment needed now.',
+  'Enviar pedido para a Mesa': 'Send order to Table',
+  'Recebemos seu pedido e já estamos organizando a operação.': 'We received your order and are organizing operations.',
+  'Seu pedido foi aceito e entrou oficialmente na fila da cozinha.': 'Your order was accepted and entered the kitchen queue.',
+  'A cozinha está preparando tudo agora.': 'The kitchen is preparing your order now.',
+  'Seu pedido já está embalado e aguardando o início da sua entrega.': 'Your order is packed and awaiting delivery dispatch.',
+  'Seu pedido está pronto e aguardando o despacho da entrega.': 'Your order is ready and awaiting delivery dispatch.',
+  'Seu pedido está pronto para retirada no balcão.': 'Your order is ready for counter pickup.',
+  'Seu entregador já iniciou a sua entrega.': 'Your courier has started your delivery.',
+  'Pedido servido com sucesso. Bom apetite!': 'Order served successfully. Bon appétit!',
+  'Pedido entregue com sucesso. Bom apetite!': 'Order delivered successfully. Bon appétit!',
+  'Pedido concluído. Obrigado pela preferência!': 'Order completed. Thank you for choosing us!',
+  'Seu pedido foi cancelado.': 'Your order was canceled.',
+  'Recebimento confirmado! Muito obrigado.': 'Receipt confirmed! Thank you very much.',
+  'Cardápio 4K': '4K Digital Menu',
+  'Painel de Senhas': 'Ticket Call Board',
+  'AO VIVO': 'LIVE',
+  'Cardápio Digital & Chamada de Pedidos no Balcão': 'Digital Menu & Counter Order Ticket Display',
+  'Iniciando Cardápio Digital para TV...': 'Initializing TV Digital Menu...',
+  'Loja não encontrada': 'Store not found',
+  'Verifique o endereço digitado no navegador da TV.': 'Check the URL entered in your TV browser.',
+  'por favor retirar no balcão': 'please collect at the counter',
+  'Você está pedindo da': 'You are ordering from',
+  'sem precisar de login. A conta fecha no final com o garçom.': 'without login. The bill is settled at the end with the waiter.',
+  'Essa mesa não foi encontrada — chame um garçom para te ajudar.': 'Table not found — please ask a waiter for assistance.',
+  'enviado! A cozinha já está preparando.': 'sent! The kitchen is preparing it.',
+  'Buscar no cardápio…': 'Search menu…',
+  'Conferência de entrega': 'Delivery check',
+
+  // ── Home e landing pages ───────────────────────────────────────────────
+  // Frase inteira, não palavra por palavra. O fallback de substituição só
+  // vale para rótulo curto (ver ehRotuloCurto): em prosa ele produzia
+  // "Desmarque o que No é da Kitchen", que é pior do que não traduzir.
+  // Estas entradas cobrem o texto visível da Home e das landing pages, que
+  // não mudava nada ao virar o toggle para inglês.
+  'NOVO': 'NEW',
+  'Fila única na cozinha e estoque': 'One queue in the kitchen, one stock',
+  'Autoatendimento direto na mesa sem taxas': 'Self-service at the table, commission free',
+  'Fichas técnicas, lotes e gráfico 3D': 'Recipe costing, batches and 3D graph',
+  'API Cloud Oficial Meta Verified': 'Official Meta Verified Cloud API',
+  'Cardápio & QR Code': 'Menu & QR Code',
+  'WhatsApp com IA': 'WhatsApp with AI',
+  'Estoque & Ficha Técnica': 'Stock & Recipe Costing',
+  'Pix Automático': 'Automatic Pix',
+  'Fim do Desperdício no Buffet': 'No More Waste on the Buffet Line',
+  'Seu restaurante a quilo vendendo com': 'Your pay-by-weight restaurant selling with',
+  'Peso Inteligente': 'Smart Weighing',
+  'Chega de perder dinheiro no buffet por falta de controle de estoque. Com a tecnologia de peso do MiseOn, cada grama servida no prato baixa exatamente a proporção de insumos cadastrada na Ficha Técnica.': 'Stop losing money on the buffet line for lack of stock control. With MiseOn\'s weighing technology, every gram served draws down exactly the share of ingredients defined in the recipe.',
+  'Baixa Exata de Estoque:': 'Exact Stock Drawdown:',
+  '0.350kg no prato = baixa proporcional exata no estoque de insumos.': '0.350kg on the plate = exact proportional drawdown from ingredient stock.',
+  'Preço R$/kg Flexível:': 'Flexible R$/kg Price:',
+  'Atualize o valor por quilo sempre que a carne ou insumos oscilarem.': 'Update the price per kilo whenever meat or ingredient costs move.',
+  'Operação Híbrida:': 'Hybrid Operation:',
+  'Prato por quilo + marmitas a peso + bebidas unitárias no mesmo caixa.': 'Pay-by-weight plates, packed meals by weight and per-unit drinks on the same till.',
+  'Conhecer Módulo por Quilo': 'Explore the Pay-by-Weight Module',
+  'Simulação de Venda por Peso': 'Sale by Weight Simulation',
+  'Feijoada por Quilo (R$ 69,90/kg)': 'Feijoada by the Kilo (R$ 69.90/kg)',
+  'Baixa automática em estoque': 'Automatic stock drawdown',
+  'Feijão': 'Beans',
+  'Carne': 'Meat',
+  'Subtotal Prato': 'Plate Subtotal',
+  'Leitura de NFC-e direto na SEFAZ': 'NFC-e read straight from the tax authority',
+  'Você comprou.': 'You bought it.',
+  'O estoque já sabe.': 'Stock already knows.',
+  'Todo sistema de gestão morre no mesmo ponto: alguém precisa sentar e cadastrar item por item. É por isso que a maioria dos restaurantes desiste do controle de estoque na segunda semana.': 'Every management system dies at the same point: someone has to sit down and enter items one by one. That is why most restaurants give up on stock control in the second week.',
+  'No MiseOn, você volta do mercado e': 'With MiseOn, you get back from the market and',
+  'escaneia o QR Code do cupom fiscal': 'scan the QR Code on the receipt',
+  'O sistema busca a nota na SEFAZ e traz a compra inteira — produto, quantidade, unidade e o custo real de cada item. Você confere, ajusta o que quiser e dá entrada de tudo de uma vez.': 'The system pulls the invoice from the tax authority and brings the whole purchase — product, quantity, unit and the real cost of each item. You review it, adjust what you want and post everything at once.',
+  'Escaneie': 'Scan',
+  'QR Code do cupom, pela câmera ou por foto': 'Receipt QR Code, by camera or photo',
+  'Confira': 'Review',
+  'Desmarque o que não é da cozinha': 'Untick whatever is not for the kitchen',
+  'Estoque, custo e lote atualizados': 'Stock, cost and batch updated',
+  'Quero parar de digitar estoque': 'I want to stop typing stock in by hand',
+  'A compra inteira, de uma vez': 'The whole purchase, in one go',
+  'Cupom de mercado com dezenas de itens entra em um scan. Cada linha vem com descrição, quantidade, unidade e o valor que você realmente pagou — lido da nota oficial, não digitado.': 'A market receipt with dozens of items goes in with one scan. Every line comes with description, quantity, unit and what you actually paid — read from the official invoice, not typed.',
+  'Você manda no que entra': 'You decide what goes in',
+  'Comprou algo pessoal junto? Desmarque. Comprou ovo em bandeja e usa em unidade? Diga que 1 bandeja rende 20 — e o estoque entra em unidade, do jeito que a sua cozinha trabalha.': 'Bought something personal along the way? Untick it. Bought eggs by the tray and use them by the unit? Say one tray yields 20 — and stock goes in by the unit, the way your kitchen actually works.',
+  'Na segunda compra, ele já sabe': 'By the second purchase, it already knows',
+  'O MiseOn guarda o vínculo entre o código daquele mercado e o seu insumo. A próxima nota do mesmo fornecedor cai reconhecida — o trabalho de conferência só diminui.': 'MiseOn remembers the link between that market\'s product code and your ingredient. The next invoice from the same supplier arrives already matched — the review work only shrinks.',
+  'A mesma nota nunca entra duas vezes': 'The same invoice never goes in twice',
+  'Escaneou de novo sem lembrar? Ele avisa a data em que aquela nota já foi lançada, em vez de dobrar seu estoque em silêncio e estragar o seu CMV.': 'Scanned it again without remembering? It tells you the date that invoice was already posted, instead of silently doubling your stock and wrecking your food cost.',
+  'Custo real, CMV honesto': 'Real cost, honest food cost',
+  'Cada entrada abre um lote PEPS com o preço daquela compra. Quando o preço da carne sobe, o custo do seu prato sobe junto — sem você refazer conta nenhuma.': 'Every entry opens a FIFO batch at that purchase price. When the price of meat goes up, the cost of your dish goes up with it — with no recalculation on your side.',
+  ') e atribua o setor físico (': ') and assign the physical sector (',
+  'Geladeira, Freezer, Dispensa, Armário': 'Fridge, Freezer, Pantry, Cabinet',
+  'Unidade de Compra:': 'Purchase Unit:',
+  'Conversão de Uso:': 'Usage Conversion:',
+  'Alerta automático de estoque crítico/risco.': 'Automatic alert for critical/at-risk stock.',
+  'Produção por Lote:': 'Batch Production:',
+  'Ordens de Serviço (OS)': 'Work Orders',
+  'Controle de Validade:': 'Shelf-Life Control:',
+  'Horas / Dias com Timer': 'Hours / Days with Timer',
+  'Sinalização de Risco:': 'Risk Flagging:',
+  'Maior Alocação:': 'Largest Allocation:',
+  'Custo unitário por Lote': 'Unit cost per Batch',
+  'Esteiras 3D por Setor': '3D Lanes by Sector',
+  'R$ 169,90/mês': 'R$ 169.90/mo',
+  'Pix com 5% OFF: R$ 161,40/mês': 'Pix with 5% OFF: R$ 161.40/mo',
+  'Sem cartão no cadastro.': 'No card required to sign up.',
+  'PDV Frente de Caixa': 'Front-of-House POS',
+  'Robô WhatsApp': 'WhatsApp Bot',
+  'livre de taxas': 'commission free',
+  'Impressão Automática': 'Automatic Printing',
+  'em telas': 'on screens',
+  'Ficha Técnica': 'Recipe Costing',
+  'avançada (CMV)': 'advanced (food cost)',
+  'Baixa automática': 'Automatic drawdown',
+  'por venda': 'per sale',
+  'Controle de Lotes': 'Batch Control',
+  'Visualização 3D': '3D View',
+  'do espaço': 'of the space',
+  'Pix Automático (Efí)': 'Automatic Pix (Efí)',
+  'analíticos': 'analytics',
+  'Usuários Ilimitados': 'Unlimited Users',
+  'com permissões': 'with permissions',
+  'prioritário': 'priority',
+  'Restaurante por Quilo': 'Pay-by-Weight Restaurant',
+  'Entrada pelo QR Code do cupom do mercado': 'Entry via the market receipt QR Code',
+  'QR Code da NFC-e': 'NFC-e QR Code',
+  'sem digitar produto por produto': 'without typing product by product',
+  'Categorias & Setores Físicos de Alocação': 'Categories & Physical Storage Sectors',
+  'Geladeira, Freezer, Dispensa ou Armário': 'Fridge, Freezer, Pantry or Cabinet',
+  'Conversão Automática de Unidade': 'Automatic Unit Conversion',
+  'por R$ 50,00 ➔ Rende': 'for R$ 50.00 ➔ Yields',
+  'Custeio PEPS & Alerta de Estoque Crítico': 'FIFO Costing & Critical Stock Alert',
+  'PEPS (Primeiro que entra, primeiro que sai)': 'FIFO (First in, first out)',
+  'Ficha Técnica por Lote de Produção': 'Recipe Costing by Production Batch',
+  'Controle de Validade de Lotes Produzidos': 'Shelf-Life Control for Produced Batches',
+  'Execução de Ordens de Serviço (OS)': 'Work Order Execution',
+  'Entre na unidade que quiser': 'Enter it in whatever unit you like',
+  'Lista que pensa': 'A list that thinks',
+  'Maior Custo Unitário': 'Highest Unit Cost',
+  'Maior Alocação': 'Largest Allocation',
+  'Guia de Ajuda & FAQ': 'Help Guide & FAQ',
+  'Dores & Soluções': 'Pain Points & Solutions',
+  'Dúvidas': 'FAQ',
+  'Sem o MiseOn': 'Without MiseOn',
+  'Com o MiseOn': 'With MiseOn',
+  'Módulos Especialistas': 'Specialist Modules',
+  'R$ 149,90/mês': 'R$ 149.90/mo',
+  '(em até 12x no cartão via Efí Bank). Pagamentos no Pix têm': '(up to 12 instalments on card via Efí Bank). Pix payments get',
+  'Gestão de Comandas': 'Tab Management',
+  'de pedidos': 'of orders',
+  'Cardápio QR Code': 'QR Code Menu',
+  'Tela de Cadastro de Novo Insumo no MiseOn': 'New Ingredient Registration Screen in MiseOn',
+  'Ajuda & Dúvidas': 'Help & FAQ',
 };
 
 function escaparRegex(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// Prepara dicionário consolidado ordenado por tamanho decrescente de chave
-// para garantir substituição de frases completas antes de palavras isoladas,
-// utilizando limite de palavra Unicode (?<![\p{L}\p{N}]) e (?![\p{L}\p{N}]) para acentuação PT-BR.
+// Dicionário consolidado ordenado por tamanho decrescente de chave, para
+// substituir frases inteiras antes de palavras isoladas, com limite de palavra
+// Unicode — (?<![\p{L}\p{N}]) / (?![\p{L}\p{N}]) — por causa da acentuação.
+//
+// Os RegExp são construídos UMA vez, na carga do módulo. Antes eles nasciam
+// dentro do laço, a cada chamada: 715 `new RegExp` + 715 `replace` por texto
+// que não batesse exato no dicionário. Medido em 2,57 ms por chamada — uma
+// tela de 50 produtos travava a thread principal por ~130 ms no desktop (e
+// vários múltiplos disso no celular do cliente). Com o KDS e o PDV também
+// usando tDynamic, isso batia na operação do balcão, não só na vitrine.
 const PARES_TRADUCAO_PREPARADOS = Object.entries({
   ...MAPA_TRADUCAO_TEXTO,
   ...DADOS_PALAVRAS_SUBSTITUICAO,
@@ -732,27 +989,60 @@ const PARES_TRADUCAO_PREPARADOS = Object.entries({
   .sort((a, b) => b[0].length - a[0].length)
   .map(([pt, en]) => ({
     en,
-    pattern: `(?<![\\p{L}\\p{N}])${escaparRegex(pt)}(?![\\p{L}\\p{N}])`,
+    rx: new RegExp(`(?<![\\p{L}\\p{N}])${escaparRegex(pt)}(?![\\p{L}\\p{N}])`, 'giu'),
   }));
+
+// Memória do que já foi traduzido. Listas re-renderizam com os mesmos textos o
+// tempo todo; sem isto o fallback caro roda de novo a cada render.
+const CACHE_TRADUCAO = new Map<string, string>();
+const LIMITE_CACHE = 2000;
 
 export function tDynamic(texto: string, idioma: Idioma): string {
   if (idioma === 'pt-BR' || !texto || typeof texto !== 'string') return texto;
 
-  // 1. Tenta tradução direta exata (O(1))
-  if (MAPA_TRADUCAO_TEXTO[texto]) {
-    return MAPA_TRADUCAO_TEXTO[texto];
+  // 1. Tradução direta exata (O(1)). `hasOwnProperty` em vez de acesso solto:
+  //    um texto chamado "constructor" ou "toString" pegaria algo da cadeia de
+  //    protótipo e devolveria uma função no lugar de uma string.
+  if (Object.prototype.hasOwnProperty.call(MAPA_TRADUCAO_TEXTO, texto)) return MAPA_TRADUCAO_TEXTO[texto];
+  if (Object.prototype.hasOwnProperty.call(DADOS_PALAVRAS_SUBSTITUICAO, texto)) return DADOS_PALAVRAS_SUBSTITUICAO[texto];
+
+  const emCache = CACHE_TRADUCAO.get(texto);
+  if (emCache !== undefined) return emCache;
+
+  // 2. Fallback de substituição por palavra — SÓ para rótulo curto.
+  //
+  //    Aplicado em prosa, ele produz mistura, que é pior do que não traduzir:
+  //      "Autoatendimento direto na mesa sem taxas"
+  //        -> "Autoatendimento DIRECT na Table sem taxas"
+  //      "Desmarque o que não é da cozinha"
+  //        -> "Desmarque o que No é da Kitchen"
+  //    Medido: 16,8% das strings da Home/landing saíam assim.
+  //
+  //    Substituir palavra solta só é seguro quando a string É uma etiqueta
+  //    ("Taxa de entrega", "Salvar"). Frase precisa de entrada inteira no
+  //    dicionário — e, sem ela, fica em português, que é legível e honesto.
+  if (!ehRotuloCurto(texto)) {
+    if (CACHE_TRADUCAO.size >= LIMITE_CACHE) CACHE_TRADUCAO.clear();
+    CACHE_TRADUCAO.set(texto, texto);
+    return texto;
   }
 
-  if (DADOS_PALAVRAS_SUBSTITUICAO[texto]) {
-    return DADOS_PALAVRAS_SUBSTITUICAO[texto];
-  }
-
-  // 2. Fallback inteligente com limites de palavra Unicode sem estado residual de RegExp
+  // `lastIndex` é zerado porque os RegExp são compartilhados entre chamadas e
+  // a flag /g guarda posição.
   let resultado = texto;
-  for (const { en, pattern } of PARES_TRADUCAO_PREPARADOS) {
-    const rx = new RegExp(pattern, 'giu');
+  for (const { en, rx } of PARES_TRADUCAO_PREPARADOS) {
+    rx.lastIndex = 0;
     resultado = resultado.replace(rx, en);
   }
 
+  if (CACHE_TRADUCAO.size >= LIMITE_CACHE) CACHE_TRADUCAO.clear();
+  CACHE_TRADUCAO.set(texto, resultado);
   return resultado;
+}
+
+/** Etiqueta curta: até 3 palavras e sem pontuação de frase. */
+function ehRotuloCurto(texto: string): boolean {
+  const t = texto.trim();
+  if (/[.!?;:—]/.test(t)) return false;
+  return t.split(/\s+/).length <= 3;
 }

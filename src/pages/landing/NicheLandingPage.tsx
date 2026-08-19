@@ -149,9 +149,9 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
           <div className="border-t border-gray-200/70 bg-white/95 px-4 pb-5 pt-3 lg:hidden dark:border-white/10 dark:bg-[#070C18]/95">
             <div className="flex flex-col gap-2 font-semibold">
               <a href="#recursos" onClick={() => setMenuAberto(false)} className="py-2">Recursos</a>
-              <a href="#comparativo" onClick={() => setMenuAberto(false)} className="py-2">Dores & Soluções</a>
-              <a href="#regras" onClick={() => setMenuAberto(false)} className="py-2">Regras de Negócio</a>
-              <a href="#faq" onClick={() => setMenuAberto(false)} className="py-2">Dúvidas</a>
+              <a href="#comparativo" onClick={() => setMenuAberto(false)} className="py-2">{tDynamic("Dores & Soluções")}</a>
+              <a href="#regras" onClick={() => setMenuAberto(false)} className="py-2">{tDynamic("Regras de Negócio")}</a>
+              <a href="#faq" onClick={() => setMenuAberto(false)} className="py-2">{tDynamic("Dúvidas")}</a>
               <Link to="/cadastre-se" className="mt-2 rounded-xl bg-[var(--cor-primaria)] p-3 text-center text-white font-bold">
                 Cadastrar Minha Loja
               </Link>
@@ -230,7 +230,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                 <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 text-red-950 dark:text-red-200">
                   <div className="flex items-center gap-2 font-bold text-red-600 dark:text-red-400">
                     <X size={20} />
-                    <span>Sem o MiseOn</span>
+                    <span>{tDynamic("Sem o MiseOn")}</span>
                   </div>
                   <p className="mt-3 text-sm leading-relaxed">{item.semMiseOn}</p>
                 </div>
@@ -239,7 +239,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                 <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-emerald-950 dark:text-emerald-200">
                   <div className="flex items-center gap-2 font-bold text-emerald-600 dark:text-emerald-400">
                     <Check size={20} />
-                    <span>Com o MiseOn</span>
+                    <span>{tDynamic("Com o MiseOn")}</span>
                   </div>
                   <p className="mt-3 text-sm leading-relaxed">{item.comMiseOn}</p>
                 </div>
@@ -254,7 +254,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
       <section id="recursos" className="scroll-mt-24 py-20 bg-gray-50 dark:bg-[#090F1E]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">Módulos Especialistas</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic("Módulos Especialistas")}</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold text-gray-900 sm:text-4xl dark:text-white">
               {data.featuresTitle}
             </h2>
@@ -370,7 +370,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
               Comece agora sem custos e transforme a gestão da sua loja
             </h2>
             <p className="mt-3 text-sm text-slate-300 max-w-2xl mx-auto">
-              Teste todos os recursos liberados por 30 dias. Plano Mensal por <b>R$ 169,90/mês</b> ou Anual por <b>R$ 149,90/mês</b> (em até 12x no cartão via Efí Bank). Pagamentos no Pix têm <b>5% de desconto à vista</b>!
+              Teste todos os recursos liberados por 30 dias. Plano Mensal por <b>{tDynamic("R$ 169,90/mês")}</b> {tDynamic("ou Anual por")} <b>{tDynamic("R$ 149,90/mês")}</b> {tDynamic("(em até 12x no cartão via Efí Bank). Pagamentos no Pix têm")} <b>5% de desconto à vista</b>!
             </p>
             <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
               <Link

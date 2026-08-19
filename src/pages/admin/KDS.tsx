@@ -11,6 +11,7 @@ import { tocarSom } from '../../lib/som';
 import { traduzirErro, type ErroTraduzido } from '../../lib/erros';
 import { ErroAmigavel } from '../../components/ui/ErroAmigavel';
 import type { CtxLoja } from './AdminLayout';
+import { useI18n } from '../../contexts/I18nContext';
 
 // Select principal: inclui adicionais (itens_pedido_opcoes) e estação de preparo do produto
 // para separar Cozinha vs Revenda Direta sem depender só de palavras-chave.
@@ -66,6 +67,7 @@ const ETAPAS_PADRAO: EtapaKDS[] = [
 ];
 
 export default function KDS() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [antecedenciaMin, setAntecedenciaMin] = useState<number | null>(null);
@@ -396,7 +398,7 @@ export default function KDS() {
             </span>
             {minNaEtapa > 0 && !finalizadoCozinha && (
               <span className="text-[10px] text-slate-400 flex items-center justify-end gap-1 font-mono">
-                <Clock size={10} /> na etapa: {Math.floor(minNaEtapa)}m
+                <Clock size={10} /> {tDynamic('na etapa:')} {Math.floor(minNaEtapa)}m
               </span>
             )}
           </div>
@@ -406,7 +408,7 @@ export default function KDS() {
           {p.tipo_pedido === 'SALAO'
             ? <UtensilsCrossed size={12} />
             : p.origem === 'balcao' ? <Store size={12} /> : p.tipo_pedido === 'DELIVERY' ? <Bike size={12} /> : <Package size={12} />}
-          {p.tipo_pedido === 'SALAO' ? `MESA ${p.mesa_numero ?? '—'}` : p.origem === 'balcao' ? 'BALCÃO' : p.tipo_pedido === 'DELIVERY' ? 'DELIVERY' : 'RETIRADA'} · {p.identificador_cliente}
+          {p.tipo_pedido === 'SALAO' ? `${tDynamic('MESA')} ${p.mesa_numero ?? '—'}` : p.origem === 'balcao' ? tDynamic('BALCÃO') : p.tipo_pedido === 'DELIVERY' ? tDynamic('DELIVERY') : tDynamic('RETIRADA')} · {p.identificador_cliente}
         </div>
 
         {/* Separação inteligente: Cozinha vs Revenda Direta */}
@@ -427,7 +429,7 @@ export default function KDS() {
               {cozinha.length > 0 && (
                 <div className="space-y-2">
                   <span className="font-['JetBrains_Mono'] text-[10px] font-extrabold uppercase tracking-wider text-orange-400">
-                    🍳 Preparo Cozinha ({cozinha.length}):
+                    🍳 {tDynamic('Preparo Cozinha')} ({cozinha.length}):
                   </span>
                   {cozinha.map((i) => (
                     <div key={i.id} className="pl-1">
@@ -449,15 +451,15 @@ export default function KDS() {
               {direto.length > 0 && (
                 <div className="mt-2 rounded-xl border border-slate-700/60 bg-slate-800/40 p-2.5 space-y-1.5">
                   <span className="font-['JetBrains_Mono'] text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                    <Store size={12} className="text-blue-400" /> Revenda / Balcão ({direto.length}):
+                    <Store size={12} className="text-blue-400" /> {tDynamic('Revenda / Balcão')} ({direto.length}):
                   </span>
                   {direto.map((i) => (
-                    <div key={i.id} className="flex items-center justify-between text-[12px] text-slate-300">
+                    <div key={i.id} className="flex items-center justify-between text-[12px] text-[#EAF1FB]">
                       <span>
                         <strong className="text-blue-400">{i.quantidade}×</strong> {i.nome_produto}
                       </span>
                       <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                        DIRETO
+                        {tDynamic('DIRETO')}
                       </span>
                     </div>
                   ))}
@@ -469,11 +471,11 @@ export default function KDS() {
 
         {finalizadoCozinha ? (
           <div className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 py-2 text-center text-[12px] font-black uppercase tracking-wider text-emerald-400">
-            <Check size={13} /> Devolvido ao balcão
+            <Check size={13} /> {tDynamic('Devolvido ao balcão')}
           </div>
         ) : (
           <div className="mt-3 rounded-xl bg-white/5 py-2 text-center text-[12px] font-black uppercase tracking-wider text-white/70 hover:bg-white/10 transition">
-            Toque → {acaoRotulo}
+            {tDynamic('Toque →')} {tDynamic(acaoRotulo)}
           </div>
         )}
       </button>
@@ -539,10 +541,10 @@ export default function KDS() {
       <div data-tour="tour-kds-header" className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <ChefHat size={22} className="text-orange-500" />
-          <h2 className="font-['Sora'] text-xl font-black text-white">KDS Kanban Cozinha</h2>
+          <h2 className="font-['Sora'] text-xl font-black text-white">{tDynamic('KDS Kanban Cozinha')}</h2>
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]" />
           <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            {etapas.length} Colunas Trello
+            {etapas.length} {tDynamic('Colunas Trello')}
           </span>
         </div>
 
@@ -550,7 +552,7 @@ export default function KDS() {
           {metricas && (
             <div className="flex items-center gap-1.5 rounded-xl border border-white/10 px-3 py-1.5 text-xs font-bold" style={{ color: corMeta }}>
               <Flame size={13} />
-              {metricas.media_hoje_min != null ? `${metricas.media_hoje_min}min hoje` : 'sem dados hoje'} · meta {metricas.meta_min}min
+              {metricas.media_hoje_min != null ? `${metricas.media_hoje_min}min ${tDynamic('hoje')}` : tDynamic('sem dados hoje')} · {tDynamic('meta')} {metricas.meta_min}min
             </div>
           )}
 
@@ -559,7 +561,7 @@ export default function KDS() {
             onClick={() => setModalMetricasAberto(true)}
             className="flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs font-bold text-blue-400 transition hover:bg-blue-500/20"
           >
-            <BarChart2 size={14} /> Indicadores por Etapa
+            <BarChart2 size={14} /> {tDynamic('Indicadores por Etapa')}
           </button>
 
           {/* Botão de Personalizar Etapas (Trello Config) */}
@@ -567,11 +569,11 @@ export default function KDS() {
             onClick={() => setModalConfigAberto(true)}
             className="flex items-center gap-1.5 rounded-xl border border-orange-500/30 bg-orange-500/10 px-3 py-1.5 text-xs font-bold text-orange-400 transition hover:bg-orange-500/20"
           >
-            <SlidersHorizontal size={14} /> Personalizar Etapas
+            <SlidersHorizontal size={14} /> {tDynamic('Personalizar Etapas')}
           </button>
 
           <button onClick={fullscreen} className="flex items-center gap-1.5 rounded-xl border border-white/10 px-3 py-1.5 text-xs font-bold text-white/60 transition hover:text-white">
-            <Maximize size={13} /> Tela cheia
+            <Maximize size={13} /> {tDynamic('Tela cheia')}
           </button>
         </div>
       </div>

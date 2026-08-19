@@ -16,6 +16,7 @@ import { fmt } from '../../types';
 import { maskCPFouCNPJ, maskTelefone, validarCPFouCNPJ } from '../../lib/mascaras';
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
 import { geocode } from '../../lib/geo';
+import { useI18n } from '../../contexts/I18nContext';
 
 const PRESETS_SEGMENTOS: Record<SegmentoNegocio, { rotulo: string; descricao: string; modulos: ModulosAtivos }> = {
   HAMBURGUERIA: {
@@ -135,6 +136,7 @@ type Aba = 'aparencia' | 'identidade' | 'segmento' | 'logistica' | 'horarios' | 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 export default function Loja() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const [aba, setAba] = useState<Aba>('aparencia');
   const [form, setForm] = useState<FormLoja>(vazio);
@@ -491,12 +493,12 @@ export default function Loja() {
     <div className="p-4 pb-28 lg:pb-4">
       <div className="mb-4 flex items-center gap-2">
         <Store size={20} className="text-[var(--cor-primaria)]" />
-        <h2 className="text-lg font-bold">Configurar Loja</h2>
+        <h2 className="text-lg font-bold">{tDynamic('Configurar Loja')}</h2>
       </div>
 
       {/* Link público — o cliente acessa por aqui, sem login */}
       <div className="mb-5 rounded-2xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3.5 shadow-sm space-y-2">
-        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Links de Acesso Rápido</p>
+        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Links de Acesso Rápido')}</p>
         <div className="flex flex-wrap items-center gap-2">
           <code className="flex-1 truncate rounded-lg bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs text-gray-700 dark:text-gray-300 font-mono">{linkPublico}</code>
           <button onClick={copiarLink} title="Copiar link" className="shrink-0 rounded-lg border p-2 text-gray-500 dark:text-gray-400">

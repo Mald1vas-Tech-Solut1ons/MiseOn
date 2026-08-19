@@ -8,10 +8,12 @@ import { Categoria, Produto, Insumo, EstacaoPreparo, TipoVenda, fmt } from '../.
 import ImageUpload from '../../components/ImageUpload';
 import type { CtxLoja } from './AdminLayout';
 import { getOptimizedImageUrl } from '../../lib/cdn';
+import { useI18n } from '../../contexts/I18nContext';
 
 type Tab = 'produtos' | 'categorias';
 
 export default function CardapioAdmin() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const [tab, setTab] = useState<Tab>('produtos');
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -56,7 +58,7 @@ export default function CardapioAdmin() {
     [produtos, catAtiva, busca],
   );
 
-  const nomeCategoria = (id?: string) => categorias.find((c) => c.id === id)?.nome ?? 'Sem categoria';
+  const nomeCategoria = (id?: string) => categorias.find((c) => c.id === id)?.nome ?? tDynamic('Sem categoria');
 
   const toggleDisponivel = async (p: Produto) => {
     await supabase.from('produtos').update({ disponivel: !p.disponivel }).eq('id', p.id);
@@ -89,7 +91,7 @@ export default function CardapioAdmin() {
         {(['produtos', 'categorias'] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium ${tab === t ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm dark:bg-gray-900 dark:text-gray-300 dark:border dark:border-gray-800'}`}>
-            {t === 'produtos' ? 'Produtos' : 'Categorias'}
+            {t === 'produtos' ? tDynamic('Produtos') : tDynamic('Categorias')}
           </button>
         ))}
       </div>
@@ -102,14 +104,14 @@ export default function CardapioAdmin() {
         <>
           <div className="mb-3 flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 px-3 py-2 shadow-sm dark:bg-gray-900 dark:border dark:border-gray-800">
             <Search size={16} className="text-gray-400" />
-            <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar produto…"
+            <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder={tDynamic('Buscar produto…')}
               className="w-full bg-transparent text-sm outline-none" />
           </div>
 
           <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
             <button onClick={() => setCatAtiva(null)}
               className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${!catAtiva ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm dark:bg-gray-900 dark:text-gray-300 dark:border dark:border-gray-800'}`}>
-              Tudo
+              {tDynamic('Tudo')}
             </button>
             {categorias.map((c) => (
               <button key={c.id} onClick={() => setCatAtiva(c.id === catAtiva ? null : c.id)}
@@ -121,7 +123,7 @@ export default function CardapioAdmin() {
 
           <button onClick={() => setEditando('novo')}
             className="mb-3 flex w-full items-center justify-center gap-1 rounded-xl bg-[var(--cor-primaria)] py-2.5 text-sm font-semibold text-white">
-            <Plus size={15} /> Novo produto
+            <Plus size={15} /> {tDynamic('Novo produto')}
           </button>
 
           {catAtiva && (

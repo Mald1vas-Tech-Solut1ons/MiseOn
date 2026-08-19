@@ -10,6 +10,7 @@ import { fmt, ProdutoCusto, ConfiguracoesCusto, Pedido, MetodoPgto } from '../..
 import DreGerencial from '../../components/admin/DreGerencial';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
+import { useI18n } from '../../contexts/I18nContext';
 
 const defaultCustos: ConfiguracoesCusto = {
   loja_id: '',
@@ -80,6 +81,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default function Financeiro() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const [aba, setAba] = useState<'EXTRATO' | 'MARGENS' | 'DRE' | 'CUSTOS_FIXOS'>('EXTRATO');
   const [periodo, setPeriodo] = useState<Periodo>('HOJE');
@@ -201,9 +203,9 @@ export default function Financeiro() {
       atualizado_em: new Date().toISOString()
     }, { onConflict: 'loja_id' });
 
-    if (error) setMensagem('Erro ao salvar custos.');
+    if (error) setMensagem(tDynamic('Erro ao salvar custos.'));
     else {
-      setMensagem('Custos atualizados com sucesso!');
+      setMensagem(tDynamic('Custos atualizados com sucesso!'));
       await carregarDados(); // Recarrega a view de produtos com o novo rateio
     }
     setSalvando(false);
@@ -213,7 +215,7 @@ export default function Financeiro() {
   if (carregando) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <MiseOnLoader status="Carregando inteligência financeira..." rows={2} />
+        <MiseOnLoader status={tDynamic('Carregando inteligência financeira...')} rows={2} />
       </div>
     );
   }
@@ -223,16 +225,16 @@ export default function Financeiro() {
 
   const abaBtn = (id: typeof aba, rotulo: string) => (
     <button onClick={() => setAba(id)} className={`px-4 py-2 text-sm font-semibold rounded-t-xl transition-colors ${aba === id ? 'bg-white dark:bg-gray-900 border-t border-x border-gray-100 dark:border-gray-800 text-[var(--cor-primaria)] -mb-[9px] shadow-[0_-2px_4px_rgba(0,0,0,0.02)]' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
-      {rotulo}
+      {tDynamic(rotulo)}
     </button>
   );
 
   return (
     <div data-tour="tour-financeiro-header" className="p-4 max-w-3xl mx-auto">
       <div className="mb-3 flex items-center gap-2">
-        <h2 className="font-bold text-xl dark:text-gray-100">Financeiro</h2>
+        <h2 className="font-bold text-xl dark:text-gray-100">{tDynamic('Financeiro')}</h2>
         <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" /> Ao vivo
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" /> {tDynamic('Ao vivo')}
         </span>
       </div>
 
@@ -263,23 +265,23 @@ export default function Financeiro() {
           {/* ── KPIs ── */}
           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><DollarSign size={11} /> Faturamento</p>
+              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><DollarSign size={11} /> {tDynamic('Faturamento')}</p>
               <p className="mt-1 text-lg font-bold dark:text-gray-100">{fmt(resumo.faturamento)}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><Bike size={11} /> Taxas Entrega</p>
+              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><Bike size={11} /> {tDynamic('Taxas Entrega')}</p>
               <p className="mt-1 text-lg font-bold text-blue-500">{fmt(resumo.totalTaxasEntrega)}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><TrendingUp size={11} /> Lucro estimado</p>
+              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><TrendingUp size={11} /> {tDynamic('Lucro estimado')}</p>
               <p className={`mt-1 text-lg font-bold ${resumo.lucro < 0 ? 'text-red-500' : 'text-green-600'}`}>{fmt(resumo.lucro)}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><ShoppingBag size={11} /> Pedidos</p>
+              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><ShoppingBag size={11} /> {tDynamic('Pedidos')}</p>
               <p className="mt-1 text-lg font-bold dark:text-gray-100">{resumo.qtdPedidos}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900 col-span-2 sm:col-span-1">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><Ticket size={11} /> Ticket médio</p>
+              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><Ticket size={11} /> {tDynamic('Ticket médio')}</p>
               <p className="mt-1 text-lg font-bold dark:text-gray-100">{fmt(resumo.ticketMedio)}</p>
             </div>
           </div>
