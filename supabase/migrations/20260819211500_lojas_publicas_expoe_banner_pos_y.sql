@@ -1,0 +1,50 @@
+-- banner_pos_y precisa atravessar a view publica, senao o cardapio nunca ve o
+-- enquadramento que o lojista escolheu. lojas_publicas e allowlist de colunas:
+-- coluna nova so aparece se for adicionada aqui de proposito.
+
+create or replace view public.lojas_publicas as
+SELECT id,
+    slug,
+    nome,
+    descricao,
+    logo_url,
+    banner_url,
+    cor_primaria,
+    cor_secundaria,
+    cor_texto,
+    cor_fundo_claro,
+    cor_fundo_escuro,
+    fonte,
+    tema_cardapio,
+    telefone,
+    whatsapp,
+    endereco,
+    lat,
+    lng,
+    aberto_manual,
+    ativo,
+    pedido_minimo,
+    aceita_agendamento,
+    agendamento_antecedencia_min,
+    aceita_online,
+    aceita_entrega,
+    antecipacao_cartao,
+    taxa_servico_padrao_pct,
+    cashback_pct,
+    meta_preparo_min,
+    chat_ia_ativo,
+    segmento_negocio,
+    modulos_ativos,
+    entrega_modo,
+    entrega_taxa_base,
+    entrega_taxa_km,
+    entrega_raio_km,
+    entrega_taxa_padrao,
+    frete_gratis_valor_minimo,
+    meta_pixel_id,
+    ga4_measurement_id,
+    NULLIF(btrim(COALESCE(efi_payee_code, ''::text)), ''::text) IS NOT NULL AS efi_configurado,
+    l.banner_pos_y
+   FROM lojas l
+  WHERE ativo;
+grant select on public.lojas_publicas to anon, authenticated;

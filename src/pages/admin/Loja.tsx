@@ -61,6 +61,7 @@ interface FormLoja {
   descricao: string;
   logo_url: string;
   banner_url: string;
+  banner_pos_y: number;
   cor_primaria: string;
   cor_secundaria: string;
   fonte: string;
@@ -117,7 +118,7 @@ interface FaixaEntregaForm {
 }
 
 const vazio: FormLoja = {
-  nome: '', descricao: '', logo_url: '', banner_url: '',
+  nome: '', descricao: '', logo_url: '', banner_url: '', banner_pos_y: 50,
   cor_primaria: PALETA_CORES[5], cor_secundaria: PALETA_CORES[1],
   fonte: 'Inter', cor_texto: PALETA_CORES[13], cor_fundo_claro: PALETA_FUNDO_POR_TEMA.claro[0], cor_fundo_escuro: PALETA_FUNDO_POR_TEMA.escuro[0], tema_cardapio: 'claro',
   whatsapp: '', telefone: '', endereco: '', cnpj: '', razao_social: '', pedido_minimo: '0', pix_chave: '', efi_payee_code: '',
@@ -158,6 +159,7 @@ export default function Loja() {
         setForm({
           nome: data.nome ?? '', descricao: data.descricao ?? '',
           logo_url: data.logo_url ?? '', banner_url: data.banner_url ?? '',
+          banner_pos_y: data.banner_pos_y ?? 50,
           cor_primaria: data.cor_primaria ?? vazio.cor_primaria,
           cor_secundaria: data.cor_secundaria ?? vazio.cor_secundaria,
           fonte: data.fonte ?? 'Inter',
@@ -358,6 +360,7 @@ export default function Loja() {
       descricao: form.descricao || null,
       logo_url: form.logo_url || null,
       banner_url: form.banner_url || null,
+      banner_pos_y: form.banner_pos_y,
       cor_primaria: form.cor_primaria,
       cor_secundaria: form.cor_secundaria,
       fonte: form.fonte,
@@ -714,6 +717,60 @@ export default function Loja() {
             <ImageUpload lojaId={lojaId} pasta="logos" aspecto="aspect-square" label="Logo" value={form.logo_url} onChange={(url) => handleImageUpload('logo_url', url)} />
             <ImageUpload lojaId={lojaId} pasta="banners" aspecto="aspect-[21/9]" label="Banner" value={form.banner_url} onChange={(url) => handleImageUpload('banner_url', url)} />
           </div>
+
+          {/* Enquadramento do banner.
+              O cardápio exibe o banner com object-fit: cover — a imagem preenche
+              a faixa e o que sobra é cortado. Com a posição travada no centro,
+              um banner 4000x1714 numa faixa 4:1 perdia ~42% da altura sempre
+              pelo meio: fachada ou prato fora do centro exato simplesmente
+              sumiam, e a única saída era reeditar a foto por fora. Este controle
+              move o ponto focal vertical, com a prévia mostrando o resultado
+              exato que o cliente vai ver. */}
+          {form.banner_url && (
+            <div className="rounded-2xl bg-white dark:bg-gray-900 dark:border-gray-800 p-4 shadow-sm">
+              <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold">
+                <Palette size={15} /> Enquadramento do banner
+              </p>
+              <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+                O cardápio mostra o banner numa faixa larga e corta o resto. Arraste
+                para escolher que parte da imagem fica visível.
+              </p>
+
+              <div className="relative h-28 w-full overflow-hidden rounded-xl sm:h-36">
+                <img
+                  src={getOptimizedImageUrl(form.banner_url)}
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: `50% ${form.banner_pos_y}%` }}
+                  alt="Prévia do enquadramento do banner"
+                />
+                <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
+                  Prévia — é assim que o cliente vê
+                </span>
+              </div>
+
+              <div className="mt-3 flex items-center gap-3">
+                <span className="w-10 shrink-0 text-xs text-gray-500 dark:text-gray-400">Topo</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={form.banner_pos_y}
+                  onChange={(e) => setForm({ ...form, banner_pos_y: Number(e.target.value) })}
+                  className="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-[var(--cor-primaria)] dark:bg-gray-700"
+                  aria-label="Posição vertical do banner"
+                />
+                <span className="w-10 shrink-0 text-right text-xs text-gray-500 dark:text-gray-400">Base</span>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, banner_pos_y: 50 })}
+                  className="shrink-0 rounded-lg border border-gray-200 px-2 py-1 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  Centro
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="rounded-2xl bg-white dark:bg-gray-900 dark:border-gray-800 p-4 shadow-sm">
             <p className="mb-4 flex items-center gap-1.5 text-sm font-semibold"><Palette size={15} /> Identidade Visual</p>

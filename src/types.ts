@@ -41,6 +41,8 @@ export interface Loja {
   descricao?: string;
   logo_url?: string;
   banner_url?: string;
+  /** Ponto focal vertical do banner em % (0 = topo, 50 = centro, 100 = base). */
+  banner_pos_y?: number | null;
   cor_primaria: string;
   cor_secundaria: string;
   fonte?: string;

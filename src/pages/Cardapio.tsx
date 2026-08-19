@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
-import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, ArrowRight, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, ArrowRight, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { maskCartaoCredito, maskValidadeCartao, maskCPF, validarCPF } from '../lib/mascaras';
 import ModalAuthCliente from '../components/ModalAuthCliente';
@@ -335,7 +335,18 @@ export default function Cardapio() {
           className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80"
           style={{ background: `linear-gradient(135deg, ${loja.cor_primaria}, ${loja.cor_secundaria})` }}
         >
-          {loja.banner_url && <img src={getOptimizedImageUrl(loja.banner_url)} className="h-full w-full object-cover" alt="" />}
+          {/* object-position vertical vem do lojista. Com o centro travado, um
+              banner 4000x1714 exibido em 4:1 perdia ~42% da altura sempre pelo
+              meio: se a fachada ou o prato nao estivesse no centro exato, sumia
+              e nao havia como corrigir sem reeditar a foto. */}
+          {loja.banner_url && (
+            <img
+              src={getOptimizedImageUrl(loja.banner_url)}
+              className="h-full w-full object-cover"
+              style={{ objectPosition: `50% ${loja.banner_pos_y ?? 50}%` }}
+              alt={`Banner de ${loja.nome}`}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/25" />
           <div className="absolute left-3 top-3 sm:left-6 sm:top-6">
             <Link
@@ -385,9 +396,25 @@ export default function Cardapio() {
                   <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold backdrop-blur-sm ${aberta ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'}`}>
                     <Clock size={11} /> {aberta ? 'Aberto agora' : 'Fechado'}
                   </span>
+                  {/* O que o cliente procura antes de decidir pedir — e o que
+                      iFood e Rappi mostram no topo. Antes so havia nome, status
+                      e pedido minimo. */}
+                  {(loja.meta_preparo_min ?? 0) > 0 && (
+                    <span className="flex items-center gap-1 rounded-full px-2 py-0.5 backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.92)', color: '#111827' }}>
+                      <Clock size={11} /> ~{loja.meta_preparo_min} min
+                    </span>
+                  )}
+                  {loja.aceita_entrega && (
+                    <span className="flex items-center gap-1 rounded-full px-2 py-0.5 backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.92)', color: '#111827' }}>
+                      <Bike size={11} />
+                      {Number(loja.entrega_taxa_padrao ?? 0) > 0
+                        ? `${tDynamic('Entrega')} ${fmt(Number(loja.entrega_taxa_padrao))}`
+                        : tDynamic('Entrega grátis')}
+                    </span>
+                  )}
                   {loja.pedido_minimo > 0 && (
                     <span className="rounded-full px-2 py-0.5 backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.92)', color: '#111827' }}>
-                      Pedido mín. {fmt(loja.pedido_minimo)}
+                      {tDynamic('Pedido mín.')} {fmt(loja.pedido_minimo)}
                     </span>
                   )}
                 </div>

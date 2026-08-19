@@ -790,6 +790,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Última atualização: 22 de julho de 2026': 'Last updated: 22 July 2026',
   'Mensagem enviada com sucesso! Nossa equipe entrará em contato em breve pelo seu WhatsApp.': 'Message sent successfully! Our team will get in touch shortly on your WhatsApp.',
   'Tudo': 'All',
+  'Pedido mín.': 'Min. order',
   // Nome próprio: entra aqui só para o teste de cobertura não acusar falta.
   'WhatsApp': 'WhatsApp',
 };
