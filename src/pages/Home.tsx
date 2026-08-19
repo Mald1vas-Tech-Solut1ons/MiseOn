@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  QrCode, ClipboardList, ChefHat, Bike, Boxes, Wallet, ScanLine,
+  QrCode, ClipboardList, ChefHat, Bike, Boxes, Wallet, ScanLine, HeartPulse,
   MessageCircle, ShieldCheck, ArrowRight, Check, Sparkles,
   Menu as MenuIcon, X, UtensilsCrossed, Megaphone, ShoppingBag,
   Mail, ChevronDown, Headset, BarChart3, Star, Quote, BadgeCheck, Scale,
@@ -23,13 +23,27 @@ const RECURSOS = [
   {
     icone: Tv,
     titulo: 'Menu Board 4K & Chamada por Voz na TV',
+    detalhes: [
+      'Chamada da senha falada em voz alta pela propria TV',
+      'Painel de senhas do dia, sem login e sem app na TV',
+      'Basta abrir o link da loja numa Smart TV comum',
+    ],
+    metrica: 'SENHA CHAMADA EM VOZ',
+    badge: 'SALAO E BALCAO',
     texto: 'Transforme qualquer Smart TV do salão em um painel noturno 4K rotativo com chamada de senhas por voz sintetizada em viva-voz.',
     cor: 'text-purple-400',
     fundo: 'bg-purple-500/10',
   },
   {
     icone: Mic,
-    titulo: 'Comanda por Voz no Celular com IA',
+    titulo: 'Comanda por Voz no Celular',
+    detalhes: [
+      'O atendente fala e o proprio aparelho transcreve',
+      'O sistema casa o que foi dito com os itens do seu cardapio',
+      'Voce confere na tela antes de mandar para a comanda',
+    ],
+    metrica: 'PEDIDO SEM DIGITAR',
+    badge: 'MAOS LIVRES',
     texto: 'O cliente fala seu pedido no celular de forma natural ("Dois X-Burgers e 1 Coca Zero") e a IA localiza e insere os itens no carrinho.',
     cor: 'text-[#FC5B24]',
     fundo: 'bg-[#FC5B24]/10',
@@ -37,6 +51,13 @@ const RECURSOS = [
   {
     icone: ShoppingCart,
     titulo: 'Inteligência Preditiva de Compras',
+    detalhes: [
+      'Sugestao pelo giro real dos ultimos 30 dias, nao pelo minimo esquecido',
+      'Projeta a cobertura do estoque ate a proxima entrega',
+      'Ordem de compra pronta para enviar ao fornecedor',
+    ],
+    metrica: 'COMPRA NA MEDIDA',
+    badge: 'PREVISAO DE GIRO',
     texto: 'Algoritmo que analisa o giro real dos últimos 30 dias, projeta o consumo para 7 dias e gera a Ordem de Compra em 1-Clique via WhatsApp do fornecedor.',
     cor: 'text-emerald-500',
     fundo: 'bg-emerald-500/10',
@@ -44,6 +65,13 @@ const RECURSOS = [
   {
     icone: QrCode,
     titulo: 'Cardápio Digital com QR Code',
+    detalhes: [
+      'Link e QR proprios, com a sua marca — sem comissao por pedido',
+      'O cardapio consulta a ficha tecnica e sabe o que ainda tem insumo',
+      'Cliente pede pelo navegador, sem instalar aplicativo',
+    ],
+    metrica: 'ZERO COMISSAO',
+    badge: 'VENDA DIRETA',
     texto: 'Sua loja no ar com link próprio e QR Code para mesas e balcão. Fotos, adicionais e preços sempre atualizados — sem imprimir nada.',
     cor: 'text-orange-500',
     fundo: 'bg-orange-500/10',
@@ -51,13 +79,27 @@ const RECURSOS = [
   {
     icone: ChefHat,
     titulo: 'Cozinha (KDS Kanban)',
+    detalhes: [
+      'Pedidos em colunas por etapa, com o tempo correndo em cada ficha',
+      'Estacoes de preparo separadas por tipo de producao',
+      'Tempo medio por etapa para achar o gargalo da cozinha',
+    ],
+    metrica: 'COZINHA SEM PAPEL',
+    badge: 'PRODUCAO',
     texto: 'Tela de produção sem papel: a cozinha vê a fila por estações (Cozinha, Bar, Confeitaria), marca o preparo e o balcão acompanha tudo em tempo real.',
     cor: 'text-red-500',
     fundo: 'bg-red-500/10',
   },
   {
     icone: Store,
-    titulo: 'Dark Kitchen Multi-Brand',
+    titulo: 'Dark Kitchen (Delivery Apenas)',
+    detalhes: [
+      'Perfil de operacao sem salao: o painel se ajusta ao delivery',
+      'Sem mesa e sem balcao atravancando a tela de quem so entrega',
+      'Mesmo estoque, mesmo KDS e mesmo financeiro',
+    ],
+    metrica: 'OPERACAO SEM SALAO',
+    badge: 'PERFIL DE NEGOCIO',
     texto: 'Opere múltiplas marcas virtuais no mesmo restaurante compartilhando a mesma cozinha física e a mesma baixa de estoque PEPS.',
     cor: 'text-indigo-400',
     fundo: 'bg-indigo-500/10',
@@ -65,6 +107,13 @@ const RECURSOS = [
   {
     icone: Bike,
     titulo: 'Gestão de Entregas por Km',
+    detalhes: [
+      'Taxa por faixa de distancia, calculada pelo km real da entrega',
+      'Rota do entregador acompanhada ao vivo',
+      'Distancia media e volume por faixa no painel',
+    ],
+    metrica: 'TAXA POR DISTANCIA',
+    badge: 'DELIVERY',
     texto: 'Cálculo de frete por distância (Taxa Base + R$/km + Raio máximo), Live GPS Tracking do entregador e visualização no mapa.',
     cor: 'text-emerald-500',
     fundo: 'bg-emerald-500/10',
@@ -72,13 +121,41 @@ const RECURSOS = [
   {
     icone: UtensilsCrossed,
     titulo: 'PDV, Mesas 3D e Comandas',
+    detalhes: [
+      'Salao desenhado em 3D: mesa livre, ocupada ou fechando conta',
+      'Caixa com abertura e fechamento de turno',
+      'Mesmo caixa do delivery, do balcao e do salao',
+    ],
+    metrica: 'SALAO E BALCAO NO MESMO CAIXA',
+    badge: 'ATENDIMENTO',
     texto: 'Balcão e salão no mesmo sistema: comanda por mesa/assento, pedido direto na tela da cozinha e fechamento de conta sem confusão.',
     cor: 'text-amber-500',
     fundo: 'bg-amber-500/10',
   },
   {
+    icone: HeartPulse,
+    titulo: 'Tabela Nutricional por Ficha Técnica',
+    detalhes: [
+      'Le o rotulo pela foto, pelo codigo de barras ou estima com IA',
+      'Bases de referencia USDA, TBCA e IBGE/POF por tras do calculo',
+      'Cada valor mostra de onde veio — rotulo, base cientifica ou estimativa',
+    ],
+    metrica: 'NUTRICAO SEM NUTRICIONISTA',
+    badge: 'DIFERENCIAL RARO',
+    texto: 'O valor nutricional do prato sai da propria ficha tecnica: o sistema soma os insumos e calcula. Voce alimenta o insumo fotografando o rotulo, lendo o codigo de barras ou deixando a IA estimar — e cada numero carrega a origem do dado.',
+    cor: 'text-rose-400',
+    fundo: 'bg-rose-500/10',
+  },
+  {
     icone: ScanLine,
     titulo: 'Estoque pelo Cupom do Mercado (NFC-e)',
+    detalhes: [
+      'A nota inteira em um scan, lida na SEFAZ — sem digitar item por item',
+      'Voce escolhe o que entra e como converte (1 bandeja = 20 unidades)',
+      'Aprende o codigo de cada mercado e recusa nota ja lancada',
+    ],
+    metrica: 'COMPRA INTEIRA EM 1 SCAN',
+    badge: 'EXCLUSIVO MISEON',
     texto: 'A compra inteira entra no estoque com um scan do cupom fiscal. O MiseOn lê a nota na SEFAZ, traz produto, quantidade e custo real, e aprende o vínculo de cada item — a segunda compra no mesmo mercado já cai reconhecida.',
     cor: 'text-orange-500',
     fundo: 'bg-orange-500/10',
@@ -86,6 +163,13 @@ const RECURSOS = [
   {
     icone: Boxes,
     titulo: 'Estoque com Ficha Técnica & CMV',
+    detalhes: [
+      'Cada venda baixa os ingredientes pela ficha do prato',
+      'Custo pelo lote PEPS: o CMV segue o preco que voce pagou',
+      'Desmonte de peca inteira com rateio de custo por corte',
+    ],
+    metrica: 'CMV REAL POR PRATO',
+    badge: 'CUSTEIO PEPS',
     texto: 'Cada venda baixa os ingredientes automaticamente pelo custo PEPS. Você sabe o custo real de cada prato e nunca vende o que acabou.',
     cor: 'text-purple-500',
     fundo: 'bg-purple-500/10',
@@ -93,6 +177,13 @@ const RECURSOS = [
   {
     icone: Wallet,
     titulo: 'Financeiro com Pix (Efí) & DRE',
+    detalhes: [
+      'Pix cai na conta da sua loja, com conciliacao automatica',
+      'DRE com margem de contribuicao e lucro liquido reais',
+      'Custo fixo e variavel separados, por periodo',
+    ],
+    metrica: 'LUCRO SEM PLANILHA',
+    badge: 'FINANCEIRO',
     texto: 'Pix cai direto na sua conta, com conciliação automática e DRE Gerencial de Dupla Entrada revelando seu lucro líquido real.',
     cor: 'text-teal-500',
     fundo: 'bg-teal-500/10',
@@ -100,6 +191,13 @@ const RECURSOS = [
   {
     icone: Megaphone,
     titulo: 'Marketing, Meta Pixel & Cashback',
+    detalhes: [
+      'CRM com analise RFM: quem sumiu, quem volta e quem gasta mais',
+      'Cashback, cupons e banners de vitrine na sua mao',
+      'Meta Pixel e GA4 medindo cada pedido, com recuperacao de venda',
+    ],
+    metrica: 'CLIENTE QUE VOLTA',
+    badge: 'CRM E FIDELIZACAO',
     texto: 'Cupons, cashback acumulado na carteira virtual, atribuição WhatsApp (?wa=) e rastreamento Meta Pixel/GA4 para vendas sem comissão.',
     cor: 'text-pink-500',
     fundo: 'bg-pink-500/10',
@@ -107,6 +205,13 @@ const RECURSOS = [
   {
     icone: Scale,
     titulo: 'Venda por Quilo (R$/kg) & Balança',
+    detalhes: [
+      'Balanca ligada por WebSerial: o peso entra sozinho na conta',
+      'Toledo Prix 3/4, Filizola, Urano e serial generica',
+      'O peso vai para a comanda e para a baixa de estoque',
+    ],
+    metrica: 'PESO DIRETO NA CONTA',
+    badge: 'SELF-SERVICE',
     texto: 'Integração WebSerial HID com balanças Toledo/Prix 3: pesagem automática, seletor de peso fracionado e baixa exata no estoque.',
     cor: 'text-emerald-400',
     fundo: 'bg-emerald-500/10',
@@ -143,6 +248,7 @@ const PLATAFORMA = [
       'Estoque com baixa automática por lote PEPS',
       'Inteligência Preditiva de Compras (Ordem no WhatsApp)',
       'Ficha técnica, alergênicos e CMV real por prato',
+      'Tabela nutricional calculada pela ficha (rótulo, código de barras ou IA)',
       'DRE Gerencial de Dupla Entrada com Margem Líquida',
       'Marketing, Meta Pixel, GA4 e Cashback Fidelidade',
       'Conformidade LGPD com E-mails Transacionais',
@@ -1039,13 +1145,9 @@ export default function Home() {
                 icone={r.icone}
                 titulo={r.titulo}
                 resumo={r.texto}
-                detalhes={[
-                  'Integração em tempo real com a produção do KDS',
-                  'Ficha técnica automatizada com baixa de insumos PEPS',
-                  'Relatórios e métricas de desempenho no painel',
-                ]}
-                metrica="100% AUTOMÁTICO"
-                badge="MÓDULO NATIVO"
+                detalhes={r.detalhes}
+                metrica={r.metrica}
+                badge={r.badge}
                 corTexto={r.cor}
                 corFundo="bg-[#0B1120]/90"
                 corBorda="border-white/10"
