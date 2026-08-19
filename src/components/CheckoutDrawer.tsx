@@ -14,6 +14,7 @@ import {
 import { maskTelefone } from '../lib/mascaras';
 import { calcularEntrega, ResultadoEntrega } from '../lib/geo';
 import { enderecoParaLabel, salvarLocalizacaoCliente } from '../lib/localizacao-cliente';
+import { useI18n } from '../contexts/I18nContext';
 
 const entrarComGoogle = (url: string) =>
   supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: url } });
@@ -45,6 +46,7 @@ export default function CheckoutDrawer({
   loja, aberta, carrinho, taxas, faixasDistancia, horarios, user,
   setCarrinho, onClose, onSucesso, onCartao, onAbrirAuth, waToken,
 }: Props) {
+  const { tDynamic } = useI18n();
   const [tipo, setTipo] = useState<'DELIVERY' | 'RETIRADA_BALCAO'>('DELIVERY');
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -159,9 +161,12 @@ export default function CheckoutDrawer({
   // --- Calculos financeiros ---
   const taxa = tipo === 'DELIVERY' ? (entrega?.taxa ?? 0) : 0;
   const foraDeArea = tipo === 'DELIVERY' && !!entrega?.foraDeArea;
+  // Espelha fn_recalcular_pedido: no cupom FIXO o desconto nunca passa do
+  // subtotal (o servidor usa least(valor, subtotal)). Sem esse limite, cupom de
+  // R$5 num carrinho de R$3 mostrava total negativo antes do clamp.
   const desconto = cupom
     ? cupom.tipo === 'FIXO'
-      ? Number(cupom.valor)
+      ? Math.min(Number(cupom.valor), subtotal)
       : (subtotal * Number(cupom.valor)) / 100
     : 0;
   const totalAntesCashback = Math.max(0, subtotal + taxa - desconto);
@@ -238,17 +243,24 @@ export default function CheckoutDrawer({
     ]);
   };
 
+  // A tabela `cupons` não é mais legível pelo cliente: a policy pública lia
+  // TODOS os cupons de TODAS as lojas (inclusive os de recuperação de carrinho,
+  // que são gerados para uma pessoa específica). Agora manda-se o código e o
+  // servidor responde válido/inválido, aplicando limite de uso, primeira
+  // compra e método exigido — regras que antes só existiam no browser.
   const aplicarCupom = async () => {
     setErro('');
-    const { data } = await supabase.from('cupons').select('*')
-      .eq('loja_id', loja.id).eq('codigo', codCupom.trim().toUpperCase()).eq('ativo', true)
-      .maybeSingle();
-    if (!data) return setErro('Cupom nao encontrado.');
-    if (subtotal < Number(data.pedido_minimo))
-      return setErro(`Cupom exige pedido minimo de ${fmt(Number(data.pedido_minimo))}.`);
-    if (data.metodo_exigido && data.metodo_exigido !== metodo)
-      return setErro(`Cupom valido apenas no ${data.metodo_exigido}.`);
-    setCupom(data);
+    const { data, error } = await supabase.rpc('fn_validar_cupom', {
+      p_loja_id: loja.id,
+      p_codigo: codCupom.trim().toUpperCase(),
+      p_subtotal: subtotal,
+      p_metodo: metodo,
+    });
+    const valido = (data as Cupom[] | null)?.[0];
+    if (error || !valido) {
+      return setErro(mensagemErroSupabase('Cupom inválido ou expirado.', error ?? undefined));
+    }
+    setCupom(valido);
   };
 
   const enviar = async () => {
@@ -467,7 +479,7 @@ export default function CheckoutDrawer({
         <div className="flex shrink-0 items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4">
           <div className="flex items-center gap-2">
             <ShoppingBag size={20} className="text-[var(--cor-primaria)]" />
-            <span className="text-base font-black dark:text-white">Finalizar Pedido</span>
+            <span data-cy="checkout-titulo" className="text-base font-black dark:text-white">{tDynamic('Finalizar Pedido')}</span>
           </div>
           <button
             onClick={onClose}
@@ -754,6 +766,7 @@ export default function CheckoutDrawer({
                 {/* Cashback disponível */}
                 {saldoCashback > 0 && (
                   <button
+                    data-cy="checkout-usar-cashback"
                     onClick={() => setUsarCashback((v) => !v)}
                     className={`flex w-full items-center justify-between rounded-2xl border-2 p-4 text-left transition-all ${
                       usarCashback ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5' : 'border-gray-200 dark:border-gray-700'
@@ -878,7 +891,13 @@ export default function CheckoutDrawer({
                 )}
 
                 {/* Botao finalizar */}
+                {/* data-cy: ancora estavel para o E2E. Sem ela, o teste
+                    dependia de cy.contains('Finalizar Pedido'), que tambem
+                    casa com o TITULO do drawer e escolhe o primeiro no do DOM
+                    — passava local e quebrava no CI conforme a ordem de
+                    render mudava. */}
                 <button
+                  data-cy="checkout-finalizar"
                   onClick={enviar}
                   disabled={enviando || carrinho.length === 0 || foraDeArea}
                   className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-black text-white transition-all disabled:cursor-not-allowed disabled:opacity-50 ${

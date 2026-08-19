@@ -11,8 +11,13 @@ export function useChat(lojaId: string | null, clienteId?: string | null, modoAd
   const [sessionId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       let stored = localStorage.getItem('miseon_chat_session');
-      if (!stored) {
-        stored = 'sess_' + Math.random().toString(36).substring(2, 15);
+      // O session_id passou a ser a credencial da conversa anonima: a RLS
+      // exige que ele venha no cabecalho x-chat-session para liberar a
+      // leitura. Math.random com 11 chars de base36 nao serve para isso —
+      // e adivinhavel e nao tem entropia criptografica. UUID v4 resolve.
+      // Sessao antiga (formato 'sess_...') e migrada na primeira visita.
+      if (!stored || stored.startsWith('sess_')) {
+        stored = crypto.randomUUID();
         localStorage.setItem('miseon_chat_session', stored);
       }
       return stored;
