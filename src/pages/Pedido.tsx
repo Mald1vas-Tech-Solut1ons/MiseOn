@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -11,6 +11,7 @@ import { tocarSom } from '../lib/som';
 import { aplicarTema, obterTemaPreferido, type PreferenciaTema } from '../lib/tema';
 import { fonteFamilia, obterFundoLojaPorTema, obterTokensLoja } from '../lib/personalizacao';
 import ThemeToggle from '../components/ThemeToggle';
+import LanguageToggle from '../components/LanguageToggle';
 import MiseOnLoader from '../components/MiseOnLoader';
 
 const ETAPAS_DELIVERY: { status: StatusPedido; label: string; icon: ReactNode }[] = [
@@ -144,7 +145,7 @@ export default function AcompanharPedido() {
     if (outcome === 'accepted') setDeferredPrompt(null);
   };
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     // Leitura por link (uuid = token) via RPC: a tabela pedidos não é mais
     // legível em massa (RLS). fn_acompanhar_pedido devolve só este pedido.
     const { data } = await supabase.rpc('fn_acompanhar_pedido', { p_id: id });
@@ -161,7 +162,7 @@ export default function AcompanharPedido() {
         .maybeSingle();
       setLoja(lojaData ?? null);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (!loja) return;
@@ -178,7 +179,7 @@ export default function AcompanharPedido() {
     };
     window.addEventListener('miseon:tema', sincronizarTema as EventListener);
     return () => window.removeEventListener('miseon:tema', sincronizarTema as EventListener);
-  }, [loja?.slug, loja?.tema_cardapio]);
+  }, [loja]);
 
   useEffect(() => {
     if (!loja) return;
@@ -280,7 +281,7 @@ export default function AcompanharPedido() {
       window.removeEventListener('focus', aoVoltar);
       if (canal) supabase.removeChannel(canal);
     };
-  }, [id]);
+  }, [id, carregar]);
 
   useEffect(() => {
     if (!id || pedido?.status !== 'EM_ROTA') return;
@@ -330,6 +331,7 @@ export default function AcompanharPedido() {
               <p className="mt-1 text-sm text-white/85">{pedido.identificador_cliente}</p>
             </div>
             <div className="flex items-center gap-2">
+              <LanguageToggle variant="minimal" />
               <Link
                 to="/lojas"
                 className="rounded-full border border-white/20 bg-black/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/20"

@@ -6,6 +6,7 @@ import { fmt, type Loja, type Pedido, type StatusPedido } from '../types';
 import { aplicarTema, obterTemaPreferido, type PreferenciaTema } from '../lib/tema';
 import { fonteFamilia, obterFundoLojaPorTema, obterTokensLoja } from '../lib/personalizacao';
 import ThemeToggle from '../components/ThemeToggle';
+import LanguageToggle from '../components/LanguageToggle';
 import MiseOnLoader from '../components/MiseOnLoader';
 
 const STATUS_LABEL: Record<StatusPedido, string> = {
@@ -71,7 +72,7 @@ export default function MeusPedidos() {
     };
     window.addEventListener('miseon:tema', sincronizarTema as EventListener);
     return () => window.removeEventListener('miseon:tema', sincronizarTema as EventListener);
-  }, [loja?.slug, loja?.tema_cardapio]);
+  }, [loja]);
 
   useEffect(() => {
     if (!loja) return;
@@ -219,6 +220,7 @@ export default function MeusPedidos() {
           </div>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageToggle variant="minimal" />
             <Link to="/lojas" className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold" style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto-suave)', background: 'var(--cor-surface)' }}>
               <Compass size={14} /> Lojas
             </Link>

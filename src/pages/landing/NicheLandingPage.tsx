@@ -29,11 +29,14 @@ const ICON_MAP: Record<string, any> = {
   HeartPulse,
 };
 
+import { useI18n } from '../../contexts/I18nContext';
+
 interface NicheLandingPageProps {
   forcedSlug?: string;
 }
 
 export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) {
+  const { t } = useI18n();
   const params = useParams<{ slug?: string }>();
   const slug = forcedSlug || params.slug || '';
   const data = LANDING_PAGES_DATA[slug];
@@ -112,10 +115,10 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
           </Link>
 
           <div className="hidden items-center gap-6 lg:flex text-sm font-semibold">
-            <a href="#recursos" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Recursos</a>
-            <a href="#comparativo" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Dores & Soluções</a>
-            <a href="#regras" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Regras de Negócio</a>
-            <a href="#faq" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Dúvidas</a>
+            <a href="#recursos" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">{t('nav.funcionalidades')}</a>
+            <a href="#comparativo" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">{t('nav.solucoes')}</a>
+            <a href="#regras" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">{t('nav.comoFunciona')}</a>
+            <a href="#faq" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">FAQ</a>
           </div>
 
           <div className="hidden items-center gap-3 lg:flex">
@@ -124,13 +127,13 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
               to="/acesso"
               className="rounded-full px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10"
             >
-              Entrar
+              {t('nav.entrar')}
             </Link>
             <Link
               to="/cadastre-se"
               className="rounded-full bg-[var(--cor-primaria)] px-5 py-2.5 font-['Sora'] text-sm font-bold text-white shadow-lg shadow-[#FC5B24]/25 transition hover:scale-105"
             >
-              Testar Agora
+              {t('nav.testar30d')}
             </Link>
           </div>
 

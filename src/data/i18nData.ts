@@ -23,18 +23,22 @@ export const DICIONARIO = {
     'nav.home': 'Início',
 
     // Soluções por Nicho
+    'nicho.badge': 'Soluções Sob Medida',
+    'nicho.titulo': 'Feito sob medida para o ritmo real da sua cozinha',
+    'nicho.subtitulo': 'Cada segmento tem suas próprias dores. Clique no seu tipo de negócio e descubra como o MiseOn resolve sua operação:',
     'nicho.porQuilo': 'Restaurantes por Quilo',
     'nicho.porQuiloDesc': 'Peso Inteligente R$/kg e Ficha Técnica',
     'nicho.hamburgueria': 'Hamburguerias',
-    'nicho.hamburgueriaDesc': 'Chapa KDS, adicionais e blends',
+    'nicho.hamburgueriaDesc': 'Ponto da carne, adicionais/combos, KDS na chapa, baixa de insumos (blends/pães) e iFood unificado.',
     'nicho.pizzaria': 'Pizzarias',
-    'nicho.pizzariaDesc': 'KDS de forno, delivery e motoboys',
+    'nicho.pizzariaDesc': 'Acompanhamento no KDS de forno, gestão de entregadores/motoboys, ficha técnica de insumos e iFood unificado.',
     'nicho.lanchonete': 'Lanchonetes',
-    'nicho.lanchoneteDesc': 'PDV balcão express e caixa por turno',
+    'nicho.lanchoneteDesc': 'PDV express de balcão, comandas de salgado/bebida, controle de caixa por turno e impressões ultrarrápidas.',
     'nicho.restauranteBar': 'Restaurantes & Bares',
-    'nicho.restauranteBarDesc': 'Garçom no celular e mapa de mesas',
+    'nicho.restauranteBarDesc': 'Comanda no celular do garçom, mapa de mesas com divisão de conta, DRE financeiro e NFC-e.',
     'nicho.darkKitchen': 'Dark Kitchens',
-    'nicho.darkKitchenDesc': 'Operação multi-marcas e estoque PEPS',
+    'nicho.darkKitchenDesc': 'Operação multi-marcas virtuais na mesma cozinha física e estoque PEPS.',
+    'nicho.verSolucao': 'Ver solução para',
 
     // Hero
     'hero.badge': 'PLATAFORMA COMPLETA PARA RESTAURANTES',
@@ -57,6 +61,17 @@ export const DICIONARIO = {
     'badge.efi': 'Parceiro Homologado Efí Bank (Pix)',
     'badge.focus': 'Emissão Fiscal FocusNFe Homologada',
     'badge.ssl': 'Conexão SSL 256-bit Certificada',
+
+    // Faixa de Recursos Globais
+    'recursos.faixaTitulo': 'Tudo o que a sua operação precisa, em um só painel',
+    'recursos.cardapio': 'Cardápio & QR Code',
+    'recursos.whatsapp': 'WhatsApp com IA',
+    'recursos.ifood': 'Integração iFood',
+    'recursos.pdv': 'PDV & Comandas',
+    'recursos.kds': 'Cozinha KDS',
+    'recursos.entregas': 'Rotas & Entregas',
+    'recursos.estoque': 'Estoque & Ficha Técnica',
+    'recursos.pix': 'Pix Automático',
 
     // Blog
     'blog.badge': 'CONHECIMENTO DE ESPECIALISTAS EM FOOD SERVICE',
@@ -140,18 +155,22 @@ export const DICIONARIO = {
     'nav.home': 'Home',
 
     // Soluções por Nicho
+    'nicho.badge': 'Tailored Solutions',
+    'nicho.titulo': 'Tailor-made for the real pace of your kitchen',
+    'nicho.subtitulo': 'Every segment has its unique pain points. Click on your business type to discover how MiseOn streamlines your operation:',
     'nicho.porQuilo': 'Buffets By Weight (R$/kg)',
-    'nicho.porQuiloDesc': 'Smart Scale Weight R$/kg & Technical Sheet',
+    'nicho.porQuiloDesc': 'Smart Scale Weight R$/kg & Technical Recipe Sheet',
     'nicho.hamburgueria': 'Burger Joints',
-    'nicho.hamburgueriaDesc': 'Grill KDS, custom add-ons & blends',
+    'nicho.hamburgueriaDesc': 'Meat doneness, custom add-ons/combos, grill KDS, ingredient inventory deduction & unified iFood.',
     'nicho.pizzaria': 'Pizzerias',
-    'nicho.pizzariaDesc': 'Oven KDS, delivery & driver management',
+    'nicho.pizzariaDesc': 'Oven KDS, delivery driver tracking, ingredient recipe sheet & unified iFood.',
     'nicho.lanchonete': 'Diners & Fast Casual',
-    'nicho.lanchoneteDesc': 'Express counter POS & shift management',
+    'nicho.lanchoneteDesc': 'Express counter POS, snack/beverage ordering, shift cash register & ultra-fast receipt printing.',
     'nicho.restauranteBar': 'Restaurants & Bars',
-    'nicho.restauranteBarDesc': 'Mobile server ordering & 3D table map',
+    'nicho.restauranteBarDesc': 'Mobile server ordering on smartphone, 3D table map with check splitting, financial P&L and tax receipt emission.',
     'nicho.darkKitchen': 'Dark Kitchens',
-    'nicho.darkKitchenDesc': 'Multi-brand ghost kitchen & FIFO inventory',
+    'nicho.darkKitchenDesc': 'Multi-brand virtual kitchens operating from the same physical kitchen with FIFO inventory.',
+    'nicho.verSolucao': 'See solution for',
 
     // Hero
     'hero.badge': 'ALL-IN-ONE FOOD SERVICE OPERATING SYSTEM',
@@ -174,6 +193,17 @@ export const DICIONARIO = {
     'badge.efi': 'Instant Bank Transfer & Credit Card Integration',
     'badge.focus': 'Automated Tax Invoice & Receipt Emission',
     'badge.ssl': '256-Bit SSL Encrypted & GDPR Compliant',
+
+    // Faixa de Recursos Globais
+    'recursos.faixaTitulo': 'Everything your operation needs, in a single dashboard',
+    'recursos.cardapio': 'Menu & QR Code',
+    'recursos.whatsapp': 'AI WhatsApp',
+    'recursos.ifood': 'iFood Integration',
+    'recursos.pdv': 'POS & Orders',
+    'recursos.kds': 'Kitchen KDS',
+    'recursos.entregas': 'Routes & Deliveries',
+    'recursos.estoque': 'Inventory & Costing',
+    'recursos.pix': 'Instant Payments',
 
     // Blog
     'blog.badge': 'EXPERT FOOD SERVICE KNOWLEDGE',
@@ -217,7 +247,7 @@ export const DICIONARIO = {
     'admin.comandas': 'Mobile Server Ordering',
     'admin.estoque': 'Inventory & COGS',
     'admin.financeiro': 'Financial P&L / DRE',
-    'admin.crm': 'CRM & Loyalty Cashback',
+    'admin.crm': 'CRM & Cashback',
     'admin.configuracoes': 'Settings',
     'admin.perfil': 'My Account',
     'admin.sair': 'Sign Out',
@@ -238,3 +268,294 @@ export const DICIONARIO = {
 } as const;
 
 export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
+
+// Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
+const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // Categorias do Blog
+  'Operação & KDS': 'Operations & KDS',
+  'Engenharia de Cardápio': 'Menu Engineering',
+  'Tecnologia & IA': 'Tech & AI',
+  'Gestão Financeira': 'Financial Management',
+  'Todas': 'All',
+
+  // Tempos de Leitura
+  '10 min de leitura': '10 min read',
+  '8 min de leitura': '8 min read',
+  '7 min de leitura': '7 min read',
+  '6 min de leitura': '6 min read',
+  '5 min de leitura': '5 min read',
+
+  // Menu Admin & Menus do Sistema
+  'Visão Geral': 'Overview',
+  'Painel de Controle': 'Control Panel',
+  'PDV Balcão': 'Counter POS',
+  'Mapa de Mesas': '3D Table Map',
+  'Balança Buffet': 'Buffet Scale',
+  'Garçom Mobile PWA': 'Mobile Server App',
+  'Pedidos': 'Orders',
+  'Cozinha (KDS)': 'Kitchen (KDS)',
+  'Cardápio': 'Menu',
+  'Estoque': 'Inventory',
+  'Produção': 'Production',
+  'Entregas': 'Deliveries',
+  'Central de Atendimento (Chat)': 'Customer Support Center (Chat)',
+  'Integração iFood': 'iFood Integration',
+  'Integração WhatsApp': 'WhatsApp Integration',
+  'Central de Compras': 'Purchasing Hub',
+  'Financeiro': 'Finances & P&L',
+  'Histórico': 'Order History',
+  'Marketing': 'Marketing & CRM',
+  'Equipe e Acessos': 'Team & Access Rights',
+  'Assinatura SaaS': 'SaaS Subscription',
+  'Configurações da Loja': 'Store Settings',
+  'Módulo Fiscal (NFe/NFCe)': 'Tax Invoicing Module (NFC-e/NF-e)',
+  'Central de Ajuda': 'Help Center',
+  'Ver Loja Online': 'View Online Store',
+  'Minha Conta': 'My Account',
+  'Sair do Sistema': 'Sign Out',
+  'Sair': 'Sign Out',
+  'Entrar': 'Sign In',
+  'Atendimento e Canais': 'Support & Sales Channels',
+  'Cardápio e Estoque': 'Menu & Inventory',
+  'Gestão e Relatórios': 'Management & Reports',
+  'Configurações': 'Settings',
+  'Ajuda': 'Help',
+  'Operação': 'Operations',
+  'Loja Atual': 'Current Store',
+
+  // Como Funciona (Passos)
+  'Como funciona': 'How it works',
+  'Do cadastro ao primeiro pedido em 3 passos': 'From sign-up to first order in 3 simple steps',
+  'Sem instalação, sem equipamento especial. Funciona no navegador, no computador e no celular.': 'No installation, no special hardware needed. Works on any browser, PC or smartphone.',
+  'Cadastre sua loja': 'Register your store',
+  'Nome, endereço, horários e formas de pagamento. Em poucos minutos sua operação está dentro do MiseOn.': 'Name, address, operating hours and payment options. Your store is set up in minutes.',
+  'Monte o cardápio': 'Build your menu',
+  'Cadastre produtos com foto, adicionais e ficha técnica. O estoque e o custo de cada prato já nascem conectados.': 'Add items with photos, add-ons and recipe sheets. Inventory and dish costs are automatically linked.',
+  'Divulgue o QR Code e receba pedidos': 'Share QR Code & receive orders',
+
+  // Depoimentos
+  'Histórias reais': 'Real success stories',
+  'O que dizem donos de restaurantes que usam o MiseOn': 'What restaurant owners using MiseOn are saying',
+
+  // Recursos Principais da Home
+  'Menu Board 4K & Chamada por Voz na TV': '4K Menu Board & Voice Calling on TV',
+  'SENHA CHAMADA EM VOZ': 'SPOKEN ORDER CALLING',
+  'SALAO E BALCAO': 'DINING ROOM & COUNTER',
+  'Transforme qualquer Smart TV do salão em um painel noturno 4K rotativo com chamada de senhas por voz sintetizada em viva-voz.': 'Turn any Smart TV in your dining room into a 4K rotating menu board with synthesized voice order calling.',
+
+  'Comanda por Voz no Celular': 'Voice Ordering on Mobile',
+  'PEDIDO SEM DIGITAR': 'HANDS-FREE ORDERING',
+  'MAOS LIVRES': 'HANDS-FREE',
+  'O cliente fala seu pedido no celular de forma natural ("Dois X-Burgers e 1 Coca Zero") e a IA localiza e insere os itens no carrinho.': 'Staff or customers speak orders naturally ("Two Cheeseburgers and 1 Coke Zero") and the AI identifies and adds items to the cart.',
+
+  'Inteligência Preditiva de Compras': 'Predictive Purchasing AI',
+  'COMPRA NA MEDIDA': 'TAILORED PURCHASING',
+  'PREVISAO DE GIRO': 'FORECASTED TURNOVER',
+  'Algoritmo que analisa o giro real dos últimos 30 dias, projeta o consumo para 7 dias e gera a Ordem de Compra em 1-Clique via WhatsApp do fornecedor.': 'Algorithm that analyzes 30-day turnover, forecasts 7-day consumption and generates a 1-Click Purchase Order via supplier WhatsApp.',
+
+  'Cardápio Digital com QR Code': 'QR Code Digital Menu',
+  'ZERO COMISSAO': 'ZERO COMMISSION',
+  'VENDA DIRETA': 'DIRECT SALES',
+  'Sua loja no ar com link próprio e QR Code para mesas e balcão. Fotos, adicionais e preços sempre atualizados — sem imprimir nada.': 'Your online store with custom link and QR Code for tables and counter. Photos, add-ons and prices always updated — with zero printing.',
+
+  'Cozinha (KDS Kanban)': 'Kitchen Display System (KDS Kanban)',
+  'COZINHA SEM PAPEL': 'PAPERLESS KITCHEN',
+  'PRODUCAO': 'PRODUCTION',
+  'Tela de produção sem papel: a cozinha vê a fila por estações (Cozinha, Bar, Confeitaria), marca o preparo e o balcão acompanha tudo em tempo real.': 'Paperless production screen: kitchen staff tracks station queues (Kitchen, Bar, Bakery) and counter staff tracks progress in real time.',
+
+  'Dark Kitchen (Delivery Apenas)': 'Dark Kitchen (Delivery Only)',
+  'OPERACAO SEM SALAO': 'GHOST KITCHEN OPERATION',
+  'PERFIL DE NEGOCIO': 'BUSINESS PROFILE',
+  'Opere múltiplas marcas virtuais no mesmo restaurante compartilhando a mesma cozinha física e a mesma baixa de estoque PEPS.': 'Operate multiple virtual brands from the same physical kitchen with unified FIFO inventory deduction.',
+
+  'Gestão de Entregas por Km': 'Delivery Distance Fee Management',
+  'TAXA POR DISTANCIA': 'DISTANCE-BASED FEE',
+  'DELIVERY': 'DELIVERY',
+  'Cálculo de frete por distância (Taxa Base + R$/km + Raio máximo), Live GPS Tracking do entregador e visualização no mapa.': 'Distance-based delivery fee calculation (Base Fee + R$/km + Max Radius), Live GPS Driver Tracking and map display.',
+
+  'PDV, Mesas 3D e Comandas': 'POS, 3D Tables & Mobile Ordering',
+  'SALAO E BALCAO NO MESMO CAIXA': 'UNIFIED HALL & COUNTER POS',
+  'ATENDIMENTO': 'SERVICE',
+  'Balcão e salão no mesmo sistema: comanda por mesa/assento, pedido direto na tela da cozinha e fechamento de conta sem confusão.': 'Counter and dining room in one OS: order by table/seat, direct routing to kitchen display and seamless check splitting.',
+
+  'Tabela Nutricional por Ficha Técnica': 'Nutritional Facts by Recipe Sheet',
+  'NUTRICAO SEM NUTRICIONISTA': 'NUTRITION MADE EASY',
+  'DIFERENCIAL RARO': 'UNIQUE FEATURE',
+  'O valor nutricional do prato sai da propria ficha tecnica: o sistema soma os insumos e calcula. Voce alimenta o insumo fotografando o rotulo, lendo o codigo de barras ou deixando a IA estimar — e cada numero carrega a origem do dado.': 'Nutritional values calculated directly from recipe sheets: scan label photos, barcodes or let AI estimate — with full data lineage.',
+
+  'Estoque pelo Cupom do Mercado (NFC-e)': 'Receipt Inventory Import (NFC-e)',
+  'COMPRA INTEIRA EM 1 SCAN': 'FULL INVENTORY 1-SCAN',
+  'EXCLUSIVO MISEON': 'MISEON EXCLUSIVE',
+  'A compra inteira entra no estoque com um scan do cupom fiscal. O MiseOn lê a nota na SEFAZ, traz produto, quantidade e custo real, e aprende o vínculo de cada item — a segunda compra no mesmo mercado já cai reconhecida.': 'Import your entire grocery store receipt into inventory with 1 QR scan. Reads SEFAZ tax invoices, extracts items, quantities and real cost.',
+
+  'Estoque com Ficha Técnica & CMV': 'Inventory with Recipe Costing & COGS',
+  'CMV REAL POR PRATO': 'REAL COGS PER DISH',
+  'CUSTEIO PEPS': 'FIFO COSTING',
+  'Cada venda baixa os ingredientes automaticamente pelo custo PEPS. Você sabe o custo real de cada prato e nunca vende o que acabou.': 'Every sale automatically deducts ingredients using FIFO costing. Know exact margins per dish and never oversell out-of-stock items.',
+
+  'Financeiro com Pix (Efí) & DRE': 'Finances with Instant Pix & P&L (DRE)',
+
+  // Seções da Home & Páginas
+  'Soluções Sob Medida': 'Tailored Solutions',
+  'Feito sob medida para o ritmo real da sua cozinha': 'Tailor-made for the real pace of your kitchen',
+  'Cada segmento tem suas próprias dores. Clique no seu tipo de negócio e descubra como o MiseOn resolve sua operação:': 'Every segment has its own challenges. Click on your business type to discover how MiseOn streamlines your operation:',
+  'Hamburguerias': 'Burger Joints',
+  'Lanchonetes': 'Diners & Fast Casual',
+  'Pizzarias': 'Pizzerias',
+  'Restaurantes & Bares': 'Restaurants & Bars',
+  'Restaurantes a Quilo & Buffet Self-Service': 'Buffets By Weight & Self-Service',
+  'Restaurantes por Quilo (R$/kg)': 'Buffets By Weight (R$/kg)',
+  'Dark Kitchens': 'Dark Kitchens',
+  'Integração iFood Nativa': 'Native iFood Integration',
+  'Cardápio Digital QR Code': 'QR Code Digital Menu',
+  'Atendimento WhatsApp com IA': 'AI WhatsApp Customer Service',
+  'Gestão Fiscal NFC-e / NF-e': 'Tax Invoice Emission (NFC-e / NF-e)',
+  'Blog do Restaurante': 'Restaurant Blog',
+  'Sobre Nós': 'About Us',
+  'Vídeos & Demonstrações': 'Videos & Demos',
+  'Contato & Suporte': 'Contact & Support',
+  'Termos de Uso': 'Terms of Service',
+  'Política de Privacidade': 'Privacy Policy',
+  'Cadastrar Minha Loja': 'Register My Store',
+  'Área do Cliente': 'Customer Portal',
+  'MiseOn Tecnologia e Soluções para Food Service': 'MiseOn Technology and Food Service Solutions',
+  'Pagamentos Efí Bank': 'Efí Bank Payments',
+  'API Oficial Meta': 'Official Meta API',
+  'Conexão SSL 256-bit': '256-bit SSL Connection',
+  'MiseOn — Sistema para Hamburguerias, Lanchonetes, Pizzarias, Restaurantes e Deliveries. Cardápio Digital com QR Code, Integração iFood, Atendimento WhatsApp IA, KDS de Cozinha, PDV Frente de Caixa, Ficha Técnica e Emissão Fiscal NFC-e/NF-e.': 'MiseOn — Restaurant, Burger Joint, Pizzeria, Diner & Dark Kitchen Operating System. QR Code Digital Menu, iFood Integration, AI WhatsApp Assistant, Kitchen KDS, POS, Recipe Sheet & Automated Tax Invoices.',
+};
+
+const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
+  'Início': 'Home',
+  'Inicio': 'Home',
+  'Pedidos': 'Orders',
+  'Pedido': 'Order',
+  'Cozinha': 'Kitchen',
+  'Estoque': 'Inventory',
+  'Financeiro': 'Finances',
+  'Histórico': 'History',
+  'Historico': 'History',
+  'Marketing': 'Marketing',
+  'Equipe': 'Team',
+  'Assinatura': 'Subscription',
+  'Loja': 'Store',
+  'Lojas': 'Stores',
+  'Configurações': 'Settings',
+  'Configuracoes': 'Settings',
+  'Ajuda': 'Help',
+  'Fiscal': 'Tax',
+  'Cardápio': 'Menu',
+  'Cardapio': 'Menu',
+  'Produção': 'Production',
+  'Producao': 'Production',
+  'Entregas': 'Deliveries',
+  'Entrega': 'Delivery',
+  'Balança': 'Scale',
+  'Balanca': 'Scale',
+  'Mesas': 'Tables',
+  'Mesa': 'Table',
+  'Comanda': 'Order Ticket',
+  'Comandas': 'Order Tickets',
+  'Garçom': 'Server',
+  'Garcom': 'Server',
+  'Entregador': 'Delivery Driver',
+  'Clientes': 'Customers',
+  'Cliente': 'Customer',
+  'Produtos': 'Products',
+  'Produto': 'Product',
+  'Insumos': 'Ingredients',
+  'Insumo': 'Ingredient',
+  'Compras': 'Purchases',
+  'Compra': 'Purchase',
+  'Fornecedor': 'Supplier',
+  'Fornecedores': 'Suppliers',
+  'Receita': 'Revenue',
+  'Despesa': 'Expense',
+  'Lucro': 'Profit',
+  'Caixa': 'Cash Register',
+  'Turno': 'Shift',
+  'Relatório': 'Report',
+  'Relatórios': 'Reports',
+  'Salvar': 'Save',
+  'Cancelar': 'Cancel',
+  'Confirmar': 'Confirm',
+  'Excluir': 'Delete',
+  'Deletar': 'Delete',
+  'Editar': 'Edit',
+  'Adicionar': 'Add New',
+  'Voltar': 'Back',
+  'Buscar': 'Search',
+  'Pesquisar': 'Search',
+  'Filtrar': 'Filter',
+  'Filtro': 'Filter',
+  'Filtros': 'Filters',
+  'Sair': 'Sign Out',
+  'Entrar': 'Sign In',
+  'Cadastrar': 'Register',
+  'Cadastro': 'Registration',
+  'Grátis': 'Free',
+  'Gratis': 'Free',
+  'Total': 'Total',
+  'Subtotal': 'Subtotal',
+  'Desconto': 'Discount',
+  'Taxa': 'Fee',
+  'Pagamento': 'Payment',
+  'Dinheiro': 'Cash',
+  'Cartão': 'Card',
+  'Cartao': 'Card',
+  'Status': 'Status',
+  'Data': 'Date',
+  'Hora': 'Time',
+  'Ações': 'Actions',
+  'Acoes': 'Actions',
+  'Detalhes': 'Details',
+  'Resumo': 'Summary',
+  'Descrição': 'Description',
+  'Descricao': 'Description',
+  'Nome': 'Name',
+  'Telefone': 'Phone',
+  'Endereço': 'Address',
+  'Endereco': 'Address',
+  'Cidade': 'City',
+  'Estado': 'State',
+  'Bairro': 'Neighborhood',
+  'CEP': 'Zip Code',
+  'Observação': 'Notes',
+  'Observacao': 'Notes',
+  'Observações': 'Notes',
+  'Observacoes': 'Notes',
+  'Sim': 'Yes',
+  'Não': 'No',
+  'Nao': 'No',
+  'Ativo': 'Active',
+  'Inativo': 'Inactive',
+  'Pendente': 'Pending',
+  'Concluído': 'Completed',
+  'Concluido': 'Completed',
+  'Cancelado': 'Canceled',
+  'Todas': 'All',
+  'Todos': 'All',
+};
+
+export function tDynamic(texto: string, idioma: Idioma): string {
+  if (idioma === 'pt-BR' || !texto) return texto;
+
+  // 1. Tenta tradução direta de frase inteira no dicionário
+  if (MAPA_TRADUCAO_TEXTO[texto]) {
+    return MAPA_TRADUCAO_TEXTO[texto];
+  }
+
+  // 2. Tenta tradução direta de palavra individual
+  if (DADOS_PALAVRAS_SUBSTITUICAO[texto]) {
+    return DADOS_PALAVRAS_SUBSTITUICAO[texto];
+  }
+
+  // 3. Fallback inteligente de substituição por limite de palavra
+  let resultado = texto;
+  for (const [pt, en] of Object.entries(DADOS_PALAVRAS_SUBSTITUICAO)) {
+    const regex = new RegExp(`\\b${pt}\\b`, 'gi');
+    resultado = resultado.replace(regex, en);
+  }
+
+  return resultado;
+}

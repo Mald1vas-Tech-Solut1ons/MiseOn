@@ -13,6 +13,7 @@ import { podeAcessar, HOME_POR_PAPEL, type Papel } from '../../lib/permissoes';
 import { useGuidedTour } from '../../hooks/useGuidedTour';
 import { GuidedTourModal } from '../../components/tour/GuidedTourModal';
 import TornarSeLojista from '../../components/admin/TornarSeLojista';
+import LanguageToggle from '../../components/LanguageToggle';
 
 export interface RouteDef {
   to: string;
@@ -574,6 +575,7 @@ export default function AdminLayout() {
                 {location.pathname === '/admin/ajuda' ? 'Tour Completo 🚀' : 'Tour desta Página 📍'}
               </span>
             </button>
+            <LanguageToggle variant="pill" />
             {ctx?.lojaId && <NotificationCenter lojaId={ctx.lojaId} />}
             <ThemeToggle />
           </div>

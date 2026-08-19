@@ -4,6 +4,8 @@ import { Bike, LogOut, Loader2, UserCircle, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
+import LanguageToggle from '../../components/LanguageToggle';
+
 export interface CtxEntregador {
   user: User;
   entregadorId: string;
@@ -88,7 +90,8 @@ export default function EntregadorLayout() {
           <Bike size={22} className="shrink-0" />
           <span className="font-black text-lg tracking-tight">MiseOn <span className="text-white">Logistics</span></span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <LanguageToggle variant="minimal" />
           <div className="text-right hidden sm:block">
             <p className="text-xs font-bold text-gray-300">{ctx.nome}</p>
             <p className="text-[10px] text-green-400">Online e operando</p>

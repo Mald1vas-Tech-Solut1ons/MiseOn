@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 import { Loja, Categoria, Produto, fmt } from '../types';
 import MiseOnLoader from '../components/MiseOnLoader';
 import { getOptimizedImageUrl } from '../lib/cdn';
+import LanguageToggle from '../components/LanguageToggle';
 
 type ModoExibicao = 'MENU_BOARD' | 'SENHAS' | 'BANNERS';
 
@@ -209,6 +210,7 @@ export default function PainelTV() {
 
         {/* Botoes de controle no topo */}
         <div className="flex items-center gap-3">
+          <LanguageToggle variant="minimal" />
           {/* Seletor de Modo */}
           <div className="flex items-center rounded-xl bg-white/5 border border-white/10 p-1">
             <button

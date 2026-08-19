@@ -19,6 +19,7 @@ import { aplicarTema, obterTemaPreferido, type PreferenciaTema } from '../lib/te
 import CheckoutDrawer from '../components/CheckoutDrawer';
 import PagamentoStatus, { type PixInfo } from '../components/PagamentoStatus';
 import ThemeToggle from '../components/ThemeToggle';
+import LanguageToggle from '../components/LanguageToggle';
 import ChatInterface from '../components/chat/ChatInterface';
 import MiseOnLoader from '../components/MiseOnLoader';
 import SEO from '../components/SEO';
@@ -335,6 +336,7 @@ export default function Cardapio() {
             </Link>
           </div>
           <div className="absolute right-3 top-3 flex gap-2 sm:right-6 sm:top-6">
+            <LanguageToggle variant="minimal" />
             <ThemeToggle className="rounded-full border border-white/30 bg-black/20 p-2 text-white backdrop-blur-sm transition hover:bg-black/30" />
             {user ? (
               <>

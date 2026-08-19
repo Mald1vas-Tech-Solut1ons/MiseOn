@@ -3,6 +3,8 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Building2, UserPlus, TrendingDown, ScrollText, LogOut, Receipt, Users, BookOpen, MessageCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
+import LanguageToggle from '../../components/LanguageToggle';
+
 export default function SuperAdminLayout() {
   const nav = useNavigate();
   const [ok, setOk] = useState<boolean | null>(null);
@@ -53,9 +55,12 @@ export default function SuperAdminLayout() {
           </div>
           <p className="text-lg font-bold tracking-wide">MiseOn <span className="font-light text-indigo-400">COMMAND</span></p>
         </div>
-        <button onClick={sair} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
-          <LogOut size={16} /> Sair
-        </button>
+        <div className="flex items-center gap-3">
+          <LanguageToggle variant="minimal" />
+          <button onClick={sair} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
+            <LogOut size={16} /> Sair
+          </button>
+        </div>
       </header>
 
       <div className="mx-auto flex max-w-7xl gap-6 p-6">

@@ -404,7 +404,7 @@ function FaqItem({ pergunta, resposta }: { pergunta: string; resposta: string })
 /* ───────────────────────────── Página ───────────────────────────── */
 
 export default function Home() {
-  const { idioma, setIdioma, t } = useI18n();
+  const { idioma, setIdioma, t, tDynamic } = useI18n();
   const [menuAberto, setMenuAberto] = useState(false);
   const [planoAnual, setPlanoAnual] = useState(true);
   const [solucoesOpen, setSolucoesOpen] = useState(false);
@@ -950,17 +950,17 @@ export default function Home() {
         <div className="pointer-events-none absolute left-1/2 top-0 h-full w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/10 via-[#0B1120]/0 to-transparent" />
         <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 sm:px-6">
           <p className="text-center font-['Sora'] text-xs font-bold uppercase tracking-widest text-slate-500">
-            Tudo o que a sua operação precisa, em um só painel
+            {tDynamic('Tudo o que a sua operação precisa, em um só painel')}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm font-semibold text-slate-300">
-            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> Cardápio & QR Code</span>
-            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> WhatsApp com IA</span>
-            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> Integração iFood</span>
-            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> PDV & Comandas</span>
-            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> Cozinha KDS</span>
-            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> Rotas & Entregas</span>
-            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> Estoque & Ficha Técnica</span>
-            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> Pix Automático</span>
+            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> {tDynamic('Cardápio & QR Code')}</span>
+            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> {tDynamic('WhatsApp com IA')}</span>
+            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> {tDynamic('Integração iFood')}</span>
+            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> {tDynamic('PDV & Comandas')}</span>
+            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> {tDynamic('Cozinha KDS')}</span>
+            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> {tDynamic('Rotas & Entregas')}</span>
+            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> {tDynamic('Estoque & Ficha Técnica')}</span>
+            <span className="flex items-center gap-2 transition hover:text-white"><Check size={16} className="text-emerald-400" /> {tDynamic('Pix Automático')}</span>
           </div>
         </div>
       </section>
@@ -970,13 +970,13 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-orange-400">
-              <Sparkles size={13} /> Soluções Sob Medida
+              <Sparkles size={13} /> {t('nicho.badge')}
             </span>
             <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              Feito sob medida para o ritmo real da sua cozinha
+              {t('nicho.titulo')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-300">
-              Cada segmento tem suas próprias dores. Clique no seu tipo de negócio e descubra como o MiseOn resolve sua operação:
+              {t('nicho.subtitulo')}
             </p>
           </div>
 
@@ -993,14 +993,14 @@ export default function Home() {
                   <ChefHat size={28} />
                 </div>
                 <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-orange-400 transition-colors">
-                  Hamburguerias
+                  {t('nicho.hamburgueria')}
                 </h3>
                 <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                  Ponto da carne, adicionais/combos, KDS na chapa, baixa de insumos (blends/pães) e iFood unificado.
+                  {t('nicho.hamburgueriaDesc')}
                 </p>
               </div>
               <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-orange-400 group-hover:translate-x-1 transition-transform">
-                Ver solução para Hamburgueria <ArrowRight size={14} />
+                {t('nicho.verSolucao')} {t('nicho.hamburgueria')} <ArrowRight size={14} />
               </div>
             </Link>
 
@@ -1014,14 +1014,14 @@ export default function Home() {
                   <UtensilsCrossed size={28} />
                 </div>
                 <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                  Lanchonetes
+                  {t('nicho.lanchonete')}
                 </h3>
                 <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                  PDV express de balcão, comandas de salgado/bebida, controle de caixa por turno e impressões ultrarrápidas.
+                  {t('nicho.lanchoneteDesc')}
                 </p>
               </div>
               <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
-                Ver solução para Lanchonete <ArrowRight size={14} />
+                {t('nicho.verSolucao')} {t('nicho.lanchonete')} <ArrowRight size={14} />
               </div>
             </Link>
 
@@ -1035,14 +1035,14 @@ export default function Home() {
                   <Boxes size={28} />
                 </div>
                 <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
-                  Pizzarias
+                  {t('nicho.pizzaria')}
                 </h3>
                 <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                  Acompanhamento no KDS de forno, gestão de entregadores/motoboys, ficha técnica de insumos e iFood unificado.
+                  {t('nicho.pizzariaDesc')}
                 </p>
               </div>
               <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
-                Ver solução para Pizzaria <ArrowRight size={14} />
+                {t('nicho.verSolucao')} {t('nicho.pizzaria')} <ArrowRight size={14} />
               </div>
             </Link>
 
@@ -1056,14 +1056,14 @@ export default function Home() {
                   <BarChart3 size={28} />
                 </div>
                 <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
-                  Restaurantes & Bares
+                  {t('nicho.restauranteBar')}
                 </h3>
                 <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                  Comanda no celular do garçom, mapa de mesas com divisão de conta, DRE financeiro e NFC-e.
+                  {t('nicho.restauranteBarDesc')}
                 </p>
               </div>
               <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
-                Ver solução para Restaurante <ArrowRight size={14} />
+                {t('nicho.verSolucao')} {t('nicho.restauranteBar')} <ArrowRight size={14} />
               </div>
             </Link>
 
