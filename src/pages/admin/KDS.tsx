@@ -214,41 +214,36 @@ export default function KDS() {
       .eq('id', p.id);
 
     if (errUpdate) {
-      // Colunas KDS ausentes no schema cache (migration Kanban ainda não aplicada):
-      // retry atualizando apenas status/estacao_atual para o Kanban continuar funcional.
-      const ehErroColunaKds =
-        errUpdate.code === 'PGRST204' || (errUpdate.message || '').includes('schema cache');
-
-      if (ehErroColunaKds) {
-        console.warn('[KDS] Colunas KDS ausentes no banco, avançando só com status/estacao_atual:', errUpdate.message);
-        const { error: errRetry } = await supabase
-          .from('pedidos')
-          .update({
-            status: novoStatus,
-            estacao_atual: ehUltimaEtapa ? 'BALCAO' : 'COZINHA',
-          })
-          .eq('id', p.id);
-
-        if (errRetry) {
-          console.error('Erro ao atualizar pedido (retry sem colunas KDS):', errRetry);
-          setErroAcao(traduzirErro(errRetry));
-          return;
-        }
-      } else {
-        console.error('Erro ao atualizar pedido:', errUpdate);
-        setErroAcao(traduzirErro(errUpdate));
-        return;
-      }
+      console.error('Erro ao atualizar pedido:', errUpdate);
+      setErroAcao(traduzirErro(errUpdate));
+      return;
     }
 
-    // 2. Chamar RPC para regras de negócio adicionais (estoque, notificações)
-    try {
-      await supabase.rpc('fn_avancar_status_pedido', {
-        p_pedido_id: p.id,
-        p_novo_status: novoStatus,
+    // 2. Regras de negócio do avanço (baixa de estoque, notificações).
+    //
+    // Isto vivia dentro de um try/catch que registrava um console.warn. Não
+    // funcionava: o client do Supabase RESOLVE a promise com `{ error }` em vez
+    // de rejeitar, então o catch nunca era alcançado e a falha era descartada em
+    // 100% dos casos — o pedido avançava na tela e o estoque não baixava, sem
+    // nenhum sinal para o operador. O update acima já foi gravado, então aqui a
+    // única coisa correta é avisar quem está na frente do KDS.
+    const { error: errRegras } = await supabase.rpc('fn_avancar_status_pedido', {
+      p_pedido_id: p.id,
+      p_novo_status: novoStatus,
+    });
+
+    if (errRegras) {
+      console.error('Falha nas regras de avanço do pedido:', errRegras);
+      const detalhe = traduzirErro(errRegras);
+      setErroAcao({
+        ...detalhe,
+        titulo: 'Pedido avançou, mas o estoque não baixou',
+        explicacao:
+          'A etapa foi gravada, porém as regras de estoque e notificação não rodaram. ' +
+          `Confira a baixa deste pedido antes de fechar o caixa. ${detalhe.explicacao}`,
       });
-    } catch (e) {
-      console.warn('Nota fn_avancar_status_pedido:', e);
+      tocarSom();
+      return;
     }
 
     setErroAcao(null);

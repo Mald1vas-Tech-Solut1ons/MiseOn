@@ -66,7 +66,7 @@ export default function Login() {
         
         <div className="p-8 pb-6 text-center">
           <div className="flex justify-center mb-6">
-            <Link to="/" className="transition hover:scale-105 active:scale-95">
+            <Link to="/" className="inline-block transition hover:scale-105 active:scale-95">
               <MiseOnLogo size={160} />
             </Link>
           </div>

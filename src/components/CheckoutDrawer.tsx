@@ -232,10 +232,6 @@ export default function CheckoutDrawer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aceitaOnline, aceitaEntrega]);
 
-  const descartarPedidoIncompleto = async (pedidoId: string) => {
-    await supabase.from('pedidos').delete().eq('id', pedidoId);
-  };
-
   const cancelarPedidoPendente = async (pedidoId: string) => {
     await Promise.all([
       supabase.from('pagamentos').update({ status: 'CANCELADO' }).eq('pedido_id', pedidoId).eq('status', 'PENDENTE'),
@@ -283,149 +279,59 @@ export default function CheckoutDrawer({
     const enderecoFormatado = tipo === 'DELIVERY' && enderecoObj
       ? `${enderecoObj.logradouro}, ${enderecoObj.numero}${enderecoObj.complemento ? ` (${enderecoObj.complemento})` : ''}${ref ? ` - Ref: ${ref}` : ''}`
       : null;
-    const bairroFormatado = tipo === 'DELIVERY' && enderecoObj ? enderecoObj.bairro : null;
-
-    // Upsert cliente (perfil / lead que o lojista consulta depois)
-    const { data: clienteRow, error: erroCliente } = await supabase.from('clientes').upsert({
-      loja_id: loja.id, user_id: user.id, nome: nome.trim(),
-      telefone, email: user.email ?? null,
-      bairro: bairroFormatado ?? bairroManual,
-      ...(metodo ? { forma_pagamento_preferida: metodo } : {}),
-    }, { onConflict: 'loja_id,user_id' }).select('id').maybeSingle();
-
-    if (erroCliente) {
-      setEnviando(false);
-      return setErro(mensagemErroSupabase('Erro ao salvar os dados do cliente.', erroCliente));
-    }
-
-    // Salvar endereco padrao (so cria se o cliente ainda nao tem nenhum)
-    if (tipo === 'DELIVERY' && enderecoObj && clienteRow?.id) {
-      const { count, error: erroCountEndereco } = await supabase.from('enderecos_cliente')
-        .select('*', { count: 'exact', head: true }).eq('cliente_id', clienteRow.id);
-      if (erroCountEndereco) {
-        setEnviando(false);
-        return setErro(mensagemErroSupabase('Erro ao verificar endereco padrao do cliente.', erroCountEndereco));
-      }
-      if (!count) {
-        const { error: erroEndereco } = await supabase.from('enderecos_cliente').insert({
-          cliente_id: clienteRow.id, cep: enderecoObj.cep,
-          logradouro: enderecoObj.logradouro,
-          numero: enderecoObj.sem_numero ? 'SN' : (enderecoObj.numero || null),
-          complemento: enderecoObj.complemento || null,
-          bairro: enderecoObj.bairro,
-          cidade: enderecoObj.cidade,
-          uf: (enderecoObj.uf || '').toUpperCase(),
-          ponto_referencia: enderecoObj.ponto_referencia || null,
-          padrao: true,
-        });
-        if (erroEndereco) {
-          setEnviando(false);
-          return setErro(mensagemErroSupabase('Erro ao salvar endereco padrao do cliente.', erroEndereco));
-        }
-      }
-    }
 
     const agendadoParaISO = quando === 'AGENDADO' && diaAgendado && horaAgendada
       ? new Date(`${diaAgendado}T${horaAgendada}:00`).toISOString()
       : null;
 
-    // Criar pedido (colunas REAIS da tabela pedidos)
-    const { data: pedido, error: erroPedido } = await supabase.from('pedidos').insert({
-      loja_id: loja.id,
-      tipo_pedido: tipo,
-      identificador_cliente: nome.trim(),
-      telefone_contato: telefone,
-      cliente_id: clienteRow?.id ?? null,
-      cliente_user_id: user.id,
-      endereco_entrega: enderecoFormatado,
-      bairro: bairroFormatado,
-      cep: enderecoObj?.cep ?? null,
-      logradouro: enderecoObj?.logradouro ?? null,
-      numero_endereco: enderecoObj?.numero ?? null,
-      complemento: enderecoObj?.complemento ?? null,
-      cidade: enderecoObj?.cidade ?? null,
-      uf: enderecoObj?.uf ?? null,
-      distancia_km: entrega?.distanciaKm ?? null,
-      lat: entrega?.geo?.lat ?? null,
-      lng: entrega?.geo?.lng ?? null,
-      subtotal, taxa_entrega: taxa, desconto, valor_total: total,
-      cupom_id: cupom?.id ?? null,
-      troco_para: metodo === 'DINHEIRO' && trocoPara ? Number(trocoPara) : null,
-      agendado_para: agendadoParaISO,
-      cashback_usado: cashbackAplicado,
-      // Nasce false; a trigger de itens_pedido promove pra true se algum
-      // item for estacao_preparo=COZINHA (fluxo passa-bastão, docs/PLANO-FLUXO-PEDIDOS.md).
-      requer_cozinha: false,
-    }).select('id, numero').single();
-
-    if (erroPedido || !pedido) {
-      setEnviando(false);
-      return setErro(mensagemErroSupabase('Erro ao criar pedido.', erroPedido));
-    }
-
-    // Vincular pedido à conversa de WhatsApp se houver token de atribuição
-    if (waToken) {
-      await supabase.rpc('fn_atribuir_conversa_ao_pedido', {
-        p_pedido_id: pedido.id,
-        p_wa_token: waToken,
-      });
-    }
-
-    // Debita o cashback usado — RPC atômica (evita gastar o mesmo saldo 2x em abas simultâneas)
-    if (cashbackAplicado > 0 && clienteRow?.id) {
-      const { data: ok, error: erroCashback } = await supabase.rpc('fn_usar_cashback', {
-        p_cliente_id: clienteRow.id, p_loja_id: loja.id, p_pedido_id: pedido.id, p_valor: cashbackAplicado,
-      });
-      if (erroCashback || !ok) {
-        await descartarPedidoIncompleto(pedido.id);
-        setEnviando(false);
-        return setErro('Seu saldo de cashback mudou nesse instante — atualize a página e tente novamente.');
-      }
-    }
-
-    // Itens do pedido + opcoes (tabelas itens_pedido / itens_pedido_opcoes)
-    for (const item of carrinho) {
-      const { data: it, error: erroItem } = await supabase.from('itens_pedido').insert({
-        pedido_id: pedido.id,
-        produto_id: item.produto.id,
-        nome_produto: item.produto.nome,
-        preco_unitario: item.produto.preco,
-        quantidade: item.quantidade,
-        observacao: item.observacao ?? null,
-      }).select('id').single();
-      if (erroItem || !it) {
-        await descartarPedidoIncompleto(pedido.id);
-        setEnviando(false);
-        return setErro(mensagemErroSupabase(`Erro ao salvar item do pedido (${item.produto.nome}).`, erroItem));
-      }
-      if (it && item.opcoesSelecionadas.length) {
-        const { error: erroOpcoes } = await supabase.from('itens_pedido_opcoes').insert(
-          item.opcoesSelecionadas.map((o) => ({
-            item_id: it.id, opcao_id: o.id, nome_opcao: o.nome, preco_adicional: o.preco_adicional,
-          })),
-        );
-        if (erroOpcoes) {
-          await descartarPedidoIncompleto(pedido.id);
-          setEnviando(false);
-          return setErro(mensagemErroSupabase(`Erro ao salvar complementos do item ${item.produto.nome}.`, erroOpcoes));
-        }
-      }
-    }
-
-    // Pagamento sempre nasce PENDENTE (a RLS bloqueia o cliente de gravar PAGO —
-    // isso é feito só server-side: gateway/webhook ou fn_quitar_pedido_cashback).
-    const quitadoPorCashback = total <= 0 && cashbackAplicado > 0;
-    const { error: erroPagamento } = await supabase.from('pagamentos').insert({
-      pedido_id: pedido.id, metodo, valor_pago: total,
+    // O pedido inteiro nasce numa transacao no banco (fn_criar_pedido_completo).
+    // Antes eram sete escritas sequenciais daqui — cliente, endereco, pedido,
+    // cashback, itens, opcoes e pagamento — cada uma com o seu tratamento de
+    // erro chamando descartarPedidoIncompleto() para desfazer na mao. O furo era
+    // que essa limpeza roda NO CELULAR: o caso que ela precisava cobrir (a rede
+    // caindo no meio do checkout) e exatamente o que a impedia de rodar, e
+    // sobrava pedido sem item no painel do lojista. Agora ou nasce tudo, ou nao
+    // nasce nada — e quem decide o preco final e o servidor.
+    const { data: criado, error: erroCriacao } = await supabase.rpc('fn_criar_pedido_completo', {
+      p_payload: {
+        loja_id: loja.id,
+        tipo_pedido: tipo,
+        nome: nome.trim(),
+        telefone,
+        email: user.email ?? null,
+        bairro_manual: bairroManual,
+        metodo,
+        endereco: tipo === 'DELIVERY' && enderecoObj ? enderecoObj : null,
+        endereco_formatado: enderecoFormatado,
+        distancia_km: entrega?.distanciaKm ?? null,
+        lat: entrega?.geo?.lat ?? null,
+        lng: entrega?.geo?.lng ?? null,
+        taxa_entrega: taxa,
+        cupom_id: cupom?.id ?? null,
+        troco_para: metodo === 'DINHEIRO' && trocoPara ? Number(trocoPara) : null,
+        agendado_para: agendadoParaISO,
+        cashback_usado: cashbackAplicado,
+        wa_token: waToken ?? null,
+        itens: carrinho.map((item) => ({
+          produto_id: item.produto.id,
+          quantidade: item.quantidade,
+          observacao: item.observacao ?? null,
+          opcoes: item.opcoesSelecionadas.map((o) => ({ id: o.id })),
+        })),
+      },
     });
-    if (erroPagamento) {
-      await descartarPedidoIncompleto(pedido.id);
+
+    if (erroCriacao || !criado) {
       setEnviando(false);
-      return setErro(mensagemErroSupabase('Erro ao registrar pagamento do pedido.', erroPagamento));
+      return setErro(mensagemErroSupabase('Erro ao criar pedido.', erroCriacao));
     }
+
+    const pedido = { id: String(criado.pedido_id), numero: Number(criado.numero) };
+    // Valor cobrado dali para frente e o do servidor, nao o calculado na tela.
+    const totalServidor = Number(criado.valor_total ?? total);
 
     // Cashback cobriu o pedido inteiro: quita e aceita via RPC (valida o dono).
-    if (quitadoPorCashback) {
+    if (totalServidor <= 0 && cashbackAplicado > 0) {
       const { error: erroQuita } = await supabase.rpc('fn_quitar_pedido_cashback', { p_pedido_id: pedido.id });
       if (erroQuita) {
         await cancelarPedidoPendente(pedido.id);
@@ -433,14 +339,14 @@ export default function CheckoutDrawer({
         return setErro(mensagemErroSupabase('Erro ao confirmar o pagamento por cashback.', erroQuita));
       }
       setEnviando(false);
-      onSucesso(pedido.numero, pedido.id, metodo, null, total);
+      onSucesso(pedido.numero, pedido.id, metodo, null, totalServidor);
       return;
     }
 
     // Cartao de credito online (Efi — tokenizacao no proximo modal)
     if (metodo === 'CREDITO') {
       setEnviando(false);
-      onCartao?.({ pedidoId: pedido.id, numero: pedido.numero, total });
+      onCartao?.({ pedidoId: pedido.id, numero: pedido.numero, total: totalServidor });
       return;
     }
 
@@ -458,7 +364,7 @@ export default function CheckoutDrawer({
     }
 
     setEnviando(false);
-    onSucesso(pedido.numero, pedido.id, metodo, pixInfo, total);
+    onSucesso(pedido.numero, pedido.id, metodo, pixInfo, totalServidor);
   };
 
   // Portal no body: fixed dentro de ancestral com transform seria posicionado errado.
