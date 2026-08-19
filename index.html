@@ -27,8 +27,19 @@
     <meta property="og:site_name" content="MiseOn" />
     <meta property="og:title" content="MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares" />
     <meta property="og:description" content="MiseOn: sistema de gestão e automação para restaurantes, hamburguerias, pizzarias e bares. Cardápio digital QR Code, KDS, comanda eletrônica e iFood." />
-    <meta property="og:image" content="https://miseon.app.br/icon-512.png" />
+    <meta property="og:image" content="https://miseon.app.br/icon-512.png?v=2" />
+    <!-- Dimensões declaradas: sem elas o robô do WhatsApp precisa BAIXAR a
+         imagem só para descobrir o tamanho e, com a paciência curta que ele
+         tem, desiste e mostra o link sem miniatura — que era o nosso caso. -->
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="MiseOn — sistema de gestão para restaurantes" />
     <meta property="og:url" content="https://miseon.app.br/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="MiseOn | Sistema de Gestão e Automação para Restaurantes e Bares" />
+    <meta name="twitter:description" content="Cardápio digital QR Code, KDS, comanda eletrônica, estoque por cupom fiscal e iFood." />
+    <meta name="twitter:image" content="https://miseon.app.br/icon-512.png?v=2" />
 
     <!-- Dados Estruturados Schema.org para o Google & Motores de IA (GEO).
          O id é o mesmo que o componente SEO usa: sem ele, o React injetava um
@@ -62,6 +73,7 @@
               "Gestão de Delivery com rastreio e integração nativa com iFood",
               "Comanda Eletrônica no celular para garçons com divisão de conta",
               "Atendimento automatizado por Inteligência Artificial no WhatsApp (API Oficial Meta)",
+              "Entrada de estoque por leitura do QR Code do cupom fiscal (NFC-e) do mercado, com quantidade e custo automáticos",
               "Controle de Estoque com Ficha Técnica, CMV e Venda por Quilo (R$/kg)",
               "Emissão Fiscal NFC-e e NF-e integrada com FocusNFe",
               "Pagamento via Pix automático com conciliação instantânea (Efí Bank)"
@@ -87,6 +99,7 @@
               "Cardápio digital QR Code",
               "KDS para cozinha",
               "Controle de estoque e CMV para food service",
+              "Importação de nota fiscal de compra para o estoque",
               "Ficha técnica e custeio de pratos",
               "Atendimento automatizado por IA no WhatsApp",
               "Integração com iFood",

@@ -4,7 +4,7 @@ import {
   Boxes, Database, FlaskConical, Eye, ArrowRight, Sparkles,
   ShieldCheck, AlertTriangle, ChevronDown, Menu as MenuIcon, X, Wallet,
   HelpCircle, Layers, RefreshCw, BarChart3, Truck, Scissors, Scale,
-  ClipboardCheck, TrendingDown
+  ClipboardCheck, TrendingDown, ScanLine
 } from 'lucide-react';
 import SEO from '../../components/SEO';
 import FooterSEO from '../../components/FooterSEO';
@@ -19,6 +19,10 @@ const IMG_3D       = '/images/estoque/media__1784863268521.png';
 // Fora do componente: as perguntas alimentam o accordion E o rich snippet do
 // Google. Duas cópias da mesma pergunta acabariam divergindo na primeira edição.
 const FAQS = [
+  {
+    p: 'Preciso cadastrar item por item quando volto do mercado?',
+    r: 'Não. Escaneie o QR Code do cupom fiscal (NFC-e) com a câmera do celular — ou envie uma foto dele — e o MiseOn consulta a nota na SEFAZ e traz a lista completa: descrição, quantidade, unidade e valor de cada item. Na tela de conferência você desmarca o que não é da cozinha, ajusta a conversão (uma bandeja de ovos vira 20 unidades, por exemplo) e dá entrada de todos de uma vez. O sistema guarda o vínculo de cada produto daquele mercado, então na compra seguinte o reconhecimento é automático. A mesma nota não entra duas vezes: se você escanear de novo, ele avisa em vez de dobrar o estoque.',
+  },
   {
     p: 'Como funciona o fracionamento quando compro um fardo ou pacote?',
     r: 'No cadastro do insumo, você indica a "Unidade de Compra" (ex: Pacote) e a "Unidade de Armazenamento/Uso" (ex: Gramas). Ao digitar que 1 pacote rende 2000g, o MiseOn passa a controlar o saldo em gramas e realiza a baixa em tempo real a cada venda no cardápio ou PDV.',
@@ -201,6 +205,19 @@ export default function EstoquePage() {
               </p>
 
               <div className="mt-6 space-y-4">
+                <div className="flex items-start gap-3.5 rounded-2xl border border-orange-400/30 bg-orange-500/10 p-4 backdrop-blur-md">
+                  <ScanLine className="mt-1 text-orange-400 shrink-0" size={20} />
+                  <div>
+                    <h4 className="font-bold text-white text-sm">Entrada pelo QR Code do cupom do mercado</h4>
+                    <p className="text-xs text-slate-300 mt-0.5">
+                      Voltou da compra com o cupom na mão? Escaneie o <b>QR Code da NFC-e</b> e o MiseOn lê a nota
+                      direto na SEFAZ: produto, quantidade e custo de cada item. Você confere, escolhe o que entra e
+                      dá entrada de tudo de uma vez — <i>sem digitar produto por produto</i>. Na segunda compra no mesmo
+                      mercado, ele já lembra a que insumo cada item pertence.
+                    </p>
+                  </div>
+                </div>
+
                 <div className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                   <Layers className="mt-1 text-blue-400 shrink-0" size={20} />
                   <div>

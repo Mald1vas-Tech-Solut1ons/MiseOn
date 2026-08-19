@@ -1,6 +1,6 @@
 import {
   QrCode, Zap, CreditCard, Timer, Store, Map as MapIcon, Bike, Boxes,
-  ClipboardList, ShoppingCart, Gift, TrendingUp, Truck, Scissors,
+  ClipboardList, ShoppingCart, Gift, TrendingUp, Truck, Scissors, ScanLine,
 } from 'lucide-react';
 
 const FEATURES = [
@@ -11,6 +11,7 @@ const FEATURES = [
   { icon: <Store size={20} />, titulo: 'PDV de balcão', texto: 'Venda presencial rápida, integrada ao mesmo estoque e ao mesmo caixa.' },
   { icon: <MapIcon size={20} />, titulo: 'Mapa de mesas', texto: 'Salão visual: mesa livre, ocupada ou fechando conta num relance.' },
   { icon: <Bike size={20} />, titulo: 'Entrega com rota ao vivo', texto: 'Despache para o motoboy com um clique e acompanhe a rota em tempo real.' },
+  { icon: <ScanLine size={20} />, titulo: 'Estoque pelo cupom do mercado', texto: 'Escaneie o QR Code da nota e os itens entram no estoque com quantidade e custo. Sem digitar produto por produto.' },
   { icon: <Boxes size={20} />, titulo: 'Estoque com ficha técnica', texto: 'Vendeu um combo? Baixa automática do pão, da carne e da embalagem.' },
   { icon: <ClipboardList size={20} />, titulo: 'Produção com lotes e validade', texto: 'Preparos organizados por lote, com validade e rendimento controlados.' },
   { icon: <ShoppingCart size={20} />, titulo: 'Compras que pensam', texto: 'A lista sai do giro real dos últimos 30 dias e do prazo do seu fornecedor.' },
