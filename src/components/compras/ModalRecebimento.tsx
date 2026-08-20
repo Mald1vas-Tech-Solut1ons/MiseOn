@@ -17,6 +17,7 @@ import { fmt, Insumo } from '../../types';
 import MiseOnLoader from '../MiseOnLoader';
 import SeletorQuantidade from '../estoque/SeletorQuantidade';
 import { ValorQuantidade, fatorDe, qtdBase, valorInicial } from '../../lib/conversaoEntrada';
+import { useI18n } from '../../contexts/I18nContext';
 import {
   CompraItem, CompraResumo, ItemRecebimento, carregarItens, receberCompra,
 } from '../../lib/compras';
@@ -42,6 +43,7 @@ interface Conferencia {
 type StatusNutricao = 'ocioso' | 'buscando' | 'encontrado' | 'nao_encontrado';
 
 export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso }: Props) {
+  const { tDynamic } = useI18n();
   const [itens, setItens] = useState<CompraItem[]>([]);
   const [conf, setConf] = useState<Record<string, Conferencia>>({});
   const [nota, setNota] = useState(compra.numero_nota ?? '');
@@ -227,7 +229,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
           {carregando ? (
             <div className="flex h-48 items-center justify-center"><MiseOnLoader status="Abrindo o pedido..." rows={2} /></div>
           ) : itens.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-400">Este pedido não tem itens.</p>
+            <p className="py-8 text-center text-sm text-gray-400">{tDynamic('Este pedido não tem itens.')}</p>
           ) : itens.map(it => {
             const c = conf[it.id];
             if (!c) return null;
@@ -321,7 +323,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                               valor: ins ? valorInicial(ins, c.valor.qtd) : c.valor,
                             });
                           }}>
-                          <option value="">Não, veio o pedido</option>
+                          <option value="">{tDynamic('Não, veio o pedido')}</option>
                           {insumos.filter(i => i.id !== it.insumo_id && !i.is_preparo).map(i => (
                             <option key={i.id} value={i.id}>{i.nome}</option>
                           ))}
@@ -351,7 +353,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                         </p>
                       )}
                       {statusNutricao[it.id] === 'nao_encontrado' && (
-                        <p className="mt-1 text-[10px] text-gray-400">Sem nutrição na base para este código — dá para fotografar o rótulo depois.</p>
+                        <p className="mt-1 text-[10px] text-gray-400">{tDynamic('Sem nutrição na base para este código — dá para fotografar o rótulo depois.')}</p>
                       )}
                     </div>
 

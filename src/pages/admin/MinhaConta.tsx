@@ -4,7 +4,9 @@ import { supabase } from '../../lib/supabase';
 import { User as UserIcon, Lock, Mail, Phone, ShieldCheck, Loader2, CheckCircle2, AlertCircle, KeyRound, X, RefreshCw, ArrowRight } from 'lucide-react';
 import MiseOnLoader from '../../components/MiseOnLoader';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function MinhaConta() {
+  const { tDynamic } = useI18n();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -221,7 +223,7 @@ export default function MinhaConta() {
                     className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 py-3 pl-10 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--cor-primaria)] dark:text-white" 
                   />
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1">Ao alterar o e-mail, enviaremos um código OTP de 6 dígitos para confirmação por segurança.</p>
+                <p className="text-[10px] text-gray-400 mt-1">{tDynamic('Ao alterar o e-mail, enviaremos um código OTP de 6 dígitos para confirmação por segurança.')}</p>
               </label>
 
               <label className="block">
@@ -357,9 +359,9 @@ export default function MinhaConta() {
             </div>
 
             <div className="rounded-xl bg-orange-50 dark:bg-orange-950/30 p-4 mb-4 border border-orange-100 dark:border-orange-900/40 text-xs text-orange-900 dark:text-orange-300">
-              <p className="font-semibold">Enviamos um código de 6 dígitos para:</p>
+              <p className="font-semibold">{tDynamic('Enviamos um código de 6 dígitos para:')}</p>
               <p className="font-bold text-sm font-mono text-orange-600 dark:text-orange-400 mt-1">{novoEmailPendente}</p>
-              <p className="mt-2 text-[11px] text-orange-700/80 dark:text-orange-400/80">Verifique sua caixa de entrada e spam. O código é válido por 10 minutos.</p>
+              <p className="mt-2 text-[11px] text-orange-700/80 dark:text-orange-400/80">{tDynamic('Verifique sua caixa de entrada e spam. O código é válido por 10 minutos.')}</p>
             </div>
 
             {msgOtp && (

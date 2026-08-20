@@ -1,6 +1,8 @@
 import { Check, MonitorSmartphone, Receipt, DollarSign, Store, Box, Boxes } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function FeaturesGrid() {
+  const { tDynamic } = useI18n();
   return (
     <section style={{ borderTop: '1px solid rgba(255,255,255,.08)', background: '#0B1120' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6">
@@ -8,7 +10,7 @@ export default function FeaturesGrid() {
           Ecossistema All-in-One
         </div>
         <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="max-w-4xl text-3xl font-black leading-tight sm:text-5xl text-white">
-          A infraestrutura tecnológica que os grandes restaurantes usam.
+          {tDynamic('A infraestrutura tecnológica que os grandes restaurantes usam.')}
         </h2>
         <p className="mt-6 text-xl text-gray-400 max-w-3xl">
           Outros sistemas vendem módulos fragmentados. O MiseOn foi desenhado desde o primeiro dia como uma suíte completa de gestão, preparada para escalar a sua marca.

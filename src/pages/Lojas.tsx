@@ -287,7 +287,7 @@ export default function Lojas() {
                 <ArrowRight size={18} style={{ color: 'rgba(234,241,251,0.4)' }} className="relative z-10 shrink-0 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white" />
               </Link>
             ))}
-            {lojasElegiveis.length === 0 && <p className="py-16 text-center text-sm" style={{ color: 'rgba(234,241,251,0.5)' }}>Nenhuma loja encontrada para sua busca ou cobertura atual.</p>}
+            {lojasElegiveis.length === 0 && <p className="py-16 text-center text-sm" style={{ color: 'rgba(234,241,251,0.5)' }}>{tDynamic('Nenhuma loja encontrada para sua busca ou cobertura atual.')}</p>}
           </div>
         )}
 

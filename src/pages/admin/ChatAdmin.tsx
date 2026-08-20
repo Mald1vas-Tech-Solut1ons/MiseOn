@@ -9,6 +9,7 @@ import { tocarSom } from '../../lib/som';
 import { useToast } from '../../components/ui/Toast';
 import type { CtxLoja } from './AdminLayout';
 
+import { useI18n } from '../../contexts/I18nContext';
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 interface Conversa {
@@ -78,6 +79,7 @@ function BadgeCanal({ canal }: { canal: string }) {
 // ─── Componente Principal ─────────────────────────────────────────────────────────
 
 export default function ChatAdmin() {
+  const { tDynamic } = useI18n();
   const ctx = useOutletContext<CtxLoja>();
   const lojaId = ctx.lojaId;
 
@@ -501,7 +503,7 @@ export default function ChatAdmin() {
         {!ativa ? (
           <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
             <MessageSquare size={48} className="opacity-30" />
-            <p className="font-medium text-gray-600 dark:text-gray-300">Selecione uma conversa</p>
+            <p className="font-medium text-gray-600 dark:text-gray-300">{tDynamic('Selecione uma conversa')}</p>
             <p className="text-sm text-center max-w-xs">As conversas do WhatsApp e do chat do site aparecem aqui em tempo real.</p>
           </div>
         ) : (

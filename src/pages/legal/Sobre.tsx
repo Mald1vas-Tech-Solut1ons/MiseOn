@@ -71,7 +71,7 @@ export default function Sobre() {
           </span>
 
           <h1 className="mt-6 font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Engenharia de software criada para o ritmo real do <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Food Service</span>
+            {tDynamic('Engenharia de software criada para o ritmo real do')} <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Food Service</span>
           </h1>
 
           <p className="mt-6 text-base leading-relaxed text-slate-300 sm:text-lg">
@@ -93,7 +93,7 @@ export default function Sobre() {
                 Assinatura Técnica Maldivas Tech Solutions
               </h2>
               <p className="text-sm leading-relaxed text-slate-300">
-                A plataforma MiseOn é desenvolvida e mantida por <strong>Rafael Maldivas</strong> (fundador da <i>Maldivas Tech Solutions / MaldivaSky</i>), especialista em arquiteturas SaaS distribuídas, análise de dados e sistemas de alta disponibilidade.
+                {tDynamic('A plataforma MiseOn é desenvolvida e mantida por')} <strong>Rafael Maldivas</strong> (fundador da <i>Maldivas Tech Solutions / MaldivaSky</i>), especialista em arquiteturas SaaS distribuídas, análise de dados e sistemas de alta disponibilidade.
               </p>
               <p className="text-sm leading-relaxed text-slate-300">
                 Com base em uma sólida experiência em engenharia fullstack e inteligência de negócios B2B, a arquitetura do MiseOn foi desenhada para oferecer latência ultrabaixa no KDS de cozinha, sincronia em tempo real via WebSockets e máxima segurança em transações financeiras e fiscais.
@@ -158,7 +158,7 @@ export default function Sobre() {
             <div className="mt-8 grid gap-6 sm:grid-cols-2 text-sm text-slate-300">
               <div className="space-y-1">
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Razão Social & Nome Fantasia</span>
-                <p className="font-bold text-white">MiseOn Tecnologia e Soluções para Food Service</p>
+                <p className="font-bold text-white">{tDynamic('MiseOn Tecnologia e Soluções para Food Service')}</p>
               </div>
 
               <div className="space-y-1">

@@ -9,6 +9,7 @@ import { supabase } from '../../lib/supabase';
 import { useToast } from '../../components/ui/Toast';
 import { CtxLoja } from './AdminLayout';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface ConfigFiscal {
   cnpj: string;
   razao_social: string;
@@ -67,6 +68,7 @@ interface ItemXmlParsed {
 }
 
 export default function Fiscal() {
+  const { tDynamic } = useI18n();
   const ctx = useOutletContext<CtxLoja>();
   const toast = useToast();
 
@@ -806,7 +808,7 @@ export default function Fiscal() {
 
           {/* Token CSC para NFC-e */}
           <div className="bg-white dark:bg-[#0B1120] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 space-y-4 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Token CSC da SEFAZ (Obrigatório para NFC-e)</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{tDynamic('Token CSC da SEFAZ (Obrigatório para NFC-e)')}</h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -855,7 +857,7 @@ export default function Fiscal() {
                     onChange={() => setFormConfig({ ...formConfig, nfe_ambiente: 'producao' })}
                     className="text-[#004198]"
                   />
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Produção (Emissão com Validade Jurídica)</span>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{tDynamic('Produção (Emissão com Validade Jurídica)')}</span>
                 </label>
               </div>
             </div>

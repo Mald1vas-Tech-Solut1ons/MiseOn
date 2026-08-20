@@ -4,6 +4,7 @@ import { FileText, UploadCloud, CheckCircle2, Clock, XCircle, Loader2 } from 'lu
 import { supabase } from '../../lib/supabase';
 import type { CtxEntregador } from './EntregadorLayout';
 
+import { useI18n } from '../../contexts/I18nContext';
 type StatusDocs = 'pendente' | 'aprovado' | 'rejeitado';
 
 const STATUS_INFO: Record<StatusDocs, { label: string; cor: string; icone: ReactNode }> = {
@@ -13,6 +14,7 @@ const STATUS_INFO: Record<StatusDocs, { label: string; cor: string; icone: React
 };
 
 export default function EntregadorDocumentos() {
+  const { tDynamic } = useI18n();
   const ctx = useOutletContext<CtxEntregador>();
   const [carregando, setCarregando] = useState(true);
   const [enviando, setEnviando] = useState(false);
@@ -110,7 +112,7 @@ export default function EntregadorDocumentos() {
     <div className="p-4 space-y-5 pb-20">
       <div>
         <h1 className="text-lg font-bold text-white">Meus documentos</h1>
-        <p className="text-sm text-gray-400 mt-1">CNH e documento do veículo, exigidos para rodar entregas.</p>
+        <p className="text-sm text-gray-400 mt-1">{tDynamic('CNH e documento do veículo, exigidos para rodar entregas.')}</p>
       </div>
 
       <div className={`flex items-center gap-2 rounded-xl border p-3 text-sm font-semibold ${info.cor}`}>

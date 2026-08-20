@@ -9,7 +9,9 @@ import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
 import { getOptimizedImageUrl } from '../../lib/cdn';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function Assinatura() {
+  const { tDynamic } = useI18n();
   const { lojaId, lojaNome } = useOutletContext<CtxLoja>();
   const [, setStatus] = useState<string>('trial');
   const [emDia, setEmDia] = useState<boolean>(true);
@@ -169,7 +171,7 @@ export default function Assinatura() {
           <div>
             <h2 className="text-2xl font-black dark:text-gray-100">Assinatura do Sistema (SaaS)</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-              <Lock size={12} /> Checkout oficial via Efí Bank com Pix 5% OFF
+              <Lock size={12} /> {tDynamic('Checkout oficial via Efí Bank com Pix 5% OFF')}
             </p>
           </div>
         </div>
@@ -393,7 +395,7 @@ export default function Assinatura() {
                      <span className="inline-flex rounded-full bg-teal-500/20 px-3 py-1 text-xs font-bold text-teal-600 dark:text-teal-400 mb-2">
                         Desconto Especial: 5% OFF à Vista
                      </span>
-                     <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">Pagamento instantâneo via Pix com aprovação imediata.</p>
+                     <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">{tDynamic('Pagamento instantâneo via Pix com aprovação imediata.')}</p>
                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                        {ciclo === 'anual' ? 'Plano Anual com 5% OFF: R$ 1.708,86 (Economia de R$ 329,94/ano)' : 'Plano Mensal com 5% OFF: R$ 161,40/mês'}
                      </p>
@@ -431,7 +433,7 @@ export default function Assinatura() {
             </div>
           </div>
           <p className="mt-4 text-center text-xs font-semibold text-gray-400 flex items-center justify-center gap-1.5">
-            <Lock size={12} /> Criptografia end-to-end. Nossos servidores não armazenam dados do seu cartão.
+            <Lock size={12} /> {tDynamic('Criptografia end-to-end. Nossos servidores não armazenam dados do seu cartão.')}
           </p>
         </div>
 

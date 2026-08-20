@@ -5,6 +5,7 @@ import { Insumo, InsumoNutricao } from '../../types';
 import { getUnidade } from '../../lib/unidades';
 import MiseOnLoader from '../MiseOnLoader';
 
+import { useI18n } from '../../contexts/I18nContext';
 /**
  * `supabase.functions.invoke` engole o corpo da resposta em erros não-2xx —
  * o motivo real (ex.: "Gemini: model not found") fica em `error.context`,
@@ -94,6 +95,7 @@ const ALERGENOS = [
  * (ADR-02: IA e lookup externo capturam, humano publica).
  */
 export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }: Props) {
+  const { tDynamic } = useI18n();
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
@@ -359,7 +361,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
             <h2 className="text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <Apple size={18} className="text-emerald-600 dark:text-emerald-400" /> Nutrição — {insumo.nome}
             </h2>
-            <p className="text-xs text-gray-500 font-medium mt-0.5">Digite, busque por código de barras ou fotografe o rótulo — salvar aqui já conta como revisado.</p>
+            <p className="text-xs text-gray-500 font-medium mt-0.5">{tDynamic('Digite, busque por código de barras ou fotografe o rótulo — salvar aqui já conta como revisado.')}</p>
           </div>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-300 rounded-xl transition-colors">
             <X size={20} />
@@ -438,7 +440,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                   </button>
                 </div>
                 <p className="mt-2 text-[11px] text-gray-400">
-                  Ordem recomendada: código de barras → foto do rótulo → estimativa por IA (menos confiável, sempre marcada em amarelo).
+                  {tDynamic('Ordem recomendada: código de barras → foto do rótulo → estimativa por IA (menos confiável, sempre marcada em amarelo).')}
                 </p>
                 {origemAtual && origemAtual !== 'MANUAL' && (
                   <p className={`mt-2.5 text-[11px] ${origemAtual === 'IA' ? 'font-bold text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
@@ -450,7 +452,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
               </div>
 
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Valores declarados por</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{tDynamic('Valores declarados por')}</p>
                 <div className="flex gap-2">
                   {(['g', 'ml'] as const).map((u) => (
                     <button key={u} onClick={() => setBaseUnidade(u)}
@@ -551,7 +553,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                   ))}
                 </div>
                 <p className="mt-2 text-[11px] text-gray-400">
-                  Alérgeno não marcado aqui significa "não avaliado" — nunca "não contém".
+                  {tDynamic('Alérgeno não marcado aqui significa "não avaliado" — nunca "não contém".')}
                 </p>
               </div>
             </>

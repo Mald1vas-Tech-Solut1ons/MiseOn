@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Users, Search, Plus, CheckCircle2, Send } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 export interface LeadB2B {
   id: string;
   nomeLoja: string;
@@ -23,6 +24,7 @@ const LEADS_INICIAIS: LeadB2B[] = [
 ];
 
 export default function CrmLeads() {
+  const { tDynamic } = useI18n();
   const [leads, setLeads] = useState<LeadB2B[]>(LEADS_INICIAIS);
   const [busca, setBusca] = useState('');
   const [etapaFiltro, setEtapaFiltro] = useState<string>('TODAS');
@@ -204,7 +206,7 @@ export default function CrmLeads() {
                       <option value="DEMO_TRIAL">Trial 30D Ativo</option>
                       <option value="FECHAMENTO">Proposta / Fechamento</option>
                       <option value="ASSINANTE">Assinante Ativo (Ganho)</option>
-                      <option value="PERDIDO">Perdido / Sem Perfil</option>
+                      <option value="PERDIDO">{tDynamic('Perdido / Sem Perfil')}</option>
                     </select>
                   </td>
                   <td className="py-3 px-4 font-mono font-bold text-emerald-400">
@@ -273,7 +275,7 @@ export default function CrmLeads() {
                 >
                   <option value="Hamburgueria">Hamburgueria</option>
                   <option value="Pizzaria">Pizzaria</option>
-                  <option value="Restaurante por Quilo">Restaurante por Quilo</option>
+                  <option value="Restaurante por Quilo">{tDynamic('Restaurante por Quilo')}</option>
                   <option value="Lanchonete / Bar">Lanchonete / Bar</option>
                   <option value="Delivery Multicanais">Delivery Multicanais</option>
                 </select>

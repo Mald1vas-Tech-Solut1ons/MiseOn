@@ -1,9 +1,11 @@
 import { ArrowRight, Layers, Box, BarChart3 } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 const WHATSAPP_VENDAS = '5511919889233';
 const zap = (msg: string) => `https://wa.me/${WHATSAPP_VENDAS}?text=${encodeURIComponent(msg)}`;
 
 export default function PainPoints() {
+  const { tDynamic } = useI18n();
   return (
     <section style={{ borderTop: '1px solid rgba(10,92,196,0.15)', background: 'rgba(10,92,196,0.02)' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6">
@@ -13,7 +15,7 @@ export default function PainPoints() {
         <div className="grid items-center gap-16 lg:grid-cols-2">
           <div>
             <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-black leading-tight sm:text-5xl text-white">
-              Vender em múltiplos canais não deveria significar <span style={{ color: '#FC5B24' }}>caos na cozinha.</span>
+              {tDynamic('Vender em múltiplos canais não deveria significar')} <span style={{ color: '#FC5B24' }}>caos na cozinha.</span>
             </h2>
             <div className="mt-8 space-y-6">
               <div className="flex gap-4 items-start">
@@ -31,7 +33,7 @@ export default function PainPoints() {
               <div className="flex gap-4 items-start">
                 <BarChart3 className="text-green-500 shrink-0 mt-1" size={24} />
                 <p style={{ color: '#AEB9CE' }} className="text-lg leading-relaxed">
-                  <b className="text-white">Falta de Dados Consolidados:</b> Conciliar o financeiro do salão, do app de delivery e do site próprio leva horas preciosas. Você precisa de um DRE claro, não de planilhas complexas.
+                  <b className="text-white">Falta de Dados Consolidados:</b> {tDynamic('Conciliar o financeiro do salão, do app de delivery e do site próprio leva horas preciosas. Você precisa de um DRE claro, não de planilhas complexas.')}
                 </p>
               </div>
             </div>
@@ -45,7 +47,7 @@ export default function PainPoints() {
               style={{ background: '#0A5CC4', fontFamily: "'Sora', sans-serif" }}
               className="mt-8 inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-bold text-white transition hover:bg-blue-600 shadow-[0_0_20px_rgba(10,92,196,0.3)]"
             >
-              Falar com um consultor especialista <ArrowRight size={18} />
+              {tDynamic('Falar com um consultor especialista')} <ArrowRight size={18} />
             </a>
           </div>
 
@@ -87,7 +89,7 @@ export default function PainPoints() {
             <div style={{ background: 'rgba(10,92,196,0.1)', border: '1px solid rgba(10,92,196,0.2)' }} className="mt-8 rounded-2xl p-6 text-center">
               <p className="text-sm font-bold text-blue-400">O resultado da orquestração:</p>
               <p style={{ fontFamily: "'Sora', sans-serif" }} className="mt-2 text-lg font-medium text-white leading-relaxed">
-                Você para de gerenciar telas e volta a focar no que importa: <b>A qualidade do seu produto e a expansão da sua marca.</b>
+                {tDynamic('Você para de gerenciar telas e volta a focar no que importa:')} <b>{tDynamic('A qualidade do seu produto e a expansão da sua marca.')}</b>
               </p>
             </div>
           </div>

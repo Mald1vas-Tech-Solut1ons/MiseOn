@@ -19,6 +19,7 @@ import SeletorQuantidade from './SeletorQuantidade';
 import { ValorQuantidade, fatorDe, qtdBase, valorInicial } from '../../lib/conversaoEntrada';
 import { transformarEstoque, LadoTransformacao } from '../../lib/compras';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface Props {
   lojaId: string;
   insumos: Insumo[];
@@ -36,6 +37,7 @@ interface Linha {
 }
 
 export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, onSucesso }: Props) {
+  const { tDynamic } = useI18n();
   const [tipo, setTipo] = useState<'DESMONTE' | 'MONTAGEM'>('DESMONTE');
   const [custos, setCustos] = useState<Record<string, number>>({});
   const [obs, setObs] = useState('');
@@ -290,7 +292,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
                     <Trash2 size={14} /> Perda / Quebra de Processamento (Refugo)
                   </p>
                   <p className="mt-0.5 text-[11px] text-red-600/80 dark:text-red-400/80">
-                    Gordura, pelancas e ossos jogados fora. <b>Não precisa cadastrar insumo de lixo!</b> O custo desta perda é absorvido automaticamente pelos cortes nobres obtidos.
+                    Gordura, pelancas e ossos jogados fora. <b>{tDynamic('Não precisa cadastrar insumo de lixo!')}</b> O custo desta perda é absorvido automaticamente pelos cortes nobres obtidos.
                   </p>
                 </div>
                 <div className="w-full sm:w-32 shrink-0">
@@ -320,7 +322,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
         <div className="shrink-0 border-t border-gray-100 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Custo que muda de lugar</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{tDynamic('Custo que muda de lugar')}</p>
               <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{fmt(custoEstimado)}</p>
               <p className="text-[10px] text-gray-400">estimado — o valor final vem do PEPS dos lotes</p>
             </div>

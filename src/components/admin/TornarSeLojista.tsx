@@ -3,6 +3,7 @@ import { Store, Building2, User, CheckCircle2, ArrowRight, ArrowLeft, Loader2 } 
 import { supabase } from '../../lib/supabase';
 import MiseOnLogo from '../MiseOnLogo';
 
+import { useI18n } from '../../contexts/I18nContext';
 const SEGMENTOS: { valor: string; rotulo: string }[] = [
   { valor: 'lanchonete', rotulo: 'Lanchonete' },
   { valor: 'restaurante_a_la_carte', rotulo: 'Restaurante à la carte' },
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
+  const { tDynamic } = useI18n();
   const [etapa, setEtapa] = useState<1 | 2 | 3>(1);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
@@ -128,7 +130,7 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
             <input value={nomeLoja} onChange={(e) => setNomeLoja(e.target.value)} placeholder="Nome da sua loja"
               className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 text-sm dark:text-white" />
 
-            <div className="mt-4 flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300"><Building2 size={16} /> Dados para a nota fiscal</div>
+            <div className="mt-4 flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300"><Building2 size={16} /> {tDynamic('Dados para a nota fiscal')}</div>
             <div className="flex gap-2">
               <button type="button" onClick={() => setTipoPessoa('PJ')}
                 className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl border p-2.5 text-sm font-semibold transition-colors ${tipoPessoa === 'PJ' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)]' : 'border-gray-200 dark:border-gray-800 text-gray-500'}`}>
@@ -178,10 +180,10 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
 
         {etapa === 2 && (
           <div className="space-y-3">
-            <div className="text-sm font-bold text-gray-700 dark:text-gray-300">Conte um pouco do seu negócio</div>
+            <div className="text-sm font-bold text-gray-700 dark:text-gray-300">{tDynamic('Conte um pouco do seu negócio')}</div>
             <select value={segmentoNegocio} onChange={(e) => setSegmentoNegocio(e.target.value)}
               className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 text-sm text-gray-700 dark:text-gray-300">
-              <option value="">Qual o segmento do seu negócio?</option>
+              <option value="">{tDynamic('Qual o segmento do seu negócio?')}</option>
               {SEGMENTOS.map((s) => <option key={s.valor} value={s.valor}>{s.rotulo}</option>)}
             </select>
             <input value={qtdFuncionarios} onChange={(e) => setQtdFuncionarios(e.target.value.replace(/\D/g, ''))} placeholder="Quantidade de funcionários" inputMode="numeric"
@@ -189,7 +191,7 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
 
             <label className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 p-3 text-sm dark:text-gray-300">
               <input type="checkbox" checked={atendeSalaoGarcom} onChange={(e) => setAtendeSalaoGarcom(e.target.checked)} className="h-4 w-4" />
-              Atendo no salão com garçom
+              {tDynamic('Atendo no salão com garçom')}
             </label>
 
             <label className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 p-3 text-sm dark:text-gray-300">
@@ -225,7 +227,7 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
         {etapa === 3 && (
           <div className="space-y-4">
             <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 p-4 text-sm text-emerald-800 dark:text-emerald-300">
-              Seu período de teste começa agora: <b>30 dias grátis, sem necessidade de cartão de crédito.</b> Ao final, você
+              {tDynamic('Seu período de teste começa agora:')} <b>30 dias grátis, sem necessidade de cartão de crédito.</b> Ao final, você
               escolhe se quer assinar mensal ou anual — sem compromisso automático.
             </div>
             <label className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-800 p-3 text-sm dark:text-gray-300">

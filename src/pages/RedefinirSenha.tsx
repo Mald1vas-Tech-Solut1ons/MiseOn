@@ -92,7 +92,7 @@ export default function RedefinirSenha() {
           {estado === 'verificando' && (
             <div className="flex flex-col items-center gap-3 py-6 text-sm text-gray-500 dark:text-gray-400">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[var(--cor-primaria)]" />
-              Confirmando seu link…
+              {tDynamic('Confirmando seu link…')}
             </div>
           )}
 
@@ -100,16 +100,16 @@ export default function RedefinirSenha() {
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               <AlertCircle size={32} className="text-red-500" />
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Este link expirou, já foi usado, ou não é válido.
+                {tDynamic('Este link expirou, já foi usado, ou não é válido.')}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Volte para o login e peça um novo link de redefinição.
+                {tDynamic('Volte para o login e peça um novo link de redefinição.')}
               </p>
               <Link
                 to={loginUrl}
                 className="mt-2 rounded-xl bg-[var(--cor-primaria)] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
               >
-                Voltar para o login
+                {tDynamic('Voltar para o login')}
               </Link>
             </div>
           )}
@@ -118,13 +118,13 @@ export default function RedefinirSenha() {
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               <ShieldCheck size={32} className="text-green-600 dark:text-green-400" />
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Senha alterada com sucesso.
+                {tDynamic('Senha alterada com sucesso.')}
               </p>
               <Link
                 to={loginUrl}
                 className="mt-2 rounded-xl bg-[var(--cor-primaria)] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
               >
-                Entrar com a senha nova
+                {tDynamic('Entrar com a senha nova')}
               </Link>
             </div>
           )}
@@ -132,7 +132,7 @@ export default function RedefinirSenha() {
           {estado === 'formulario' && (
             <form onSubmit={redefinir}>
               <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">
-                Escolha uma senha nova para sua conta.
+                {tDynamic('Escolha uma senha nova para sua conta.')}
               </p>
 
               {erro && (

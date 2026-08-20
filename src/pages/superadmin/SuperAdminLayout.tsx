@@ -5,7 +5,9 @@ import { supabase } from '../../lib/supabase';
 
 import LanguageToggle from '../../components/LanguageToggle';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function SuperAdminLayout() {
+  const { tDynamic } = useI18n();
   const nav = useNavigate();
   const [ok, setOk] = useState<boolean | null>(null);
 
@@ -29,7 +31,7 @@ export default function SuperAdminLayout() {
   if (ok === false) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3 bg-gray-900 p-8 text-center text-white">
-        <p className="font-semibold">Sua conta não tem acesso ao painel SuperAdmin.</p>
+        <p className="font-semibold">{tDynamic('Sua conta não tem acesso ao painel SuperAdmin.')}</p>
         <button onClick={sair} className="mt-2 rounded-xl border border-white/30 px-5 py-2.5 text-sm font-semibold">Sair</button>
       </div>
     );

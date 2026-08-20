@@ -546,7 +546,7 @@ export default function PDV() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-gray-900">
             <h3 className="text-lg font-black dark:text-gray-100">Pix de {fmt(total)}</h3>
-            <p className="mt-1 text-xs text-gray-500">Peça para o cliente apontar a câmera para o QR Code.</p>
+            <p className="mt-1 text-xs text-gray-500">{tDynamic('Peça para o cliente apontar a câmera para o QR Code.')}</p>
             {pixInfo.qrImagem
               ? <img src={getOptimizedImageUrl(pixInfo.qrImagem)} alt="QR Code Pix" className="mx-auto mt-4 w-56 rounded-2xl border border-gray-200 dark:border-gray-700" />
               : <p className="mt-4 break-all rounded-xl bg-gray-100 p-3 font-mono text-[10px] dark:bg-gray-800 dark:text-gray-200">{pixInfo.copiaECola}</p>}

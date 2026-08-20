@@ -5,7 +5,9 @@ import { supabase } from '../../lib/supabase';
 import type { CtxEntregador } from './EntregadorLayout';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function EntregadorRota() {
+  const { tDynamic } = useI18n();
   const { id } = useParams();
   const navigate = useNavigate();
   const ctx = useOutletContext<CtxEntregador>();
@@ -149,7 +151,7 @@ export default function EntregadorRota() {
   };
 
   if (loading) return <div className="p-8 text-center text-gray-500">Carregando navegação...</div>;
-  if (!rota) return <div className="p-8 text-center text-red-500">Rota não encontrada.</div>;
+  if (!rota) return <div className="p-8 text-center text-red-500">{tDynamic('Rota não encontrada.')}</div>;
 
   const pedidosNaoEntregues = rota.pedidos.filter((p: any) => p.status !== 'FINALIZADO');
   const paradaAtual = pedidosNaoEntregues[0]; // Sempre a primeira da lista que falta
@@ -166,7 +168,7 @@ export default function EntregadorRota() {
           <div className="bg-green-500/10 border border-green-500/20 p-6 rounded-2xl text-center">
             <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
             <h2 className="text-xl font-bold text-white mb-1">Rota Concluída!</h2>
-            <p className="text-gray-400 text-sm mb-6">Excelente trabalho. Você finalizou todas as entregas.</p>
+            <p className="text-gray-400 text-sm mb-6">{tDynamic('Excelente trabalho. Você finalizou todas as entregas.')}</p>
             <button onClick={finalizarRota} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3.5 rounded-xl transition-colors">
               Encerrar Rota e Retornar
             </button>
@@ -198,7 +200,7 @@ export default function EntregadorRota() {
 
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <button onClick={() => { setPedidoChatAtual(paradaAtual); setChatAberto(true); }} className="bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
-                  <MessageCircle size={14} /> Falar com Cliente
+                  <MessageCircle size={14} /> {tDynamic('Falar com Cliente')}
                 </button>
                 <button onClick={() => finalizarEntrega(paradaAtual)} className="bg-orange-600 hover:bg-orange-500 text-white py-2.5 rounded-xl text-xs font-bold transition-colors shadow-[0_0_15px_rgba(234,88,12,0.3)]">
                   Marcar Entregue
@@ -228,7 +230,7 @@ export default function EntregadorRota() {
           </div>
           <div className="mt-6 flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
              <AlertTriangle size={16} className="text-blue-400 shrink-0" />
-             <p className="text-xs text-blue-300 font-medium leading-tight">Estes clientes só saberão que você está a caminho quando você finalizar a parada atual. Fique tranquilo!</p>
+             <p className="text-xs text-blue-300 font-medium leading-tight">{tDynamic('Estes clientes só saberão que você está a caminho quando você finalizar a parada atual. Fique tranquilo!')}</p>
           </div>
         </div>
       )}
@@ -262,7 +264,7 @@ export default function EntregadorRota() {
             <div className="flex gap-2 mb-3 overflow-x-auto pb-2 hide-scrollbar">
               <button onClick={() => enviarMensagem("Estou chegando!")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">Estou chegando!</button>
               <button onClick={() => enviarMensagem("Estou na portaria.")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">Estou na portaria</button>
-              <button onClick={() => enviarMensagem("Não estou encontrando o endereço, pode me ajudar?")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">Não acho endereço</button>
+              <button onClick={() => enviarMensagem("Não estou encontrando o endereço, pode me ajudar?")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">{tDynamic('Não acho endereço')}</button>
             </div>
             <div className="flex gap-2">
               <input 

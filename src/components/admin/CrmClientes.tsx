@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 import {
   Users as UsersIcon, TrendingUp as TrendingUpIcon, MessageSquare as MessageSquareIcon,
   Gift as GiftIcon, Search as SearchIcon, Send as SendIcon, CheckCircle2
@@ -24,6 +25,7 @@ const CLIENTES_MOCK: Cliente[] = [
 ];
 
 export default function CrmClientes() {
+  const { tDynamic } = useI18n();
   const [busca, setBusca] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState<string>('TODOS');
   const [taxaCashback, setTaxaCashback] = useState<number>(5);
@@ -65,7 +67,7 @@ export default function CrmClientes() {
             CRM & Engenharia de Clientes (LTV & RFM)
           </h2>
           <p className="text-xs text-gray-500 dark:text-slate-400">
-            Segmentação inteligente por frequência e valor monetário com campanhas de retenção no WhatsApp.
+            {tDynamic('Segmentação inteligente por frequência e valor monetário com campanhas de retenção no WhatsApp.')}
           </p>
         </div>
       </div>
@@ -79,7 +81,7 @@ export default function CrmClientes() {
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-4">
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">LTV Médio por Cliente</span>
+          <span className="text-[11px] font-bold text-gray-400">{tDynamic('LTV Médio por Cliente')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">R$ {ltvMedio}</p>
           <span className="text-[10px] text-emerald-500 font-semibold flex items-center gap-0.5 mt-1">
             <TrendingUpIcon size={12} /> +14.2% este mês
@@ -117,7 +119,7 @@ export default function CrmClientes() {
                 Fidelização Nativa via Cashback
               </h3>
               <p className="text-xs text-gray-600 dark:text-slate-300">
-                Cada pedido concluído gera saldo de volta para o cliente usar na próxima compra, aumentando o LTV e o retorno orgânico.
+                {tDynamic('Cada pedido concluído gera saldo de volta para o cliente usar na próxima compra, aumentando o LTV e o retorno orgânico.')}
               </p>
             </div>
           </div>

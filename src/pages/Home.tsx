@@ -1562,7 +1562,7 @@ export default function Home() {
                   </h3>
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-slate-300">
-                  Cadastre insumos por categoria (<i>Ingrediente, Revenda Direta, Embalagem, Limpeza</i>{tDynamic(") e atribua o setor físico (")}<i>{tDynamic("Geladeira, Freezer, Dispensa, Armário")}</i>).
+                  {tDynamic('Cadastre insumos por categoria (')}<i>Ingrediente, Revenda Direta, Embalagem, Limpeza</i>{tDynamic(") e atribua o setor físico (")}<i>{tDynamic("Geladeira, Freezer, Dispensa, Armário")}</i>).
                 </p>
                 <div className="mt-4 space-y-2 rounded-2xl bg-black/40 p-4 text-xs">
                   <div className="flex items-center justify-between text-slate-200">
@@ -1626,7 +1626,7 @@ export default function Home() {
                   </h3>
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-slate-300">
-                  Visualização tridimensional interativa que mapeia lotes físicos no espaço da cozinha e aplica o método PEPS (Primeiro que entra, Primeiro que sai).
+                  {tDynamic('Visualização tridimensional interativa que mapeia lotes físicos no espaço da cozinha e aplica o método PEPS (Primeiro que entra, Primeiro que sai).')}
                 </p>
                 <div className="mt-4 space-y-2 rounded-2xl bg-black/40 p-4 text-xs">
                   <div className="flex items-center justify-between text-slate-200">
@@ -1649,10 +1649,10 @@ export default function Home() {
 
           <div className="mt-12 rounded-3xl border border-white/10 bg-gradient-to-r from-blue-950/40 via-purple-950/40 to-slate-900 p-8 text-center backdrop-blur-xl">
             <h3 className="font-['Sora'] text-2xl font-bold text-white">
-              Quer ver o controle de estoque 3D da sua cozinha em ação?
+              {tDynamic('Quer ver o controle de estoque 3D da sua cozinha em ação?')}
             </h3>
             <p className="mt-2 text-sm text-slate-300 max-w-2xl mx-auto">
-              Elimine perdas por insumos vencidos e saiba exatamente quanto dinheiro está parado nas suas prateleiras e geladeiras.
+              {tDynamic('Elimine perdas por insumos vencidos e saiba exatamente quanto dinheiro está parado nas suas prateleiras e geladeiras.')}
             </p>
             <div className="mt-6 flex justify-center">
               <Link
@@ -1675,7 +1675,7 @@ export default function Home() {
               Do cadastro ao primeiro pedido em 3 passos
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-slate-300">
-              Sem instalação, sem equipamento especial. Funciona no navegador, no computador e no celular.
+              {tDynamic('Sem instalação, sem equipamento especial. Funciona no navegador, no computador e no celular.')}
             </p>
           </div>
 
@@ -1747,7 +1747,7 @@ export default function Home() {
           <div className="mx-auto max-w-2xl text-center mb-14">
             <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">Planos & Assinatura</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-              Sua loja no ar com 30 dias grátis — Sem pegadinha de cartão
+              {tDynamic('Sua loja no ar com 30 dias grátis — Sem pegadinha de cartão')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-slate-300">
               Cadastre sua loja em menos de 3 minutos, use 30 dias sem custos e escolha a melhor opção para a sua operação. 
@@ -1794,7 +1794,7 @@ export default function Home() {
                     </span>
                     {planoAnual && (
                       <span className="inline-flex rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-lg">
-                        Mais Recomendado
+                        {tDynamic('Mais Recomendado')}
                       </span>
                     )}
                   </div>
@@ -1843,7 +1843,7 @@ export default function Home() {
               <div className="p-8 lg:w-[58%] lg:p-10 bg-[#060a14]">
                 <h4 className="font-['Sora'] text-base font-bold text-white mb-8 flex items-center gap-2">
                   <Sparkles size={18} className="text-orange-400" />
-                  O sistema completo, sem surpresas:
+                  {tDynamic('O sistema completo, sem surpresas:')}
                 </h4>
                 
                 <div className="grid gap-x-8 gap-y-8 sm:grid-cols-2">
@@ -1911,7 +1911,7 @@ export default function Home() {
               rel="noreferrer"
               className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 transition hover:text-[var(--cor-primaria)] dark:text-slate-400 dark:hover:text-orange-400"
             >
-              <MessageCircle size={18} /> Ainda com dúvidas? Fale com nosso time
+              <MessageCircle size={18} /> {tDynamic('Ainda com dúvidas? Fale com nosso time')}
             </a>
           </div>
         </div>
@@ -1929,7 +1929,7 @@ export default function Home() {
               Conteúdo profundo sobre CMV, KDS, Engenharia de Cardápio e IA
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-300">
-              Aprenda com estudos de caso reais, análises financeiras e regras de operação validadas na prática em cozinhas profissionais.
+              {tDynamic('Aprenda com estudos de caso reais, análises financeiras e regras de operação validadas na prática em cozinhas profissionais.')}
             </p>
           </div>
 
@@ -1941,7 +1941,7 @@ export default function Home() {
                   A Evolução do CMV: Do Caderno ao Custeio PEPS 3D
                 </h3>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                  Como calcular a perda de cocção e valorizar preparos em lote sem margens maquiadas.
+                  {tDynamic('Como calcular a perda de cocção e valorizar preparos em lote sem margens maquiadas.')}
                 </p>
               </div>
               <Link to="/blog/evolucao-do-cmv-do-caderno-ao-custeio-peps-3d" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FC5B24] hover:underline">
@@ -1953,7 +1953,7 @@ export default function Home() {
               <div>
                 <span className="text-[10px] font-black uppercase text-blue-400">{tDynamic("Operação & KDS")}</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
-                  O Fim do Papel na Cozinha com KDS Kanban
+                  {tDynamic('O Fim do Papel na Cozinha com KDS Kanban')}
                 </h3>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
                   Reduza até 35% do tempo de preparo eliminando rasuras e papel engordurado.
@@ -1971,7 +1971,7 @@ export default function Home() {
                   IA no WhatsApp: Conexão Oficial Meta vs Bots Amadores
                 </h3>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                  Evite banimento do seu número de delivery e atenda clientes com precisão.
+                  {tDynamic('Evite banimento do seu número de delivery e atenda clientes com precisão.')}
                 </p>
               </div>
               <Link to="/blog/ia-no-whatsapp-do-restaurante-atendimento-oficial-meta-vs-bots-amadores" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FC5B24] hover:underline">
@@ -1986,7 +1986,7 @@ export default function Home() {
                   Perda de Cocção & Peso Inteligente no Buffet
                 </h3>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                  Entenda o encolhimento de carnes e a baixa de estoque por grama servida.
+                  {tDynamic('Entenda o encolhimento de carnes e a baixa de estoque por grama servida.')}
                 </p>
               </div>
               <Link to="/blog/verdade-sobre-venda-por-quilo-perda-coccao-peso-inteligente" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FC5B24] hover:underline">
@@ -2006,7 +2006,7 @@ export default function Home() {
                   É Consultor de CMV, Chef, Nutricionista ou Especialista em Gastronomia?
                 </h3>
                 <p className="mt-2 text-xs text-slate-300 max-w-2xl leading-relaxed">
-                  Publique seus artigos técnicos em nosso Blog e seja lido por milhares de donos de restaurantes e gestores de food service de todo o Brasil.
+                  {tDynamic('Publique seus artigos técnicos em nosso Blog e seja lido por milhares de donos de restaurantes e gestores de food service de todo o Brasil.')}
                 </p>
               </div>
 
@@ -2120,14 +2120,14 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md">
             <h2 className="font-['Sora'] text-2xl font-extrabold text-white">
-              Sobre o Sistema MiseOn | Sistema de Gestão para Food Service e Restaurantes
+              {tDynamic('Sobre o Sistema MiseOn | Sistema de Gestão para Food Service e Restaurantes')}
             </h2>
             <div className="mt-4 space-y-4 text-sm leading-relaxed text-slate-300">
               <p>
                 O sistema <strong>MiseOn</strong> é uma plataforma de gestão corporativa e automação inteligente desenvolvida exclusivamente para atender a rotina de restaurantes, hamburguerias, pizzarias, lanchonetes e bares em todo o Brasil.
               </p>
               <p>
-                Com arquitetura em nuvem de alta performance, o <strong>MiseOn</strong> integra em um único painel o cardápio digital QR Code para mesas e balcão, comandas eletrônicas via celular para garçons, telas de produção de cozinha (KDS sem papel), gerenciador de delivery integrado ao iFood, controle de caixa PDV, ficha técnica com baixa automática de estoque e atendimento via IA no WhatsApp oficial da Meta.
+                {tDynamic('Com arquitetura em nuvem de alta performance, o')} <strong>MiseOn</strong> integra em um único painel o cardápio digital QR Code para mesas e balcão, comandas eletrônicas via celular para garçons, telas de produção de cozinha (KDS sem papel), gerenciador de delivery integrado ao iFood, controle de caixa PDV, ficha técnica com baixa automática de estoque e atendimento via IA no WhatsApp oficial da Meta.
               </p>
               <p>
                 Desenvolvido para garantir agilidade e controle financeiro total, o sistema conta ainda com recebimento Pix automático sem retenção de valores e emissão fiscal NFC-e / NF-e integrada.

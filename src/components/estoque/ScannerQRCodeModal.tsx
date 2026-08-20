@@ -3,6 +3,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { QrCode, Camera, Keyboard, X, ArrowRight, Loader2, AlertCircle, Image as ImageIcon, Zap, ZapOff } from 'lucide-react';
 import { temDetectorNativo, lerQrDeImagem, lerQrDeVideo, type EtapaLeitura } from '../../lib/lerQrCode';
 
+import { useI18n } from '../../contexts/I18nContext';
 /**
  * Abre a câmera tentando do pedido mais rico ao mais simples.
  *
@@ -69,6 +70,7 @@ interface Props {
 type Modo = 'CAMERA' | 'FOTO' | 'DIGITACAO';
 
 export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Props) {
+  const { tDynamic } = useI18n();
   const [modo, setModo] = useState<Modo>('CAMERA');
   const [chaveManual, setChaveManual] = useState('');
   const [erroCamera, setErroCamera] = useState<string | null>(null);
@@ -250,7 +252,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
           </div>
           <div>
             <h3 className="font-black text-base leading-tight text-gray-900 dark:text-gray-100">Escanear Cupom Fiscal</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Importação sem digitação manual</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Importação sem digitação manual')}</p>
           </div>
         </div>
 
@@ -280,7 +282,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
                 <p className="text-xs text-amber-800 dark:text-amber-300 font-medium mb-3">{erroCamera}</p>
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
                   <button onClick={() => setModo('FOTO')} className="bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-amber-700">
-                    Ler a partir de uma foto
+                    {tDynamic('Ler a partir de uma foto')}
                   </button>
                   <button
                     onClick={() => setTentativa((n) => n + 1)}
@@ -328,12 +330,12 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
                 <div>
                   <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Como fotografar</p>
                   <ol className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-gray-600 dark:text-gray-400">
-                    <li><strong>1.</strong> Deixe o cupom esticado sobre uma mesa, sem dobra no QR.</li>
-                    <li><strong>2.</strong> Fotografe de cima, a uns 15 cm, com o QR no meio do quadro.</li>
+                    <li><strong>1.</strong> {tDynamic('Deixe o cupom esticado sobre uma mesa, sem dobra no QR.')}</li>
+                    <li><strong>2.</strong> {tDynamic('Fotografe de cima, a uns 15 cm, com o QR no meio do quadro.')}</li>
                     <li><strong>3.</strong> Evite sombra da própria mão e reflexo em cima do código.</li>
                   </ol>
                   <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-500">
-                    Serve foto da galeria, inclusive uma que você já tirou antes.
+                    {tDynamic('Serve foto da galeria, inclusive uma que você já tirou antes.')}
                   </p>
                 </div>
               </div>

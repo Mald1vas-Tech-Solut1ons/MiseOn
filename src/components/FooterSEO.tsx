@@ -147,7 +147,7 @@ export function FooterSEO() {
               <div className="flex items-center gap-2">
                 <Building2 size={16} className="text-orange-400" />
                 <span className="font-['Sora'] text-sm font-bold text-white">
-                  MiseOn Tecnologia e Soluções para Food Service
+                  {tDynamic('MiseOn Tecnologia e Soluções para Food Service')}
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 font-mono">

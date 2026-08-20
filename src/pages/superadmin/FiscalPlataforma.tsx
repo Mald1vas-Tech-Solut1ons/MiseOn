@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Receipt, ShieldCheck, UploadCloud, Loader2, Check, Info } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 
 interface ConfigFiscal {
@@ -32,6 +33,7 @@ interface ConfigFiscal {
 }
 
 export default function FiscalPlataforma() {
+  const { tDynamic } = useI18n();
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
@@ -106,7 +108,7 @@ export default function FiscalPlataforma() {
         <Receipt className="text-emerald-400" size={24} />
         <div>
           <h2 className="text-lg font-bold text-white">Configuração Fiscal da Plataforma</h2>
-          <p className="text-xs text-gray-400">Dados da MiseOn (emissora) usados na NFS-e da assinatura dos lojistas.</p>
+          <p className="text-xs text-gray-400">{tDynamic('Dados da MiseOn (emissora) usados na NFS-e da assinatura dos lojistas.')}</p>
         </div>
         {config.certificado_status === 'valido' && (
           <span className="ml-auto flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400">

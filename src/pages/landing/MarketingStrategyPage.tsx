@@ -8,6 +8,7 @@ import FooterSEO from '../../components/FooterSEO';
 import MiseOnLogo from '../../components/MiseOnLogo';
 import FlipCard from '../../components/ui/FlipCard';
 
+import { useI18n } from '../../contexts/I18nContext';
 const PILARES_MARKETING = [
   {
     icone: Target,
@@ -102,6 +103,7 @@ const PILARES_MARKETING = [
 ];
 
 export default function MarketingStrategyPage() {
+  const { tDynamic } = useI18n();
   return (
     <div className="min-h-screen bg-[#070C18] text-white font-['Inter'] selection:bg-orange-500 selection:text-white">
       <SEO
@@ -134,11 +136,11 @@ export default function MarketingStrategyPage() {
       <section className="relative overflow-hidden py-16 sm:py-24 px-4 sm:px-8">
         <div className="mx-auto max-w-5xl text-center space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 text-xs font-extrabold text-orange-400">
-            <Sparkles size={14} /> PLAYBOOK DE GROWTH E MARKETING PARA FOOD SERVICE
+            <Sparkles size={14} /> {tDynamic('PLAYBOOK DE GROWTH E MARKETING PARA FOOD SERVICE')}
           </div>
 
           <h1 className="font-['Sora'] text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-            Como Criar uma Máquina de Vendas Sem Pagar <span className="text-[#FC5B24]">27% de Comissão</span> por Pedido
+            {tDynamic('Como Criar uma Máquina de Vendas Sem Pagar')} <span className="text-[#FC5B24]">27% de Comissão</span> por Pedido
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
@@ -150,7 +152,7 @@ export default function MarketingStrategyPage() {
               to="/cadastre-se"
               className="inline-flex items-center gap-2 rounded-full bg-[#FC5B24] px-8 py-4 text-base font-black text-white shadow-xl shadow-[#FC5B24]/30 hover:scale-105 transition-all"
             >
-              Começar Agora sem Cartão <ArrowRight size={18} />
+              {tDynamic('Começar Agora sem Cartão')} <ArrowRight size={18} />
             </Link>
           </div>
         </div>
@@ -164,7 +166,7 @@ export default function MarketingStrategyPage() {
               Os 6 Pilares de Marketing Interativos do MiseOn
             </h2>
             <p className="text-sm text-slate-400 max-w-2xl mx-auto">
-              Passe o cursor ou toque nos cards para girá-los em 3D e visualizar as regras de negócio e métricas operacionais.
+              {tDynamic('Passe o cursor ou toque nos cards para girá-los em 3D e visualizar as regras de negócio e métricas operacionais.')}
             </p>
           </div>
 
@@ -191,10 +193,10 @@ export default function MarketingStrategyPage() {
       <section className="py-20 px-4 sm:px-8 text-center space-y-6">
         <div className="mx-auto max-w-3xl rounded-3xl border border-orange-500/30 bg-gradient-to-r from-orange-500/20 via-orange-500/10 to-transparent p-8 sm:p-12 space-y-6 shadow-2xl">
           <h2 className="font-['Sora'] text-2xl sm:text-4xl font-black text-white">
-            Pronto para Dobrar o Lucro do Seu Restaurante?
+            {tDynamic('Pronto para Dobrar o Lucro do Seu Restaurante?')}
           </h2>
           <p className="text-sm text-slate-300">
-            Teste gratuitamente por 30 dias com todos os módulos de Marketing, Smart TV 4K, Pedido por Voz e Estoque Preditivo ativados.
+            {tDynamic('Teste gratuitamente por 30 dias com todos os módulos de Marketing, Smart TV 4K, Pedido por Voz e Estoque Preditivo ativados.')}
           </p>
           <Link
             to="/cadastre-se"

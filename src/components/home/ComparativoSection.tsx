@@ -1,7 +1,9 @@
 import { Check, X, Minus } from 'lucide-react';
 import MiseOnLogo from '../MiseOnLogo';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function ComparativoSection() {
+  const { tDynamic } = useI18n();
   return (
     <section style={{ borderTop: '1px solid rgba(10,92,196,0.15)', background: '#0B1120' }} className="py-24">
       <div className="mx-auto max-w-5xl px-6">
@@ -13,7 +15,7 @@ export default function ComparativoSection() {
             Como o MiseOn esmaga a concorrência
           </h2>
           <p className="mt-6 text-xl text-gray-400 max-w-2xl mx-auto">
-            Compare nossa tecnologia contra os líderes de mercado e descubra por que os restaurantes que mais crescem estão migrando para o MiseOn.
+            {tDynamic('Compare nossa tecnologia contra os líderes de mercado e descubra por que os restaurantes que mais crescem estão migrando para o MiseOn.')}
           </p>
         </div>
 
@@ -95,7 +97,7 @@ export default function ComparativoSection() {
             style={{ background: '#FC5B24', fontFamily: "'Sora', sans-serif" }}
             className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-bold text-white transition-all hover:scale-105 shadow-[0_0_30px_rgba(252,91,36,0.3)]"
           >
-            Migrar para o MiseOn
+            {tDynamic('Migrar para o MiseOn')}
           </a>
         </div>
       </div>

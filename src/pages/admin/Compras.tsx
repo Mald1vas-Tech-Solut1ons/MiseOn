@@ -27,6 +27,7 @@ import ModalRecebimento from '../../components/compras/ModalRecebimento';
 import ScannerQRCodeModal from '../../components/estoque/ScannerQRCodeModal';
 import ModalImportarNFCe from '../../components/estoque/ModalImportarNFCe';
 import { QrCode } from 'lucide-react';
+import { useI18n } from '../../contexts/I18nContext';
 import {
   CompraResumo, Fornecedor, InsumoGiro, LoteValidade, ROTULO_STATUS,
   SugestaoCompra, arquivarFornecedor, cancelarCompra, carregarGiro,
@@ -44,6 +45,7 @@ const COR_STATUS: Record<string, string> = {
 };
 
 export default function Compras() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const [aba, setAba] = useState<Aba>('repor');
   const [carregando, setCarregando] = useState(true);
@@ -265,7 +267,7 @@ export default function Compras() {
           </div>
           <div>
             <h2 className="text-xl font-black dark:text-gray-100">Central de Compras</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Do que falta ao que chegou — com preço, marca e fornecedor.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{tDynamic('Do que falta ao que chegou — com preço, marca e fornecedor.')}</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -317,7 +319,7 @@ export default function Compras() {
           )}
 
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Comprar para cobrir</span>
+            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{tDynamic('Comprar para cobrir')}</span>
             <div className="flex gap-1">
               {[3, 7, 15, 30].map(d => (
                 <button key={d} onClick={() => setDiasAlvo(d)}
@@ -485,8 +487,8 @@ export default function Compras() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <select value={fornecedorPedido} onChange={e => setFornecedorPedido(e.target.value)}
                     className="rounded-xl border border-gray-300 p-2.5 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100">
-                    <option value="AUTO">Separar por fornecedor</option>
-                    <option value="NENHUM">Forçar sem fornecedor</option>
+                    <option value="AUTO">{tDynamic('Separar por fornecedor')}</option>
+                    <option value="NENHUM">{tDynamic('Forçar sem fornecedor')}</option>
                     {fornecedores.map(f => <option key={f.id} value={f.id}>Forçar para: {f.nome}</option>)}
                   </select>
                   <button
@@ -602,7 +604,7 @@ export default function Compras() {
             <div className="rounded-3xl border border-gray-100 bg-white p-8 text-center dark:border-gray-800 dark:bg-gray-900">
               <Truck size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-700" />
               <h3 className="mb-1 text-lg font-bold text-gray-700 dark:text-gray-300">Nenhum fornecedor cadastrado</h3>
-              <p className="text-sm text-gray-500">Com fornecedor cadastrado, o sistema passa a comparar preço por marca e por origem.</p>
+              <p className="text-sm text-gray-500">{tDynamic('Com fornecedor cadastrado, o sistema passa a comparar preço por marca e por origem.')}</p>
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">

@@ -8,6 +8,7 @@ import { useToast } from '../../components/ui/Toast';
 import { MiseOnLoader } from '../../components/MiseOnLoader';
 import type { CtxLoja } from './AdminLayout';
 
+import { useI18n } from '../../contexts/I18nContext';
 /* ══════════════════════════════════════════════════════════════════
    Tipos da resposta da Edge Function whatsapp-conectar
    ══════════════════════════════════════════════════════════════════ */
@@ -134,6 +135,7 @@ function mascararTelefone(tel: string | null): string {
 }
 
 export default function WhatsApp() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const toast = useToast();
 
@@ -461,7 +463,7 @@ export default function WhatsApp() {
           <div>
             <h1 className="font-['Sora'] text-2xl font-extrabold text-gray-900 dark:text-white">Integração WhatsApp</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Atendimento automático com IA direto no WhatsApp da sua loja.
+              {tDynamic('Atendimento automático com IA direto no WhatsApp da sua loja.')}
             </p>
           </div>
         </div>
@@ -503,7 +505,7 @@ export default function WhatsApp() {
                 </div>
               ) : (
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  Nenhum número conectado. Preencha o assistente abaixo para ativar o atendimento automático.
+                  {tDynamic('Nenhum número conectado. Preencha o assistente abaixo para ativar o atendimento automático.')}
                 </p>
               )}
             </div>
@@ -592,7 +594,7 @@ export default function WhatsApp() {
                 className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3 font-['Sora'] text-sm font-black text-white backdrop-blur-md transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <MessageCircle size={16} />
-                Usar um chip dedicado só para o atendimento
+                {tDynamic('Usar um chip dedicado só para o atendimento')}
               </button>
               <span className="max-w-md text-[11px] leading-relaxed text-emerald-200/70">
                 Registro novo na Meta, confirmado por SMS. O número{' '}
@@ -610,10 +612,10 @@ export default function WhatsApp() {
               <Mail size={18} className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
               <div>
                 <h3 className="font-['Sora'] text-base font-bold text-gray-900 dark:text-white">
-                  A conexão não concluiu?
+                  {tDynamic('A conexão não concluiu?')}
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                  Não existe nada para você configurar manualmente — <b>o MiseOn cuida de toda a
+                  {tDynamic('Não existe nada para você configurar manualmente —')} <b>o MiseOn cuida de toda a
                   parte técnica com a Meta</b>. Se o botão acima não concluir, fale com o suporte
                   em <b>suporte@miseon.app.br</b> que a gente resolve a conexão pra você.
                 </p>
@@ -636,8 +638,8 @@ export default function WhatsApp() {
               className="flex w-full items-center justify-between gap-3 rounded-xl border border-gray-100 px-4 py-3 text-left transition hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/5"
             >
               <div>
-                <p className="text-sm font-bold text-gray-800 dark:text-gray-100">Atendimento automático com IA</p>
-                <p className="text-[11px] text-gray-400">A IA responde os clientes no WhatsApp usando seu cardápio.</p>
+                <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{tDynamic('Atendimento automático com IA')}</p>
+                <p className="text-[11px] text-gray-400">{tDynamic('A IA responde os clientes no WhatsApp usando seu cardápio.')}</p>
               </div>
               <span className={`relative h-6 w-11 shrink-0 rounded-full transition ${iaAtivo ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
                 <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${iaAtivo ? 'left-[22px]' : 'left-0.5'}`} />
@@ -653,7 +655,7 @@ export default function WhatsApp() {
                 <p className="text-sm font-bold text-gray-800 dark:text-gray-100">Mensagens fora da janela (templates)</p>
                 <p className="text-[11px] leading-snug text-gray-400">
                   Permite avisar o cliente depois de 24h sem resposta.{' '}
-                  <b className="text-amber-600 dark:text-amber-400">Mensagens fora da janela de 24h são cobradas pela Meta</b>{' '}
+                  <b className="text-amber-600 dark:text-amber-400">{tDynamic('Mensagens fora da janela de 24h são cobradas pela Meta')}</b>{' '}
                   — desligado por padrão.
                 </p>
               </div>
@@ -673,7 +675,7 @@ export default function WhatsApp() {
                 className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-emerald-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
               />
               <span className="mt-1 block text-[11px] text-gray-400">
-                Primeira mensagem que o cliente recebe ao falar com sua loja.
+                {tDynamic('Primeira mensagem que o cliente recebe ao falar com sua loja.')}
               </span>
             </div>
 

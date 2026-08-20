@@ -10,6 +10,7 @@ import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
 import AprovacaoEntregadores from '../../components/admin/AprovacaoEntregadores';
 
+import { useI18n } from '../../contexts/I18nContext';
 const PAPEL_INFO: Record<string, { label: string; icon: typeof ShieldCheck; classe: string }> = {
   admin:      { label: 'Admin',      icon: ShieldCheck,     classe: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
   operador:   { label: 'Balcão',     icon: Store,           classe: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
@@ -45,6 +46,7 @@ interface FormAcesso {
 const FORM_VAZIO: FormAcesso = { nome: '', email: '', senha: '', telefone: '', papel: 'operador', tipo_contrato: 'CLT' };
 
 export default function Equipe() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const [equipe, setEquipe] = useState<MembroEquipe[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -191,7 +193,7 @@ export default function Equipe() {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold dark:text-gray-100">Equipe &amp; Acessos</h2>
-          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Crie logins com usuário e senha para o painel, balcão e app do entregador.</p>
+          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{tDynamic('Crie logins com usuário e senha para o painel, balcão e app do entregador.')}</p>
         </div>
         <button onClick={abrirCriacao} className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:brightness-110">
           <Plus size={16} /> Criar acesso
@@ -246,14 +248,14 @@ export default function Equipe() {
               </div>
             );
           })}
-          {equipe.length === 0 && <p className="py-6 text-center text-sm text-gray-400">Só você por enquanto. Crie o primeiro acesso da sua equipe.</p>}
+          {equipe.length === 0 && <p className="py-6 text-center text-sm text-gray-400">{tDynamic('Só você por enquanto. Crie o primeiro acesso da sua equipe.')}</p>}
         </div>
       )}
 
       {/* ── Convite por e-mail (opcional) ── */}
       <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold dark:text-gray-200"><Mail size={15} /> Convidar por e-mail (opcional)</p>
-        <p className="mb-3 text-[11px] text-gray-400">A pessoa recebe um link para definir a própria senha. Se o e-mail não chegar, use o botão <b>Criar acesso</b> acima — funciona na hora, sem depender de e-mail.</p>
+        <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold dark:text-gray-200"><Mail size={15} /> {tDynamic('Convidar por e-mail (opcional)')}</p>
+        <p className="mb-3 text-[11px] text-gray-400">{tDynamic('A pessoa recebe um link para definir a própria senha. Se o e-mail não chegar, use o botão')} <b>Criar acesso</b> acima — funciona na hora, sem depender de e-mail.</p>
         <div className="flex gap-2">
           <input value={conviteEmail} onChange={(e) => setConviteEmail(e.target.value)} placeholder="email@exemplo.com"
             className="flex-1 rounded-xl border border-gray-300 p-2.5 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" />
@@ -288,7 +290,7 @@ export default function Equipe() {
                   <p className="font-mono text-sm dark:text-gray-100"><b>Senha:</b> {credenciais.senha}</p>
                   <p className="mt-1 font-mono text-xs text-gray-500">Login em: {window.location.origin}{form.papel === 'entregador' ? '/entregador' : '/admin'}</p>
                 </div>
-                <p className="mt-2 text-[11px] text-gray-400">A senha não fica visível depois — copie agora. Se perder, é só redefinir na edição do membro.</p>
+                <p className="mt-2 text-[11px] text-gray-400">{tDynamic('A senha não fica visível depois — copie agora. Se perder, é só redefinir na edição do membro.')}</p>
                 <div className="mt-4 flex gap-2">
                   <button onClick={copiarCredenciais} className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 py-2.5 text-sm font-bold text-gray-700 dark:border-gray-700 dark:text-gray-200">
                     {copiado ? <Check size={15} className="text-green-500" /> : <Copy size={15} />} {copiado ? 'Copiado!' : 'Copiar credenciais'}
@@ -398,7 +400,7 @@ export default function Equipe() {
                 </label>
               </div>
               <label className="block">
-                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Redefinir senha (deixe em branco para manter a atual)</span>
+                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">{tDynamic('Redefinir senha (deixe em branco para manter a atual)')}</span>
                 <div className="mt-1 flex gap-2">
                   <input value={formEdit.nova_senha} onChange={(e) => setFormEdit({ ...formEdit, nova_senha: e.target.value })} placeholder="Nova senha" className={`${inputCls} mt-0 flex-1`} />
                   <button type="button" onClick={() => setFormEdit({ ...formEdit, nova_senha: gerarSenha() })} className="rounded-xl border border-gray-300 px-3 text-xs font-bold text-gray-600 dark:border-gray-700 dark:text-gray-300" title="Gerar senha forte">

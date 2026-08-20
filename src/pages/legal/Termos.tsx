@@ -56,13 +56,13 @@ export default function Termos() {
                 operações de food service, que inclui, conforme o plano contratado:
               </p>
               <ul className="mt-3 list-disc space-y-2 pl-5">
-                <li>Cardápio digital com link próprio e QR Code (PWA);</li>
+                <li>{tDynamic('Cardápio digital com link próprio e QR Code (PWA);')}</li>
                 <li>Painel de pedidos em tempo real e PDV de balcão;</li>
-                <li>Tela de produção para cozinha (KDS) e gestão de mesas;</li>
+                <li>{tDynamic('Tela de produção para cozinha (KDS) e gestão de mesas;')}</li>
                 <li>Gestão de entregas e entregadores;</li>
-                <li>Controle de estoque com ficha técnica e apuração de CMV;</li>
-                <li>Módulo financeiro com recebimento via Pix e cartões, processado por instituição de pagamento parceira (Efí);</li>
-                <li>Atendimento automatizado via inteligência artificial no WhatsApp, por meio da WhatsApp Business Platform (Meta).</li>
+                <li>{tDynamic('Controle de estoque com ficha técnica e apuração de CMV;')}</li>
+                <li>{tDynamic('Módulo financeiro com recebimento via Pix e cartões, processado por instituição de pagamento parceira (Efí);')}</li>
+                <li>{tDynamic('Atendimento automatizado via inteligência artificial no WhatsApp, por meio da WhatsApp Business Platform (Meta).')}</li>
               </ul>
               <p className="mt-3">
                 O MiseOn é um fornecedor de tecnologia. Não somos restaurante, não produzimos nem entregamos
@@ -74,24 +74,24 @@ export default function Termos() {
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">3. Assinatura, Cobrança e Cancelamento</h2>
               <ul className="list-disc space-y-2 pl-5">
                 <li>O acesso à plataforma é concedido mediante assinatura mensal, conforme plano escolhido no cadastro. Os valores e condições vigentes são apresentados antes da contratação.</li>
-                <li>A cobrança é recorrente e antecipada. O não pagamento poderá resultar em suspensão do acesso após período de carência informado no painel.</li>
-                <li>Você pode cancelar a assinatura a qualquer momento, diretamente no painel administrativo, sem multa e sem fidelidade.</li>
-                <li>Não realizamos reembolso proporcional de períodos já faturados; o acesso permanece ativo até o fim do ciclo pago.</li>
-                <li>Após o cancelamento, seus dados permanecem disponíveis para exportação por prazo razoável, observada a nossa Política de Privacidade.</li>
+                <li>{tDynamic('A cobrança é recorrente e antecipada. O não pagamento poderá resultar em suspensão do acesso após período de carência informado no painel.')}</li>
+                <li>{tDynamic('Você pode cancelar a assinatura a qualquer momento, diretamente no painel administrativo, sem multa e sem fidelidade.')}</li>
+                <li>{tDynamic('Não realizamos reembolso proporcional de períodos já faturados; o acesso permanece ativo até o fim do ciclo pago.')}</li>
+                <li>{tDynamic('Após o cancelamento, seus dados permanecem disponíveis para exportação por prazo razoável, observada a nossa Política de Privacidade.')}</li>
               </ul>
             </section>
 
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">4. Responsabilidades do Lojista</h2>
-              <p>O Lojista é o único responsável pela sua operação e pelo conteúdo que publica na plataforma, incluindo:</p>
+              <p>{tDynamic('O Lojista é o único responsável pela sua operação e pelo conteúdo que publica na plataforma, incluindo:')}</p>
               <ul className="mt-3 list-disc space-y-2 pl-5">
                 <li>Manter verídicas e atualizadas as informações do cardápio, incluindo descrições, ingredientes, preços, taxas de entrega e horários de funcionamento;</li>
                 <li>Honrar ofertas, cupons, promoções e políticas de entrega cadastrados na plataforma;</li>
-                <li>Cumprir a legislação sanitária, fiscal, trabalhista e de defesa do consumidor aplicável à sua atividade;</li>
-                <li>Não utilizar a plataforma para venda de produtos ilícitos, proibidos ou que violem direitos de terceiros;</li>
+                <li>{tDynamic('Cumprir a legislação sanitária, fiscal, trabalhista e de defesa do consumidor aplicável à sua atividade;')}</li>
+                <li>{tDynamic('Não utilizar a plataforma para venda de produtos ilícitos, proibidos ou que violem direitos de terceiros;')}</li>
                 <li>Utilizar o atendimento automatizado do WhatsApp em conformidade com as políticas da Meta e da WhatsApp Business Platform, abstendo-se de envio de spam ou mensagens não solicitadas;</li>
-                <li>Assumir integral responsabilidade civil, fiscal e criminal pelos produtos vendidos e serviços prestados por meio da plataforma;</li>
-                <li>Manter a confidencialidade das suas credenciais de acesso e das contas dos membros da sua equipe.</li>
+                <li>{tDynamic('Assumir integral responsabilidade civil, fiscal e criminal pelos produtos vendidos e serviços prestados por meio da plataforma;')}</li>
+                <li>{tDynamic('Manter a confidencialidade das suas credenciais de acesso e das contas dos membros da sua equipe.')}</li>
               </ul>
             </section>
 

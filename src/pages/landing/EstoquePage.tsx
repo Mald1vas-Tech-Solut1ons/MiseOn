@@ -212,7 +212,7 @@ export default function EstoquePage() {
                   <div>
                     <h4 className="font-bold text-white text-sm">{tDynamic("Entrada pelo QR Code do cupom do mercado")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Voltou da compra com o cupom na mão? Escaneie o <b>{tDynamic("QR Code da NFC-e")}</b> e o MiseOn lê a nota
+                      {tDynamic('Voltou da compra com o cupom na mão? Escaneie o')} <b>{tDynamic("QR Code da NFC-e")}</b> e o MiseOn lê a nota
                       direto na SEFAZ: produto, quantidade e custo de cada item. Você confere, escolhe o que entra e
                       dá entrada de tudo de uma vez — <i>{tDynamic("sem digitar produto por produto")}</i>. Na segunda compra no mesmo
                       mercado, ele já lembra a que insumo cada item pertence.
@@ -355,7 +355,7 @@ export default function EstoquePage() {
             <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold text-white sm:text-4xl">
               Comprou metade, de outra marca, mais caro?{' '}
               <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                O sistema registra o que aconteceu de verdade.
+                {tDynamic('O sistema registra o que aconteceu de verdade.')}
               </span>
             </h2>
             <p className="mt-5 text-base leading-relaxed text-slate-300">
@@ -418,7 +418,7 @@ export default function EstoquePage() {
                   no caminho</b>. É a conta que a maioria dos restaurantes faz de cabeça, e erra.
                 </p>
                 <p className="mt-4 text-sm text-slate-400">
-                  Também vale ao contrário: junte insumos e monte cestas, kits e combos com o custo somado.
+                  {tDynamic('Também vale ao contrário: junte insumos e monte cestas, kits e combos com o custo somado.')}
                 </p>
               </div>
 
@@ -455,7 +455,7 @@ export default function EstoquePage() {
             </div>
             <div>
               <h3 className="font-['Sora'] text-base font-bold text-white">
-                Inventário do jeito que a contagem acontece
+                {tDynamic('Inventário do jeito que a contagem acontece')}
               </h3>
               <p className="mt-1 text-sm leading-relaxed text-slate-300">
                 Ninguém conta 540 dentes de alho — conta 3 cabeças. Você conta na unidade que estiver na
@@ -510,7 +510,7 @@ export default function EstoquePage() {
                 <span>Lotes Mapeados</span>
               </div>
               <p className="mt-2 text-xs text-slate-300 leading-relaxed">
-                Controle de lotes ativos divididos por esteira (<i>Ingredientes, Revenda Direta, Limpeza</i>).
+                {tDynamic('Controle de lotes ativos divididos por esteira (')}<i>Ingredientes, Revenda Direta, Limpeza</i>).
               </p>
             </div>
 
@@ -520,7 +520,7 @@ export default function EstoquePage() {
                 <span>{tDynamic("Maior Custo Unitário")}</span>
               </div>
               <p className="mt-2 text-xs text-slate-300 leading-relaxed">
-                Identificação instantânea dos itens de maior impacto financeiro por unidade comprada para tomada de decisão em compras.
+                {tDynamic('Identificação instantânea dos itens de maior impacto financeiro por unidade comprada para tomada de decisão em compras.')}
               </p>
             </div>
 
@@ -530,7 +530,7 @@ export default function EstoquePage() {
                 <span>{tDynamic("Maior Alocação")}</span>
               </div>
               <p className="mt-2 text-xs text-slate-300 leading-relaxed">
-                Sinalização dos insumos que concentram a maior fatia do capital da empresa no momento.
+                {tDynamic('Sinalização dos insumos que concentram a maior fatia do capital da empresa no momento.')}
               </p>
             </div>
           </div>
@@ -575,10 +575,10 @@ export default function EstoquePage() {
       <section className="bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] py-16 text-white text-center">
         <div className="mx-auto max-w-4xl px-4">
           <h2 className="font-['Sora'] text-3xl font-extrabold sm:text-4xl">
-            Sua cozinha com estoque profissional, Fichas Técnicas e 3D
+            {tDynamic('Sua cozinha com estoque profissional, Fichas Técnicas e 3D')}
           </h2>
           <p className="mt-4 text-base text-orange-100">
-            Experimente a plataforma de gestão de suprimentos mais avançada do mercado.
+            {tDynamic('Experimente a plataforma de gestão de suprimentos mais avançada do mercado.')}
           </p>
           <Link
             to="/cadastre-se"

@@ -252,7 +252,7 @@ export default function Contato() {
               </div>
 
               <div className="text-xs text-slate-300 space-y-1 font-mono">
-                <p><strong>{tDynamic('Razão Social:')}</strong> MiseOn Tecnologia e Soluções para Food Service</p>
+                <p><strong>{tDynamic('Razão Social:')}</strong> {tDynamic('MiseOn Tecnologia e Soluções para Food Service')}</p>
                 <p><strong>CNPJ:</strong> 63.310.253/0001-81</p>
                 <p className="flex items-center gap-1 font-sans text-slate-400 mt-2">
                   <MapPin size={14} className="text-orange-400" /> Manaus / AM — Brasil

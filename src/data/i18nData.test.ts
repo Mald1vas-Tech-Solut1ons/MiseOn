@@ -100,14 +100,15 @@ describe('texto escrito direto no JSX', () => {
    *     <Boxes size={22} /> Observabilidade 3D de Estoque Físico
    *
    * Esse texto nunca é traduzido e nem aparece na varredura do dicionário, então
-   * declarar cobertura total aqui seria falsa segurança. Em 19/08/2026 existiam
-   * 442 ocorrências em 101 arquivos — grande demais para um passe só, e mexer em
-   * JSX em massa é arriscado.
+   * declarar cobertura total aqui seria falsa segurança. Começou em 442
+   * ocorrências em 101 arquivos e está em 109: o que sobrou vive em componentes
+   * onde o texto fica fora do escopo do hook, e mexer neles exige refatorar o
+   * componente — não é um passe automático.
    *
    * Então o combinado é: não pode aumentar. Ao envolver um trecho em tDynamic,
    * baixe o teto junto. Ao adicionar texto novo solto, este teste reprova.
    */
-  const TETO = 442;
+  const TETO = 109;
 
   it('não cresce o volume de texto não traduzível', () => {
     const rxJsx = />\s*([A-ZÀ-Ý][^<>{}\n]{14,150}?)\s*</g;
@@ -141,7 +142,9 @@ describe('português dos textos de interface', () => {
     'voce', 'nao', 'proprio', 'propria', 'cardapio', 'sugestao', 'comissao',
     'salao', 'balcao', 'garcom', 'gestao', 'preco', 'producao', 'estacoes',
     'operacao', 'integracao', 'antecipacao', 'conciliacao', 'emissao',
-    'impressao', 'historico', 'analise', 'relatorio', 'automatico', 'automatica',
+    // 'analise' fica de fora: é forma verbal válida ("Analise o tempo médio"),
+    // diferente de 'análise'. Mesma razão de 'media', 'ja', 'so' e 'ate'.
+    'impressao', 'historico', 'relatorio', 'automatico', 'automatica',
     'minimo', 'maximo', 'rapido', 'basico', 'publico', 'atencao', 'atraves',
     'servico', 'usuario', 'codigo', 'numero', 'padrao', 'descricao', 'posicao',
     'informacao', 'informacoes', 'configuracao', 'configuracoes', 'notificacao',

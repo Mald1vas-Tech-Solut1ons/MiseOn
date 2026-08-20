@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { X, Loader2, Truck, AlertTriangle } from 'lucide-react';
 import { Fornecedor, salvarFornecedor } from '../../lib/compras';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface Props {
   lojaId: string;
   fornecedor?: Fornecedor | null;
@@ -20,6 +21,7 @@ interface Props {
 const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo }: Props) {
+  const { tDynamic } = useI18n();
   const [f, setF] = useState<Partial<Fornecedor>>(fornecedor ?? { nome: '', ativo: true });
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -119,7 +121,7 @@ export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo 
               </label>
             </div>
             <div className="mt-3">
-              <span className={rotulo}>Dias em que entrega</span>
+              <span className={rotulo}>{tDynamic('Dias em que entrega')}</span>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {DIAS.map((d, i) => {
                   const ativo = (f.dias_entrega ?? []).includes(i);

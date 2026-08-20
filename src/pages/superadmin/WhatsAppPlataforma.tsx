@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { MessageCircle, Loader2, Plug, RefreshCw, Unplug, KeyRound, ShieldCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface Loja {
   id: string;
   nome: string;
@@ -34,6 +35,7 @@ const APP_MISEON = {
 };
 
 export default function WhatsAppPlataforma() {
+  const { tDynamic } = useI18n();
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [lojaId, setLojaId] = useState('');
   const [conexao, setConexao] = useState<Conexao | null>(null);
@@ -147,7 +149,7 @@ export default function WhatsAppPlataforma() {
         <div>
           <h1 className="font-['Sora'] text-xl font-black text-white">WhatsApp — Suporte da Plataforma</h1>
           <p className="text-xs text-gray-400">
-            Conexão manual de tenants. O lojista nunca vê estes campos — ele conecta pelo Embedded Signup.
+            {tDynamic('Conexão manual de tenants. O lojista nunca vê estes campos — ele conecta pelo Embedded Signup.')}
           </p>
         </div>
       </div>
@@ -156,7 +158,7 @@ export default function WhatsAppPlataforma() {
       <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
         <div className="mb-3 flex items-center gap-2">
           <ShieldCheck size={18} className="text-indigo-400" />
-          <h2 className="font-['Sora'] text-sm font-bold text-white">App MiseOn na Meta (vale para todos os tenants)</h2>
+          <h2 className="font-['Sora'] text-sm font-bold text-white">{tDynamic('App MiseOn na Meta (vale para todos os tenants)')}</h2>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           {[
@@ -180,7 +182,7 @@ export default function WhatsAppPlataforma() {
       <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
         <label className="mb-1 block text-xs font-bold text-gray-300">Tenant</label>
         <select value={lojaId} onChange={(e) => setLojaId(e.target.value)} className={campoCls}>
-          <option value="">Selecione uma loja…</option>
+          <option value="">{tDynamic('Selecione uma loja…')}</option>
           {lojas.map((l) => (
             <option key={l.id} value={l.id}>{l.nome}</option>
           ))}
@@ -235,7 +237,7 @@ export default function WhatsAppPlataforma() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-400">Nenhuma conexão para este tenant.</p>
+              <p className="text-sm text-gray-400">{tDynamic('Nenhuma conexão para este tenant.')}</p>
             )}
           </div>
 
@@ -270,7 +272,7 @@ export default function WhatsAppPlataforma() {
               <div>
                 <h2 className="font-['Sora'] text-sm font-bold text-white">Conexão manual completa</h2>
                 <p className="text-xs text-gray-400">
-                  Registra o webhook e inscreve o app na WABA. Use só quando o Embedded Signup não resolver.
+                  {tDynamic('Registra o webhook e inscreve o app na WABA. Use só quando o Embedded Signup não resolver.')}
                 </p>
               </div>
             </div>

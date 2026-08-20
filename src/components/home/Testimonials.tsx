@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 const DEPOIMENTOS = [
   {
     nome: "Carlos Eduardo",
@@ -22,6 +23,7 @@ const DEPOIMENTOS = [
 ];
 
 export default function Testimonials() {
+  const { tDynamic } = useI18n();
   return (
     <section style={{ borderTop: '1px solid rgba(255,255,255,.08)', background: '#0B1120' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6 text-center">
@@ -32,7 +34,7 @@ export default function Testimonials() {
           Quem migrou, <span style={{ color: '#FC5B24' }}>dobrou o lucro.</span>
         </h2>
         <p style={{ color: 'rgba(234,241,251,0.5)' }} className="mx-auto mt-4 max-w-xl text-lg">
-          Veja o que donos de restaurantes que cansaram de pagar comissões altas têm a dizer.
+          {tDynamic('Veja o que donos de restaurantes que cansaram de pagar comissões altas têm a dizer.')}
         </p>
 
         <div className="mt-16 grid gap-6 md:grid-cols-3">

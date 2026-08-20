@@ -4,6 +4,7 @@ import { fmt } from '../../types';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Users, DollarSign, Activity, TrendingUp } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface Loja {
   id: string; slug: string; nome: string; ativo: boolean;
   plano: string; status_assinatura: string; trial_termina_em: string | null; observacao_admin: string | null;
@@ -11,6 +12,7 @@ interface Loja {
 interface Metrica { loja_id: string; pedidos_30d: number; gmv_30d: number; ultimo_pedido: string | null }
 
 export default function Tenants() {
+  const { tDynamic } = useI18n();
   const [lojas, setLojas] = useState<Loja[]>([]);
   const [metricas, setMetricas] = useState<Record<string, Metrica>>({});
   const [busca, setBusca] = useState('');
@@ -361,7 +363,7 @@ export default function Tenants() {
               {carregandoFaturas ? (
                 <p className="text-gray-500">Buscando faturas no banco...</p>
               ) : faturas.length === 0 ? (
-                <p className="text-gray-500">Esta loja ainda não possui faturas de assinatura.</p>
+                <p className="text-gray-500">{tDynamic('Esta loja ainda não possui faturas de assinatura.')}</p>
               ) : faturas.map((f) => (
                 <div key={f.id} className="rounded-xl border border-white/5 bg-white/5 p-4">
                   <div className="flex items-center justify-between">
@@ -408,7 +410,7 @@ export default function Tenants() {
             {carregandoPerfil ? (
               <p className="text-gray-500">Carregando…</p>
             ) : !perfil ? (
-              <p className="text-gray-500">Esta loja ainda não preencheu o cadastro de perfil de negócio.</p>
+              <p className="text-gray-500">{tDynamic('Esta loja ainda não preencheu o cadastro de perfil de negócio.')}</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl border border-white/5 bg-white/5 p-3">

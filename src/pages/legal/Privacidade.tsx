@@ -37,7 +37,7 @@ export default function Privacidade() {
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">1. Controlador e Encarregado</h2>
               <p>
-                O controlador dos dados pessoais tratados nesta plataforma é <strong>MiseOn</strong>,
+                {tDynamic('O controlador dos dados pessoais tratados nesta plataforma é')} <strong>MiseOn</strong>,
                 inscrito no CNPJ sob o nº <strong>63.310.253/0001-81</strong>, com sede em Manaus/AM, Brasil.
               </p>
               <p className="mt-3">
@@ -60,23 +60,23 @@ export default function Privacidade() {
               <p className="mb-2"><strong>a) Dos Lojistas (restaurantes e seus usuários):</strong></p>
               <ul className="mb-4 list-disc space-y-1 pl-5">
                 <li>Dados cadastrais: nome, e-mail, telefone/WhatsApp, CPF/CNPJ, endereço do estabelecimento;</li>
-                <li>Dados financeiros: dados bancários e identificadores necessários ao split de pagamentos processado pela instituição de pagamento parceira (Efí);</li>
-                <li>Dados de uso: logs de acesso, metadados de navegação e interações com a plataforma;</li>
+                <li>{tDynamic('Dados financeiros: dados bancários e identificadores necessários ao split de pagamentos processado pela instituição de pagamento parceira (Efí);')}</li>
+                <li>{tDynamic('Dados de uso: logs de acesso, metadados de navegação e interações com a plataforma;')}</li>
                 <li>Conteúdo operacional: cardápio, preços, fichas técnicas, estoque e configurações da loja.</li>
               </ul>
 
               <p className="mb-2"><strong>b) Dos clientes finais dos Lojistas (consumidores):</strong></p>
               <ul className="list-disc space-y-1 pl-5">
-                <li>Nome e telefone (WhatsApp) para identificação e autenticação do pedido;</li>
-                <li>Endereço de entrega, quando o pedido é para delivery;</li>
+                <li>{tDynamic('Nome e telefone (WhatsApp) para identificação e autenticação do pedido;')}</li>
+                <li>{tDynamic('Endereço de entrega, quando o pedido é para delivery;')}</li>
                 <li>Conteúdo das conversas realizadas no chat do cardápio digital e no WhatsApp da loja, incluindo mensagens trocadas com o atendente humano ou com a inteligência artificial;</li>
-                <li>Histórico de pedidos e preferências de consumo, usado para o funcionamento do CRM do Lojista.</li>
+                <li>{tDynamic('Histórico de pedidos e preferências de consumo, usado para o funcionamento do CRM do Lojista.')}</li>
               </ul>
             </section>
 
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">3. Finalidades e Base Legal</h2>
-              <p className="mb-2">Tratamos dados pessoais para as seguintes finalidades:</p>
+              <p className="mb-2">{tDynamic('Tratamos dados pessoais para as seguintes finalidades:')}</p>
               <ul className="list-disc space-y-2 pl-5">
                 <li><strong>Execução de contrato</strong> (art. 7º, V, LGPD): viabilizar pedidos, entregas, pagamentos, cardápio digital, painel de gestão e atendimento automatizado;</li>
                 <li><strong>Legítimo interesse</strong> (art. 7º, IX, LGPD): melhoria da plataforma, prevenção a fraudes, segurança da informação, métricas agregadas e anonimizadas de uso;</li>
@@ -121,15 +121,15 @@ export default function Privacidade() {
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">6. Direitos do Titular</h2>
               <p className="mb-2">
-                Nos termos do art. 18 da LGPD, você pode solicitar, a qualquer tempo e de forma gratuita:
+                {tDynamic('Nos termos do art. 18 da LGPD, você pode solicitar, a qualquer tempo e de forma gratuita:')}
               </p>
               <ul className="list-disc space-y-1 pl-5">
                 <li>Confirmação da existência de tratamento e acesso aos seus dados;</li>
                 <li>Correção de dados incompletos, inexatos ou desatualizados;</li>
                 <li>Anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desconformidade;</li>
-                <li>Portabilidade dos dados, observados os segredos comercial e industrial;</li>
-                <li>Eliminação dos dados tratados com consentimento e revogação do consentimento;</li>
-                <li>Informação sobre as entidades com as quais os dados foram compartilhados.</li>
+                <li>{tDynamic('Portabilidade dos dados, observados os segredos comercial e industrial;')}</li>
+                <li>{tDynamic('Eliminação dos dados tratados com consentimento e revogação do consentimento;')}</li>
+                <li>{tDynamic('Informação sobre as entidades com as quais os dados foram compartilhados.')}</li>
               </ul>
               <p className="mt-3">
                 Para exercer seus direitos, escreva para{' '}
@@ -154,7 +154,7 @@ export default function Privacidade() {
                 <li><strong>Marketing:</strong> utilizados para mensuração de anúncios e atribuição de conversões (Meta Pixel).</li>
               </ul>
               <p className="mt-3 text-sm">
-                Você pode gerenciar ou alterar suas preferências de cookies a qualquer momento utilizando o botão abaixo:
+                {tDynamic('Você pode gerenciar ou alterar suas preferências de cookies a qualquer momento utilizando o botão abaixo:')}
               </p>
               <div className="mt-4 rounded-xl border border-gray-200/80 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-800/50">
                 <button

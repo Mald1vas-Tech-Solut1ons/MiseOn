@@ -651,7 +651,7 @@ export default function KDS() {
                 ))}
                 {listaPedidos.length === 0 && (
                   <div className="rounded-2xl border border-dashed border-white/10 py-12 text-center text-[13px] text-[#3D4A63]">
-                    Sem pedidos nesta etapa 🎉
+                    {tDynamic('Sem pedidos nesta etapa 🎉')}
                   </div>
                 )}
               </div>
@@ -667,7 +667,7 @@ export default function KDS() {
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <BarChart2 className="text-blue-400" size={22} />
-                <h3 className="font-['Sora'] text-lg font-bold">Métricas & Indicadores de Tempo por Etapa</h3>
+                <h3 className="font-['Sora'] text-lg font-bold">{tDynamic('Métricas & Indicadores de Tempo por Etapa')}</h3>
               </div>
               <button onClick={() => setModalMetricasAberto(false)} className="rounded-lg p-1 text-slate-400 hover:text-white">
                 <X size={20} />
@@ -675,7 +675,7 @@ export default function KDS() {
             </div>
 
             <p className="mt-3 text-xs leading-relaxed text-slate-300">
-              Analise o tempo médio em minutos que os pedidos permanecem em cada processo da sua cozinha para identificar gargalos e otimizar a expedição.
+              {tDynamic('Analise o tempo médio em minutos que os pedidos permanecem em cada processo da sua cozinha para identificar gargalos e otimizar a expedição.')}
             </p>
 
             <div className="mt-6 space-y-3">
@@ -741,7 +741,7 @@ export default function KDS() {
             </div>
 
             <p className="mt-3 text-xs leading-relaxed text-slate-300">
-              Crie, renomeie e organize as colunas do seu Kanban de cozinha conforme os processos do seu negócio (ex: <b>Entrada, Chapa, Grelha, Montagem, Forno, Expedição</b>).
+              {tDynamic('Crie, renomeie e organize as colunas do seu Kanban de cozinha conforme os processos do seu negócio (ex:')} <b>Entrada, Chapa, Grelha, Montagem, Forno, Expedição</b>).
             </p>
 
             <div className="mt-5 space-y-3 max-h-60 overflow-y-auto pr-1">

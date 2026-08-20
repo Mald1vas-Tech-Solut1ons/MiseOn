@@ -523,10 +523,10 @@ export default function Cardapio() {
             <section className="px-4 lg:px-0">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2 font-black" style={{ color: 'var(--cor-texto)' }}>
-                  <Star size={16} className="text-amber-500" /> Os mais pedidos
+                  <Star size={16} className="text-amber-500" /> {tDynamic('Os mais pedidos')}
                 </h2>
                 <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-texto-suave)' }}>
-                  <Sparkles size={12} /> Selecionados pela casa
+                  <Sparkles size={12} /> {tDynamic('Selecionados pela casa')}
                 </span>
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2">
@@ -564,7 +564,7 @@ export default function Cardapio() {
           <div className="vitrine-panel overflow-hidden rounded-[28px] p-4">
             <div className="mb-4 rounded-[22px] p-4" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--cor-primaria) 18%, transparent), color-mix(in srgb, var(--cor-secundaria) 10%, transparent))' }}>
               <p className="mb-1 flex items-center gap-2 font-black" style={{ color: 'var(--cor-texto)' }}><ShoppingBag size={18} /> Seu carrinho</p>
-              <p className="text-xs" style={{ color: 'var(--cor-texto-suave)' }}>Revise seus itens e finalize com seguranca.</p>
+              <p className="text-xs" style={{ color: 'var(--cor-texto-suave)' }}>{tDynamic('Revise seus itens e finalize com segurança.')}</p>
             </div>
             {carrinho.length === 0 ? (
               <p className="py-8 text-center text-sm" style={{ color: 'var(--cor-texto-fraco)' }}>Adicione itens do cardápio.</p>

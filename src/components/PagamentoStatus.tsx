@@ -8,6 +8,7 @@ import { Button, ProgressBar, SuccessCelebration } from './ui';
 
 import { getOptimizedImageUrl } from '../lib/cdn';
 
+import { useI18n } from '../contexts/I18nContext';
 export interface PixInfo {
   copia_e_cola: string;
   qr_imagem?: string;
@@ -31,6 +32,7 @@ type Estado = 'aguardando' | 'confirmado' | 'expirado';
 const JANELA_PADRAO_SEG = 15 * 60;
 
 export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onFechar, onRegenerar }: Props) {
+  const { tDynamic } = useI18n();
   const [pix, setPix] = useState<PixInfo>(pixInicial);
   const [estado, setEstado] = useState<Estado>('aguardando');
   const [copiado, setCopiado] = useState(false);
@@ -143,7 +145,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
             </div>
             <h3 className="text-xl font-black text-gray-900 dark:text-white">O tempo de pagamento acabou</h3>
             <p className="mt-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-              Se você já pagou, toque em verificar. Senão, gere um novo código Pix.
+              {tDynamic('Se você já pagou, toque em verificar. Senão, gere um novo código Pix.')}
             </p>
             <div className="mt-6 flex w-full flex-col gap-2">
               <Button variant="secundario" size="lg" className="w-full" carregando={verificando}
@@ -228,7 +230,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
               </div>
 
               <p className="mt-4 flex items-center justify-center gap-1 text-[10px] font-semibold text-gray-400">
-                <ShieldCheck size={12} /> A confirmação é automática assim que o banco liquidar o Pix.
+                <ShieldCheck size={12} /> {tDynamic('A confirmação é automática assim que o banco liquidar o Pix.')}
               </p>
             </div>
           </>

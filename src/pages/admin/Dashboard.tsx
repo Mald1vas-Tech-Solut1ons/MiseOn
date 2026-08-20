@@ -176,7 +176,7 @@ export default function Dashboard() {
   // Operador e entregador não veem números do negócio — vão direto para a operação.
   if (papel !== 'admin') return <Navigate to="/admin/pedidos" replace />;
 
-  if (!dados) return <div className="p-8 text-center text-gray-400">Preparando o seu dia…</div>;
+  if (!dados) return <div className="p-8 text-center text-gray-400">{tDynamic('Preparando o seu dia…')}</div>;
 
   const lotesVencidos = dados.lotesVencendo.filter((l) => new Date(l.vence_em!) <= new Date());
   const lotesQuaseVencendo = dados.lotesVencendo.filter((l) => new Date(l.vence_em!) > new Date());
@@ -196,7 +196,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-[var(--cor-primaria)]/10 p-2 text-[var(--cor-primaria)]"><Rocket size={18} /></div>
               <div>
-                <p className="text-sm font-black dark:text-gray-100">Deixe sua loja pronta para vender</p>
+                <p className="text-sm font-black dark:text-gray-100">{tDynamic('Deixe sua loja pronta para vender')}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{passosFeitos} de {PASSOS_ONBOARDING.length} passos concluídos</p>
               </div>
             </div>

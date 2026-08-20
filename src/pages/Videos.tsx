@@ -357,7 +357,7 @@ export default function Videos() {
               Explore Todos os Vídeos
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              Assista ao tour das telas, recursos do PDV, KDS e módulo fiscal.
+              {tDynamic('Assista ao tour das telas, recursos do PDV, KDS e módulo fiscal.')}
             </p>
           </div>
 
@@ -463,10 +463,10 @@ export default function Videos() {
               <Star size={14} className="fill-emerald-400" /> Depoimentos &amp; Histórias de Clientes
             </div>
             <h2 className="font-['Sora'] text-3xl font-extrabold text-white">
-              O Que Dizem os Restaurantes Parceiros
+              {tDynamic('O Que Dizem os Restaurantes Parceiros')}
             </h2>
             <p className="mt-3 text-sm text-slate-400">
-              Estamos gravando novos depoimentos em vídeo de proprietários e gestores que usam o MiseOn no seu dia a dia.
+              {tDynamic('Estamos gravando novos depoimentos em vídeo de proprietários e gestores que usam o MiseOn no seu dia a dia.')}
             </p>
           </div>
 
@@ -513,14 +513,14 @@ export default function Videos() {
                 <CheckCircle2 className="text-orange-400" size={20} /> É cliente MiseOn e quer aparecer aqui?
               </h3>
               <p className="text-xs text-slate-400 mt-1 max-w-xl">
-                Grave um vídeo sobre a experiência da sua loja com o MiseOn e ganhe destaque oficial no nosso portal.
+                {tDynamic('Grave um vídeo sobre a experiência da sua loja com o MiseOn e ganhe destaque oficial no nosso portal.')}
               </p>
             </div>
             <Link
               to="/contato"
               className="shrink-0 rounded-xl bg-orange-500 px-6 py-3 text-xs font-bold text-white hover:bg-orange-600 transition"
             >
-              Falar com Nossa Equipe
+              {tDynamic('Falar com Nossa Equipe')}
             </Link>
           </div>
         </div>

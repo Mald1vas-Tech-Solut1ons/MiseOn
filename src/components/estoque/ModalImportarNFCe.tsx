@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Insumo, fmt } from '../../types';
 import { UNIDADES } from '../../lib/unidades';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface ItemLidoNFCe {
   num_item: number;
   descricao: string;
@@ -59,6 +60,7 @@ interface Props {
 }
 
 export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes, onFechar, onSucesso }: Props) {
+  const { tDynamic } = useI18n();
   const [linhas, setLinhas] = useState<LinhaDePara[]>([]);
   const [carregandoMatch, setCarregandoMatch] = useState(true);
   const [salvando, setSalvando] = useState(false);
@@ -314,8 +316,8 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
           {carregandoMatch ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Loader2 size={36} className="animate-spin text-orange-600 mb-3" />
-              <p className="font-bold text-sm text-gray-900 dark:text-gray-100">Cruzando itens da nota com o seu estoque...</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Verificando memória de De-Para e sugestões por nome.</p>
+              <p className="font-bold text-sm text-gray-900 dark:text-gray-100">{tDynamic('Cruzando itens da nota com o seu estoque...')}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{tDynamic('Verificando memória de De-Para e sugestões por nome.')}</p>
             </div>
           ) : (
             <div>

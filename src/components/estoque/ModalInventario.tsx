@@ -17,6 +17,7 @@ import SeletorQuantidade from './SeletorQuantidade';
 import { ValorQuantidade, fatorDe, qtdBase, valorInicial } from '../../lib/conversaoEntrada';
 import { ajustarInventario } from '../../lib/compras';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface Props {
   insumos: Insumo[];
   onFechar: () => void;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export default function ModalInventario({ insumos, onFechar, onSucesso }: Props) {
+  const { tDynamic } = useI18n();
   const [busca, setBusca] = useState('');
   const [contagem, setContagem] = useState<Record<string, ValorQuantidade>>({});
   const [obs, setObs] = useState('');
@@ -83,7 +85,7 @@ export default function ModalInventario({ insumos, onFechar, onSucesso }: Props)
                 <ClipboardCheck size={18} className="text-purple-500" /> Inventário
               </h2>
               <p className="mt-0.5 text-xs text-gray-500">
-                Conte na unidade que estiver na mão — cabeça, caixa, quilo. O sistema converte.
+                {tDynamic('Conte na unidade que estiver na mão — cabeça, caixa, quilo. O sistema converte.')}
               </p>
             </div>
             <button onClick={onFechar} className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">

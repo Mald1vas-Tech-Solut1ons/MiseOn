@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 import {
   ArrowUpRight, Download, Calculator
 } from 'lucide-react';
@@ -12,6 +13,7 @@ interface LinhaDRE {
 }
 
 export default function DreGerencial() {
+  const { tDynamic } = useI18n();
   const [mesSelecionado, setMesSelecionado] = useState<string>('2026-07');
 
   // Dados gerenciais da operação atual (exemplo com dados reais da plataforma)
@@ -51,7 +53,7 @@ export default function DreGerencial() {
             Demonstrativo do Resultado do Exercício (DRE Gerencial)
           </h2>
           <p className="text-xs text-gray-500 dark:text-slate-400">
-            Visão contábil e gerencial completa da lucratividade da sua cozinha em tempo real.
+            {tDynamic('Visão contábil e gerencial completa da lucratividade da sua cozinha em tempo real.')}
           </p>
         </div>
 

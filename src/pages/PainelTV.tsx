@@ -278,7 +278,7 @@ export default function PainelTV() {
                 <h2 className="font-['Sora'] text-3xl font-black tracking-tight text-white">
                   {ultimoChamado.primeiro_nome || 'Cliente'}
                 </h2>
-                <p className="text-sm text-emerald-100 font-medium mt-0.5">Por favor, retire seu pedido no balcão de atendimento.</p>
+                <p className="text-sm text-emerald-100 font-medium mt-0.5">{tDynamic('Por favor, retire seu pedido no balcão de atendimento.')}</p>
               </div>
             </div>
             <div className="text-right flex flex-col items-end">
@@ -376,9 +376,9 @@ export default function PainelTV() {
             {/* Card QR Code de Autoatendimento */}
             <div className="rounded-3xl border border-orange-500/30 bg-gradient-to-b from-orange-500/10 to-transparent p-6 text-center shadow-xl space-y-4">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FC5B24]/20 px-3 py-1 text-xs font-extrabold text-[#FC5B24] border border-[#FC5B24]/30">
-                <QrIcon size={14} /> PEÇA PELO CELULAR
+                <QrIcon size={14} /> {tDynamic('PEÇA PELO CELULAR')}
               </div>
-              <p className="text-xs text-slate-300 font-medium">Escaneie o QR Code abaixo para ver o cardápio e fazer seu pedido na mesa sem pegar fila:</p>
+              <p className="text-xs text-slate-300 font-medium">{tDynamic('Escaneie o QR Code abaixo para ver o cardápio e fazer seu pedido na mesa sem pegar fila:')}</p>
               
               <div className="bg-white p-3 rounded-2xl inline-block shadow-2xl border-4 border-white/10">
                 <img src={qrCodeUrl} alt="QR Code do Cardápio" className="w-40 h-40" />
@@ -427,7 +427,7 @@ export default function PainelTV() {
                 <h2 className="font-['Sora'] text-3xl font-black text-amber-400 uppercase tracking-wider">
                   EM PREPARAÇÃO ({pedidosEmPreparo.length})
                 </h2>
-                <p className="text-xs text-amber-200/60 font-medium">Sua refeição está sendo preparada na cozinha</p>
+                <p className="text-xs text-amber-200/60 font-medium">{tDynamic('Sua refeição está sendo preparada na cozinha')}</p>
               </div>
             </div>
 
@@ -452,7 +452,7 @@ export default function PainelTV() {
                 <h2 className="font-['Sora'] text-3xl font-black text-emerald-400 uppercase tracking-wider">
                   PRONTO PARA RETIRADA ({pedidosProntos.length})
                 </h2>
-                <p className="text-xs text-emerald-200/60 font-medium">Dirija-se ao balcão com sua comanda</p>
+                <p className="text-xs text-emerald-200/60 font-medium">{tDynamic('Dirija-se ao balcão com sua comanda')}</p>
               </div>
             </div>
 
@@ -477,7 +477,7 @@ export default function PainelTV() {
           <span className="h-2 w-2 rounded-full bg-[#FC5B24]" />
           <span>MiseOn Smart TV Engine v2.4</span>
         </div>
-        <p className="text-[11px] text-slate-500">Pressione F11 na Smart TV para alternar para modo Tela Cheia sem bordas.</p>
+        <p className="text-[11px] text-slate-500">{tDynamic('Pressione F11 na Smart TV para alternar para modo Tela Cheia sem bordas.')}</p>
       </footer>
     </div>
   );

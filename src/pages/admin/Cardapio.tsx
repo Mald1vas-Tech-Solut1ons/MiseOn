@@ -275,6 +275,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
   onClose: () => void;
   onSalvo: () => void;
 }) {
+  const { tDynamic } = useI18n();
   const [nome, setNome] = useState(produto?.nome ?? '');
   const [descricao, setDescricao] = useState(produto?.descricao ?? '');
   const [tipoVenda, setTipoVenda] = useState<TipoVenda>(produto?.tipo_venda ?? 'UNITARIO');
@@ -488,14 +489,14 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
           </div>
           <div className="pt-1">
             <input value={pdvCode} onChange={(e) => setPdvCode(e.target.value)} placeholder="Código PDV / iFood (opcional)" className="w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-            <p className="mt-1 text-[10px] text-gray-400">Use este código para mapear este produto com integrações externas como o iFood.</p>
+            <p className="mt-1 text-[10px] text-gray-400">{tDynamic('Use este código para mapear este produto com integrações externas como o iFood.')}</p>
             {isIfoodActive && pdvCode && (
               <div className="mt-2 rounded-xl bg-amber-50 p-3 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-900/30">
                 <p className="text-[10px] font-bold text-amber-800 dark:text-amber-500">
                   Bloqueio iFood Ativo
                 </p>
                 <p className="text-[10px] text-amber-700 dark:text-amber-400 mt-1">
-                  O markup está ligado. <b>Não altere o preço deste item manualmente no Portal do iFood</b>, pois o MiseOn será a fonte oficial do preço, sob pena de dessincronização financeira.
+                  O markup está ligado. <b>{tDynamic('Não altere o preço deste item manualmente no Portal do iFood')}</b>, pois o MiseOn será a fonte oficial do preço, sob pena de dessincronização financeira.
                 </p>
               </div>
             )}
@@ -638,7 +639,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                       <select value={o.insumo_id || ''} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key
                         ? { ...x, opcoes: x.opcoes.map((y) => y._key === o._key ? { ...y, insumo_id: e.target.value || null } : y) } : x))}
                         className="flex-1 rounded-lg border border-dashed border-gray-300 p-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        <option value="">Sem baixa de estoque</option>
+                        <option value="">{tDynamic('Sem baixa de estoque')}</option>
                         {insumos.map((i) => <option key={i.id} value={i.id}>Baixar: {i.nome} ({i.unidade_medida})</option>)}
                       </select>
                       {o.insumo_id && (

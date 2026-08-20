@@ -1,7 +1,9 @@
 import React from 'react';
 import { BookOpen, ExternalLink } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function GuiaCeoGtm() {
+  const { tDynamic } = useI18n();
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -11,7 +13,7 @@ export default function GuiaCeoGtm() {
             Bíblia de Vendas & Guia do CEO — Primeiros 10 Clientes SaaS
           </h1>
           <p className="text-xs text-gray-400">
-            Estratégia completa de Go-To-Market, abordagem PAP, tráfego pago e quebra de objeções para fechar os primeiros R$ 1.500/mês no MiseOn.
+            {tDynamic('Estratégia completa de Go-To-Market, abordagem PAP, tráfego pago e quebra de objeções para fechar os primeiros R$ 1.500/mês no MiseOn.')}
           </p>
         </div>
 

@@ -261,7 +261,7 @@ export default function CheckoutDrawer({
 
   const enviar = async () => {
     setErro('');
-    if (!user) { onAbrirAuth(); return setErro('Faca login para finalizar.'); }
+    if (!user) { onAbrirAuth(); return setErro('Faça login para finalizar.'); }
     if (!aberta && quando === 'AGORA') return setErro('A loja esta fechada no momento — agende um horário ou volte quando abrir.');
     if (quando === 'AGENDADO' && (!diaAgendado || !horaAgendada)) return setErro('Escolha o dia e o horário do agendamento.');
     if (!nome.trim() || !telefone.trim()) return setErro('Preencha nome e telefone.');
@@ -452,15 +452,15 @@ export default function CheckoutDrawer({
               /* Nao logado */
               <div className="rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 p-6 text-center">
                 <ShoppingBag size={32} className="mx-auto mb-3 text-gray-300" />
-                <p className="text-sm font-bold dark:text-gray-200">Faca login para finalizar</p>
+                <p className="text-sm font-bold dark:text-gray-200">{tDynamic('Faça login para finalizar')}</p>
                 <p className="mt-1 text-xs text-gray-400">
-                  Usamos sua conta Google para salvar seu endereco e historico de pedidos.
+                  {tDynamic('Usamos sua conta Google para salvar seu endereço e histórico de pedidos.')}
                 </p>
                 <button
                   onClick={() => entrarComGoogle(window.location.href)}
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white hover:brightness-110 transition-all"
                 >
-                  <LogIn size={16} /> Entrar com Google
+                  <LogIn size={16} /> {tDynamic('Entrar com Google')}
                 </button>
               </div>
             ) : !perfilCarregado ? (
@@ -494,7 +494,7 @@ export default function CheckoutDrawer({
                 {loja.aceita_agendamento && (
                   <div>
                     <p className="mb-2 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-gray-400">
-                      <CalendarClock size={12} /> Quando você quer receber?
+                      <CalendarClock size={12} /> {tDynamic('Quando você quer receber?')}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       <button onClick={() => setQuando('AGORA')}
@@ -510,7 +510,7 @@ export default function CheckoutDrawer({
                     {quando === 'AGENDADO' && (
                       <div className="mt-2 space-y-2">
                         {diasDisponiveis.length === 0 ? (
-                          <p className="text-xs text-gray-400">Nenhum horário de funcionamento cadastrado para agendamento.</p>
+                          <p className="text-xs text-gray-400">{tDynamic('Nenhum horário de funcionamento cadastrado para agendamento.')}</p>
                         ) : (
                           <>
                             <div className="flex gap-1.5 overflow-x-auto pb-1">
@@ -523,7 +523,7 @@ export default function CheckoutDrawer({
                             </div>
                             {diaAgendado && (
                               slotsDoDia.length === 0 ? (
-                                <p className="text-xs text-gray-400">Sem horários disponíveis nesse dia — escolha outro.</p>
+                                <p className="text-xs text-gray-400">{tDynamic('Sem horários disponíveis nesse dia — escolha outro.')}</p>
                               ) : (
                                 <div className="flex flex-wrap gap-1.5">
                                   {slotsDoDia.map((h) => (
@@ -591,7 +591,7 @@ export default function CheckoutDrawer({
 
                       {calcTaxa ? (
                         <p className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                          <Loader2 size={14} className="animate-spin" /> Calculando pela distância…
+                          <Loader2 size={14} className="animate-spin" /> {tDynamic('Calculando pela distância…')}
                         </p>
                       ) : entrega?.origem === 'DISTANCIA' ? (
                         <>
@@ -624,7 +624,7 @@ export default function CheckoutDrawer({
                             }}
                             className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm font-semibold outline-none transition-colors focus:border-[var(--cor-primaria)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                           >
-                            <option value="">Selecione seu bairro…</option>
+                            <option value="">{tDynamic('Selecione seu bairro…')}</option>
                             {taxas.map((t) => (
                               <option key={t.id} value={t.bairro}>{t.bairro} — {fmt(Number(t.valor))}</option>
                             ))}
@@ -698,7 +698,7 @@ export default function CheckoutDrawer({
                   </p>
 
                   {metodosDisponiveis.length === 0 && (
-                    <p className="text-sm text-gray-400">A loja ainda não configurou formas de pagamento.</p>
+                    <p className="text-sm text-gray-400">{tDynamic('A loja ainda não configurou formas de pagamento.')}</p>
                   )}
 
                   {metodosOnline.length > 0 && (
@@ -822,7 +822,7 @@ export default function CheckoutDrawer({
                     : `Finalizar Pedido - ${fmt(total)}`}
                 </button>
                 <p className="pb-4 text-center text-[10px] text-gray-400">
-                  Ao finalizar voce concorda com os termos de uso.
+                  {tDynamic('Ao finalizar você concorda com os termos de uso.')}
                 </p>
               </>
             )}

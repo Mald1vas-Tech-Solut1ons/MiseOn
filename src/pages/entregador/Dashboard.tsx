@@ -5,7 +5,9 @@ import { supabase } from '../../lib/supabase';
 import type { CtxEntregador } from './EntregadorLayout';
 import { fmt } from '../../types';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function EntregadorDashboard() {
+  const { tDynamic } = useI18n();
   const navigate = useNavigate();
   const ctx = useOutletContext<CtxEntregador>();
   
@@ -183,7 +185,7 @@ export default function EntregadorDashboard() {
               <p className="text-xs font-bold uppercase">Tempo Méd.</p>
             </div>
             <p className="text-2xl font-black text-white">{metricas.tempoMedio} <span className="text-sm text-gray-500 font-bold">min</span></p>
-            <p className="text-[10px] text-gray-500 font-medium">Por corrida concluída</p>
+            <p className="text-[10px] text-gray-500 font-medium">{tDynamic('Por corrida concluída')}</p>
           </div>
           
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-4 flex flex-col items-center justify-center text-center">
@@ -256,7 +258,7 @@ export default function EntregadorDashboard() {
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-8 flex flex-col items-center justify-center text-center">
             <CheckCircle2 size={48} className="text-gray-700 mb-4" />
             <p className="text-lg font-bold text-gray-300">Nenhuma rota ativa</p>
-            <p className="text-sm text-gray-500 mt-1 max-w-[200px]">Aguarde o restaurante despachar novos pedidos para você.</p>
+            <p className="text-sm text-gray-500 mt-1 max-w-[200px]">{tDynamic('Aguarde o restaurante despachar novos pedidos para você.')}</p>
           </div>
         )}
       </div>

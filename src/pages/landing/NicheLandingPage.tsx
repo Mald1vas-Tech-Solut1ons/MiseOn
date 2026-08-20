@@ -312,7 +312,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
 
             <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
               <span className="text-xs text-slate-400">
-                Pronto para colocar sua operação no automático com o MiseOn?
+                {tDynamic('Pronto para colocar sua operação no automático com o MiseOn?')}
               </span>
               <Link
                 to="/cadastre-se"
@@ -367,10 +367,10 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
               ✨ 30 Dias Grátis · Sem Cartão de Crédito
             </span>
             <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold text-white">
-              Comece agora sem custos e transforme a gestão da sua loja
+              {tDynamic('Comece agora sem custos e transforme a gestão da sua loja')}
             </h2>
             <p className="mt-3 text-sm text-slate-300 max-w-2xl mx-auto">
-              Teste todos os recursos liberados por 30 dias. Plano Mensal por <b>{tDynamic("R$ 169,90/mês")}</b> {tDynamic("ou Anual por")} <b>{tDynamic("R$ 149,90/mês")}</b> {tDynamic("(em até 12x no cartão via Efí Bank). Pagamentos no Pix têm")} <b>5% de desconto à vista</b>!
+              {tDynamic('Teste todos os recursos liberados por 30 dias. Plano Mensal por')} <b>{tDynamic("R$ 169,90/mês")}</b> {tDynamic("ou Anual por")} <b>{tDynamic("R$ 149,90/mês")}</b> {tDynamic("(em até 12x no cartão via Efí Bank). Pagamentos no Pix têm")} <b>5% de desconto à vista</b>!
             </p>
             <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
               <Link
@@ -391,10 +391,10 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
       <section className="bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] py-16 text-white text-center">
         <div className="mx-auto max-w-4xl px-4">
           <h2 className="font-['Sora'] text-3xl font-extrabold sm:text-4xl">
-            Sua operação mais ágil, lucrativa e sem erros
+            {tDynamic('Sua operação mais ágil, lucrativa e sem erros')}
           </h2>
           <p className="mt-4 text-base text-orange-100">
-            Cadastre sua loja em menos de 3 minutos e comece a vender no automático.
+            {tDynamic('Cadastre sua loja em menos de 3 minutos e comece a vender no automático.')}
           </p>
           <Link
             to="/cadastre-se"

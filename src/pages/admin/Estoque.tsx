@@ -546,7 +546,7 @@ export default function Estoque() {
              <p className="text-xs text-amber-700 dark:text-amber-400">Você tem {criticos.length} insumos que chegaram na margem de risco.</p>
           </div>
           <Link to="/admin/compras" className="shrink-0 flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 dark:bg-amber-800 dark:hover:bg-amber-700 dark:text-amber-100 px-4 py-2 rounded-xl text-xs font-bold transition-colors">
-            Ir para Central de Compras <ArrowRight size={14} />
+            {tDynamic('Ir para Central de Compras')} <ArrowRight size={14} />
           </Link>
         </div>
       )}
@@ -872,7 +872,7 @@ export default function Estoque() {
       <div className="mb-3 flex items-center gap-4 text-[11px] text-gray-400 dark:text-gray-500">
         <span className="flex items-center gap-1.5"><Apple size={13} className="rounded-full bg-emerald-500 p-0.5 text-white" /> Nutrição revisada</span>
         <span className="flex items-center gap-1.5"><span className="relative inline-flex"><Apple size={13} className="text-emerald-500" /><span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-400" /></span> Aguardando revisão</span>
-        <span className="flex items-center gap-1.5"><Apple size={13} className="text-emerald-500" /> Ainda não cadastrada</span>
+        <span className="flex items-center gap-1.5"><Apple size={13} className="text-emerald-500" /> {tDynamic('Ainda não cadastrada')}</span>
       </div>
 
       <div className="space-y-3">

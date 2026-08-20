@@ -448,7 +448,7 @@ export default function Mesas() {
         <div className="rounded-2xl border border-dashed border-gray-300 py-16 text-center dark:border-gray-700">
           <LayoutGrid size={32} className="mx-auto mb-3 text-gray-300" />
           <p className="text-sm font-semibold text-gray-500">Nenhuma mesa cadastrada ainda.</p>
-          <p className="mt-1 text-xs text-gray-400">Crie suas mesas e gere o QR Code para os clientes pedirem direto de onde estão sentados.</p>
+          <p className="mt-1 text-xs text-gray-400">{tDynamic('Crie suas mesas e gere o QR Code para os clientes pedirem direto de onde estão sentados.')}</p>
         </div>
       ) : viewModo === 'SALAO_3D' ? (
         <Mesas3DCanvas
@@ -484,7 +484,7 @@ export default function Mesas() {
                       <p className="flex items-center gap-1 text-[11px] text-gray-500"><Clock size={10} /> {min}min · {m.qtdItens} item(ns){m.temItemEmPreparo ? ' · prep.' : ''}{m.totalPago > 0 ? ' · (Pago par.)' : ''}</p>
                     </div>
                   ) : (
-                    <p className="mt-3 text-[11px] text-gray-400">Toque para abrir a conta</p>
+                    <p className="mt-3 text-[11px] text-gray-400">{tDynamic('Toque para abrir a conta')}</p>
                   )}
                 </button>
                 <div className="mt-2 flex gap-1.5 border-t border-gray-100 pt-2 dark:border-gray-800">
@@ -538,7 +538,7 @@ export default function Mesas() {
               : <div className="flex h-56 items-center justify-center"><Loader2 className="animate-spin text-gray-300" /></div>}
             <p className="mt-3 text-xs text-gray-500">O cliente aponta a câmera e cai direto no cardápio, já identificado como Mesa {mesaQr.numero} — sem precisar criar login.</p>
             <button onClick={imprimirQr} disabled={!qrDataUrl} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] py-3.5 text-sm font-black text-white disabled:opacity-50">
-              <Printer size={16} /> Imprimir para a mesa
+              <Printer size={16} /> {tDynamic('Imprimir para a mesa')}
             </button>
           </div>
         </div>
@@ -554,7 +554,7 @@ export default function Mesas() {
                 {mesaDetalhe.comanda && (
                   <>
                     <button onClick={() => setModalDivisaoCaixa(true)} className="text-xs font-bold text-orange-500 hover:underline">
-                      Rachar por Produto
+                      {tDynamic('Rachar por Produto')}
                     </button>
                     <button onClick={() => setMostrarTransferencia(!mostrarTransferencia)} className="text-xs font-bold text-[var(--cor-primaria)]">Mover</button>
                   </>
@@ -565,10 +565,10 @@ export default function Mesas() {
 
             {mostrarTransferencia && mesaDetalhe.comanda && (
               <div className="bg-gray-50 dark:bg-gray-800/50 p-5 border-b border-gray-100 dark:border-gray-800">
-                <p className="text-sm font-bold dark:text-gray-200 mb-2">Transferir para qual mesa?</p>
+                <p className="text-sm font-bold dark:text-gray-200 mb-2">{tDynamic('Transferir para qual mesa?')}</p>
                 <div className="flex gap-2">
                   <select value={transferindoPara} onChange={(e) => setTransferindoPara(e.target.value)} className={`${inputCls} flex-1`}>
-                    <option value="">Selecione uma mesa livre</option>
+                    <option value="">{tDynamic('Selecione uma mesa livre')}</option>
                     {livres.map(m => <option key={m.id} value={m.numero}>Mesa {m.numero}</option>)}
                   </select>
                   <button onClick={transferirMesa} disabled={!transferindoPara || processandoFechamento} className="rounded-xl bg-[var(--cor-primaria)] px-4 text-sm font-bold text-white disabled:opacity-50">
@@ -581,8 +581,8 @@ export default function Mesas() {
 
             {!mesaDetalhe.comanda ? (
               <div className="p-8 text-center">
-                <p className="text-sm text-gray-500">Essa mesa está livre — sem comanda aberta.</p>
-                <p className="mt-1 text-xs text-gray-400">Gere o QR Code para o cliente pedir, ou use o PDV em modo mesa para lançar o primeiro pedido.</p>
+                <p className="text-sm text-gray-500">{tDynamic('Essa mesa está livre — sem comanda aberta.')}</p>
+                <p className="mt-1 text-xs text-gray-400">{tDynamic('Gere o QR Code para o cliente pedir, ou use o PDV em modo mesa para lançar o primeiro pedido.')}</p>
               </div>
             ) : carregandoDetalhe ? (
               <div className="p-8 text-center text-sm text-gray-400">Carregando comanda…</div>
@@ -591,7 +591,7 @@ export default function Mesas() {
                 <div className="flex-1 overflow-y-auto p-5">
                   {bloqueadoPorPreparo && (
                     <div className="mb-4 flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs font-semibold text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/10 dark:text-amber-400">
-                      <AlertTriangle size={14} /> Ainda tem item sendo preparado — a conta libera para fechar quando tudo estiver pronto.
+                      <AlertTriangle size={14} /> {tDynamic('Ainda tem item sendo preparado — a conta libera para fechar quando tudo estiver pronto.')}
                     </div>
                   )}
                   <div className="space-y-3">
@@ -710,9 +710,9 @@ export default function Mesas() {
                               </p>
                             </>
                           ) : (
-                            <p className="text-xs text-amber-600">Cadastre a chave Pix da loja em Configurações → Pagamentos para mostrar aqui.</p>
+                            <p className="text-xs text-amber-600">{tDynamic('Cadastre a chave Pix da loja em Configurações → Pagamentos para mostrar aqui.')}</p>
                           )}
-                          <p className="mt-2 text-[11px] text-gray-400">Confirme abaixo assim que o Pix cair.</p>
+                          <p className="mt-2 text-[11px] text-gray-400">{tDynamic('Confirme abaixo assim que o Pix cair.')}</p>
                         </div>
                       )}
                       {(fechando === 'CREDITO' || fechando === 'DEBITO') && (

@@ -1,6 +1,8 @@
 import { ArrowRight, LayoutDashboard, Play } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function HeroSection() {
+  const { tDynamic } = useI18n();
   return (
     <section className="relative overflow-hidden pb-32 pt-36 lg:pt-48">
       {/* Elementos de background orgânicos */}
@@ -15,7 +17,7 @@ export default function HeroSection() {
           style={{ border: '1px solid rgba(10,92,196,0.3)', background: 'rgba(10,92,196,0.1)', color: '#4A90E2', fontFamily: "'Sora', sans-serif" }}
           className="mb-8 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold uppercase tracking-wider backdrop-blur-md"
         >
-          <LayoutDashboard size={16} /> O Sistema Operacional do seu Restaurante
+          <LayoutDashboard size={16} /> {tDynamic('O Sistema Operacional do seu Restaurante')}
         </div>
 
         <h1

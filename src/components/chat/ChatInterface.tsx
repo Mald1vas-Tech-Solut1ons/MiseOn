@@ -5,12 +5,14 @@ import { Loja } from '../../types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { getOptimizedImageUrl } from '../../lib/cdn';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface ChatInterfaceProps {
   loja: Loja;
   user: SupabaseUser | null;
 }
 
 export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
+  const { tDynamic } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -156,7 +158,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
           {/* Default Welcome Message */}
           <div className="flex justify-center mb-6">
             <span className="bg-[#FEEFCA] dark:bg-[#1E2A30] text-[#54656F] dark:text-[#8696A0] text-[11px] font-medium px-4 py-1.5 rounded-xl shadow-sm text-center max-w-[85%]">
-              As mensagens são protegidas com criptografia de ponta a ponta. Ninguém fora desta conversa pode lê-las.
+              {tDynamic('As mensagens são protegidas com criptografia de ponta a ponta. Ninguém fora desta conversa pode lê-las.')}
             </span>
           </div>
 
@@ -166,7 +168,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
                 <MessageSquare size={28} className="text-gray-400" />
               </div>
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Olá! Como podemos ajudar?</p>
-              <p className="text-xs text-gray-500 text-center mt-1">Mande sua dúvida ou acompanhe seu pedido.</p>
+              <p className="text-xs text-gray-500 text-center mt-1">{tDynamic('Mande sua dúvida ou acompanhe seu pedido.')}</p>
             </div>
           ) : (
             messages.map((msg) => {

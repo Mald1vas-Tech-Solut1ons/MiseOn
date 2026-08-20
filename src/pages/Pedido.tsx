@@ -392,7 +392,7 @@ export default function AcompanharPedido() {
                 <Sparkles size={18} />
               </div>
               <div>
-                <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>Seu pedido continua salvo mesmo se você sair desta tela.</p>
+                <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Seu pedido continua salvo mesmo se você sair desta tela.')}</p>
                 <p className="mt-1 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
                   As atualizações continuam aparecendo em tempo real em <b>Meus pedidos</b> e aqui no link direto do pedido.
                 </p>
@@ -412,10 +412,10 @@ export default function AcompanharPedido() {
         <div className="mx-auto mt-4 max-w-4xl px-4">
           <div className="rounded-3xl border p-5 shadow-sm bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-900/20 border-green-200 dark:border-green-900/50">
             <h3 className="font-bold text-green-900 dark:text-green-300 text-lg mb-1">
-              Já está com o seu pedido?
+              {tDynamic('Já está com o seu pedido?')}
             </h3>
             <p className="text-sm text-green-700 dark:text-green-400/80 mb-4">
-              Para nos ajudar, confirme que você já retirou ou recebeu sua encomenda.
+              {tDynamic('Para nos ajudar, confirme que você já retirou ou recebeu sua encomenda.')}
             </p>
             <div className="flex flex-wrap gap-3">
               <button 
@@ -492,7 +492,7 @@ export default function AcompanharPedido() {
               <div className="flex items-center justify-between border-b px-4 py-3" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--cor-texto-fraco)' }}>Live tracking</p>
-                  <p className="font-bold" style={{ color: 'var(--cor-texto)' }}>Seu entregador está em rota</p>
+                  <p className="font-bold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Seu entregador está em rota')}</p>
                 </div>
                 <span className="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" style={{ background: 'var(--cor-primaria)' }}>Ao vivo</span>
               </div>
@@ -500,7 +500,7 @@ export default function AcompanharPedido() {
                 <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <MapUpdater posicao={posicao} />
                 <Marker position={[posicao.lat, posicao.lng]} icon={iconeMoto}>
-                  <Popup>Seu entregador está aqui.</Popup>
+                  <Popup>{tDynamic('Seu entregador está aqui.')}</Popup>
                 </Marker>
               </MapContainer>
             </section>
@@ -508,18 +508,18 @@ export default function AcompanharPedido() {
 
           {temTrackingAoVivo && !posicao && (
             <section className="rounded-3xl border p-4 shadow-sm" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
-              <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>A entrega do seu pedido já começou.</p>
+              <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('A entrega do seu pedido já começou.')}</p>
               <p className="mt-1 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
-                O mapa aparece assim que o app do entregador enviar a primeira localização deste pedido.
+                {tDynamic('O mapa aparece assim que o app do entregador enviar a primeira localização deste pedido.')}
               </p>
             </section>
           )}
 
           {pedido.tipo_pedido === 'DELIVERY' && pedido.status === 'PRONTO' && !!pedido.rota_id && (
             <section className="rounded-3xl border p-4 shadow-sm" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
-              <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>Sua entrega está na fila do entregador.</p>
+              <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Sua entrega está na fila do entregador.')}</p>
               <p className="mt-1 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
-                O rastreio só começa quando a sua entrega for iniciada. Isso evita mostrar um trajeto que ainda está atendendo outro cliente.
+                {tDynamic('O rastreio só começa quando a sua entrega for iniciada. Isso evita mostrar um trajeto que ainda está atendendo outro cliente.')}
               </p>
             </section>
           )}
@@ -583,7 +583,7 @@ export default function AcompanharPedido() {
               <div>
                 <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>Atualizações protegidas e em tempo real</p>
                 <p className="mt-1 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
-                  Quando a loja muda o status ou o entregador inicia sua entrega, esta tela é atualizada automaticamente.
+                  {tDynamic('Quando a loja muda o status ou o entregador inicia sua entrega, esta tela é atualizada automaticamente.')}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {loja?.slug && (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, ShieldCheck } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 const CHECKLIST = [
   'Gestão Unificada de Pedidos (Balcão, Salão e iFood)',
   'Integração Oficial com iFood Sem Taxas Extras',
@@ -14,16 +15,17 @@ const CHECKLIST = [
 ];
 
 export default function Pricing() {
+  const { tDynamic } = useI18n();
   const [anual, setAnual] = useState(true);
 
   return (
     <section className="py-28" style={{ background: '#070C18' }}>
       <div className="mx-auto max-w-4xl px-6 text-center">
         <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: '.3em', color: '#0A5CC4', textTransform: 'uppercase', marginBottom: 18 }}>
-          Sem Taxas Escondidas
+          {tDynamic('Sem Taxas Escondidas')}
         </div>
         <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-black sm:text-6xl text-white leading-tight">
-          Uma única assinatura.<br />O <span className="text-[#0A5CC4]">ecossistema</span> completo.
+          {tDynamic('Uma única assinatura.')}<br />O <span className="text-[#0A5CC4]">ecossistema</span> completo.
         </h2>
         <p style={{ color: 'rgba(234,241,251,0.6)' }} className="mx-auto mt-6 max-w-2xl text-xl font-medium">
           Diferente do padrão do mercado, não limitamos funcionalidades para realizar vendas de "módulos extras". Você acessa a potência total desde o primeiro dia.
@@ -36,7 +38,7 @@ export default function Pricing() {
             style={{ fontFamily: "'Sora', sans-serif" }}
             className={`rounded-full px-8 py-3 text-sm font-bold transition ${!anual ? 'bg-[#FC5B24] text-white' : 'text-gray-400 hover:text-white'}`}
           >
-            Mensal (Sem Fidelidade)
+            {tDynamic('Mensal (Sem Fidelidade)')}
           </button>
           <button
             onClick={() => setAnual(true)}
@@ -64,10 +66,10 @@ export default function Pricing() {
               {anual ? (
                 <>
                   <span className="text-gray-400">Faturamento anual em parcela única (R$ 1.198,80).</span>
-                  <span className="text-blue-400 font-bold mt-1">Sua economia: R$ 360,00/ano</span>
+                  <span className="text-blue-400 font-bold mt-1">{tDynamic('Sua economia: R$ 360,00/ano')}</span>
                 </>
               ) : (
-                <span className="text-gray-400">Assinatura mensal flexível com cancelamento online.</span>
+                <span className="text-gray-400">{tDynamic('Assinatura mensal flexível com cancelamento online.')}</span>
               )}
             </div>
 
@@ -90,7 +92,7 @@ export default function Pricing() {
               Criar Conta (14 Dias Grátis)
             </a>
             <div className="mt-6 flex items-center justify-center gap-2 text-xs font-bold text-gray-500">
-              <ShieldCheck size={14} className="text-gray-400" /> Cancele quando quiser. Cartão não exigido no teste.
+              <ShieldCheck size={14} className="text-gray-400" /> {tDynamic('Cancele quando quiser. Cartão não exigido no teste.')}
             </div>
           </div>
         </div>

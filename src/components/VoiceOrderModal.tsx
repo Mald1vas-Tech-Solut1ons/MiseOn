@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, X, Sparkles, ShoppingBag, Check } from 'lucide-react';
 import { Produto, fmt } from '../types';
 
+import { useI18n } from '../contexts/I18nContext';
 interface VoiceOrderModalProps {
   aberto: boolean;
   onFechar: () => void;
@@ -15,6 +16,7 @@ export default function VoiceOrderModal({
   produtos,
   onAdicionarAoCarrinho,
 }: VoiceOrderModalProps) {
+  const { tDynamic } = useI18n();
   const [ouvindo, setOuvindo] = useState(false);
   const [transcricao, setTranscricao] = useState('');
   const [itensEncontrados, setItensEncontrados] = useState<{ produto: Produto; quantidade: number }[]>([]);
@@ -112,7 +114,7 @@ export default function VoiceOrderModal({
           <div className="flex items-center gap-2">
             <Sparkles size={20} className="text-[#FC5B24]" />
             <h3 className="font-['Sora'] font-bold text-lg text-gray-900 dark:text-white">
-              Fazer Pedido por Voz
+              {tDynamic('Fazer Pedido por Voz')}
             </h3>
           </div>
           <button onClick={onFechar} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">

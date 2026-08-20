@@ -617,7 +617,7 @@ export default function AdminLayout() {
                     <h3 className="text-sm font-bold text-blue-700 dark:text-blue-400 leading-tight">
                       {diasRestantes <= 0 ? 'Seu teste grátis termina hoje' : `Seu teste grátis termina em ${diasRestantes} dia${diasRestantes === 1 ? '' : 's'}`}
                     </h3>
-                    <p className="text-[11px] text-blue-600/80 dark:text-blue-400/80 mt-0.5">Garanta sua assinatura pra não perder o acesso.</p>
+                    <p className="text-[11px] text-blue-600/80 dark:text-blue-400/80 mt-0.5">{tDynamic('Garanta sua assinatura pra não perder o acesso.')}</p>
                   </div>
                 </div>
                 <button onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">

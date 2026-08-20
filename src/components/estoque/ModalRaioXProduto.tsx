@@ -6,12 +6,14 @@ import MiseOnLoader from '../MiseOnLoader';
 import { HistoricoPreco, historicoPrecos } from '../../lib/compras';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface Props {
   insumo: Insumo;
   onClose: () => void;
 }
 
 export default function ModalRaioXProduto({ insumo, onClose }: Props) {
+  const { tDynamic } = useI18n();
   const [lotes, setLotes] = useState<any[]>([]);
   const [movimentacoes, setMovimentacoes] = useState<any[]>([]);
   const [compras, setCompras] = useState<HistoricoPreco[]>([]);
@@ -179,7 +181,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
               {origens.length > 0 && (
                 <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
                   <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-gray-100">
-                    <Truck size={16} className="text-emerald-500" /> Onde você compra melhor
+                    <Truck size={16} className="text-emerald-500" /> {tDynamic('Onde você compra melhor')}
                   </h3>
                   <div className="space-y-2">
                     {origens.map((o, idx) => {
@@ -227,8 +229,8 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                    {chartData.length < 2 ? (
                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
                         <Info size={24} className="mb-2 opacity-50" />
-                        <p className="text-xs font-medium">Dados insuficientes para gerar o gráfico.</p>
-                        <p className="text-[10px]">Registre mais de uma compra com custo para ver a inflação.</p>
+                        <p className="text-xs font-medium">{tDynamic('Dados insuficientes para gerar o gráfico.')}</p>
+                        <p className="text-[10px]">{tDynamic('Registre mais de uma compra com custo para ver a inflação.')}</p>
                      </div>
                    ) : (
                      <ResponsiveContainer width="100%" height="100%">

@@ -594,7 +594,7 @@ export default function Loja() {
                 <span>Segmento de Negócio do Estabelecimento</span>
               </div>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Selecione o perfil do seu negócio para ativar os pré-requisitos automáticos da sua operação.
+                {tDynamic('Selecione o perfil do seu negócio para ativar os pré-requisitos automáticos da sua operação.')}
               </p>
             </div>
 
@@ -650,7 +650,7 @@ export default function Loja() {
                 </span>
               </div>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Ligue ou desligue qualquer recurso individualmente para atender exatamente a rotina da sua casa (ex: buffet no almoço + pizzaria à noite).
+                {tDynamic('Ligue ou desligue qualquer recurso individualmente para atender exatamente a rotina da sua casa (ex: buffet no almoço + pizzaria à noite).')}
               </p>
             </div>
 
@@ -744,7 +744,7 @@ export default function Loja() {
                   alt="Prévia do enquadramento do banner"
                 />
                 <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
-                  Prévia — é assim que o cliente vê
+                  {tDynamic('Prévia — é assim que o cliente vê')}
                 </span>
               </div>
 
@@ -783,7 +783,7 @@ export default function Loja() {
                     {form.tema_cardapio === 'escuro' ? 'Escuro' : 'Claro'}
                   </p>
                   <p className="mt-1 text-[11px] text-gray-500">
-                    Define o tema inicial para quem entrar pela primeira vez. Depois disso, o cliente final pode alternar o tema na vitrine pública.
+                    {tDynamic('Define o tema inicial para quem entrar pela primeira vez. Depois disso, o cliente final pode alternar o tema na vitrine pública.')}
                   </p>
                 </div>
 
@@ -851,7 +851,7 @@ export default function Loja() {
                 </div>
               </div>
               <p className="text-[11px] text-gray-500">
-                O cliente final pode escolher entre claro e escuro na vitrine pública. Aqui você garante que os dois modos fiquem bonitos e legíveis.
+                {tDynamic('O cliente final pode escolher entre claro e escuro na vitrine pública. Aqui você garante que os dois modos fiquem bonitos e legíveis.')}
               </p>
             </div>
             
@@ -862,18 +862,18 @@ export default function Loja() {
 
             <div className="mb-4">
               <ColorSwatchPicker label="Cor base da identidade" value={form.cor_texto} onChange={(c) => setValor('cor_texto', c)} />
-              <p className="mt-1 text-[11px] text-gray-500">Essa cor é a origem dos dois temas. O claro vira uma leitura suave dessa cor e o escuro vira uma leitura profunda da mesma família cromática.</p>
+              <p className="mt-1 text-[11px] text-gray-500">{tDynamic('Essa cor é a origem dos dois temas. O claro vira uma leitura suave dessa cor e o escuro vira uma leitura profunda da mesma família cromática.')}</p>
             </div>
             
             <div className="mb-4">
               <ColorSwatchPicker label="Cor Secundária" value={form.cor_secundaria} onChange={(c) => setValor('cor_secundaria', c)} />
-              <p className="mt-1 text-[11px] text-gray-500">Cor de apoio. Usada apenas em selos menores (ex: "Promoção", "Destaque") para não conflitar com os botões.</p>
+              <p className="mt-1 text-[11px] text-gray-500">{tDynamic('Cor de apoio. Usada apenas em selos menores (ex: "Promoção", "Destaque") para não conflitar com os botões.')}</p>
             </div>
             
             <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Leitura cromática automática</p>
               <p className="mt-1 text-sm font-semibold dark:text-gray-100">
-                A cor primária da loja gera os dois temas com a mesma identidade visual
+                {tDynamic('A cor primária da loja gera os dois temas com a mesma identidade visual')}
               </p>
               <p className="mt-1 text-[11px] text-gray-500">
                 Exemplo: azul vira azul claro no tema claro e azul profundo no tema escuro. Vermelho vira vermelho claro e vermelho profundo. O sistema recalcula contraste, superfícies e bordas sem deixar texto sumir.
@@ -947,7 +947,7 @@ export default function Loja() {
               {renderCampo('Razão social / Nome', 'razao_social', 'Lanche do Paulista Ltda')}
               {renderCampo('CPF / CNPJ', 'cnpj', '000.000.000-00 ou 00.000.000/0001-00')}
             </div>
-            <p className="mt-2 text-[11px] text-gray-400">Aparecem no cabeçalho da Nota do Cliente. Deixe em branco se não quiser exibir.</p>
+            <p className="mt-2 text-[11px] text-gray-400">{tDynamic('Aparecem no cabeçalho da Nota do Cliente. Deixe em branco se não quiser exibir.')}</p>
           </div>
           {renderCampo('Pedido mínimo (R$)', 'pedido_minimo', '15')}
         </div>
@@ -960,7 +960,7 @@ export default function Loja() {
               <div>
                 <p className="flex items-center gap-1.5 text-sm font-semibold"><Bike size={15} /> Motor de entrega</p>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Configure a cobertura do tenant como operação real: raio máximo, cálculo por km e faixas comerciais por distância.
+                  {tDynamic('Configure a cobertura do tenant como operação real: raio máximo, cálculo por km e faixas comerciais por distância.')}
                 </p>
               </div>
               <button
@@ -987,7 +987,7 @@ export default function Loja() {
               </label>
 
               <label className="block">
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Valor Adicional por Km (R$/km)</span>
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tDynamic('Valor Adicional por Km (R$/km)')}</span>
                 <input
                   value={form.entrega_taxa_km}
                   onChange={set('entrega_taxa_km')}
@@ -996,7 +996,7 @@ export default function Loja() {
                   placeholder="2.00"
                   className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
                 />
-                <p className="mt-1 text-[11px] text-gray-400">Adicional multiplicado pela distância em km.</p>
+                <p className="mt-1 text-[11px] text-gray-400">{tDynamic('Adicional multiplicado pela distância em km.')}</p>
               </label>
 
               <label className="block">
@@ -1009,7 +1009,7 @@ export default function Loja() {
                   placeholder="8.0"
                   className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
                 />
-                <p className="mt-1 text-[11px] text-gray-400">Bloqueia pedidos com distância superior a este raio.</p>
+                <p className="mt-1 text-[11px] text-gray-400">{tDynamic('Bloqueia pedidos com distância superior a este raio.')}</p>
               </label>
 
               <label className="block">
@@ -1022,7 +1022,7 @@ export default function Loja() {
                   placeholder="0.00 (desativado)"
                   className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500"
                 />
-                <p className="mt-1 text-[11px] text-gray-400">Isenta a taxa se o subtotal atingir este valor (0 = sem frete grátis).</p>
+                <p className="mt-1 text-[11px] text-gray-400">{tDynamic('Isenta a taxa se o subtotal atingir este valor (0 = sem frete grátis).')}</p>
               </label>
             </div>
 
@@ -1056,7 +1056,7 @@ export default function Loja() {
                 <div>
                   <p className="text-sm font-semibold dark:text-gray-100">Georreferência da loja</p>
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Usamos o endereço da loja para localizar automaticamente a origem das entregas ao salvar.
+                    {tDynamic('Usamos o endereço da loja para localizar automaticamente a origem das entregas ao salvar.')}
                   </p>
                 </div>
                 <button
@@ -1090,9 +1090,9 @@ export default function Loja() {
           <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold dark:text-gray-100">Faixas de entrega por distância</p>
+                <p className="text-sm font-semibold dark:text-gray-100">{tDynamic('Faixas de entrega por distância')}</p>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Exemplo profissional: até 3 km cobra fixo; até 5 km cobra outra faixa; acima disso aplica valor por km.
+                  {tDynamic('Exemplo profissional: até 3 km cobra fixo; até 5 km cobra outra faixa; acima disso aplica valor por km.')}
                 </p>
               </div>
               <button
@@ -1107,7 +1107,7 @@ export default function Loja() {
             <div className="space-y-3">
               {faixasEntrega.length === 0 && (
                 <div className="rounded-2xl border border-dashed border-gray-200 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
-                  Nenhuma faixa cadastrada ainda. No modo híbrido, cadastre pelo menos uma faixa ativa.
+                  {tDynamic('Nenhuma faixa cadastrada ainda. No modo híbrido, cadastre pelo menos uma faixa ativa.')}
                 </div>
               )}
 
@@ -1159,7 +1159,7 @@ export default function Loja() {
             </div>
 
             <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
-              As taxas por bairro continuam disponíveis na aba <Link to="/admin/marketing" className="font-bold underline">Marketing</Link> e entram como contingência operacional quando necessário.
+              {tDynamic('As taxas por bairro continuam disponíveis na aba')} <Link to="/admin/marketing" className="font-bold underline">Marketing</Link> e entram como contingência operacional quando necessário.
             </div>
           </div>
         </div>
@@ -1204,7 +1204,7 @@ export default function Loja() {
               </div>
             )}
             <p className="mt-4 text-xs text-gray-500 leading-relaxed">
-              Dica: Você pode adicionar múltiplos turnos no mesmo dia (Ex: Sexta 11:00 às 14:00 e Sexta 18:00 às 23:59). <br/>
+              {tDynamic('Dica: Você pode adicionar múltiplos turnos no mesmo dia (Ex: Sexta 11:00 às 14:00 e Sexta 18:00 às 23:59).')} <br/>
               <b>Se passar da meia noite</b>, cadastre o dia atual até 23:59 e o dia seguinte de 00:00 até o horário final.
             </p>
           </div>
@@ -1245,7 +1245,7 @@ export default function Loja() {
             <div className="flex items-center justify-between gap-3 border-t border-gray-100 dark:border-gray-800 pt-4">
               <div>
                 <p className="text-sm font-semibold dark:text-gray-200">Agendamento de pedidos</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Cliente escolhe um horário futuro pra receber, dentro dos seus horários de funcionamento.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Cliente escolhe um horário futuro pra receber, dentro dos seus horários de funcionamento.')}</p>
               </div>
               <button type="button" onClick={() => setForm((f) => ({ ...f, aceita_agendamento: !f.aceita_agendamento }))}
                 className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${form.aceita_agendamento ? 'bg-[var(--cor-primaria)]' : 'bg-gray-300 dark:bg-gray-600'}`}>
@@ -1258,15 +1258,15 @@ export default function Loja() {
                 <input type="number" min="0" value={form.agendamento_antecedencia_min}
                   onChange={(e) => setForm((f) => ({ ...f, agendamento_antecedencia_min: e.target.value }))}
                   className="mt-1 w-32 rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" />
-                <span className="mt-1 block text-[10px] text-gray-400">Quanto tempo você precisa entre "agora" e o horário agendado mais próximo, pra dar tempo de preparar.</span>
+                <span className="mt-1 block text-[10px] text-gray-400">{tDynamic('Quanto tempo você precisa entre "agora" e o horário agendado mais próximo, pra dar tempo de preparar.')}</span>
               </label>
             )}
           </div>
 
           <div data-tour="tour-loja-efi-payee" className="rounded-2xl border border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 p-4">
-            <h3 className="mb-1 text-sm font-bold text-[var(--cor-primaria)]">Cartão de crédito direto na sua conta (Identificador Efí)</h3>
+            <h3 className="mb-1 text-sm font-bold text-[var(--cor-primaria)]">{tDynamic('Cartão de crédito direto na sua conta (Identificador Efí)')}</h3>
             <p className="mb-4 text-xs text-gray-600 dark:text-gray-300">
-              Com este código, <b>cada venda no cartão é repassada 100% para a sua conta Efí automaticamente</b>.
+              {tDynamic('Com este código,')} <b>cada venda no cartão é repassada 100% para a sua conta Efí automaticamente</b>.
               Ele <b>não é o número da conta nem agência</b> — é o "Identificador de conta" da Efí, um código público
               e seguro que só serve para receber.
             </p>
@@ -1275,7 +1275,7 @@ export default function Loja() {
             <div className="mt-6 rounded-xl bg-gray-900 p-5 shadow-sm border border-gray-800 text-white">
               <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
                 <Monitor size={16} className="text-[var(--cor-primaria)]" /> 
-                Onde encontro isso na Efí Bank? (Pelo Computador)
+                {tDynamic('Onde encontro isso na Efí Bank? (Pelo Computador)')}
               </h4>
               
               <div className="flex flex-col md:flex-row gap-4 items-stretch">
@@ -1330,10 +1330,10 @@ export default function Loja() {
           {/* Repasse do Pix — a Efí exige CPF/CNPJ do titular + número da conta (não usa payee_code) */}
           <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-4">
             <h3 className="mb-1 flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400">
-              <Shield size={14} /> Pix direto na sua conta Efí
+              <Shield size={14} /> {tDynamic('Pix direto na sua conta Efí')}
             </h3>
             <p className="mb-4 text-xs text-gray-600 dark:text-gray-300">
-              Para o dinheiro do <b>Pix</b> cair automaticamente na sua conta, a Efí pede só dois dados do
+              {tDynamic('Para o dinheiro do')} <b>Pix</b> cair automaticamente na sua conta, a Efí pede só dois dados do
               <b> titular da conta</b> — nada técnico. Você encontra o número da sua conta no app da Efí em
               <b> Perfil → Dados da conta</b>.
             </p>
@@ -1360,7 +1360,7 @@ export default function Loja() {
             <div className="space-y-2 text-xs text-gray-600 dark:text-gray-300">
               <div className="flex items-start gap-2">
                 <span className="mt-0.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">PIX</span>
-                <p><b>Na hora.</b> O repasse é imediato assim que o cliente paga. Tarifa Efí: <b>{EFI_TARIFAS.pix}</b> por venda recebida.</p>
+                <p><b>Na hora.</b> {tDynamic('O repasse é imediato assim que o cliente paga. Tarifa Efí:')} <b>{EFI_TARIFAS.pix}</b> por venda recebida.</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="mt-0.5 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">CRÉDITO</span>
@@ -1406,7 +1406,7 @@ export default function Loja() {
                 </button>
               </div>
               <p className="mt-2 text-[10px] text-gray-400">
-                A escolha vale para as <b>próximas</b> vendas no cartão — o que já foi vendido mantém o prazo original.
+                {tDynamic('A escolha vale para as')} <b>próximas</b> vendas no cartão — o que já foi vendido mantém o prazo original.
                 {' '}Tarifas da tabela pública da Efí ({EFI_TARIFAS.referencia}), negociáveis por volume — confira em{' '}
                 <a href={EFI_LINKS.tarifas} target="_blank" rel="noreferrer" className="font-semibold underline">sejaefi.com.br/tarifas</a>.
               </p>

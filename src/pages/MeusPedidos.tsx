@@ -243,12 +243,12 @@ export default function MeusPedidos() {
       <div className="mx-auto max-w-3xl px-4 pt-5">
         {logado === false && (
           <div className="mt-6 rounded-3xl border border-dashed p-6 text-center" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda-forte)' }}>
-            <p className="text-lg font-bold" style={{ color: 'var(--cor-texto)' }}>Entre para ver seus pedidos e acompanhar tudo em tempo real.</p>
+            <p className="text-lg font-bold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Entre para ver seus pedidos e acompanhar tudo em tempo real.')}</p>
             <p className="mt-2 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
-              Seu histórico, pedidos em preparo e entregas em andamento ficam centralizados aqui.
+              {tDynamic('Seu histórico, pedidos em preparo e entregas em andamento ficam centralizados aqui.')}
             </p>
             <button onClick={entrar} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110">
-              <LogIn size={16} /> Entrar com Google
+              <LogIn size={16} /> {tDynamic('Entrar com Google')}
             </button>
           </div>
         )}
@@ -268,9 +268,9 @@ export default function MeusPedidos() {
                     <Sparkles size={18} />
                   </div>
                   <div>
-                    <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>Acompanhe tudo daqui, sem depender de ficar na tela do pedido.</p>
+                    <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Acompanhe tudo daqui, sem depender de ficar na tela do pedido.')}</p>
                     <p className="mt-1 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
-                      Sempre que a loja aceitar, preparar, despachar ou concluir uma entrega, esta central é atualizada automaticamente.
+                      {tDynamic('Sempre que a loja aceitar, preparar, despachar ou concluir uma entrega, esta central é atualizada automaticamente.')}
                     </p>
                   </div>
                 </div>
@@ -289,7 +289,7 @@ export default function MeusPedidos() {
                 </div>
                 <div>
                   <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>Você tem {fmt(saldoCashback)} de cashback</p>
-                  <p className="text-sm" style={{ color: 'var(--cor-texto-suave)' }}>Use como desconto no seu próximo pedido, direto no checkout.</p>
+                  <p className="text-sm" style={{ color: 'var(--cor-texto-suave)' }}>{tDynamic('Use como desconto no seu próximo pedido, direto no checkout.')}</p>
                 </div>
               </section>
             )}
@@ -343,7 +343,7 @@ export default function MeusPedidos() {
               </div>
               {historico.length === 0 ? (
                 <div className="rounded-3xl border p-6 text-center" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
-                  <p className="text-sm" style={{ color: 'var(--cor-texto-suave)' }}>Seu histórico ainda não tem pedidos finalizados.</p>
+                  <p className="text-sm" style={{ color: 'var(--cor-texto-suave)' }}>{tDynamic('Seu histórico ainda não tem pedidos finalizados.')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">

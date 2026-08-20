@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Bike, Mail, Lock, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 export default function EntregadorLogin() {
+  const { tDynamic } = useI18n();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -108,7 +110,7 @@ export default function EntregadorLogin() {
         </form>
 
         <p className="mt-8 text-center text-[11px] font-medium text-gray-600">
-          Você precisa ser convidado por um restaurante Parceiro MiseOn para ter acesso ao app.
+          {tDynamic('Você precisa ser convidado por um restaurante Parceiro MiseOn para ter acesso ao app.')}
         </p>
       </div>
     </div>
