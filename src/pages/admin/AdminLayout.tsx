@@ -131,7 +131,17 @@ export default function AdminLayout() {
           .eq('user_id', user.id);
 
         if (relErr) {
+          // Registra no painel de erros ANTES de mostrar a tela genérica.
+          // Este ponto já derrubou a área logada inteira uma vez: a consulta
+          // pedia a coluna `dias_atraso`, que não existe, e o PostgREST recusa
+          // a consulta toda quando um campo é desconhecido. Na tela aparecia
+          // "verifique sua conexão", que mandou todo mundo procurar no lugar
+          // errado. Com o motivo gravado, o próximo caso se resolve olhando.
           console.error('[AdminLayout] Erro ao buscar vínculo:', relErr);
+          registrarErro(`Falha ao carregar vínculo da loja: ${relErr.message}`, {
+            contexto: 'AdminLayout/carregarVinculo',
+            stack: [relErr.code, relErr.details, relErr.hint].filter(Boolean).join(' | '),
+          });
           if (!unmounted) setErroConexao(true);
           return;
         }
