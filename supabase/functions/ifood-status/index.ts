@@ -13,9 +13,17 @@
 //   PRONTO      -> /readyToPickup   (retirada/balcão)
 //   EM_ROTA     -> /dispatch        (entrega)
 //
-// FINALIZADO e CANCELADO não têm callback: CON e CAN vêm DO iFood para nós,
-// não o contrário. Cancelamento partindo da loja usa requestCancellation, que
-// já está na ifood-webhook.
+//   CANCELADO   -> /cancellationReasons + /requestCancellation
+//
+// FINALIZADO não tem callback: CON vem DO iFood para nós, não o contrário.
+//
+// O cancelamento tem duas direções e só UMA delas passa por aqui:
+//   - iFood cancela  -> evento CAN chega na ifood-webhook, que grava o status
+//     com o prefixo "[iFood]" no motivo. Aqui isso é ignorado, senão a gente
+//     devolveria ao iFood um cancelamento que partiu dele — eco.
+//   - Lojista cancela no Painel de Pedidos -> cai aqui e vira requestCancellation.
+//     O iFood exige escolher um motivo da lista dele, então buscamos
+//     /cancellationReasons antes.
 //
 // Chamada pelo gatilho `trg_ifood_status` em `pedidos` (pg_net), então cobre
 // KDS, Painel de Pedidos e app do entregador de uma vez — sem depender de cada
@@ -52,6 +60,45 @@ function acaoPara(status: string, tipoPedido: string): string | null {
   return null;
 }
 
+/**
+ * O iFood não aceita cancelamento com texto livre: o motivo tem que ser um dos
+ * códigos que ELE devolve para aquele pedido (varia com o estágio do pedido).
+ */
+async function motivosDeCancelamento(orderId: string, token: string) {
+  const res = await fetch(`${IFOOD}/order/v1.0/orders/${orderId}/cancellationReasons`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return [];
+  return (await res.json()) as { cancelCodeId: string; description: string }[];
+}
+
+async function cancelarNoIfood(orderId: string, token: string, motivoDaLoja: string | null) {
+  const motivos = await motivosDeCancelamento(orderId, token);
+  if (motivos.length === 0) {
+    return { ok: false, erro: 'iFood não devolveu motivos de cancelamento para este pedido' };
+  }
+
+  // Tenta casar com o que o lojista escreveu; sem correspondência, usa o primeiro
+  // que o iFood ofereceu — recusar o cancelamento seria pior para a loja.
+  const alvo = (motivoDaLoja ?? '').toLowerCase();
+  const escolhido =
+    motivos.find((m) => alvo && m.description?.toLowerCase().includes(alvo)) ?? motivos[0];
+
+  const res = await fetch(`${IFOOD}/order/v1.0/orders/${orderId}/requestCancellation`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      cancellationCode: escolhido.cancelCodeId,
+      reason: escolhido.description,
+    }),
+  });
+
+  if (!res.ok) {
+    return { ok: false, erro: (await res.text()).slice(0, 300), codigo: escolhido.cancelCodeId };
+  }
+  return { ok: true, codigo: escolhido.cancelCodeId, motivo: escolhido.description };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
@@ -73,11 +120,34 @@ Deno.serve(async (req) => {
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey);
     const { data: pedido } = await supabase
       .from('pedidos')
-      .select('id, status, tipo_pedido, ifood_order_id')
+      .select('id, status, tipo_pedido, ifood_order_id, motivo_cancelamento')
       .eq('id', pedido_id)
       .maybeSingle();
 
     if (!pedido?.ifood_order_id) return json({ ok: true, motivo: 'pedido não é do iFood' });
+
+    // ── Cancelamento pedido PELA LOJA ────────────────────────────────────────
+    if (pedido.status === 'CANCELADO') {
+      // Cancelamento que veio DO iFood já está cancelado lá; devolver seria eco.
+      if ((pedido.motivo_cancelamento ?? '').startsWith('[iFood]')) {
+        return json({ ok: true, motivo: 'cancelamento originado no iFood, nada a devolver' });
+      }
+
+      const token = await getPlatformToken(clientId, clientSecret);
+      const r = await cancelarNoIfood(
+        pedido.ifood_order_id,
+        token,
+        pedido.motivo_cancelamento ?? null,
+      );
+
+      if (!r.ok) {
+        console.error(`iFood recusou cancelamento de ${pedido.ifood_order_id}: ${r.erro}`);
+        // Mesma regra dos outros callbacks: o status no MiseOn já mudou e a loja
+        // segue trabalhando. Fica no log em vez de derrubar a operação.
+        return json({ ok: false, acao: 'requestCancellation', erro: r.erro }, 200);
+      }
+      return json({ ok: true, acao: 'requestCancellation', ...r });
+    }
 
     const acao = acaoPara(pedido.status, pedido.tipo_pedido);
     if (!acao) return json({ ok: true, motivo: `status ${pedido.status} não tem callback` });

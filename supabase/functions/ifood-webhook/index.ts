@@ -342,7 +342,10 @@ serve(async (req: Request) => {
             .from('pedidos')
             .update({
               status: 'CANCELADO',
-              motivo_cancelamento: reasons?.[0]?.description || 'Cancelado via iFood',
+              // Prefixo "[iFood]" marca a ORIGEM do cancelamento. A ifood-status lê
+              // isto para não devolver ao iFood um cancelamento que partiu dele
+              // mesmo — sem a marca, o gatilho de status geraria eco.
+              motivo_cancelamento: `[iFood] ${reasons?.[0]?.description || 'Cancelado via iFood'}`,
             })
             .eq('ifood_order_id', orderId);
 
