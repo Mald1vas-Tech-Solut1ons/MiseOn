@@ -127,7 +127,7 @@ export default function AdminLayout() {
 
         const { data: rels, error: relErr } = await supabase
           .from('usuarios_loja')
-          .select('loja_id, papel, lojas(id, nome, slug, status_assinatura, dias_atraso, trial_termina_em, segmento_negocio, modulos_ativos)')
+          .select('loja_id, papel, lojas(id, nome, slug, status_assinatura, trial_termina_em, segmento_negocio, modulos_ativos)')
           .eq('user_id', user.id);
 
         if (relErr) {
