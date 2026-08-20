@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { RotuloSecao } from './shared';
 
+import { useI18n } from '../../contexts/I18nContext';
 const GRADE = [
   { icon: <QrCode size={20} />, titulo: 'Cardápio digital com seu link', texto: 'Sua loja no ar com sua marca, suas cores e seu endereço. QR Code para mesa e balcão.' },
   { icon: <ShoppingBag size={20} />, titulo: 'PDV frente de caixa', texto: 'Venda de balcão rápida, com abertura e fechamento de caixa, sangria e múltiplas formas de pagamento.' },
@@ -23,12 +24,13 @@ const GRADE = [
 ];
 
 export function GradeRecursos() {
+  const { tDynamic } = useI18n();
   return (
     <section style={{ borderTop: '1px solid rgba(255,255,255,.08)' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6">
         <RotuloSecao numero="05" texto="Sem módulo escondido" />
         <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="max-w-3xl text-3xl font-extrabold leading-tight sm:text-4xl">
-          Tudo isso está incluído. <span style={{ color: '#FC5B24' }}>Nada é "plano superior".</span>
+          {tDynamic('Tudo isso está incluído.')} <span style={{ color: '#FC5B24' }}>{tDynamic('Nada é "plano superior".')}</span>
         </h2>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {GRADE.map((g) => (

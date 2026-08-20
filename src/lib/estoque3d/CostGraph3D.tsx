@@ -15,6 +15,7 @@ import { construirGrafoCusto, descreverRotaCusto } from './types';
 import type { CompraInput, GrafoCusto, NoCusto } from './types';
 import './CostGraph3D.css';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface PropsBase {
   /** Altura do canvas (o pai controla a largura). Default 520px. */
   altura?: number | string;
@@ -41,6 +42,7 @@ const ROTULO_TIPO: Record<NoCusto['tipo'], string> = {
 };
 
 export function CostGraph3D(props: Props) {
+  const { tDynamic } = useI18n();
   const { altura = 520, corFundo, onSelecionar } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<CostGraphEngine | null>(null);
@@ -96,7 +98,7 @@ export function CostGraph3D(props: Props) {
   if (erro) {
     return (
       <div className="mo-cg3d-erro" style={{ height: altura }}>
-        <strong>Grafo bloqueado pela conservação de valor</strong>
+        <strong>{tDynamic('Grafo bloqueado pela conservação de valor')}</strong>
         <span>{erro}</span>
       </div>
     );
@@ -147,7 +149,7 @@ export function CostGraph3D(props: Props) {
           <h4>{selecionado.rotulo}</h4>
           <dl>
             <div>
-              <dt>Proporção do Fracionamento</dt>
+              <dt>{tDynamic('Proporção do Fracionamento')}</dt>
               <dd className="w-full">
                 <div className="flex items-center justify-between text-xs mb-1">
                   <span className="font-bold text-blue-400">
@@ -164,19 +166,19 @@ export function CostGraph3D(props: Props) {
               </dd>
             </div>
             <div>
-              <dt>Ordem de Grandeza</dt>
+              <dt>{tDynamic('Ordem de Grandeza')}</dt>
               <dd className="font-bold text-purple-300">
                 10<sup>{selecionado.ordemGrandeza}</sup> R$/un <span className="text-[10px] font-normal text-gray-400">({selecionado.ordemGrandeza >= 0 ? `~R$ 10^${selecionado.ordemGrandeza}` : `~R$ 10^(${selecionado.ordemGrandeza})`})</span>
               </dd>
             </div>
             <div>
-              <dt>Volume em Estoque</dt>
+              <dt>{tDynamic('Volume em Estoque')}</dt>
               <dd className="font-bold text-blue-400">
                 {selecionado.quantidade} {selecionado.unidade}
               </dd>
             </div>
             <div>
-              <dt>Densidade de Custo</dt>
+              <dt>{tDynamic('Densidade de Custo')}</dt>
               <dd className="font-black text-emerald-400">
                 {brl(selecionado.custoUnitario, 4)}/{selecionado.unidade}
               </dd>
@@ -187,12 +189,12 @@ export function CostGraph3D(props: Props) {
             </div>
             {selecionado.custoConsumidoPelosFilhos > 0 && (
               <div>
-                <dt>Fracionado p/ Produção</dt>
+                <dt>{tDynamic('Fracionado p/ Produção')}</dt>
                 <dd className="text-purple-300 font-semibold">{brl(selecionado.custoConsumidoPelosFilhos)}</dd>
               </div>
             )}
             <div>
-              <dt>Origem Rastreável</dt>
+              <dt>{tDynamic('Origem Rastreável')}</dt>
               <dd className="text-gray-400 text-xs">Lote #{selecionado.compraOrigemId.slice(0, 8)}</dd>
             </div>
           </dl>

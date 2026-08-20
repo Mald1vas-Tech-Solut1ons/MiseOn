@@ -274,7 +274,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
 
           <div>
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              Entra no estoque
+              {tDynamic('Entra no estoque')}
             </p>
             {renderLado('d', destinos)}
             <p className="mt-2 text-[10px] text-gray-400">
@@ -289,10 +289,10 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold text-red-700 dark:text-red-400 flex items-center gap-1.5">
-                    <Trash2 size={14} /> Perda / Quebra de Processamento (Refugo)
+                    <Trash2 size={14} /> {tDynamic('Perda / Quebra de Processamento (Refugo)')}
                   </p>
                   <p className="mt-0.5 text-[11px] text-red-600/80 dark:text-red-400/80">
-                    Gordura, pelancas e ossos jogados fora. <b>{tDynamic('Não precisa cadastrar insumo de lixo!')}</b> O custo desta perda é absorvido automaticamente pelos cortes nobres obtidos.
+                    Gordura, pelancas e ossos jogados fora. <b>{tDynamic('Não precisa cadastrar insumo de lixo!')}</b> {tDynamic('O custo desta perda é absorvido automaticamente pelos cortes nobres obtidos.')}
                   </p>
                 </div>
                 <div className="w-full sm:w-32 shrink-0">

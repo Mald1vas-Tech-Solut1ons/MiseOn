@@ -14,6 +14,7 @@ import type { CtxLoja } from './AdminLayout';
 import { imprimir } from '../../lib/print';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
 
+import { useI18n } from '../../contexts/I18nContext';
 const iconeMoto = L.divIcon({
   html: '<div style="font-size:26px;line-height:1">🛵</div>',
   className: '', iconSize: [26, 26], iconAnchor: [13, 13],
@@ -372,6 +373,7 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
 // ── Componente de Métricas de Rendimentos das Taxas de Entrega ─────────
 
 function PainelRendimentoEntregas({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
   const [metricas, setMetricas] = useState({
     totalTaxas: 0,
     qtdEntregas: 0,
@@ -441,14 +443,14 @@ function PainelRendimentoEntregas({ lojaId }: { lojaId: string }) {
         <div>
           <h3 className="font-['Sora'] font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
             <DollarSign className="text-emerald-500" size={20} />
-            Rendimentos & Performance das Taxas (Últimos 30 Dias)
+            {tDynamic('Rendimentos & Performance das Taxas (Últimos 30 Dias)')}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Indicadores financeiros reais arrecadados através do cálculo por distância.
+            {tDynamic('Indicadores financeiros reais arrecadados através do cálculo por distância.')}
           </p>
         </div>
         <span className="self-start sm:self-auto rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-          Cálculo Ativo por Km
+          {tDynamic('Cálculo Ativo por Km')}
         </span>
       </div>
 
@@ -462,7 +464,7 @@ function PainelRendimentoEntregas({ lojaId }: { lojaId: string }) {
         </div>
 
         <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 p-3.5">
-          <span className="text-[11px] font-semibold text-gray-400 block">Taxa Média por Pedido</span>
+          <span className="text-[11px] font-semibold text-gray-400 block">{tDynamic('Taxa Média por Pedido')}</span>
           <p className="font-['Sora'] text-lg font-black text-gray-900 dark:text-white mt-0.5">
             {fmt(metricas.taxaMedia)}
           </p>
@@ -472,17 +474,17 @@ function PainelRendimentoEntregas({ lojaId }: { lojaId: string }) {
         </div>
 
         <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 p-3.5">
-          <span className="text-[11px] font-semibold text-gray-400 block">Distância Média</span>
+          <span className="text-[11px] font-semibold text-gray-400 block">{tDynamic('Distância Média')}</span>
           <p className="font-['Sora'] text-lg font-black text-blue-500 mt-0.5">
             {metricas.distanciaMediaKm.toFixed(1)} km
           </p>
           <span className="text-[10px] text-blue-400 font-medium mt-0.5 flex items-center gap-0.5">
-            <Compass size={12} /> Raio médio de rota
+            <Compass size={12} /> {tDynamic('Raio médio de rota')}
           </span>
         </div>
 
         <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 p-3.5">
-          <span className="text-[11px] font-semibold text-gray-400 block">Distribuição por Raio</span>
+          <span className="text-[11px] font-semibold text-gray-400 block">{tDynamic('Distribuição por Raio')}</span>
           <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-gray-700 dark:text-gray-300">
             <span className="text-emerald-500">{metricas.curtasCount}c (0-3km)</span> ·
             <span className="text-blue-500">{metricas.mediasCount}m (3-6km)</span>
@@ -497,6 +499,7 @@ function PainelRendimentoEntregas({ lojaId }: { lojaId: string }) {
 // ── Aba 2: Gestão de Entregadores & Despacho de Rotas ─────────
 
 function GestaoEntregadores({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
   const [entregadores, setEntregadores] = useState<Entregador[]>([]);
   const [rotas, setRotas] = useState<RotaEntrega[]>([]);
   const [pedidosProntos, setPedidosProntos] = useState<Pedido[]>([]);
@@ -677,7 +680,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
         </h2>
 
         {pedidosProntos.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-4">Nenhum pedido PRONTO aguardando rota. Os pedidos aparecem aqui assim que a cozinha finalizar.</p>
+          <p className="text-sm text-gray-400 text-center py-4">{tDynamic('Nenhum pedido PRONTO aguardando rota. Os pedidos aparecem aqui assim que a cozinha finalizar.')}</p>
         ) : (
           <div className="space-y-4">
             {/* Seleção do entregador */}
@@ -811,7 +814,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
       <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Users size={18} className="text-[var(--cor-primaria)]" /> Minha Equipe de Entrega
+            <Users size={18} className="text-[var(--cor-primaria)]" /> {tDynamic('Minha Equipe de Entrega')}
           </h2>
           <button
             onClick={() => setShowFormEntregador(v => !v)}
@@ -861,7 +864,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
 
         {/* Lista de entregadores */}
         {entregadores.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-6">Nenhum entregador cadastrado. Adicione sua equipe!</p>
+          <p className="text-sm text-gray-400 text-center py-6">{tDynamic('Nenhum entregador cadastrado. Adicione sua equipe!')}</p>
         ) : (
           <div className="space-y-2">
             {entregadores.map(e => (

@@ -65,7 +65,7 @@ export default function Pricing() {
             <div className="mt-4 flex flex-col items-center justify-center text-sm font-medium h-12">
               {anual ? (
                 <>
-                  <span className="text-gray-400">Faturamento anual em parcela única (R$ 1.198,80).</span>
+                  <span className="text-gray-400">{tDynamic('Faturamento anual em parcela única (R$ 1.198,80).')}</span>
                   <span className="text-blue-400 font-bold mt-1">{tDynamic('Sua economia: R$ 360,00/ano')}</span>
                 </>
               ) : (
@@ -89,7 +89,7 @@ export default function Pricing() {
               style={{ background: '#0A5CC4', fontFamily: "'Sora', sans-serif", boxShadow: '0 8px 32px rgba(10,92,196,0.4)' }}
               className="mt-12 block w-full rounded-2xl py-5 text-center text-xl font-black text-white transition hover:scale-105 hover:bg-blue-600 hover:shadow-[0_8px_40px_rgba(10,92,196,0.6)]"
             >
-              Criar Conta (14 Dias Grátis)
+              {tDynamic('Criar Conta (14 Dias Grátis)')}
             </a>
             <div className="mt-6 flex items-center justify-center gap-2 text-xs font-bold text-gray-500">
               <ShieldCheck size={14} className="text-gray-400" /> {tDynamic('Cancele quando quiser. Cartão não exigido no teste.')}

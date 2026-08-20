@@ -15,6 +15,7 @@ import { PedidoItens } from '../../components/pedidos/PedidoItens';
 import { PedidoFooter } from '../../components/pedidos/PedidoFooter';
 import { PedidoActions } from '../../components/pedidos/PedidoActions';
 
+import { useI18n } from '../../contexts/I18nContext';
 const SELECT = '*, itens_pedido(*, itens_pedido_opcoes(*)), pagamentos(metodo, status, valor_pago)';
 
 /* ── Card de pedido com visual oficial MiseOn ── */
@@ -94,6 +95,7 @@ const FILTROS: { id: string; label: string; pred: (p: Pedido) => boolean }[] = [
 ];
 
 export default function PainelPedidos() {
+  const { tDynamic } = useI18n();
   const { lojaId, papel } = useOutletContext<CtxLoja>();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -245,7 +247,7 @@ export default function PainelPedidos() {
     <div className="min-h-screen bg-gray-50 px-4 py-5 dark:bg-[#070C18]">
       <div className="print:hidden mb-6">
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-['JetBrains_Mono'] text-[11px] tracking-[0.28em] text-orange-500 uppercase">PAINEL · AO VIVO</span>
+          <span className="font-['JetBrains_Mono'] text-[11px] tracking-[0.28em] text-orange-500 uppercase">{tDynamic('PAINEL · AO VIVO')}</span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]" />
         </div>
         <h2 data-tour="tour-pedidos-header" className="m-0 font-['Sora'] text-[26px] font-extrabold text-gray-900 dark:text-white">Balcão</h2>

@@ -34,7 +34,7 @@ export default function Termos() {
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">1. Partes e Aceitação</h2>
               <p>
-                Estes Termos de Uso e Serviço ("Termos") regulam a relação entre <strong>MiseOn</strong>,
+                {tDynamic('Estes Termos de Uso e Serviço ("Termos") regulam a relação entre')} <strong>MiseOn</strong>,
                 pessoa jurídica de direito privado, inscrita no CNPJ sob o nº <strong>63.310.253/0001-81</strong>,
                 com sede em Manaus/AM, Brasil ("MiseOn", "nós"), e a pessoa física ou jurídica que se cadastra
                 na plataforma ("Lojista", "você").
@@ -43,7 +43,7 @@ export default function Termos() {
                 Ao criar uma conta, acessar ou utilizar a plataforma MiseOn, você declara que leu, compreendeu
                 e concorda integralmente com estes Termos e com a nossa{' '}
                 <Link to="/privacidade" className="font-semibold text-[var(--cor-secundaria)] hover:underline">
-                  Política de Privacidade
+                  {tDynamic('Política de Privacidade')}
                 </Link>.
                 Caso não concorde com qualquer disposição, você não deverá utilizar a plataforma.
               </p>
@@ -57,9 +57,9 @@ export default function Termos() {
               </p>
               <ul className="mt-3 list-disc space-y-2 pl-5">
                 <li>{tDynamic('Cardápio digital com link próprio e QR Code (PWA);')}</li>
-                <li>Painel de pedidos em tempo real e PDV de balcão;</li>
+                <li>{tDynamic('Painel de pedidos em tempo real e PDV de balcão;')}</li>
                 <li>{tDynamic('Tela de produção para cozinha (KDS) e gestão de mesas;')}</li>
-                <li>Gestão de entregas e entregadores;</li>
+                <li>{tDynamic('Gestão de entregas e entregadores;')}</li>
                 <li>{tDynamic('Controle de estoque com ficha técnica e apuração de CMV;')}</li>
                 <li>{tDynamic('Módulo financeiro com recebimento via Pix e cartões, processado por instituição de pagamento parceira (Efí);')}</li>
                 <li>{tDynamic('Atendimento automatizado via inteligência artificial no WhatsApp, por meio da WhatsApp Business Platform (Meta).')}</li>
@@ -85,8 +85,8 @@ export default function Termos() {
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">4. Responsabilidades do Lojista</h2>
               <p>{tDynamic('O Lojista é o único responsável pela sua operação e pelo conteúdo que publica na plataforma, incluindo:')}</p>
               <ul className="mt-3 list-disc space-y-2 pl-5">
-                <li>Manter verídicas e atualizadas as informações do cardápio, incluindo descrições, ingredientes, preços, taxas de entrega e horários de funcionamento;</li>
-                <li>Honrar ofertas, cupons, promoções e políticas de entrega cadastrados na plataforma;</li>
+                <li>{tDynamic('Manter verídicas e atualizadas as informações do cardápio, incluindo descrições, ingredientes, preços, taxas de entrega e horários de funcionamento;')}</li>
+                <li>{tDynamic('Honrar ofertas, cupons, promoções e políticas de entrega cadastrados na plataforma;')}</li>
                 <li>{tDynamic('Cumprir a legislação sanitária, fiscal, trabalhista e de defesa do consumidor aplicável à sua atividade;')}</li>
                 <li>{tDynamic('Não utilizar a plataforma para venda de produtos ilícitos, proibidos ou que violem direitos de terceiros;')}</li>
                 <li>Utilizar o atendimento automatizado do WhatsApp em conformidade com as políticas da Meta e da WhatsApp Business Platform, abstendo-se de envio de spam ou mensagens não solicitadas;</li>

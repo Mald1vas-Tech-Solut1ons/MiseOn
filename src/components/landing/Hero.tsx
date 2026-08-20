@@ -2,8 +2,10 @@ import { ArrowRight, MessageCircle, Flame, QrCode } from 'lucide-react';
 import { Badge } from '../ui';
 import { zap } from './zap';
 
+import { useI18n } from '../../contexts/I18nContext';
 /** Mockup em JSX: tela do KDS com cronômetros (baseado no painel real). */
 function MockupKDS() {
+  const { tDynamic } = useI18n();
   return (
     <div className="flex h-full flex-col gap-3 rounded-xl border border-gray-800 bg-[#070C18] p-4">
       <div className="flex items-center justify-between border-b border-gray-800 pb-3">
@@ -14,7 +16,7 @@ function MockupKDS() {
         <div className="flex-1 rounded-lg border border-orange-500/30 bg-gray-900/50 p-3">
           <div className="mb-2 text-xs font-bold text-orange-500">#1042 · PREPARANDO (04:12)</div>
           <div className="text-sm text-gray-300">1x Combo Smash Duplo</div>
-          <div className="mt-1 text-xs text-gray-500">Sem cebola, molho extra</div>
+          <div className="mt-1 text-xs text-gray-500">{tDynamic('Sem cebola, molho extra')}</div>
         </div>
         <div className="flex-1 rounded-lg border border-gray-800 bg-gray-900/50 p-3">
           <div className="mb-2 text-xs font-bold text-blue-500">#1043 · NOVO (00:45)</div>
@@ -26,6 +28,7 @@ function MockupKDS() {
 }
 
 export function Hero() {
+  const { tDynamic } = useI18n();
   return (
     <section className="relative overflow-hidden pt-32 pb-20 lg:pt-44 lg:pb-28">
       {/* Glow orbs */}
@@ -39,7 +42,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-14 px-6 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="text-center lg:text-left">
           <Badge tom="primario" className="mb-6 px-4 py-1.5 text-xs">
-            <Flame size={12} /> Cardápio digital + operação completa
+            <Flame size={12} /> {tDynamic('Cardápio digital + operação completa')}
           </Badge>
 
           <h1 style={{ fontFamily: "'Sora', sans-serif", lineHeight: 1.08 }} className="text-4xl font-extrabold tracking-tight sm:text-6xl">
@@ -59,7 +62,7 @@ export function Hero() {
               style={{ background: '#0A5CC4', fontFamily: "'Sora', sans-serif", boxShadow: '0 8px 32px rgba(10,92,196,0.5)' }}
               className="flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-lg font-bold text-white transition hover:brightness-125 hover:scale-105 sm:w-auto"
             >
-              Testar grátis por 14 dias <ArrowRight size={20} />
+              {tDynamic('Testar grátis por 14 dias')} <ArrowRight size={20} />
             </a>
             <a
               href={zap('Olá! Quero ver o MiseOn funcionando no meu negócio.')}
@@ -68,12 +71,12 @@ export function Hero() {
               style={{ border: '2px solid #22c55e', color: '#22c55e', background: 'rgba(34,197,94,0.08)', fontFamily: "'Sora', sans-serif" }}
               className="flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-lg font-bold transition hover:bg-green-500/15 sm:w-auto"
             >
-              <MessageCircle size={20} /> Falar no WhatsApp
+              <MessageCircle size={20} /> {tDynamic('Falar no WhatsApp')}
             </a>
           </div>
 
           <p style={{ color: 'rgba(234,241,251,0.4)' }} className="mt-4 text-sm font-medium">
-            Sem cartão de crédito · Cancele quando quiser
+            {tDynamic('Sem cartão de crédito · Cancele quando quiser')}
           </p>
         </div>
 
@@ -97,7 +100,7 @@ export function Hero() {
               <QrCode size={18} />
             </div>
             <div>
-              <div className="text-xs text-gray-400">Pix recebido na sua conta</div>
+              <div className="text-xs text-gray-400">{tDynamic('Pix recebido na sua conta')}</div>
               <div className="text-sm font-extrabold text-emerald-400">+ R$ 38,90</div>
             </div>
           </div>

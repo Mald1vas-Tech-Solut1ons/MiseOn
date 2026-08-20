@@ -59,10 +59,10 @@ export default function Privacidade() {
 
               <p className="mb-2"><strong>a) Dos Lojistas (restaurantes e seus usuários):</strong></p>
               <ul className="mb-4 list-disc space-y-1 pl-5">
-                <li>Dados cadastrais: nome, e-mail, telefone/WhatsApp, CPF/CNPJ, endereço do estabelecimento;</li>
+                <li>{tDynamic('Dados cadastrais: nome, e-mail, telefone/WhatsApp, CPF/CNPJ, endereço do estabelecimento;')}</li>
                 <li>{tDynamic('Dados financeiros: dados bancários e identificadores necessários ao split de pagamentos processado pela instituição de pagamento parceira (Efí);')}</li>
                 <li>{tDynamic('Dados de uso: logs de acesso, metadados de navegação e interações com a plataforma;')}</li>
-                <li>Conteúdo operacional: cardápio, preços, fichas técnicas, estoque e configurações da loja.</li>
+                <li>{tDynamic('Conteúdo operacional: cardápio, preços, fichas técnicas, estoque e configurações da loja.')}</li>
               </ul>
 
               <p className="mb-2"><strong>b) Dos clientes finais dos Lojistas (consumidores):</strong></p>
@@ -78,9 +78,9 @@ export default function Privacidade() {
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">3. Finalidades e Base Legal</h2>
               <p className="mb-2">{tDynamic('Tratamos dados pessoais para as seguintes finalidades:')}</p>
               <ul className="list-disc space-y-2 pl-5">
-                <li><strong>Execução de contrato</strong> (art. 7º, V, LGPD): viabilizar pedidos, entregas, pagamentos, cardápio digital, painel de gestão e atendimento automatizado;</li>
-                <li><strong>Legítimo interesse</strong> (art. 7º, IX, LGPD): melhoria da plataforma, prevenção a fraudes, segurança da informação, métricas agregadas e anonimizadas de uso;</li>
-                <li><strong>Cumprimento de obrigação legal ou regulatória</strong> (art. 7º, II, LGPD): emissão de documentos fiscais, guarda de registros exigida por lei e atendimento a autoridades competentes.</li>
+                <li><strong>{tDynamic('Execução de contrato')}</strong> (art. 7º, V, LGPD): viabilizar pedidos, entregas, pagamentos, cardápio digital, painel de gestão e atendimento automatizado;</li>
+                <li><strong>{tDynamic('Legítimo interesse')}</strong> (art. 7º, IX, LGPD): melhoria da plataforma, prevenção a fraudes, segurança da informação, métricas agregadas e anonimizadas de uso;</li>
+                <li><strong>{tDynamic('Cumprimento de obrigação legal ou regulatória')}</strong> (art. 7º, II, LGPD): emissão de documentos fiscais, guarda de registros exigida por lei e atendimento a autoridades competentes.</li>
               </ul>
               <p className="mt-3">
                 Os dados dos clientes finais pertencem ao Lojista para o qual o pedido foi realizado.
@@ -111,10 +111,10 @@ export default function Privacidade() {
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">5. Retenção de Dados</h2>
               <ul className="list-disc space-y-2 pl-5">
-                <li><strong>Dados cadastrais e operacionais do Lojista:</strong> mantidos enquanto a conta estiver ativa e, após o encerramento, pelo prazo necessário ao cumprimento de obrigações legais e fiscais;</li>
-                <li><strong>Conversas de chat e WhatsApp:</strong> retidas por até <strong>12 (doze) meses</strong>, prazo após o qual são eliminadas ou anonimizadas;</li>
-                <li><strong>Logs de acesso:</strong> mantidos pelo prazo mínimo exigido pelo Marco Civil da Internet (Lei nº 12.965/2014);</li>
-                <li><strong>Dados de pedidos e financeiros:</strong> mantidos pelos prazos legais de guarda fiscal e contábil.</li>
+                <li><strong>{tDynamic('Dados cadastrais e operacionais do Lojista:')}</strong> mantidos enquanto a conta estiver ativa e, após o encerramento, pelo prazo necessário ao cumprimento de obrigações legais e fiscais;</li>
+                <li><strong>{tDynamic('Conversas de chat e WhatsApp:')}</strong> retidas por até <strong>12 (doze) meses</strong>, prazo após o qual são eliminadas ou anonimizadas;</li>
+                <li><strong>{tDynamic('Logs de acesso:')}</strong> mantidos pelo prazo mínimo exigido pelo Marco Civil da Internet (Lei nº 12.965/2014);</li>
+                <li><strong>{tDynamic('Dados de pedidos e financeiros:')}</strong> mantidos pelos prazos legais de guarda fiscal e contábil.</li>
               </ul>
             </section>
 
@@ -124,9 +124,9 @@ export default function Privacidade() {
                 {tDynamic('Nos termos do art. 18 da LGPD, você pode solicitar, a qualquer tempo e de forma gratuita:')}
               </p>
               <ul className="list-disc space-y-1 pl-5">
-                <li>Confirmação da existência de tratamento e acesso aos seus dados;</li>
-                <li>Correção de dados incompletos, inexatos ou desatualizados;</li>
-                <li>Anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desconformidade;</li>
+                <li>{tDynamic('Confirmação da existência de tratamento e acesso aos seus dados;')}</li>
+                <li>{tDynamic('Correção de dados incompletos, inexatos ou desatualizados;')}</li>
+                <li>{tDynamic('Anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desconformidade;')}</li>
                 <li>{tDynamic('Portabilidade dos dados, observados os segredos comercial e industrial;')}</li>
                 <li>{tDynamic('Eliminação dos dados tratados com consentimento e revogação do consentimento;')}</li>
                 <li>{tDynamic('Informação sobre as entidades com as quais os dados foram compartilhados.')}</li>
@@ -146,7 +146,7 @@ export default function Privacidade() {
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">7. Cookies e Tecnologias Semelhantes</h2>
               <p>
-                Utilizamos cookies e armazenamento local divididos em três categorias:
+                {tDynamic('Utilizamos cookies e armazenamento local divididos em três categorias:')}
               </p>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                 <li><strong>Essenciais:</strong> estritamente necessários para autenticação, sessão do carrinho e tema (sempre ativos).</li>
@@ -162,7 +162,7 @@ export default function Privacidade() {
                   onClick={abrirGerenciadorCookies}
                   className="inline-flex items-center gap-2 rounded-xl bg-[var(--cor-primaria)] px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:brightness-110 active:scale-95"
                 >
-                  <Cookie size={16} /> Gerenciar Minhas Preferências de Cookies
+                  <Cookie size={16} /> {tDynamic('Gerenciar Minhas Preferências de Cookies')}
                 </button>
               </div>
             </section>
@@ -189,7 +189,7 @@ export default function Privacidade() {
             </section>
 
             <div className="mt-10 rounded-xl border border-gray-100 bg-gray-50 p-6 text-sm dark:border-gray-700 dark:bg-gray-800">
-              <p className="mb-1 font-semibold text-gray-900 dark:text-white">Encarregado de Dados (DPO)</p>
+              <p className="mb-1 font-semibold text-gray-900 dark:text-white">{tDynamic('Encarregado de Dados (DPO)')}</p>
               <p>
                 MiseOn · CNPJ 63.310.253/0001-81 · Manaus/AM, Brasil<br />
                 E-mail:{' '}
@@ -201,7 +201,7 @@ export default function Privacidade() {
                   (11) 91988-9233
                 </a>
                 <br />
-                Última atualização desta Política: <strong>22/07/2026</strong>.
+                {tDynamic('Última atualização desta Política:')} <strong>22/07/2026</strong>.
               </p>
             </div>
 

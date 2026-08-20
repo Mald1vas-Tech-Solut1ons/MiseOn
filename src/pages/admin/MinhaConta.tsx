@@ -192,7 +192,7 @@ export default function MinhaConta() {
           <UserIcon size={24} className="text-[var(--cor-primaria)]" /> Minha Conta
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Gerencie seus dados de acesso e segurança como parceiro MiseOn.
+          {tDynamic('Gerencie seus dados de acesso e segurança como parceiro MiseOn.')}
         </p>
       </div>
 
@@ -213,7 +213,7 @@ export default function MinhaConta() {
 
             <div className="space-y-4">
               <label className="block">
-                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">E-mail de Acesso (Login)</span>
+                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">{tDynamic('E-mail de Acesso (Login)')}</span>
                 <div className="relative">
                   <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input 
@@ -270,7 +270,7 @@ export default function MinhaConta() {
         <div className="space-y-6">
           <form onSubmit={alterarSenha} className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
             <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
-              <Lock size={18} className="text-orange-500" /> Segurança e Senha
+              <Lock size={18} className="text-orange-500" /> {tDynamic('Segurança e Senha')}
             </h3>
 
             {msgSenha && (
@@ -349,8 +349,8 @@ export default function MinhaConta() {
                   <KeyRound size={20} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold dark:text-gray-100">Verificação de Segurança</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Confirmação de alteração de e-mail</p>
+                  <h3 className="text-base font-bold dark:text-gray-100">{tDynamic('Verificação de Segurança')}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Confirmação de alteração de e-mail')}</p>
                 </div>
               </div>
               <button onClick={() => setModalOtpAberto(false)} disabled={verificandoOtp} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
@@ -373,7 +373,7 @@ export default function MinhaConta() {
 
             <form onSubmit={confirmarTrocaEmail} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 text-center">Código de 6 dígitos</label>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 text-center">{tDynamic('Código de 6 dígitos')}</label>
                 <input
                   type="text"
                   maxLength={6}

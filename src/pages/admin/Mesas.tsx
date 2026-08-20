@@ -213,7 +213,7 @@ export default function Mesas() {
         <div class="card">
           <p style="text-transform:uppercase;font-weight:700;letter-spacing:2px;">Mesa</p>
           <h1>${mesaQr.numero}</h1>
-          <p>Aponte a câmera do celular<br/>para ver o cardápio e pedir</p>
+          <p>{tDynamic('Aponte a câmera do celular')}<br/>para ver o cardápio e pedir</p>
           <img src="${qrDataUrl}" />
           <div class="rodape">MiseOn</div>
         </div>
@@ -508,7 +508,7 @@ export default function Mesas() {
               <button type="button" onClick={() => setModalNovaMesa(false)} className="text-gray-400"><X size={20} /></button>
             </div>
             
-            <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Número da mesa *</label>
+            <label className="text-xs font-bold text-gray-600 dark:text-gray-300">{tDynamic('Número da mesa *')}</label>
             <input {...register('numero')} placeholder="ex: 5" inputMode="numeric" autoFocus className={`${inputCls} mt-1 text-center text-xl font-black ${errors.numero ? 'border-red-500 focus:border-red-500' : ''}`} />
             {errors.numero && <p className="mt-1 text-[10px] text-red-500">{errors.numero.message}</p>}
 
@@ -614,7 +614,7 @@ export default function Mesas() {
 
                 <div className="border-t border-gray-100 p-5 dark:border-gray-800">
                   <div className="mb-2 flex items-center justify-between">
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-gray-600 dark:text-gray-300"><Percent size={12} /> Taxa de serviço</label>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-gray-600 dark:text-gray-300"><Percent size={12} /> {tDynamic('Taxa de serviço')}</label>
                     <div className="flex items-center gap-1">
                       <input value={taxaEditavel} onChange={(e) => {
                         const value = e.target.value;
@@ -632,7 +632,7 @@ export default function Mesas() {
                   </div>
                   <div className="space-y-1 text-sm text-gray-500">
                     <div className="flex justify-between"><span>Subtotal</span><span>{fmt(subtotalComanda)}</span></div>
-                    {valorServico > 0 && <div className="flex justify-between"><span>Taxa de serviço</span><span>{fmt(valorServico)}</span></div>}
+                    {valorServico > 0 && <div className="flex justify-between"><span>{tDynamic('Taxa de serviço')}</span><span>{fmt(valorServico)}</span></div>}
                     {valorJaPago > 0 && <div className="flex justify-between font-medium text-emerald-600 dark:text-emerald-400"><span>Já pago</span><span>- {fmt(valorJaPago)}</span></div>}
                     <div className="flex justify-between text-lg font-black dark:text-gray-100">
                       <span>Restante</span>
@@ -654,7 +654,7 @@ export default function Mesas() {
                           <op.icon size={18} />{op.label}
                         </button>
                       )) : (
-                        <div className="col-span-2 text-center text-sm font-bold text-emerald-600">A conta já foi 100% paga. <button onClick={() => confirmarFechamento('DINHEIRO')} className="underline">Fechar comanda agora.</button></div>
+                        <div className="col-span-2 text-center text-sm font-bold text-emerald-600">{tDynamic('A conta já foi 100% paga.')} <button onClick={() => confirmarFechamento('DINHEIRO')} className="underline">Fechar comanda agora.</button></div>
                       )}
                     </div>
                   ) : (
@@ -685,7 +685,7 @@ export default function Mesas() {
                       )}
                       {fechando !== 'DINHEIRO' && (
                         <div className="mb-3">
-                          <label className="text-xs font-bold text-gray-600 dark:text-gray-300">Valor a passar na maquininha/pix</label>
+                          <label className="text-xs font-bold text-gray-600 dark:text-gray-300">{tDynamic('Valor a passar na maquininha/pix')}</label>
                           <input value={valorRecebido} onChange={(e) => {
                             const value = e.target.value;
                             if (value.startsWith('-')) { setErroFechamento('Valor não pode ser negativo'); return; }

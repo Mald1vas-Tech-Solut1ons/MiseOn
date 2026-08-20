@@ -12,6 +12,7 @@ import { MiseOnLoader } from '../../components/MiseOnLoader';
 import { IfoodOnboarding } from '../../components/admin/IfoodOnboarding';
 import type { CtxLoja } from './AdminLayout';
 
+import { useI18n } from '../../contexts/I18nContext';
 type Aba = 'conexao' | 'depara' | 'pedidos';
 
 interface LojaIfood {
@@ -43,6 +44,7 @@ const LIMIAR: LojaIfood = {
 };
 
 export default function Ifood() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const toast = useToast();
   const [aba, setAba] = useState<Aba>('conexao');
@@ -127,9 +129,9 @@ export default function Ifood() {
             <Store size={24} />
           </div>
           <div>
-            <h1 className="font-['Sora'] text-2xl font-extrabold text-gray-900 dark:text-white">Integração iFood</h1>
+            <h1 className="font-['Sora'] text-2xl font-extrabold text-gray-900 dark:text-white">{tDynamic('Integração iFood')}</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Pedidos do iFood direto no seu PDV, com margem protegida.
+              {tDynamic('Pedidos do iFood direto no seu PDV, com margem protegida.')}
             </p>
           </div>
         </div>
@@ -154,7 +156,7 @@ export default function Ifood() {
               : 'bg-white text-gray-600 shadow-sm hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
           }`}
         >
-          <Link2 size={15} /> Conexão e Taxas
+          <Link2 size={15} /> {tDynamic('Conexão e Taxas')}
         </button>
         <button
           data-tour="tour-ifood-aba-depara"
@@ -165,7 +167,7 @@ export default function Ifood() {
               : 'bg-white text-gray-600 shadow-sm hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
           }`}
         >
-          <Package size={15} /> De-Para de Produtos
+          <Package size={15} /> {tDynamic('De-Para de Produtos')}
         </button>
         <button
           onClick={() => setAba('pedidos')}
@@ -190,9 +192,9 @@ export default function Ifood() {
           {conectado && (
             <div className="mx-auto max-w-xl space-y-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
               <div>
-                <p className="text-sm font-black text-gray-900 dark:text-white">O que o MiseOn controla no iFood</p>
+                <p className="text-sm font-black text-gray-900 dark:text-white">{tDynamic('O que o MiseOn controla no iFood')}</p>
                 <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                  Cada item é independente. Tudo começa desligado — nada é alterado no seu iFood sem você ligar aqui.
+                  {tDynamic('Cada item é independente. Tudo começa desligado — nada é alterado no seu iFood sem você ligar aqui.')}
                 </p>
               </div>
 
@@ -263,6 +265,7 @@ export default function Ifood() {
    ABA 2 — De-Para de Produtos (pdv_code ↔ externalCode do iFood)
    ══════════════════════════════════════════════════════════════════ */
 function DeParaProdutos({ lojaId, loja }: { lojaId: string; loja: LojaIfood }) {
+  const { tDynamic } = useI18n();
   const toast = useToast();
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [codigos, setCodigos] = useState<Record<string, string>>({});
@@ -339,7 +342,7 @@ function DeParaProdutos({ lojaId, loja }: { lojaId: string; loja: LojaIfood }) {
     <div className="space-y-4">
       {/* Explicação + estatísticas */}
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <h3 className="font-['Sora'] text-base font-bold text-gray-900 dark:text-white">Como funciona o De-Para</h3>
+        <h3 className="font-['Sora'] text-base font-bold text-gray-900 dark:text-white">{tDynamic('Como funciona o De-Para')}</h3>
         <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
           O <b>Código iFood</b> de cada produto precisa ser <b>idêntico</b> ao "Código PDV" cadastrado no Portal do Parceiro
           do iFood. Quando um pedido entra via webhook, o MiseOn usa esse código para vincular os itens aos seus produtos —
@@ -408,7 +411,7 @@ function DeParaProdutos({ lojaId, loja }: { lojaId: string; loja: LojaIfood }) {
           <span>Produto</span>
           <span className="text-right">Preço PDV</span>
           <span className="text-right">Preço iFood</span>
-          <span>Código iFood (PDV)</span>
+          <span>{tDynamic('Código iFood (PDV)')}</span>
         </div>
         {filtrados.length === 0 && (
           <p className="px-4 py-10 text-center text-sm text-gray-400">
@@ -458,6 +461,7 @@ function DeParaProdutos({ lojaId, loja }: { lojaId: string; loja: LojaIfood }) {
    ABA 3 — Pedidos iFood (últimos 30 dias)
    ══════════════════════════════════════════════════════════════════ */
 function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepara: () => void }) {
+  const { tDynamic } = useI18n();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [carregando, setCarregando] = useState(true);
 
@@ -495,9 +499,9 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
     return (
       <div className="rounded-2xl border border-gray-200 bg-white px-4 py-16 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <Store size={40} className="mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-        <p className="font-['Sora'] text-sm font-bold text-gray-700 dark:text-gray-200">Nenhum pedido iFood nos últimos 30 dias</p>
+        <p className="font-['Sora'] text-sm font-bold text-gray-700 dark:text-gray-200">{tDynamic('Nenhum pedido iFood nos últimos 30 dias')}</p>
         <p className="mt-1 text-xs text-gray-400">
-          Quando um pedido entrar pelo webhook do iFood, ele aparece aqui e no Painel de Pedidos automaticamente.
+          {tDynamic('Quando um pedido entrar pelo webhook do iFood, ele aparece aqui e no Painel de Pedidos automaticamente.')}
         </p>
       </div>
     );
@@ -517,7 +521,7 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
         </div>
         <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center dark:border-emerald-900/30 dark:bg-emerald-900/10">
           <p className="font-['JetBrains_Mono'] text-lg font-black text-emerald-600 dark:text-emerald-400">{fmt(totais.liquido)}</p>
-          <p className="text-[11px] font-semibold text-emerald-600/80 dark:text-emerald-400/80">Líquido estimado</p>
+          <p className="text-[11px] font-semibold text-emerald-600/80 dark:text-emerald-400/80">{tDynamic('Líquido estimado')}</p>
         </div>
       </div>
 

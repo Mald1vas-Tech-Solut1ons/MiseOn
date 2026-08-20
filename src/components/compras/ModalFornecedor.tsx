@@ -93,12 +93,12 @@ export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo 
               <input className={campo} type="email" value={f.email ?? ''} onChange={e => set({ email: e.target.value })} />
             </label>
             <label className="block">
-              <span className={rotulo}>Pessoa de contato</span>
+              <span className={rotulo}>{tDynamic('Pessoa de contato')}</span>
               <input className={campo} placeholder="Ex: Seu Zé, o vendedor"
                 value={f.contato_nome ?? ''} onChange={e => set({ contato_nome: e.target.value })} />
             </label>
             <label className="block">
-              <span className={rotulo}>Condição de pagamento</span>
+              <span className={rotulo}>{tDynamic('Condição de pagamento')}</span>
               <input className={campo} placeholder="Ex: 28 dias, à vista"
                 value={f.condicao_pagamento ?? ''} onChange={e => set({ condicao_pagamento: e.target.value })} />
             </label>
@@ -106,16 +106,16 @@ export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo 
 
           <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-900/10">
             <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-              Logística — alimenta a sugestão de compra
+              {tDynamic('Logística — alimenta a sugestão de compra')}
             </p>
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className={rotulo}>Prazo de entrega (dias)</span>
+                <span className={rotulo}>{tDynamic('Prazo de entrega (dias)')}</span>
                 <input className={campo} type="number" min="0" placeholder="Ex: 2"
                   value={f.prazo_entrega_dias ?? ''} onChange={e => set({ prazo_entrega_dias: e.target.value === '' ? null : Number(e.target.value) })} />
               </label>
               <label className="block">
-                <span className={rotulo}>Pedido mínimo R$</span>
+                <span className={rotulo}>{tDynamic('Pedido mínimo R$')}</span>
                 <input className={campo} type="number" step="any" min="0" placeholder="Ex: 300"
                   value={f.pedido_minimo ?? ''} onChange={e => set({ pedido_minimo: e.target.value === '' ? null : Number(e.target.value) })} />
               </label>

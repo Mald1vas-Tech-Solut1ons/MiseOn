@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { MailX, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 /**
  * Descadastro de e-mails promocionais, sem login.
  *
@@ -17,6 +18,7 @@ import { supabase } from '../../lib/supabase';
 type Estado = 'processando' | 'ok' | 'invalido' | 'erro';
 
 export default function DescadastroEmail() {
+  const { tDynamic } = useI18n();
   const [params] = useSearchParams();
   const token = params.get('t');
   const [estado, setEstado] = useState<Estado>('processando');
@@ -58,7 +60,7 @@ export default function DescadastroEmail() {
       <div className="max-w-xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
         <div className="bg-[var(--cor-secundaria)] px-8 py-10 text-white text-center">
           <MailX size={48} className="mx-auto mb-4 opacity-90" />
-          <h1 className="text-2xl font-extrabold font-sora">Preferências de e-mail</h1>
+          <h1 className="text-2xl font-extrabold font-sora">{tDynamic('Preferências de e-mail')}</h1>
         </div>
 
         <div className="p-8 sm:p-12 text-center text-gray-600 dark:text-gray-300">
@@ -67,7 +69,7 @@ export default function DescadastroEmail() {
           <p className="leading-relaxed">{conteudo.texto}</p>
 
           <a href="/" className="mt-8 inline-block rounded-xl bg-[var(--cor-primaria)] px-6 py-3 text-sm font-bold text-white">
-            Voltar ao início
+            {tDynamic('Voltar ao início')}
           </a>
         </div>
       </div>

@@ -107,7 +107,7 @@ export default function FiscalPlataforma() {
       <div className="mb-5 flex items-center gap-2">
         <Receipt className="text-emerald-400" size={24} />
         <div>
-          <h2 className="text-lg font-bold text-white">Configuração Fiscal da Plataforma</h2>
+          <h2 className="text-lg font-bold text-white">{tDynamic('Configuração Fiscal da Plataforma')}</h2>
           <p className="text-xs text-gray-400">{tDynamic('Dados da MiseOn (emissora) usados na NFS-e da assinatura dos lojistas.')}</p>
         </div>
         {config.certificado_status === 'valido' && (
@@ -138,14 +138,14 @@ export default function FiscalPlataforma() {
               className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
           </label>
           <label className="block md:col-span-2">
-            <span className="text-xs font-semibold text-gray-400 mb-1 block">Razão social (oficial, do CNPJ)</span>
+            <span className="text-xs font-semibold text-gray-400 mb-1 block">{tDynamic('Razão social (oficial, do CNPJ)')}</span>
             <input value={config.razao_social} onChange={(e) => set('razao_social', e.target.value)}
               className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
           </label>
         </div>
 
         <div className="rounded-2xl border border-dashed border-white/10 p-4">
-          <p className="text-sm font-bold text-white mb-1">Enquadramento de serviço (CNAE 8219-9/99)</p>
+          <p className="text-sm font-bold text-white mb-1">{tDynamic('Enquadramento de serviço (CNAE 8219-9/99)')}</p>
           <p className="mb-4 flex items-center gap-1.5 text-[11px] text-gray-400">
             <Info size={14} /> Manaus exige NFS-e Padrão Nacional desde 01/01/2026 (LC 214/2025), inclusive pra
             MEI. Já pré-preenchido com o código de tributação nacional 170202 ("apoio administrativo",
@@ -158,17 +158,17 @@ export default function FiscalPlataforma() {
                 className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold text-gray-400 mb-1 block">Código tributação nacional (cTribNac)</span>
+              <span className="text-xs font-semibold text-gray-400 mb-1 block">{tDynamic('Código tributação nacional (cTribNac)')}</span>
               <input value={config.codigo_tributacao_nacional ?? ''} onChange={(e) => set('codigo_tributacao_nacional', e.target.value)} placeholder="170202"
                 className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold text-gray-400 mb-1 block">Alíquota ISS (%)</span>
+              <span className="text-xs font-semibold text-gray-400 mb-1 block">{tDynamic('Alíquota ISS (%)')}</span>
               <input value={config.aliquota_iss ?? ''} onChange={(e) => set('aliquota_iss', e.target.value ? Number(e.target.value) : null)} inputMode="decimal"
                 className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold text-gray-400 mb-1 block">Opção Simples Nacional (DPS)</span>
+              <span className="text-xs font-semibold text-gray-400 mb-1 block">{tDynamic('Opção Simples Nacional (DPS)')}</span>
               <select value={config.codigo_opcao_simples_nacional ?? 2} onChange={(e) => set('codigo_opcao_simples_nacional', Number(e.target.value))}
                 className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white">
                 <option value={1}>Não optante</option>
@@ -177,12 +177,12 @@ export default function FiscalPlataforma() {
               </select>
             </label>
             <label className="block">
-              <span className="text-xs font-semibold text-gray-400 mb-1 block">Item lista serviço (LC116, referência)</span>
+              <span className="text-xs font-semibold text-gray-400 mb-1 block">{tDynamic('Item lista serviço (LC116, referência)')}</span>
               <input value={config.item_lista_servico ?? ''} onChange={(e) => set('item_lista_servico', e.target.value)} placeholder="17.02"
                 className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold text-gray-400 mb-1 block">Inscrição municipal</span>
+              <span className="text-xs font-semibold text-gray-400 mb-1 block">{tDynamic('Inscrição municipal')}</span>
               <input value={config.inscricao_municipal ?? ''} onChange={(e) => set('inscricao_municipal', e.target.value)}
                 className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
             </label>
@@ -224,12 +224,12 @@ export default function FiscalPlataforma() {
               className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
           </label>
           <label className="block">
-            <span className="text-xs font-semibold text-gray-400 mb-1 block">Código IBGE do município</span>
+            <span className="text-xs font-semibold text-gray-400 mb-1 block">{tDynamic('Código IBGE do município')}</span>
             <input value={config.codigo_ibge ?? ''} onChange={(e) => set('codigo_ibge', e.target.value)}
               className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
           </label>
           <label className="block">
-            <span className="text-xs font-semibold text-gray-400 mb-1 block">E-mail de contato</span>
+            <span className="text-xs font-semibold text-gray-400 mb-1 block">{tDynamic('E-mail de contato')}</span>
             <input value={config.email ?? ''} onChange={(e) => set('email', e.target.value)}
               className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
           </label>
@@ -240,13 +240,13 @@ export default function FiscalPlataforma() {
             <span className="text-xs font-semibold text-gray-400 mb-1 block">Ambiente</span>
             <select value={config.ambiente} onChange={(e) => set('ambiente', e.target.value as any)}
               className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white">
-              <option value="homologacao">Homologação (testes)</option>
-              <option value="producao">Produção (nota real)</option>
+              <option value="homologacao">{tDynamic('Homologação (testes)')}</option>
+              <option value="producao">{tDynamic('Produção (nota real)')}</option>
             </select>
           </label>
           <label className="flex items-center gap-2 rounded-xl border border-white/10 p-3 text-sm text-white mt-5">
             <input type="checkbox" checked={config.habilita_nfse} onChange={(e) => set('habilita_nfse', e.target.checked)} className="h-4 w-4" />
-            Habilitar emissão automática de NFS-e
+            {tDynamic('Habilitar emissão automática de NFS-e')}
           </label>
         </div>
 
@@ -261,14 +261,14 @@ export default function FiscalPlataforma() {
               </button>
             </div>
             <label className="block">
-              <span className="text-xs font-semibold text-gray-400 mb-1 block">Senha do certificado</span>
+              <span className="text-xs font-semibold text-gray-400 mb-1 block">{tDynamic('Senha do certificado')}</span>
               <input value={senha} onChange={(e) => setSenha(e.target.value)} type="password" placeholder="***"
                 className="w-full rounded-xl border border-white/10 bg-gray-950 p-3 text-sm text-white" />
             </label>
           </div>
           {config.certificado_status === 'valido' && (
             <p className="mt-3 text-[11px] text-emerald-400 font-semibold">
-              Certificado já configurado. Só preencha acima se precisar renovar/atualizar.
+              {tDynamic('Certificado já configurado. Só preencha acima se precisar renovar/atualizar.')}
             </p>
           )}
         </div>

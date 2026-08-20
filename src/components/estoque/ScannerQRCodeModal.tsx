@@ -271,7 +271,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
         {carregando ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Loader2 size={36} className="animate-spin text-orange-600 mb-3" />
-            <p className="font-bold text-sm text-gray-900 dark:text-gray-100">Consultando nota na SEFAZ SP...</p>
+            <p className="font-bold text-sm text-gray-900 dark:text-gray-100">{tDynamic('Consultando nota na SEFAZ SP...')}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Buscando itens, quantidades e valores.</p>
           </div>
         ) : modo === 'CAMERA' ? (
@@ -288,7 +288,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
                     onClick={() => setTentativa((n) => n + 1)}
                     className="border border-amber-600 text-amber-700 dark:text-amber-300 font-bold text-xs px-4 py-2 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30"
                   >
-                    Tentar a câmera de novo
+                    {tDynamic('Tentar a câmera de novo')}
                   </button>
                 </div>
               </div>
@@ -306,7 +306,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
                 <div className="mt-3 flex items-start justify-between gap-2">
                   <p className="text-[11px] text-gray-500 dark:text-gray-400">
                     Encoste no QR Code do cupom, a uns 10 cm, com o papel esticado.
-                    {usandoNativo && <span className="block text-emerald-600 dark:text-emerald-400">Leitor do próprio aparelho ativo.</span>}
+                    {usandoNativo && <span className="block text-emerald-600 dark:text-emerald-400">{tDynamic('Leitor do próprio aparelho ativo.')}</span>}
                   </p>
                   {temLanterna && (
                     <button
@@ -332,7 +332,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
                   <ol className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-gray-600 dark:text-gray-400">
                     <li><strong>1.</strong> {tDynamic('Deixe o cupom esticado sobre uma mesa, sem dobra no QR.')}</li>
                     <li><strong>2.</strong> {tDynamic('Fotografe de cima, a uns 15 cm, com o QR no meio do quadro.')}</li>
-                    <li><strong>3.</strong> Evite sombra da própria mão e reflexo em cima do código.</li>
+                    <li><strong>3.</strong> {tDynamic('Evite sombra da própria mão e reflexo em cima do código.')}</li>
                   </ol>
                   <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-500">
                     {tDynamic('Serve foto da galeria, inclusive uma que você já tirou antes.')}
@@ -373,7 +373,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
           <form onSubmit={handleSubmitManual} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                URL contida no QR Code
+                {tDynamic('URL contida no QR Code')}
               </label>
               <textarea
                 rows={3}

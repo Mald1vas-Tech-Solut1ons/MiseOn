@@ -11,9 +11,11 @@ import CrmClientes from '../../components/admin/CrmClientes';
 import type { CtxLoja } from './AdminLayout';
 import { getOptimizedImageUrl } from '../../lib/cdn';
 
+import { useI18n } from '../../contexts/I18nContext';
 type Tab = 'cupons' | 'banners' | 'cashback' | 'recuperacao' | 'anuncios' | 'disparos' | 'emails' | 'crm';
 
 export default function Marketing() {
+  const { tDynamic } = useI18n();
   const { lojaId, lojaSlug } = useOutletContext<CtxLoja>();
   const [tab, setTab] = useState<Tab>('cupons');
 
@@ -22,12 +24,12 @@ export default function Marketing() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-['JetBrains_Mono'] text-[11px] tracking-[0.25em] text-orange-500 uppercase">GESTÃO · MARKETING & VENDAS</span>
+          <span className="font-['JetBrains_Mono'] text-[11px] tracking-[0.25em] text-orange-500 uppercase">{tDynamic('GESTÃO · MARKETING & VENDAS')}</span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]" />
         </div>
         <h2 className="font-['Sora'] text-2xl font-black text-gray-900 dark:text-white">Marketing & Engajamento</h2>
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-2xl">
-          Atraia novos clientes com anúncios rastreados, fidelize com cashback e recupere vendas no WhatsApp sem pagar comissões adicionais.
+          {tDynamic('Atraia novos clientes com anúncios rastreados, fidelize com cashback e recupere vendas no WhatsApp sem pagar comissões adicionais.')}
         </p>
       </div>
 
@@ -73,6 +75,7 @@ export default function Marketing() {
 
 // ── Cupons ────────────────────────────────────────────────────
 function CuponsTab({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
   const [cupons, setCupons] = useState<Cupom[]>([]);
   const [editando, setEditando] = useState<Cupom | 'novo' | null>(null);
 
@@ -97,8 +100,8 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white">Cupons de Desconto</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Ofereça incentivos estratégicos para primeira compra ou pedidos mínimos.</p>
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white">{tDynamic('Cupons de Desconto')}</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Ofereça incentivos estratégicos para primeira compra ou pedidos mínimos.')}</p>
         </div>
         <button
           onClick={() => setEditando('novo')}
@@ -170,7 +173,7 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
         <div className="p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl">
           <Gift size={32} className="mx-auto mb-2 text-gray-400" />
           <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Nenhum cupom cadastrado</p>
-          <p className="text-xs text-gray-400 max-w-sm mx-auto mt-1">Crie cupons de primeira compra para aumentar a taxa de conversão do seu cardápio.</p>
+          <p className="text-xs text-gray-400 max-w-sm mx-auto mt-1">{tDynamic('Crie cupons de primeira compra para aumentar a taxa de conversão do seu cardápio.')}</p>
         </div>
       )}
 
@@ -187,6 +190,7 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
 }
 
 function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom: Cupom | null; onClose: () => void; onSalvo: () => void }) {
+  const { tDynamic } = useI18n();
   const [codigo, setCodigo] = useState(cupom?.codigo ?? '');
   const [descricao, setDescricao] = useState(cupom?.descricao ?? '');
   const [tipo, setTipo] = useState<'FIXO' | 'PERCENTUAL'>(cupom?.tipo ?? 'FIXO');
@@ -228,29 +232,29 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
 
         <div className="space-y-3 text-sm">
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Código do Cupom</label>
+            <label className="text-xs font-bold text-gray-500 uppercase">{tDynamic('Código do Cupom')}</label>
             <input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="Ex: BEMVINDO10" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-mono font-bold uppercase outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" />
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Descrição (Exibida para o cliente)</label>
+            <label className="text-xs font-bold text-gray-500 uppercase">{tDynamic('Descrição (Exibida para o cliente)')}</label>
             <input value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Ex: 10% de desconto no seu primeiro pedido!" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase">Tipo de Desconto</label>
+              <label className="text-xs font-bold text-gray-500 uppercase">{tDynamic('Tipo de Desconto')}</label>
               <select value={tipo} onChange={(e) => setTipo(e.target.value as any)} className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-semibold outline-none">
                 <option value="FIXO">Valor fixo (R$)</option>
                 <option value="PERCENTUAL">Percentual (%)</option>
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase">Valor do Desconto</label>
+              <label className="text-xs font-bold text-gray-500 uppercase">{tDynamic('Valor do Desconto')}</label>
               <input value={valor} onChange={(e) => setValor(e.target.value)} type="number" placeholder="10" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-bold outline-none" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase">Pedido Mínimo (R$)</label>
+              <label className="text-xs font-bold text-gray-500 uppercase">{tDynamic('Pedido Mínimo (R$)')}</label>
               <input value={pedidoMinimo} onChange={(e) => setPedidoMinimo(e.target.value)} type="number" placeholder="0" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none" />
             </div>
             <div>
@@ -260,20 +264,20 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase">Forma de Pagamento</label>
+              <label className="text-xs font-bold text-gray-500 uppercase">{tDynamic('Forma de Pagamento')}</label>
               <select value={metodo} onChange={(e) => setMetodo(e.target.value as any)} className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none">
-                <option value="">Qualquer método</option>
+                <option value="">{tDynamic('Qualquer método')}</option>
                 {(['PIX', 'CREDITO', 'DEBITO', 'DINHEIRO'] as MetodoPgto[]).map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase">Data de Validade</label>
+              <label className="text-xs font-bold text-gray-500 uppercase">{tDynamic('Data de Validade')}</label>
               <input value={validade} onChange={(e) => setValidade(e.target.value)} type="date" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none" />
             </div>
           </div>
           <label className="flex items-center gap-2 pt-1 text-xs font-semibold text-gray-700 dark:text-gray-300">
             <input type="checkbox" checked={primeiraCompra} onChange={(e) => setPrimeiraCompra(e.target.checked)} className="h-4 w-4 rounded accent-[var(--cor-primaria)]" />
-            Válido exclusivamente no 1º pedido do cliente
+            {tDynamic('Válido exclusivamente no 1º pedido do cliente')}
           </label>
         </div>
 
@@ -289,6 +293,7 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
 
 // ── Banners ───────────────────────────────────────────────────
 function BannersTab({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [novo, setNovo] = useState({ imagem_url: '', titulo: '', link_redirecionamento: '' });
 
@@ -330,7 +335,7 @@ function BannersTab({ lojaId }: { lojaId: string }) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white">Banners do Carrossel da Vitrine</h3>
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white">{tDynamic('Banners do Carrossel da Vitrine')}</h3>
           {banners.map((b, idx) => (
             <div key={b.id} className={`flex items-center gap-3 rounded-2xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm ${b.is_ativo === false ? 'opacity-50' : ''}`}>
               <img src={getOptimizedImageUrl(b.imagem_url)} className="h-16 w-28 shrink-0 rounded-xl object-cover" alt="" />
@@ -346,7 +351,7 @@ function BannersTab({ lojaId }: { lojaId: string }) {
               <button onClick={() => excluir(b)} className="rounded-xl border border-red-200 p-2 text-red-500 hover:bg-red-50"><Trash2 size={14} /></button>
             </div>
           ))}
-          {banners.length === 0 && <p className="py-8 text-center text-xs text-gray-400">Nenhum banner cadastrado no carrossel.</p>}
+          {banners.length === 0 && <p className="py-8 text-center text-xs text-gray-400">{tDynamic('Nenhum banner cadastrado no carrossel.')}</p>}
         </div>
 
         <div className="rounded-3xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-5 shadow-sm space-y-3 h-fit">
@@ -363,6 +368,7 @@ function BannersTab({ lojaId }: { lojaId: string }) {
 
 // ── Cashback ──────────────────────────────────────────────────
 function CashbackTab({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
   const [pct, setPct] = useState('0');
   const [pctOriginal, setPctOriginal] = useState('0');
   const [stats, setStats] = useState({ clientesComSaldo: 0, passivoTotal: 0 });
@@ -396,12 +402,12 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
     setTimeout(() => setMsg(''), 2500);
   };
 
-  if (carregando) return <p className="py-10 text-center text-xs text-gray-400">Carregando dados de Cashback…</p>;
+  if (carregando) return <p className="py-10 text-center text-xs text-gray-400">{tDynamic('Carregando dados de Cashback…')}</p>;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="rounded-3xl border border-[var(--cor-primaria)]/30 bg-[var(--cor-primaria)]/5 p-5">
-        <p className="mb-1 flex items-center gap-2 text-sm font-black text-[var(--cor-primaria)]"><Wallet size={16} /> Como Funciona o Programa de Fidelidade</p>
+        <p className="mb-1 flex items-center gap-2 text-sm font-black text-[var(--cor-primaria)]"><Wallet size={16} /> {tDynamic('Como Funciona o Programa de Fidelidade')}</p>
         <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
           A cada pedido <b>finalizado</b> feito pelo cardápio online, o cliente ganha automaticamente um % do valor pago em saldo. Na compra seguinte, o saldo acumulado aparece como opção de desconto no checkout, gerando uma taxa de retenção até 4x superior a concorrentes sem programa de pontos.
         </p>
@@ -409,13 +415,13 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
 
       <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-4">
         <div>
-          <span className="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">Percentual de Cashback por Pedido</span>
+          <span className="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">{tDynamic('Percentual de Cashback por Pedido')}</span>
           <div className="mt-3 flex items-center gap-3">
             <input type="number" min="0" max="100" step="0.5" value={pct} onChange={(e) => setPct(e.target.value)}
               className="w-32 rounded-2xl border-2 border-[var(--cor-primaria)] bg-green-50 p-3 text-center text-3xl font-black text-[var(--cor-primaria)] outline-none dark:bg-green-900/10" />
             <span className="text-2xl font-black text-gray-400">% de retorno</span>
           </div>
-          <p className="mt-2 text-xs text-gray-400">Dica: 5% a 10% é o valor ideal utilizado pelas maiores redes para garantir a volta do cliente.</p>
+          <p className="mt-2 text-xs text-gray-400">{tDynamic('Dica: 5% a 10% é o valor ideal utilizado pelas maiores redes para garantir a volta do cliente.')}</p>
         </div>
 
         {msg && <p className={`text-xs font-bold ${msg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
@@ -428,14 +434,14 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-xs font-bold text-gray-400 uppercase">Clientes com Saldo Ativo</p>
+          <p className="text-xs font-bold text-gray-400 uppercase">{tDynamic('Clientes com Saldo Ativo')}</p>
           <p className="mt-2 text-3xl font-black dark:text-white">{stats.clientesComSaldo}</p>
-          <p className="text-[11px] text-gray-400 mt-1">Clientes engajados prontos para pedir de novo.</p>
+          <p className="text-[11px] text-gray-400 mt-1">{tDynamic('Clientes engajados prontos para pedir de novo.')}</p>
         </div>
         <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-xs font-bold text-gray-400 uppercase">Passivo Total em Aberto</p>
+          <p className="text-xs font-bold text-gray-400 uppercase">{tDynamic('Passivo Total em Aberto')}</p>
           <p className="mt-2 text-3xl font-black text-[var(--cor-primaria)]">{fmt(stats.passivoTotal)}</p>
-          <p className="text-[11px] text-gray-400 mt-1">Valor acumulado por clientes para futuros descontos.</p>
+          <p className="text-[11px] text-gray-400 mt-1">{tDynamic('Valor acumulado por clientes para futuros descontos.')}</p>
         </div>
       </div>
     </div>
@@ -449,6 +455,7 @@ interface PixPendente {
 }
 
 function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string }) {
+  const { tDynamic } = useI18n();
   const [subtab, setSubtab] = useState<'pix' | 'carrinhos'>('pix');
   const [pixPendentes, setPixPendentes] = useState<PixPendente[]>([]);
   const [carrinhos, setCarrinhos] = useState<(CarrinhoAbandonado & { nome?: string | null; telefone?: string })[]>([]);
@@ -514,7 +521,7 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
     enviarCarrinho(c, codigo);
   };
 
-  if (carregando) return <p className="py-10 text-center text-xs text-gray-400">Buscando oportunidades de recuperação…</p>;
+  if (carregando) return <p className="py-10 text-center text-xs text-gray-400">{tDynamic('Buscando oportunidades de recuperação…')}</p>;
 
   return (
     <div className="space-y-4">
@@ -550,7 +557,7 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
               </button>
             </div>
           ))}
-          {pixPendentes.length === 0 && <p className="py-8 text-center text-xs text-gray-400">Nenhum Pix pendente sem pagamento nos últimos dias. Excelente!</p>}
+          {pixPendentes.length === 0 && <p className="py-8 text-center text-xs text-gray-400">{tDynamic('Nenhum Pix pendente sem pagamento nos últimos dias. Excelente!')}</p>}
         </div>
       )}
 
@@ -567,7 +574,7 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
               </div>
               <div className="flex gap-2">
                 <button onClick={() => enviarCarrinho(c)} disabled={!c.telefone} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50">
-                  <MessageCircle size={14} /> Falar no WhatsApp
+                  <MessageCircle size={14} /> {tDynamic('Falar no WhatsApp')}
                 </button>
                 <button onClick={() => gerarCupomEEnviar(c)} disabled={!c.telefone || gerandoCupom === c.id} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] py-2 text-xs font-bold text-white shadow-sm hover:brightness-110">
                   <Gift size={14} /> {gerandoCupom === c.id ? 'Gerando…' : 'Enviar com 10% OFF'}
@@ -584,6 +591,7 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
 
 // ── Meta Pixel & GA4 ──────────────────────────────────────────
 function AnunciosTab({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
   const [pixelId, setPixelId] = useState('');
   const [ga4Id, setGa4Id] = useState('');
   const [salvando, setSalvando] = useState(false);
@@ -629,10 +637,10 @@ function AnunciosTab({ lojaId }: { lojaId: string }) {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="rounded-3xl border border-blue-200 bg-blue-50/60 dark:bg-blue-950/30 dark:border-blue-900/50 p-5 space-y-2">
         <p className="flex items-center gap-2 text-sm font-bold text-blue-800 dark:text-blue-300">
-          <Target size={16} /> Rastreamento Profissional de Anúncios no Instagram & Google
+          <Target size={16} /> {tDynamic('Rastreamento Profissional de Anúncios no Instagram & Google')}
         </p>
         <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
-          Cole abaixo os identificadores dos seus pixels. O cardápio do MiseOn dispara automaticamente os eventos de <b>PageView</b>, <b>AddToCart</b> e <b>Purchase</b> para otimizar suas campanhas de tráfego pago sem custo adicional de servidor.
+          {tDynamic('Cole abaixo os identificadores dos seus pixels. O cardápio do MiseOn dispara automaticamente os eventos de')} <b>PageView</b>, <b>AddToCart</b> e <b>Purchase</b> para otimizar suas campanhas de tráfego pago sem custo adicional de servidor.
         </p>
       </div>
 
@@ -645,7 +653,7 @@ function AnunciosTab({ lojaId }: { lojaId: string }) {
             placeholder="Ex: 123456789012345"
             className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
           />
-          <p className="text-[11px] text-gray-400 mt-1">Encontrado no Gerenciador de Negócios da Meta em Fontes de Dados → Pixels.</p>
+          <p className="text-[11px] text-gray-400 mt-1">{tDynamic('Encontrado no Gerenciador de Negócios da Meta em Fontes de Dados → Pixels.')}</p>
         </div>
 
         <div>
@@ -656,7 +664,7 @@ function AnunciosTab({ lojaId }: { lojaId: string }) {
             placeholder="Ex: G-XXXXXXXXXX"
             className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
           />
-          <p className="text-[11px] text-gray-400 mt-1">Encontrado no painel do Google Analytics em Administrador → Fluxos de dados.</p>
+          <p className="text-[11px] text-gray-400 mt-1">{tDynamic('Encontrado no painel do Google Analytics em Administrador → Fluxos de dados.')}</p>
         </div>
 
         {msg && <p className={`text-xs font-bold ${msg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
@@ -671,6 +679,7 @@ function AnunciosTab({ lojaId }: { lojaId: string }) {
 
 // ── Disparos WhatsApp ─────────────────────────────────────────
 function DisparosTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string }) {
+  const { tDynamic } = useI18n();
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [segmento, setSegmento] = useState<'todos' | 'vips' | 'inativos'>('todos');
   const [mensagem, setMensagem] = useState('');
@@ -699,7 +708,7 @@ function DisparosTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string })
       <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-4">
         <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Megaphone size={18} className="text-[var(--cor-primaria)]" />
-          Central de Disparos Promocionais no WhatsApp
+          {tDynamic('Central de Disparos Promocionais no WhatsApp')}
         </h3>
 
         <div className="space-y-3">
@@ -761,6 +770,7 @@ function DisparosTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string })
 
 // ── Central de E-mails Transacionais ─────────────────────────────
 function EmailsTab({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
   const [eventoSelecionado, setEventoSelecionado] = useState('pedido-recebido');
   const [emailTeste, setEmailTeste] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -802,10 +812,10 @@ function EmailsTab({ lojaId }: { lojaId: string }) {
           <div>
             <h3 className="font-['Sora'] text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Mail className="text-orange-500" size={20} />
-              Central de E-mails Transacionais & Notificações
+              {tDynamic('Central de E-mails Transacionais & Notificações')}
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Modelos de e-mail responsivos com alta entregabilidade anti-spam e layout personalizado com a cor da sua marca.
+              {tDynamic('Modelos de e-mail responsivos com alta entregabilidade anti-spam e layout personalizado com a cor da sua marca.')}
             </p>
           </div>
           <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
@@ -816,7 +826,7 @@ function EmailsTab({ lojaId }: { lojaId: string }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <label className="block">
-              <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Selecione o Modelo de E-mail:</span>
+              <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tDynamic('Selecione o Modelo de E-mail:')}</span>
               <select
                 value={eventoSelecionado}
                 onChange={(e) => setEventoSelecionado(e.target.value)}
@@ -832,7 +842,7 @@ function EmailsTab({ lojaId }: { lojaId: string }) {
             </label>
 
             <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 p-4 space-y-3 bg-gray-50 dark:bg-gray-950">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Disparar E-mail de Teste</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{tDynamic('Disparar E-mail de Teste')}</p>
               <input
                 type="email"
                 placeholder="Seu e-mail para receber o teste"
@@ -856,14 +866,14 @@ function EmailsTab({ lojaId }: { lojaId: string }) {
           </div>
 
           <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-[#070C18] p-5 text-white space-y-3">
-            <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">Pré-visualização do Modelo</p>
+            <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">{tDynamic('Pré-visualização do Modelo')}</p>
             <div className="rounded-xl bg-white text-gray-900 p-4 space-y-2 text-xs shadow-inner">
               <div className="border-b pb-2 flex justify-between font-bold">
                 <span>Assunto: Pedido #142 confirmado</span>
                 <span className="text-orange-600">MiseOn Transactional</span>
               </div>
               <p className="text-gray-600 leading-relaxed">
-                Olá! Seu pedido <b>#142</b> foi recebido com sucesso e entrou na fila de preparo.
+                {tDynamic('Olá! Seu pedido')} <b>#142</b> foi recebido com sucesso e entrou na fila de preparo.
               </p>
               <div className="bg-gray-50 p-2 rounded-lg border font-mono">
                 2x X-Burger Artesanal — R$ 48,50

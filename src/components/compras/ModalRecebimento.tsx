@@ -208,7 +208,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                 placeholder="Ex: 12345" value={nota} onChange={e => setNota(e.target.value)} />
             </label>
             <label className="block">
-              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Data da entrega</span>
+              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Data da entrega')}</span>
               <input type="date" className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                 value={dataReceb} onChange={e => setDataReceb(e.target.value)} />
             </label>
@@ -334,7 +334,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                     <div className="mt-3">
                       <label className="block max-w-xs">
                         <span className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-gray-600 dark:text-gray-400">
-                          <Barcode size={12} /> Código de barras (opcional)
+                          <Barcode size={12} /> {tDynamic('Código de barras (opcional)')}
                         </span>
                         <input placeholder="Escaneie ou digite o EAN"
                           inputMode="numeric"
@@ -345,11 +345,11 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                         />
                       </label>
                       {statusNutricao[it.id] === 'buscando' && (
-                        <p className="mt-1 text-[10px] text-gray-400">Buscando informação nutricional…</p>
+                        <p className="mt-1 text-[10px] text-gray-400">{tDynamic('Buscando informação nutricional…')}</p>
                       )}
                       {statusNutricao[it.id] === 'encontrado' && (
                         <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                          <Sparkles size={11} /> Nutrição encontrada — revise em Estoque › Nutrição
+                          <Sparkles size={11} /> {tDynamic('Nutrição encontrada — revise em Estoque › Nutrição')}
                         </p>
                       )}
                       {statusNutricao[it.id] === 'nao_encontrado' && (
@@ -366,7 +366,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                         )}
                         {sobra && (
                           <span className="flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
-                            <Info size={11} /> Veio acima do pedido
+                            <Info size={11} /> {tDynamic('Veio acima do pedido')}
                           </span>
                         )}
                         {caro && (
@@ -410,7 +410,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
             </div>
             <button onClick={confirmar} disabled={salvando || carregando}
               className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">
-              {salvando ? <><Loader2 size={16} className="animate-spin" /> Registrando...</> : <><PackageCheck size={16} /> Dar entrada no estoque</>}
+              {salvando ? <><Loader2 size={16} className="animate-spin" /> Registrando...</> : <><PackageCheck size={16} /> {tDynamic('Dar entrada no estoque')}</>}
             </button>
           </div>
         </div>

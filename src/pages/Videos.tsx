@@ -338,7 +338,7 @@ export default function Videos() {
                 to="/cadastre-se"
                 className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-orange-500/25 hover:bg-orange-600 transition"
               >
-                Testar o MiseOn na Prática
+                {tDynamic('Testar o MiseOn na Prática')}
               </Link>
             </div>
 
@@ -354,7 +354,7 @@ export default function Videos() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div>
             <h3 className="font-['Sora'] text-2xl font-bold text-white">
-              Explore Todos os Vídeos
+              {tDynamic('Explore Todos os Vídeos')}
             </h3>
             <p className="text-xs text-slate-400 mt-1">
               {tDynamic('Assista ao tour das telas, recursos do PDV, KDS e módulo fiscal.')}
@@ -460,7 +460,7 @@ export default function Videos() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1 text-xs font-bold text-emerald-400 mb-3">
-              <Star size={14} className="fill-emerald-400" /> Depoimentos &amp; Histórias de Clientes
+              <Star size={14} className="fill-emerald-400" /> {tDynamic('Depoimentos &amp; Histórias de Clientes')}
             </div>
             <h2 className="font-['Sora'] text-3xl font-extrabold text-white">
               {tDynamic('O Que Dizem os Restaurantes Parceiros')}
@@ -510,7 +510,7 @@ export default function Videos() {
           <div className="mt-12 rounded-3xl border border-orange-500/30 bg-gradient-to-r from-orange-950/40 via-slate-900 to-slate-900 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <h3 className="font-['Sora'] text-lg font-bold text-white flex items-center gap-2">
-                <CheckCircle2 className="text-orange-400" size={20} /> É cliente MiseOn e quer aparecer aqui?
+                <CheckCircle2 className="text-orange-400" size={20} /> {tDynamic('É cliente MiseOn e quer aparecer aqui?')}
               </h3>
               <p className="text-xs text-slate-400 mt-1 max-w-xl">
                 {tDynamic('Grave um vídeo sobre a experiência da sua loja com o MiseOn e ganhe destaque oficial no nosso portal.')}

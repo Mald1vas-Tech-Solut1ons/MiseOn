@@ -555,7 +555,7 @@ export default function PDV() {
             </p>
             <div className="mt-4 flex gap-2">
               <button onClick={limparVenda} className="flex-1 rounded-xl border border-gray-300 py-3 text-sm font-bold text-gray-500 dark:border-gray-700">Cancelar</button>
-              <button onClick={confirmarPixRecebido} disabled={processando} className="flex-1 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white disabled:opacity-50">Já caiu — confirmar</button>
+              <button onClick={confirmarPixRecebido} disabled={processando} className="flex-1 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white disabled:opacity-50">{tDynamic('Já caiu — confirmar')}</button>
             </div>
           </div>
         </div>

@@ -315,7 +315,7 @@ export default function Financeiro() {
           <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <p className="mb-3 text-sm font-bold dark:text-gray-200">{tDynamic('Recebimentos por forma de pagamento')}</p>
             {resumo.porMetodo.length === 0 ? (
-              <p className="py-3 text-center text-xs text-gray-400">Nenhuma venda no período.</p>
+              <p className="py-3 text-center text-xs text-gray-400">{tDynamic('Nenhuma venda no período.')}</p>
             ) : (
               <div className="space-y-2">
                 {resumo.porMetodo.map(([metodo, info]) => {
@@ -339,9 +339,9 @@ export default function Financeiro() {
           </div>
 
           {/* ── Extrato pedido a pedido ── */}
-          <p className="mb-2 flex items-center gap-1.5 text-sm font-bold dark:text-gray-200"><Receipt size={15} /> Extrato do período</p>
+          <p className="mb-2 flex items-center gap-1.5 text-sm font-bold dark:text-gray-200"><Receipt size={15} /> {tDynamic('Extrato do período')}</p>
           <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            {pedidos.length === 0 && <p className="py-10 text-center text-sm text-gray-400">Nenhum pedido no período.</p>}
+            {pedidos.length === 0 && <p className="py-10 text-center text-sm text-gray-400">{tDynamic('Nenhum pedido no período.')}</p>}
             {pedidos.map((p, idx) => {
               const dt = new Date(p.criado_em);
               const metodo = p.pagamentos?.[0]?.metodo;
@@ -421,7 +421,7 @@ export default function Financeiro() {
       {aba === 'CUSTOS_FIXOS' && (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4">
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-xl p-4 text-sm text-blue-800 dark:text-blue-300">
-            <p className="font-semibold mb-1 flex items-center gap-2"><Calculator size={16} /> Rateio de Custos</p>
+            <p className="font-semibold mb-1 flex items-center gap-2"><Calculator size={16} /> {tDynamic('Rateio de Custos')}</p>
             <p>O sistema pega o total dos seus gastos mensais e divide pela expectativa de vendas. Esse valor é cobrado no custo de cada lanche para garantir que a sua operação se pague.</p>
           </div>
 
@@ -435,7 +435,7 @@ export default function Financeiro() {
                     value={configCusto.custo_aluguel} onChange={e => setConfigCusto({...configCusto, custo_aluguel: e.target.valueAsNumber || 0})} />
                 </label>
                 <label className="block">
-                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Energia Elétrica</span>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{tDynamic('Energia Elétrica')}</span>
                   <input type="number" className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100"
                     value={configCusto.custo_energia} onChange={e => setConfigCusto({...configCusto, custo_energia: e.target.valueAsNumber || 0})} />
                 </label>
@@ -465,7 +465,7 @@ export default function Financeiro() {
                <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
                  <div className="w-full sm:w-1/2">
                    <label className="block">
-                    <span className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-1 block">Expectativa de Vendas / Mês (Qtd)</span>
+                    <span className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-1 block">{tDynamic('Expectativa de Vendas / Mês (Qtd)')}</span>
                     <input type="number" className="w-full rounded-xl border-2 border-[var(--cor-primaria)] bg-green-50 dark:bg-green-900/10 p-3 text-lg font-bold text-[var(--cor-primaria)] focus:outline-none"
                       value={configCusto.expectativa_vendas_mes} onChange={e => setConfigCusto({...configCusto, expectativa_vendas_mes: e.target.valueAsNumber || 0})} />
                     <p className="text-[10px] text-gray-500 mt-1">{tDynamic('Quantos itens principais você estima vender por mês?')}</p>
@@ -482,7 +482,7 @@ export default function Financeiro() {
              </div>
 
              <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-               <p className="mb-3 flex items-center gap-1.5 text-sm font-bold text-gray-900 dark:text-gray-100"><Bike size={16} /> Remuneração do Entregador</p>
+               <p className="mb-3 flex items-center gap-1.5 text-sm font-bold text-gray-900 dark:text-gray-100"><Bike size={16} /> {tDynamic('Remuneração do Entregador')}</p>
                <label className="block mb-3">
                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{tDynamic('Como você paga seu(s) entregador(es)?')}</span>
                  <select className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100"
@@ -506,7 +506,7 @@ export default function Financeiro() {
                {configCusto.tipo_remuneracao_entregador === 'POR_KM' && (
                  <div className="grid gap-3 sm:grid-cols-3">
                    <label className="block">
-                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Taxa mínima (R$)</span>
+                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{tDynamic('Taxa mínima (R$)')}</span>
                      <input type="number" step="0.01" className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100"
                        value={configCusto.entregador_taxa_minima ?? 5}
                        onChange={e => setConfigCusto({ ...configCusto, entregador_taxa_minima: e.target.valueAsNumber || 0 })} />

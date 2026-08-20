@@ -392,12 +392,12 @@ export default function PainelTV() {
             {/* Quadro Lateral de ÚLTIMAS SENHAS PRONTAS */}
             <div className="rounded-3xl border border-white/10 bg-white/5 p-5 space-y-3">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                <span>Últimas Senhas Prontas</span>
+                <span>{tDynamic('Últimas Senhas Prontas')}</span>
                 <CheckCircle2 size={14} className="text-emerald-400" />
               </h4>
 
               {pedidosProntos.length === 0 ? (
-                <p className="text-xs text-slate-500 py-3 text-center">Nenhuma senha pronta no momento.</p>
+                <p className="text-xs text-slate-500 py-3 text-center">{tDynamic('Nenhuma senha pronta no momento.')}</p>
               ) : (
                 <div className="space-y-2 max-h-48 overflow-hidden">
                   {pedidosProntos.slice(0, 4).map((p) => (

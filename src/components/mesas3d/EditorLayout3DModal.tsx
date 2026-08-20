@@ -7,6 +7,7 @@ import { X, Save, Layers } from 'lucide-react';
 import type { Mesa, FormatoMesa } from '../../types';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface Props {
   mesas: Mesa[];
   onClose: () => void;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function EditorLayout3DModal({ mesas, onClose, onSalvo }: Props) {
+  const { tDynamic } = useI18n();
   const [mesaSelecionadaId, setMesaSelecionadaId] = useState<string>(mesas[0]?.id ?? '');
   const [formato, setFormato] = useState<FormatoMesa>('QUADRADA');
   const [capacidade, setCapacidade] = useState<number>(4);
@@ -58,7 +60,7 @@ export function EditorLayout3DModal({ mesas, onClose, onSalvo }: Props) {
       <div className="w-full max-w-md rounded-3xl border border-gray-800 bg-gray-950 p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-lg font-black text-gray-100">
-            <Layers size={18} className="text-orange-400" /> Configurar Salão 3D
+            <Layers size={18} className="text-orange-400" /> {tDynamic('Configurar Salão 3D')}
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-200"><X size={20} /></button>
         </div>
@@ -81,7 +83,7 @@ export function EditorLayout3DModal({ mesas, onClose, onSalvo }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-gray-400">Formato da Mesa</label>
+              <label className="text-xs font-bold text-gray-400">{tDynamic('Formato da Mesa')}</label>
               <select
                 value={formato}
                 onChange={(e) => setFormato(e.target.value as FormatoMesa)}

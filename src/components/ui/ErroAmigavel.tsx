@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { AlertTriangle, ArrowRight, ChevronDown, LifeBuoy, X } from 'lucide-react';
 import type { ErroTraduzido } from '../../lib/erros';
 
+import { useI18n } from '../../contexts/I18nContext';
 /**
  * Cartão de erro para usuário leigo: título humano, explicação do que
  * aconteceu, o que fazer (com link quando existir) e o detalhe técnico
  * recolhido para repassar ao suporte.
  */
 export function ErroAmigavel({ erro, onFechar }: { erro: ErroTraduzido; onFechar: () => void }) {
+  const { tDynamic } = useI18n();
   const [tecnicoAberto, setTecnicoAberto] = useState(false);
 
   return (
@@ -59,7 +61,7 @@ export function ErroAmigavel({ erro, onFechar }: { erro: ErroTraduzido; onFechar
             className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-red-400 transition hover:text-red-600 dark:hover:text-red-300"
           >
             <LifeBuoy size={12} />
-            Detalhe técnico para o suporte
+            {tDynamic('Detalhe técnico para o suporte')}
             <ChevronDown size={12} className={`transition-transform ${tecnicoAberto ? 'rotate-180' : ''}`} />
           </button>
           {tecnicoAberto && (

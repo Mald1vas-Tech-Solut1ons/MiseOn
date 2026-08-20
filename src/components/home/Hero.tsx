@@ -1,6 +1,8 @@
 import { ArrowRight, Zap } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 export function Hero() {
+  const { tDynamic } = useI18n();
   return (
     <section className="relative overflow-hidden pb-24 pt-36 lg:pb-32 lg:pt-48">
       <div style={{ background: 'radial-gradient(circle, rgba(10,92,196,0.35) 0%, transparent 70%)', width: 700, height: 700, borderRadius: '50%', position: 'absolute', top: -200, left: '50%', transform: 'translateX(-60%)', pointerEvents: 'none' }} />
@@ -11,7 +13,7 @@ export function Hero() {
           style={{ border: '1px solid rgba(252,91,36,0.4)', background: 'rgba(252,91,36,0.1)', color: '#FC5B24', fontFamily: "'Sora', sans-serif" }}
           className="mb-8 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold uppercase tracking-wider"
         >
-          <Zap size={14} className="fill-current" /> Sistema completo para bares e restaurantes
+          <Zap size={14} className="fill-current" /> {tDynamic('Sistema completo para bares e restaurantes')}
         </div>
 
         <h1
@@ -20,7 +22,7 @@ export function Hero() {
         >
           O marketplace fica com 27% do seu lanche.{' '}
           <span style={{ backgroundImage: 'linear-gradient(135deg, #FC5B24, #0A5CC4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            A gente fica com 0%.
+            {tDynamic('A gente fica com 0%.')}
           </span>
         </h1>
 
@@ -36,19 +38,19 @@ export function Hero() {
             style={{ background: '#0A5CC4', fontFamily: "'Sora', sans-serif", boxShadow: '0 8px 32px rgba(10,92,196,0.5)' }}
             className="flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-lg font-bold text-white transition hover:scale-105 hover:brightness-125 sm:w-auto"
           >
-            Testar 14 dias grátis <ArrowRight size={20} />
+            {tDynamic('Testar 14 dias grátis')} <ArrowRight size={20} />
           </a>
           <a
             href="/natureba"
             style={{ border: '2px solid rgba(252,91,36,0.5)', color: '#FC5B24', background: 'rgba(252,91,36,0.08)', fontFamily: "'Sora', sans-serif" }}
             className="flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-lg font-bold transition hover:bg-orange-500/20 sm:w-auto"
           >
-            Ver loja de exemplo
+            {tDynamic('Ver loja de exemplo')}
           </a>
         </div>
 
         <p style={{ color: 'rgba(234,241,251,0.4)' }} className="mt-5 text-sm font-medium">
-          Sem cartão de crédito · Sem fidelidade · Cancele quando quiser
+          {tDynamic('Sem cartão de crédito · Sem fidelidade · Cancele quando quiser')}
         </p>
 
         {/* Barra de métricas — prova executiva logo no primeiro scroll */}

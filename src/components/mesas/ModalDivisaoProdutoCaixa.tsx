@@ -3,6 +3,7 @@ import { X, Calculator, ShoppingBag, Receipt, ArrowRight } from 'lucide-react';
 
 import { fmt, type ItemPedido } from '../../types';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface ModalDivisaoProdutoCaixaProps {
   numeroMesa: number;
   capacidadeMesa: number;
@@ -18,6 +19,7 @@ export function ModalDivisaoProdutoCaixa({
   onConfirmarDivisao,
   onCancelar,
 }: ModalDivisaoProdutoCaixaProps) {
+  const { tDynamic } = useI18n();
   const assentos = Array.from({ length: capacidadeMesa }, (_, i) => i + 1);
 
   // Mapeamento: itemId -> array de números de assento que dividem aquele item
@@ -91,7 +93,7 @@ export function ModalDivisaoProdutoCaixa({
               <Calculator size={24} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-100">Método 2: Divisão por Produto no Caixa</h2>
+              <h2 className="text-xl font-bold text-slate-100">{tDynamic('Método 2: Divisão por Produto no Caixa')}</h2>
               <p className="text-xs text-slate-400">Mesa #{numeroMesa} — Distribua os produtos consumidos entre os clientes</p>
             </div>
           </div>
@@ -107,7 +109,7 @@ export function ModalDivisaoProdutoCaixa({
         <div className="space-y-4">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <ShoppingBag size={14} className="text-orange-400" />
-            Produtos Consumidos na Mesa (Selecione quem racha cada item):
+            {tDynamic('Produtos Consumidos na Mesa (Selecione quem racha cada item):')}
           </h3>
 
           <div className="rounded-xl border border-slate-800 bg-slate-950 overflow-hidden divide-y divide-slate-800/60">
@@ -211,7 +213,7 @@ export function ModalDivisaoProdutoCaixa({
             onClick={() => onConfirmarDivisao(resumoPorAssento)}
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg hover:brightness-110 transition"
           >
-            <span>Confirmar e Gerar Cobranças Individuais</span>
+            <span>{tDynamic('Confirmar e Gerar Cobranças Individuais')}</span>
             <ArrowRight size={18} />
           </button>
         </div>

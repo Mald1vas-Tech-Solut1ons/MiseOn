@@ -64,7 +64,7 @@ export default function CrmClientes() {
         <div>
           <h2 className="font-['Sora'] text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <UsersIcon className="text-[#FC5B24]" size={22} />
-            CRM & Engenharia de Clientes (LTV & RFM)
+            {tDynamic('CRM & Engenharia de Clientes (LTV & RFM)')}
           </h2>
           <p className="text-xs text-gray-500 dark:text-slate-400">
             {tDynamic('Segmentação inteligente por frequência e valor monetário com campanhas de retenção no WhatsApp.')}
@@ -91,19 +91,19 @@ export default function CrmClientes() {
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
           <span className="text-[11px] font-bold text-gray-400">Clientes VIPs</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-[#FC5B24]">{totalVips}</p>
-          <span className="text-[10px] text-slate-400 mt-1 block">Frequência e ticket alto</span>
+          <span className="text-[10px] text-slate-400 mt-1 block">{tDynamic('Frequência e ticket alto')}</span>
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">Clientes em Risco</span>
+          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Clientes em Risco')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-amber-500">{totalEmRisco}</p>
-          <span className="text-[10px] text-amber-400 font-semibold mt-1 block">Inativos há +15 dias</span>
+          <span className="text-[10px] text-amber-400 font-semibold mt-1 block">{tDynamic('Inativos há +15 dias')}</span>
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">Programa de Cashback</span>
+          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Programa de Cashback')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-emerald-500">{taxaCashback}%</p>
-          <span className="text-[10px] text-slate-400 mt-1 block">Devolvido no cardápio</span>
+          <span className="text-[10px] text-slate-400 mt-1 block">{tDynamic('Devolvido no cardápio')}</span>
         </div>
       </div>
 
@@ -116,7 +116,7 @@ export default function CrmClientes() {
             </div>
             <div>
               <h3 className="font-['Sora'] text-sm font-bold text-gray-900 dark:text-white">
-                Fidelização Nativa via Cashback
+                {tDynamic('Fidelização Nativa via Cashback')}
               </h3>
               <p className="text-xs text-gray-600 dark:text-slate-300">
                 {tDynamic('Cada pedido concluído gera saldo de volta para o cliente usar na próxima compra, aumentando o LTV e o retorno orgânico.')}
@@ -125,7 +125,7 @@ export default function CrmClientes() {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-gray-700 dark:text-slate-200">Taxa de Cashback:</span>
+            <span className="text-xs font-bold text-gray-700 dark:text-slate-200">{tDynamic('Taxa de Cashback:')}</span>
             <select
               value={taxaCashback}
               onChange={(e) => setTaxaCashback(Number(e.target.value))}

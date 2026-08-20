@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useI18n } from '../../contexts/I18nContext';
 import {
   Bell,
   CheckCheck,
@@ -38,6 +39,7 @@ function tempoRelativo(iso: string): string {
 }
 
 export function NotificationCenter({ lojaId }: NotificationCenterProps) {
+  const { tDynamic } = useI18n();
   const nav = useNavigate();
   const [aberto, setAberto] = useState(false);
   const [catAtiva, setCatAtiva] = useState<CategoriaNotificacao>('TODAS');
@@ -179,7 +181,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
               </div>
               <div>
                 <h3 className="font-['Sora'] text-sm font-extrabold text-gray-900 dark:text-white">
-                  Central de Notificações
+                  {tDynamic('Central de Notificações')}
                 </h3>
                 <p className="text-[10px] text-gray-400">
                   {naoLidas > 0 ? `${naoLidas} não lida(s) • As notificações permanecem salvas até você decidir resolver` : 'Todas visualizadas • Clique na lixeira para excluir o alerta'}
@@ -246,10 +248,10 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                   <Bell size={24} />
                 </div>
                 <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
-                  Nenhuma notificação nesta categoria
+                  {tDynamic('Nenhuma notificação nesta categoria')}
                 </p>
                 <p className="text-[10px] text-gray-400 mt-1">
-                  Alertas de estoque crítico, novos pedidos e atendimento aparecem aqui.
+                  {tDynamic('Alertas de estoque crítico, novos pedidos e atendimento aparecem aqui.')}
                 </p>
               </div>
             ) : (
@@ -337,7 +339,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
           {notificacoes.length > 0 && (
             <div className="p-3 border-t border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] text-center">
               <span className="text-[10px] font-semibold text-gray-400">
-                Notificações salvas permanentemente • Clique em "Excluir" quando resolver o problema
+                {tDynamic('Notificações salvas permanentemente • Clique em "Excluir" quando resolver o problema')}
               </span>
             </div>
           )}

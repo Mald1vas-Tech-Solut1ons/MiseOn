@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Button, SuccessCelebration } from '../ui';
 import { zap } from './zap';
 
+import { useI18n } from '../../contexts/I18nContext';
 const SEGMENTOS = [
   { valor: 'lanchonete', rotulo: 'Lanchonete' },
   { valor: 'hamburgueria', rotulo: 'Hamburgueria' },
@@ -21,6 +22,7 @@ const inputCls =
  * Grava em public.leads (INSERT público liberado pela migration 20260719120000_leads).
  */
 export function LeadForm({ compact = false, origem = 'landing' }: { compact?: boolean; origem?: string }) {
+  const { tDynamic } = useI18n();
   const [nome, setNome] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [email, setEmail] = useState('');
@@ -67,7 +69,7 @@ export function LeadForm({ compact = false, origem = 'landing' }: { compact?: bo
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-emerald-500/60 px-5 py-2.5 text-sm font-bold text-emerald-400 transition hover:bg-emerald-500/10"
         >
-          <MessageCircle size={16} /> Falar agora no WhatsApp
+          <MessageCircle size={16} /> {tDynamic('Falar agora no WhatsApp')}
         </a>
       </SuccessCelebration>
     );
@@ -78,7 +80,7 @@ export function LeadForm({ compact = false, origem = 'landing' }: { compact?: bo
       <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome*" className={inputCls} />
       <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="WhatsApp (11) 9…*" className={inputCls} />
       <select value={segmento} onChange={(e) => setSegmento(e.target.value)} className={`${inputCls} ${segmento ? '' : 'text-gray-500'}`}>
-        <option value="">Segmento do negócio*</option>
+        <option value="">{tDynamic('Segmento do negócio*')}</option>
         {SEGMENTOS.map((s) => (
           <option key={s.valor} value={s.valor} className="text-white">{s.rotulo}</option>
         ))}
@@ -108,7 +110,7 @@ export function LeadForm({ compact = false, origem = 'landing' }: { compact?: bo
           {enviando ? 'Enviando…' : 'Quero uma demonstração'}
         </Button>
         <p className="mt-2 text-center text-xs text-gray-500">
-          Sem compromisso. Seus dados só serão usados para o nosso contato comercial.
+          {tDynamic('Sem compromisso. Seus dados só serão usados para o nosso contato comercial.')}
         </p>
       </div>
     </form>

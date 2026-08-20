@@ -3,6 +3,7 @@ import { Scale, RefreshCw, X, Check, Utensils, AlertTriangle, ArchiveRestore, Cl
 import { supabase } from '../../lib/supabase';
 import { type Insumo, type ReposicaoBuffet } from '../../types';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface ModalReposicaoBuffetProps {
   lojaId: string;
   preparosAtivos: Insumo[];
@@ -16,6 +17,7 @@ export function ModalReposicaoBuffet({
   onSucesso,
   onCancelar,
 }: ModalReposicaoBuffetProps) {
+  const { tDynamic } = useI18n();
   const [aba, setAba] = useState<'ENVIAR' | 'RECOLHER'>('ENVIAR');
   const [preparoId, setPreparoId] = useState<string>(preparosAtivos[0]?.id || '');
   const [nomeCuba, setNomeCuba] = useState<string>('Cuba Pista Principal');
@@ -159,7 +161,7 @@ export function ModalReposicaoBuffet({
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-100">KDS Buffet (Pista)</h2>
-              <p className="text-xs text-slate-400">Transferências e apuração de sobras limpas</p>
+              <p className="text-xs text-slate-400">{tDynamic('Transferências e apuração de sobras limpas')}</p>
             </div>
           </div>
           <button onClick={onCancelar} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
@@ -203,7 +205,7 @@ export function ModalReposicaoBuffet({
             </div>
             <div className="rounded-xl bg-slate-950 p-4 border border-slate-800/80 text-xs space-y-1">
               <div className="font-semibold text-slate-300 flex items-center gap-1.5">
-                <Utensils size={14} className="text-amber-400" /> Transferência Limpa
+                <Utensils size={14} className="text-amber-400" /> {tDynamic('Transferência Limpa')}
               </div>
               <p className="text-slate-400">Isso abaterá <b>{pesoKgInput || 0} {preparoSelecionado?.unidade_medida}</b> do estoque da cozinha. O alimento passa a estar "Na Pista".</p>
             </div>
@@ -219,13 +221,13 @@ export function ModalReposicaoBuffet({
           <div className="space-y-4 animate-in fade-in slide-in-from-left-2">
             {!cubaSendoFechada ? (
                <>
-                 <p className="text-xs text-slate-400 mb-2">Cubas atualmente na pista. Ao final do turno, recolha e pese a sobra.</p>
+                 <p className="text-xs text-slate-400 mb-2">{tDynamic('Cubas atualmente na pista. Ao final do turno, recolha e pese a sobra.')}</p>
                  {carregandoCubas ? (
                     <div className="text-center p-4 text-slate-500"><RefreshCw className="h-5 w-5 animate-spin mx-auto" /></div>
                  ) : cubasNaPista.length === 0 ? (
                     <div className="text-center p-8 bg-slate-950 rounded-2xl border border-slate-800">
                       <Utensils size={24} className="mx-auto text-slate-600 mb-2" />
-                      <p className="text-sm text-slate-400">Nenhuma cuba ativa na pista.</p>
+                      <p className="text-sm text-slate-400">{tDynamic('Nenhuma cuba ativa na pista.')}</p>
                     </div>
                  ) : (
                    <div className="max-h-64 overflow-y-auto space-y-2 pr-1 hide-scrollbar">
@@ -245,7 +247,7 @@ export function ModalReposicaoBuffet({
                </>
             ) : (
                <div className="bg-slate-950 p-4 rounded-xl border border-blue-500/30">
-                 <h3 className="font-bold text-slate-200 flex items-center gap-2 mb-4"><ArchiveRestore size={18} className="text-blue-400" /> Fechamento de Cuba</h3>
+                 <h3 className="font-bold text-slate-200 flex items-center gap-2 mb-4"><ArchiveRestore size={18} className="text-blue-400" /> {tDynamic('Fechamento de Cuba')}</h3>
                  
                  <div className="mb-4">
                    <p className="text-sm text-slate-300"><b>Item:</b> {cubaSendoFechada.preparo?.nome}</p>
@@ -261,8 +263,8 @@ export function ModalReposicaoBuffet({
                    <label className="flex items-center gap-2 bg-slate-900 p-3 rounded-xl border border-slate-800 cursor-pointer">
                      <input type="checkbox" checked={reaproveitarSobra} onChange={(e) => setReaproveitarSobra(e.target.checked)} className="rounded bg-slate-800 border-slate-700 text-blue-500 focus:ring-0 focus:ring-offset-0" />
                      <div>
-                       <p className="text-xs font-bold text-slate-200">Reaproveitar no Estoque</p>
-                       <p className="text-[10px] text-slate-500">Se marcado, o peso da sobra voltará para o estoque da cozinha. Senão, será descartado.</p>
+                       <p className="text-xs font-bold text-slate-200">{tDynamic('Reaproveitar no Estoque')}</p>
+                       <p className="text-[10px] text-slate-500">{tDynamic('Se marcado, o peso da sobra voltará para o estoque da cozinha. Senão, será descartado.')}</p>
                      </div>
                    </label>
                  </div>

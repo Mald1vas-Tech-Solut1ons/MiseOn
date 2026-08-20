@@ -4,7 +4,9 @@ import { supabase } from '../../lib/supabase';
 import { fmt, type BalancaConfiguracao, type ProtocoloBalanca, type ModoConexaoBalanca, type Produto, type Comanda } from '../../types';
 import { BalancaEngine, type LeituraBalanca } from '../../lib/balanca/balancaEngine';
 
+import { useI18n } from '../../contexts/I18nContext';
 export function PainelBalanca() {
+  const { tDynamic } = useI18n();
   const [lojaId, setLojaId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
@@ -384,9 +386,9 @@ export function PainelBalanca() {
               <Scale size={28} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-100">Balança do Buffet por Quilo</h1>
+              <h1 className="text-2xl font-bold text-slate-100">{tDynamic('Balança do Buffet por Quilo')}</h1>
               <p className="text-sm text-slate-400">
-                Integração inteligente de pesagem em tempo real com Toledo, Filizola, Urano e Web Serial.
+                {tDynamic('Integração inteligente de pesagem em tempo real com Toledo, Filizola, Urano e Web Serial.')}
               </p>
             </div>
           </div>
@@ -433,7 +435,7 @@ export function PainelBalanca() {
           <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl backdrop-blur-md">
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Zap size={14} className="text-amber-400" /> Leitura Digital em Tempo Real
+                <Zap size={14} className="text-amber-400" /> {tDynamic('Leitura Digital em Tempo Real')}
               </span>
               <span className="text-xs text-slate-500 font-mono">
                 {leituraAtual.estavel ? 'ESTÁVEL' : 'OSCILANDO...'}
@@ -486,7 +488,7 @@ export function PainelBalanca() {
             {/* Produto Buffet & Valor Estimado (Override de Preço) */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-slate-800/40 p-4 border border-slate-700/50">
               <div className="flex-1 space-y-3">
-                <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">O que estamos pesando?</div>
+                <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">{tDynamic('O que estamos pesando?')}</div>
                 <div className="flex flex-wrap gap-2">
                   {produtosPeso.map(p => (
                     <button
@@ -512,7 +514,7 @@ export function PainelBalanca() {
 
               <div className="flex items-center gap-6 border-t border-slate-700/50 pt-4 sm:border-0 sm:pt-0 sm:pl-4 sm:border-l">
                 <div className="flex flex-col">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 mb-1">Preço Praticado/kg</label>
+                  <label className="text-[10px] uppercase font-bold text-slate-400 mb-1">{tDynamic('Preço Praticado/kg')}</label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-sm font-bold text-slate-500">R$</span>
                     <input
@@ -534,13 +536,13 @@ export function PainelBalanca() {
             {/* Formulário de Lançamento Direto na Comanda */}
             <div className="space-y-4 pt-2 border-t border-slate-800">
               <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
-                Vincular Pesagem à Comanda do Cliente
+                {tDynamic('Vincular Pesagem à Comanda do Cliente')}
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1">
-                    Comanda ou Ficha (Aceita Código de Barras)
+                    {tDynamic('Comanda ou Ficha (Aceita Código de Barras)')}
                   </label>
                   <div className="relative">
                     <Hash size={16} className="absolute left-3 top-3 text-slate-500" />
@@ -564,7 +566,7 @@ export function PainelBalanca() {
 
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1">
-                    Ou Escolha uma Comanda de Mesa
+                    {tDynamic('Ou Escolha uma Comanda de Mesa')}
                   </label>
                   <select
                     value={comandaSelecionadaId}
@@ -603,12 +605,12 @@ export function PainelBalanca() {
         <div className="lg:col-span-5 space-y-6">
           <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl backdrop-blur-md space-y-5">
             <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-              <Usb size={18} className="text-orange-400" /> Configuração do Hardware
+              <Usb size={18} className="text-orange-400" /> {tDynamic('Configuração do Hardware')}
             </h2>
 
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1">
-                Modo de Conexão com a Balança
+                {tDynamic('Modo de Conexão com a Balança')}
               </label>
               <select
                 value={config.modo_conexao}
@@ -617,7 +619,7 @@ export function PainelBalanca() {
               >
                 <option value="WEB_SERIAL">Web Serial API (Cabo USB / RS-232 Direct)</option>
                 <option value="NETWORK_WEBHOOK">Rede Local / IP TCP/IP</option>
-                <option value="MANUAL">Digitação Manual (Sem Comunicação Integrada)</option>
+                <option value="MANUAL">{tDynamic('Digitação Manual (Sem Comunicação Integrada)')}</option>
               </select>
             </div>
 
@@ -625,21 +627,21 @@ export function PainelBalanca() {
             {config.modo_conexao === 'MANUAL' && (
               <div className="rounded-xl bg-orange-500/10 p-3 border border-orange-500/20 text-xs text-orange-300 flex items-center gap-2">
                 <ShieldCheck size={16} className="shrink-0" />
-                <span>Modo de Digitação Manual: O operador deverá olhar o visor da balança não-integrada e digitar o peso do prato diretamente no sistema.</span>
+                <span>{tDynamic('Modo de Digitação Manual: O operador deverá olhar o visor da balança não-integrada e digitar o peso do prato diretamente no sistema.')}</span>
               </div>
             )}
 
             {config.modo_conexao === 'NETWORK_WEBHOOK' && (
               <div className="rounded-xl bg-emerald-500/10 p-3 border border-emerald-500/20 text-xs text-emerald-300 flex items-center gap-2">
                 <ShieldCheck size={16} className="shrink-0" />
-                <span>Modo Rede ativado. O sistema escutará as transmissões da balança diretamente via TCP/IP na porta configurada.</span>
+                <span>{tDynamic('Modo Rede ativado. O sistema escutará as transmissões da balança diretamente via TCP/IP na porta configurada.')}</span>
               </div>
             )}
 
             {(config.modo_conexao === 'WEB_SERIAL' || config.modo_conexao === 'NETWORK_WEBHOOK') && (
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1">
-                  Protocolo / Fabricante da Balança
+                  {tDynamic('Protocolo / Fabricante da Balança')}
                 </label>
                 <select
                   value={config.protocolo}
@@ -649,7 +651,7 @@ export function PainelBalanca() {
                   <option value="TOLEDO_PRIX3">Toledo Prix 3 / Prix 4</option>
                   <option value="FILIZOLA_CS15">Filizola CS 15 / Platina</option>
                   <option value="URANO">Urano Pop / Integra</option>
-                  <option value="CUSTOM_SERIAL">Serial Genérica (ASCII Float)</option>
+                  <option value="CUSTOM_SERIAL">{tDynamic('Serial Genérica (ASCII Float)')}</option>
                 </select>
               </div>
             )}
@@ -714,7 +716,7 @@ export function PainelBalanca() {
               {config.modo_conexao === 'NETWORK_WEBHOOK' && (
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1">
-                    Porta de Escuta (TCP)
+                    {tDynamic('Porta de Escuta (TCP)')}
                   </label>
                   <input
                     type="number"
@@ -727,7 +729,7 @@ export function PainelBalanca() {
 
               <div className={config.modo_conexao === 'MANUAL' ? 'sm:col-span-2' : ''}>
                 <label className="block text-xs font-medium text-slate-400 mb-1">
-                  Tara Padrão do Prato (gramas)
+                  {tDynamic('Tara Padrão do Prato (gramas)')}
                 </label>
                 <input
                   type="number"
@@ -741,7 +743,7 @@ export function PainelBalanca() {
             {/* Gerenciamento Rápido de Botões (Substitui Cardápio) */}
             <div className="pt-4 border-t border-slate-800/50">
               <label className="block text-xs font-bold text-orange-400 mb-3 uppercase tracking-wider">
-                Botões de Preço Rápido (Exclusivo desta balança)
+                {tDynamic('Botões de Preço Rápido (Exclusivo desta balança)')}
               </label>
               <div className="space-y-3">
                 {produtosPeso.map((p, index) => (
@@ -808,7 +810,7 @@ export function PainelBalanca() {
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-800 py-3 text-sm font-semibold text-slate-100 border border-slate-700 hover:bg-slate-700 transition"
             >
               {salvando ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Check size={16} />}
-              <span>Salvar Parâmetros da Balança</span>
+              <span>{tDynamic('Salvar Parâmetros da Balança')}</span>
             </button>
           </div>
         </div>

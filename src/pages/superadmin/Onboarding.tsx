@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { LeadCadastro } from '../../types';
 
+import { useI18n } from '../../contexts/I18nContext';
 const DIACRITICOS = new RegExp(String.fromCharCode(0x5b, 0x5c, 0x75, 0x30, 0x33, 0x30, 0x30, 0x2d, 0x5c, 0x75, 0x30, 0x33, 0x36, 0x66, 0x5d), 'g');
 const gerarSlug = (nome: string) => nome
   .normalize('NFD')
@@ -19,6 +20,7 @@ const STATUS_COR: Record<string, string> = {
 };
 
 export default function Onboarding() {
+  const { tDynamic } = useI18n();
   const [slug, setSlug] = useState('');
   const [nome, setNome] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -65,7 +67,7 @@ export default function Onboarding() {
 
   return (
     <div>
-      <h2 className="mb-3 text-lg font-bold">Onboarding de nova loja</h2>
+      <h2 className="mb-3 text-lg font-bold">{tDynamic('Onboarding de nova loja')}</h2>
 
       {leadsAbertos.length > 0 && (
         <div className="mb-5 max-w-md">

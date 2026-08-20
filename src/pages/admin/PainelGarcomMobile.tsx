@@ -7,7 +7,9 @@ import type { CtxLoja } from './AdminLayout';
 import type { Mesa, Produto } from '../../types';
 import { ModalDivisaoItemGarcom } from '../../components/mesas/ModalDivisaoItemGarcom';
 
+import { useI18n } from '../../contexts/I18nContext';
 export function PainelGarcomMobile() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const {
     chamadosPendentes,
@@ -147,7 +149,7 @@ export function PainelGarcomMobile() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-lg">
             <Smartphone size={22} />
-            <span>Garçom Mobile PWA</span>
+            <span>{tDynamic('Garçom Mobile PWA')}</span>
           </div>
           <span className="rounded-full bg-black/20 px-2.5 py-0.5 text-xs font-bold">
             Ao Vivo
@@ -155,7 +157,7 @@ export function PainelGarcomMobile() {
         </div>
 
         <p className="text-xs font-medium text-slate-900 opacity-90">
-          Receba chamados com vibração e lance pedidos com fracionamento automático na mesa.
+          {tDynamic('Receba chamados com vibração e lance pedidos com fracionamento automático na mesa.')}
         </p>
 
         {!pushHabilitado && (
@@ -163,7 +165,7 @@ export function PainelGarcomMobile() {
             onClick={solicitarPermissaoPush}
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-950 py-2.5 text-xs font-bold text-orange-400 shadow-md hover:bg-slate-900 transition"
           >
-            <Volume2 size={16} /> Ativar Vibração & Notificações Push
+            <Volume2 size={16} /> {tDynamic('Ativar Vibração & Notificações Push')}
           </button>
         )}
       </div>
@@ -178,8 +180,8 @@ export function PainelGarcomMobile() {
         {chamadosPendentes.length === 0 ? (
           <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 text-center text-xs text-slate-400 space-y-1">
             <CheckCircle size={28} className="mx-auto text-emerald-500/60 mb-2" />
-            <div className="font-semibold text-slate-300">Nenhum chamado no momento</div>
-            <div>O dispositivo vibrará quando um cliente solicitar atendimento.</div>
+            <div className="font-semibold text-slate-300">{tDynamic('Nenhum chamado no momento')}</div>
+            <div>{tDynamic('O dispositivo vibrará quando um cliente solicitar atendimento.')}</div>
           </div>
         ) : (
           <div className="space-y-3">
@@ -232,7 +234,7 @@ export function PainelGarcomMobile() {
       <div className="space-y-3">
         <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
           <Divide size={14} className="text-amber-400" />
-          Lançar Pedido / Método 1 (Fracionado)
+          {tDynamic('Lançar Pedido / Método 1 (Fracionado)')}
         </h2>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 space-y-4">

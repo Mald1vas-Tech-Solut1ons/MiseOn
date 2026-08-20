@@ -135,7 +135,7 @@ export default function CardapioAdmin() {
               </button>
               <button onClick={() => marcarCategoriaEstacao(catAtiva, 'COZINHA')}
                 className="flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 font-bold text-orange-700 hover:bg-orange-100 dark:border-orange-900/50 dark:bg-orange-900/20 dark:text-orange-400">
-                <ChefHat size={12} /> Preparo na cozinha
+                <ChefHat size={12} /> {tDynamic('Preparo na cozinha')}
               </button>
             </div>
           )}
@@ -445,7 +445,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
           </div>
           {/* Modelo de Venda: Unidade ou Peso */}
           <div className="rounded-2xl border p-3 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-            <p className="mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400">Modelo de Venda</p>
+            <p className="mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Modelo de Venda')}</p>
             <div className="grid grid-cols-2 gap-2">
               <button type="button" onClick={() => setTipoVenda('UNITARIO')}
                 className={`rounded-xl border p-2.5 text-xs font-bold transition-all ${
@@ -496,13 +496,13 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                   Bloqueio iFood Ativo
                 </p>
                 <p className="text-[10px] text-amber-700 dark:text-amber-400 mt-1">
-                  O markup está ligado. <b>{tDynamic('Não altere o preço deste item manualmente no Portal do iFood')}</b>, pois o MiseOn será a fonte oficial do preço, sob pena de dessincronização financeira.
+                  {tDynamic('O markup está ligado.')} <b>{tDynamic('Não altere o preço deste item manualmente no Portal do iFood')}</b>, pois o MiseOn será a fonte oficial do preço, sob pena de dessincronização financeira.
                 </p>
               </div>
             )}
           </div>
           <div>
-            <p className="mb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Fotos do Produto (até 3)</p>
+            <p className="mb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Fotos do Produto (até 3)')}</p>
             <div className="grid grid-cols-3 gap-2">
               {[0, 1, 2].map((i) => (
                 (galeria[i] || i === galeria.length) ? (
@@ -534,7 +534,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
 
           {/* Estação de preparo: define se o item entra na fila do KDS. */}
           <div className="rounded-2xl border p-3 dark:border-gray-800">
-            <p className="mb-2 text-sm font-semibold dark:text-gray-200">Onde este produto é preparado?</p>
+            <p className="mb-2 text-sm font-semibold dark:text-gray-200">{tDynamic('Onde este produto é preparado?')}</p>
             <div className="grid grid-cols-2 gap-2">
               <button type="button" onClick={() => setEstacaoPreparo('COZINHA')}
                 className={`flex items-center justify-center gap-1.5 rounded-xl border p-2.5 text-xs font-bold transition-colors ${
@@ -542,7 +542,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                     ? 'border-orange-300 bg-orange-50 text-orange-700 dark:border-orange-900/50 dark:bg-orange-900/20 dark:text-orange-400'
                     : 'border-gray-200 text-gray-400 dark:border-gray-700'
                 }`}>
-                <ChefHat size={14} /> Preparo na cozinha
+                <ChefHat size={14} /> {tDynamic('Preparo na cozinha')}
               </button>
               <button type="button" onClick={() => setEstacaoPreparo('DIRETO')}
                 className={`flex items-center justify-center gap-1.5 rounded-xl border p-2.5 text-xs font-bold transition-colors ${
@@ -564,7 +564,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
         {/* Ficha técnica */}
         {controlaEstoque && (
           <div className="mt-4 rounded-2xl border p-3 dark:border-gray-800">
-            <p className="mb-2 text-sm font-semibold dark:text-gray-200">Ficha técnica (consumo de insumos)</p>
+            <p className="mb-2 text-sm font-semibold dark:text-gray-200">{tDynamic('Ficha técnica (consumo de insumos)')}</p>
             {ficha.map((f, idx) => (
               <div key={idx} className="mb-1.5 flex items-center gap-1.5">
                 <select value={f.insumo_id} onChange={(e) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, insumo_id: e.target.value } : x))}
@@ -579,7 +579,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
             <button onClick={addInsumoFicha} disabled={!insumos.length} className="mt-1 flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)] disabled:opacity-40">
               <Plus size={12} /> Adicionar insumo
             </button>
-            {!insumos.length && <p className="mt-1 text-xs text-gray-400">Cadastre insumos em Estoque primeiro.</p>}
+            {!insumos.length && <p className="mt-1 text-xs text-gray-400">{tDynamic('Cadastre insumos em Estoque primeiro.')}</p>}
              {ficha.length > 0 && (
               <div className="mt-4 border-t border-gray-100 dark:border-gray-800 pt-3">
                  <div className="grid grid-cols-4 gap-2 text-center text-[10px] sm:text-xs">
@@ -657,7 +657,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
             </div>
           ))}
           <button onClick={addGrupo} className="flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
-            <Plus size={12} /> Novo grupo de adicionais
+            <Plus size={12} /> {tDynamic('Novo grupo de adicionais')}
           </button>
         </div>
 

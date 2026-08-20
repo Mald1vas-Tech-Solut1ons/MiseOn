@@ -7,6 +7,7 @@ import type { CtxLoja } from './AdminLayout';
 import { Timer } from 'lucide-react';
 import MiseOnLoader from '../../components/MiseOnLoader';
 
+import { useI18n } from '../../contexts/I18nContext';
 const STATUS_LABEL: Record<StatusPedido, string> = {
   NOVO: 'Recebido', ACEITO: 'Aceito', PREPARANDO: 'Preparando',
   PRONTO: 'Pronto', EM_ROTA: 'Em rota', FINALIZADO: 'Entregue', CANCELADO: 'Cancelado',
@@ -18,6 +19,7 @@ const STATUS_COR: Record<StatusPedido, string> = {
 };
 
 export default function Historico() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [busca, setBusca] = useState('');
@@ -77,11 +79,11 @@ export default function Historico() {
 
   return (
     <div className="p-4">
-      <h2 className="mb-3 font-bold">Histórico de pedidos</h2>
+      <h2 className="mb-3 font-bold">{tDynamic('Histórico de pedidos')}</h2>
 
       <div className="mb-4 flex items-center justify-between rounded-2xl bg-white dark:bg-gray-900 dark:border-gray-800 p-4 shadow-sm">
         <div>
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Tempo Médio de Preparo (24h)</p>
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Tempo Médio de Preparo (24h)')}</p>
           <p className="text-xl font-bold text-gray-800 dark:text-gray-100">
             {tmp !== null ? `${tmp} min` : '--'}
           </p>

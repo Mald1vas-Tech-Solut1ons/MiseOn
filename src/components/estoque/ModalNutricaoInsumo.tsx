@@ -405,7 +405,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
               )}
 
               <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">Captura rápida (opcional)</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">{tDynamic('Captura rápida (opcional)')}</p>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <div className="relative flex-1">
                     <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
@@ -470,10 +470,10 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
               {precisaPesoMedio && (
                 <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-4">
                   <p className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">
-                    <Info size={14} /> Peso médio necessário
+                    <Info size={14} /> {tDynamic('Peso médio necessário')}
                   </p>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                    Este insumo é controlado em <b>"{insumo.unidade_medida}"</b>, que não tem massa universal.
+                    {tDynamic('Este insumo é controlado em')} <b>"{insumo.unidade_medida}"</b>, que não tem massa universal.
                     Quantos gramas pesa <b>1 {insumo.unidade_medida}</b>?
                   </p>
                   <input value={pesoMedioUnG} onChange={(e) => setPesoMedioUnG(e.target.value)}
@@ -486,10 +486,10 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
               {precisaDensidade && (
                 <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-4">
                   <p className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">
-                    <Info size={14} /> Densidade necessária
+                    <Info size={14} /> {tDynamic('Densidade necessária')}
                   </p>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                    O insumo é controlado em <b>{insumo.unidade_medida}</b> mas os valores acima são por <b>100 {baseUnidade}</b> — sem densidade não dá para converter.
+                    {tDynamic('O insumo é controlado em')} <b>{insumo.unidade_medida}</b> mas os valores acima são por <b>100 {baseUnidade}</b> — sem densidade não dá para converter.
                   </p>
                   <input value={densidadeGMl} onChange={(e) => setDensidadeGMl(e.target.value)}
                     type="text" inputMode="decimal" placeholder="ex.: 0,92"
@@ -523,7 +523,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
               </div>
 
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Contém alérgeno</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{tDynamic('Contém alérgeno')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {ALERGENOS.map((a) => (
                     <button key={a} onClick={() => toggle(contem, setContem, a)}
@@ -539,7 +539,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
               </div>
 
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Pode conter (contaminação cruzada)</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{tDynamic('Pode conter (contaminação cruzada)')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {ALERGENOS.filter((a) => !contem.has(a)).map((a) => (
                     <button key={a} onClick={() => toggle(podeConter, setPodeConter, a)}

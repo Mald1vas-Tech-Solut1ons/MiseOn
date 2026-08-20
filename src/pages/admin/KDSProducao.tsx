@@ -10,6 +10,7 @@ import type { CtxLoja } from './AdminLayout';
 import { imprimir } from '../../lib/print';
 import MiseOnLoader from '../../components/MiseOnLoader';
 
+import { useI18n } from '../../contexts/I18nContext';
 type Ficha = { insumo_id: string; quantidade: number };
 
 const custoUnit = (i?: Insumo) =>
@@ -29,6 +30,7 @@ function OSCard({
   insumoById: Map<string, Insumo>;
   onProduzir: (p: Insumo, qtdLotes: number) => Promise<void>;
 }) {
+  const { tDynamic } = useI18n();
   const [qtdLotes, setQtdLotes] = useState(() => {
     const rend = Number(p.rendimento_porcoes || 1);
     const deficit = Number(p.estoque_minimo) - Number(p.quantidade_atual);
@@ -177,7 +179,7 @@ function OSCard({
             <Check size={24} strokeWidth={3} />
           </div>
           <div>
-            <h3 className="text-xl font-black text-green-700 dark:text-green-400">Produção Concluída!</h3>
+            <h3 className="text-xl font-black text-green-700 dark:text-green-400">{tDynamic('Produção Concluída!')}</h3>
             <p className="text-sm font-medium text-green-600/80 dark:text-green-500/80">
               {rendimento} {p.unidade_medida} de {p.nome} enviados para o estoque.
             </p>
@@ -189,7 +191,7 @@ function OSCard({
               <span className="font-bold">#{dadosFinais.osNum}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500 font-medium">Tempo de Preparo:</span>
+              <span className="text-gray-500 font-medium">{tDynamic('Tempo de Preparo:')}</span>
               <span className="font-bold">{dadosFinais.tempoFormatado}</span>
             </div>
             <div className="flex justify-between text-sm">
@@ -278,9 +280,9 @@ function OSCard({
 
         {/* Checklist de insumos */}
         <div className="mt-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 p-3 border border-gray-100 dark:border-gray-800">
-          <p className="text-[10px] uppercase font-black text-gray-400 mb-2">Checklist de Manufatura</p>
+          <p className="text-[10px] uppercase font-black text-gray-400 mb-2">{tDynamic('Checklist de Manufatura')}</p>
           {semFicha ? (
-            <p className="text-xs text-gray-400 py-1">Sem ficha técnica cadastrada.</p>
+            <p className="text-xs text-gray-400 py-1">{tDynamic('Sem ficha técnica cadastrada.')}</p>
           ) : (
             <ul className="space-y-1.5">
               {itens.map((it, idx) => (
@@ -307,7 +309,7 @@ function OSCard({
         {!podeProduzir && !semFicha && (
           <div className="mt-3 flex items-start gap-2 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 p-2 rounded-lg border border-red-100 dark:border-red-900/50">
             <AlertTriangle size={16} className="shrink-0 mt-0.5" /> 
-            <p>Estoque digital divergente. A produção exigirá <b>Furo de Estoque</b> (balanço negativo).</p>
+            <p>{tDynamic('Estoque digital divergente. A produção exigirá')} <b>{tDynamic('Furo de Estoque')}</b> (balanço negativo).</p>
           </div>
         )}
 
@@ -342,14 +344,14 @@ function OSCard({
           <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md p-6 shadow-2xl border border-red-500/30" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4 text-red-600 dark:text-red-500">
               <AlertTriangle size={32} />
-              <h3 className="font-black text-xl">Risco de Furo de Estoque</h3>
+              <h3 className="font-black text-xl">{tDynamic('Risco de Furo de Estoque')}</h3>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 leading-relaxed">
-              O sistema aponta que a cozinha não tem insumos brutos suficientes. Na vida real, isso significa que seu <b>estoque físico divergiu do digital</b> (ex: uma compra de emergência não foi dada a entrada).
+              {tDynamic('O sistema aponta que a cozinha não tem insumos brutos suficientes. Na vida real, isso significa que seu')} <b>estoque físico divergiu do digital</b> (ex: uma compra de emergência não foi dada a entrada).
             </p>
             
             <div className="bg-red-50 dark:bg-red-900/10 rounded-xl p-3 mb-5 border border-red-100 dark:border-red-900/30">
-              <p className="text-[10px] font-black uppercase text-red-800 dark:text-red-400 mb-2 tracking-wider">Insumos que ficarão negativos:</p>
+              <p className="text-[10px] font-black uppercase text-red-800 dark:text-red-400 mb-2 tracking-wider">{tDynamic('Insumos que ficarão negativos:')}</p>
               <div className="space-y-2">
                 {itens.filter(i => !i.ok).map(i => {
                   const saldoApos = Number(i.ins?.quantidade_atual) - i.necessario;
@@ -366,7 +368,7 @@ function OSCard({
             </div>
             
             <p className="text-sm font-medium mb-6 text-gray-700 dark:text-gray-300">
-              Deseja <b>Forçar a Produção</b>? A operação da cozinha não será travada, mas você ou o gerente precisarão realizar um balanço de correção amanhã.
+              Deseja <b>{tDynamic('Forçar a Produção')}</b>? A operação da cozinha não será travada, mas você ou o gerente precisarão realizar um balanço de correção amanhã.
             </p>
             
             <div className="flex gap-3">
@@ -389,6 +391,7 @@ function OSCard({
 
 // --- Main Component ---
 export default function KDSProducao() {
+  const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
   const [insumos, setInsumos] = useState<Insumo[]>([]);
   const [loja, setLoja] = useState<Loja | null>(null);
@@ -475,7 +478,7 @@ export default function KDSProducao() {
         <div className="flex items-center gap-4">
           <div className="bg-white/20 p-4 rounded-full backdrop-blur-sm"><ChefHat size={32} /></div>
           <div>
-            <h2 className="text-2xl font-black">KDS de Produção Interna</h2>
+            <h2 className="text-2xl font-black">{tDynamic('KDS de Produção Interna')}</h2>
             <p className="text-orange-100 text-sm mt-1 font-medium max-w-lg">
               Sistema inteligente de manufatura. Monitore o tempo de execução, baixe os insumos brutos e imprima a etiqueta de validade e rastreabilidade para o lote.
             </p>
@@ -491,7 +494,7 @@ export default function KDSProducao() {
         <div className="text-center py-20 text-gray-400 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
           <ClipboardList size={40} className="mx-auto mb-3 opacity-40" />
           <p className="font-semibold">Nenhum preparo cadastrado ainda.</p>
-          <p className="text-sm mt-1">Cadastre receitas base em <b>Estoque → Preparos</b> para gerar ordens de produção (OS).</p>
+          <p className="text-sm mt-1">{tDynamic('Cadastre receitas base em')} <b>Estoque → Preparos</b> para gerar ordens de produção (OS).</p>
         </div>
       ) : (
         <div className="space-y-8">
@@ -499,7 +502,7 @@ export default function KDSProducao() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <span className="flex items-center justify-center min-w-6 h-6 px-1.5 rounded-full bg-orange-500 text-white text-xs font-black">{pendentes.length}</span>
-              <h3 className="font-black text-xl text-gray-800 dark:text-gray-100">Ordens Críticas Pendentes</h3>
+              <h3 className="font-black text-xl text-gray-800 dark:text-gray-100">{tDynamic('Ordens Críticas Pendentes')}</h3>
             </div>
             
             {pendentes.length === 0 ? (
@@ -509,7 +512,7 @@ export default function KDSProducao() {
                 </div>
                 <div>
                   <p className="font-black text-lg text-green-700 dark:text-green-400">Cozinha 100% abastecida!</p>
-                  <p className="text-sm font-medium text-green-600/80 dark:text-green-500/80 mt-0.5">Todos os preparos e molhos estão com saldo superior à margem de segurança configurada.</p>
+                  <p className="text-sm font-medium text-green-600/80 dark:text-green-500/80 mt-0.5">{tDynamic('Todos os preparos e molhos estão com saldo superior à margem de segurança configurada.')}</p>
                 </div>
               </div>
             ) : (

@@ -147,7 +147,7 @@ export default function WhatsAppPlataforma() {
       <div className="flex items-center gap-3">
         <MessageCircle size={22} className="text-emerald-400" />
         <div>
-          <h1 className="font-['Sora'] text-xl font-black text-white">WhatsApp — Suporte da Plataforma</h1>
+          <h1 className="font-['Sora'] text-xl font-black text-white">{tDynamic('WhatsApp — Suporte da Plataforma')}</h1>
           <p className="text-xs text-gray-400">
             {tDynamic('Conexão manual de tenants. O lojista nunca vê estes campos — ele conecta pelo Embedded Signup.')}
           </p>
@@ -201,13 +201,13 @@ export default function WhatsAppPlataforma() {
         </div>
       )}
 
-      {carregando && <p className="text-sm text-gray-400">Carregando conexão…</p>}
+      {carregando && <p className="text-sm text-gray-400">{tDynamic('Carregando conexão…')}</p>}
 
       {lojaId && !carregando && (
         <>
           {/* ── Status ── */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <h2 className="mb-3 font-['Sora'] text-sm font-bold text-white">Status da conexão</h2>
+            <h2 className="mb-3 font-['Sora'] text-sm font-bold text-white">{tDynamic('Status da conexão')}</h2>
             {conexao ? (
               <div className="space-y-1 text-sm text-gray-300">
                 <p>
@@ -249,7 +249,7 @@ export default function WhatsAppPlataforma() {
                 <div>
                   <h2 className="font-['Sora'] text-sm font-bold text-white">Trocar o token</h2>
                   <p className="text-xs text-gray-400">
-                    O número já está cadastrado — use quando o token vencer. É o único campo necessário.
+                    {tDynamic('O número já está cadastrado — use quando o token vencer. É o único campo necessário.')}
                   </p>
                 </div>
               </div>
@@ -270,7 +270,7 @@ export default function WhatsAppPlataforma() {
             <div className="mb-4 flex items-center gap-2">
               <Plug size={18} className="text-indigo-400" />
               <div>
-                <h2 className="font-['Sora'] text-sm font-bold text-white">Conexão manual completa</h2>
+                <h2 className="font-['Sora'] text-sm font-bold text-white">{tDynamic('Conexão manual completa')}</h2>
                 <p className="text-xs text-gray-400">
                   {tDynamic('Registra o webhook e inscreve o app na WABA. Use só quando o Embedded Signup não resolver.')}
                 </p>

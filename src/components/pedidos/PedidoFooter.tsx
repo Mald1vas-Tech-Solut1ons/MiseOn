@@ -2,7 +2,9 @@ import { Bike, Store, UtensilsCrossed } from 'lucide-react';
 import { fmt } from '../../types';
 import type { PedidoFooterProps } from '../../types';
 
+import { useI18n } from '../../contexts/I18nContext';
 export function PedidoFooter({ pedido: p }: PedidoFooterProps) {
+  const { tDynamic } = useI18n();
   return (
     <>
       {/* ── Entrega/Balcão/Mesa ── */}
@@ -18,7 +20,7 @@ export function PedidoFooter({ pedido: p }: PedidoFooterProps) {
           </div>
         ) : (
           <div className="flex items-center gap-1.5 text-emerald-500 font-semibold">
-            <Store size={14} /> Retirada no balcão
+            <Store size={14} /> {tDynamic('Retirada no balcão')}
           </div>
         )}
       </div>

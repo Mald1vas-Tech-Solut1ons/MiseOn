@@ -1,5 +1,6 @@
 import { Sandwich, UtensilsCrossed, Factory } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 const SEGMENTOS = [
   {
     icon: <Sandwich size={22} />,
@@ -22,6 +23,7 @@ const SEGMENTOS = [
 ];
 
 export function Segmentos() {
+  const { tDynamic } = useI18n();
   return (
     <section style={{ borderTop: '1px solid rgba(10,92,196,0.15)', background: 'rgba(10,92,196,0.03)' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6">
@@ -30,7 +32,7 @@ export function Segmentos() {
             Para quem é
           </div>
           <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Feito para a sua operação, não para uma operação genérica
+            {tDynamic('Feito para a sua operação, não para uma operação genérica')}
           </h2>
         </div>
 

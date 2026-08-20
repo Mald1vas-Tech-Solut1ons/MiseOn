@@ -394,7 +394,7 @@ export default function AcompanharPedido() {
               <div>
                 <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Seu pedido continua salvo mesmo se você sair desta tela.')}</p>
                 <p className="mt-1 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
-                  As atualizações continuam aparecendo em tempo real em <b>Meus pedidos</b> e aqui no link direto do pedido.
+                  {tDynamic('As atualizações continuam aparecendo em tempo real em')} <b>Meus pedidos</b> e aqui no link direto do pedido.
                 </p>
               </div>
             </div>
@@ -431,7 +431,7 @@ export default function AcompanharPedido() {
                 className="flex items-center gap-2 rounded-2xl border-2 border-red-200 bg-white dark:bg-gray-900 px-5 py-3 text-sm font-bold text-red-600 dark:text-red-400 transition hover:bg-red-50 dark:hover:bg-red-950/30 dark:border-red-900/30"
               >
                 <MessageSquareWarning size={18} />
-                Tive um problema
+                {tDynamic('Tive um problema')}
               </button>
             </div>
           </div>
@@ -444,7 +444,7 @@ export default function AcompanharPedido() {
             <CheckCircle2 size={24} className="text-emerald-500 shrink-0" />
             <div>
               <p className="font-bold text-emerald-900 dark:text-emerald-300">Pedido Entregue</p>
-              <p className="text-sm text-emerald-700 dark:text-emerald-400/80">O recebimento foi confirmado. Agradecemos a preferência!</p>
+              <p className="text-sm text-emerald-700 dark:text-emerald-400/80">{tDynamic('O recebimento foi confirmado. Agradecemos a preferência!')}</p>
             </div>
           </div>
         </div>
@@ -525,7 +525,7 @@ export default function AcompanharPedido() {
           )}
 
           <section className="rounded-3xl border p-5 shadow-sm" style={{ background: 'var(--cor-card)', borderColor: 'var(--cor-borda)' }}>
-            <p className="mb-3 text-sm font-bold" style={{ color: 'var(--cor-texto)' }}>Resumo do pedido</p>
+            <p className="mb-3 text-sm font-bold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Resumo do pedido')}</p>
             <ul className="space-y-2 text-sm">
               {pedido.itens_pedido?.map((item) => (
                 <li key={item.id}>
@@ -543,7 +543,7 @@ export default function AcompanharPedido() {
               </div>
               {Number(pedido.taxa_entrega) > 0 && (
                 <div className="flex items-center justify-between" style={{ color: 'var(--cor-texto-suave)' }}>
-                  <span>Taxa de entrega</span>
+                  <span>{tDynamic('Taxa de entrega')}</span>
                   <span>{fmt(Number(pedido.taxa_entrega))}</span>
                 </div>
               )}
@@ -563,7 +563,7 @@ export default function AcompanharPedido() {
               <div className="mt-4 rounded-2xl p-4" style={{ background: 'var(--cor-surface-muted)' }}>
                 <p className="mb-1 flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--cor-texto)' }}>
                   <MapPin size={14} />
-                  Endereço de entrega
+                  {tDynamic('Endereço de entrega')}
                 </p>
                 <p className="text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
                   {pedido.endereco_entrega}
@@ -581,14 +581,14 @@ export default function AcompanharPedido() {
                 <ShieldCheck size={18} />
               </div>
               <div>
-                <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>Atualizações protegidas e em tempo real</p>
+                <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Atualizações protegidas e em tempo real')}</p>
                 <p className="mt-1 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
                   {tDynamic('Quando a loja muda o status ou o entregador inicia sua entrega, esta tela é atualizada automaticamente.')}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {loja?.slug && (
                     <Link to={`/${loja.slug}`} className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-texto)' }}>
-                      <Package size={14} /> Voltar ao cardapio
+                      <Package size={14} /> {tDynamic('Voltar ao cardápio')}
                     </Link>
                   )}
                   <Link to="/lojas" className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold" style={{ background: 'var(--cor-surface-muted)', color: 'var(--cor-texto)' }}>

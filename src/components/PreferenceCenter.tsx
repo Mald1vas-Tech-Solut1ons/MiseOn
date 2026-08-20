@@ -3,12 +3,14 @@ import { supabase } from '../lib/supabase';
 import { Settings, Mail, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useI18n } from '../contexts/I18nContext';
 interface Preferences {
   marketing_allowed: boolean;
   transactional_allowed: boolean;
 }
 
 export const PreferenceCenter: React.FC = () => {
+  const { tDynamic } = useI18n();
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -101,8 +103,8 @@ export const PreferenceCenter: React.FC = () => {
           <Settings size={22} />
         </div>
         <div>
-          <h3 className="font-semibold text-lg text-[var(--cor-texto)]">Centro de Preferências</h3>
-          <p className="text-sm text-[var(--cor-texto-suave)]">Gerencie suas comunicações por e-mail.</p>
+          <h3 className="font-semibold text-lg text-[var(--cor-texto)]">{tDynamic('Centro de Preferências')}</h3>
+          <p className="text-sm text-[var(--cor-texto-suave)]">{tDynamic('Gerencie suas comunicações por e-mail.')}</p>
         </div>
       </div>
 
@@ -113,7 +115,7 @@ export const PreferenceCenter: React.FC = () => {
             <Mail className="text-[var(--cor-texto-suave)]" size={20} />
             <div>
               <p className="font-medium text-[var(--cor-texto)]">Emails Transacionais</p>
-              <p className="text-xs text-[var(--cor-texto-fraco)] max-w-[240px]">Recibos, atualizações de pedidos e alertas essenciais da conta.</p>
+              <p className="text-xs text-[var(--cor-texto-fraco)] max-w-[240px]">{tDynamic('Recibos, atualizações de pedidos e alertas essenciais da conta.')}</p>
             </div>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
@@ -134,7 +136,7 @@ export const PreferenceCenter: React.FC = () => {
             <AlertCircle className="text-[var(--cor-texto-suave)]" size={20} />
             <div>
               <p className="font-medium text-[var(--cor-texto)]">Ofertas e Marketing</p>
-              <p className="text-xs text-[var(--cor-texto-fraco)] max-w-[240px]">Novidades do sistema, dicas operacionais e promoções exclusivas.</p>
+              <p className="text-xs text-[var(--cor-texto-fraco)] max-w-[240px]">{tDynamic('Novidades do sistema, dicas operacionais e promoções exclusivas.')}</p>
             </div>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">

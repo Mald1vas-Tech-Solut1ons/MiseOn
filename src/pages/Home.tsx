@@ -606,7 +606,7 @@ export default function Home() {
               {recursosOpen && (
                 <div className="absolute top-full -left-4 mt-2 w-80 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0B1120]/95 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="mb-2 px-3 pt-1 text-[11px] font-black uppercase tracking-wider text-slate-400">
-                    Recursos em Destaque
+                    {tDynamic('Recursos em Destaque')}
                   </div>
                   <div className="space-y-1">
                     <Link
@@ -1142,8 +1142,8 @@ export default function Home() {
               <FlipCard
                 key={i}
                 icone={r.icone}
-                titulo={r.titulo}
-                resumo={r.texto}
+                titulo={tDynamic(r.titulo)}
+                resumo={tDynamic(r.texto)}
                 detalhes={r.detalhes}
                 metrica={r.metrica}
                 badge={r.badge}
@@ -1534,12 +1534,12 @@ export default function Home() {
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-blue-400">
-              <Boxes size={14} /> Módulo de Engenharia de Estoque & Preparos
+              <Boxes size={14} /> {tDynamic('Módulo de Engenharia de Estoque & Preparos')}
             </span>
             <h2 className="mt-5 font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
               Controle de Insumos, Fichas Técnicas e{' '}
               <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-                Observabilidade 3D em Tempo Real
+                {tDynamic('Observabilidade 3D em Tempo Real')}
               </span>
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-300 sm:text-lg">
@@ -1590,11 +1590,11 @@ export default function Home() {
                 <div className="mt-5">
                   <span className="text-[11px] font-black uppercase tracking-wider text-orange-400">Pilar 02</span>
                   <h3 className="mt-1 font-['Sora'] text-xl font-bold text-white">
-                    Receitas Base & Validade de Lotes
+                    {tDynamic('Receitas Base & Validade de Lotes')}
                   </h3>
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-slate-300">
-                  Crie preparos intermediários (ex: <i>Blend Moldado 180g, Cebola Caramelizada, Molhos</i>) especificando rendimento por lote e ficha técnica dos insumos brutos.
+                  {tDynamic('Crie preparos intermediários (ex:')} <i>Blend Moldado 180g, Cebola Caramelizada, Molhos</i>) especificando rendimento por lote e ficha técnica dos insumos brutos.
                 </p>
                 <div className="mt-4 space-y-2 rounded-2xl bg-black/40 p-4 text-xs">
                   <div className="flex items-center justify-between text-slate-200">
@@ -1622,7 +1622,7 @@ export default function Home() {
                 <div className="mt-5">
                   <span className="text-[11px] font-black uppercase tracking-wider text-purple-400">Pilar 03</span>
                   <h3 className="mt-1 font-['Sora'] text-xl font-bold text-white">
-                    Observabilidade 3D de Estoque Físico
+                    {tDynamic('Observabilidade 3D de Estoque Físico')}
                   </h3>
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-slate-300">
@@ -1659,7 +1659,7 @@ export default function Home() {
                 to="/cadastre-se"
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-sm font-extrabold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105"
               >
-                Testar Estoque 3D Grátis <ArrowRight size={18} />
+                {tDynamic('Testar Estoque 3D Grátis')} <ArrowRight size={18} />
               </Link>
             </div>
           </div>
@@ -1672,7 +1672,7 @@ export default function Home() {
           <div className="mx-auto max-w-2xl text-center">
             <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">Como funciona</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-              Do cadastro ao primeiro pedido em 3 passos
+              {tDynamic('Do cadastro ao primeiro pedido em 3 passos')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-slate-300">
               {tDynamic('Sem instalação, sem equipamento especial. Funciona no navegador, no computador e no celular.')}
@@ -1688,8 +1688,8 @@ export default function Home() {
                 <div className="absolute -top-5 left-7 flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FC5B24] to-[#E34A1B] font-['Sora'] text-lg font-black text-white shadow-lg shadow-[#FC5B24]/30">
                   {p.n}
                 </div>
-                <h3 className="font-['Sora'] text-lg font-bold text-gray-900 dark:text-white">{p.titulo}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-slate-300">{p.texto}</p>
+                <h3 className="font-['Sora'] text-lg font-bold text-gray-900 dark:text-white">{tDynamic(p.titulo)}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-slate-300">{tDynamic(p.texto)}</p>
               </div>
             ))}
           </div>
@@ -1702,7 +1702,7 @@ export default function Home() {
           <div className="mx-auto max-w-2xl text-center">
             <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic("Histórias reais")}</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-              De quem já tentou de tudo, ou estava apenas começando
+              {tDynamic('De quem já tentou de tudo, ou estava apenas começando')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-slate-300">
               Não importa se você usa um sistema caro, um sistema incompleto ou se ainda está no papel.
@@ -1723,7 +1723,7 @@ export default function Home() {
                     <Star size={16} fill="currentColor" />
                   </div>
                   <p className="mt-5 text-sm leading-relaxed text-gray-700 dark:text-slate-300 italic">
-                    "{d.texto}"
+                    "{tDynamic(d.texto)}"
                   </p>
                 </div>
                 <div className="relative mt-8 flex items-center justify-between border-t border-gray-100 pt-5 dark:border-white/10">
@@ -1831,10 +1831,10 @@ export default function Home() {
                     to="/cadastre-se"
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-6 py-4 font-['Sora'] text-base font-bold text-white shadow-lg shadow-[#FC5B24]/30 transition hover:scale-105 hover:brightness-110"
                   >
-                    Testar 30 Dias Grátis <ArrowRight size={18} />
+                    {tDynamic('Testar 30 Dias Grátis')} <ArrowRight size={18} />
                   </Link>
                   <p className="mt-4 text-center text-[11px] font-medium text-slate-400">
-                    <strong className="text-slate-200">{tDynamic("Sem cartão no cadastro.")}</strong> Tolerância de 7 dias pós-vencimento.
+                    <strong className="text-slate-200">{tDynamic("Sem cartão no cadastro.")}</strong> {tDynamic('Tolerância de 7 dias pós-vencimento.')}
                   </p>
                 </div>
               </div>
@@ -1850,7 +1850,7 @@ export default function Home() {
                   {/* Categoria 1 */}
                   <div>
                     <h5 className="flex items-center gap-2 text-sm font-bold text-slate-200 mb-3 border-b border-white/5 pb-2">
-                      <ChefHat size={16} className="text-emerald-400" /> Operação e Vendas
+                      <ChefHat size={16} className="text-emerald-400" /> {tDynamic('Operação e Vendas')}
                     </h5>
                     <ul className="space-y-2.5 text-xs text-slate-400">
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("PDV Frente de Caixa")}</strong> inteligente</span></li>
@@ -1876,7 +1876,7 @@ export default function Home() {
                   {/* Categoria 3 */}
                   <div>
                     <h5 className="flex items-center gap-2 text-sm font-bold text-slate-200 mb-3 border-b border-white/5 pb-2">
-                      <Boxes size={16} className="text-orange-400" /> Estoque e Precisão
+                      <Boxes size={16} className="text-orange-400" /> {tDynamic('Estoque e Precisão')}
                     </h5>
                     <ul className="space-y-2.5 text-xs text-slate-400">
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-orange-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Ficha Técnica")}</strong> {tDynamic("avançada (CMV)")}</span></li>
@@ -1923,10 +1923,10 @@ export default function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FC5B24]/20 border border-[#FC5B24]/40 px-4 py-1 text-xs font-black uppercase tracking-widest text-orange-300">
               <BookOpen size={14} className="text-[#FC5B24]" />
-              Blog & Centro de Inteligência em Food Service
+              {tDynamic('Blog & Centro de Inteligência em Food Service')}
             </span>
             <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Conteúdo profundo sobre CMV, KDS, Engenharia de Cardápio e IA
+              {tDynamic('Conteúdo profundo sobre CMV, KDS, Engenharia de Cardápio e IA')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-300">
               {tDynamic('Aprenda com estudos de caso reais, análises financeiras e regras de operação validadas na prática em cozinhas profissionais.')}
@@ -1938,7 +1938,7 @@ export default function Home() {
               <div>
                 <span className="text-[10px] font-black uppercase text-[#FC5B24]">{tDynamic("Gestão Financeira")}</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
-                  A Evolução do CMV: Do Caderno ao Custeio PEPS 3D
+                  {tDynamic('A Evolução do CMV: Do Caderno ao Custeio PEPS 3D')}
                 </h3>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
                   {tDynamic('Como calcular a perda de cocção e valorizar preparos em lote sem margens maquiadas.')}
@@ -1956,7 +1956,7 @@ export default function Home() {
                   {tDynamic('O Fim do Papel na Cozinha com KDS Kanban')}
                 </h3>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                  Reduza até 35% do tempo de preparo eliminando rasuras e papel engordurado.
+                  {tDynamic('Reduza até 35% do tempo de preparo eliminando rasuras e papel engordurado.')}
                 </p>
               </div>
               <Link to="/blog/o-fim-do-papel-na-cozinha-kds-kanban-operacional" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FC5B24] hover:underline">
@@ -1968,7 +1968,7 @@ export default function Home() {
               <div>
                 <span className="text-[10px] font-black uppercase text-emerald-400">Tecnologia & IA</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
-                  IA no WhatsApp: Conexão Oficial Meta vs Bots Amadores
+                  {tDynamic('IA no WhatsApp: Conexão Oficial Meta vs Bots Amadores')}
                 </h3>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
                   {tDynamic('Evite banimento do seu número de delivery e atenda clientes com precisão.')}
@@ -1983,7 +1983,7 @@ export default function Home() {
               <div>
                 <span className="text-[10px] font-black uppercase text-amber-400">{tDynamic("Restaurante por Quilo")}</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
-                  Perda de Cocção & Peso Inteligente no Buffet
+                  {tDynamic('Perda de Cocção & Peso Inteligente no Buffet')}
                 </h3>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
                   {tDynamic('Entenda o encolhimento de carnes e a baixa de estoque por grama servida.')}
@@ -2003,7 +2003,7 @@ export default function Home() {
                   🖋️ Escreva para o Blog MiseOn
                 </span>
                 <h3 className="mt-2 font-['Sora'] text-2xl font-bold text-white">
-                  É Consultor de CMV, Chef, Nutricionista ou Especialista em Gastronomia?
+                  {tDynamic('É Consultor de CMV, Chef, Nutricionista ou Especialista em Gastronomia?')}
                 </h3>
                 <p className="mt-2 text-xs text-slate-300 max-w-2xl leading-relaxed">
                   {tDynamic('Publique seus artigos técnicos em nosso Blog e seja lido por milhares de donos de restaurantes e gestores de food service de todo o Brasil.')}
@@ -2015,13 +2015,13 @@ export default function Home() {
                   to="/blog"
                   className="rounded-full bg-white px-5 py-3 font-['Sora'] text-xs font-bold text-gray-900 shadow-md transition hover:bg-gray-100"
                 >
-                  Acessar Hub do Blog
+                  {tDynamic('Acessar Hub do Blog')}
                 </Link>
                 <a
                   href="mailto:contato@miseon.app.br?subject=Proposta%20de%20Artigo%20para%20o%20Blog%20MiseOn"
                   className="rounded-full bg-[#FC5B24] px-5 py-3 font-['Sora'] text-xs font-bold text-white shadow-lg shadow-[#FC5B24]/30 transition hover:scale-105"
                 >
-                  Enviar Proposta de Artigo
+                  {tDynamic('Enviar Proposta de Artigo')}
                 </a>
               </div>
             </div>
@@ -2035,7 +2035,7 @@ export default function Home() {
           <div className="mx-auto max-w-2xl text-center">
             <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">Suporte</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-              Gente de verdade do outro lado
+              {tDynamic('Gente de verdade do outro lado')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-slate-300">
               Nada de ticket perdido em fila infinita. Você fala com o time que constrói
@@ -2047,7 +2047,7 @@ export default function Home() {
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             {SUPORTE_CANAIS.map((c) => (
               <div
-                key={c.titulo}
+                key={tDynamic(c.titulo)}
                 className={`flex flex-col rounded-3xl border p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl ${
                   c.destaque
                     ? 'border-emerald-500/40 bg-gradient-to-br from-emerald-600 to-emerald-800 text-white'
@@ -2062,10 +2062,10 @@ export default function Home() {
                   <c.icone size={24} />
                 </div>
                 <h3 className={`mt-4 font-['Sora'] text-lg font-bold ${c.destaque ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                  {c.titulo}
+                  {tDynamic(c.titulo)}
                 </h3>
                 <p className={`mt-2 flex-1 text-sm leading-relaxed ${c.destaque ? 'text-emerald-100/90' : 'text-gray-600 dark:text-slate-300'}`}>
-                  {c.descricao}
+                  {tDynamic(c.descricao)}
                 </p>
                 <a
                   href={c.href}
@@ -2089,7 +2089,7 @@ export default function Home() {
             </h3>
             <div className="mt-8 grid gap-3">
               {FAQ.map((f) => (
-                <FaqItem key={f.pergunta} pergunta={f.pergunta} resposta={f.resposta} />
+                <FaqItem key={tDynamic(f.pergunta)} pergunta={tDynamic(f.pergunta)} resposta={tDynamic(f.resposta)} />
               ))}
             </div>
             <p className="mt-8 text-center text-sm text-gray-500 dark:text-slate-400">
@@ -2100,7 +2100,7 @@ export default function Home() {
                 rel="noreferrer"
                 className="font-bold text-[var(--cor-primaria)] underline-offset-2 transition hover:underline"
               >
-                Chama no WhatsApp
+                {tDynamic('Chama no WhatsApp')}
               </a>{' '}
               ou escreva para{' '}
               <a

@@ -72,7 +72,7 @@ export default function Login() {
               <MiseOnLogo size={160} />
             </Link>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Bem-vindo de volta</h1>
+          <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">{tDynamic('Bem-vindo de volta')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{tDynamic('Entre para gerenciar sua operação')}</p>
         </div>
 

@@ -493,8 +493,8 @@ export default function Fiscal() {
               <FileText size={28} />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Módulo Fiscal SaaS</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Emissão automatizada de NF-e, NFC-e (Focus NFe API v2) e entrada de compras via XML</p>
+              <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">{tDynamic('Módulo Fiscal SaaS')}</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{tDynamic('Emissão automatizada de NF-e, NFC-e (Focus NFe API v2) e entrada de compras via XML')}</p>
             </div>
           </div>
         </div>
@@ -520,7 +520,7 @@ export default function Fiscal() {
               : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
-          <Building2 size={18} /> Configurações Fiscais do Tenant
+          <Building2 size={18} /> {tDynamic('Configurações Fiscais do Tenant')}
         </button>
 
         <button
@@ -542,7 +542,7 @@ export default function Fiscal() {
               : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
-          <Box size={18} /> Importar XML (Estoque de Fornecedores)
+          <Box size={18} /> {tDynamic('Importar XML (Estoque de Fornecedores)')}
         </button>
       </div>
 
@@ -556,7 +556,7 @@ export default function Fiscal() {
                 <ShieldCheck size={24} />
               </div>
               <div>
-                <h3 className="font-bold text-base text-gray-900 dark:text-white">Status da Habilitação SEFAZ / Focus NFe</h3>
+                <h3 className="font-bold text-base text-gray-900 dark:text-white">{tDynamic('Status da Habilitação SEFAZ / Focus NFe')}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {formConfig.certificado_validade 
                     ? `Certificado A1 Ativo (Validade: ${new Date(formConfig.certificado_validade).toLocaleDateString('pt-BR')})` 
@@ -579,7 +579,7 @@ export default function Fiscal() {
           {/* Dados Fiscais da Empresa */}
           <div className="bg-white dark:bg-[#0B1120] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 space-y-4 shadow-sm">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Building2 size={20} className="text-[#004198]" /> Dados Cadastrais Fiscais da Empresa
+              <Building2 size={20} className="text-[#004198]" /> {tDynamic('Dados Cadastrais Fiscais da Empresa')}
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -619,7 +619,7 @@ export default function Fiscal() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">Inscrição Estadual (IE) *</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">{tDynamic('Inscrição Estadual (IE) *')}</label>
                 <input
                   type="text"
                   required
@@ -631,7 +631,7 @@ export default function Fiscal() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">Inscrição Municipal (IM)</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">{tDynamic('Inscrição Municipal (IM)')}</label>
                 <input
                   type="text"
                   value={formConfig.inscricao_municipal}
@@ -642,7 +642,7 @@ export default function Fiscal() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">Regime Tributário (CRT) *</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">{tDynamic('Regime Tributário (CRT) *')}</label>
                 <select
                   value={formConfig.crt}
                   onChange={(e) => {
@@ -662,7 +662,7 @@ export default function Fiscal() {
 
           {/* Endereço Fiscal */}
           <div className="bg-white dark:bg-[#0B1120] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 space-y-4 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Endereço Fiscal Emitente (SEFAZ)</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{tDynamic('Endereço Fiscal Emitente (SEFAZ)')}</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
@@ -739,7 +739,7 @@ export default function Fiscal() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">Código IBGE Cidade</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">{tDynamic('Código IBGE Cidade')}</label>
                 <input
                   type="text"
                   value={formConfig.codigo_ibge}
@@ -755,7 +755,7 @@ export default function Fiscal() {
           <div className="bg-white dark:bg-[#0B1120] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Lock size={20} className="text-emerald-500" /> Certificado Digital A1 (.pfx ou .p12)
+                <Lock size={20} className="text-emerald-500" /> {tDynamic('Certificado Digital A1 (.pfx ou .p12)')}
               </h2>
               <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg">
                 🔒 Criptografia Servidor AES-256
@@ -778,11 +778,11 @@ export default function Fiscal() {
                 <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
                   {certificadoFile ? certificadoFile.name : (formConfig.certificado_nome ? `Substituir ${formConfig.certificado_nome}` : 'Clique para selecionar arquivo .pfx/.p12')}
                 </span>
-                <span className="text-[10px] text-gray-400 mt-1">Tamanho máximo: 5MB</span>
+                <span className="text-[10px] text-gray-400 mt-1">{tDynamic('Tamanho máximo: 5MB')}</span>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">Senha do Certificado A1</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">{tDynamic('Senha do Certificado A1')}</label>
                 <div className="relative">
                   <input
                     type={mostrarSenha ? 'text' : 'password'}
@@ -800,7 +800,7 @@ export default function Fiscal() {
                   </button>
                 </div>
                 <p className="text-[10px] text-gray-400 mt-1.5">
-                  Conforme a LGPD, esta senha é encriptada e nunca armazenada em texto puro.
+                  {tDynamic('Conforme a LGPD, esta senha é encriptada e nunca armazenada em texto puro.')}
                 </p>
               </div>
             </div>
@@ -812,7 +812,7 @@ export default function Fiscal() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">ID do Token CSC</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">{tDynamic('ID do Token CSC')}</label>
                 <input
                   type="text"
                   value={formConfig.id_csc}
@@ -823,7 +823,7 @@ export default function Fiscal() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">Código Token CSC (SEFAZ)</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">{tDynamic('Código Token CSC (SEFAZ)')}</label>
                 <input
                   type="text"
                   value={formConfig.csc}
@@ -846,7 +846,7 @@ export default function Fiscal() {
                     onChange={() => setFormConfig({ ...formConfig, nfe_ambiente: 'homologacao' })}
                     className="text-[#004198]"
                   />
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Homologação (Ambiente de Testes)</span>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{tDynamic('Homologação (Ambiente de Testes)')}</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -883,7 +883,7 @@ export default function Fiscal() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white dark:bg-[#0B1120] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase">Total Faturado no Mês</p>
+                <p className="text-xs font-bold text-gray-400 uppercase">{tDynamic('Total Faturado no Mês')}</p>
                 <h3 className="text-2xl font-black text-gray-900 dark:text-white mt-1">R$ {totalEmitidoMes.toFixed(2)}</h3>
               </div>
               <div className="p-3 bg-emerald-500/10 text-emerald-600 rounded-xl">
@@ -903,7 +903,7 @@ export default function Fiscal() {
 
             <div className="bg-white dark:bg-[#0B1120] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase">Total de Histórico</p>
+                <p className="text-xs font-bold text-gray-400 uppercase">{tDynamic('Total de Histórico')}</p>
                 <h3 className="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">{notas.length}</h3>
               </div>
               <div className="p-3 bg-blue-500/10 text-blue-600 rounded-xl">
@@ -931,7 +931,7 @@ export default function Fiscal() {
                 onChange={(e) => setFiltroStatus(e.target.value)}
                 className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0B1120] text-xs font-bold outline-none"
               >
-                <option value="todos">Todos os Status</option>
+                <option value="todos">{tDynamic('Todos os Status')}</option>
                 <option value="autorizada">Autorizada</option>
                 <option value="processando">Processando</option>
                 <option value="rejeitada">Rejeitada</option>
@@ -966,7 +966,7 @@ export default function Fiscal() {
                   {notasFiltradas.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center p-8 text-sm text-gray-400">
-                        Nenhuma nota fiscal encontrada no período.
+                        {tDynamic('Nenhuma nota fiscal encontrada no período.')}
                       </td>
                     </tr>
                   ) : (
@@ -1066,7 +1066,7 @@ export default function Fiscal() {
         <div className="space-y-6">
           <div className="bg-white dark:bg-[#0B1120] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 space-y-4 shadow-sm">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Box size={20} className="text-[#004198]" /> Entrada de Mercadorias via XML de NFe (Fornecedores)
+              <Box size={20} className="text-[#004198]" /> {tDynamic('Entrada de Mercadorias via XML de NFe (Fornecedores)')}
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Faça o upload do arquivo `.xml` fornecido pela sua distribuidora/fornecedor para ler automaticamente os itens, atualizar o custo unitário e incrementar o saldo no estoque do MiseOn.
@@ -1087,7 +1087,7 @@ export default function Fiscal() {
               <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
                 {xmlFile ? xmlFile.name : 'Arraste ou selecione o arquivo .xml da NFe'}
               </span>
-              <span className="text-xs text-gray-400 mt-1">Formato suportado: XML NFe Modelo 55 da SEFAZ</span>
+              <span className="text-xs text-gray-400 mt-1">{tDynamic('Formato suportado: XML NFe Modelo 55 da SEFAZ')}</span>
             </div>
           </div>
 
@@ -1100,7 +1100,7 @@ export default function Fiscal() {
                   <p className="text-xs text-gray-500">CNPJ: {xmlDataParsed.fornecedorCnpj} | NFe Nº: {xmlDataParsed.numeroNota}</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-gray-400 uppercase font-bold block">Valor Total da Nota</span>
+                  <span className="text-xs text-gray-400 uppercase font-bold block">{tDynamic('Valor Total da Nota')}</span>
                   <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">R$ {xmlDataParsed.valorTotal.toFixed(2)}</span>
                 </div>
               </div>
@@ -1111,12 +1111,12 @@ export default function Fiscal() {
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 font-bold text-gray-400 uppercase">
                       <th className="p-3">Código</th>
-                      <th className="p-3">Descrição do Produto (NFe)</th>
+                      <th className="p-3">{tDynamic('Descrição do Produto (NFe)')}</th>
                       <th className="p-3">Qtd</th>
                       <th className="p-3">Unid</th>
                       <th className="p-3">Custo Unit.</th>
                       <th className="p-3">Total</th>
-                      <th className="p-3">Destino no Estoque</th>
+                      <th className="p-3">{tDynamic('Destino no Estoque')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800 font-semibold">
@@ -1139,10 +1139,10 @@ export default function Fiscal() {
                             }}
                             className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-xs font-bold outline-none"
                           >
-                            <option value="insumo">Insumo de Preparo</option>
+                            <option value="insumo">{tDynamic('Insumo de Preparo')}</option>
                             <option value="venda_direta">Venda Direta / Revenda</option>
                             <option value="embalagem">Embalagem</option>
-                            <option value="limpeza">Material de Limpeza</option>
+                            <option value="limpeza">{tDynamic('Material de Limpeza')}</option>
                             <option value="outros">Outros</option>
                           </select>
                         </td>
@@ -1181,7 +1181,7 @@ export default function Fiscal() {
             </p>
 
             <div>
-              <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">Justificativa (Mínimo 15 caracteres) *</label>
+              <label className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-1 block">{tDynamic('Justificativa (Mínimo 15 caracteres) *')}</label>
               <textarea
                 rows={3}
                 value={justificativaCancelamento}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Users, Check, X, Divide, Sparkles } from 'lucide-react';
 import { fmt, type Produto } from '../../types';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface ModalDivisaoItemGarcomProps {
   produto: Produto;
   capacidadeMesa: number;
@@ -17,6 +18,7 @@ export function ModalDivisaoItemGarcom({
   onConfirmar,
   onCancelar,
 }: ModalDivisaoItemGarcomProps) {
+  const { tDynamic } = useI18n();
   // Lista total de assentos baseada na capacidade da mesa (1..N)
   const totalAssentos = Array.from({ length: capacidadeMesa }, (_, i) => i + 1);
 
@@ -48,8 +50,8 @@ export function ModalDivisaoItemGarcom({
               <Divide size={22} />
             </div>
             <div>
-              <h3 className="font-bold text-slate-100">Método 1: Rachar no Lançamento</h3>
-              <p className="text-xs text-slate-400">Garçom fraciona o item entre participantes</p>
+              <h3 className="font-bold text-slate-100">{tDynamic('Método 1: Rachar no Lançamento')}</h3>
+              <p className="text-xs text-slate-400">{tDynamic('Garçom fraciona o item entre participantes')}</p>
             </div>
           </div>
           <button
@@ -127,7 +129,7 @@ export function ModalDivisaoItemGarcom({
             onClick={() => onConfirmar(selecionados)}
             className="w-2/3 flex items-center justify-center gap-2 rounded-xl bg-orange-500 py-3 text-sm font-bold text-slate-950 hover:bg-orange-400 shadow-lg transition"
           >
-            <Check size={18} /> Confirmar Divisão
+            <Check size={18} /> {tDynamic('Confirmar Divisão')}
           </button>
         </div>
       </div>

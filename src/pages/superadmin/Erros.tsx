@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { AlertTriangle, RefreshCw, CheckCircle2, Filter } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 /**
  * Painel de erros de produção.
  *
@@ -28,6 +29,7 @@ interface ErroApp {
 }
 
 export default function Erros() {
+  const { tDynamic } = useI18n();
   const [erros, setErros] = useState<ErroApp[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [mostrarResolvidos, setMostrarResolvidos] = useState(false);
@@ -69,7 +71,7 @@ export default function Erros() {
     <div className="text-white">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-['Sora'] text-2xl font-black tracking-tight">Erros em produção</h1>
+          <h1 className="font-['Sora'] text-2xl font-black tracking-tight">{tDynamic('Erros em produção')}</h1>
           <p className="mt-1 text-sm text-slate-400">
             {erros.length} tipo(s) · {totalOcorrencias} ocorrência(s)
             {lojasAfetadas > 0 && ` · ${lojasAfetadas} loja(s) afetada(s)`}
@@ -96,9 +98,9 @@ export default function Erros() {
       ) : erros.length === 0 ? (
         <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 py-12 text-center">
           <CheckCircle2 size={32} className="mx-auto mb-3 text-emerald-400" />
-          <p className="font-bold text-emerald-400">Nenhum erro em aberto</p>
+          <p className="font-bold text-emerald-400">{tDynamic('Nenhum erro em aberto')}</p>
           <p className="mt-1 text-xs text-slate-400">
-            A captura roda em todas as telas. Silêncio aqui é boa notícia.
+            {tDynamic('A captura roda em todas as telas. Silêncio aqui é boa notícia.')}
           </p>
         </div>
       ) : (

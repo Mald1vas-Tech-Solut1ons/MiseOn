@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, ChefHat, Flame, X, CheckCircle2, Clock, AlertTria
 import { supabase } from '../../lib/supabase';
 import { Insumo, ProducaoPreparo, fmt } from '../../types';
 
+import { useI18n } from '../../contexts/I18nContext';
 /* ── Validade: status de um lote produzido ── */
 function statusValidade(vence_em?: string | null): { label: string; classe: string; vencido: boolean } | null {
   if (!vence_em) return null;
@@ -36,6 +37,7 @@ interface ResultadoProducao {
 }
 
 export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuffet = false }: { lojaId: string; insumosTotais: Insumo[]; onUpdate: () => void; isBuffet?: boolean }) {
+  const { tDynamic } = useI18n();
   const [editando, setEditando] = useState<Insumo | 'novo' | null>(null);
   const [nome, setNome] = useState('');
   const [unidade, setUnidade] = useState('un');
@@ -269,7 +271,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
            </div>
            <div>
              <h2 className="text-2xl font-black">Cozinha & Preparos</h2>
-             <p className="text-orange-100 text-sm mt-1 font-medium">Transforme insumos brutos em receitas base, caldos, molhos e massas.</p>
+             <p className="text-orange-100 text-sm mt-1 font-medium">{tDynamic('Transforme insumos brutos em receitas base, caldos, molhos e massas.')}</p>
            </div>
         </div>
       </div>
@@ -389,7 +391,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
             
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Nome do Preparo</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400">{tDynamic('Nome do Preparo')}</label>
                 <input value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Molho de Tomate / Queijo Muçarela Ralado" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500" />
               </div>
 
@@ -417,7 +419,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
               </div>
 
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-900/10">
-                <label className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-amber-700 dark:text-amber-500"><Timer size={13} /> Validade após produção</label>
+                <label className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-amber-700 dark:text-amber-500"><Timer size={13} /> {tDynamic('Validade após produção')}</label>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1">
                     <input value={validadeQtd} onChange={e => setValidadeQtd(e.target.value)} type="number" min="0" placeholder="ex: 3" className="w-24 p-2.5 rounded-xl border border-amber-300 dark:border-amber-900/50 bg-white dark:bg-gray-950 dark:text-gray-100 outline-none focus:border-amber-500 text-center font-bold text-lg" />
@@ -440,17 +442,17 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                     ))}
                   </div>
                 </div>
-                <p className="mt-2 text-[11px] text-amber-700/80 dark:text-amber-500/80">Cada produção vira uma ordem de serviço com data de vencimento. Deixe em branco para não controlar validade.</p>
+                <p className="mt-2 text-[11px] text-amber-700/80 dark:text-amber-500/80">{tDynamic('Cada produção vira uma ordem de serviço com data de vencimento. Deixe em branco para não controlar validade.')}</p>
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-                <h4 className="font-bold text-sm mb-3 dark:text-gray-200">Ficha Técnica (Ingredientes que compõem 1 Lote)</h4>
+                <h4 className="font-bold text-sm mb-3 dark:text-gray-200">{tDynamic('Ficha Técnica (Ingredientes que compõem 1 Lote)')}</h4>
                 
                 <div className="space-y-2">
                   {ficha.map((f, i) => (
                     <div key={i} className="flex gap-2 items-center">
                       <select value={f.insumo_id} onChange={e => { const n = [...ficha]; n[i].insumo_id = e.target.value; setFicha(n); }} className="flex-1 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-sm">
-                        <option value="">Selecione um Insumo Bruto...</option>
+                        <option value="">{tDynamic('Selecione um Insumo Bruto...')}</option>
                         {insumosBrutos.map(ib => <option key={ib.id} value={ib.id}>{ib.nome} ({ib.unidade_medida})</option>)}
                       </select>
                       <input value={f.quantidade} onChange={e => { const n = [...ficha]; n[i].quantidade = e.target.value; setFicha(n); }} type="number" placeholder="Qtd" className="w-24 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-sm text-center" />
@@ -468,7 +470,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/40 dark:bg-emerald-900/10">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400">Custo Estimado do Lote</p>
+                      <p className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400">{tDynamic('Custo Estimado do Lote')}</p>
                       <p className="text-xl font-black text-emerald-900 dark:text-emerald-100">{fmt(custoFichaTotal)}</p>
                     </div>
                     <div className="text-right">
@@ -513,10 +515,10 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
 
                       <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-left dark:border-green-900/40 dark:bg-green-900/10">
                         <p className="text-[10px] font-black uppercase tracking-wider text-green-800 dark:text-green-400">
-                          Custo apurado desta produção
+                          {tDynamic('Custo apurado desta produção')}
                         </p>
                         <div className="mt-2 flex items-baseline justify-between">
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Total da panela</span>
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{tDynamic('Total da panela')}</span>
                           <span className="text-xl font-black text-gray-900 dark:text-gray-100">
                             R$ {fmt(resultadoProducao.custo_total)}
                           </span>
@@ -543,7 +545,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                       </div>
 
                       <p className="mt-3 text-[11px] leading-relaxed text-gray-400">
-                        Esse custo já entra nas fichas técnicas dos pratos que usam este preparo.
+                        {tDynamic('Esse custo já entra nas fichas técnicas dos pratos que usam este preparo.')}
                       </p>
                     </>
                   ) : (
@@ -561,7 +563,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                   </div>
                   
                   <h3 className="text-xl font-black text-center text-gray-900 dark:text-gray-100 mb-2">Bora Cozinhar!</h3>
-                  <p className="text-center text-gray-500 text-sm font-medium mb-6">Quantas receitas de <b className="text-orange-600">{produzindo.nome}</b> você vai fazer agora?</p>
+                  <p className="text-center text-gray-500 text-sm font-medium mb-6">{tDynamic('Quantas receitas de')} <b className="text-orange-600">{produzindo.nome}</b> você vai fazer agora?</p>
 
                   <div className="flex items-center justify-center gap-6 mb-8">
                      <button onClick={() => setMultProducao(m => Math.max(1, m - 1))} className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-black text-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">-</button>
@@ -573,7 +575,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                   </div>
 
                   <div className="bg-orange-50 dark:bg-orange-900/10 rounded-2xl p-4 border border-orange-100 dark:border-orange-900/30 mb-6 max-h-32 overflow-y-auto">
-                    <p className="text-[10px] uppercase font-black text-orange-800 dark:text-orange-400 mb-2">Resumo da Produção:</p>
+                    <p className="text-[10px] uppercase font-black text-orange-800 dark:text-orange-400 mb-2">{tDynamic('Resumo da Produção:')}</p>
                     <ul className="space-y-1.5">
                        {((produzindo as any).fichas_preparos || []).map((f: any, idx: number) => {
                           const i = insumosTotais.find(x => x.id === f.insumo_id);

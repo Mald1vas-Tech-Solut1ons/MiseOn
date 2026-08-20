@@ -150,7 +150,7 @@ export default function EntregadorRota() {
     navigate('/entregador');
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Carregando navegação...</div>;
+  if (loading) return <div className="p-8 text-center text-gray-500">{tDynamic('Carregando navegação...')}</div>;
   if (!rota) return <div className="p-8 text-center text-red-500">{tDynamic('Rota não encontrada.')}</div>;
 
   const pedidosNaoEntregues = rota.pedidos.filter((p: any) => p.status !== 'FINALIZADO');
@@ -161,13 +161,13 @@ export default function EntregadorRota() {
     <div className="flex flex-col min-h-[calc(100vh-60px)] relative">
       <div className="bg-gray-900 border-b border-gray-800 p-4 sticky top-[60px] z-30 shadow-md">
         <button onClick={() => navigate('/entregador')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
-          <ArrowLeft size={16} /> Voltar ao Dashboard
+          <ArrowLeft size={16} /> {tDynamic('Voltar ao Dashboard')}
         </button>
         
         {isTodasEntregues ? (
           <div className="bg-green-500/10 border border-green-500/20 p-6 rounded-2xl text-center">
             <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
-            <h2 className="text-xl font-bold text-white mb-1">Rota Concluída!</h2>
+            <h2 className="text-xl font-bold text-white mb-1">{tDynamic('Rota Concluída!')}</h2>
             <p className="text-gray-400 text-sm mb-6">{tDynamic('Excelente trabalho. Você finalizou todas as entregas.')}</p>
             <button onClick={finalizarRota} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3.5 rounded-xl transition-colors">
               Encerrar Rota e Retornar
@@ -214,7 +214,7 @@ export default function EntregadorRota() {
       {/* Próximas Paradas */}
       {!isTodasEntregues && pedidosNaoEntregues.length > 1 && (
         <div className="p-4 flex-1">
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Próximas Paradas</h2>
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{tDynamic('Próximas Paradas')}</h2>
           <div className="space-y-3">
             {pedidosNaoEntregues.slice(1).map((p: any) => (
               <div key={p.id} className="bg-gray-900 border border-gray-800 p-3 rounded-xl flex items-center gap-3 opacity-60">
@@ -263,7 +263,7 @@ export default function EntregadorRota() {
           <div className="p-3 bg-gray-900 border-t border-gray-800 shrink-0">
             <div className="flex gap-2 mb-3 overflow-x-auto pb-2 hide-scrollbar">
               <button onClick={() => enviarMensagem("Estou chegando!")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">Estou chegando!</button>
-              <button onClick={() => enviarMensagem("Estou na portaria.")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">Estou na portaria</button>
+              <button onClick={() => enviarMensagem("Estou na portaria.")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">{tDynamic('Estou na portaria')}</button>
               <button onClick={() => enviarMensagem("Não estou encontrando o endereço, pode me ajudar?")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">{tDynamic('Não acho endereço')}</button>
             </div>
             <div className="flex gap-2">

@@ -305,7 +305,7 @@ export default function Equipe() {
                   <input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="ex: João da Silva" className={inputCls} />
                 </label>
                 <label className="block">
-                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">E-mail (será o usuário de login) *</span>
+                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">{tDynamic('E-mail (será o usuário de login) *')}</span>
                   <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} type="email" placeholder="joao@exemplo.com" className={inputCls} />
                 </label>
                 <label className="block">
@@ -331,13 +331,13 @@ export default function Equipe() {
                     <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Função *</span>
                     <select value={form.papel} onChange={(e) => setForm({ ...form, papel: e.target.value })} className={inputCls}>
                       <option value="admin">Admin (tudo)</option>
-                      <option value="operador">Balcão (pedidos)</option>
+                      <option value="operador">{tDynamic('Balcão (pedidos)')}</option>
                       <option value="garcom">Garçom (mesas)</option>
                       <option value="entregador">Entregador (app)</option>
                     </select>
                   </label>
                   <label className="block">
-                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Tipo de contrato</span>
+                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">{tDynamic('Tipo de contrato')}</span>
                     <select value={form.tipo_contrato} onChange={(e) => setForm({ ...form, tipo_contrato: e.target.value as TipoContrato })} className={inputCls}>
                       <option value="CLT">CLT</option>
                       <option value="FREELANCE">Freelance</option>
@@ -390,7 +390,7 @@ export default function Equipe() {
                   </select>
                 </label>
                 <label className="block">
-                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Tipo de contrato</span>
+                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">{tDynamic('Tipo de contrato')}</span>
                   <select value={formEdit.tipo_contrato} onChange={(e) => setFormEdit({ ...formEdit, tipo_contrato: e.target.value as TipoContrato })} className={inputCls}>
                     <option value="CLT">CLT</option>
                     <option value="FREELANCE">Freelance</option>

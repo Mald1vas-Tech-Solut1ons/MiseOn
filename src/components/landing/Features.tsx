@@ -2,6 +2,7 @@ import {
   QrCode, Zap, CreditCard, Timer, Store, Map as MapIcon, Bike, Boxes,
   ClipboardList, ShoppingCart, Gift, TrendingUp, Truck, Scissors, ScanLine,
 } from 'lucide-react';
+import { useI18n } from '../../contexts/I18nContext';
 
 const FEATURES = [
   { icon: <QrCode size={20} />, titulo: 'Cardápio digital white-label', texto: 'Seu link, seu visual, sua marca. O cliente pede do celular sem instalar nada.' },
@@ -22,6 +23,7 @@ const FEATURES = [
 ];
 
 export function Features() {
+  const { tDynamic } = useI18n();
   return (
     <section style={{ borderTop: '1px solid rgba(10,92,196,0.15)' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6">
@@ -30,10 +32,10 @@ export function Features() {
             Plataforma
           </div>
           <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Tudo que a sua operação precisa, num login só
+            {tDynamic('Tudo que a sua operação precisa, num login só')}
           </h2>
           <p style={{ color: 'rgba(234,241,251,0.55)' }} className="mx-auto mt-4 max-w-2xl text-base">
-            E ainda é um PWA instalável: vira app no celular da equipe sem passar por loja de aplicativo.
+            {tDynamic('E ainda é um PWA instalável: vira app no celular da equipe sem passar por loja de aplicativo.')}
           </p>
         </div>
 

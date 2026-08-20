@@ -167,7 +167,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
               <div className="bg-white dark:bg-gray-800 p-4 rounded-full shadow-sm mb-3">
                 <MessageSquare size={28} className="text-gray-400" />
               </div>
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Olá! Como podemos ajudar?</p>
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{tDynamic('Olá! Como podemos ajudar?')}</p>
               <p className="text-xs text-gray-500 text-center mt-1">{tDynamic('Mande sua dúvida ou acompanhe seu pedido.')}</p>
             </div>
           ) : (

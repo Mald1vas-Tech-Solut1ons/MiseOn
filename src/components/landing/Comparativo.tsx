@@ -1,5 +1,6 @@
 import { Check, X } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 type Linha = { recurso: string; miseon: boolean; concorrente: boolean | 'parcial' };
 
 const LINHAS: Linha[] = [
@@ -31,6 +32,7 @@ function Marca({ valor, destaque }: { valor: boolean | 'parcial'; destaque?: boo
 }
 
 export function Comparativo() {
+  const { tDynamic } = useI18n();
   return (
     <section style={{ borderTop: '1px solid rgba(10,92,196,0.15)' }} className="py-24">
       <div className="mx-auto max-w-4xl px-6">
@@ -39,10 +41,10 @@ export function Comparativo() {
             Comparativo
           </div>
           <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            MiseOn × anota-ai: o que muda na prática
+            {tDynamic('MiseOn × anota-ai: o que muda na prática')}
           </h2>
           <p style={{ color: 'rgba(234,241,251,0.55)' }} className="mx-auto mt-4 max-w-2xl text-base">
-            O anota-ai é um bom cardápio digital. A MiseOn é o cardápio <b style={{ color: '#EAF1FB' }}>mais a operação inteira</b>: cozinha, salão, estoque e produção.
+            {tDynamic('O anota-ai é um bom cardápio digital. A MiseOn é o cardápio')} <b style={{ color: '#EAF1FB' }}>mais a operação inteira</b>: cozinha, salão, estoque e produção.
           </p>
         </div>
 
@@ -70,7 +72,7 @@ export function Comparativo() {
         </div>
 
         <p style={{ color: 'rgba(234,241,251,0.35)' }} className="mt-4 text-center text-[11px] leading-relaxed">
-          Levantamento baseado nas funcionalidades públicas do anota-ai em julho/2026. Se algo mudou por lá, nos avise que corrigimos aqui.
+          {tDynamic('Levantamento baseado nas funcionalidades públicas do anota-ai em julho/2026. Se algo mudou por lá, nos avise que corrigimos aqui.')}
         </p>
       </div>
     </section>

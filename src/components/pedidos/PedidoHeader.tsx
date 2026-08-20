@@ -2,7 +2,9 @@ import { Flame } from 'lucide-react';
 import type { PedidoHeaderProps } from '../../types';
 import { FLUXO, STATUS_LABEL } from './constants';
 
+import { useI18n } from '../../contexts/I18nContext';
 export function PedidoHeader({ pedido: p }: PedidoHeaderProps) {
+  const { tDynamic } = useI18n();
   const fluxo = FLUXO[p.status] ?? FLUXO.CANCELADO;
   const hora = new Date(p.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   const naCozinha = p.estacao_atual === 'COZINHA';
@@ -83,14 +85,14 @@ export function PedidoHeader({ pedido: p }: PedidoHeaderProps) {
           <Flame size={16} className="shrink-0 text-orange-500" />
           <div>
             <p className="font-['Sora'] text-sm font-bold text-orange-500">Na cozinha</p>
-            <p className="text-[11px] text-gray-400 dark:text-[#AEB9CE]">Só a cozinha avança este pedido agora.</p>
+            <p className="text-[11px] text-gray-400 dark:text-[#AEB9CE]">{tDynamic('Só a cozinha avança este pedido agora.')}</p>
           </div>
         </div>
       )}
       {p.status === 'ACEITO' && !naCozinha && p.requer_cozinha && (
         <div style={{ margin: '12px 16px 0', background: 'rgba(252,91,36,.1)', border: '1px solid rgba(252,91,36,.35)', borderRadius: 12, padding: '10px 14px' }}>
-          <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 14, color: '#FE7A47' }}>Aceito — pronto para ir à cozinha</div>
-          <div style={{ fontSize: 12, color: '#AEB9CE', marginTop: 4 }}>Estoque baixado por ficha técnica ✓</div>
+          <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 14, color: '#FE7A47' }}>{tDynamic('Aceito — pronto para ir à cozinha')}</div>
+          <div style={{ fontSize: 12, color: '#AEB9CE', marginTop: 4 }}>{tDynamic('Estoque baixado por ficha técnica ✓')}</div>
         </div>
       )}
     </>

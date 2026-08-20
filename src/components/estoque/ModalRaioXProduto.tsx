@@ -129,7 +129,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
               {/* Painel de Indicadores (KPIs) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-center">
-                  <p className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-1">Último Custo Pago</p>
+                  <p className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-1">{tDynamic('Último Custo Pago')}</p>
                   <div className="flex items-end gap-3">
                     <span className="text-3xl font-black text-gray-900 dark:text-gray-100">
                       {ultimoCustoValido > 0 ? fmt(ultimoCustoValido) : 'Sem Custo'}
@@ -145,7 +145,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                 </div>
                 
                 <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                  <p className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3">Lotes Físicos Ativos</p>
+                  <p className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3">{tDynamic('Lotes Físicos Ativos')}</p>
                   {lotes.length === 0 ? (
                     <p className="text-sm font-medium text-gray-400">Nenhum lote ativo.</p>
                   ) : (
@@ -223,7 +223,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
               {/* Gráfico de Custos */}
               <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                  <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                    <TrendingUp size={16} className="text-purple-500" /> Evolução de Custo de Compra
+                    <TrendingUp size={16} className="text-purple-500" /> {tDynamic('Evolução de Custo de Compra')}
                  </h3>
                  <div className="h-48 w-full">
                    {chartData.length < 2 ? (
@@ -254,7 +254,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-gray-100 dark:border-gray-800">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <ListOrdered size={16} className="text-blue-500" /> Extrato Completo de Movimentações
+                    <ListOrdered size={16} className="text-blue-500" /> {tDynamic('Extrato Completo de Movimentações')}
                   </h3>
                 </div>
                 <div className="overflow-x-auto hide-scrollbar max-h-64 overflow-y-auto">
@@ -270,7 +270,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                     </thead>
                     <tbody>
                       {movimentacoes.length === 0 ? (
-                        <tr><td colSpan={5} className="py-6 text-center text-gray-400">Nenhuma movimentação registrada.</td></tr>
+                        <tr><td colSpan={5} className="py-6 text-center text-gray-400">{tDynamic('Nenhuma movimentação registrada.')}</td></tr>
                       ) : movimentacoes.map((mov) => {
                          const unit = mov.custo_total > 0 && mov.quantidade > 0 ? Number(mov.custo_total) / Number(mov.quantidade) : 0;
                          const isEntrada = mov.tipo === 'ENTRADA';

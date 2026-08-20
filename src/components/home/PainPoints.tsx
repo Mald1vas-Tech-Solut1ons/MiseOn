@@ -10,7 +10,7 @@ export default function PainPoints() {
     <section style={{ borderTop: '1px solid rgba(10,92,196,0.15)', background: 'rgba(10,92,196,0.02)' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6">
         <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: '.3em', color: '#0A5CC4', textTransform: 'uppercase', marginBottom: 18 }}>
-          O Desafio do Crescimento
+          {tDynamic('O Desafio do Crescimento')}
         </div>
         <div className="grid items-center gap-16 lg:grid-cols-2">
           <div>
@@ -21,25 +21,25 @@ export default function PainPoints() {
               <div className="flex gap-4 items-start">
                 <Layers className="text-blue-500 shrink-0 mt-1" size={24} />
                 <p style={{ color: '#AEB9CE' }} className="text-lg leading-relaxed">
-                  <b className="text-white">Fragmentação de Pedidos:</b> iFood apitando de um lado, WhatsApp de outro, balcão lotado. Sem um KDS centralizado, pedidos se perdem, atrasam e a equipe entra em colapso nos dias de pico.
+                  <b className="text-white">{tDynamic('Fragmentação de Pedidos:')}</b> iFood apitando de um lado, WhatsApp de outro, balcão lotado. Sem um KDS centralizado, pedidos se perdem, atrasam e a equipe entra em colapso nos dias de pico.
                 </p>
               </div>
               <div className="flex gap-4 items-start">
                 <Box className="text-orange-500 shrink-0 mt-1" size={24} />
                 <p style={{ color: '#AEB9CE' }} className="text-lg leading-relaxed">
-                  <b className="text-white">Furo de Estoque e Margem:</b> Vender sem baixa automática de insumos (Ficha Técnica) é pilotar no escuro. Você descobre que faltou embalagem no meio do rush e não sabe o custo real de cada prato.
+                  <b className="text-white">{tDynamic('Furo de Estoque e Margem:')}</b> Vender sem baixa automática de insumos (Ficha Técnica) é pilotar no escuro. Você descobre que faltou embalagem no meio do rush e não sabe o custo real de cada prato.
                 </p>
               </div>
               <div className="flex gap-4 items-start">
                 <BarChart3 className="text-green-500 shrink-0 mt-1" size={24} />
                 <p style={{ color: '#AEB9CE' }} className="text-lg leading-relaxed">
-                  <b className="text-white">Falta de Dados Consolidados:</b> {tDynamic('Conciliar o financeiro do salão, do app de delivery e do site próprio leva horas preciosas. Você precisa de um DRE claro, não de planilhas complexas.')}
+                  <b className="text-white">{tDynamic('Falta de Dados Consolidados:')}</b> {tDynamic('Conciliar o financeiro do salão, do app de delivery e do site próprio leva horas preciosas. Você precisa de um DRE claro, não de planilhas complexas.')}
                 </p>
               </div>
             </div>
             
             <p className="mt-8 text-xl font-bold text-white">
-              O MiseOn resolve tudo isso. Sincronizamos seus canais de venda (incluindo o iFood) em um único ecossistema fluido.
+              {tDynamic('O MiseOn resolve tudo isso. Sincronizamos seus canais de venda (incluindo o iFood) em um único ecossistema fluido.')}
             </p>
 
             <a
@@ -54,7 +54,7 @@ export default function PainPoints() {
           {/* Gráfico Visual de Centralização */}
           <div style={{ border: '1px solid rgba(10,92,196,0.2)', background: '#0B1120', borderRadius: 24 }} className="p-8 shadow-2xl relative">
             <p style={{ fontFamily: "'Sora', sans-serif" }} className="mb-8 text-xl font-bold text-center text-white">
-              A Sinergia do Ecossistema MiseOn
+              {tDynamic('A Sinergia do Ecossistema MiseOn')}
             </p>
             
             <div className="flex flex-col items-center gap-4">
@@ -82,12 +82,12 @@ export default function PainPoints() {
               {/* Core */}
               <div className="w-full rounded-2xl bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 p-6 text-center shadow-[0_0_30px_rgba(10,92,196,0.2)]">
                 <h3 style={{ fontFamily: "'Sora', sans-serif" }} className="text-2xl font-black text-white mb-2">MiseOn O.S.</h3>
-                <p className="text-sm text-blue-200 font-medium">Gestão unificada de KDS, Ficha Técnica e Financeiro</p>
+                <p className="text-sm text-blue-200 font-medium">{tDynamic('Gestão unificada de KDS, Ficha Técnica e Financeiro')}</p>
               </div>
             </div>
             
             <div style={{ background: 'rgba(10,92,196,0.1)', border: '1px solid rgba(10,92,196,0.2)' }} className="mt-8 rounded-2xl p-6 text-center">
-              <p className="text-sm font-bold text-blue-400">O resultado da orquestração:</p>
+              <p className="text-sm font-bold text-blue-400">{tDynamic('O resultado da orquestração:')}</p>
               <p style={{ fontFamily: "'Sora', sans-serif" }} className="mt-2 text-lg font-medium text-white leading-relaxed">
                 {tDynamic('Você para de gerenciar telas e volta a focar no que importa:')} <b>{tDynamic('A qualidade do seu produto e a expansão da sua marca.')}</b>
               </p>

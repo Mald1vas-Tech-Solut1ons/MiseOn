@@ -535,7 +535,7 @@ export default function AdminLayout() {
             className={`relative flex items-center gap-3 w-full px-3.5 py-3 rounded-2xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-red-500/15 hover:text-red-500 dark:hover:bg-red-500/20 dark:hover:text-red-400 transition-colors group ${isCollapsed ? 'justify-center' : ''}`}
           >
             <LogOut size={20} className="shrink-0 group-hover:scale-110 transition-transform duration-300" />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>Sair do Sistema</span>
+            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>{tDynamic('Sair do Sistema')}</span>
             {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-red-600/90 backdrop-blur-sm text-white text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">Sair</div>}
           </button>
         </div>

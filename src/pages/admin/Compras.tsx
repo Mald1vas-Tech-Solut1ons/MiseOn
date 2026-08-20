@@ -266,7 +266,7 @@ export default function Compras() {
             <ShoppingCart size={24} />
           </div>
           <div>
-            <h2 className="text-xl font-black dark:text-gray-100">Central de Compras</h2>
+            <h2 className="text-xl font-black dark:text-gray-100">{tDynamic('Central de Compras')}</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">{tDynamic('Do que falta ao que chegou — com preço, marca e fornecedor.')}</p>
           </div>
         </div>
@@ -333,12 +333,12 @@ export default function Compras() {
             {fornecedores.length > 0 && (
               <select value={filtroFornecedor} onChange={e => { setFiltroFornecedor(e.target.value); setFornecedorPedido(e.target.value || 'AUTO'); }}
                 className="rounded-lg border border-gray-300 p-2 text-xs font-bold focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100">
-                <option value="">Todos os fornecedores</option>
+                <option value="">{tDynamic('Todos os fornecedores')}</option>
                 {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
               </select>
             )}
             <span className="text-xs text-gray-400">
-              O alvo soma o consumo real do período ao prazo de entrega do fornecedor.
+              {tDynamic('O alvo soma o consumo real do período ao prazo de entrega do fornecedor.')}
             </span>
           </div>
 
@@ -520,7 +520,7 @@ export default function Compras() {
                   </button>
                   <button onClick={() => gerarPedido(true)} disabled={salvando}
                     className="flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">
-                    {salvando ? <><Loader2 size={16} className="animate-spin" /> Criando...</> : <><Zap size={16} /> Já comprei — conferir</>}
+                    {salvando ? <><Loader2 size={16} className="animate-spin" /> Criando...</> : <><Zap size={16} /> {tDynamic('Já comprei — conferir')}</>}
                   </button>
                 </div>
               </div>
@@ -535,7 +535,7 @@ export default function Compras() {
           <div className="rounded-3xl border border-gray-100 bg-white p-8 text-center dark:border-gray-800 dark:bg-gray-900">
             <FileText size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-700" />
             <h3 className="mb-1 text-lg font-bold text-gray-700 dark:text-gray-300">Nenhum pedido ainda</h3>
-            <p className="text-sm text-gray-500">Monte a lista na aba <b>Repor</b> e gere seu primeiro pedido.</p>
+            <p className="text-sm text-gray-500">{tDynamic('Monte a lista na aba')} <b>Repor</b> e gere seu primeiro pedido.</p>
           </div>
         ) : (
           <div className="space-y-3">

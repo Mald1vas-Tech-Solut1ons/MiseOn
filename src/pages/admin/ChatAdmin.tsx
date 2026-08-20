@@ -504,7 +504,7 @@ export default function ChatAdmin() {
           <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
             <MessageSquare size={48} className="opacity-30" />
             <p className="font-medium text-gray-600 dark:text-gray-300">{tDynamic('Selecione uma conversa')}</p>
-            <p className="text-sm text-center max-w-xs">As conversas do WhatsApp e do chat do site aparecem aqui em tempo real.</p>
+            <p className="text-sm text-center max-w-xs">{tDynamic('As conversas do WhatsApp e do chat do site aparecem aqui em tempo real.')}</p>
           </div>
         ) : (
           <>

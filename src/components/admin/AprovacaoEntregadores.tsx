@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { FileText, CheckCircle2, XCircle, Loader2, IdCard } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface EntregadorPendente {
   id: string;
   nome: string;
@@ -15,6 +16,7 @@ interface EntregadorPendente {
 }
 
 export default function AprovacaoEntregadores({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
   const [itens, setItens] = useState<EntregadorPendente[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState<string | null>(null);
@@ -96,7 +98,7 @@ export default function AprovacaoEntregadores({ lojaId }: { lojaId: string }) {
                 <FileText size={12} /> Ver CNH
               </button>
               <button onClick={() => abrirDocumento(e.veiculo_doc_arquivo_url)} className="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200">
-                <FileText size={12} /> Ver doc. veículo
+                <FileText size={12} /> {tDynamic('Ver doc. veículo')}
               </button>
             </div>
 
@@ -107,7 +109,7 @@ export default function AprovacaoEntregadores({ lojaId }: { lojaId: string }) {
                 <div className="flex gap-2">
                   <button onClick={() => { setRejeitando(null); setMotivo(''); }} className="flex-1 rounded-lg bg-gray-100 dark:bg-gray-800 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Cancelar</button>
                   <button onClick={() => confirmarRejeicao(e.id)} disabled={!motivo.trim() || processando === e.id}
-                    className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 py-1.5 text-xs font-bold text-white disabled:opacity-50">Confirmar rejeição</button>
+                    className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 py-1.5 text-xs font-bold text-white disabled:opacity-50">{tDynamic('Confirmar rejeição')}</button>
                 </div>
               </div>
             ) : (

@@ -126,7 +126,7 @@ export default function MarketingStrategyPage() {
               to="/cadastre-se"
               className="rounded-full bg-[#FC5B24] px-5 py-2.5 text-xs font-black text-white shadow-lg shadow-[#FC5B24]/30 hover:brightness-110 transition-all"
             >
-              Testar 30 Dias Grátis
+              {tDynamic('Testar 30 Dias Grátis')}
             </Link>
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function MarketingStrategyPage() {
         <div className="mx-auto max-w-7xl space-y-12">
           <div className="text-center space-y-3">
             <h2 className="font-['Sora'] text-2xl sm:text-4xl font-black text-white">
-              Os 6 Pilares de Marketing Interativos do MiseOn
+              {tDynamic('Os 6 Pilares de Marketing Interativos do MiseOn')}
             </h2>
             <p className="text-sm text-slate-400 max-w-2xl mx-auto">
               {tDynamic('Passe o cursor ou toque nos cards para girá-los em 3D e visualizar as regras de negócio e métricas operacionais.')}
@@ -202,7 +202,7 @@ export default function MarketingStrategyPage() {
             to="/cadastre-se"
             className="inline-flex items-center gap-2 rounded-full bg-[#FC5B24] px-8 py-4 text-sm font-black text-white shadow-xl shadow-[#FC5B24]/40 hover:scale-105 transition-all"
           >
-            Criar Minha Loja em 2 Minutos <ArrowRight size={18} />
+            {tDynamic('Criar Minha Loja em 2 Minutos')} <ArrowRight size={18} />
           </Link>
         </div>
       </section>

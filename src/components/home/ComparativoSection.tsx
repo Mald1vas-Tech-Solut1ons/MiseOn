@@ -12,7 +12,7 @@ export default function ComparativoSection() {
             O Verdadeiro All-in-One
           </div>
           <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-black text-white sm:text-5xl">
-            Como o MiseOn esmaga a concorrência
+            {tDynamic('Como o MiseOn esmaga a concorrência')}
           </h2>
           <p className="mt-6 text-xl text-gray-400 max-w-2xl mx-auto">
             {tDynamic('Compare nossa tecnologia contra os líderes de mercado e descubra por que os restaurantes que mais crescem estão migrando para o MiseOn.')}
@@ -90,7 +90,7 @@ export default function ComparativoSection() {
 
         <div className="mt-12 text-center">
           <p className="text-gray-400 text-sm mb-6">
-            A concorrência te vende partes do sistema. O MiseOn te entrega a máquina inteira.
+            {tDynamic('A concorrência te vende partes do sistema. O MiseOn te entrega a máquina inteira.')}
           </p>
           <a
             href="/cadastre-se"

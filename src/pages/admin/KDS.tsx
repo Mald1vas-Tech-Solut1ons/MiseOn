@@ -612,7 +612,7 @@ export default function KDS() {
         {nomeGargalo && metricasPorEtapa.tempoGargalo > 0 && (
           <div className="flex items-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300">
             <AlertCircle size={14} className="text-amber-400 shrink-0" />
-            <span>Gargalo da Cozinha: <b>{nomeGargalo}</b> (média {metricasPorEtapa.tempoGargalo} min)</span>
+            <span>{tDynamic('Gargalo da Cozinha:')} <b>{nomeGargalo}</b> (média {metricasPorEtapa.tempoGargalo} min)</span>
           </div>
         )}
       </div>
@@ -741,7 +741,7 @@ export default function KDS() {
             </div>
 
             <p className="mt-3 text-xs leading-relaxed text-slate-300">
-              {tDynamic('Crie, renomeie e organize as colunas do seu Kanban de cozinha conforme os processos do seu negócio (ex:')} <b>Entrada, Chapa, Grelha, Montagem, Forno, Expedição</b>).
+              {tDynamic('Crie, renomeie e organize as colunas do seu Kanban de cozinha conforme os processos do seu negócio (ex:')} <b>{tDynamic('Entrada, Chapa, Grelha, Montagem, Forno, Expedição')}</b>).
             </p>
 
             <div className="mt-5 space-y-3 max-h-60 overflow-y-auto pr-1">
@@ -820,7 +820,7 @@ export default function KDS() {
                 onClick={() => salvarEtapas(ETAPAS_PADRAO)}
                 className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white"
               >
-                <RotateCcw size={14} /> Restaurar Padrão
+                <RotateCcw size={14} /> {tDynamic('Restaurar Padrão')}
               </button>
               <button
                 onClick={() => setModalConfigAberto(false)}
@@ -835,7 +835,7 @@ export default function KDS() {
 
       {celebrar && (
         <div className="pointer-events-none fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-3 text-emerald-300 shadow-2xl backdrop-blur-sm">
-          <Trophy size={20} /> <span className="font-['Sora'] text-sm font-black">Dentro da meta hoje! 🔥</span>
+          <Trophy size={20} /> <span className="font-['Sora'] text-sm font-black">{tDynamic('Dentro da meta hoje! 🔥')}</span>
         </div>
       )}
     </div>

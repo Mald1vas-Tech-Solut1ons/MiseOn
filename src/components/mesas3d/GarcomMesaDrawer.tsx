@@ -13,6 +13,7 @@ import { fmt } from '../../types';
 import { imprimir } from '../../lib/print';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface Props {
   mesa3d: Mesa3DPosicionada;
   assentoInicial?: number | null;
@@ -37,6 +38,7 @@ export function GarcomMesaDrawer({
   onAtualizar,
   onNovoPedidoAssento,
 }: Props) {
+  const { tDynamic } = useI18n();
   const [assentoAtivo, setAssentoAtivo] = useState<number | null>(assentoInicial ?? null);
   const [modoDivisao, setModoDivisao] = useState<ModoDivisaoConta>('POR_ASSENTO');
   const [qtdPessoasDivisao, setQtdPessoasDivisao] = useState<number>(mesa3d.capacidade);
@@ -229,7 +231,7 @@ export function GarcomMesaDrawer({
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {mesa3d.temItemEmPreparo && (
             <div className="flex items-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs font-semibold text-amber-300">
-              <ShieldAlert size={16} /> A cozinha está preparando itens desta mesa.
+              <ShieldAlert size={16} /> {tDynamic('A cozinha está preparando itens desta mesa.')}
             </div>
           )}
 
@@ -244,7 +246,7 @@ export function GarcomMesaDrawer({
           {/* Modalidades de Divisão de Comanda */}
           <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-4">
             <h4 className="flex items-center gap-1.5 text-xs font-black text-gray-200 uppercase tracking-wider mb-3">
-              <Calculator size={14} className="text-blue-400" /> Modalidade de Divisão de Conta
+              <Calculator size={14} className="text-blue-400" /> {tDynamic('Modalidade de Divisão de Conta')}
             </h4>
 
             <div className="grid grid-cols-3 gap-2">
@@ -297,7 +299,7 @@ export function GarcomMesaDrawer({
 
             {modoDivisao === 'IGUALITARIA' && (
               <div className="mt-3 flex items-center justify-between border-t border-gray-800 pt-3 text-xs">
-                <span className="text-gray-400 font-semibold">Dividir por quantas pessoas?</span>
+                <span className="text-gray-400 font-semibold">{tDynamic('Dividir por quantas pessoas?')}</span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setQtdPessoasDivisao((q) => Math.max(1, q - 1))}
@@ -324,7 +326,7 @@ export function GarcomMesaDrawer({
               <span className="font-semibold text-gray-200">{fmt(subtotalAssento)}</span>
             </div>
             <div className="flex justify-between items-center text-gray-400 text-xs">
-              <span className="flex items-center gap-1">Taxa de serviço (%)</span>
+              <span className="flex items-center gap-1">{tDynamic('Taxa de serviço (%)')}</span>
               <input
                 type="number"
                 min={0}

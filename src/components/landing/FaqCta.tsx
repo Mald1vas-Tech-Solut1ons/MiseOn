@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import { LeadForm } from './LeadForm';
 
+import { useI18n } from '../../contexts/I18nContext';
 const PERGUNTAS = [
   {
     q: 'Preciso comprar algum equipamento?',
@@ -29,6 +30,7 @@ const PERGUNTAS = [
 ];
 
 export function FaqCta() {
+  const { tDynamic } = useI18n();
   return (
     <>
       {/* ── FAQ ── */}
@@ -36,10 +38,10 @@ export function FaqCta() {
         <div className="mx-auto max-w-3xl px-6">
           <div className="mb-12 text-center">
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: '.3em', color: '#FC5B24', textTransform: 'uppercase', marginBottom: 14 }}>
-              Dúvidas frequentes
+              {tDynamic('Dúvidas frequentes')}
             </div>
             <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Perguntas de quem está decidindo
+              {tDynamic('Perguntas de quem está decidindo')}
             </h2>
           </div>
 
@@ -68,10 +70,10 @@ export function FaqCta() {
           <div className="text-center lg:text-left">
             <h2 style={{ fontFamily: "'Sora', sans-serif", lineHeight: 1.15 }} className="text-3xl font-extrabold tracking-tight sm:text-4xl">
               Sua concorrência já pede pelo celular.{' '}
-              <span style={{ color: '#FC5B24' }}>Sua cozinha merece o mesmo.</span>
+              <span style={{ color: '#FC5B24' }}>{tDynamic('Sua cozinha merece o mesmo.')}</span>
             </h2>
             <p style={{ color: 'rgba(234,241,251,0.55)' }} className="mt-5 max-w-md text-base leading-relaxed max-lg:mx-auto">
-              Deixe seu contato e a gente te mostra a MiseOn funcionando com o cardápio do seu negócio — sem compromisso.
+              {tDynamic('Deixe seu contato e a gente te mostra a MiseOn funcionando com o cardápio do seu negócio — sem compromisso.')}
             </p>
           </div>
           <div className="rounded-3xl border border-[rgba(10,92,196,0.3)] bg-[#0B1120]/70 p-7 shadow-[0_0_40px_rgba(10,92,196,0.12)] backdrop-blur sm:p-8">

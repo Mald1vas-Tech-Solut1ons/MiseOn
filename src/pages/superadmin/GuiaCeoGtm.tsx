@@ -10,7 +10,7 @@ export default function GuiaCeoGtm() {
         <div>
           <h1 className="font-['Sora'] text-2xl font-bold text-white flex items-center gap-2">
             <BookOpen className="text-[#FC5B24]" size={26} />
-            Bíblia de Vendas & Guia do CEO — Primeiros 10 Clientes SaaS
+            {tDynamic('Bíblia de Vendas & Guia do CEO — Primeiros 10 Clientes SaaS')}
           </h1>
           <p className="text-xs text-gray-400">
             {tDynamic('Estratégia completa de Go-To-Market, abordagem PAP, tráfego pago e quebra de objeções para fechar os primeiros R$ 1.500/mês no MiseOn.')}
@@ -23,7 +23,7 @@ export default function GuiaCeoGtm() {
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-xl bg-[#FC5B24] px-4 py-2.5 text-xs font-bold text-white shadow-lg transition hover:bg-[#E34A1B]"
         >
-          <ExternalLink size={16} /> Abrir Versão em Tela Cheia (HTML)
+          <ExternalLink size={16} /> {tDynamic('Abrir Versão em Tela Cheia (HTML)')}
         </a>
       </div>
 

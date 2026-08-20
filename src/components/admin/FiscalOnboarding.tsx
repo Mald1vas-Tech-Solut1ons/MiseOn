@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, ShieldCheck, UploadCloud, Receipt, Loader2, Info } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface FiscalOnboardingProps {
   lojaId: string;
   documentoLoja: string;
@@ -17,6 +18,7 @@ interface FiscalOnboardingProps {
 export function FiscalOnboarding({
   documentoLoja, nfeHabilitado, nfeAmbiente, nfeRegime, nfeIe, nfeIdCsc, nfeCsc, onSuccess
 }: FiscalOnboardingProps) {
+  const { tDynamic } = useI18n();
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
   
@@ -108,8 +110,8 @@ export function FiscalOnboarding({
           <div className="flex items-center gap-2">
             <Receipt className="text-emerald-500" size={24} />
             <div>
-              <h3 className="font-bold text-gray-900 dark:text-gray-100">Emissão de NFC-e (Focus NFe)</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Emita cupons fiscais automáticos via PDV.</p>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100">{tDynamic('Emissão de NFC-e (Focus NFe)')}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Emita cupons fiscais automáticos via PDV.')}</p>
             </div>
           </div>
           {nfeHabilitado && (
@@ -121,7 +123,7 @@ export function FiscalOnboarding({
 
         <div className="mb-6 rounded-xl bg-blue-50 p-4 border border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30">
           <p className="flex items-center gap-1.5 text-sm font-bold text-blue-700 dark:text-blue-400 mb-1">
-            <ShieldCheck size={16} /> Política Zero-Trust para o seu Certificado
+            <ShieldCheck size={16} /> {tDynamic('Política Zero-Trust para o seu Certificado')}
           </p>
           <p className="text-xs text-blue-600 dark:text-blue-300 leading-relaxed">
             O MiseOn não salva o arquivo do seu Certificado Digital nem a sua senha em nosso banco de dados. 
@@ -135,50 +137,50 @@ export function FiscalOnboarding({
             <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Ambiente</span>
             <select value={ambiente} onChange={e => setAmbiente(e.target.value as any)}
               className="w-full rounded-xl border p-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100">
-              <option value="homologacao">Homologação (Sem valor fiscal - testes)</option>
-              <option value="producao">Produção (Com valor fiscal real)</option>
+              <option value="homologacao">{tDynamic('Homologação (Sem valor fiscal - testes)')}</option>
+              <option value="producao">{tDynamic('Produção (Com valor fiscal real)')}</option>
             </select>
           </label>
 
           <label className="block">
-            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Regime Tributário</span>
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">{tDynamic('Regime Tributário')}</span>
             <select value={regime} onChange={e => setRegime(e.target.value)}
               className="w-full rounded-xl border p-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100">
               <option value="Simples Nacional">Simples Nacional</option>
               <option value="Regime Normal">Regime Normal (Lucro Presumido/Real)</option>
-              <option value="Simples Nacional - Excesso de sublimite">Simples Nacional (Excesso de Sublimite)</option>
+              <option value="Simples Nacional - Excesso de sublimite">{tDynamic('Simples Nacional (Excesso de Sublimite)')}</option>
             </select>
           </label>
 
           <label className="block">
-            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Inscrição Estadual (IE)</span>
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">{tDynamic('Inscrição Estadual (IE)')}</span>
             <input value={ie} onChange={e => setIe(e.target.value.replace(/\D/g, ''))} placeholder="Apenas números"
               className="w-full rounded-xl border p-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" />
           </label>
 
           <label className="block md:col-span-2">
-            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Razão Social (Opcional)</span>
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">{tDynamic('Razão Social (Opcional)')}</span>
             <input value={razaoSocial} onChange={e => setRazaoSocial(e.target.value)} placeholder="Nome registrado na Receita"
               className="w-full rounded-xl border p-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" />
           </label>
         </div>
 
         <div className="mt-5 rounded-2xl border border-dashed border-gray-200 p-4 dark:border-gray-700">
-          <p className="text-sm font-bold dark:text-gray-100 mb-4">Código de Segurança do Contribuinte (CSC)</p>
+          <p className="text-sm font-bold dark:text-gray-100 mb-4">{tDynamic('Código de Segurança do Contribuinte (CSC)')}</p>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">
-              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">ID do Token (CSC)</span>
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">{tDynamic('ID do Token (CSC)')}</span>
               <input value={idCsc} onChange={e => setIdCsc(e.target.value)} placeholder="Ex: 000001"
                 className="w-full rounded-xl border p-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Código CSC (Alfanumérico)</span>
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">{tDynamic('Código CSC (Alfanumérico)')}</span>
               <input value={csc} onChange={e => setCsc(e.target.value)} placeholder="Fornecido pela SEFAZ"
                 className="w-full rounded-xl border p-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" />
             </label>
           </div>
           <p className="mt-3 flex items-center gap-1.5 text-[11px] text-gray-400">
-            <Info size={14} /> O CSC é emitido pelo site da SEFAZ do seu estado e é obrigatório para emissão de NFC-e.
+            <Info size={14} /> {tDynamic('O CSC é emitido pelo site da SEFAZ do seu estado e é obrigatório para emissão de NFC-e.')}
           </p>
         </div>
 
@@ -195,14 +197,14 @@ export function FiscalOnboarding({
               </button>
             </div>
             <label className="block">
-              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Senha do Certificado</span>
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">{tDynamic('Senha do Certificado')}</span>
               <input value={senha} onChange={e => setSenha(e.target.value)} type="password" placeholder="***"
                 className="w-full rounded-xl border p-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" />
             </label>
           </div>
           {nfeHabilitado && (
             <p className="mt-3 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
-              Seu certificado já foi enviado anteriormente. Só preencha acima se precisar renovar/atualizar.
+              {tDynamic('Seu certificado já foi enviado anteriormente. Só preencha acima se precisar renovar/atualizar.')}
             </p>
           )}
         </div>

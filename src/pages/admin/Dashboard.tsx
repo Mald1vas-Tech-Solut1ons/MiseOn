@@ -239,7 +239,7 @@ export default function Dashboard() {
               <p className="text-sm font-black text-orange-700 dark:text-orange-400">
                 {resumo.aguardando} pedido{resumo.aguardando > 1 ? 's' : ''} aguardando aceite!
               </p>
-              <p className="text-xs text-orange-600/80 dark:text-orange-400/70">O cliente está esperando a confirmação da loja.</p>
+              <p className="text-xs text-orange-600/80 dark:text-orange-400/70">{tDynamic('O cliente está esperando a confirmação da loja.')}</p>
             </div>
           </div>
           <ArrowRight size={18} className="shrink-0 text-orange-500" />
@@ -321,7 +321,7 @@ export default function Dashboard() {
           {dados.lotesVencendo.length > 0 && (
             <Link to="/admin/estoque" className="rounded-2xl border border-red-300 bg-red-50 p-4 shadow-sm transition hover:bg-red-100 dark:border-red-900/50 dark:bg-red-900/15 dark:hover:bg-red-900/25">
               <p className="flex items-center gap-2 text-sm font-black text-red-600 dark:text-red-400">
-                <Timer size={15} /> Validade de preparos
+                <Timer size={15} /> {tDynamic('Validade de preparos')}
               </p>
               <div className="mt-2 space-y-1">
                 {lotesVencidos.slice(0, 2).map((l) => (
@@ -371,12 +371,12 @@ export default function Dashboard() {
       {/* ── Últimos pedidos de hoje ── */}
       <div className="mb-5 rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
-          <p className="text-sm font-black dark:text-gray-100">Últimos pedidos de hoje</p>
+          <p className="text-sm font-black dark:text-gray-100">{tDynamic('Últimos pedidos de hoje')}</p>
           <Link to="/admin/pedidos" className="flex items-center gap-1 text-xs font-bold text-[var(--cor-primaria)]">Ver todos <ArrowRight size={13} /></Link>
         </div>
         {dados.pedidosHoje.length === 0 ? (
           <p className="px-4 py-8 text-center text-sm text-gray-400">
-            Nenhum pedido ainda hoje. Compartilhe o link da loja: <b className="text-gray-600 dark:text-gray-300">{window.location.origin}/{lojaSlug}</b>
+            {tDynamic('Nenhum pedido ainda hoje. Compartilhe o link da loja:')} <b className="text-gray-600 dark:text-gray-300">{window.location.origin}/{lojaSlug}</b>
           </p>
         ) : (
           <div className="divide-y divide-gray-50 dark:divide-gray-800/60">

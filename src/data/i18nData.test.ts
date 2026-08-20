@@ -100,19 +100,27 @@ describe('texto escrito direto no JSX', () => {
    *     <Boxes size={22} /> Observabilidade 3D de Estoque Físico
    *
    * Esse texto nunca é traduzido e nem aparece na varredura do dicionário, então
-   * declarar cobertura total aqui seria falsa segurança. Começou em 442
-   * ocorrências em 101 arquivos e está em 109: o que sobrou vive em componentes
-   * onde o texto fica fora do escopo do hook, e mexer neles exige refatorar o
-   * componente — não é um passe automático.
+   * declarar cobertura total aqui seria falsa segurança. Começou em 631 e
+   * está em 17. O que sobrou vive em lugares onde não existe componente para
+   * pendurar o hook — JSX dentro de `const RECURSOS = [...]`, em escopo de
+   * módulo — ou é dado fictício de mockup ("Rua das Flores, 123"). Tirar isso
+   * exigiria mover os arrays para dentro de componentes, o que não se paga
+   * pelo que se ganha.
    *
    * Então o combinado é: não pode aumentar. Ao envolver um trecho em tDynamic,
    * baixe o teto junto. Ao adicionar texto novo solto, este teste reprova.
    */
-  const TETO = 109;
+  const TETO = 17;
 
   it('não cresce o volume de texto não traduzível', () => {
     const rxJsx = />\s*([A-ZÀ-Ý][^<>{}\n]{14,150}?)\s*</g;
-    const rePT = /\b(voce|você|nao|não|com|para|sua|seu|mais|dos|das|que|uma|por|sem|pelo|pela)\b/i;
+    // Detecta português por acento OU palavra funcional. A primeira versão
+    // procurava só 16 palavras e deixava passar frases inteiras sem nenhuma
+    // delas — "Observabilidade 3D de Estoque Físico" não casava com nenhuma e
+    // saía da conta. O teto marcava 2 quando o número real era 631: falsa
+    // segurança, exatamente o que este arquivo existe para evitar.
+    const rePT = /[áéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ]|\b(de|da|do|das|dos|em|na|no|nas|nos|com|para|por|que|uma|um|os|as|ao|aos|pelo|pela|sem|seu|sua|você|não|mais|já|também|ou|se|são|está|estão)\b/i;
+    const reEN = /\b(the|your|with|and|for|from|this|that|you|are|will|can|our)\b/i;
 
     let total = 0;
     for (const [caminho, s] of fonte) {
@@ -120,6 +128,8 @@ describe('texto escrito direto no JSX', () => {
       for (const m of s.matchAll(rxJsx)) {
         const t = m[1].trim();
         if (!rePT.test(t)) continue;
+        // frase claramente em inglês e sem acento não conta
+        if (reEN.test(t) && !/[áéíóúâêôãõç]/i.test(t)) continue;
         if (/^[{}/]|&&|=>/.test(t)) continue;
         total++;
       }

@@ -221,7 +221,7 @@ export default function Tenants() {
 
       {/* BI Chart */}
       <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
-        <h3 className="mb-4 text-sm font-semibold tracking-widest text-gray-400 uppercase">Fluxo de Transações Globais (GMV)</h3>
+        <h3 className="mb-4 text-sm font-semibold tracking-widest text-gray-400 uppercase">{tDynamic('Fluxo de Transações Globais (GMV)')}</h3>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
@@ -307,7 +307,7 @@ export default function Tenants() {
                     Ver Faturas
                   </button>
                   <button onClick={() => setLojaPerfil(l)} className="flex-1 rounded-lg bg-amber-500/10 py-2 text-xs font-semibold text-amber-400 transition-colors hover:bg-amber-500/20 border border-amber-500/20">
-                    Perfil do Negócio
+                    {tDynamic('Perfil do Negócio')}
                   </button>
                   <button onClick={() => setLojaSuporte(l)} className="flex-1 rounded-lg bg-green-500/10 py-2 text-xs font-semibold text-green-400 transition-colors hover:bg-green-500/20 border border-green-500/20">
                     Atender Loja
@@ -328,7 +328,7 @@ export default function Tenants() {
             
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase text-gray-400">Nome da Empresa</label>
+                <label className="mb-1 block text-xs font-bold uppercase text-gray-400">{tDynamic('Nome da Empresa')}</label>
                 <input value={editForm.nome} onChange={e => setEditForm({...editForm, nome: e.target.value})} className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white focus:border-indigo-500 focus:outline-none" required />
               </div>
               
@@ -343,7 +343,7 @@ export default function Tenants() {
 
             <div className="mt-8 flex gap-3">
               <button type="button" onClick={() => setLojaEditando(null)} className="flex-1 rounded-xl bg-white/10 py-3 font-semibold text-white hover:bg-white/20 transition-colors">Cancelar</button>
-              <button type="submit" className="flex-1 rounded-xl bg-indigo-500 py-3 font-semibold text-white hover:bg-indigo-600 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]">Salvar Alterações</button>
+              <button type="submit" className="flex-1 rounded-xl bg-indigo-500 py-3 font-semibold text-white hover:bg-indigo-600 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]">{tDynamic('Salvar Alterações')}</button>
             </div>
           </form>
         </div>
@@ -354,14 +354,14 @@ export default function Tenants() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-gray-900 p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Faturas da Assinatura MiseOn</h3>
+              <h3 className="text-xl font-bold text-white">{tDynamic('Faturas da Assinatura MiseOn')}</h3>
               <button onClick={() => setLojaFaturas(null)} className="text-gray-400 hover:text-white">&times;</button>
             </div>
-            <p className="text-sm text-gray-400 mb-6">Cobranças e notas fiscais da assinatura de <b>{lojaFaturas.nome}</b>.</p>
+            <p className="text-sm text-gray-400 mb-6">{tDynamic('Cobranças e notas fiscais da assinatura de')} <b>{lojaFaturas.nome}</b>.</p>
 
             <div className="space-y-3">
               {carregandoFaturas ? (
-                <p className="text-gray-500">Buscando faturas no banco...</p>
+                <p className="text-gray-500">{tDynamic('Buscando faturas no banco...')}</p>
               ) : faturas.length === 0 ? (
                 <p className="text-gray-500">{tDynamic('Esta loja ainda não possui faturas de assinatura.')}</p>
               ) : faturas.map((f) => (
@@ -402,7 +402,7 @@ export default function Tenants() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-gray-900 p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Perfil do Negócio</h3>
+              <h3 className="text-xl font-bold text-white">{tDynamic('Perfil do Negócio')}</h3>
               <button onClick={() => setLojaPerfil(null)} className="text-gray-400 hover:text-white">&times;</button>
             </div>
             <p className="text-sm text-gray-400 mb-6">Dados que <b>{lojaPerfil.nome}</b> informou no cadastro — use para personalizar o contato.</p>
@@ -422,7 +422,7 @@ export default function Tenants() {
                   <p className="font-semibold text-white">{perfil.qtd_funcionarios ?? '—'}</p>
                 </div>
                 <div className="rounded-xl border border-white/5 bg-white/5 p-3">
-                  <p className="text-gray-500 text-xs">Atende no salão (garçom)</p>
+                  <p className="text-gray-500 text-xs">{tDynamic('Atende no salão (garçom)')}</p>
                   <p className="font-semibold text-white">{perfil.atende_salao_garcom ? 'Sim' : 'Não'}</p>
                 </div>
                 <div className="rounded-xl border border-white/5 bg-white/5 p-3">
@@ -434,7 +434,7 @@ export default function Tenants() {
                   <p className="font-semibold text-white">{perfil.cpf_cnpj} — {perfil.razao_social_ou_nome}</p>
                 </div>
                 <div className="col-span-2 rounded-xl border border-white/5 bg-white/5 p-3">
-                  <p className="text-gray-500 text-xs">E-mail de cobrança</p>
+                  <p className="text-gray-500 text-xs">{tDynamic('E-mail de cobrança')}</p>
                   <p className="font-semibold text-white">{perfil.email_cobranca}</p>
                 </div>
               </div>

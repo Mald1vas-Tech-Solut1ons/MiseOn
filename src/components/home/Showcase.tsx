@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ShoppingBag, Store, Boxes, QrCode, ChevronRight, TrendingUp, DollarSign, CheckCircle2, Clock, MapPin, Truck, Box } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 const RECURSOS = [
   {
     id: 'salao3d',
@@ -47,10 +48,12 @@ const RECURSOS = [
 ];
 
 // Sub-componentes visuais para simular a UI do sistema
-const MockupKDS = () => (
+const MockupKDS = () => {
+  const { tDynamic } = useI18n();
+  return (
   <div className="w-full h-full bg-[#0B1120] p-4 flex flex-col gap-4 font-sans">
     <div className="flex justify-between items-center border-b border-gray-800 pb-3">
-      <div className="text-white font-bold flex items-center gap-2"><Clock size={16} className="text-orange-500" /> KDS - Linha de Produção</div>
+      <div className="text-white font-bold flex items-center gap-2"><Clock size={16} className="text-orange-500" /> {tDynamic('KDS - Linha de Produção')}</div>
       <div className="flex gap-2">
         <span className="bg-red-500/20 text-red-500 px-2 py-1 rounded text-xs font-bold">12 Atrasados</span>
         <span className="bg-green-500/20 text-green-500 px-2 py-1 rounded text-xs font-bold">45 Prontos</span>
@@ -81,12 +84,15 @@ const MockupKDS = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
-const MockupIFood = () => (
+const MockupIFood = () => {
+  const { tDynamic } = useI18n();
+  return (
   <div className="w-full h-full bg-[#0B1120] p-5 flex flex-col gap-5">
     <div className="flex justify-between items-center">
-      <div className="text-white font-bold text-lg flex items-center gap-2"><Store size={20} className="text-red-500" /> Sincronização iFood</div>
+      <div className="text-white font-bold text-lg flex items-center gap-2"><Store size={20} className="text-red-500" /> {tDynamic('Sincronização iFood')}</div>
       <div className="flex items-center gap-2 text-xs font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
         <div className="w-2 h-2 rounded-full bg-green-500 animate-ping"></div> Online
       </div>
@@ -99,21 +105,21 @@ const MockupIFood = () => (
         <div className="text-green-400 text-xs mt-1 flex items-center"><TrendingUp size={12} className="mr-1"/> +12% vs ontem</div>
       </div>
       <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-        <div className="text-gray-400 text-xs mb-1">Repasse Líquido Estimado</div>
+        <div className="text-gray-400 text-xs mb-1">{tDynamic('Repasse Líquido Estimado')}</div>
         <div className="text-2xl font-black text-red-400">R$ 4.290,00</div>
-        <div className="text-gray-500 text-xs mt-1">Taxas já deduzidas</div>
+        <div className="text-gray-500 text-xs mt-1">{tDynamic('Taxas já deduzidas')}</div>
       </div>
     </div>
 
     <div className="flex-1 bg-gray-900 rounded-xl border border-gray-800 p-4">
-      <div className="text-sm font-bold text-white mb-3">Últimos Pedidos</div>
+      <div className="text-sm font-bold text-white mb-3">{tDynamic('Últimos Pedidos')}</div>
       {[1,2,3].map((i) => (
         <div key={i} className="flex justify-between items-center border-b border-gray-800 py-2 last:border-0">
           <div className="flex items-center gap-3">
             <div className="bg-red-500/10 p-2 rounded-lg"><Store size={14} className="text-red-500" /></div>
             <div>
               <div className="text-white text-sm font-bold">#49{i}2 <span className="text-gray-500 font-normal text-xs ml-2">Há {i*2} min</span></div>
-              <div className="text-gray-400 text-xs">João Silva • 2 itens</div>
+              <div className="text-gray-400 text-xs">{tDynamic('João Silva • 2 itens')}</div>
             </div>
           </div>
           <div className="text-white font-bold text-sm">R$ {(i * 45.9).toFixed(2)}</div>
@@ -121,19 +127,22 @@ const MockupIFood = () => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
 
 
-const MockupEfi = () => (
+const MockupEfi = () => {
+  const { tDynamic } = useI18n();
+  return (
   <div className="w-full h-full bg-[#0B1120] p-5 flex flex-col gap-5">
     <div className="flex justify-between items-center">
-      <div className="text-white font-bold text-lg flex items-center gap-2"><QrCode size={20} className="text-orange-500" /> Efí Bank Integrado</div>
+      <div className="text-white font-bold text-lg flex items-center gap-2"><QrCode size={20} className="text-orange-500" /> {tDynamic('Efí Bank Integrado')}</div>
       <div className="bg-orange-500/20 text-orange-400 text-xs font-bold px-2 py-1 rounded">Saldo Atual</div>
     </div>
 
     <div className="bg-gradient-to-r from-orange-600 to-orange-400 rounded-2xl p-6 shadow-[0_10px_40px_rgba(249,115,22,0.3)]">
-      <div className="text-orange-100 text-sm mb-1">Disponível para saque</div>
+      <div className="text-orange-100 text-sm mb-1">{tDynamic('Disponível para saque')}</div>
       <div className="text-4xl font-black text-white">R$ 14.850,00</div>
       <div className="flex gap-4 mt-4 text-xs font-bold text-white">
         <div className="bg-white/20 px-3 py-1.5 rounded-lg flex items-center gap-1"><ArrowUpRight size={14}/> Transferir</div>
@@ -142,7 +151,7 @@ const MockupEfi = () => (
     </div>
 
     <div className="flex-1 bg-gray-900 rounded-xl border border-gray-800 p-4">
-      <div className="text-sm font-bold text-white mb-3">Últimas Transações</div>
+      <div className="text-sm font-bold text-white mb-3">{tDynamic('Últimas Transações')}</div>
       {[
         { t: 'Pix Recebido - Pedido #1042', v: '+ R$ 45,90', c: 'text-green-400' },
         { t: 'Pix Recebido - Pedido #1041', v: '+ R$ 89,90', c: 'text-green-400' },
@@ -160,12 +169,15 @@ const MockupEfi = () => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
-const MockupLogistica = () => (
+const MockupLogistica = () => {
+  const { tDynamic } = useI18n();
+  return (
   <div className="w-full h-full bg-[#0B1120] p-5 flex flex-col gap-4 relative overflow-hidden">
     <div className="flex justify-between items-center z-10">
-      <div className="text-white font-bold text-lg flex items-center gap-2"><Truck size={20} className="text-indigo-500" /> Logística & Rotas</div>
+      <div className="text-white font-bold text-lg flex items-center gap-2"><Truck size={20} className="text-indigo-500" /> {tDynamic('Logística & Rotas')}</div>
     </div>
 
     <div className="flex-1 grid grid-rows-2 gap-4 z-10">
@@ -186,11 +198,11 @@ const MockupLogistica = () => (
       </div>
 
       <div className="bg-gray-900 rounded-xl border border-gray-800 p-4 overflow-y-auto">
-        <div className="text-sm font-bold text-white mb-3">Fila de Despacho</div>
+        <div className="text-sm font-bold text-white mb-3">{tDynamic('Fila de Despacho')}</div>
         <div className="bg-gray-800 rounded-lg p-3 flex justify-between items-center mb-2">
           <div>
             <div className="text-white font-bold text-sm">Pedido #1043</div>
-            <div className="text-gray-400 text-xs">Rua das Flores, 123 - Centro</div>
+            <div className="text-gray-400 text-xs">{tDynamic('Rua das Flores, 123 - Centro')}</div>
           </div>
           <button className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded transition">Despachar</button>
         </div>
@@ -204,18 +216,21 @@ const MockupLogistica = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 // Helper for Arrow
 const ArrowUpRight = ({ size, className }: { size: number, className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
 );
 
-const MockupEstoque3D = () => (
+const MockupEstoque3D = () => {
+  const { tDynamic } = useI18n();
+  return (
   <div className="w-full h-full bg-[#0B1120] p-5 flex flex-col gap-4 font-sans">
     <div className="flex justify-between items-center border-b border-gray-800 pb-3">
       <div className="text-white font-bold text-lg flex items-center gap-2">
-        <Boxes size={20} className="text-cyan-400" /> Grafo 3D PEPS & Rastreio de Lotes
+        <Boxes size={20} className="text-cyan-400" /> {tDynamic('Grafo 3D PEPS & Rastreio de Lotes')}
       </div>
       <div className="flex items-center gap-2">
         <span className="bg-cyan-500/20 text-cyan-300 text-xs font-bold px-3 py-1 rounded-full border border-cyan-500/30">
@@ -234,7 +249,7 @@ const MockupEstoque3D = () => (
         {/* Nó 1: Lote de Compra */}
         <div className="bg-gray-900/90 backdrop-blur-md border-2 border-cyan-500/60 rounded-2xl p-3.5 shadow-[0_0_20px_rgba(6,182,212,0.15)] flex flex-col justify-between h-36">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase text-cyan-400 tracking-wider">Nó #1 • Lote PEPS</span>
+            <span className="text-[10px] font-black uppercase text-cyan-400 tracking-wider">{tDynamic('Nó #1 • Lote PEPS')}</span>
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
           </div>
           <div>
@@ -250,7 +265,7 @@ const MockupEstoque3D = () => (
         {/* Nó 2: Insumo Processado */}
         <div className="bg-gray-900/90 backdrop-blur-md border-2 border-orange-500/60 rounded-2xl p-3.5 shadow-[0_0_20px_rgba(252,91,36,0.15)] flex flex-col justify-between h-36 relative">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase text-orange-400 tracking-wider">Nó #2 • Ficha Técnica</span>
+            <span className="text-[10px] font-black uppercase text-orange-400 tracking-wider">{tDynamic('Nó #2 • Ficha Técnica')}</span>
             <span className="bg-orange-500/20 text-orange-400 text-[9px] font-bold px-1.5 py-0.5 rounded">Rendimento 96.8%</span>
           </div>
           <div>
@@ -259,19 +274,19 @@ const MockupEstoque3D = () => (
           </div>
           <div className="border-t border-gray-800 pt-1.5 flex justify-between items-center text-[10px]">
             <span className="text-gray-500">Custo/Un:</span>
-            <span className="text-orange-300 font-bold">R$ 4,50 /porção</span>
+            <span className="text-orange-300 font-bold">{tDynamic('R$ 4,50 /porção')}</span>
           </div>
         </div>
 
         {/* Nó 3: Produto Final */}
         <div className="bg-gray-900/90 backdrop-blur-md border-2 border-emerald-500/60 rounded-2xl p-3.5 shadow-[0_0_20px_rgba(16,185,129,0.15)] flex flex-col justify-between h-36">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">Nó #3 • Produto Final</span>
+            <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">{tDynamic('Nó #3 • Produto Final')}</span>
             <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded">Margem 79.1%</span>
           </div>
           <div>
             <p className="text-white font-black text-xs leading-tight">Burger Master X-Bacon</p>
-            <p className="text-gray-400 text-[11px] font-medium mt-0.5">Preço: R$ 38,90</p>
+            <p className="text-gray-400 text-[11px] font-medium mt-0.5">{tDynamic('Preço: R$ 38,90')}</p>
           </div>
           <div className="border-t border-gray-800 pt-1.5 flex justify-between items-center text-[10px]">
             <span className="text-gray-500">CMV Exato:</span>
@@ -284,19 +299,22 @@ const MockupEstoque3D = () => (
       <div className="relative z-10 bg-gray-900/90 backdrop-blur-md rounded-xl border border-gray-800 p-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span className="text-xs text-gray-200 font-bold">Conservação de Valor PEPS: <strong className="text-emerald-400">100.0% Auditado</strong></span>
+          <span className="text-xs text-gray-200 font-bold">{tDynamic('Conservação de Valor PEPS:')} <strong className="text-emerald-400">100.0% Auditado</strong></span>
         </div>
         <span className="text-[11px] text-gray-400 font-mono">Rastreio Causal Lote → Venda</span>
       </div>
     </div>
   </div>
-);
+  );
+};
 
-const MockupSalao3D = () => (
+const MockupSalao3D = () => {
+  const { tDynamic } = useI18n();
+  return (
   <div className="w-full h-full bg-[#0B1120] p-5 flex flex-col gap-4 font-sans">
     <div className="flex justify-between items-center border-b border-gray-800 pb-3">
       <div className="text-white font-bold text-lg flex items-center gap-2">
-        <Box size={20} className="text-orange-500" /> Salão 3D & Divisão por Cadeira
+        <Box size={20} className="text-orange-500" /> {tDynamic('Salão 3D & Divisão por Cadeira')}
       </div>
       <span className="bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1 rounded-full border border-orange-500/30">
         Three.js WebGL Engine
@@ -337,7 +355,7 @@ const MockupSalao3D = () => (
             <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-black px-2.5 py-0.5 rounded-full">LIVRE</span>
           </div>
           <div className="mt-4">
-            <p className="text-gray-400 font-medium text-sm">Pronta para Atendimento</p>
+            <p className="text-gray-400 font-medium text-sm">{tDynamic('Pronta para Atendimento')}</p>
             <p className="text-xs text-emerald-400 font-bold mt-1">4 lugares disponíveis no setor Salão Principal</p>
           </div>
         </div>
@@ -345,7 +363,7 @@ const MockupSalao3D = () => (
 
       <div className="bg-gray-900/90 backdrop-blur-md rounded-xl border border-gray-800 p-3.5 flex justify-between items-center">
         <div>
-          <div className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-0.5">App Garçom • Divisão por Assento</div>
+          <div className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-0.5">{tDynamic('App Garçom • Divisão por Assento')}</div>
           <div className="text-xs text-gray-300">Cadeira #1: R$ 65,00 · Cadeira #2: R$ 82,00 · Cadeira #3: R$ 67,00</div>
         </div>
         <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 px-2.5 py-1.5 rounded-lg border border-orange-500/20 shrink-0">
@@ -354,9 +372,11 @@ const MockupSalao3D = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default function Showcase() {
+  const { tDynamic } = useI18n();
   const [activeTab, setActiveTab] = useState(RECURSOS[0].id);
 
   const renderMockup = () => {
@@ -376,10 +396,10 @@ export default function Showcase() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-20 text-center">
           <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-black tracking-tight text-white sm:text-5xl">
-            Um sistema só. <span className="text-[#FC5B24]">Do pedido ao dinheiro na conta.</span>
+            {tDynamic('Um sistema só.')}<span className="text-[#FC5B24]">{tDynamic('Do pedido ao dinheiro na conta.')}</span>
           </h2>
           <p className="mt-6 text-xl text-gray-400 max-w-3xl mx-auto font-medium">
-            Você não precisa de 5 aplicativos para tocar sua loja. Veja a operação do MiseOn em ação.
+            {tDynamic('Você não precisa de 5 aplicativos para tocar sua loja. Veja a operação do MiseOn em ação.')}
           </p>
         </div>
 

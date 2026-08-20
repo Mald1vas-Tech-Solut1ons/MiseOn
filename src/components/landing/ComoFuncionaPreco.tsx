@@ -3,6 +3,7 @@ import { ArrowRight, Check, Landmark, ShieldCheck } from 'lucide-react';
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
 import { zap } from './zap';
 
+import { useI18n } from '../../contexts/I18nContext';
 const PASSOS = [
   { numero: '1', titulo: 'Cadastre sua loja', texto: 'Nome, cardápio e identidade visual. Você mesmo faz em minutos, ou nosso time monta com você no WhatsApp.' },
   { numero: '2', titulo: 'Conecte o recebimento', texto: 'Abra uma conta Efí gratuita e cole 3 dados no painel. Pix e cartão passam a cair direto na sua conta.' },
@@ -23,6 +24,7 @@ const INCLUSO = [
 ];
 
 export function ComoFuncionaPreco() {
+  const { tDynamic } = useI18n();
   const [anual, setAnual] = useState(true);
 
   return (
@@ -35,7 +37,7 @@ export function ComoFuncionaPreco() {
               Como funciona
             </div>
             <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              No ar hoje, sem técnico e sem obra
+              {tDynamic('No ar hoje, sem técnico e sem obra')}
             </h2>
           </div>
 
@@ -61,13 +63,13 @@ export function ComoFuncionaPreco() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12 text-center">
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: '.3em', color: '#FC5B24', textTransform: 'uppercase', marginBottom: 14 }}>
-              Preço Transparente
+              {tDynamic('Preço Transparente')}
             </div>
             <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Um preço fixo. Zero comissão por pedido.
+              {tDynamic('Um preço fixo. Zero comissão por pedido.')}
             </h2>
             <p style={{ color: 'rgba(234,241,251,0.55)' }} className="mx-auto mt-4 max-w-2xl text-base">
-              Marketplace nenhum fica com percentual do seu faturamento. Aqui você escolhe a mensalidade e fica com 100% das suas vendas.
+              {tDynamic('Marketplace nenhum fica com percentual do seu faturamento. Aqui você escolhe a mensalidade e fica com 100% das suas vendas.')}
             </p>
 
             {/* Toggle Mensal / Anual */}
@@ -77,14 +79,14 @@ export function ComoFuncionaPreco() {
                 style={{ fontFamily: "'Sora', sans-serif" }}
                 className={`rounded-full px-6 py-2.5 text-xs sm:text-sm font-bold transition ${!anual ? 'bg-[#FC5B24] text-white' : 'text-gray-400 hover:text-white'}`}
               >
-                Mensal (R$ 129,90/mês)
+                {tDynamic('Mensal (R$ 129,90/mês)')}
               </button>
               <button
                 onClick={() => setAnual(true)}
                 style={{ fontFamily: "'Sora', sans-serif" }}
                 className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-xs sm:text-sm font-bold transition ${anual ? 'bg-[#0A5CC4] text-white shadow-[0_0_20px_rgba(10,92,196,0.5)]' : 'text-gray-400 hover:text-white'}`}
               >
-                Anual (R$ 99,90/mês) <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-23% OFF</span>
+                {tDynamic('Anual (R$ 99,90/mês)')} <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-23% OFF</span>
               </button>
             </div>
           </div>
@@ -123,7 +125,7 @@ export function ComoFuncionaPreco() {
                   style={{ background: '#FC5B24', fontFamily: "'Sora', sans-serif", boxShadow: '0 8px 24px rgba(252,91,36,0.4)' }}
                   className="mt-10 flex items-center justify-center gap-2 rounded-full py-4 text-center text-lg font-extrabold text-white transition hover:brightness-110 hover:scale-[1.02]"
                 >
-                  Começar teste grátis <ArrowRight size={18} />
+                  {tDynamic('Começar teste grátis')} <ArrowRight size={18} />
                 </a>
                 <p style={{ color: 'rgba(234,241,251,0.35)' }} className="mt-3 text-center text-xs">
                   14 dias grátis. Sem cartão de crédito.
@@ -136,11 +138,11 @@ export function ComoFuncionaPreco() {
               <div className="mb-4 flex items-center gap-2">
                 <Landmark size={16} style={{ color: '#FC5B24' }} />
                 <span style={{ fontFamily: "'Sora', sans-serif", color: '#EAF1FB' }} className="text-sm font-extrabold">
-                  Recebimentos via Efí Bank, sem letra miúda
+                  {tDynamic('Recebimentos via Efí Bank, sem letra miúda')}
                 </span>
               </div>
               <p style={{ color: '#AEB9CE' }} className="text-sm leading-relaxed">
-                Os pagamentos online são processados pelo <b style={{ color: '#EAF1FB' }}>Efí Bank</b> (instituição autorizada pelo Banco Central) e caem <b style={{ color: '#EAF1FB' }}>direto na conta da sua loja</b>. A MiseOn não segura o seu dinheiro e não fica com nada das suas vendas.
+                {tDynamic('Os pagamentos online são processados pelo')} <b style={{ color: '#EAF1FB' }}>Efí Bank</b> (instituição autorizada pelo Banco Central) e caem <b style={{ color: '#EAF1FB' }}>direto na conta da sua loja</b>. A MiseOn não segura o seu dinheiro e não fica com nada das suas vendas.
               </p>
               <div className="mt-5">
                 {[
@@ -167,7 +169,7 @@ export function ComoFuncionaPreco() {
               <div className="mt-5 flex items-start gap-3 rounded-2xl border border-gray-800 bg-black/20 p-4">
                 <ShieldCheck size={18} className="mt-0.5 shrink-0 text-emerald-400" />
                 <p className="text-xs leading-relaxed text-gray-400">
-                  Zero conhecimento técnico: o painel tem um guia passo a passo e nosso time acompanha você pelo WhatsApp.
+                  {tDynamic('Zero conhecimento técnico: o painel tem um guia passo a passo e nosso time acompanha você pelo WhatsApp.')}
                 </p>
               </div>
               <a
@@ -177,7 +179,7 @@ export function ComoFuncionaPreco() {
                 style={{ border: '1px solid rgba(252,91,36,0.5)', color: '#FC5B24', fontFamily: "'Sora', sans-serif" }}
                 className="mt-5 flex items-center justify-center gap-2 rounded-full py-3 text-sm font-bold transition hover:bg-orange-500 hover:text-white"
               >
-                Tirar dúvidas sobre recebimentos <ArrowRight size={15} />
+                {tDynamic('Tirar dúvidas sobre recebimentos')} <ArrowRight size={15} />
               </a>
             </div>
           </div>

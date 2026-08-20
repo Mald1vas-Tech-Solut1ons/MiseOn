@@ -90,7 +90,7 @@ export default function Sobre() {
                 <Code2 size={28} />
               </div>
               <h2 className="font-['Sora'] text-2xl font-bold text-white sm:text-3xl">
-                Assinatura Técnica Maldivas Tech Solutions
+                {tDynamic('Assinatura Técnica Maldivas Tech Solutions')}
               </h2>
               <p className="text-sm leading-relaxed text-slate-300">
                 {tDynamic('A plataforma MiseOn é desenvolvida e mantida por')} <strong>Rafael Maldivas</strong> (fundador da <i>Maldivas Tech Solutions / MaldivaSky</i>), especialista em arquiteturas SaaS distribuídas, análise de dados e sistemas de alta disponibilidade.
@@ -105,7 +105,7 @@ export default function Sobre() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-xl bg-blue-600/20 border border-blue-500/40 px-4 py-2.5 text-xs font-bold text-blue-400 hover:bg-blue-600/30 transition-all"
                 >
-                  Conheça o Portfólio de Engenharia (Maldivas Tech) →
+                  {tDynamic('Conheça o Portfólio de Engenharia (Maldivas Tech) →')}
                 </a>
               </div>
             </div>
@@ -149,20 +149,20 @@ export default function Sobre() {
               <Building2 className="text-orange-400" size={32} />
               <div>
                 <h2 className="font-['Sora'] text-xl font-extrabold text-white sm:text-2xl">
-                  Dados Institucionais da Empresa
+                  {tDynamic('Dados Institucionais da Empresa')}
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">Transparência jurídica e governança corporativa</p>
+                <p className="text-xs text-slate-400 mt-0.5">{tDynamic('Transparência jurídica e governança corporativa')}</p>
               </div>
             </div>
 
             <div className="mt-8 grid gap-6 sm:grid-cols-2 text-sm text-slate-300">
               <div className="space-y-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Razão Social & Nome Fantasia</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{tDynamic('Razão Social & Nome Fantasia')}</span>
                 <p className="font-bold text-white">{tDynamic('MiseOn Tecnologia e Soluções para Food Service')}</p>
               </div>
 
               <div className="space-y-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Cadastro de Pessoa Jurídica (CNPJ)</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{tDynamic('Cadastro de Pessoa Jurídica (CNPJ)')}</span>
                 <p className="font-mono font-bold text-emerald-400">63.310.253/0001-81</p>
               </div>
 

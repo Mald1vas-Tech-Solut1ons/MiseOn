@@ -570,7 +570,7 @@ export default function CheckoutDrawer({
                 {tipo === 'DELIVERY' && (
                   <div>
                     <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1">
-                      <MapPin size={11} /> Endereco de entrega
+                      <MapPin size={11} /> {tDynamic('Endereco de entrega')}
                     </p>
                     <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 dark:bg-gray-900">
                       <EnderecoMixin
@@ -586,7 +586,7 @@ export default function CheckoutDrawer({
                         : 'border-gray-200 dark:border-gray-700 dark:bg-gray-900'
                     }`}>
                       <p className="mb-2 flex items-center gap-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                        <MapPin size={11} /> Taxa de entrega
+                        <MapPin size={11} /> {tDynamic('Taxa de entrega')}
                       </p>
 
                       {calcTaxa ? (
@@ -605,7 +605,7 @@ export default function CheckoutDrawer({
                           </div>
                           {!foraDeArea && entrega.faixaNome && (
                             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              Faixa aplicada automaticamente conforme a distância do cliente.
+                              {tDynamic('Faixa aplicada automaticamente conforme a distância do cliente.')}
                             </p>
                           )}
                           {foraDeArea && entrega.raioConsideradoKm != null && (
@@ -645,7 +645,7 @@ export default function CheckoutDrawer({
                 {/* Cupom */}
                 <div>
                   <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
-                    Cupom de desconto
+                    {tDynamic('Cupom de desconto')}
                   </p>
                   <div className="flex gap-2">
                     <input
@@ -694,7 +694,7 @@ export default function CheckoutDrawer({
                 {/* Metodo de pagamento (agrupado por antecipado x na entrega) */}
                 <div>
                   <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
-                    Forma de pagamento
+                    {tDynamic('Forma de pagamento')}
                   </p>
 
                   {metodosDisponiveis.length === 0 && (
@@ -723,7 +723,7 @@ export default function CheckoutDrawer({
 
                   {metodosEntrega.length > 0 && (
                     <div>
-                      <p className="mb-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400">Pague na entrega</p>
+                      <p className="mb-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400">{tDynamic('Pague na entrega')}</p>
                       <div className="grid grid-cols-2 gap-2">
                         {metodosEntrega.map((m) => (
                           <button key={m} onClick={() => setMetodo(m)}
@@ -758,7 +758,7 @@ export default function CheckoutDrawer({
                   </div>
                   {tipo === 'DELIVERY' && (
                     <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                      <span>Taxa de entrega</span>
+                      <span>{tDynamic('Taxa de entrega')}</span>
                       <span className="font-semibold text-gray-900 dark:text-gray-200">
                         {calcTaxa ? '…' : taxa > 0 ? fmt(taxa) : '—'}
                       </span>

@@ -157,13 +157,13 @@ export default function EstoquePage() {
         <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6">
           <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-blue-300 backdrop-blur-md">
             <Boxes size={14} className="text-blue-400" />
-            Engenharia de Suprimentos & Inteligência 3D
+            {tDynamic('Engenharia de Suprimentos & Inteligência 3D')}
           </span>
 
           <h1 className="mx-auto mt-6 font-['Sora'] text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
             Gestão de Estoque Físico, Fichas Técnicas e{' '}
             <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-              Observabilidade 3D em Tempo Real
+              {tDynamic('Observabilidade 3D em Tempo Real')}
             </span>
           </h1>
 
@@ -176,7 +176,7 @@ export default function EstoquePage() {
               to="/cadastre-se"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105 sm:w-auto"
             >
-              Começar Agora Grátis <ArrowRight size={18} />
+              {tDynamic('Começar Agora Grátis')} <ArrowRight size={18} />
             </Link>
             <a
               href="#fracionamento"
@@ -199,7 +199,7 @@ export default function EstoquePage() {
               <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold text-white sm:text-4xl">
                 Compre em fardos ou pacotes.{' '}
                 <span className="bg-gradient-to-r from-blue-400 to-teal-300 bg-clip-text text-transparent">
-                  Use em gramas ou fatias.
+                  {tDynamic('Use em gramas ou fatias.')}
                 </span>
               </h2>
               <p className="mt-4 text-base leading-relaxed text-slate-300">
@@ -225,7 +225,7 @@ export default function EstoquePage() {
                   <div>
                     <h4 className="font-bold text-white text-sm">{tDynamic("Categorias & Setores Físicos de Alocação")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Classifique insumos como <i>Ingrediente, Revenda Direta, Embalagem ou Limpeza</i> e defina onde ficam armazenados (<i>{tDynamic("Geladeira, Freezer, Dispensa ou Armário")}</i>).
+                      Classifique insumos como <i>{tDynamic('Ingrediente, Revenda Direta, Embalagem ou Limpeza')}</i> e defina onde ficam armazenados (<i>{tDynamic("Geladeira, Freezer, Dispensa ou Armário")}</i>).
                     </p>
                   </div>
                 </div>
@@ -296,7 +296,7 @@ export default function EstoquePage() {
 
             <div className="order-1 lg:order-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-400/10 px-3.5 py-1 text-xs font-black uppercase tracking-widest text-orange-400">
-                <FlaskConical size={14} /> Passo 02 · Fichas Técnicas & Preparos
+                <FlaskConical size={14} /> {tDynamic('Passo 02 · Fichas Técnicas & Preparos')}
               </span>
               <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold text-white sm:text-4xl">
                 Transforme insumos brutos em{' '}
@@ -314,7 +314,7 @@ export default function EstoquePage() {
                   <div>
                     <h4 className="font-bold text-white text-sm">{tDynamic("Ficha Técnica por Lote de Produção")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Defina quantos porções/unidades 1 lote rende (ex: <i>1800g de carne moída rende 10 hambúrgueres de 180g</i>). O sistema calcula o custo exato da porção individual!
+                      {tDynamic('Defina quantos porções/unidades 1 lote rende (ex:')} <i>1800g de carne moída rende 10 hambúrgueres de 180g</i>). O sistema calcula o custo exato da porção individual!
                     </p>
                   </div>
                 </div>
@@ -324,7 +324,7 @@ export default function EstoquePage() {
                   <div>
                     <h4 className="font-bold text-white text-sm">{tDynamic("Controle de Validade de Lotes Produzidos")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Atribua a validade em horas ou dias (<i>24h, 2 dias, 3 dias, 5 dias</i>). Cada lote produzido ganha uma marcação temporal com alerta automático em caso de vencimento.
+                      {tDynamic('Atribua a validade em horas ou dias (')}<i>24h, 2 dias, 3 dias, 5 dias</i>). Cada lote produzido ganha uma marcação temporal com alerta automático em caso de vencimento.
                     </p>
                   </div>
                 </div>
@@ -334,7 +334,7 @@ export default function EstoquePage() {
                   <div>
                     <h4 className="font-bold text-white text-sm">{tDynamic("Execução de Ordens de Serviço (OS)")}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Um toque no botão <b>"Produzir"</b> consome a matéria-prima bruta do estoque e incrementa imediatamente o saldo de lotes prontos na cozinha.
+                      {tDynamic('Um toque no botão')} <b>"Produzir"</b> consome a matéria-prima bruta do estoque e incrementa imediatamente o saldo de lotes prontos na cozinha.
                     </p>
                   </div>
                 </div>
@@ -472,12 +472,12 @@ export default function EstoquePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-purple-400/30 bg-purple-400/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-purple-300">
-              <Eye size={14} /> Passo 04 · Inovação Exclusiva MiseOn
+              <Eye size={14} /> {tDynamic('Passo 04 · Inovação Exclusiva MiseOn')}
             </span>
             <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl">
               Observabilidade 3D de Estoque Físico &{' '}
               <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-blue-400 bg-clip-text text-transparent">
-                Rastreabilidade de Lotes
+                {tDynamic('Rastreabilidade de Lotes')}
               </span>
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-300">
@@ -500,7 +500,7 @@ export default function EstoquePage() {
                 <span>Capital Investido</span>
               </div>
               <p className="mt-2 text-xs text-slate-300 leading-relaxed">
-                Mapeamento financeiro automático: saiba exatamente o valor em Reais (R$) imobilizado em estoques ativos nas prateleiras.
+                {tDynamic('Mapeamento financeiro automático: saiba exatamente o valor em Reais (R$) imobilizado em estoques ativos nas prateleiras.')}
               </p>
             </div>
 
@@ -543,7 +543,7 @@ export default function EstoquePage() {
           <div className="text-center">
             <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic("Guia de Ajuda & FAQ")}</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold text-white">
-              Dúvidas Frequentes sobre a Engenharia de Estoque
+              {tDynamic('Dúvidas Frequentes sobre a Engenharia de Estoque')}
             </h2>
           </div>
 

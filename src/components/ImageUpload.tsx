@@ -5,6 +5,7 @@ import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
 import { getOptimizedImageUrl } from '../lib/cdn';
 
+import { useI18n } from '../contexts/I18nContext';
 /* ─────────────────────────────────────────────────────────────
    ImageUpload com react-easy-crop (React 19 compatível)
    Substitui o Filerobot que não disparava onSave.
@@ -88,6 +89,7 @@ export default function ImageUpload({
   aspecto?: string;
   label?: string;
 }) {
+  const { tDynamic } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
@@ -169,7 +171,7 @@ export default function ImageUpload({
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-gray-400">
             <ImageIcon size={24} className="opacity-50" />
-            <span className="text-xs font-medium">Toque para enviar foto</span>
+            <span className="text-xs font-medium">{tDynamic('Toque para enviar foto')}</span>
           </div>
         )}
 

@@ -15,6 +15,7 @@ import { SETORES, type SetorId } from './setores';
 import type { ItemRastreio, SetorRastreio } from './carregarRastreio';
 import './Rastreio3D.css';
 
+import { useI18n } from '../../../contexts/I18nContext';
 interface Props {
   setores: SetorRastreio[];
   dadosReceitas: DadosReceitas | null;
@@ -37,6 +38,7 @@ const ESTADO_UI: Record<ItemRastreio['estado'], { rotulo: string; classe: string
 };
 
 export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
+  const { tDynamic } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<RastreioEngine | null>(null);
 
@@ -104,9 +106,9 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
     return (
       <div className="mo-r3d-falha" style={{ height: altura }} role="alert">
         <AlertTriangle size={22} />
-        <strong>O módulo 3D não pôde ser exibido neste dispositivo.</strong>
+        <strong>{tDynamic('O módulo 3D não pôde ser exibido neste dispositivo.')}</strong>
         <span>{erroEngine}</span>
-        <span>Os números continuam disponíveis nas abas Matérias-Primas e Custo 3D.</span>
+        <span>{tDynamic('Os números continuam disponíveis nas abas Matérias-Primas e Custo 3D.')}</span>
       </div>
     );
   }
@@ -208,7 +210,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
             <button onClick={() => setReceitaId('')} aria-label="Fechar checagem de receita"><X size={15} /></button>
           </header>
           {receitaCheck.ingredientes.length === 0 ? (
-            <p className="mo-r3d-rec-linha">Receita sem ficha técnica cadastrada.</p>
+            <p className="mo-r3d-rec-linha">{tDynamic('Receita sem ficha técnica cadastrada.')}</p>
           ) : (
             <>
               <p className={`mo-r3d-rec-veredito ${receitaCheck.completa ? 'ok' : 'falta'}`}>

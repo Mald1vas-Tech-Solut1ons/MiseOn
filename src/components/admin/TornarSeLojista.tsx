@@ -110,7 +110,7 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
       <div className="w-full max-w-lg rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-xl">
         <div className="mb-6 flex flex-col items-center text-center">
           <MiseOnLogo size={120} className="mb-3" />
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Torne-se um lojista MiseOn</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{tDynamic('Torne-se um lojista MiseOn')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             30 dias grátis, sem cartão. Só pedimos os dados abaixo pra deixar sua nota fiscal certinha desde o início.
           </p>
@@ -134,7 +134,7 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
             <div className="flex gap-2">
               <button type="button" onClick={() => setTipoPessoa('PJ')}
                 className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl border p-2.5 text-sm font-semibold transition-colors ${tipoPessoa === 'PJ' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)]' : 'border-gray-200 dark:border-gray-800 text-gray-500'}`}>
-                <Building2 size={14} /> Pessoa Jurídica
+                <Building2 size={14} /> {tDynamic('Pessoa Jurídica')}
               </button>
               <button type="button" onClick={() => setTipoPessoa('PF')}
                 className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl border p-2.5 text-sm font-semibold transition-colors ${tipoPessoa === 'PF' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)]' : 'border-gray-200 dark:border-gray-800 text-gray-500'}`}>
@@ -232,7 +232,7 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
             </div>
             <label className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-800 p-3 text-sm dark:text-gray-300">
               <input type="checkbox" checked={aceiteTrial} onChange={(e) => setAceiteTrial(e.target.checked)} className="mt-0.5 h-4 w-4" />
-              Quero iniciar meu teste grátis de 30 dias na MiseOn.
+              {tDynamic('Quero iniciar meu teste grátis de 30 dias na MiseOn.')}
             </label>
 
             <div className="flex gap-2">

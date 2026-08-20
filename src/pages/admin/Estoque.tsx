@@ -541,7 +541,7 @@ export default function Estoque() {
         <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:bg-amber-900/20 dark:border-amber-900/50 shadow-sm flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div>
              <p className="flex items-center gap-1.5 text-sm font-bold text-amber-800 dark:text-amber-500 mb-1">
-               <AlertTriangle size={16} /> Estoque Crítico Detetado
+               <AlertTriangle size={16} /> {tDynamic('Estoque Crítico Detetado')}
              </p>
              <p className="text-xs text-amber-700 dark:text-amber-400">Você tem {criticos.length} insumos que chegaram na margem de risco.</p>
           </div>
@@ -650,7 +650,7 @@ export default function Estoque() {
              <div className="space-y-4 rounded-xl border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                  <label className="block">
-                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Unidade de Estoque</span>
+                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Unidade de Estoque')}</span>
                    <select className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 font-bold outline-none focus:border-[var(--cor-primaria)]"
                      value={unidadeDireta} onChange={e => { setUnidadeDireta(e.target.value); setUnidadeCompra(e.target.value); }}>
                      {UNIDADES.map(u => (
@@ -668,12 +668,12 @@ export default function Estoque() {
                  </label>
 
                  <label className="block">
-                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Preço pago (R$)</span>
+                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Preço pago (R$)')}</span>
                    <input className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm font-bold dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 focus:outline-none focus:border-[var(--cor-primaria)]" type="number" placeholder="0.00" value={precoCompra} onChange={e => setPrecoCompra(e.target.value)} />
                  </label>
 
                  <label className="block">
-                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Alerta Estoque Mínimo</span>
+                   <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Alerta Estoque Mínimo')}</span>
                    <div className="mt-1 flex rounded-lg border border-gray-300 overflow-hidden dark:border-gray-700 bg-white dark:bg-gray-950">
                      <input className="w-full p-2.5 text-sm font-bold dark:bg-gray-950 dark:text-gray-100 focus:outline-none bg-transparent" type="number" placeholder="0" value={estoqueMinimo} onChange={e => setEstoqueMinimo(e.target.value)} />
                      <div className="bg-gray-100 dark:bg-gray-800 px-2 flex items-center justify-center text-[11px] text-gray-500 font-bold border-l border-gray-300 dark:border-gray-700 min-w-[2.5rem]">{unidadeDireta}</div>
@@ -701,7 +701,7 @@ export default function Estoque() {
                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">1. Como você compra?</p>
                      <div className="space-y-3">
                         <label className="block">
-                           <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Unidade de Compra</span>
+                           <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Unidade de Compra')}</span>
                            <select className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 outline-none" value={unidadeCompra} onChange={e => setUnidadeCompra(e.target.value)}>
                              {UNIDADES.map(u => (
                                <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>
@@ -710,7 +710,7 @@ export default function Estoque() {
                         </label>
                         <div className="grid grid-cols-2 gap-3">
                            <label className="block">
-                              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Preço pago (R$)</span>
+                              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Preço pago (R$)')}</span>
                               <input className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 focus:outline-none" type="number" placeholder="0.00" value={precoCompra} onChange={e => setPrecoCompra(e.target.value)} />
                            </label>
                            <label className="block">
@@ -781,7 +781,7 @@ export default function Estoque() {
                         </button>
 
                         <label data-tour="tour-estoque-campo-minimo" className="block mt-4 pt-3 border-t border-blue-200 dark:border-blue-800/30">
-                           <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 block mb-1">Avisar estoque baixo quando chegar em:</span>
+                           <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 block mb-1">{tDynamic('Avisar estoque baixo quando chegar em:')}</span>
                            <div className="flex rounded-lg border border-blue-200 overflow-hidden dark:border-blue-800/50">
                               <input className="w-full p-2 text-sm dark:bg-gray-950 dark:text-gray-100 focus:outline-none bg-transparent" type="number" placeholder="0" value={estoqueMinimo} onChange={e => setEstoqueMinimo(e.target.value)} />
                               <div className="bg-blue-100 dark:bg-blue-900/40 px-3 flex items-center justify-center text-[11px] text-blue-700 dark:text-blue-400 font-bold border-l border-blue-200 dark:border-blue-800/50 min-w-[3rem]">
@@ -810,7 +810,7 @@ export default function Estoque() {
                  </div>
                  {Number(precoCompra) > 0 && (
                     <div className="text-right">
-                       <p className="text-[10px] text-green-700 dark:text-green-500 font-semibold uppercase">Custo Unitário Final</p>
+                       <p className="text-[10px] text-green-700 dark:text-green-500 font-semibold uppercase">{tDynamic('Custo Unitário Final')}</p>
                        <p className="text-sm font-bold text-green-800 dark:text-green-400">
                           {fmt(Number(precoCompra) / (modoCadastro === 'RAPIDO' ? (Number(qtdEstoqueCompra) || 1) : passosRendimento.reduce((acc, p) => acc * (Number(p.rendimento) || 1), 1)))} por {modoCadastro === 'RAPIDO' ? unidadeDireta : passosRendimento[passosRendimento.length - 1].unidade}
                        </p>
@@ -870,8 +870,8 @@ export default function Estoque() {
       </div>
 
       <div className="mb-3 flex items-center gap-4 text-[11px] text-gray-400 dark:text-gray-500">
-        <span className="flex items-center gap-1.5"><Apple size={13} className="rounded-full bg-emerald-500 p-0.5 text-white" /> Nutrição revisada</span>
-        <span className="flex items-center gap-1.5"><span className="relative inline-flex"><Apple size={13} className="text-emerald-500" /><span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-400" /></span> Aguardando revisão</span>
+        <span className="flex items-center gap-1.5"><Apple size={13} className="rounded-full bg-emerald-500 p-0.5 text-white" /> {tDynamic('Nutrição revisada')}</span>
+        <span className="flex items-center gap-1.5"><span className="relative inline-flex"><Apple size={13} className="text-emerald-500" /><span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-400" /></span> {tDynamic('Aguardando revisão')}</span>
         <span className="flex items-center gap-1.5"><Apple size={13} className="text-emerald-500" /> {tDynamic('Ainda não cadastrada')}</span>
       </div>
 
@@ -913,7 +913,7 @@ export default function Estoque() {
                     Estoque: <span className="font-semibold text-gray-700 dark:text-gray-300">{Number(i.quantidade_atual)} {i.unidade_medida}</span>
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Custo Unitário: <span className="font-semibold text-[var(--cor-primaria)]">{fmt(custoUnit)}</span>
+                    {tDynamic('Custo Unitário:')} <span className="font-semibold text-[var(--cor-primaria)]">{fmt(custoUnit)}</span>
                   </p>
                 </div>
                 {((i.detalhes_rendimento?.regras?.length ?? 0) > 0 || (i.detalhes_rendimento?.equivalencias?.length ?? 0) > 0) && (
@@ -1063,7 +1063,7 @@ export default function Estoque() {
               </div>
             )}
             <label className="block mb-3">
-              <span className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Custo da compra R$ (opcional)</span>
+              <span className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">{tDynamic('Custo da compra R$ (opcional)')}</span>
               <input className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" type="number"
                 value={entrada.custo} onChange={(e) => setEntrada({ ...entrada, custo: e.target.value })} />
               {Number(entrada.custo) > 0 && qtdEntradaBase > 0 && (

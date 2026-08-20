@@ -292,7 +292,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="rounded-3xl border border-white/10 bg-white/10 p-8 backdrop-blur-xl sm:p-12">
             <span className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-400/10 px-4 py-1 text-xs font-bold uppercase tracking-wider text-orange-300">
-              <ShieldCheck size={14} /> Regras de Negócio e Engenharia
+              <ShieldCheck size={14} /> {tDynamic('Regras de Negócio e Engenharia')}
             </span>
             <h2 className="mt-4 font-['Sora'] text-2xl font-extrabold sm:text-3xl">
               {data.businessRules.title}
@@ -377,11 +377,11 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                 to="/cadastre-se"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105"
               >
-                Testar 30 Dias Grátis <ArrowRight size={18} />
+                {tDynamic('Testar 30 Dias Grátis')} <ArrowRight size={18} />
               </Link>
             </div>
             <p className="mt-4 text-xs text-slate-400">
-              Zero pegadinhas. Tolerância de 7 dias pós-vencimento. Cancele quando quiser.
+              {tDynamic('Zero pegadinhas. Tolerância de 7 dias pós-vencimento. Cancele quando quiser.')}
             </p>
           </div>
         </div>

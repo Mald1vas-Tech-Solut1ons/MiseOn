@@ -40,7 +40,7 @@ export default function HeroSection() {
             style={{ background: '#0A5CC4', fontFamily: "'Sora', sans-serif", boxShadow: '0 8px 32px rgba(10,92,196,0.3)' }}
             className="group flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-lg font-bold text-white transition-all hover:scale-105 hover:bg-blue-600 sm:w-auto"
           >
-            Começar o Teste Gratuito <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+            {tDynamic('Começar o Teste Gratuito')} <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
           </a>
           <a
             href="#demo"

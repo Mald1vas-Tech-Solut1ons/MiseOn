@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 
+import { useI18n } from '../../contexts/I18nContext';
 const WHATSAPP_VENDAS = '5511919889233';
 const zap = (msg: string) => `https://wa.me/${WHATSAPP_VENDAS}?text=${encodeURIComponent(msg)}`;
 
@@ -28,13 +29,14 @@ const FAQ = [
 ];
 
 export default function FaqSection() {
+  const { tDynamic } = useI18n();
   const [faqAberto, setFaqAberto] = useState<number | null>(0);
 
   return (
     <section style={{ borderTop: '1px solid rgba(255,255,255,.08)', background: '#070C18' }} className="py-24">
       <div className="mx-auto max-w-3xl px-6">
         <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-center text-3xl font-black text-white sm:text-4xl">
-          Dúvidas sobre o <span style={{ color: '#0A5CC4' }}>Ecossistema</span>
+          {tDynamic('Dúvidas sobre o')} <span style={{ color: '#0A5CC4' }}>Ecossistema</span>
         </h2>
         <div className="mt-10 space-y-3">
           {FAQ.map((f, i) => {

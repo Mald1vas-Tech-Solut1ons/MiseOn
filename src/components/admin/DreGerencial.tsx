@@ -50,7 +50,7 @@ export default function DreGerencial() {
         <div>
           <h2 className="font-['Sora'] text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Calculator className="text-[#FC5B24]" size={22} />
-            Demonstrativo do Resultado do Exercício (DRE Gerencial)
+            {tDynamic('Demonstrativo do Resultado do Exercício (DRE Gerencial)')}
           </h2>
           <p className="text-xs text-gray-500 dark:text-slate-400">
             {tDynamic('Visão contábil e gerencial completa da lucratividade da sua cozinha em tempo real.')}
@@ -94,7 +94,7 @@ export default function DreGerencial() {
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">Margem de Contribuição</span>
+          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Margem de Contribuição')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-blue-500">
             R$ {margemContribucao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
@@ -104,7 +104,7 @@ export default function DreGerencial() {
         </div>
 
         <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4 shadow-sm">
-          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">Lucro Líquido (EBITDA)</span>
+          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">{tDynamic('Lucro Líquido (EBITDA)')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-emerald-600 dark:text-emerald-400">
             R$ {lucroLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>

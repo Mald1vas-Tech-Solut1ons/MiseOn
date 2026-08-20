@@ -82,10 +82,10 @@ export default function CrmLeads() {
         <div>
           <h1 className="font-['Sora'] text-2xl font-bold text-white flex items-center gap-2">
             <Users className="text-indigo-400" size={26} />
-            CRM de Leads B2B & Funil de Vendas MiseOn
+            {tDynamic('CRM de Leads B2B & Funil de Vendas MiseOn')}
           </h1>
           <p className="text-xs text-gray-400">
-            Pipeline de prospecção, qualificação de restaurantes e conversão em assinantes recorrentes (MRR).
+            {tDynamic('Pipeline de prospecção, qualificação de restaurantes e conversão em assinantes recorrentes (MRR).')}
           </p>
         </div>
 
@@ -106,7 +106,7 @@ export default function CrmLeads() {
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-4">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-          <span className="text-[11px] font-bold text-gray-400">MRR Potencial no Funil</span>
+          <span className="text-[11px] font-bold text-gray-400">{tDynamic('MRR Potencial no Funil')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-emerald-400">
             R$ {mrrTotalEstimado.toFixed(2)}/mês
           </p>
@@ -116,17 +116,17 @@ export default function CrmLeads() {
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
           <span className="text-[11px] font-bold text-gray-400">Assinantes Ativos</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-indigo-400">{totalAssinantes}</p>
-          <span className="text-[10px] text-emerald-400 font-semibold block mt-1">Lojas em produção</span>
+          <span className="text-[10px] text-emerald-400 font-semibold block mt-1">{tDynamic('Lojas em produção')}</span>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-          <span className="text-[11px] font-bold text-gray-400">Degustação / Trial 30D</span>
+          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Degustação / Trial 30D')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-orange-400">{totalTrials}</p>
-          <span className="text-[10px] text-orange-300 block mt-1">Em período de teste</span>
+          <span className="text-[10px] text-orange-300 block mt-1">{tDynamic('Em período de teste')}</span>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-          <span className="text-[11px] font-bold text-gray-400">Total de Leads no Funil</span>
+          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Total de Leads no Funil')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-white">{leads.length}</p>
           <span className="text-[10px] text-gray-400 block mt-1">Origem multicanal</span>
         </div>
@@ -220,7 +220,7 @@ export default function CrmLeads() {
                       onClick={() => abrirWhatsAppComercial(lead)}
                       className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 px-3 py-1.5 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30 transition"
                     >
-                      <Send size={13} /> Chamar no WhatsApp
+                      <Send size={13} /> {tDynamic('Chamar no WhatsApp')}
                     </button>
                   </td>
                 </tr>
@@ -234,10 +234,10 @@ export default function CrmLeads() {
       {modalNovoLead && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0F172A] p-6 shadow-2xl text-white">
-            <h3 className="font-['Sora'] text-lg font-bold">Cadastrar Lead de Prospecção</h3>
+            <h3 className="font-['Sora'] text-lg font-bold">{tDynamic('Cadastrar Lead de Prospecção')}</h3>
             <div className="mt-4 space-y-3 text-xs">
               <div>
-                <label className="block text-gray-400 mb-1">Nome do Restaurante / Loja</label>
+                <label className="block text-gray-400 mb-1">{tDynamic('Nome do Restaurante / Loja')}</label>
                 <input
                   type="text"
                   value={novoLead.nomeLoja}
@@ -247,7 +247,7 @@ export default function CrmLeads() {
                 />
               </div>
               <div>
-                <label className="block text-gray-400 mb-1">Nome do Responsável / Head</label>
+                <label className="block text-gray-400 mb-1">{tDynamic('Nome do Responsável / Head')}</label>
                 <input
                   type="text"
                   value={novoLead.nomeContato}

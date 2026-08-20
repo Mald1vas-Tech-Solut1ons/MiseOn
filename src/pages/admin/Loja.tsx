@@ -520,7 +520,7 @@ export default function Loja() {
             className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-xs font-bold text-purple-600 dark:text-purple-300 hover:bg-purple-500/20 transition-all"
             title="Abrir no navegador da Smart TV"
           >
-            <Tv size={15} /> Cardápio na TV 4K
+            <Tv size={15} /> {tDynamic('Cardápio na TV 4K')}
           </a>
         </div>
         {copiado && <p className="text-[11px] font-medium text-green-600">Link copiado!</p>}
@@ -591,7 +591,7 @@ export default function Loja() {
             <div>
               <div className="flex items-center gap-2 text-sm font-bold dark:text-gray-100">
                 <Sliders size={18} className="text-[var(--cor-primaria)]" />
-                <span>Segmento de Negócio do Estabelecimento</span>
+                <span>{tDynamic('Segmento de Negócio do Estabelecimento')}</span>
               </div>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {tDynamic('Selecione o perfil do seu negócio para ativar os pré-requisitos automáticos da sua operação.')}
@@ -643,7 +643,7 @@ export default function Loja() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-bold dark:text-gray-100">
                   <Layers size={18} className="text-orange-500" />
-                  <span>Módulos Operacionais Híbridos (TUDO CONFIGURÁVEL)</span>
+                  <span>{tDynamic('Módulos Operacionais Híbridos (TUDO CONFIGURÁVEL)')}</span>
                 </div>
                 <span className="rounded-full bg-orange-500/10 px-2.5 py-0.5 text-[11px] font-bold text-orange-400 border border-orange-500/20">
                   Inteligente
@@ -729,7 +729,7 @@ export default function Loja() {
           {form.banner_url && (
             <div className="rounded-2xl bg-white dark:bg-gray-900 dark:border-gray-800 p-4 shadow-sm">
               <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold">
-                <Palette size={15} /> Enquadramento do banner
+                <Palette size={15} /> {tDynamic('Enquadramento do banner')}
               </p>
               <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
                 O cardápio mostra o banner numa faixa larga e corta o resto. Arraste
@@ -778,7 +778,7 @@ export default function Loja() {
             <div className="mb-4 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Tema padrão da vitrine</p>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Tema padrão da vitrine')}</p>
                   <p className="mt-1 text-sm font-semibold dark:text-gray-100">
                     {form.tema_cardapio === 'escuro' ? 'Escuro' : 'Claro'}
                   </p>
@@ -828,9 +828,9 @@ export default function Loja() {
             <div className="mb-4 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Pré-visualização</p>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Pré-visualização')}</p>
                   <p className="mt-1 text-sm font-semibold dark:text-gray-100">
-                    Veja como a identidade reage em cada tema
+                    {tDynamic('Veja como a identidade reage em cada tema')}
                   </p>
                 </div>
                 <div className="inline-flex rounded-full bg-gray-100 p-1 dark:bg-gray-800">
@@ -857,7 +857,7 @@ export default function Loja() {
             
             <div className="mb-4">
               <ColorSwatchPicker label="Cor Primária" value={form.cor_primaria} onChange={(c) => setValor('cor_primaria', c)} />
-              <p className="mt-1 text-[11px] text-gray-500">Principal cor de ação. Usada nos botões grandes (ex: Finalizar Pedido) e menus principais.</p>
+              <p className="mt-1 text-[11px] text-gray-500">{tDynamic('Principal cor de ação. Usada nos botões grandes (ex: Finalizar Pedido) e menus principais.')}</p>
             </div>
 
             <div className="mb-4">
@@ -871,7 +871,7 @@ export default function Loja() {
             </div>
             
             <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Leitura cromática automática</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Leitura cromática automática')}</p>
               <p className="mt-1 text-sm font-semibold dark:text-gray-100">
                 {tDynamic('A cor primária da loja gera os dois temas com a mesma identidade visual')}
               </p>
@@ -904,9 +904,9 @@ export default function Loja() {
                       </div>
 
                       <div className="mt-3 rounded-2xl border p-3" style={{ background: tokensTema.surface, borderColor: tokensTema.border }}>
-                        <p className="text-sm font-semibold" style={{ color: tokensTema.texto }}>Lanche do Paulista</p>
+                        <p className="text-sm font-semibold" style={{ color: tokensTema.texto }}>{tDynamic('Lanche do Paulista')}</p>
                         <p className="mt-1 text-xs" style={{ color: tokensTema.textoSuave }}>
-                          A paleta se adapta automaticamente a partir da cor primária.
+                          {tDynamic('A paleta se adapta automaticamente a partir da cor primária.')}
                         </p>
                         <div className="mt-3 flex gap-2">
                           <span className="rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: form.cor_primaria, color: isLightColor(form.cor_primaria) ? '#111827' : '#FFFFFF' }}>
@@ -942,7 +942,7 @@ export default function Loja() {
           {renderCampo('Celular 1 / WhatsApp Principal', 'whatsapp', '(11) 99999-9999')}
           {renderCampo('Celular 2 / WhatsApp Secundário (Opcional)', 'telefone', '(11) 99999-9999')}
           <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-3">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">Dados no cupom do cliente (opcional)</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">{tDynamic('Dados no cupom do cliente (opcional)')}</p>
             <div className="space-y-3">
               {renderCampo('Razão social / Nome', 'razao_social', 'Lanche do Paulista Ltda')}
               {renderCampo('CPF / CNPJ', 'cnpj', '000.000.000-00 ou 00.000.000/0001-00')}
@@ -958,7 +958,7 @@ export default function Loja() {
           <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="flex items-center gap-1.5 text-sm font-semibold"><Bike size={15} /> Motor de entrega</p>
+                <p className="flex items-center gap-1.5 text-sm font-semibold"><Bike size={15} /> {tDynamic('Motor de entrega')}</p>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {tDynamic('Configure a cobertura do tenant como operação real: raio máximo, cálculo por km e faixas comerciais por distância.')}
                 </p>
@@ -974,7 +974,7 @@ export default function Loja() {
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Taxa Mínima de Saída (R$)</span>
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tDynamic('Taxa Mínima de Saída (R$)')}</span>
                 <input
                   value={form.entrega_taxa_base}
                   onChange={set('entrega_taxa_base')}
@@ -983,7 +983,7 @@ export default function Loja() {
                   placeholder="5.00"
                   className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
                 />
-                <p className="mt-1 text-[11px] text-gray-400">Valor fixo cobrado em qualquer entrega.</p>
+                <p className="mt-1 text-[11px] text-gray-400">{tDynamic('Valor fixo cobrado em qualquer entrega.')}</p>
               </label>
 
               <label className="block">
@@ -1000,7 +1000,7 @@ export default function Loja() {
               </label>
 
               <label className="block">
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Raio Máximo de Cobertura (Km)</span>
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tDynamic('Raio Máximo de Cobertura (Km)')}</span>
                 <input
                   value={form.entrega_raio_km}
                   onChange={set('entrega_raio_km')}
@@ -1013,7 +1013,7 @@ export default function Loja() {
               </label>
 
               <label className="block">
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Frete Grátis acima de (R$)</span>
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tDynamic('Frete Grátis acima de (R$)')}</span>
                 <input
                   value={form.frete_gratis_valor_minimo}
                   onChange={set('frete_gratis_valor_minimo')}
@@ -1029,24 +1029,24 @@ export default function Loja() {
             {/* Simulador Interativo em Tempo Real */}
             <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50/60 dark:bg-blue-950/30 dark:border-blue-900/50 p-4 space-y-2">
               <p className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Calculator size={14} /> Simulador da Taxa no Checkout
+                <Calculator size={14} /> {tDynamic('Simulador da Taxa no Checkout')}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
                 <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
-                  <span className="text-gray-400">Distância: 3.5 km</span>
+                  <span className="text-gray-400">{tDynamic('Distância: 3.5 km')}</span>
                   <p className="font-bold text-gray-900 dark:text-white mt-0.5">
                     Taxa: {fmt(Number(form.entrega_taxa_base || 0) + (3.5 * Number(form.entrega_taxa_km || 0)))}
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
-                  <span className="text-gray-400">Distância: 6.0 km</span>
+                  <span className="text-gray-400">{tDynamic('Distância: 6.0 km')}</span>
                   <p className="font-bold text-gray-900 dark:text-white mt-0.5">
                     Taxa: {fmt(Number(form.entrega_taxa_base || 0) + (6.0 * Number(form.entrega_taxa_km || 0)))}
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
                   <span className="text-gray-400">Acima de {form.entrega_raio_km || 8} km</span>
-                  <p className="font-bold text-red-500 mt-0.5">Fora da área (Bloqueado)</p>
+                  <p className="font-bold text-red-500 mt-0.5">{tDynamic('Fora da área (Bloqueado)')}</p>
                 </div>
               </div>
             </div>
@@ -1054,7 +1054,7 @@ export default function Loja() {
             <div className="mt-4 rounded-2xl border border-dashed border-gray-200 p-4 dark:border-gray-700">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold dark:text-gray-100">Georreferência da loja</p>
+                  <p className="text-sm font-semibold dark:text-gray-100">{tDynamic('Georreferência da loja')}</p>
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     {tDynamic('Usamos o endereço da loja para localizar automaticamente a origem das entregas ao salvar.')}
                   </p>
@@ -1169,7 +1169,7 @@ export default function Loja() {
         <div className="space-y-4">
           <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="flex items-center gap-1.5 text-sm font-semibold"><Clock size={15} /> Grade de Horários</h3>
+              <h3 className="flex items-center gap-1.5 text-sm font-semibold"><Clock size={15} /> {tDynamic('Grade de Horários')}</h3>
               <button onClick={() => setHorarios([...horarios, { dia_semana: 1, abre: '18:00', fecha: '23:00' }])}
                 className="flex items-center gap-1 rounded-lg bg-[var(--cor-primaria)]/10 px-3 py-1.5 text-xs font-bold text-[var(--cor-primaria)] transition hover:bg-[var(--cor-primaria)]/20">
                 <Plus size={14} /> Novo Turno
@@ -1177,7 +1177,7 @@ export default function Loja() {
             </div>
             
             {horarios.length === 0 ? (
-              <p className="text-sm text-gray-500 py-4 text-center">Nenhum horário cadastrado. A loja aparecerá como fechada.</p>
+              <p className="text-sm text-gray-500 py-4 text-center">{tDynamic('Nenhum horário cadastrado. A loja aparecerá como fechada.')}</p>
             ) : (
               <div className="space-y-2">
                 {horarios.map((h, i) => (
@@ -1205,7 +1205,7 @@ export default function Loja() {
             )}
             <p className="mt-4 text-xs text-gray-500 leading-relaxed">
               {tDynamic('Dica: Você pode adicionar múltiplos turnos no mesmo dia (Ex: Sexta 11:00 às 14:00 e Sexta 18:00 às 23:59).')} <br/>
-              <b>Se passar da meia noite</b>, cadastre o dia atual até 23:59 e o dia seguinte de 00:00 até o horário final.
+              <b>{tDynamic('Se passar da meia noite')}</b>, cadastre o dia atual até 23:59 e o dia seguinte de 00:00 até o horário final.
             </p>
           </div>
         </div>
@@ -1215,17 +1215,17 @@ export default function Loja() {
         <div data-tour="tour-loja-pagamentos" className="space-y-4">
           <Link to="/admin/ajuda" className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-[var(--cor-primaria)]/40 bg-[var(--cor-primaria)]/5 px-4 py-3 transition hover:bg-[var(--cor-primaria)]/10">
             <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">
-              🧭 Primeira vez configurando? A <b>Central de Ajuda</b> tem o passo a passo completo — da abertura da conta Efí até o dinheiro na sua mão.
+              🧭 Primeira vez configurando? A <b>{tDynamic('Central de Ajuda')}</b> tem o passo a passo completo — da abertura da conta Efí até o dinheiro na sua mão.
             </span>
             <ArrowRight size={16} className="shrink-0 text-[var(--cor-primaria)]" />
           </Link>
 
           <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 space-y-4">
-            <h3 className="text-sm font-bold dark:text-gray-100">Formas de pagamento aceitas</h3>
+            <h3 className="text-sm font-bold dark:text-gray-100">{tDynamic('Formas de pagamento aceitas')}</h3>
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold dark:text-gray-200">Pagamento antecipado (online)</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Pix e crédito via Efí — o cliente paga na hora do pedido.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Pix e crédito via Efí — o cliente paga na hora do pedido.')}</p>
               </div>
               <button type="button" onClick={() => setForm((f) => ({ ...f, aceita_online: !f.aceita_online }))}
                 className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${form.aceita_online ? 'bg-[var(--cor-primaria)]' : 'bg-gray-300 dark:bg-gray-600'}`}>
@@ -1234,8 +1234,8 @@ export default function Loja() {
             </div>
             <div className="flex items-center justify-between gap-3 border-t border-gray-100 dark:border-gray-800 pt-4">
               <div>
-                <p className="text-sm font-semibold dark:text-gray-200">Pagamento na entrega</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Dinheiro e maquininha (débito) — o cliente paga ao receber.</p>
+                <p className="text-sm font-semibold dark:text-gray-200">{tDynamic('Pagamento na entrega')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Dinheiro e maquininha (débito) — o cliente paga ao receber.')}</p>
               </div>
               <button type="button" onClick={() => setForm((f) => ({ ...f, aceita_entrega: !f.aceita_entrega }))}
                 className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${form.aceita_entrega ? 'bg-[var(--cor-primaria)]' : 'bg-gray-300 dark:bg-gray-600'}`}>
@@ -1244,7 +1244,7 @@ export default function Loja() {
             </div>
             <div className="flex items-center justify-between gap-3 border-t border-gray-100 dark:border-gray-800 pt-4">
               <div>
-                <p className="text-sm font-semibold dark:text-gray-200">Agendamento de pedidos</p>
+                <p className="text-sm font-semibold dark:text-gray-200">{tDynamic('Agendamento de pedidos')}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Cliente escolhe um horário futuro pra receber, dentro dos seus horários de funcionamento.')}</p>
               </div>
               <button type="button" onClick={() => setForm((f) => ({ ...f, aceita_agendamento: !f.aceita_agendamento }))}
@@ -1254,7 +1254,7 @@ export default function Loja() {
             </div>
             {form.aceita_agendamento && (
               <label className="block border-t border-gray-100 dark:border-gray-800 pt-4">
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Antecedência mínima (minutos)</span>
+                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{tDynamic('Antecedência mínima (minutos)')}</span>
                 <input type="number" min="0" value={form.agendamento_antecedencia_min}
                   onChange={(e) => setForm((f) => ({ ...f, agendamento_antecedencia_min: e.target.value }))}
                   className="mt-1 w-32 rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" />
@@ -1282,7 +1282,7 @@ export default function Loja() {
                 {/* Passo 1 */}
                 <div className="flex-1 rounded-lg border border-gray-700 bg-gray-800/50 p-4 relative">
                   <div className="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-[var(--cor-primaria)] text-white flex items-center justify-center font-bold text-xs">1</div>
-                  <p className="text-xs text-gray-300 mb-3">No menu lateral esquerdo, desça e clique em <b className="text-white">API</b>.</p>
+                  <p className="text-xs text-gray-300 mb-3">{tDynamic('No menu lateral esquerdo, desça e clique em')} <b className="text-white">API</b>.</p>
                   <div className="rounded border border-gray-700 bg-[#1e1e1e] p-2 flex flex-col gap-2 opacity-80">
                     <div className="h-2 w-12 bg-gray-600 rounded"></div>
                     <div className="h-2 w-16 bg-gray-600 rounded"></div>
@@ -1298,10 +1298,10 @@ export default function Loja() {
                 {/* Passo 2 */}
                 <div className="flex-1 rounded-lg border border-gray-700 bg-gray-800/50 p-4 relative">
                   <div className="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-[var(--cor-primaria)] text-white flex items-center justify-center font-bold text-xs">2</div>
-                  <p className="text-xs text-gray-300 mb-3">Lá em cima, no canto superior direito, clique em <b className="text-white">Identificador de conta</b>.</p>
+                  <p className="text-xs text-gray-300 mb-3">{tDynamic('Lá em cima, no canto superior direito, clique em')} <b className="text-white">{tDynamic('Identificador de conta')}</b>.</p>
                   <div className="rounded border border-gray-700 bg-[#1e1e1e] p-2 flex justify-end opacity-80">
                     <div className="flex items-center gap-1 text-[10px] text-cyan-400 font-mono">
-                      <Shield size={12} /> Identificador de conta
+                      <Shield size={12} /> {tDynamic('Identificador de conta')}
                     </div>
                   </div>
                 </div>
@@ -1311,9 +1311,9 @@ export default function Loja() {
                 {/* Passo 3 */}
                 <div className="flex-1 rounded-lg border border-gray-700 bg-gray-800/50 p-4 relative">
                   <div className="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-[var(--cor-primaria)] text-white flex items-center justify-center font-bold text-xs">3</div>
-                  <p className="text-xs text-gray-300 mb-3">Copie o código <b className="text-white">payee_code</b> e cole aqui em cima!</p>
+                  <p className="text-xs text-gray-300 mb-3">{tDynamic('Copie o código')}<b className="text-white">payee_code</b> e cole aqui em cima!</p>
                   <div className="rounded border border-gray-600 bg-[#252525] p-3 shadow-lg">
-                    <p className="text-[10px] font-bold text-white mb-2">Identificador de conta</p>
+                    <p className="text-[10px] font-bold text-white mb-2">{tDynamic('Identificador de conta')}</p>
                     <div className="flex items-center justify-between border-b border-gray-600 pb-1">
                       <span className="text-[9px] text-gray-400">payee_code</span>
                       <div className="flex items-center gap-1">
@@ -1335,7 +1335,7 @@ export default function Loja() {
             <p className="mb-4 text-xs text-gray-600 dark:text-gray-300">
               {tDynamic('Para o dinheiro do')} <b>Pix</b> cair automaticamente na sua conta, a Efí pede só dois dados do
               <b> titular da conta</b> — nada técnico. Você encontra o número da sua conta no app da Efí em
-              <b> Perfil → Dados da conta</b>.
+              <b> {tDynamic('Perfil → Dados da conta')}</b>.
             </p>
 
             <div className="grid gap-3 sm:grid-cols-2">
@@ -1346,7 +1346,7 @@ export default function Loja() {
             <div className="mt-3 flex items-start gap-2 rounded-xl bg-emerald-500/10 p-3">
               <Check size={14} className="mt-0.5 shrink-0 text-emerald-600" />
               <p className="text-[11px] text-gray-600 dark:text-gray-300">
-                Preenchendo os dois campos, <b>cada venda no Pix é repassada 100% para a sua conta na hora</b>.
+                {tDynamic('Preenchendo os dois campos,')} <b>cada venda no Pix é repassada 100% para a sua conta na hora</b>.
                 Se ficarem em branco, o valor entra na conta da plataforma e o repasse é feito manualmente.
               </p>
             </div>
@@ -1355,7 +1355,7 @@ export default function Loja() {
           {/* Quando o dinheiro cai + antecipação do crédito */}
           <div className="rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
             <h3 className="mb-3 flex items-center gap-1.5 text-sm font-bold dark:text-gray-100">
-              <Clock size={14} className="text-[var(--cor-primaria)]" /> Quando o dinheiro cai na conta?
+              <Clock size={14} className="text-[var(--cor-primaria)]" /> {tDynamic('Quando o dinheiro cai na conta?')}
             </h3>
             <div className="space-y-2 text-xs text-gray-600 dark:text-gray-300">
               <div className="flex items-start gap-2">
@@ -1365,7 +1365,7 @@ export default function Loja() {
               <div className="flex items-start gap-2">
                 <span className="mt-0.5 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">CRÉDITO</span>
                 <p>
-                  <b>Depende da modalidade escolhida abaixo.</b> À vista a tarifa Efí é <b>{EFI_TARIFAS.creditoAVista}</b>;
+                  <b>{tDynamic('Depende da modalidade escolhida abaixo.')}</b> {tDynamic('À vista a tarifa Efí é')} <b>{EFI_TARIFAS.creditoAVista}</b>;
                   no parcelado, a tarifa e o prazo mudam conforme a opção.
                 </p>
               </div>
@@ -1386,7 +1386,7 @@ export default function Loja() {
                     Recebe <b>uma parcela a cada ~31 dias</b>.
                   </p>
                   <p className="mt-2 rounded-lg bg-gray-100 px-2 py-1.5 text-[10px] font-semibold leading-relaxed text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                    Tarifa Efí: à vista <b>{EFI_TARIFAS.creditoAVista}</b> · 2–6x <b>{EFI_TARIFAS.creditoParcelado2a6}</b> · 7–12x <b>{EFI_TARIFAS.creditoParcelado7a12}</b>
+                    {tDynamic('Tarifa Efí: à vista')} <b>{EFI_TARIFAS.creditoAVista}</b> · 2–6x <b>{EFI_TARIFAS.creditoParcelado2a6}</b> · 7–12x <b>{EFI_TARIFAS.creditoParcelado7a12}</b>
                   </p>
                 </button>
                 <button type="button" onClick={() => setForm((f) => ({ ...f, antecipacao_cartao: true }))}

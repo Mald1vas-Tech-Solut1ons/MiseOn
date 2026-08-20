@@ -3,11 +3,13 @@ import { Printer, Bike, Check, X as XIcon, Store, ChefHat, Receipt, UtensilsCros
 import type { PedidoActionsProps } from '../../types';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 export function PedidoActions({
   pedido: p, papel, naCozinha, precisaConferir, todosConferidos, semAvancoSalao,
   destinoStatus, destinoLabel, isDelivery, processando, fluxoProx, fluxoLabel,
   onAvancar, onEnviarCozinha, onCancelar, onImprimir, executar,
 }: PedidoActionsProps) {
+  const { tDynamic } = useI18n();
   const [menu, setMenu] = useState(false);
   const [emitindoNfe, setEmitindoNfe] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -60,7 +62,7 @@ export function PedidoActions({
         p.requer_cozinha ? (
           <button disabled={processando} onClick={() => executar(onEnviarCozinha)}
             className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-xl py-2.5 font-['Sora'] font-bold text-sm shadow-lg shadow-orange-500/20 hover:brightness-110 transition disabled:opacity-50">
-            <Flame size={16} /> Enviar para a cozinha
+            <Flame size={16} /> {tDynamic('Enviar para a cozinha')}
           </button>
         ) : (
           <button disabled={processando} onClick={() => executar(() => onAvancar('PRONTO'))}
@@ -111,15 +113,15 @@ export function PedidoActions({
           <div className="absolute bottom-12 right-0 z-20 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0B1120]">
             <p className="px-3 pt-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">Imprimir via</p>
             <button onClick={() => { setMenu(false); onImprimir('cozinha'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
-              <ChefHat size={16} className="text-orange-500" /> Comanda da Cozinha
+              <ChefHat size={16} className="text-orange-500" /> {tDynamic('Comanda da Cozinha')}
             </button>
             {isDelivery && (
               <button onClick={() => { setMenu(false); onImprimir('romaneio'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
-                <Bike size={16} className="text-blue-500" /> Romaneio do Entregador
+                <Bike size={16} className="text-blue-500" /> {tDynamic('Romaneio do Entregador')}
               </button>
             )}
             <button onClick={() => { setMenu(false); onImprimir('nota'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
-              <Receipt size={16} className="text-emerald-500" /> Nota do Cliente
+              <Receipt size={16} className="text-emerald-500" /> {tDynamic('Nota do Cliente')}
             </button>
             <div className="my-1 border-t border-gray-100 dark:border-white/5"></div>
             <button 

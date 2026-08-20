@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Compass, X, ArrowRight, ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react';
 import { TourStep } from '../../hooks/useGuidedTour';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface GuidedTourModalProps {
   ativo: boolean;
   passoAtual: TourStep | null;
@@ -30,6 +31,7 @@ export function GuidedTourModal({
   onAnterior,
   onEncerrar,
 }: GuidedTourModalProps) {
+  const { tDynamic } = useI18n();
   const [targetRect, setTargetRect] = useState<RectPos | null>(null);
 
   // Recalcular a posição do elemento em tempo real (mesmo com resize ou scroll)
@@ -220,7 +222,7 @@ export function GuidedTourModal({
           {!targetRect && (
             <div className="mt-3 flex items-center gap-2 rounded-xl border border-blue-500/40 bg-blue-500/15 px-3.5 py-2 text-xs sm:text-sm font-bold text-blue-300 animate-pulse">
               <Compass size={16} className="animate-spin text-blue-400" />
-              <span>Localizando elemento na página...</span>
+              <span>{tDynamic('Localizando elemento na página...')}</span>
             </div>
           )}
         </div>
@@ -239,7 +241,7 @@ export function GuidedTourModal({
             <div className="flex items-start gap-3 rounded-2xl border border-amber-500/50 bg-amber-500/20 p-4 text-amber-50 shadow-md">
               <Sparkles size={22} className="mt-0.5 shrink-0 text-amber-400" />
               <p className="text-sm sm:text-base leading-relaxed font-bold">
-                <b className="text-amber-300">Dica de Sucesso:</b> {passoAtual.dicaExtra}
+                <b className="text-amber-300">{tDynamic('Dica de Sucesso:')}</b> {passoAtual.dicaExtra}
               </p>
             </div>
           )}

@@ -1,6 +1,7 @@
 import { Bot, Database, Clock, UserCheck, ShieldCheck } from 'lucide-react';
 import { RotuloSecao } from './shared';
 
+import { useI18n } from '../../contexts/I18nContext';
 const PILARES_IA = [
   {
     icon: <Database size={18} />,
@@ -25,6 +26,7 @@ const PILARES_IA = [
 ];
 
 export function AiSection() {
+  const { tDynamic } = useI18n();
   return (
     <section id="ia" style={{ borderTop: '1px solid rgba(255,255,255,.08)', background: 'linear-gradient(180deg, rgba(10,92,196,0.06), rgba(7,12,24,0))' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6">
@@ -32,7 +34,7 @@ export function AiSection() {
         <div className="grid items-start gap-10 lg:grid-cols-2">
           <div>
             <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold leading-tight sm:text-4xl">
-              Uma atendente que <span style={{ color: '#FC5B24' }}>conhece seu cardápio</span> melhor que estagiário.
+              {tDynamic('Uma atendente que')} <span style={{ color: '#FC5B24' }}>conhece seu cardápio</span> melhor que estagiário.
             </h2>
             <p style={{ color: '#AEB9CE' }} className="mt-5 max-w-xl text-base leading-relaxed">
               Todo sistema diz que "tem IA". A nossa você consegue testar: ela responde o cliente no chat
@@ -66,7 +68,7 @@ export function AiSection() {
                 <Bot size={18} />
               </div>
               <div>
-                <p className="text-sm font-bold text-white">Atendente IA · Lanche da Praça</p>
+                <p className="text-sm font-bold text-white">{tDynamic('Atendente IA · Lanche da Praça')}</p>
                 <p className="flex items-center gap-1.5 text-[11px] text-green-400">
                   <span className="h-1.5 w-1.5 rounded-full bg-green-400" /> respondendo em segundos
                 </p>
@@ -77,7 +79,7 @@ export function AiSection() {
                 boa noite, quanto ta o x-bacon duplo? e o milk shake ainda tem?
               </div>
               <div className="ml-auto max-w-[88%] rounded-2xl rounded-tr-sm bg-blue-600/25 p-3 text-[13px] leading-relaxed text-gray-200">
-                Boa noite! 😊 O X-Bacon Duplo está <b>R$ 29,90</b>. O Milk Shake de Chocolate <b>acabou hoje</b>,
+                {tDynamic('Boa noite! 😊 O X-Bacon Duplo está')} <b>R$ 29,90</b>. O Milk Shake de Chocolate <b>acabou hoje</b>,
                 mas temos o de Morango e Ovomaltine por <b>R$ 14,90</b>. Quer aproveitar e já montar seu pedido?
               </div>
               <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-gray-800/70 p-3 text-[13px] text-gray-300">

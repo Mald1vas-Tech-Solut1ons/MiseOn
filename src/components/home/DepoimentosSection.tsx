@@ -1,6 +1,7 @@
 import { Quote, Star } from 'lucide-react';
 import { RotuloSecao } from './shared';
 
+import { useI18n } from '../../contexts/I18nContext';
 const DEPOIMENTOS = [
   {
     texto:
@@ -26,12 +27,13 @@ const DEPOIMENTOS = [
 ];
 
 export function DepoimentosSection() {
+  const { tDynamic } = useI18n();
   return (
     <section style={{ borderTop: '1px solid rgba(255,255,255,.08)', background: 'rgba(10,92,196,0.03)' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6">
         <RotuloSecao numero="08" texto="Quem opera com MiseOn" />
         <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="max-w-3xl text-3xl font-extrabold leading-tight sm:text-4xl">
-          Lojista não quer tecnologia.<br />Quer <span style={{ color: '#FC5B24' }}>sobrar dinheiro no fim do mês.</span>
+          {tDynamic('Lojista não quer tecnologia.')}<br />Quer <span style={{ color: '#FC5B24' }}>sobrar dinheiro no fim do mês.</span>
         </h2>
         <div className="mt-12 grid gap-5 md:grid-cols-3">
           {DEPOIMENTOS.map((d) => (
@@ -60,7 +62,7 @@ export function DepoimentosSection() {
           ))}
         </div>
         <p className="mt-6 text-center text-[11px] text-gray-600">
-          Depoimentos ilustrativos baseados em relatos reais de lojistas do segmento.
+          {tDynamic('Depoimentos ilustrativos baseados em relatos reais de lojistas do segmento.')}
         </p>
       </div>
     </section>

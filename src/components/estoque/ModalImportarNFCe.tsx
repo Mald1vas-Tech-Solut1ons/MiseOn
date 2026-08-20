@@ -294,7 +294,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-black text-xl text-gray-900 dark:text-gray-100">Conferência de Cupom Fiscal (NFC-e)</h3>
+                <h3 className="font-black text-xl text-gray-900 dark:text-gray-100">{tDynamic('Conferência de Cupom Fiscal (NFC-e)')}</h3>
                 <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 uppercase tracking-wider">
                   SEFAZ {dadosNota.uf}
                 </span>
@@ -352,7 +352,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                       title="Deixa marcados só os itens que já existem no seu estoque"
                       className="rounded-lg border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                     >
-                      Só os já cadastrados
+                      {tDynamic('Só os já cadastrados')}
                     </button>
                   </div>
                 </div>
@@ -409,7 +409,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                                 {l.confiancaMatch === 'ALTA' && <span className="rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black px-1.5 py-0.5">AUTO MATCH</span>}
                                 {l.confiancaMatch === 'MEDIA' && <span className="rounded-full bg-amber-100 text-amber-700 text-[9px] font-black px-1.5 py-0.5">SUGESTÃO</span>}
                                 {l.criarNovo && <span className="rounded-full bg-blue-100 text-blue-700 text-[9px] font-black px-1.5 py-0.5">+ NOVO INSUMO</span>}
-                                {!l.importar && <span className="rounded-full bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400 text-[9px] font-black px-1.5 py-0.5">FORA DA IMPORTAÇÃO</span>}
+                                {!l.importar && <span className="rounded-full bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400 text-[9px] font-black px-1.5 py-0.5">{tDynamic('FORA DA IMPORTAÇÃO')}</span>}
                               </div>
                               <p className={`font-bold text-sm ${l.importar ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 line-through dark:text-gray-600'}`}>
                                 {l.itemNota.descricao}
@@ -484,7 +484,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                             */
                             <div className="mb-2 flex flex-wrap items-center gap-2">
                               <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                                Controlar no estoque em:
+                                {tDynamic('Controlar no estoque em:')}
                               </span>
                               <select
                                 value={l.unidadeInsumo}
@@ -586,7 +586,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
               className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg transition disabled:opacity-50"
             >
               {salvando
-                ? <><Loader2 size={16} className="animate-spin" /> Lançando no Estoque...</>
+                ? <><Loader2 size={16} className="animate-spin" /> {tDynamic('Lançando no Estoque...')}</>
                 : <><CheckCircle2 size={18} /> Dar entrada em {marcados.length} {marcados.length === 1 ? 'item' : 'itens'}</>}
             </button>
           </div>

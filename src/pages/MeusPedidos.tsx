@@ -302,7 +302,7 @@ export default function MeusPedidos() {
               {ativos.length === 0 ? (
                 <div className="rounded-3xl border p-6 text-center" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
                   <Package size={28} className="mx-auto mb-3" style={{ color: 'var(--cor-texto-fraco)' }} />
-                  <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>Nenhum pedido em andamento no momento.</p>
+                  <p className="font-semibold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Nenhum pedido em andamento no momento.')}</p>
                   <Link to="/lojas" className="mt-4 inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-texto)' }}>
                     <Compass size={15} /> Explorar restaurantes
                   </Link>

@@ -567,7 +567,7 @@ export default function Cardapio() {
               <p className="text-xs" style={{ color: 'var(--cor-texto-suave)' }}>{tDynamic('Revise seus itens e finalize com segurança.')}</p>
             </div>
             {carrinho.length === 0 ? (
-              <p className="py-8 text-center text-sm" style={{ color: 'var(--cor-texto-fraco)' }}>Adicione itens do cardápio.</p>
+              <p className="py-8 text-center text-sm" style={{ color: 'var(--cor-texto-fraco)' }}>{tDynamic('Adicione itens do cardápio.')}</p>
             ) : (
               <>
                 <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
@@ -701,7 +701,7 @@ export default function Cardapio() {
               {/* Resumo do pedido */}
               <div className="rounded-2xl border border-[var(--cor-borda)] bg-[var(--cor-surface)] p-4 text-left">
                 <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--cor-texto-fraco)]">
-                  <Receipt size={12} /> Resumo do pedido
+                  <Receipt size={12} /> {tDynamic('Resumo do pedido')}
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between">
@@ -709,7 +709,7 @@ export default function Cardapio() {
                     <span className="font-bold text-[var(--cor-texto)] dark:text-[var(--cor-texto-claro)]">#{pedidoNumero}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[var(--cor-texto-suave)]">Forma de pagamento</span>
+                    <span className="text-[var(--cor-texto-suave)]">{tDynamic('Forma de pagamento')}</span>
                     <span className="font-semibold text-[var(--cor-texto)] dark:text-[var(--cor-texto-claro)]">{ROTULO_METODO[metodo]}</span>
                   </div>
                   {pedidoTotal !== null && (
@@ -727,12 +727,12 @@ export default function Cardapio() {
                 </Button>
                 <Button variant="secundario" size="lg" className="flex-1"
                   onClick={() => { setPedidoNumero(null); setPix(null); setPedidoId(null); setPedidoTotal(null); setCheckoutAberto(false); }}>
-                  Voltar ao cardápio
+                  {tDynamic('Voltar ao cardápio')}
                 </Button>
               </div>
 
               <p className="flex items-center justify-center gap-1 text-[10px] font-semibold text-[var(--cor-texto-fraco)]">
-                <ShieldCheck size={12} /> Transação protegida de ponta a ponta.
+                <ShieldCheck size={12} /> {tDynamic('Transação protegida de ponta a ponta.')}
               </p>
             </div>
           </SuccessCelebration>
@@ -1028,6 +1028,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
   onFechar: () => void;
   onAprovado: () => void;
 }) {
+  const { tDynamic } = useI18n();
   const salvo = lerTitularSalvo();
   const [numero, setNumero] = useState('');
   const [nome, setNome] = useState(salvo?.nome ?? '');
@@ -1241,7 +1242,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
           {/* Formulário compacto */}
           <div className="space-y-2.5">
             <label className="block">
-              <span className={rotuloCls}>Número do cartão</span>
+              <span className={rotuloCls}>{tDynamic('Número do cartão')}</span>
               <div className="relative">
                 <input ref={numeroRef} value={numero}
                   onChange={(e) => {
@@ -1262,7 +1263,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
             </label>
 
             <label className="block">
-              <span className={rotuloCls}>Nome impresso no cartão</span>
+              <span className={rotuloCls}>{tDynamic('Nome impresso no cartão')}</span>
               <input ref={nomeRef} value={nome} onChange={(e) => setNome(e.target.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '').toUpperCase())} onBlur={() => marcar('nome')}
                 onKeyDown={(e) => { if (e.key === 'Enter' && okNome) validadeRef.current?.focus(); }}
                 autoComplete="cc-name" placeholder="COMO ESTÁ NO CARTÃO" className={campoCls('nome', okNome)} />
@@ -1321,7 +1322,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
               className="h-4 w-4 shrink-0 accent-[var(--cor-primaria)]" />
             <span className="text-[12px] leading-tight text-gray-600 dark:text-gray-300">
               Salvar meu <b>nome e CPF</b> para a próxima compra
-              <span className="block text-[10px] text-gray-400">Nunca guardamos o número nem o CVV do cartão.</span>
+              <span className="block text-[10px] text-gray-400">{tDynamic('Nunca guardamos o número nem o CVV do cartão.')}</span>
             </span>
           </label>
 

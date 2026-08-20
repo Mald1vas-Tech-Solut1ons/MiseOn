@@ -2,7 +2,9 @@ import { QrCode, CreditCard, ShieldCheck, Landmark, ArrowRight } from 'lucide-re
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
 import { RotuloSecao, zap } from './shared';
 
+import { useI18n } from '../../contexts/I18nContext';
 export function PagamentosSection() {
+  const { tDynamic } = useI18n();
   return (
     <section id="pagamentos" style={{ borderTop: '1px solid rgba(10,92,196,0.15)' }} className="py-24">
       <div className="mx-auto max-w-6xl px-6">
@@ -10,10 +12,10 @@ export function PagamentosSection() {
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
           <div>
             <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold leading-tight sm:text-4xl">
-              Seu dinheiro cai direto<br />na <span style={{ color: '#FC5B24' }}>sua conta</span>. Não na nossa.
+              {tDynamic('Seu dinheiro cai direto')}<br />na <span style={{ color: '#FC5B24' }}>sua conta</span>. Não na nossa.
             </h2>
             <p style={{ color: '#AEB9CE' }} className="mt-5 max-w-xl text-base leading-relaxed">
-              Os pagamentos online são processados pelo <b style={{ color: '#EAF1FB' }}>Efí Bank</b>, instituição
+              {tDynamic('Os pagamentos online são processados pelo')} <b style={{ color: '#EAF1FB' }}>Efí Bank</b>, instituição
               autorizada pelo Banco Central — e repassados <b style={{ color: '#EAF1FB' }}>automaticamente</b> para a
               conta da sua loja. O MiseOn não segura o seu dinheiro e não cobra comissão por venda: você paga só a
               mensalidade fixa.
@@ -41,7 +43,7 @@ export function PagamentosSection() {
           <div style={{ border: '1px solid rgba(255,255,255,.09)', background: 'rgba(10,92,196,0.05)', borderRadius: 24 }} className="p-6 sm:p-7">
             <div className="mb-4 flex items-center gap-2">
               <Landmark size={16} style={{ color: '#FC5B24' }} />
-              <span style={{ fontFamily: "'Sora', sans-serif", color: '#EAF1FB' }} className="text-sm font-extrabold">Taxas do Efí Bank, sem letra miúda</span>
+              <span style={{ fontFamily: "'Sora', sans-serif", color: '#EAF1FB' }} className="text-sm font-extrabold">{tDynamic('Taxas do Efí Bank, sem letra miúda')}</span>
             </div>
             <div className="space-y-0">
               {[
@@ -68,7 +70,7 @@ export function PagamentosSection() {
               style={{ border: '1px solid rgba(252,91,36,0.5)', color: '#FC5B24', fontFamily: "'Sora', sans-serif" }}
               className="mt-5 flex items-center justify-center gap-2 rounded-full py-3 text-sm font-bold transition hover:bg-orange-500 hover:text-white"
             >
-              Tirar dúvidas sobre recebimentos <ArrowRight size={15} />
+              {tDynamic('Tirar dúvidas sobre recebimentos')} <ArrowRight size={15} />
             </a>
           </div>
         </div>

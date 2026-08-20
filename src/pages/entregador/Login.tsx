@@ -59,7 +59,7 @@ export default function EntregadorLogin() {
             <Bike size={32} />
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight">MiseOn <span className="text-orange-500">Logistics</span></h1>
-          <p className="mt-2 text-sm font-medium text-gray-400">O app do entregador de alta performance.</p>
+          <p className="mt-2 text-sm font-medium text-gray-400">{tDynamic('O app do entregador de alta performance.')}</p>
         </div>
 
         {erro && (

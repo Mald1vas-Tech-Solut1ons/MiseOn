@@ -169,7 +169,7 @@ export default function Assinatura() {
             <CreditCard size={28} />
           </div>
           <div>
-            <h2 className="text-2xl font-black dark:text-gray-100">Assinatura do Sistema (SaaS)</h2>
+            <h2 className="text-2xl font-black dark:text-gray-100">{tDynamic('Assinatura do Sistema (SaaS)')}</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
               <Lock size={12} /> {tDynamic('Checkout oficial via Efí Bank com Pix 5% OFF')}
             </p>
@@ -215,7 +215,7 @@ export default function Assinatura() {
             <div className="mb-6 rounded-2xl bg-amber-50 dark:bg-amber-900/20 p-3.5 border border-amber-200 dark:border-amber-800/50 flex items-center gap-3">
               <Clock size={20} className="text-amber-600 shrink-0" />
               <div className="text-xs text-amber-900 dark:text-amber-200">
-                <span className="font-bold">Regra de Tolerância:</span> 7 dias de carência pós-vencimento antes da suspensão automática.
+                <span className="font-bold">{tDynamic('Regra de Tolerância:')}</span> 7 dias de carência pós-vencimento antes da suspensão automática.
               </div>
             </div>
 
@@ -260,7 +260,7 @@ export default function Assinatura() {
                     R$ {ciclo === 'anual' ? '149,90' : '169,90'} <span className="text-xs text-gray-400 font-medium">/mês</span>
                   </span>
                   {ciclo === 'anual' && (
-                    <span className="text-[10px] font-bold text-emerald-500">Economia de R$ 240,00/ano</span>
+                    <span className="text-[10px] font-bold text-emerald-500">{tDynamic('Economia de R$ 240,00/ano')}</span>
                   )}
                 </div>
               </div>
@@ -274,7 +274,7 @@ export default function Assinatura() {
               <div className="h-px bg-gray-200 dark:bg-gray-800 w-full"></div>
               
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 dark:text-gray-400"><Calendar size={16} /> Vencimento do Trial</span>
+                <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 dark:text-gray-400"><Calendar size={16} /> {tDynamic('Vencimento do Trial')}</span>
                 <span className="font-bold text-xs px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
                   {vencimento ? `${new Date(vencimento).toLocaleDateString('pt-BR')} (${diasRestantesTrial} dias)` : `${diasRestantesTrial} dias restantes`}
                 </span>
@@ -297,7 +297,7 @@ export default function Assinatura() {
             {/* Tabs */}
             <div className="flex p-1 bg-gray-100 dark:bg-gray-950 rounded-2xl mb-6">
               <button onClick={() => setMetodo('cartao')} className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${metodo === 'cartao' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
-                <CreditCard size={18} /> Cartão de Crédito (até 12x)
+                <CreditCard size={18} /> {tDynamic('Cartão de Crédito (até 12x)')}
               </button>
               <button onClick={() => setMetodo('pix')} className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${metodo === 'pix' ? 'bg-white dark:bg-gray-900 shadow-sm text-teal-600 dark:text-teal-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
                 <QrCode size={18} /> Pix (5% OFF)
@@ -323,7 +323,7 @@ export default function Assinatura() {
                   </p>
                   
                   <label className="block">
-                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">Número do Cartão</span>
+                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">{tDynamic('Número do Cartão')}</span>
                      <div className="relative mt-1">
                         <input value={numero} onChange={(e) => setNumero(e.target.value)} inputMode="numeric" placeholder="0000 0000 0000 0000" 
                           className="w-full rounded-xl border border-gray-300 p-3.5 pl-10 text-sm font-medium focus:border-[var(--cor-primaria)] focus:ring-4 focus:ring-[var(--cor-primaria)]/10 focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 transition-all" />
@@ -332,7 +332,7 @@ export default function Assinatura() {
                   </label>
                   
                   <label className="block">
-                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">Nome impresso no cartão</span>
+                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">{tDynamic('Nome impresso no cartão')}</span>
                      <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="JOAO S SILVA" 
                        className="mt-1 w-full rounded-xl border border-gray-300 p-3.5 text-sm font-medium uppercase focus:border-[var(--cor-primaria)] focus:ring-4 focus:ring-[var(--cor-primaria)]/10 focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 transition-all" />
                   </label>
@@ -365,7 +365,7 @@ export default function Assinatura() {
 
                   {ciclo === 'anual' && (
                     <label className="block mt-4">
-                       <span className="text-xs font-bold text-[var(--cor-primaria)] ml-1">Opções de Parcelamento no Cartão via Efí Bank</span>
+                       <span className="text-xs font-bold text-[var(--cor-primaria)] ml-1">{tDynamic('Opções de Parcelamento no Cartão via Efí Bank')}</span>
                        <select
                          value={parcelas}
                          onChange={(e) => setParcelas(Number(e.target.value))}
@@ -383,7 +383,7 @@ export default function Assinatura() {
                   <button onClick={assinarCartao} disabled={processando}
                     className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 dark:bg-gray-100 py-4 font-bold text-white dark:text-gray-900 transition-transform hover:scale-[1.01] active:scale-95 disabled:pointer-events-none disabled:opacity-50">
                     {processando ? (
-                      <><div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-500 border-t-white dark:border-t-gray-900"></div> Autenticando no Banco...</>
+                      <><div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-500 border-t-white dark:border-t-gray-900"></div> {tDynamic('Autenticando no Banco...')}</>
                     ) : (
                       <><Lock size={18} /> Pagar Assinatura ({ciclo === 'anual' ? 'R$ 1.798,80' : 'R$ 169,90'})</>
                     )}
@@ -405,7 +405,7 @@ export default function Assinatura() {
                      <button onClick={gerarPix} disabled={processando}
                        className="flex w-full max-w-sm items-center justify-center gap-2 rounded-xl bg-teal-600 py-4 font-bold text-white transition-transform hover:scale-[1.01] active:scale-95 disabled:pointer-events-none disabled:opacity-50">
                        {processando ? (
-                         <><div className="h-5 w-5 animate-spin rounded-full border-2 border-teal-800 border-t-white"></div> Gerando código seguro...</>
+                         <><div className="h-5 w-5 animate-spin rounded-full border-2 border-teal-800 border-t-white"></div> {tDynamic('Gerando código seguro...')}</>
                        ) : (
                          <><QrCode size={20} /> Gerar Pix com 5% OFF ({ciclo === 'anual' ? 'R$ 1.708,86' : 'R$ 161,40'})</>
                        )}
@@ -424,7 +424,7 @@ export default function Assinatura() {
                            </button>
                         </div>
                         <p className="text-[10px] text-teal-600 dark:text-teal-400 font-semibold mt-4 flex items-center gap-1">
-                           <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div> Aguardando confirmação do banco...
+                           <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div> {tDynamic('Aguardando confirmação do banco...')}
                         </p>
                      </div>
                   )}

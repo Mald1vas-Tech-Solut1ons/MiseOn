@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Loader2, CheckCircle2, Store, Percent, AlertCircle } from 'lucide-react';
 import { useToast } from '../../components/ui/Toast';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface IfoodOnboardingProps {
   lojaId: string;
   form: any;
@@ -11,6 +12,7 @@ interface IfoodOnboardingProps {
 }
 
 export function IfoodOnboarding({ lojaId, form, setValor, onSuccess }: IfoodOnboardingProps) {
+  const { tDynamic } = useI18n();
   const [userCode, setUserCode] = useState('');
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState('');
@@ -67,8 +69,8 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess }: IfoodOnbo
     <div className="mx-auto max-w-xl">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-black text-gray-800 dark:text-gray-100">Integração iFood</h2>
-          <p className="mt-1 text-sm text-gray-500">Receba pedidos do iFood direto no PDV.</p>
+          <h2 className="text-xl font-black text-gray-800 dark:text-gray-100">{tDynamic('Integração iFood')}</h2>
+          <p className="mt-1 text-sm text-gray-500">{tDynamic('Receba pedidos do iFood direto no PDV.')}</p>
         </div>
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-500 dark:bg-red-900/20">
           <Store size={24} />
@@ -94,11 +96,11 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess }: IfoodOnbo
           <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <h4 className="mb-4 flex items-center gap-2 font-bold text-gray-800 dark:text-gray-100">
               <Percent size={18} className="text-red-500" />
-              Gestão de Margem e Taxas
+              {tDynamic('Gestão de Margem e Taxas')}
             </h4>
             <div className="mb-4 rounded-xl bg-amber-50 p-4 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-900/30">
               <p className="flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-500 mb-1">
-                <AlertCircle size={14} /> Importante: Markup de Cardápio
+                <AlertCircle size={14} /> {tDynamic('Importante: Markup de Cardápio')}
               </p>
               <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
                 Ao configurar a sua taxa de contrato abaixo, o MiseOn aplicará automaticamente este Markup aos itens do cardápio vinculados ao iFood. Assim, garantimos sua margem real, evitando prejuízos por divergência de preços no app.
@@ -132,7 +134,7 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess }: IfoodOnbo
             </div>
             
             <p className="mt-4 text-center text-[10px] text-gray-400">
-              Lembre-se de clicar em <b>"Salvar Alterações"</b> no final da tela para aplicar estas taxas.
+              {tDynamic('Lembre-se de clicar em')} <b>"Salvar Alterações"</b> no final da tela para aplicar estas taxas.
             </p>
           </div>
         </div>
@@ -141,17 +143,17 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess }: IfoodOnbo
           <div className="mb-6 rounded-2xl bg-gray-50 p-4 dark:bg-gray-800/50">
             <h4 className="font-bold text-gray-700 dark:text-gray-200">Como vincular:</h4>
             <ol className="mt-2 list-inside list-decimal space-y-1.5 text-sm text-gray-600 dark:text-gray-400">
-              <li>Acesse o <strong>Portal do Parceiro iFood</strong>.</li>
+              <li>Acesse o <strong>{tDynamic('Portal do Parceiro iFood')}</strong>.</li>
               <li>Vá em <strong>Aplicativos {'>'} Meus Aplicativos</strong>.</li>
               <li>Procure por <strong>MiseOn</strong> e clique em Autorizar.</li>
-              <li>Copie o <strong>Código de Autorização</strong> (User Code) gerado e cole abaixo.</li>
+              <li>Copie o <strong>{tDynamic('Código de Autorização')}</strong> (User Code) gerado e cole abaixo.</li>
             </ol>
           </div>
 
           <div className="space-y-4">
             <div>
               <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">
-                Código de Autorização (User Code)
+                {tDynamic('Código de Autorização (User Code)')}
               </label>
               <input
                 value={userCode}

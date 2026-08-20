@@ -15,10 +15,12 @@ import { CostGraph3D } from './CostGraph3D';
 import { carregarGrafoDaLoja } from './carregarGrafo';
 import type { GrafoCusto, NoCusto } from './types';
 
+import { useI18n } from '../../contexts/I18nContext';
 /** Debounce em ms antes de remontar o grafo após um evento Realtime. */
 const DEBOUNCE_REBUILD_MS = 800;
 
 export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
   const [grafo, setGrafo]             = useState<GrafoCusto | null>(null);
   const [erro, setErro]               = useState<string | null>(null);
   const [atualizando, setAtualizando] = useState(false);
@@ -165,7 +167,7 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
       <div className="rounded-2xl border border-red-200 bg-red-50 p-6 dark:bg-red-900/20 dark:border-red-900/50 flex items-start gap-3">
         <AlertTriangle className="text-red-500 shrink-0" size={20} />
         <div>
-          <p className="font-bold text-red-800 dark:text-red-300">Não foi possível montar o grafo 3D</p>
+          <p className="font-bold text-red-800 dark:text-red-300">{tDynamic('Não foi possível montar o grafo 3D')}</p>
           <p className="text-sm text-red-700 dark:text-red-400 mt-1">{erro}</p>
         </div>
       </div>
@@ -175,7 +177,7 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
   if (!grafo || !kpis || !grafoFiltrado) {
     return (
       <div className="h-[520px] rounded-2xl bg-gray-100 dark:bg-gray-800/40 animate-pulse flex items-center justify-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400">Montando a árvore física de custos…</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{tDynamic('Montando a árvore física de custos…')}</p>
       </div>
     );
   }
@@ -184,9 +186,9 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
     return (
       <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-10 text-center">
         <Boxes className="mx-auto text-gray-400 mb-3" size={32} />
-        <p className="font-bold dark:text-gray-200">Nenhum lote de estoque com custo</p>
+        <p className="font-bold dark:text-gray-200">{tDynamic('Nenhum lote de estoque com custo')}</p>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
-          A árvore 3D ganha vida quando houver entradas de estoque com preço. Registre uma compra em &quot;+ Entrada&quot;.
+          {tDynamic('A árvore 3D ganha vida quando houver entradas de estoque com preço. Registre uma compra em &quot;+ Entrada&quot;.')}
         </p>
       </div>
     );
@@ -201,12 +203,12 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
             <Boxes size={22} className="text-blue-500" /> Observabilidade 3D de Estoque Físico
             {atualizando && (
               <span className="flex items-center gap-1 text-[11px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full animate-pulse">
-                <RefreshCw size={11} className="animate-spin" /> Atualizando ao vivo…
+                <RefreshCw size={11} className="animate-spin" /> {tDynamic('Atualizando ao vivo…')}
               </span>
             )}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            Mapeamento tridimensional dos lotes físicos em estoque e suas esteiras de conversão.
+            {tDynamic('Mapeamento tridimensional dos lotes físicos em estoque e suas esteiras de conversão.')}
           </p>
         </div>
 
@@ -270,7 +272,7 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
 
         <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
           <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
-            <Flame size={12} className="text-red-500" /> Maior Custo Unitário
+            <Flame size={12} className="text-red-500" /> {tDynamic('Maior Custo Unitário')}
           </p>
           <p className="text-sm font-black text-red-600 dark:text-red-400 mt-1 truncate" title={kpis.maiorCustoUnitarioItem?.rotulo}>
             {kpis.maiorCustoUnitarioItem?.rotulo.split('(')[0] ?? 'N/A'}

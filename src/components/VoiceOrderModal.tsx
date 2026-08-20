@@ -181,7 +181,7 @@ export default function VoiceOrderModal({
                 onClick={confirmarEAdicionar}
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-lg hover:brightness-110 transition-all"
               >
-                <Check size={18} /> Adicionar ao Carrinho
+                <Check size={18} /> {tDynamic('Adicionar ao Carrinho')}
               </button>
             )}
           </div>

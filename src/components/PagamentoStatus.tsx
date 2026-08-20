@@ -143,14 +143,14 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
             <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
               <Clock3 size={38} />
             </div>
-            <h3 className="text-xl font-black text-gray-900 dark:text-white">O tempo de pagamento acabou</h3>
+            <h3 className="text-xl font-black text-gray-900 dark:text-white">{tDynamic('O tempo de pagamento acabou')}</h3>
             <p className="mt-2 text-sm font-medium text-gray-500 dark:text-gray-400">
               {tDynamic('Se você já pagou, toque em verificar. Senão, gere um novo código Pix.')}
             </p>
             <div className="mt-6 flex w-full flex-col gap-2">
               <Button variant="secundario" size="lg" className="w-full" carregando={verificando}
                 icone={<RefreshCw size={16} />} onClick={verificarAgora}>
-                Já paguei — verificar
+                {tDynamic('Já paguei — verificar')}
               </Button>
               {onRegenerar && (
                 <Button size="lg" className="w-full" carregando={regenerando}

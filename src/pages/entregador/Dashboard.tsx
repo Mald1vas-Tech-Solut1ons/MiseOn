@@ -159,7 +159,7 @@ export default function EntregadorDashboard() {
 
       {/* Métricas Operacionais Obrigatórias */}
       <div>
-        <h2 className="mb-3 text-sm font-bold text-gray-400 uppercase tracking-wider">Desempenho Diário</h2>
+        <h2 className="mb-3 text-sm font-bold text-gray-400 uppercase tracking-wider">{tDynamic('Desempenho Diário')}</h2>
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-4">
             <div className="flex items-center gap-2 mb-2 text-blue-400">
@@ -199,7 +199,7 @@ export default function EntregadorDashboard() {
 
       {/* Rota Ativa */}
       <div>
-        <h2 className="mb-3 text-sm font-bold text-gray-400 uppercase tracking-wider">Ação Necessária</h2>
+        <h2 className="mb-3 text-sm font-bold text-gray-400 uppercase tracking-wider">{tDynamic('Ação Necessária')}</h2>
         
         {loading ? (
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-8 flex items-center justify-center">
@@ -249,7 +249,7 @@ export default function EntregadorDashboard() {
                 </button>
               ) : (
                 <button onClick={() => navigate(`/entregador/rota/${rotaAtiva.id}`)} className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 rounded-xl border border-gray-700 transition-colors flex items-center justify-center gap-2">
-                  <Map size={18} /> Acessar Navegação e Entregas
+                  <Map size={18} /> {tDynamic('Acessar Navegação e Entregas')}
                 </button>
               )}
             </div>

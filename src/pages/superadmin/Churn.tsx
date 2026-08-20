@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
+import { useI18n } from '../../contexts/I18nContext';
 interface Loja { id: string; slug: string; nome: string; status_assinatura: string; trial_termina_em: string | null }
 interface Metrica { loja_id: string; ultimo_pedido: string | null }
 
 export default function Churn() {
+  const { tDynamic } = useI18n();
   const [risco, setRisco] = useState<{ loja: Loja; motivos: string[] }[]>([]);
   const [carregando, setCarregando] = useState(true);
 
@@ -41,7 +43,7 @@ export default function Churn() {
 
   return (
     <div>
-      <h2 className="mb-3 text-lg font-bold">Lojas em risco de churn</h2>
+      <h2 className="mb-3 text-lg font-bold">{tDynamic('Lojas em risco de churn')}</h2>
       <div className="space-y-2">
         {risco.map(({ loja, motivos }) => (
           <div key={loja.id} className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -51,7 +53,7 @@ export default function Churn() {
             </ul>
           </div>
         ))}
-        {risco.length === 0 && <p className="py-10 text-center text-sm text-gray-400">Nenhuma loja em risco no momento. 🎉</p>}
+        {risco.length === 0 && <p className="py-10 text-center text-sm text-gray-400">{tDynamic('Nenhuma loja em risco no momento. 🎉')}</p>}
       </div>
     </div>
   );
