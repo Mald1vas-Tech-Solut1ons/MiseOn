@@ -31,6 +31,28 @@ export interface LandingPageData {
     description: string;
     items: string[];
   };
+  /**
+   * Capturas da tela real do produto.
+   *
+   * Opcional de propósito: página sem imagem continua funcionando igual. Mas
+   * numa landing que vende software, texto sozinho pede um ato de fé — e a
+   * captura é a única prova que o visitante consegue conferir antes de assinar.
+   * Só entram telas de verdade: mockup desenhado envelhece e mente.
+   */
+  screenshots?: {
+    titulo: string;
+    src: string;
+    alt: string;
+    legenda: string;
+    /**
+     * Dimensoes REAIS do arquivo. Nao e detalhe: sem elas o navegador nao sabe
+     * quanto espaco reservar e o texto pula quando a imagem carrega. As tres
+     * capturas do iFood tem proporcoes diferentes entre si (1.81, 1.54, 1.83),
+     * entao um valor unico chutado quebraria justamente a do meio.
+     */
+    largura: number;
+    altura: number;
+  }[];
   faqs: {
     pergunta: string;
     resposta: string;
@@ -737,6 +759,32 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         'Emissão de NFC-e para o pedido do iFood, para quem usa o módulo fiscal.',
       ],
     },
+    screenshots: [
+      {
+        titulo: 'A comissão do iFood vira número, não surpresa',
+        src: '/images/ifood/margem-e-taxas.png',
+        largura: 1622,
+        altura: 896,
+        alt: 'Tela de Conexão e Taxas da integração iFood no MiseOn, com a conta vinculada e os campos de taxa percentual e taxa fixa do contrato',
+        legenda: 'Você informa a taxa do seu contrato uma vez. O MiseOn passa a calcular o preço sugerido para o cardápio do iFood e a descontar a comissão de cada pedido.',
+      },
+      {
+        titulo: 'Nada é alterado no seu iFood sem você ligar',
+        src: '/images/ifood/controles-da-integracao.png',
+        largura: 1608,
+        altura: 1047,
+        alt: 'Painel de controles da integração iFood no MiseOn, com interruptores separados para pedidos e cardápio, todos começando desligados',
+        legenda: 'Cada automação é um interruptor independente, e todos nascem desligados. Quando algo ainda não é automático, a própria tela avisa — em vez de deixar você achar que decidiu.',
+      },
+      {
+        titulo: 'Bruto, taxa retida e líquido, pedido a pedido',
+        src: '/images/ifood/pedidos-e-liquido.png',
+        largura: 1614,
+        altura: 882,
+        alt: 'Aba de pedidos iFood no MiseOn mostrando faturamento bruto, taxas retidas, líquido estimado e filtros por situação do pedido',
+        legenda: 'O extrato do canal, com filtro para o que exige ação sua: pedido que entrou sem produto vinculado fatura, mas não baixa estoque nem lança custo.',
+      },
+    ],
     faqs: [
       {
         pergunta: 'Os pedidos do iFood caem na mesma tela dos pedidos do meu site e salão?',

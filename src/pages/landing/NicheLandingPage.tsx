@@ -7,6 +7,7 @@ import {
   Percent,
   Ban,
   KeyRound,
+  Maximize2,
 } from 'lucide-react';
 import { LANDING_PAGES_DATA } from '../../data/landingPagesData';
 import SEO from '../../components/SEO';
@@ -292,6 +293,72 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
           </div>
         </div>
       </section>
+
+      {/* ══════════ 4B. AS TELAS DE VERDADE ══════════
+          Vem depois dos recursos de propósito: o visitante acabou de ler seis
+          afirmações e aqui confere três delas. Só renderiza quando a página tem
+          captura — nenhuma landing quebra por não ter. */}
+      {data.screenshots && data.screenshots.length > 0 && (
+        <section id="telas" className="scroll-mt-24 bg-white py-20 dark:bg-transparent">
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="text-center">
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-[var(--cor-primaria)]">
+                {tDynamic('Telas do produto')}
+              </span>
+              <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold text-gray-900 sm:text-4xl dark:text-white">
+                {tDynamic('Isto é a tela, não é ilustração')}
+              </h2>
+              <p className="mt-3 text-base text-gray-600 dark:text-slate-300">
+                {tDynamic('Capturas do sistema em operação, com dados reais de uma loja usando a integração.')}
+              </p>
+            </div>
+
+            <div className="mt-14 space-y-10">
+              {data.screenshots.map((shot, idx) => (
+                <div key={idx} className="grid items-center gap-8 lg:grid-cols-5">
+                  {/* Ímpar inverte o lado: leitura em zigue-zague segura melhor
+                      a atenção do que três blocos idênticos empilhados. */}
+                  <div className={`lg:col-span-2 ${idx % 2 === 1 ? 'lg:order-2' : ''}`}>
+                    <h3 className="font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">
+                      {tDynamic(shot.titulo)}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-slate-300">
+                      {tDynamic(shot.legenda)}
+                    </p>
+                  </div>
+                  <div className={`lg:col-span-3 ${idx % 2 === 1 ? 'lg:order-1' : ''}`}>
+                    {/* Abre a captura em tamanho real.
+                        No celular a imagem cai para ~340px de largura e a
+                        interface dentro dela fica ilegivel — prova que nao da
+                        para ler nao prova nada, e a maior parte do trafego e
+                        mobile. Link simples em vez de lightbox: funciona sem
+                        JavaScript, sem dependencia, e o visitante volta com o
+                        botao de voltar. */}
+                    <a
+                      href={shot.src}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group block overflow-hidden rounded-3xl border border-gray-200 bg-black/60 shadow-2xl transition hover:border-[var(--cor-primaria)] dark:border-white/15"
+                    >
+                      <img
+                        src={shot.src}
+                        alt={shot.alt}
+                        loading="lazy"
+                        width={shot.largura}
+                        height={shot.altura}
+                        className="h-auto w-full object-cover"
+                      />
+                      <span className="flex items-center justify-center gap-1.5 border-t border-white/10 bg-slate-900/80 p-3 text-[11px] font-bold text-slate-300 transition group-hover:text-white">
+                        <Maximize2 size={12} /> {tDynamic('Ver em tamanho real')}
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ══════════ 5. REGRAS DE NEGÓCIO DO SISTEMA ══════════ */}
       <section id="regras" className="scroll-mt-24 py-20 bg-gradient-to-br from-[#0B1120] via-[#0C1730] to-[#070C18] text-white">

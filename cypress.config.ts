@@ -4,6 +4,11 @@ import coverageTask from '@cypress/code-coverage/task';
 export default defineConfig({
   e2e: {
     baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:4173',
+    // `capturas-*.cy.ts` nao sao testes: sao geradores de imagem para a landing.
+    // Dependem de login e de dados que so existem no ambiente real, entao no
+    // runner limpo do CI eles falhariam e derrubariam o job inteiro. Rodam sob
+    // demanda, com --spec.
+    excludeSpecPattern: ['**/capturas-*.cy.ts'],
     viewportWidth: 1280,
     viewportHeight: 800,
     // O runner do GitHub Actions e bem mais lento que a maquina local, e no
