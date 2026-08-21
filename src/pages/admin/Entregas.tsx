@@ -6,13 +6,15 @@ import 'leaflet/dist/leaflet.css';
 import {
   MapPin, Navigation, CheckCircle2, Phone, Bike, MessageCircle, X,
   Plus, Trash2, Users, Send, Route, Loader2, AlertCircle, UserPlus, ChevronDown,
-  Radio, Printer, DollarSign, TrendingUp, Compass
+  Radio, Printer, DollarSign, TrendingUp, Compass, AlertTriangle
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Pedido, Entregador, RotaEntrega, MensagemPedido, fmt } from '../../types';
 import type { CtxLoja } from './AdminLayout';
 import { imprimir } from '../../lib/print';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
+import { ModalCodigoEntrega } from '../../components/pedidos/ModalCodigoEntrega';
+import { despacharNoIfood, ehPedidoIfood, entregaEhDaLoja } from '../../lib/ifood';
 
 import { useI18n } from '../../contexts/I18nContext';
 const iconeMoto = L.divIcon({
@@ -181,6 +183,8 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [mensagemPara, setMensagemPara] = useState<Pedido | null>(null);
   const [minhaPosicao, setMinhaPosicao] = useState<{ lat: number; lng: number } | null>(null);
+  const [validandoEntrega, setValidandoEntrega] = useState<Pedido | null>(null);
+  const [erroIfood, setErroIfood] = useState<string | null>(null);
   const watchIds = useRef<Record<string, number>>({});
 
   const carregar = async () => {
@@ -235,13 +239,36 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${d}&travelmode=driving`, '_blank');
   };
 
+  /**
+   * Sair para entrega, num pedido do iFood, e um ato com duas pontas: o
+   * /dispatch precisa ser aceito la antes de a moto virar "em rota" aqui. Se o
+   * iFood recusar e o status ja tivesse mudado, o cliente veria o pedido parado
+   * na cozinha com a entrega na rua.
+   */
   const iniciarRota = async (p: Pedido) => {
+    if (ehPedidoIfood(p) && entregaEhDaLoja(p)) {
+      const r = await despacharNoIfood(p.id);
+      if (!r.ok) {
+        setErroIfood(r.erro ?? 'O iFood recusou o despacho deste pedido.');
+        return;
+      }
+    }
+    setErroIfood(null);
     await supabase.from('pedidos').update({ status: 'EM_ROTA' }).eq('id', p.id);
     transmitirLocalizacao(p.id);
     abrirMaps(p);
   };
 
+  /** Entrega de pedido do iFood so encerra depois do codigo do cliente. */
   const concluir = async (p: Pedido) => {
+    if (ehPedidoIfood(p) && entregaEhDaLoja(p)) {
+      setValidandoEntrega(p);
+      return;
+    }
+    await darBaixa(p);
+  };
+
+  const darBaixa = async (p: Pedido) => {
     pararLocalizacao(p.id);
     await supabase.from('pedidos').update({ status: 'FINALIZADO' }).eq('id', p.id);
     await supabase.from('localizacao_entregador').delete().eq('pedido_id', p.id);
@@ -324,6 +351,29 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
 
   return (
     <div className="space-y-6">
+      <ModalCodigoEntrega
+        pedido={validandoEntrega}
+        tipo="entrega"
+        onFechar={() => setValidandoEntrega(null)}
+        onValidado={async () => {
+          const alvo = validandoEntrega;
+          setValidandoEntrega(null);
+          if (alvo) await darBaixa(alvo);
+        }}
+      />
+
+      {/* Recusa do iFood no despacho: o pedido continua PRONTO nos dois lados,
+          e quem esta no balcao precisa saber por que a moto nao saiu. */}
+      {erroIfood && (
+        <div className="flex items-start gap-2.5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/30 dark:bg-red-900/10">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-red-500" />
+          <p className="flex-1 text-xs font-semibold leading-snug text-red-700 dark:text-red-300">{erroIfood}</p>
+          <button onClick={() => setErroIfood(null)} className="text-xs font-bold text-red-500 hover:underline">
+            Fechar
+          </button>
+        </div>
+      )}
+
       {minhaPosicao && (
         <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm h-[250px]">
           <MapContainer center={[minhaPosicao.lat, minhaPosicao.lng]} zoom={14} style={{ height: '100%', width: '100%' }}>

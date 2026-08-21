@@ -1,6 +1,7 @@
 import { Bike, Store, UtensilsCrossed } from 'lucide-react';
 import { fmt } from '../../types';
 import type { PedidoFooterProps } from '../../types';
+import { ComandaIfood } from './ComandaIfood';
 
 import { useI18n } from '../../contexts/I18nContext';
 export function PedidoFooter({ pedido: p }: PedidoFooterProps) {
@@ -12,7 +13,10 @@ export function PedidoFooter({ pedido: p }: PedidoFooterProps) {
         {p.tipo_pedido === 'DELIVERY' ? (
           <div className="flex items-start gap-2 text-xs text-gray-600 dark:text-[#AEB9CE]">
             <Bike size={14} className="mt-0.5 shrink-0 text-blue-500 dark:text-[#6B9EFF]" />
-            <span>{p.endereco_entrega}{p.bairro ? ` — ${p.bairro}` : ''}</span>
+            <span>
+              {p.endereco_entrega || tDynamic('Endereço não informado')}
+              {p.bairro ? ` — ${p.bairro}` : ''}
+            </span>
           </div>
         ) : p.tipo_pedido === 'SALAO' ? (
           <div className="flex items-center gap-1.5 font-semibold text-purple-500">
@@ -24,6 +28,8 @@ export function PedidoFooter({ pedido: p }: PedidoFooterProps) {
           </div>
         )}
       </div>
+
+      <ComandaIfood pedido={p} />
 
       {p.origem === 'ifood' ? (
         <div className="px-4 py-3 border-t border-gray-100 bg-red-50/50 dark:border-red-900/20 dark:bg-red-900/5">

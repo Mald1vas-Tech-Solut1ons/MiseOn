@@ -49,27 +49,10 @@ async function confirmOrder(orderId: string, token: string): Promise<void> {
   }
 }
 
-/** Busca os motivos de cancelamento disponíveis para o pedido */
-async function getCancellationReasons(orderId: string, token: string): Promise<{ cancelCodeId: string; description: string }[]> {
-  const res = await fetch(`https://merchant-api.ifood.com.br/order/v1.0/orders/${orderId}/cancellationReasons`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) return [];
-  return res.json();
-}
 
-/** Solicita/confirma cancelamento de um pedido */
-async function requestCancellation(orderId: string, cancelCodeId: string, token: string): Promise<void> {
-  const res = await fetch(`https://merchant-api.ifood.com.br/order/v1.0/orders/${orderId}/requestCancellation`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cancellationCode: cancelCodeId }),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    logger.warn(`Falha ao solicitar cancelamento ${orderId}: ${res.status} - ${err}`);
-  }
-}
+// Nao existe requestCancellation aqui de proposito: cancelar no iFood e ato
+// que parte da LOJA, e mora na Edge Function ifood-status, onde a tela consegue
+// esperar a resposta e mostrar o que aconteceu. Este arquivo so RECEBE eventos.
 
 // ─── Email de falha crítica ───────────────────────────────────────────────────
 
@@ -153,6 +136,20 @@ serve(async (req: Request) => {
     let normalizedBody = rawBody;
     if (rawBody && !Array.isArray(rawBody) && typeof rawBody === 'object') {
       normalizedBody = [rawBody];
+    }
+
+    // KEEPALIVE: o iFood bate aqui a cada ~30s só para saber se estamos de pé.
+    // Vem sem orderId, então o schema reprovava e cada batida gerava um
+    // `error` no log com stack de ZodError. Duas dezenas de erros por minuto
+    // escondendo os erros de verdade — e, num painel de saúde da integração,
+    // dando a impressão de webhook quebrado justo no período de homologação.
+    // Não é evento de pedido: responde e sai.
+    const eventosBrutos = Array.isArray(normalizedBody) ? normalizedBody : [];
+    const soKeepalive =
+      eventosBrutos.length > 0 &&
+      eventosBrutos.every((e) => (e as { code?: string })?.code === 'KEEPALIVE');
+    if (soKeepalive) {
+      return new Response('OK', { status: 200, headers: corsHeaders });
     }
 
     const validation = ifoodEventSchema.safeParse(normalizedBody);
@@ -326,31 +323,99 @@ serve(async (req: Request) => {
           else reqLogger.info(`CON: pedido ${orderId} → FINALIZADO`);
         }
 
-        // ── CAN: Cancelamento solicitado ───────────────────────────────────
+        // ── CAN: pedido cancelado no iFood ─────────────────────────────────
+        // CAN e AVISO, nao pedido de acao: quando ele chega, o pedido JA esta
+        // cancelado la. O codigo antigo respondia com requestCancellation, o que
+        // era cancelar de novo o que ja caiu — o iFood recusava e a falha ficava
+        // num warn que ninguem lia.
+        //
+        // O CAN tambem volta como eco do cancelamento que a LOJA fez pelo
+        // Painel. Por isso o update nao pode sobrescrever cegamente: se o
+        // carimbo diz que a origem foi a loja, o motivo escolhido pelo lojista
+        // e a versao que vale, e sobrescrever apagaria justamente a informacao
+        // que explica o cancelamento para quem for olhar depois.
         else if (code === 'CAN') {
-          // 1. Buscar motivos disponíveis
-          const reasons = await getCancellationReasons(orderId, token);
+          const { data: existente } = await supabase
+            .from('pedidos')
+            .select('id, status, ifood_cancelamento_origem')
+            .eq('ifood_order_id', orderId)
+            .maybeSingle();
 
-          // 2. Usar o primeiro motivo disponível (ou um genérico se a lista vier vazia)
-          const cancelCodeId = reasons?.[0]?.cancelCodeId ?? '501';
+          if (!existente) {
+            reqLogger.warn(`CAN: pedido ${orderId} não encontrado no MiseOn`);
+          } else if (existente.ifood_cancelamento_origem === 'LOJA') {
+            // Chegou o CAN: o cancelamento da loja passou. Qualquer recusa
+            // registrada antes (CARF de uma tentativa anterior) deixa de valer.
+            await supabase
+              .from('pedidos')
+              .update({ ifood_cancelamento_erro: null })
+              .eq('id', existente.id)
+              .not('ifood_cancelamento_erro', 'is', null);
 
-          // 3. Confirmar o cancelamento para o iFood
-          await requestCancellation(orderId, cancelCodeId, token);
+            // Motivo e origem ficam como o lojista deixou. Mas o status ainda
+            // precisa fechar: se a tela cancelou no iFood e caiu antes de gravar
+            // no MiseOn, este eco e a rede que impede o pedido de ficar aberto
+            // aqui e cancelado la.
+            if (existente.status !== 'CANCELADO') {
+              const { error } = await supabase
+                .from('pedidos')
+                .update({ status: 'CANCELADO' })
+                .eq('id', existente.id);
+              if (error) reqLogger.warn(`CAN: falha ao fechar ${orderId}`, { context: { erro: error.message } });
+              else reqLogger.info(`CAN: ${orderId} fechado pelo eco — cancelamento tinha parado no meio`);
+            } else {
+              reqLogger.info(`CAN: eco do cancelamento feito pela loja em ${orderId} — nada a mudar`);
+            }
+          } else {
+            // O motivo REAL vem do pedido, nao da lista de motivos possiveis.
+            // O codigo antigo gravava reasons[0].description — o primeiro item
+            // do cardapio de motivos — como se fosse o motivo escolhido. Num
+            // cancelamento feito pelo cliente, isso escrevia "Problemas de
+            // sistema na loja" no historico de um pedido que a loja nao errou.
+            const detalhe = await getOrderDetails(orderId, token).catch(() => null);
+            const cancelamento = detalhe?.cancellation ?? detalhe?.cancellationDetails ?? null;
 
-          // 4. Atualizar no banco
+            const { error } = await supabase
+              .from('pedidos')
+              .update({
+                status: 'CANCELADO',
+                motivo_cancelamento:
+                  cancelamento?.reason ?? detalhe?.cancellationReason ?? 'Cancelado pelo iFood',
+                ifood_cancelamento_origem: 'IFOOD',
+                ifood_cancelamento_codigo: cancelamento?.cancelCodeId ?? cancelamento?.code ?? null,
+                // Carimbo: e ele que impede o gatilho de status de devolver ao
+                // iFood um cancelamento que nasceu no proprio iFood.
+                ifood_cancelamento_em: new Date().toISOString(),
+              })
+              .eq('id', existente.id);
+
+            if (error) reqLogger.warn(`CAN: falha ao atualizar status ${orderId}`, { context: { erro: error.message } });
+            else reqLogger.info(`CAN: pedido ${orderId} → CANCELADO`);
+          }
+        }
+
+        // ── CAR / CARF: o desfecho do cancelamento que a LOJA pediu ────────
+        // requestCancellation responde 202 e nao decide nada ali. O iFood
+        // manda CAR ("recebi seu pedido de cancelamento") e depois CAN
+        // (cancelou) ou CARF (recusou). Enquanto esses dois codigos cairam no
+        // ramo "evento nao tratado", a recusa era invisivel: MiseOn com o
+        // pedido cancelado, iFood com o pedido de pe, cliente esperando.
+        else if (code === 'CAR') {
+          reqLogger.info(`CAR: iFood recebeu o pedido de cancelamento de ${orderId}`);
+        }
+
+        else if (code === 'CARF') {
           const { error } = await supabase
             .from('pedidos')
             .update({
-              status: 'CANCELADO',
-              // Prefixo "[iFood]" marca a ORIGEM do cancelamento. A ifood-status lê
-              // isto para não devolver ao iFood um cancelamento que partiu dele
-              // mesmo — sem a marca, o gatilho de status geraria eco.
-              motivo_cancelamento: `[iFood] ${reasons?.[0]?.description || 'Cancelado via iFood'}`,
+              ifood_cancelamento_erro:
+                'O iFood recusou o cancelamento. O pedido pode continuar ativo no app do cliente — ' +
+                'confira no Portal do Parceiro.',
             })
             .eq('ifood_order_id', orderId);
 
-          if (error) reqLogger.warn(`CAN: falha ao atualizar status ${orderId}`, { context: { erro: error.message } });
-          else reqLogger.info(`CAN: pedido ${orderId} → CANCELADO (motivo: ${reasons?.[0]?.description})`);
+          if (error) reqLogger.warn(`CARF: falha ao registrar recusa de ${orderId}`, { context: { erro: error.message } });
+          else reqLogger.warn(`CARF: iFood RECUSOU o cancelamento de ${orderId}`);
         }
 
         // ── Outros eventos: logar e ignorar graciosamente ──────────────────

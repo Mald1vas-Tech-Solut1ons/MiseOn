@@ -14,19 +14,24 @@ import { PedidoHeader } from '../../components/pedidos/PedidoHeader';
 import { PedidoItens } from '../../components/pedidos/PedidoItens';
 import { PedidoFooter } from '../../components/pedidos/PedidoFooter';
 import { PedidoActions } from '../../components/pedidos/PedidoActions';
+import { ModalCancelamento } from '../../components/pedidos/ModalCancelamento';
+import { ModalCodigoEntrega } from '../../components/pedidos/ModalCodigoEntrega';
+import { despacharNoIfood, ehPedidoIfood, entregaEhDaLoja } from '../../lib/ifood';
 
 import { useI18n } from '../../contexts/I18nContext';
 const SELECT = '*, itens_pedido(*, itens_pedido_opcoes(*)), pagamentos(metodo, status, valor_pago)';
 
 /* ── Card de pedido com visual oficial MiseOn ── */
 function CardPedido({
-  p, papel, onEnviarCozinha, onAvancar, onCancelar, onImprimir, onErro,
+  p, papel, onEnviarCozinha, onAvancar, onCancelar, onValidarCodigo, onImprimir, onErro,
 }: {
   p: Pedido;
   papel: string;
   onEnviarCozinha: () => Promise<void>;
   onAvancar: (status: StatusPedido) => Promise<void>;
   onCancelar: () => void;
+  /** Abre a conferência de código do iFood (coleta pelo entregador ou entrega ao cliente). */
+  onValidarCodigo: (tipo: 'coleta' | 'entrega') => void;
   onImprimir: (via: Via) => void;
   onErro: (e: unknown) => void;
 }) {
@@ -59,6 +64,46 @@ function CardPedido({
     setProcessando(false);
   };
 
+  /**
+   * O avanço de status de um pedido do iFood não é só nosso.
+   *
+   * Dois pontos do fluxo têm contrapartida obrigatória do outro lado, e em
+   * ambos o certo é falar com o iFood ANTES de mexer no status daqui:
+   *
+   *   → EM_ROTA     precisa de /dispatch. Se o iFood recusar e a gente já
+   *                 tivesse marcado "saiu para entrega", o cliente veria o
+   *                 pedido parado na cozinha enquanto a moto está na rua.
+   *   → FINALIZADO  precisa do código de entrega (verifyDeliveryCode), que é o
+   *                 que conclui o pedido lá. Vai por modal, então aqui só
+   *                 interrompe: quem chama `onAvancar` de verdade é o modal,
+   *                 depois do iFood confirmar.
+   */
+  const avancar = async (status: StatusPedido) => {
+    const doIfood = ehPedidoIfood(p);
+
+    if (doIfood && status === 'EM_ROTA' && entregaEhDaLoja(p)) {
+      const r = await despacharNoIfood(p.id);
+      if (!r.ok) {
+        onErro(new Error(r.erro ?? 'O iFood recusou o despacho.'));
+        return;
+      }
+    }
+
+    if (doIfood && status === 'FINALIZADO') {
+      onValidarCodigo('entrega');
+      return;
+    }
+
+    await onAvancar(status);
+  };
+
+  // O código de coleta só existe quando quem entrega é o iFood — e só faz
+  // sentido conferir quando a sacola já está pronta para sair.
+  const conferirColeta =
+    ehPedidoIfood(p) && !entregaEhDaLoja(p) && p.status === 'PRONTO'
+      ? () => onValidarCodigo('coleta')
+      : undefined;
+
   return (
     <div
       className="flex flex-col overflow-hidden rounded-[20px] border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#0B1120]"
@@ -71,8 +116,9 @@ function CardPedido({
         pedido={p} papel={papel} naCozinha={naCozinha} precisaConferir={precisaConferir}
         todosConferidos={todosConferidos} semAvancoSalao={semAvancoSalao} destinoStatus={destinoStatus}
         destinoLabel={destinoLabel} isDelivery={isDelivery} processando={processando}
-        fluxoProx={fluxo.prox} fluxoLabel={fluxo.label} onAvancar={onAvancar}
-        onEnviarCozinha={onEnviarCozinha} onCancelar={onCancelar} onImprimir={onImprimir} executar={executar}
+        fluxoProx={fluxo.prox} fluxoLabel={fluxo.label} onAvancar={avancar}
+        onEnviarCozinha={onEnviarCozinha} onCancelar={onCancelar} onConferirColeta={conferirColeta}
+        onImprimir={onImprimir} executar={executar}
       />
     </div>
   );
@@ -200,14 +246,18 @@ export default function PainelPedidos() {
     carregar();
   };
 
-  const cancelar = async (p: Pedido) => {
-    if (!confirm('Cancelar pedido?')) return;
-    try {
-      await avancarStatus(p, 'CANCELADO');
-    } catch (e: any) {
-      setErroAcao(traduzirErro(e));
-    }
-  };
+  // Cancelamento não é um `confirm()`: precisa de motivo, e num pedido do iFood
+  // o motivo tem que sair da lista que o próprio iFood devolve para aquele
+  // pedido. Todo o fluxo (consultar motivos, cancelar lá, baixar aqui) vive no
+  // ModalCancelamento — aqui só guardamos QUAL pedido está sendo cancelado.
+  //
+  // Guardado fora da lista de propósito: `carregar()` roda no fim do
+  // cancelamento e trocaria o objeto embaixo do modal ainda aberto.
+  const [cancelando, setCancelando] = useState<Pedido | null>(null);
+
+  // Mesma ideia para a conferência de código: o pedido é guardado à parte,
+  // junto do momento do fluxo que está sendo conferido.
+  const [validando, setValidando] = useState<{ pedido: Pedido; tipo: 'coleta' | 'entrega' } | null>(null);
 
   // Agendado "futuro" = ainda fora da janela de antecedência da loja — fica numa
   // seção separada pra não misturar com o que está de fato acontecendo agora.
@@ -324,7 +374,8 @@ export default function PainelPedidos() {
               papel={papel}
               onEnviarCozinha={() => enviarParaCozinha(p)}
               onAvancar={(status) => avancarStatus(p, status)}
-              onCancelar={() => cancelar(p)}
+              onCancelar={() => setCancelando(p)}
+              onValidarCodigo={(tipo) => setValidando({ pedido: p, tipo })}
               onImprimir={(v) => {
                 const map: Record<Via, any> = { cozinha: 'COMANDA_COZINHA', romaneio: 'VIA_ENTREGADOR', nota: 'RECIBO_CLIENTE' };
                 imprimir({ template: map[v], lojaNome: loja?.nome || 'MiseOn', loja, pedido: p, itens: p.itens_pedido });
@@ -347,6 +398,30 @@ export default function PainelPedidos() {
           )}
         </div>
       )}
+
+      <ModalCancelamento
+        pedido={cancelando}
+        onFechar={() => setCancelando(null)}
+        onCancelado={carregar}
+      />
+
+      <ModalCodigoEntrega
+        pedido={validando?.pedido ?? null}
+        tipo={validando?.tipo ?? 'entrega'}
+        onFechar={() => setValidando(null)}
+        onValidado={async () => {
+          // Coleta é só conferência: a sacola sai com o entregador do iFood e o
+          // pedido segue vivo até eles concluírem. Entrega, sim, encerra aqui.
+          if (validando?.tipo === 'entrega' && validando.pedido) {
+            try {
+              await avancarStatus(validando.pedido, 'FINALIZADO');
+            } catch (e) {
+              setErroAcao(traduzirErro(e));
+            }
+          }
+          carregar();
+        }}
+      />
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { Navigation, MapPin, CheckCircle2, MessageCircle, AlertTriangle, ArrowLe
 import { supabase } from '../../lib/supabase';
 import type { CtxEntregador } from './EntregadorLayout';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
+import { ModalCodigoEntrega } from '../../components/pedidos/ModalCodigoEntrega';
+import { despacharNoIfood, ehPedidoIfood, entregaEhDaLoja } from '../../lib/ifood';
 
 import { useI18n } from '../../contexts/I18nContext';
 export default function EntregadorRota() {
@@ -23,6 +25,9 @@ export default function EntregadorRota() {
   const [mensagens, setMensagens] = useState<any[]>([]);
   const [msgInput, setMsgInput] = useState('');
   const [pedidoChatAtual, setPedidoChatAtual] = useState<any>(null);
+
+  // Pedido esperando a conferência do código de entrega do iFood.
+  const [validandoEntrega, setValidandoEntrega] = useState<any>(null);
 
   const pararGps = () => {
     if (watchId.current !== null) {
@@ -51,6 +56,16 @@ export default function EntregadorRota() {
     const ativos = (pedidos || []).filter((p: any) => !['FINALIZADO', 'CANCELADO'].includes(p.status));
     const alvo = pedidoAtivoId ?? ativos[0]?.id;
     if (!alvo) return;
+
+    // A parada que vira EM_ROTA e um despacho de verdade: se o pedido veio do
+    // iFood com entrega propria, eles precisam receber o /dispatch. A funcao e
+    // idempotente (carimba `ifood_despachado_em`), entao reentrar na rota nao
+    // manda o despacho duas vezes. Falha aqui nao trava o entregador: o status
+    // local segue, e o gatilho de status tenta de novo por conta.
+    const pedidoAlvo = ativos.find((p: any) => p.id === alvo);
+    if (pedidoAlvo && ehPedidoIfood(pedidoAlvo) && entregaEhDaLoja(pedidoAlvo)) {
+      await despacharNoIfood(alvo);
+    }
 
     await Promise.all(
       ativos.map((p: any) =>
@@ -134,7 +149,21 @@ export default function EntregadorRota() {
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
   };
 
+  /**
+   * No pedido do iFood com entrega própria, quem encerra o pedido lá é o código
+   * que o cliente informa (verifyDeliveryCode). Marcar FINALIZADO aqui sem
+   * passar por ele deixaria o pedido concluído no MiseOn e aberto no iFood —
+   * e é justamente esse passo que a etapa 5 da homologação verifica.
+   */
   const finalizarEntrega = async (pedido: any) => {
+    if (ehPedidoIfood(pedido) && entregaEhDaLoja(pedido)) {
+      setValidandoEntrega(pedido);
+      return;
+    }
+    await concluirEntrega(pedido);
+  };
+
+  const concluirEntrega = async (pedido: any) => {
     await supabase.from('pedidos').update({ status: 'FINALIZADO' }).eq('id', pedido.id);
     await supabase.from('localizacao_entregador').delete().eq('pedido_id', pedido.id);
     const restantes = (rota?.pedidos || []).filter((p: any) => p.id !== pedido.id && !['FINALIZADO', 'CANCELADO'].includes(p.status));
@@ -159,6 +188,16 @@ export default function EntregadorRota() {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-60px)] relative">
+      <ModalCodigoEntrega
+        pedido={validandoEntrega}
+        tipo="entrega"
+        onFechar={() => setValidandoEntrega(null)}
+        onValidado={async () => {
+          const alvo = validandoEntrega;
+          setValidandoEntrega(null);
+          if (alvo) await concluirEntrega(alvo);
+        }}
+      />
       <div className="bg-gray-900 border-b border-gray-800 p-4 sticky top-[60px] z-30 shadow-md">
         <button onClick={() => navigate('/entregador')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
           <ArrowLeft size={16} /> {tDynamic('Voltar ao Dashboard')}

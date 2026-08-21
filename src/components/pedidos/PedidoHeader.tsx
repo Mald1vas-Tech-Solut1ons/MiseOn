@@ -1,6 +1,6 @@
-import { Flame } from 'lucide-react';
+import { AlertTriangle, Ban, Flame } from 'lucide-react';
 import type { PedidoHeaderProps } from '../../types';
-import { FLUXO, STATUS_LABEL } from './constants';
+import { FLUXO, STATUS_LABEL, resumoCancelamento } from './constants';
 
 import { useI18n } from '../../contexts/I18nContext';
 export function PedidoHeader({ pedido: p }: PedidoHeaderProps) {
@@ -8,6 +8,7 @@ export function PedidoHeader({ pedido: p }: PedidoHeaderProps) {
   const fluxo = FLUXO[p.status] ?? FLUXO.CANCELADO;
   const hora = new Date(p.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   const naCozinha = p.estacao_atual === 'COZINHA';
+  const cancelamento = p.status === 'CANCELADO' ? resumoCancelamento(p) : null;
 
   return (
     <>
@@ -75,6 +76,27 @@ export function PedidoHeader({ pedido: p }: PedidoHeaderProps) {
       </div>
 
       {/* ── Status em destaque ── */}
+      {/* Cancelado precisa dizer QUEM cancelou e POR QUÊ. Um pedido que some do
+          fluxo sem explicação vira discussão no balcão meia hora depois. */}
+      {cancelamento && (
+        <div className="mx-4 mt-3 rounded-xl border border-red-500/35 bg-red-500/10 px-3.5 py-2.5">
+          <div className="flex items-center gap-2">
+            <Ban size={15} className="shrink-0 text-red-500" />
+            <p className="font-['Sora'] text-sm font-bold text-red-500">{tDynamic(cancelamento.quem)}</p>
+          </div>
+          {cancelamento.motivo && (
+            <p className="mt-1 pl-[23px] text-[11px] leading-snug text-gray-500 dark:text-[#AEB9CE]">
+              {cancelamento.motivo}
+            </p>
+          )}
+          {cancelamento.recusa && (
+            <p className="mt-2 flex gap-1.5 rounded-lg bg-red-500/15 px-2 py-1.5 text-[11px] font-semibold leading-snug text-red-500">
+              <AlertTriangle size={13} className="mt-px shrink-0" />
+              {cancelamento.recusa}
+            </p>
+          )}
+        </div>
+      )}
       {p.status === 'NOVO' && (
         <div style={{ margin: '12px 16px 0', background: 'rgba(252,91,36,.1)', border: '1px solid rgba(252,91,36,.35)', borderRadius: 12, padding: '10px 14px' }}>
           <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 14, color: '#FE7A47' }}>Aguardando aceite</div>

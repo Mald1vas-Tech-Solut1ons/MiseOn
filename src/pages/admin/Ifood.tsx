@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   Store, Link2, Percent, ClipboardList, Search, Loader2, Save,
-  AlertTriangle, Package, ArrowRight,
+  AlertTriangle, Package, ArrowRight, Ban,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmt, type Pedido, type Produto } from '../../types';
-import { STATUS_LABEL } from '../../components/pedidos/constants';
+import { STATUS_LABEL, classeDoStatus, resumoCancelamento } from '../../components/pedidos/constants';
 import { useToast } from '../../components/ui/Toast';
 import { MiseOnLoader } from '../../components/MiseOnLoader';
 import { IfoodOnboarding } from '../../components/admin/IfoodOnboarding';
@@ -470,7 +470,7 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
       const cutoff = new Date(Date.now() - 30 * 24 * 3600e3).toISOString();
       const { data } = await supabase
         .from('pedidos')
-        .select('id, numero, status, identificador_cliente, criado_em, valor_total, valor_bruto_ifood, taxa_ifood_retida, ifood_order_id, itens_pedido(id, nome_produto, produto_id, quantidade, preco_unitario)')
+        .select('id, numero, status, identificador_cliente, criado_em, valor_total, valor_bruto_ifood, taxa_ifood_retida, ifood_order_id, motivo_cancelamento, ifood_cancelamento_origem, ifood_cancelamento_em, ifood_cancelamento_erro, itens_pedido(id, nome_produto, produto_id, quantidade, preco_unitario)')
         .eq('loja_id', lojaId)
         .eq('origem', 'ifood')
         .gte('criado_em', cutoff)
@@ -541,11 +541,44 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
                     {new Date(p.criado_em).toLocaleDateString('pt-BR')} {new Date(p.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
-                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-gray-500 dark:bg-white/5 dark:text-gray-400">
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${classeDoStatus(p.status)}`}>
                   {STATUS_LABEL[p.status] ?? p.status}
                 </span>
               </div>
               <p className="mt-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">{p.identificador_cliente}</p>
+
+              {/* Cancelado: a etiqueta diz O QUE aconteceu; esta faixa diz quem
+                  fez e por quê. Sem ela, o lojista precisa abrir o suporte do
+                  iFood para descobrir o motivo de um cancelamento do próprio dia. */}
+              {p.status === 'CANCELADO' && (() => {
+                const c = resumoCancelamento(p);
+                return (
+                  <div className="mt-2.5 space-y-2">
+                    <div className="flex gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 dark:border-red-900/30 dark:bg-red-900/10">
+                      <Ban size={14} className="mt-px shrink-0 text-red-500" />
+                      <p className="text-[11px] leading-snug text-red-700 dark:text-red-300">
+                        <strong className="font-bold">{tDynamic(c.quem)}</strong>
+                        {c.motivo ? ` · ${c.motivo}` : ''}
+                        {p.ifood_cancelamento_em && (
+                          <span className="text-red-500/70 dark:text-red-400/60">
+                            {' · '}
+                            {new Date(p.ifood_cancelamento_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    {/* Recusa do iFood: pedido baixado aqui, possivelmente vivo lá. */}
+                    {c.recusa && (
+                      <div className="flex gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-900/15">
+                        <AlertTriangle size={14} className="mt-px shrink-0 text-amber-600 dark:text-amber-400" />
+                        <p className="text-[11px] font-semibold leading-snug text-amber-800 dark:text-amber-300">
+                          {c.recusa}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 <div className="rounded-xl bg-gray-50 p-2 dark:bg-white/5">

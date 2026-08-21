@@ -7,7 +7,7 @@ import { useI18n } from '../../contexts/I18nContext';
 export function PedidoActions({
   pedido: p, papel, naCozinha, precisaConferir, todosConferidos, semAvancoSalao,
   destinoStatus, destinoLabel, isDelivery, processando, fluxoProx, fluxoLabel,
-  onAvancar, onEnviarCozinha, onCancelar, onImprimir, executar,
+  onAvancar, onEnviarCozinha, onCancelar, onConferirColeta, onImprimir, executar,
 }: PedidoActionsProps) {
   const { tDynamic } = useI18n();
   const [menu, setMenu] = useState(false);
@@ -92,6 +92,18 @@ export function PedidoActions({
         <button disabled={processando} onClick={() => executar(() => onAvancar(fluxoProx))}
           className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-xl py-2.5 font-['Sora'] font-bold text-sm shadow-lg shadow-orange-500/20 hover:brightness-110 transition disabled:opacity-50">
           <Check size={16} /> {fluxoLabel}
+        </button>
+      )}
+
+      {/* Entrega do iFood: quem leva é o entregador deles, então o balcão não
+          despacha — só confere o código dele antes de soltar a sacola. */}
+      {onConferirColeta && (
+        <button
+          disabled={processando}
+          onClick={onConferirColeta}
+          className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 py-2.5 font-['Sora'] text-sm font-bold text-blue-600 transition hover:bg-blue-500/20 disabled:opacity-50 dark:text-blue-400"
+        >
+          <Bike size={16} /> {tDynamic('Conferir entregador')}
         </button>
       )}
 

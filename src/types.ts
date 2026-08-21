@@ -306,6 +306,19 @@ export interface ItemPedido {
   produtos?: { estacao_preparo?: EstacaoPreparo | null } | null;
 }
 
+/**
+ * Cupom/incentivo do iFood. `sponsorshipValues` diz QUEM paga cada pedaço —
+ * é o que a homologação exige exibir: cupom bancado pelo iFood é repasse, e
+ * cupom bancado pela loja (MERCHANT) sai do bolso do lojista.
+ */
+export interface BeneficioIfood {
+  value?: number;
+  target?: 'CART' | 'DELIVERY_FEE' | 'ITEM' | 'PROGRESSIVE_DISCOUNT_ITEM' | string;
+  targetId?: string;
+  sponsorshipValues?: { name?: string; value?: number; description?: string }[];
+  campaign?: { id?: string; name?: string; description?: string };
+}
+
 export interface Pedido {
   id: string;
   loja_id?: string;
@@ -336,6 +349,32 @@ export interface Pedido {
   ifood_order_id?: string | null;
   valor_bruto_ifood?: number | null;
   taxa_ifood_retida?: number | null;
+  motivo_cancelamento?: string | null;
+  /** Carimbo de que o cancelamento já foi acertado com o iFood (impede eco do gatilho). */
+  ifood_cancelamento_em?: string | null;
+  ifood_cancelamento_codigo?: string | null;
+  /** LOJA = partiu do lojista. IFOOD = chegou pelo evento CAN. */
+  ifood_cancelamento_origem?: 'LOJA' | 'IFOOD' | null;
+  /** Texto preenchido quando o iFood RECUSA o cancelamento (evento CARF). */
+  ifood_cancelamento_erro?: string | null;
+  /** Carimbo do /dispatch aceito pelo iFood (etapa 4 da homologação). */
+  ifood_despachado_em?: string | null;
+  /** Carimbo do código de entrega validado — conclui o pedido no iFood (etapa 5). */
+  ifood_entrega_validada_em?: string | null;
+  /** MERCHANT = entrega própria (a loja despacha). IFOOD = logística deles. */
+  ifood_entregue_por?: 'MERCHANT' | 'IFOOD' | null;
+  /** customer.phone.localizer — o código que conclui a entrega própria. */
+  ifood_localizador?: string | null;
+  /** delivery.pickupCode — código que o entregador do iFood mostra na coleta. */
+  ifood_codigo_coleta?: string | null;
+  ifood_cartao_bandeira?: string | null;
+  /** benefits[] do iFood: valor do cupom e quem patrocina. */
+  ifood_beneficios?: BeneficioIfood[] | null;
+  ifood_taxas_adicionais?: number | null;
+  /** extraInfo do iFood, ex.: "Pago Online. NÃO LEVAR MÁQUINA". */
+  ifood_info_extra?: string | null;
+  observacao_entrega?: string | null;
+  documento_cliente?: string | null;
   comanda_id?: string | null;
   mesa_numero?: number | null;
   agendado_para?: string | null; // null = pedido imediato
@@ -844,6 +883,11 @@ export interface PedidoActionsProps {
   onAvancar: (status: StatusPedido) => Promise<void>;
   onEnviarCozinha: () => Promise<void>;
   onCancelar: () => void;
+  /**
+   * Conferência do código que o entregador do iFood mostra ao coletar.
+   * Só existe quando o pedido tem código de coleta — por isso é opcional.
+   */
+  onConferirColeta?: () => void;
   onImprimir: (via: Via) => void;
   executar: (fn: () => Promise<void>) => Promise<void>;
 }
@@ -858,25 +902,6 @@ export interface PedidoFooterProps {
   pedido: Pedido;
 }
 
-export interface PedidoActionsProps {
-  pedido: Pedido;
-  papel: string;
-  naCozinha: boolean;
-  precisaConferir: boolean;
-  todosConferidos: boolean;
-  semAvancoSalao: boolean;
-  destinoStatus: StatusPedido;
-  destinoLabel: string;
-  isDelivery: boolean;
-  processando: boolean;
-  fluxoProx?: StatusPedido;
-  fluxoLabel?: string;
-  onAvancar: (status: StatusPedido) => Promise<void>;
-  onEnviarCozinha: () => Promise<void>;
-  onCancelar: () => void;
-  onImprimir: (via: Via) => void;
-  executar: (fn: () => Promise<void>) => Promise<void>;
-}
 
 export interface HeaderBarProps {
   modo: ModoPDV;
