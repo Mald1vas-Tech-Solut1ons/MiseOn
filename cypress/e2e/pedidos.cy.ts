@@ -90,7 +90,12 @@ describe('Fluxo de Pedidos', () => {
       }]
     }).as('getAdminPedidos');
 
-    cy.intercept('POST', '**/rpc/fn_avancar_status_pedido', { statusCode: 200, body: null }).as('avancarStatus');
+    // Cancelar deixou de ser um confirm() seguido de UPDATE: agora passa pelo
+    // ModalCancelamento, que exige um motivo e chama fn_cancelar_pedido. O
+    // motivo e obrigatorio porque pedido que some do painel sem historia vira
+    // discussao no balcao — e, no iFood, o motivo tem que ser um codigo aceito
+    // por eles.
+    cy.intercept('POST', '**/rpc/fn_cancelar_pedido', { statusCode: 200, body: null }).as('cancelarPedido');
     cy.intercept('PATCH', '**/rest/v1/pedidos*', { statusCode: 200 }).as('patchPedido');
     cy.intercept('PATCH', '**/rest/v1/pagamentos*', { statusCode: 200 });
 
@@ -101,6 +106,15 @@ describe('Fluxo de Pedidos', () => {
     cy.contains('#1002').should('be.visible');
     cy.get('button[title*="Cancelar"]').click();
 
-    cy.wait('@avancarStatus').its('request.body').should('deep.include', { p_novo_status: 'CANCELADO' });
+    // Pedido que nao e do iFood usa a lista propria da loja, sem ida a rede.
+    cy.contains('Por que este pedido está sendo cancelado?').should('be.visible');
+    cy.contains('button', 'O cliente desistiu do pedido').click();
+    cy.contains('button', 'Cancelar pedido').click();
+
+    cy.wait('@cancelarPedido')
+      .its('request.body')
+      .should('deep.include', { p_motivo: 'O cliente desistiu do pedido' });
+
+    cy.contains('Pedido cancelado').should('be.visible');
   });
 });
