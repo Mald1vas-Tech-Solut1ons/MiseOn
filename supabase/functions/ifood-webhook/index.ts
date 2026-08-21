@@ -91,7 +91,14 @@ const ifoodEventSchema = z.array(
 // Mapeamento iFood → enum status_pedido do banco
 const STATUS_MAP: Record<string, string> = {
   PLC: 'NOVO',
-  CFR: 'ACEITO',      // Confirmado pelo lojista
+  // CFM e o codigo que o iFood realmente manda na confirmacao
+  // (fullCode CONFIRMED). `CFR` estava aqui desde o inicio e NUNCA casou com
+  // nada: toda confirmacao caia em "evento nao tratado". Medido no log da
+  // homologacao de 21/08: {"code":"CFM","fullCode":"CONFIRMED"}.
+  // CFR fica como apelido porque contas antigas ainda o emitem.
+  CFM: 'ACEITO',
+  CFR: 'ACEITO',
+  PRS: 'PREPARANDO',  // PREPARATION_STARTED
   RTP: 'PRONTO',     // Pronto para entrega/retirada
   DSP: 'EM_ROTA',    // Entregador a caminho
   CON: 'FINALIZADO', // Concluído
@@ -303,15 +310,47 @@ serve(async (req: Request) => {
           });
         }
 
-        // ── CFR: Confirmado pelo iFood ──────────────────────────────────────
-        else if (code === 'CFR') {
+        // ── CFM/CFR: Confirmado pelo iFood ─────────────────────────────────
+        else if (code === 'CFM' || code === 'CFR') {
           const { error } = await supabase
             .from('pedidos')
             .update({ status: 'ACEITO' })
             .eq('ifood_order_id', orderId);
 
-          if (error) reqLogger.warn(`CFR: falha ao atualizar status ${orderId}`, { context: { erro: error.message } });
-          else reqLogger.info(`CFR: pedido ${orderId} → ACEITO`);
+          if (error) reqLogger.warn(`${code}: falha ao atualizar status ${orderId}`, { context: { erro: error.message } });
+          else reqLogger.info(`${code}: pedido ${orderId} → ACEITO`);
+        }
+
+        // ── PRS: preparo iniciado ──────────────────────────────────────────
+        // Eco do "iniciar preparo" — pelo Portal do Parceiro, pelo wizard de
+        // homologacao ou pelo proprio MiseOn. Ficou em "evento nao tratado"
+        // desde sempre, e o efeito colateral apareceu na homologacao de 21/08:
+        // o pedido nao andava de estado sozinho, entao os botoes de despachar e
+        // cancelar nao apareciam na hora em que o iFood esperava a acao.
+        //
+        // A maquina de estado LOCAL continua mandando na estacao: se a cozinha
+        // ainda nao recebeu o pedido, `fn_valida_transicao_pedido` recusa e
+        // esta recusa e legitima — quem organiza a producao aqui e o KDS, nao o
+        // iFood. Por isso a falha e `info`, nao `warn`: nao ha nada a consertar.
+        else if (code === 'PRS') {
+          const { error } = await supabase
+            .from('pedidos')
+            .update({ status: 'PREPARANDO' })
+            .eq('ifood_order_id', orderId)
+            .in('status', ['NOVO', 'ACEITO']);
+
+          if (error) reqLogger.info(`PRS: ${orderId} segue no fluxo local (${error.message})`);
+          else reqLogger.info(`PRS: pedido ${orderId} → PREPARANDO`);
+        }
+
+        // ── DDCR: o iFood gerou o codigo de entrega ────────────────────────
+        // DELIVERY_DROP_CODE_REQUESTED avisa que existe codigo para este
+        // pedido; o codigo em si NAO vem no evento — mora em
+        // `delivery.pickupCode`, que o PLC ja gravou em `ifood_codigo_coleta`.
+        // Nao ha estado a mudar. Esta como ramo proprio so para parar de sujar
+        // o log de "evento nao tratado", que e onde se procura problema real.
+        else if (code === 'DDCR') {
+          reqLogger.info(`DDCR: iFood gerou codigo de entrega para ${orderId}`);
         }
 
         // ── RTP: Pronto para retirada/entrega ──────────────────────────────
