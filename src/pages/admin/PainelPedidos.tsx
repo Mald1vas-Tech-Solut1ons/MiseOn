@@ -23,10 +23,20 @@ const SELECT = '*, itens_pedido(*, itens_pedido_opcoes(*)), pagamentos(metodo, s
 
 /* ── Card de pedido com visual oficial MiseOn ── */
 function CardPedido({
-  p, papel, onEnviarCozinha, onAvancar, onCancelar, onValidarCodigo, onImprimir, onErro,
+  p, papel, avisaIfood, onEnviarCozinha, onAvancar, onCancelar, onValidarCodigo, onImprimir, onErro,
 }: {
   p: Pedido;
   papel: string;
+  /**
+   * A loja quer que o MiseOn avise o iFood do andamento?
+   *
+   * Vem de `ifood_addon_ativo && ifood_sync_status_pedido`. Com isso desligado,
+   * o lojista escolheu tocar o iFood pelo Portal do Parceiro — e a tela tem que
+   * respeitar ANTES de agir: nada de despachar lá, e nada de abrir a conferência
+   * de código para depois dizer que não podia. A Edge Function recusa de
+   * qualquer jeito; aqui é para não oferecer o que não vai acontecer.
+   */
+  avisaIfood: boolean;
   onEnviarCozinha: () => Promise<void>;
   onAvancar: (status: StatusPedido) => Promise<void>;
   onCancelar: () => void;
@@ -79,7 +89,7 @@ function CardPedido({
    *                 depois do iFood confirmar.
    */
   const avancar = async (status: StatusPedido) => {
-    const doIfood = ehPedidoIfood(p);
+    const doIfood = ehPedidoIfood(p) && avisaIfood;
 
     if (doIfood && status === 'EM_ROTA' && entregaEhDaLoja(p)) {
       const r = await despacharNoIfood(p.id);
@@ -100,7 +110,7 @@ function CardPedido({
   // O código de coleta só existe quando quem entrega é o iFood — e só faz
   // sentido conferir quando a sacola já está pronta para sair.
   const conferirColeta =
-    ehPedidoIfood(p) && !entregaEhDaLoja(p) && p.status === 'PRONTO'
+    ehPedidoIfood(p) && avisaIfood && !entregaEhDaLoja(p) && p.status === 'PRONTO'
       ? () => onValidarCodigo('coleta')
       : undefined;
 
@@ -374,6 +384,7 @@ export default function PainelPedidos() {
               papel={papel}
               onEnviarCozinha={() => enviarParaCozinha(p)}
               onAvancar={(status) => avancarStatus(p, status)}
+              avisaIfood={!!loja?.ifood_addon_ativo && !!loja?.ifood_sync_status_pedido}
               onCancelar={() => setCancelando(p)}
               onValidarCodigo={(tipo) => setValidando({ pedido: p, tipo })}
               onImprimir={(v) => {

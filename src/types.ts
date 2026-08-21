@@ -74,6 +74,13 @@ export interface Loja {
   ifood_addon_ativo?: boolean;
   ifood_taxa_pct?: number;
   ifood_taxa_fixa?: number;
+  /** Preferências da integração — ver migration ifood_preferencias_por_loja. */
+  ifood_sync_cardapio?: boolean;
+  ifood_sync_preco_auto?: boolean;
+  ifood_sync_disponibilidade?: boolean;
+  ifood_sync_status_pedido?: boolean;
+  ifood_pausar_sem_estoque?: boolean;
+  ifood_confirmar_automatico?: boolean;
 
   cashback_pct?: number | null; // % do pedido creditado como saldo pro cliente (0 = desligado)
   meta_preparo_min?: number; // meta de tempo de preparo da cozinha (min), default 20

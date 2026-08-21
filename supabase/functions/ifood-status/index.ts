@@ -120,6 +120,12 @@ async function getPlatformToken(clientId: string, clientSecret: string): Promise
 
 /** status do MiseOn -> ação no iFood. null = nada a enviar. */
 function acaoPara(status: string, tipoPedido: string): string | null {
+  // ACEITO -> /confirm cobre a loja que desligou a confirmacao automatica: o
+  // lojista clica "Aceitar pedido" no Painel e o iFood precisa saber, senao o
+  // pedido morre no SLA de 8 minutos deles. Quando a confirmacao automatica
+  // esta ligada, quem ja confirmou foi a webhook — o caminho abaixo detecta e
+  // nao repete.
+  if (status === 'ACEITO') return 'confirm';
   if (status === 'PREPARANDO') return 'startPreparation';
   if (status === 'PRONTO') return tipoPedido === 'DELIVERY' ? null : 'readyToPickup';
   if (status === 'EM_ROTA') return 'dispatch';
@@ -284,6 +290,47 @@ Deno.serve(async (req) => {
       return acao
         ? json({ error: 'Este pedido não veio do iFood.' }, 400)
         : json({ ok: true, motivo: 'pedido não é do iFood' });
+    }
+
+    // ── As preferências da loja valem para TODO caminho ─────────────────────
+    //
+    // O gatilho `trg_ifood_status` já consultava `ifood_addon_ativo` e
+    // `ifood_sync_status_pedido` antes de avisar o iFood. Quando as telas
+    // passaram a chamar esta função direto (despachar, validar), elas pularam
+    // essa checagem — o lojista podia desligar "Avançar o pedido no iFood" e o
+    // MiseOn avançava assim mesmo. Interruptor que não desliga é pior do que
+    // interruptor nenhum: o lojista acha que decidiu.
+    //
+    // A regra mora AQUI, e não em cada tela, porque é aqui que passa todo mundo:
+    // gatilho, Painel, Entregas e app do entregador.
+    const { data: prefs } = await supabase
+      .from('lojas')
+      .select('ifood_addon_ativo, ifood_sync_status_pedido, ifood_confirmar_automatico')
+      .eq('id', pedido.loja_id)
+      .maybeSingle();
+
+    if (!prefs?.ifood_addon_ativo) {
+      return json(
+        {
+          ok: false,
+          erro: 'A integração com o iFood está desligada para esta loja. Ligue em Integração iFood → Conexão e Taxas.',
+          desligado: true,
+        },
+        acao ? 200 : 200,
+      );
+    }
+
+    // Cancelar é exceção deliberada: um pedido cancelado aqui e vivo lá deixa
+    // cliente esperando comida que ninguém vai fazer. Some com a preferência de
+    // "avançar status" — quem desliga aquilo está dizendo que não quer que a
+    // gente empurre o ANDAMENTO, não que quer o cliente no prejuízo.
+    const exigeSyncStatus = !acao || acao === 'despachar' || acao.startsWith('validar');
+    if (exigeSyncStatus && !prefs.ifood_sync_status_pedido) {
+      return json({
+        ok: false,
+        erro: '"Avançar o pedido no iFood" está desligado nas preferências da loja — o iFood não foi avisado.',
+        desligado: true,
+      });
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -544,6 +591,11 @@ Deno.serve(async (req) => {
 
     const proxima = acaoPara(pedido.status, pedido.tipo_pedido);
     if (!proxima) return json({ ok: true, motivo: `status ${pedido.status} não tem callback` });
+
+    // Confirmacao ja feita pela webhook: repetir volta erro do iFood.
+    if (proxima === 'confirm' && prefs.ifood_confirmar_automatico) {
+      return json({ ok: true, motivo: 'pedido já confirmado automaticamente ao chegar' });
+    }
 
     // Despacho já acertado pela tela (ação 'despachar'), ou pedido que o iFood
     // entrega: em ambos, mandar /dispatch daqui seria repetir ou errar.

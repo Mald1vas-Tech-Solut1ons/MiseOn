@@ -2270,6 +2270,19 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'O código aparece no app do entregador, na tela da coleta. Se ele não conseguir mostrar, não libere a sacola: acione o suporte do iFood pelo Portal do Parceiro.': 'The code shows up in the courier app, on the pickup screen. If they cannot show it, do not hand over the bag: contact iFood support through the Partner Portal.',
   'O código fica no acompanhamento do pedido, no app do iFood. Sem ele, não confirme por aqui — o iFood conclui o pedido sozinho depois do prazo de entrega, e forçar a baixa aqui faria os dois sistemas discordarem.': 'The code is on the order tracking screen in the iFood app. Without it, do not confirm here — iFood completes the order on its own after the delivery window, and forcing it here would make the two systems disagree.',
 
+  // ── Preferencias e De-Para da integracao ───────────────────────────────────
+  'O pedido do iFood chega dizendo': 'The iFood order arrives saying',
+  'Tem que ser idêntico': 'It has to be identical',
+  'O que quebra sem ele:': 'What breaks without it:',
+  'Preço iFood (sugerido)': 'iFood price (suggested)',
+  'Sem markup configurado.': 'No markup set.',
+  'Sincronizar cardápio agora': 'Sync menu now',
+  'Enviando para o iFood…': 'Sending to iFood…',
+  'Preencha o De-Para para sincronizar': 'Fill in the code mapping to sync',
+  'Preencher no De-Para': 'Fill in the code mapping',
+  'produtos têm Código iFood. Os que não têm ficam de fora da sincronização — o iFood não tem como saber a qual item dele cada produto daqui corresponde.': 'products have an iFood code. The ones without it are left out of the sync — iFood has no way to know which of its items each product here matches.',
+  'Nenhum pedido neste filtro.': 'No orders in this filter.',
+
   // ── Comanda do iFood ───────────────────────────────────────────────────────
   'Endereço não informado': 'No address provided',
   'localizador': 'locator',

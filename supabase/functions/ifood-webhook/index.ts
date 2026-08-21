@@ -261,15 +261,39 @@ serve(async (req: Request) => {
 
           lojaNomeFallback = criado?.loja ?? lojaNomeFallback;
 
+          // A preferencia da loja decide quem confirma.
+          //
+          // A tela oferece "Confirmar pedido automaticamente" desde a migration
+          // de preferencias, mas NENHUMA linha de codigo lia a coluna: o
+          // webhook confirmava sempre. O lojista desligava o interruptor e o
+          // MiseOn continuava aceitando pedido por ele — inclusive com a loja
+          // sem condicao de produzir. Interruptor decorativo e pior do que
+          // interruptor nenhum, porque o lojista acha que decidiu.
+          //
+          // Desligado, o pedido entra como NOVO e espera o "Aceitar pedido" no
+          // Painel. O SLA de 8 minutos passa a ser responsabilidade de quem
+          // desligou — e a tela diz isso ao lado do interruptor.
+          const { data: prefLoja } = await supabase
+            .from('lojas')
+            .select('ifood_confirmar_automatico')
+            .eq('ifood_merchant_id', order?.merchant?.id ?? '')
+            .maybeSingle();
+          const confirmaSozinho = prefLoja?.ifood_confirmar_automatico ?? true;
+
           if (criado?.status === 'ja_existe') {
-            reqLogger.info(`Pedido iFood ${orderId} ja processado — confirmando mesmo assim.`);
-            await confirmOrder(orderId, token);
+            if (confirmaSozinho) {
+              reqLogger.info(`Pedido iFood ${orderId} ja processado — confirmando mesmo assim.`);
+              await confirmOrder(orderId, token);
+            }
             continue;
           }
 
-          // Confirmar e obrigatorio (SLA de 8 min do iFood), e so acontece
-          // depois que o pedido inteiro ja esta comitado.
-          await confirmOrder(orderId, token);
+          // Confirmar so acontece depois que o pedido inteiro ja esta comitado.
+          if (confirmaSozinho) {
+            await confirmOrder(orderId, token);
+          } else {
+            reqLogger.info(`PLC ${orderId}: confirmacao automatica desligada — aguardando o lojista.`);
+          }
 
           reqLogger.info(`PLC processado: pedido #${criado?.numero} (${orderId}) → loja ${criado?.loja}`, {
             context: {
