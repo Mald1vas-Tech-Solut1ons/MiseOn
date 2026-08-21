@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   Store, Link2, Percent, ClipboardList, Search, Loader2, Save,
-  AlertTriangle, Package, ArrowRight, Ban, RefreshCw, Clock,
+  AlertTriangle, Package, ArrowRight, Ban, RefreshCw, Clock, Info,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmt, type Pedido, type Produto } from '../../types';
@@ -683,14 +683,14 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
    * e o caso que mais importa, o item sem vinculo, e justamente o que fica
    * escondido no meio.
    */
-  const [filtro, setFiltro] = useState<'TODOS' | 'SEM_VINCULO' | 'CANCELADOS' | 'ATIVOS'>('TODOS');
+  const [filtro, setFiltro] = useState<'TODOS' | 'SEM_VINCULO' | 'CANCELADOS' | 'ATIVOS' | 'TESTE'>('TODOS');
 
   useEffect(() => {
     (async () => {
       const cutoff = new Date(Date.now() - 30 * 24 * 3600e3).toISOString();
       const { data } = await supabase
         .from('pedidos')
-        .select('id, numero, status, identificador_cliente, criado_em, valor_total, valor_bruto_ifood, taxa_ifood_retida, ifood_order_id, motivo_cancelamento, ifood_cancelamento_origem, ifood_cancelamento_em, ifood_cancelamento_erro, itens_pedido(id, nome_produto, produto_id, quantidade, preco_unitario)')
+        .select('id, numero, status, identificador_cliente, criado_em, valor_total, valor_bruto_ifood, taxa_ifood_retida, ifood_order_id, motivo_cancelamento, ifood_cancelamento_origem, ifood_cancelamento_em, ifood_cancelamento_erro, ifood_pedido_teste, itens_pedido(id, nome_produto, produto_id, quantidade, preco_unitario)')
         .eq('loja_id', lojaId)
         .eq('origem', 'ifood')
         .gte('criado_em', cutoff)
@@ -701,12 +701,33 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
     })();
   }, [lojaId]);
 
-  // Os totais somam SEMPRE a lista inteira, nunca a filtrada: o resumo
-  // financeiro do canal nao pode mudar porque alguem clicou num filtro.
+  /**
+   * Faturamento do canal.
+   *
+   * Somava TODOS os pedidos do periodo. Medido na loja de demonstracao: dos 19
+   * pedidos somados em R$ 513,00, dezesseis estavam CANCELADOS (R$ 432,00) e os
+   * dezenove eram pedidos de teste do wizard de homologacao. Ou seja, 84% do
+   * numero era pedido cancelado e 100% era dinheiro que nunca existiu.
+   *
+   * Pedido cancelado nao e receita, e pedido de teste tambem nao. Os dois ficam
+   * de fora — e a linha abaixo dos cartoes diz quantos ficaram, porque total
+   * que muda sem explicacao e tao ruim quanto total errado.
+   *
+   * O filtro da lista NAO entra nesta conta: o resumo financeiro do canal nao
+   * pode mudar porque alguem clicou em "Cancelados".
+   */
   const totais = useMemo(() => {
-    const bruto = pedidos.reduce((s, p) => s + Number(p.valor_bruto_ifood ?? p.valor_total ?? 0), 0);
-    const taxas = pedidos.reduce((s, p) => s + Number(p.taxa_ifood_retida ?? 0), 0);
-    return { bruto, taxas, liquido: bruto - taxas };
+    const valem = pedidos.filter((p) => !p.ifood_pedido_teste && p.status !== 'CANCELADO');
+    const bruto = valem.reduce((s, p) => s + Number(p.valor_bruto_ifood ?? p.valor_total ?? 0), 0);
+    const taxas = valem.reduce((s, p) => s + Number(p.taxa_ifood_retida ?? 0), 0);
+    return {
+      bruto,
+      taxas,
+      liquido: bruto - taxas,
+      considerados: valem.length,
+      testes: pedidos.filter((p) => p.ifood_pedido_teste).length,
+      cancelados: pedidos.filter((p) => !p.ifood_pedido_teste && p.status === 'CANCELADO').length,
+    };
   }, [pedidos]);
 
   const semVinculo = (p: Pedido) => (p.itens_pedido ?? []).some((i) => !i.produto_id);
@@ -716,9 +737,11 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
     SEM_VINCULO: pedidos.filter(semVinculo).length,
     CANCELADOS: pedidos.filter((p) => p.status === 'CANCELADO').length,
     ATIVOS: pedidos.filter((p) => !['CANCELADO', 'FINALIZADO'].includes(p.status)).length,
+    TESTE: pedidos.filter((p) => p.ifood_pedido_teste).length,
   }), [pedidos]);
 
   const visiveis = useMemo(() => {
+    if (filtro === 'TESTE') return pedidos.filter((p) => p.ifood_pedido_teste);
     if (filtro === 'SEM_VINCULO') return pedidos.filter(semVinculo);
     if (filtro === 'CANCELADOS') return pedidos.filter((p) => p.status === 'CANCELADO');
     if (filtro === 'ATIVOS') return pedidos.filter((p) => !['CANCELADO', 'FINALIZADO'].includes(p.status));
@@ -763,6 +786,29 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
         </div>
       </div>
 
+      {/* O que ficou de fora da conta.
+          Total que ignora pedido em silêncio é tão ruim quanto total errado: o
+          lojista conta 19 cartões na tela, vê o dinheiro de 3 e conclui que o
+          sistema perdeu vendas. Aqui a diferença tem nome. */}
+      {(totais.testes > 0 || totais.cancelados > 0) && (
+        <p className="flex flex-wrap items-center gap-x-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+          <Info size={12} className="shrink-0" />
+          {tDynamic('Fora da conta:')}
+          {totais.testes > 0 && (
+            <button onClick={() => setFiltro('TESTE')} className="font-bold underline decoration-dotted">
+              {totais.testes} {totais.testes === 1 ? tDynamic('pedido de teste') : tDynamic('pedidos de teste')}
+            </button>
+          )}
+          {totais.testes > 0 && totais.cancelados > 0 && <span>·</span>}
+          {totais.cancelados > 0 && (
+            <button onClick={() => setFiltro('CANCELADOS')} className="font-bold underline decoration-dotted">
+              {totais.cancelados} {totais.cancelados === 1 ? tDynamic('cancelado') : tDynamic('cancelados')}
+            </button>
+          )}
+          <span>· {tDynamic('somando')} {totais.considerados} {totais.considerados === 1 ? tDynamic('pedido válido') : tDynamic('pedidos válidos')}</span>
+        </p>
+      )}
+
       {/* Filtros. "Sem vínculo" vem antes de "Cancelados" de proposito: é o
           único que exige AÇÃO do lojista — os outros são consulta. */}
       <div className="flex flex-wrap gap-2">
@@ -771,6 +817,7 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
           ['SEM_VINCULO', 'Sem produto vinculado'],
           ['ATIVOS', 'Em andamento'],
           ['CANCELADOS', 'Cancelados'],
+          ['TESTE', 'De teste'],
         ] as [typeof filtro, string][]).map(([id, rotulo]) => {
           const ativo = filtro === id;
           const alerta = id === 'SEM_VINCULO' && contagens.SEM_VINCULO > 0;
@@ -816,6 +863,11 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
                     {new Date(p.criado_em).toLocaleDateString('pt-BR')} {new Date(p.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
+                {p.ifood_pedido_teste && (
+                  <span className="rounded-full bg-amber-100 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                    {tDynamic('teste')}
+                  </span>
+                )}
                 <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${classeDoStatus(p.status)}`}>
                   {STATUS_LABEL[p.status] ?? p.status}
                 </span>

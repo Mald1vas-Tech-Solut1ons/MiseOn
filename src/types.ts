@@ -364,6 +364,11 @@ export interface Pedido {
   ifood_cancelamento_origem?: 'LOJA' | 'IFOOD' | null;
   /** Texto preenchido quando o iFood RECUSA o cancelamento (evento CARF). */
   ifood_cancelamento_erro?: string | null;
+  /**
+   * `isTest` do payload do iFood: pedido gerado para homologação ou conferência.
+   * Aparece no painel para o lojista operar, mas nunca entra em faturamento.
+   */
+  ifood_pedido_teste?: boolean;
   /** Carimbo do /dispatch aceito pelo iFood (etapa 4 da homologação). */
   ifood_despachado_em?: string | null;
   /** Carimbo do código de entrega validado — conclui o pedido no iFood (etapa 5). */
