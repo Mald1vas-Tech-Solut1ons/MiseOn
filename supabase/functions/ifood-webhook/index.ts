@@ -418,6 +418,109 @@ serve(async (req: Request) => {
           }
         }
 
+        // ── HSD: negociacao pos-entrega aberta pelo cliente ────────────────
+        //
+        // O cliente reclamou depois de receber e o iFood NAO cancela sozinho:
+        // abre uma negociacao e da a loja um prazo curto (`expiresAt`) para
+        // aceitar, rejeitar ou fazer contraproposta. Sem resposta, o
+        // `timeoutAction` executa — e em cancelamento pos-entrega ele costuma
+        // ser ACCEPT_CANCELLATION.
+        //
+        // Enquanto este codigo caiu no ramo "evento nao tratado", o lojista
+        // PERDIA o valor do pedido sem nunca ter visto a reclamacao. Nao e
+        // falha de tela: e dinheiro saindo por omissao nossa.
+        else if (code === 'HSD' || (event as { fullCode?: string }).fullCode === 'HANDSHAKE_DISPUTE') {
+          const d = (event as { metadata?: Record<string, unknown> })?.metadata ?? {};
+          const disputeId = String(d.id ?? '');
+
+          if (!disputeId) {
+            reqLogger.warn(`HSD sem id de disputa para ${orderId} — evento descartado`);
+            continue;
+          }
+
+          // O pedido pode nao existir aqui (disputa de pedido anterior a
+          // integracao). Guardar assim mesmo e melhor que descartar: o prazo
+          // corre igual, e o lojista precisa ver.
+          const { data: pedidoLocal } = await supabase
+            .from('pedidos')
+            .select('id, loja_id, numero')
+            .eq('ifood_order_id', orderId)
+            .maybeSingle();
+
+          let lojaId = pedidoLocal?.loja_id ?? null;
+          if (!lojaId) {
+            const merchantId = (event as { merchantId?: string })?.merchantId ?? '';
+            const { data: loja } = await supabase
+              .from('lojas').select('id').eq('ifood_merchant_id', merchantId).maybeSingle();
+            lojaId = loja?.id ?? null;
+          }
+
+          if (!lojaId) {
+            reqLogger.warn(`HSD ${disputeId}: loja nao identificada para ${orderId}`);
+            continue;
+          }
+
+          const meta = (d.metadata ?? {}) as Record<string, unknown>;
+
+          // `upsert` por dispute_id: o mesmo evento pode chegar pela webhook E
+          // pelo polling. Gravar duas vezes criaria duas negociacoes na tela
+          // para a mesma reclamacao.
+          const { error } = await supabase
+            .from('ifood_disputas')
+            .upsert({
+              loja_id: lojaId,
+              pedido_id: pedidoLocal?.id ?? null,
+              dispute_id: disputeId,
+              ifood_order_id: orderId,
+              acao: d.action ?? null,
+              tipo: d.handshakeType ?? null,
+              grupo: d.handshakeGroup ?? null,
+              mensagem: d.message ?? null,
+              expira_em: d.expiresAt ?? null,
+              acao_no_prazo: d.timeoutAction ?? null,
+              alternativas: d.alternatives ?? null,
+              metadados: meta,
+            }, { onConflict: 'dispute_id' });
+
+          if (error) {
+            reqLogger.error(`HSD ${disputeId}: falha ao gravar negociacao`, error);
+          } else {
+            reqLogger.info(
+              `HSD: negociacao ${disputeId} aberta no pedido #${pedidoLocal?.numero ?? '?'} ` +
+              `(${d.action}, expira ${d.expiresAt}, sem resposta o iFood faz ${d.timeoutAction})`,
+            );
+          }
+        }
+
+        // ── HSS: desfecho da negociacao ────────────────────────────────────
+        // Chega quando a negociacao fecha — por resposta nossa, por
+        // contraproposta aceita, ou por prazo estourado (status EXPIRED).
+        else if (code === 'HSS' || (event as { fullCode?: string }).fullCode === 'HANDSHAKE_SETTLEMENT') {
+          const d = (event as { metadata?: Record<string, unknown> })?.metadata ?? {};
+          const disputeId = String(d.disputeId ?? '');
+          const status = String(d.status ?? '');
+
+          const mapa: Record<string, string> = {
+            ACCEPTED: 'ACEITA',
+            REJECTED: 'REJEITADA',
+            ALTERNATIVE_REPLIED: 'ALTERNATIVA',
+            EXPIRED: 'EXPIRADA',
+          };
+
+          if (disputeId) {
+            await supabase
+              .from('ifood_disputas')
+              .update({
+                situacao: mapa[status] ?? 'EXPIRADA',
+                resposta_erro: status === 'EXPIRED'
+                  ? 'O prazo estourou e o iFood decidiu sozinho.'
+                  : null,
+              })
+              .eq('dispute_id', disputeId);
+            reqLogger.info(`HSS: negociacao ${disputeId} encerrada como ${status}`);
+          }
+        }
+
         // ── CAR / CARF: o desfecho do cancelamento que a LOJA pediu ────────
         // requestCancellation responde 202 e nao decide nada ali. O iFood
         // manda CAR ("recebi seu pedido de cancelamento") e depois CAN

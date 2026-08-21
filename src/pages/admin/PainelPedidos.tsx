@@ -16,6 +16,7 @@ import { PedidoFooter } from '../../components/pedidos/PedidoFooter';
 import { PedidoActions } from '../../components/pedidos/PedidoActions';
 import { ModalCancelamento } from '../../components/pedidos/ModalCancelamento';
 import { ModalCodigoEntrega } from '../../components/pedidos/ModalCodigoEntrega';
+import { PainelNegociacoes } from '../../components/pedidos/PainelNegociacoes';
 import { despacharNoIfood, ehPedidoIfood, entregaEhDaLoja } from '../../lib/ifood';
 
 import { useI18n } from '../../contexts/I18nContext';
@@ -321,6 +322,14 @@ export default function PainelPedidos() {
             <ErroAmigavel erro={erroAcao} onFechar={() => setErroAcao(null)} />
           </div>
         )}
+
+        {/* Negociacao pos-entrega tem prazo curto e consequencia automatica:
+            sem resposta o iFood decide sozinho, e em cancelamento pos-entrega
+            isso e a loja perdendo o valor. Por isso fica ACIMA dos filtros, na
+            primeira coisa que o balcao ve — nao numa aba. */}
+        <div className="mt-4">
+          <PainelNegociacoes lojaId={lojaId} />
+        </div>
 
         {/* ── Filtro por status ── */}
         <div data-tour="tour-pedidos-filtros" className="mt-4 flex gap-2 overflow-x-auto pb-1">
