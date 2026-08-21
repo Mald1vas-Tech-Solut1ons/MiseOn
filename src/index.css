@@ -59,6 +59,22 @@
   --cor-destaque: rgba(234, 241, 251, 0.06);
 }
 
+/* Leaflet: prender o mapa no proprio contexto de empilhamento.
+   POR QUE ISTO EXISTE: o CSS do Leaflet crava z-index alto nos elementos
+   internos -- `.leaflet-pane` 400, `.leaflet-top`/`.leaflet-bottom` 1000. O
+   `.leaflet-container` e `position: relative` mas sem `z-index`, entao NAO cria
+   contexto de empilhamento: aqueles 400/1000 sobem e disputam com o resto da
+   pagina. O modal do app e `z-[80]`, entao o mapa passava por cima dele -- foi
+   assim que o "Confirmar entrega" ficou coberto pelo mapa de rastreio.
+   `isolation: isolate` forca o contexto independente de z-index, e o `z-index: 0`
+   ancora o conjunto na base. Vale para todo mapa, inclusive os que ainda nao
+   existem -- por isso aqui e nao inline no componente. */
+.leaflet-container {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+
 /* Vitrine white-label: fundo e fonte vêm da identidade escolhida pelo lojista. */
 .loja-marca { font-family: var(--fonte-loja); color: var(--cor-texto); background: var(--cor-fundo); }
 .dark .loja-marca { color: var(--cor-texto); }

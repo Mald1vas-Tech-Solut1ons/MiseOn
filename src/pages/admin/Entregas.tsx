@@ -142,7 +142,7 @@ function LiveTrackingAdmin({ lojaId }: { lojaId: string }) {
           <Loader2 size={24} className="animate-spin text-gray-400" />
         </div>
       ) : (
-        <MapContainer center={center} zoom={13} style={{ height: 280, width: '100%', zIndex: 1 }}>
+        <MapContainer center={center} zoom={13} style={{ height: 280, width: '100%' }}>
           <TileLayer
             attribution='&copy; <a href="https://carto.com/">CARTO</a>'
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
