@@ -3,7 +3,10 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import {
   ChefHat, UtensilsCrossed, Boxes, ShoppingBag, QrCode,
   MessageCircle, ShieldCheck, BarChart3, Bike, Wallet, Sparkles,
-  ArrowRight, Check, X, ChevronDown, Menu as MenuIcon, ScanLine, HeartPulse
+  ArrowRight, Check, X, ChevronDown, Menu as MenuIcon, ScanLine, HeartPulse,
+  Percent,
+  Ban,
+  KeyRound,
 } from 'lucide-react';
 import { LANDING_PAGES_DATA } from '../../data/landingPagesData';
 import SEO from '../../components/SEO';
@@ -27,6 +30,9 @@ const ICON_MAP: Record<string, any> = {
   // identidade visual — o componente nao quebra, so fica sem sinal.
   ScanLine,
   HeartPulse,
+  Percent,
+  Ban,
+  KeyRound,
 };
 
 import { useI18n } from '../../contexts/I18nContext';
