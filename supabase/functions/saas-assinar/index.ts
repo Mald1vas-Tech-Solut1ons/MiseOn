@@ -230,7 +230,10 @@ Deno.serve(async (req) => {
     // está no futuro — antes contava sempre a partir de hoje, então quem
     // renovava adiantado perdia os dias que ainda tinha pagos.
     const { data: lojaAtual } = await supabase
-      .from('lojas').select('trial_termina_em').eq('id', loja_id).maybeSingle();
+      .from('lojas').select('status_assinatura, trial_termina_em').eq('id', loja_id).maybeSingle();
+    // Loja vitalícia não vira 'ativa' ao pagar: seria trocar acesso permanente
+    // por acesso com data de validade.
+    const vitalicia = String(lojaAtual?.status_assinatura ?? '').toLowerCase() === 'vitalicio';
     const vencimentoVigente = lojaAtual?.trial_termina_em
       ? new Date(lojaAtual.trial_termina_em)
       : null;
@@ -240,7 +243,7 @@ Deno.serve(async (req) => {
     novoVencimento.setMonth(novoVencimento.getMonth() + (ehAnual ? 12 : 1));
 
     const { error: updErr } = await supabase.from('lojas').update({
-      status_assinatura: 'ativa',
+      ...(vitalicia ? {} : { status_assinatura: 'ativa' }),
       trial_termina_em: novoVencimento.toISOString(),
     }).eq('id', loja_id);
     if (updErr) {
