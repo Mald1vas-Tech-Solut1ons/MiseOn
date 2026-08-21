@@ -364,7 +364,7 @@ const FAQ = [
   {
     pergunta: 'O MiseOn integra com o iFood?',
     resposta:
-      'Sim. Os pedidos do iFood entram na mesma fila dos pedidos do seu site, com baixa de estoque unificada. Você opera uma cozinha só, sem alternar entre telas.',
+      'Sim, via API do iFood. Os pedidos entram na mesma fila dos do seu site com a comanda inteira — endereço, observação de entrega, troco e bandeira do cartão — e a comissão do iFood descontada pedido a pedido, para você ver o líquido. A baixa de estoque é unificada depois que os produtos são vinculados aos códigos do iFood, o que fazemos no onboarding.',
   },
   {
     pergunta: 'Posso cancelar quando quiser?',
@@ -632,7 +632,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-rose-400">{tDynamic("Integração iFood")}</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic("Fila única na cozinha e estoque")}</p>
+                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic("Margem protegida e comanda completa")}</p>
                       </div>
                     </Link>
                     <Link

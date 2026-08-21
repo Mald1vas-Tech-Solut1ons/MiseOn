@@ -2278,6 +2278,7 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Preço iFood (sugerido)': 'iFood price (suggested)',
   'Sem markup configurado.': 'No markup set.',
   'Sincronizar cardápio agora': 'Sync menu now',
+  'Margem protegida e comanda completa': 'Protected margin and a complete order ticket',
   'Enviando para o iFood…': 'Sending to iFood…',
   'Preencha o De-Para para sincronizar': 'Fill in the code mapping to sync',
   'Preencher no De-Para': 'Fill in the code mapping',
