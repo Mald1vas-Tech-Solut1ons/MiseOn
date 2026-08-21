@@ -16,6 +16,7 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
+import { aplicarPagamentoAssinatura } from '../_shared/assinatura-pix.ts';
 
 const EFI_URL = Deno.env.get('EFI_SANDBOX') === 'true'
   ? 'https://pix-h.api.efipay.com.br'
@@ -94,12 +95,22 @@ async function getToken(creds: EfiCreds): Promise<string> {
   return data.access_token;
 }
 
-// txid da Efí: 26–35 caracteres alfanuméricos. O prefixo 'saas' é o que faz o
-// webhook saber que esta cobrança é de assinatura e não de pedido.
+// txid da Efí: 26–35 caracteres alfanuméricos, e o teto de 35 é apertado.
+// Montagem: 'saas' (4) + 25 hex da loja + 6 aleatórios = 35 exatos.
+//   - 'saas' faz o webhook saber que é assinatura, não pedido;
+//   - o pedaço da loja permite conferir dono do txid sem ir ao banco;
+//   - o aleatório impede que duas cobranças da mesma loja colidam no mesmo
+//     txid (cortar o aleatório no slice deixava o txid fixo por loja, e a
+//     segunda cobrança sobrescrevia a primeira na Efí).
+const HEX_LOJA_NO_TXID = 25;
+
+function prefixoTxid(lojaId: string): string {
+  return `saas${String(lojaId).replace(/-/g, '').slice(0, HEX_LOJA_NO_TXID)}`;
+}
+
 function gerarTxid(lojaId: string): string {
-  const lojaHex = String(lojaId).replace(/-/g, '');
   const aleatorio = crypto.randomUUID().replace(/-/g, '').slice(0, 6);
-  return `saas${lojaHex}${aleatorio}`.slice(0, 35);
+  return `${prefixoTxid(lojaId)}${aleatorio}`;
 }
 
 async function qrCodeDaCobranca(creds: EfiCreds, token: string, locId: unknown): Promise<string | null> {
@@ -112,13 +123,18 @@ async function qrCodeDaCobranca(creds: EfiCreds, token: string, locId: unknown):
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
-  const rl = await checkRateLimit(`saas-pix:${ipDaRequisicao(req)}`, { windowMs: 60000, maxRequests: 10 });
-  if (!rl.allowed) return json({ error: 'Muitas tentativas seguidas. Aguarde um minuto.' }, { status: 429 });
-
   try {
-    const { loja_id, ciclo } = await req.json();
+    const { loja_id, ciclo, acao, txid: txidConsulta } = await req.json();
     if (!loja_id) return json({ error: 'loja_id obrigatório' }, { status: 400 });
     const ehAnual = ciclo === 'anual';
+    // 'status' é chamada em laço pela tela enquanto o QR está aberto, então
+    // tem teto próprio — o teto de criar cobrança é apertado de propósito.
+    const consultando = acao === 'status';
+    const rl = await checkRateLimit(
+      `saas-pix:${consultando ? 'status' : 'criar'}:${ipDaRequisicao(req)}`,
+      { windowMs: 60000, maxRequests: consultando ? 30 : 10 },
+    );
+    if (!rl.allowed) return json({ error: 'Muitas tentativas seguidas. Aguarde um minuto.' }, { status: 429 });
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -147,6 +163,52 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (vinculo?.papel !== 'admin') {
       return json({ error: 'Só o administrador da loja pode assinar.' }, { status: 403 });
+    }
+
+    // ── CONSULTA DE PAGAMENTO ──────────────────────────────────────────────
+    // A tela pergunta aqui de tempos em tempos. Não é conveniência: é o que
+    // faz o lojista que já pagou sair da tela mesmo se o webhook da Efí falhar,
+    // atrasar ou não estiver configurado. A verdade vem da Efí, não do cliente.
+    if (consultando) {
+      const creds = credsPlataforma();
+      const token = await getToken(creds);
+
+      let txid = typeof txidConsulta === 'string' ? txidConsulta : '';
+      if (!txid) {
+        const { data: ultima } = await supabase
+          .from('faturas_assinatura')
+          .select('efi_charge_id')
+          .eq('loja_id', loja_id)
+          .eq('forma_pagamento', 'pix')
+          .eq('status_cobranca', 'pendente')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        txid = ultima?.efi_charge_id ?? '';
+      }
+      if (!txid) return json({ confirmado: false, motivo: 'sem_cobranca' });
+
+      // A cobrança consultada tem que ser desta loja: o txid nasce com o id da
+      // loja embutido, então dá para conferir sem ir ao banco de novo.
+      if (!txid.startsWith(prefixoTxid(loja_id))) {
+        return json({ error: 'Cobrança não pertence a esta loja' }, { status: 403 });
+      }
+
+      const res = await efiFetch(creds, `/v2/cob/${txid}`, { method: 'GET' }, token);
+      const cob = await res.json().catch(() => ({}));
+      const resultado = await aplicarPagamentoAssinatura(supabase, txid, cob, {
+        info: (m, c) => console.log(m, c ?? ''),
+        warn: (m, c) => console.warn(m, c ?? ''),
+        error: (m, e, c) => console.error(m, e ?? '', c ?? ''),
+      });
+
+      return json({
+        txid,
+        status_cobranca_efi: cob?.status ?? null,
+        confirmado: resultado.confirmado,
+        vencimento: resultado.vencimento ?? null,
+        motivo: resultado.motivo ?? null,
+      });
     }
 
     const valorCentavos = ehAnual ? VALOR_PIX_ANUAL : VALOR_PIX_MENSAL;

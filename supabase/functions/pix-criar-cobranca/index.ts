@@ -14,6 +14,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 // mais um import lá embaixo: a função local vencia, devolvia boolean, e o
 // `rl.allowed` dava undefined — 429 em 100% das cobranças. Uma declaração só.
 import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
+import { confirmarPagamentoPedido } from '../_shared/pedido-pix.ts';
 
 const EFI_URL = Deno.env.get('EFI_SANDBOX') === 'true'
   ? 'https://pix-h.api.efipay.com.br'
@@ -86,16 +87,21 @@ async function getToken(creds: EfiCreds): Promise<string> {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   
-  // Rate limiting (max 10 req por minuto por IP)
-  const clientIp = ipDaRequisicao(req);
-  const rl = await checkRateLimit(`pix:${clientIp}`, { windowMs: 60000, maxRequests: 10 });
-  if (!rl.allowed) {
-    return json({ error: 'Too Many Requests' }, { status: 429 });
-  }
-
   try {
-    const { pedido_id } = await req.json();
+    const { pedido_id, acao } = await req.json();
     if (!pedido_id) return json({ error: 'pedido_id obrigatório' }, { status: 400 });
+
+    // 'status' é chamada em laço pela tela enquanto o QR está aberto, então
+    // tem teto próprio; criar cobrança segue com o teto apertado de sempre.
+    const consultando = acao === 'status';
+    const clientIp = ipDaRequisicao(req);
+    const rl = await checkRateLimit(
+      `pix:${consultando ? 'status' : 'criar'}:${clientIp}`,
+      { windowMs: 60000, maxRequests: consultando ? 30 : 10 },
+    );
+    if (!rl.allowed) {
+      return json({ error: 'Too Many Requests' }, { status: 429 });
+    }
 
     // service role: roda no servidor, ignora RLS para leitura segura do pedido
     const supabase = createClient(
@@ -143,6 +149,41 @@ Deno.serve(async (req) => {
           }
         }
       }
+    }
+
+    // ── CONSULTA DE PAGAMENTO (reconciliação) ──────────────────────────────
+    // A tela do cliente pergunta aqui enquanto o QR está aberto. Não é luxo: é
+    // o que faz o pedido pago ser reconhecido mesmo quando o webhook da Efí
+    // falha, atrasa ou está mal configurado — situação real entre 17/08 e
+    // 21/08/2026, quando o webhook recusou 100% dos callbacks e não havia
+    // segundo caminho. A verdade vem da Efí, nunca do cliente.
+    if (consultando) {
+      const { data: pgtoPix } = await supabase
+        .from('pagamentos')
+        .select('status, gateway_txid')
+        .eq('pedido_id', pedido_id)
+        .eq('metodo', 'PIX')
+        .maybeSingle();
+
+      if (pgtoPix?.status === 'PAGO') return json({ pago: true, motivo: 'ja_processado' });
+      if (!pgtoPix?.gateway_txid) return json({ pago: false, motivo: 'sem_cobranca' });
+
+      const credsConsulta: EfiCreds = credsPlataforma();
+      const tokenConsulta = await getToken(credsConsulta);
+      const resCob = await efiFetch(credsConsulta, `/v2/cob/${pgtoPix.gateway_txid}`, { method: 'GET' }, tokenConsulta);
+      const cob = await resCob.json().catch(() => ({}));
+
+      const resultado = await confirmarPagamentoPedido(supabase, pgtoPix.gateway_txid, cob, {
+        info: (m, c) => console.log(m, c ?? ''),
+        warn: (m, c) => console.warn(m, c ?? ''),
+        error: (m, e, c) => console.error(m, e ?? '', c ?? ''),
+      });
+
+      return json({
+        pago: resultado.pago,
+        status_cobranca_efi: cob?.status ?? null,
+        motivo: resultado.motivo ?? null,
+      });
     }
 
     // SEGURANÇA: o total é recalculado no servidor a partir dos preços reais

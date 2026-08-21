@@ -329,9 +329,30 @@ export default function PDV() {
     }
   };
 
-  // Pix pago via webhook → confirma sozinho na tela
+  // Pix pago → confirma sozinho na tela.
+  //
+  // Dois gatilhos de propósito. O realtime é o caminho rápido, mas depende de
+  // ALGUÉM ter gravado PAGO — ou seja, do webhook da Efí. Quando o webhook
+  // falha (aconteceu: recusou 100% dos callbacks entre 17/08 e 21/08/2026), a
+  // venda no balcão estourava o timeout de 5 minutos com o cliente já tendo
+  // pago. A reconciliação pergunta à Efí direto e não depende de aviso.
   useEffect(() => {
     if (etapa !== 'PIX_AGUARDANDO' || !pixInfo) return;
+    let concluido = false;
+
+    const concluirPixPago = async () => {
+      if (concluido) return;
+      concluido = true;
+      await supabase.from('pedidos').update({ status: 'ACEITO' }).eq('id', pixInfo.pedidoId);
+      if (venda && !venda.temCozinha) {
+        await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: pixInfo.pedidoId, p_novo_status: 'PRONTO' });
+        await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: pixInfo.pedidoId, p_novo_status: 'FINALIZADO' });
+      }
+      setEtapa('SUCESSO');
+      toast(`Venda concluída!`, 'sucesso');
+      tocarSom();
+      carregarCaixa();
+    };
 
     // Timeout de 5 minutos (300.000 ms) para liberar o PDV se não for pago
     const timeoutLimpeza = setTimeout(() => {
@@ -339,25 +360,24 @@ export default function PDV() {
       setErro('Tempo limite de 5 minutos excedido para o pagamento do Pix.');
     }, 5 * 60 * 1000);
 
+    const reconciliacao = setInterval(async () => {
+      if (concluido) return;
+      const { data } = await supabase.functions.invoke('pix-criar-cobranca', {
+        body: { pedido_id: pixInfo.pedidoId, acao: 'status' },
+      });
+      if (data?.pago) await concluirPixPago();
+    }, 10000);
+
     const canal = supabase
       .channel(`pdv-pix-${pixInfo.pedidoId}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pagamentos', filter: `pedido_id=eq.${pixInfo.pedidoId}` }, async (payload) => {
-        if ((payload.new as any)?.status === 'PAGO') {
-          await supabase.from('pedidos').update({ status: 'ACEITO' }).eq('id', pixInfo.pedidoId);
-          if (venda && !venda.temCozinha) {
-            await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: pixInfo.pedidoId, p_novo_status: 'PRONTO' });
-            await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: pixInfo.pedidoId, p_novo_status: 'FINALIZADO' });
-          }
-          setEtapa('SUCESSO');
-          toast(`Venda concluída!`, 'sucesso');
-          tocarSom();
-          carregarCaixa();
-        }
+        if ((payload.new as any)?.status === 'PAGO') await concluirPixPago();
       })
       .subscribe();
-    return () => { 
+    return () => {
       clearTimeout(timeoutLimpeza);
-      supabase.removeChannel(canal); 
+      clearInterval(reconciliacao);
+      supabase.removeChannel(canal);
     };
   }, [etapa, pixInfo, carregarCaixa, toast, venda]);
 

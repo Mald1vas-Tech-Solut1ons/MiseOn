@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { CreditCard, CheckCircle, AlertCircle, Calendar, Lock, ShieldCheck, QrCode, Copy, Sparkles, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -35,6 +35,9 @@ export default function Assinatura() {
 
   // Estados para o Pix
   const [qrCode, setQrCode] = useState<string | null>(null);
+  // txid da cobrança aberta na tela — é por ele que perguntamos à Efí se o
+  // pagamento caiu.
+  const txidPix = useRef<string | null>(null);
   const [copiaCola, setCopiaCola] = useState('');
   const [copiado, setCopiado] = useState(false);
 
@@ -130,16 +133,21 @@ export default function Assinatura() {
   };
 
   const valorPixCalculado = ciclo === 'anual' ? SAAS_PRICING.anual.pix : SAAS_PRICING.mensal.pix;
+  const emReais = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const economiaAnualPix = SAAS_PRICING.mensal.bruto * 12 - SAAS_PRICING.anual.pix;
 
   const gerarPix = async () => {
     setErro(''); setSucesso(''); setProcessando(true);
     try {
+      // O valor NÃO vai daqui: quem define o preço é a Edge Function. A tela
+      // só diz qual plano o lojista escolheu.
       const { data, error } = await supabase.functions.invoke('saas-pix', {
-        body: { loja_id: lojaId, ciclo, valor: valorPixCalculado }
+        body: { loja_id: lojaId, ciclo }
       });
       if (error || data?.error) throw new Error(data?.error || error?.message || 'Falha ao gerar Pix.');
       
       if (data.qr_imagem && data.copia_e_cola) {
+         txidPix.current = data.txid ?? null;
          setQrCode(data.qr_imagem);
          setCopiaCola(data.copia_e_cola);
       }
@@ -148,6 +156,29 @@ export default function Assinatura() {
     }
     setProcessando(false);
   };
+
+  // Pix não confirma na resposta da cobrança: quem confirma é a Efí, depois.
+  // Enquanto o QR está na tela, perguntamos à própria Edge Function, que
+  // consulta a Efí e ativa a assinatura se o dinheiro caiu. É por isso que a
+  // tela funciona mesmo se o webhook da Efí atrasar ou falhar — sem isto o
+  // "Aguardando confirmação do banco" ficava girando para sempre.
+  useEffect(() => {
+    if (!qrCode) return;
+    let vivo = true;
+    const timer = setInterval(async () => {
+      const { data } = await supabase.functions.invoke('saas-pix', {
+        body: { loja_id: lojaId, acao: 'status', txid: txidPix.current },
+      });
+      if (!vivo || !data?.confirmado) return;
+      clearInterval(timer);
+      txidPix.current = null;
+      setQrCode(null);
+      setCopiaCola('');
+      setSucesso('Pix confirmado! Assinatura ativada.');
+      carregarDados();
+    }, 10000);
+    return () => { vivo = false; clearInterval(timer); };
+  }, [qrCode, lojaId, carregarDados]);
 
   const copiarPix = () => {
     navigator.clipboard.writeText(copiaCola);
@@ -397,7 +428,9 @@ export default function Assinatura() {
                      </span>
                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">{tDynamic('Pagamento instantâneo via Pix com aprovação imediata.')}</p>
                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                       {ciclo === 'anual' ? 'Plano Anual com 5% OFF: R$ 1.708,86 (Economia de R$ 329,94/ano)' : 'Plano Mensal com 5% OFF: R$ 161,40/mês'}
+                       {ciclo === 'anual'
+                         ? `Plano Anual com 5% OFF: ${emReais(SAAS_PRICING.anual.pix)} (Economia de ${emReais(economiaAnualPix)}/ano)`
+                         : `Plano Mensal com 5% OFF: ${emReais(SAAS_PRICING.mensal.pix)}/mês`}
                      </p>
                   </div>
 
@@ -407,7 +440,7 @@ export default function Assinatura() {
                        {processando ? (
                          <><div className="h-5 w-5 animate-spin rounded-full border-2 border-teal-800 border-t-white"></div> {tDynamic('Gerando código seguro...')}</>
                        ) : (
-                         <><QrCode size={20} /> Gerar Pix com 5% OFF ({ciclo === 'anual' ? 'R$ 1.708,86' : 'R$ 161,40'})</>
+                         <><QrCode size={20} /> Gerar Pix com 5% OFF ({emReais(valorPixCalculado)})</>
                        )}
                      </button>
                   ) : (
@@ -424,7 +457,7 @@ export default function Assinatura() {
                            </button>
                         </div>
                         <p className="text-[10px] text-teal-600 dark:text-teal-400 font-semibold mt-4 flex items-center gap-1">
-                           <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div> {tDynamic('Aguardando confirmação do banco...')}
+                           <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span> {tDynamic('Aguardando confirmação do banco...')}
                         </p>
                      </div>
                   )}

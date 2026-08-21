@@ -58,16 +58,28 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
   // Polling curto (robusto: independe de realtime/RLS) + realtime de `pedidos`
   // (essa tabela ESTÁ publicada; o webhook a move de NOVO->ACEITO ao confirmar,
   // dando confirmação instantânea quando o canal entrega).
+  // Reconciliação: pergunta ao servidor, que pergunta à Efí. O polling acima
+  // só enxerga o que ALGUÉM já gravou — se o webhook da Efí não chegar, ele
+  // gira para sempre com o pedido pago. Aqui o pagamento é reconhecido mesmo
+  // sem webhook nenhum. Intervalo maior porque cada chamada vai até a Efí.
+  const reconciliar = async () => {
+    const { data } = await supabase.functions.invoke('pix-criar-cobranca', {
+      body: { pedido_id: pedidoId, acao: 'status' },
+    });
+    if (data?.pago) await checar();
+  };
+
   useEffect(() => {
     if (estado !== 'aguardando') return;
     let ativo = true;
     const intervalo = setInterval(() => { if (ativo) void checar(); }, 3500);
+    const intervaloEfi = setInterval(() => { if (ativo) void reconciliar(); }, 10000);
     const canal = supabase
       .channel(`pag-status-${pedidoId}-${Date.now()}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos', filter: `id=eq.${pedidoId}` },
         (payload: any) => { if (payload.new?.status && payload.new.status !== 'NOVO') void checar(); })
       .subscribe();
-    return () => { ativo = false; clearInterval(intervalo); supabase.removeChannel(canal); };
+    return () => { ativo = false; clearInterval(intervalo); clearInterval(intervaloEfi); supabase.removeChannel(canal); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pedidoId, estado]);
 
