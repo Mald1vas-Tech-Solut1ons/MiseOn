@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Loader2, CheckCircle2, Store, Percent, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, Store, Percent, AlertCircle, Save } from 'lucide-react';
 import { useToast } from '../../components/ui/Toast';
 
 import { useI18n } from '../../contexts/I18nContext';
@@ -9,9 +9,17 @@ interface IfoodOnboardingProps {
   form: any;
   setValor: (campo: any, valor: any) => void;
   onSuccess: () => void;
+  /**
+   * Salva as taxas. Opcional: em Configurações da Loja o componente vive dentro
+   * de um formulário que ja tem botao global, e ali a dica de texto e o certo.
+   * Na tela de Integração iFood nao havia botao perto do campo — passar o
+   * handler faz o botao nascer colado nele.
+   */
+  onSalvarTaxas?: () => void;
+  salvandoTaxas?: boolean;
 }
 
-export function IfoodOnboarding({ lojaId, form, setValor, onSuccess }: IfoodOnboardingProps) {
+export function IfoodOnboarding({ lojaId, form, setValor, onSuccess, onSalvarTaxas, salvandoTaxas }: IfoodOnboardingProps) {
   const { tDynamic } = useI18n();
   const [userCode, setUserCode] = useState('');
   const [processando, setProcessando] = useState(false);
@@ -133,9 +141,31 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess }: IfoodOnbo
               </label>
             </div>
             
-            <p className="mt-4 text-center text-[10px] text-gray-400">
-              {tDynamic('Lembre-se de clicar em')} <b>"Salvar Alterações"</b> no final da tela para aplicar estas taxas.
-            </p>
+            {/* O botão de salvar mora AQUI, colado no campo que ele salva.
+                Antes esta linha mandava clicar em "Salvar Alterações" — botão
+                que não existe na tela de Integração iFood, onde ele se chama
+                "Salvar Taxas" e fica no fim do cartão SEGUINTE, depois de sete
+                interruptores que salvam sozinhos ao toque. Três modelos de
+                salvamento e uma instrução apontando para um botão inexistente:
+                o lojista preenche a taxa, não acha o botão e vai embora achando
+                que salvou.
+
+                Em Configurações da Loja o componente continua sem handler e a
+                dica antiga vale, porque lá o botão global existe de verdade. */}
+            {onSalvarTaxas ? (
+              <button
+                onClick={onSalvarTaxas}
+                disabled={salvandoTaxas}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 p-3 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {salvandoTaxas ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
+                {salvandoTaxas ? tDynamic('Salvando…') : tDynamic('Salvar taxas')}
+              </button>
+            ) : (
+              <p className="mt-4 text-center text-[10px] text-gray-400">
+                {tDynamic('Lembre-se de clicar em')} <b>"Salvar alterações"</b> no final da tela para aplicar estas taxas.
+              </p>
+            )}
           </div>
         </div>
       ) : (

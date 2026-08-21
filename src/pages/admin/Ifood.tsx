@@ -237,6 +237,8 @@ export default function Ifood() {
             form={loja}
             setValor={setValor}
             onSuccess={carregarLoja}
+            onSalvarTaxas={salvarTaxas}
+            salvandoTaxas={salvandoTaxas}
           />
           {conectado && (
             <div className="mx-auto max-w-xl space-y-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
@@ -334,14 +336,13 @@ export default function Ifood() {
                 onToggle={() => alternarPreferencia('ifood_pausar_sem_estoque', !loja.ifood_pausar_sem_estoque)}
               />
 
-              <button
-                onClick={salvarTaxas}
-                disabled={salvandoTaxas}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 p-3.5 text-base font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 disabled:opacity-50"
-              >
-                {salvandoTaxas ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
-                Salvar Taxas
-              </button>
+              {/* Nao existe botao de salvar aqui de proposito: cada interruptor
+                  grava no toque. O que existia era um "Salvar Taxas" — que
+                  salvava os campos de OUTRO cartao — plantado no fim deste,
+                  sugerindo que os interruptores dependiam dele. */}
+              <p className="pt-1 text-center text-[10px] text-gray-400">
+                {tDynamic('Cada interruptor é salvo no momento em que você toca.')}
+              </p>
             </div>
           )}
         </div>
