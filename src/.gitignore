@@ -1,0 +1,3 @@
+# Pasta de descarte: o agente nao tem permissao para apagar arquivos nesta
+# maquina, entao backups temporarios param aqui. Nunca entra no commit.
+_to_delete/

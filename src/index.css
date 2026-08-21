@@ -34,7 +34,30 @@
   --fonte-loja: 'Manrope', 'Inter', sans-serif;
 }
 
-.dark { color-scheme: dark; }
+.dark {
+  color-scheme: dark;
+  /* Tokens de superficie do modo escuro.
+     POR QUE ISTO EXISTE: antes o `.dark` so trocava o `color-scheme` e deixava
+     TODOS os tokens no valor claro. O corpo da pagina escurecia (via `.dark
+     body`), mas `--cor-card` e `--cor-surface` continuavam `#ffffff`. Qualquer
+     componente com `bg-[var(--cor-card)]` + `dark:text-[var(--cor-texto-claro)]`
+     virava #EAF1FB sobre #ffffff -- contraste 1.1:1, texto invisivel.
+     Foi assim que o modal de cancelamento do iFood perdeu o titulo e o
+     "Por que este pedido esta sendo cancelado?".
+     Os tokens da vitrine white-label NAO sao afetados: `Cardapio.tsx` os
+     escreve inline em `document.documentElement`, e style inline vence regra
+     de classe. */
+  --cor-texto: #EAF1FB;
+  --cor-texto-suave: #A9B7CE;
+  --cor-texto-fraco: #7C8BA5;
+  --cor-fundo: #060B18;
+  --cor-surface: #0F1A30;
+  --cor-surface-muted: #0B1426;
+  --cor-card: #101C33;
+  --cor-borda: #22304C;
+  --cor-borda-forte: #33456A;
+  --cor-destaque: rgba(234, 241, 251, 0.06);
+}
 
 /* Vitrine white-label: fundo e fonte vêm da identidade escolhida pelo lojista. */
 .loja-marca { font-family: var(--fonte-loja); color: var(--cor-texto); background: var(--cor-fundo); }
