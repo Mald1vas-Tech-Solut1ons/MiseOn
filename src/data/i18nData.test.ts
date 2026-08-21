@@ -90,6 +90,60 @@ describe('cobertura de tradução', () => {
   });
 });
 
+describe('copy das landing pages', () => {
+  /**
+   * O ponto cego que deixou a pagina do iFood sair em portugues no /en.
+   *
+   * A catraca acima varre `tDynamic('literal')`. As landing pages nao escrevem
+   * assim: elas guardam a copy em landingPagesData.ts e a tela chama
+   * `tDynamic(data.h1Title)` — com VARIAVEL. Nenhuma expressao regular de
+   * varredura enxerga isso, entao 488 frases de marketing passavam batidas.
+   *
+   * Sem entrada no dicionario, o tDynamic cai na substituicao palavra a palavra
+   * e devolve frase pela metade em ingles. Foi assim que a pagina de integracao
+   * inteira — H1, cards, regras de negocio e FAQ — ficou macarronica sem que
+   * nenhum teste reclamasse.
+   *
+   * A divida existente esta medida no TETO. A pagina do iFood foi traduzida por
+   * inteiro (67 frases); o resto fica registrado aqui em vez de invisivel. Regra:
+   * nao pode aumentar. Ao traduzir um bloco, baixe o teto junto.
+   */
+  const TETO_SEM_TRADUCAO = 421;
+
+  /** Campos de landingPagesData.ts que chegam na tela como texto. */
+  const CAMPOS = [
+    'badge', 'h1Title', 'h1Highlight', 'subheadline', 'painPointsTitle',
+    'painPointsSubtitle', 'featuresTitle', 'featuresSubtitle', 'semMiseOn',
+    'comMiseOn', 'title', 'description', 'tag', 'label', 'value',
+    'pergunta', 'resposta', 'titulo', 'legenda',
+  ];
+
+  it('a copy das landings nao cresce sem traducao', () => {
+    const dados = readFileSync(join(RAIZ, 'data', 'landingPagesData.ts'), 'utf-8');
+    const traduzidas = chavesTraduzidas();
+
+    const textos = new Set<string>();
+    for (const campo of CAMPOS) {
+      const rx = new RegExp(`${campo}:\\s*'((?:[^'\\\\]|\\\\.)+)'`, 'g');
+      for (const m of dados.matchAll(rx)) {
+        const t = m[1].replace(/\\'/g, "'");
+        if (t.length > 2 && /[A-Za-zÀ-ÿ]/.test(t)) textos.add(t);
+      }
+    }
+
+    const faltando = [...textos].filter((t) => !traduzidas.has(t));
+
+    expect(
+      faltando.length,
+      `\n${faltando.length} frases de landing page sem traducao (teto: ${TETO_SEM_TRADUCAO}).\n` +
+        'Elas chegam na tela por tDynamic(data.campo) — variavel, nao literal —\n' +
+        'entao a catraca de cobertura nao as enxerga. Sem entrada no dicionario o\n' +
+        'visitante em /en le portugues traduzido palavra a palavra.\n' +
+        'Cadastre em MAPA_TRADUCAO_TEXTO (src/data/i18nData.ts).\n',
+    ).toBeLessThanOrEqual(TETO_SEM_TRADUCAO);
+  });
+});
+
 describe('texto escrito direto no JSX', () => {
   /**
    * Limite de não-regressão.

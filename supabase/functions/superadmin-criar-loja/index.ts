@@ -4,11 +4,21 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
+// Chamada pelo painel do superadmin, ou seja: pelo navegador. Sem preflight
+// respondido aqui, o POST nem chega a sair — o navegador barra antes.
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-chat-session',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
   try {
     const { slug, nome, whatsapp, email_dono } = await req.json();
     if (!slug || !nome || !whatsapp || !email_dono) {
-      return Response.json({ error: 'slug, nome, whatsapp e email_dono são obrigatórios' }, { status: 400 });
+      return Response.json({ error: 'slug, nome, whatsapp e email_dono são obrigatórios' }, { status: 400, headers: corsHeaders });
     }
 
     const supabaseAuth = createClient(
@@ -17,7 +27,7 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } },
     );
     const { data: { user: caller } } = await supabaseAuth.auth.getUser();
-    if (!caller) return Response.json({ error: 'Não autenticado' }, { status: 401 });
+    if (!caller) return Response.json({ error: 'Não autenticado' }, { status: 401, headers: corsHeaders });
 
     const admin = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -25,11 +35,11 @@ Deno.serve(async (req) => {
     );
 
     const { data: souSuperadmin } = await admin.from('plataforma_admins').select('user_id').eq('user_id', caller.id).maybeSingle();
-    if (!souSuperadmin) return Response.json({ error: 'Só o superadmin pode criar lojas' }, { status: 403 });
+    if (!souSuperadmin) return Response.json({ error: 'Só o superadmin pode criar lojas' }, { status: 403, headers: corsHeaders });
 
     const slugLimpo = String(slug).toLowerCase().trim().replace(/[^a-z0-9-]/g, '-');
     const { data: existente } = await admin.from('lojas').select('id').eq('slug', slugLimpo).maybeSingle();
-    if (existente) return Response.json({ error: `Slug "${slugLimpo}" já está em uso` }, { status: 409 });
+    if (existente) return Response.json({ error: `Slug "${slugLimpo}" já está em uso` }, { status: 409, headers: corsHeaders });
 
     const { data: loja, error: eLoja } = await admin.from('lojas')
       .insert({ slug: slugLimpo, nome, whatsapp })
@@ -52,9 +62,9 @@ Deno.serve(async (req) => {
       loja_id: loja.id, ator: caller.id, acao: 'onboarding_loja', detalhes: { slug: loja.slug, email_dono },
     });
 
-    return Response.json({ ok: true, loja_id: loja.id, slug: loja.slug });
+    return Response.json({ ok: true, loja_id: loja.id, slug: loja.slug }, { headers: corsHeaders });
   } catch (e) {
     console.error(e);
-    return Response.json({ error: String(e) }, { status: 500 });
+    return Response.json({ error: String(e) }, { status: 500, headers: corsHeaders });
   }
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import {
   ChefHat, UtensilsCrossed, Boxes, ShoppingBag, QrCode,
@@ -9,7 +9,7 @@ import {
   KeyRound,
   Maximize2,
 } from 'lucide-react';
-import { LANDING_PAGES_DATA } from '../../data/landingPagesData';
+import { LANDING_PAGES_DATA, type LandingPageData } from '../../data/landingPagesData';
 import SEO from '../../components/SEO';
 import FooterSEO from '../../components/FooterSEO';
 import MiseOnLogo from '../../components/MiseOnLogo';
@@ -50,6 +50,39 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
 
   const [menuAberto, setMenuAberto] = useState(false);
   const [faqAberto, setFaqAberto] = useState<number | null>(null);
+
+  /**
+   * Captura aberta em tela cheia. `null` = nenhuma.
+   *
+   * Fica AQUI, acima do `if (!data)` logo abaixo, e nao junto da secao que a
+   * usa: hook depois de return antecipado muda a ordem de chamada entre um
+   * render e outro. Nesta tela quebraria de verdade — basta navegar de
+   * /integracao-ifood para um slug que nao existe.
+   */
+  const [ampliada, setAmpliada] = useState<
+    NonNullable<LandingPageData['screenshots']>[number] | null
+  >(null);
+
+  // Esc fecha, e a pagina para de rolar por tras do overlay — sem isso o
+  // visitante rola a landing inteira achando que esta rolando a imagem.
+  useEffect(() => {
+    if (!ampliada) return;
+    const aoTeclar = (e: KeyboardEvent) => { if (e.key === 'Escape') setAmpliada(null); };
+    // `overflow: hidden` so no <body> nao segura: dependendo do CSS quem rola e
+    // o <html>. Trava os dois.
+    const anterior = {
+      body: document.body.style.overflow,
+      html: document.documentElement.style.overflow,
+    };
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    window.addEventListener('keydown', aoTeclar);
+    return () => {
+      window.removeEventListener('keydown', aoTeclar);
+      document.body.style.overflow = anterior.body;
+      document.documentElement.style.overflow = anterior.html;
+    };
+  }, [ampliada]);
 
   if (!data) {
     return <Navigate to="/" replace />;
@@ -239,7 +272,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                     <X size={20} />
                     <span>{tDynamic("Sem o MiseOn")}</span>
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed">{item.semMiseOn}</p>
+                  <p className="mt-3 text-sm leading-relaxed">{tDynamic(item.semMiseOn)}</p>
                 </div>
 
                 {/* Com MiseOn */}
@@ -248,7 +281,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                     <Check size={20} />
                     <span>{tDynamic("Com o MiseOn")}</span>
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed">{item.comMiseOn}</p>
+                  <p className="mt-3 text-sm leading-relaxed">{tDynamic(item.comMiseOn)}</p>
                 </div>
 
               </div>
@@ -263,10 +296,10 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
           <div className="mx-auto max-w-2xl text-center">
             <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic("Módulos Especialistas")}</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold text-gray-900 sm:text-4xl dark:text-white">
-              {data.featuresTitle}
+              {tDynamic(data.featuresTitle)}
             </h2>
             <p className="mt-3 text-base text-gray-600 dark:text-slate-300">
-              {data.featuresSubtitle}
+              {tDynamic(data.featuresSubtitle)}
             </p>
           </div>
 
@@ -279,13 +312,13 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                     <IconComp size={24} />
                   </div>
                   <span className="mt-4 block text-[10px] font-black uppercase tracking-wider text-slate-400">
-                    {feat.tag}
+                    {tDynamic(feat.tag)}
                   </span>
                   <h3 className="mt-1 font-['Sora'] text-lg font-bold text-gray-900 dark:text-white">
-                    {feat.title}
+                    {tDynamic(feat.title)}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-slate-300">
-                    {feat.description}
+                    {tDynamic(feat.description)}
                   </p>
                 </div>
               );
@@ -327,18 +360,17 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                     </p>
                   </div>
                   <div className={`lg:col-span-3 ${idx % 2 === 1 ? 'lg:order-1' : ''}`}>
-                    {/* Abre a captura em tamanho real.
-                        No celular a imagem cai para ~340px de largura e a
-                        interface dentro dela fica ilegivel — prova que nao da
-                        para ler nao prova nada, e a maior parte do trafego e
-                        mobile. Link simples em vez de lightbox: funciona sem
-                        JavaScript, sem dependencia, e o visitante volta com o
-                        botao de voltar. */}
-                    <a
-                      href={shot.src}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group block overflow-hidden rounded-3xl border border-gray-200 bg-black/60 shadow-2xl transition hover:border-[var(--cor-primaria)] dark:border-white/15"
+                    {/* Ampliar sem sair da pagina.
+                        A primeira versao era um <a target="_blank"> para o PNG:
+                        joga o visitante para fora da landing, no meio da leitura,
+                        e no celular entrega uma imagem crua para ele pinçar com
+                        os dedos. Aqui a captura abre sobre a pagina, ocupando a
+                        tela inteira, e fecha no Esc ou no clique fora. */}
+                    <button
+                      type="button"
+                      onClick={() => setAmpliada(shot)}
+                      aria-label={`${tDynamic('Ampliar')}: ${shot.alt}`}
+                      className="group block w-full overflow-hidden rounded-3xl border border-gray-200 bg-black/60 text-left shadow-2xl transition hover:border-[var(--cor-primaria)] dark:border-white/15"
                     >
                       <img
                         src={shot.src}
@@ -349,15 +381,56 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                         className="h-auto w-full object-cover"
                       />
                       <span className="flex items-center justify-center gap-1.5 border-t border-white/10 bg-slate-900/80 p-3 text-[11px] font-bold text-slate-300 transition group-hover:text-white">
-                        <Maximize2 size={12} /> {tDynamic('Ver em tamanho real')}
+                        <Maximize2 size={12} /> {tDynamic('Ampliar a tela')}
                       </span>
-                    </a>
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
+      )}
+
+      {ampliada && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={ampliada.alt}
+          onClick={() => setAmpliada(null)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+        >
+          <button
+            type="button"
+            onClick={() => setAmpliada(null)}
+            aria-label={tDynamic('Fechar')}
+            className="absolute right-4 top-4 rounded-full bg-white/10 p-2.5 text-white transition hover:bg-white/20"
+          >
+            <X size={20} />
+          </button>
+          {/* A caixa rola; a imagem NAO encolhe para caber.
+              Numa tela estreita, limitar a imagem a largura do viewport faz o
+              "ampliar" nao ampliar nada — foi exatamente o defeito da primeira
+              versao. Aqui a captura entra no tamanho natural e o visitante
+              arrasta para ler a interface; a partir de `md` ela ja cabe e passa
+              a se ajustar sozinha. */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[92vh] max-w-full overflow-auto overscroll-contain rounded-xl md:overflow-visible"
+          >
+            <img
+              src={ampliada.src}
+              alt={ampliada.alt}
+              width={ampliada.largura}
+              height={ampliada.altura}
+              className="h-auto w-auto max-w-none cursor-default rounded-xl shadow-2xl md:max-h-[92vh] md:max-w-full md:object-contain"
+            />
+          </div>
+          <p className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-[11px] font-semibold text-white/80">
+            <span className="md:hidden">{tDynamic('Arraste para ver a tela inteira · toque fora para fechar')}</span>
+            <span className="hidden md:inline">{tDynamic('Toque fora ou aperte Esc para fechar')}</span>
+          </p>
+        </div>
       )}
 
       {/* ══════════ 5. REGRAS DE NEGÓCIO DO SISTEMA ══════════ */}
@@ -368,17 +441,17 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
               <ShieldCheck size={14} /> {tDynamic('Regras de Negócio e Engenharia')}
             </span>
             <h2 className="mt-4 font-['Sora'] text-2xl font-extrabold sm:text-3xl">
-              {data.businessRules.title}
+              {tDynamic(data.businessRules.title)}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-slate-300">
-              {data.businessRules.description}
+              {tDynamic(data.businessRules.description)}
             </p>
 
             <ul className="mt-8 space-y-4">
               {data.businessRules.items.map((rule, idx) => (
                 <li key={idx} className="flex items-start gap-3 text-sm text-slate-200">
                   <Check size={18} className="mt-0.5 shrink-0 text-emerald-400" />
-                  <span>{rule}</span>
+                  <span>{tDynamic(rule)}</span>
                 </li>
               ))}
             </ul>
@@ -417,12 +490,12 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                     onClick={() => setFaqAberto(aberto ? null : idx)}
                     className="flex w-full items-center justify-between p-5 text-left font-['Sora'] font-bold text-gray-900 dark:text-white"
                   >
-                    <span>{faq.pergunta}</span>
+                    <span>{tDynamic(faq.pergunta)}</span>
                     <ChevronDown size={18} className={`transition-transform duration-300 ${aberto ? 'rotate-180 text-[var(--cor-primaria)]' : ''}`} />
                   </button>
                   {aberto && (
                     <p className="border-t border-gray-100 p-5 text-sm leading-relaxed text-gray-600 dark:border-white/10 dark:text-slate-300">
-                      {faq.resposta}
+                      {tDynamic(faq.resposta)}
                     </p>
                   )}
                 </div>

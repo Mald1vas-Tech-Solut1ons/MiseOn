@@ -12,7 +12,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 // CORS: sem isto o navegador bloqueia a chamada do painel antes de chegar na função.
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-chat-session',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (data: unknown, init: ResponseInit = {}) =>

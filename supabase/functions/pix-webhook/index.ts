@@ -65,6 +65,74 @@ function valorPagoDaCobranca(cob: any): number {
   return Number(cob?.valor?.original ?? 0);
 }
 
+// Confirma a ASSINATURA da loja (cobrança criada pela saas-pix, txid 'saas...').
+// Diferente do pedido: aqui o dinheiro é da plataforma e o efeito do pagamento
+// é estender a validade da loja + emitir a NFS-e da fatura.
+async function confirmarAssinatura(
+  supabase: any,
+  certPem: string,
+  token: string,
+  txid: string,
+  log: any,
+) {
+  const { data: fatura } = await supabase
+    .from('faturas_assinatura')
+    .select('id, loja_id, ciclo, valor_cobrado')
+    .eq('efi_charge_id', txid)
+    .eq('status_cobranca', 'pendente')
+    .maybeSingle();
+  if (!fatura) return;
+
+  const res = await efiFetch(certPem, `/v2/cob/${txid}`, { method: 'GET' }, token);
+  const cob = await res.json().catch(() => ({}));
+  if (String(cob?.status) !== 'CONCLUIDA') return;
+
+  const pago = valorPagoDaCobranca(cob);
+  const devido = Number(fatura.valor_cobrado ?? 0);
+  if (pago + 0.01 < devido) {
+    log.warn('Webhook Pix assinatura: valor pago menor que a fatura; não ativa.', { txid, pago, devido });
+    return;
+  }
+
+  // Idempotência: o webhook da Efí repete. Só segue quem conseguiu virar a
+  // linha de 'pendente' para 'pago' — as repetições não acham mais nada.
+  const { data: faturaPaga } = await supabase
+    .from('faturas_assinatura')
+    .update({ status_cobranca: 'pago', data_pagamento: new Date().toISOString() })
+    .eq('id', fatura.id)
+    .eq('status_cobranca', 'pendente')
+    .select('id')
+    .maybeSingle();
+  if (!faturaPaga?.id) return;
+
+  // Mesma regra da saas-assinar: renovar adiantado não pode queimar os dias
+  // que a loja ainda tem pagos.
+  const ehAnual = fatura.ciclo === 'anual';
+  const { data: lojaAtual } = await supabase
+    .from('lojas').select('trial_termina_em').eq('id', fatura.loja_id).maybeSingle();
+  const vigente = lojaAtual?.trial_termina_em ? new Date(lojaAtual.trial_termina_em) : null;
+  const agora = new Date();
+  const base = vigente && vigente > agora ? vigente : agora;
+  const novoVencimento = new Date(base);
+  novoVencimento.setMonth(novoVencimento.getMonth() + (ehAnual ? 12 : 1));
+
+  const { error: updErr } = await supabase.from('lojas').update({
+    status_assinatura: 'ativa',
+    trial_termina_em: novoVencimento.toISOString(),
+  }).eq('id', fatura.loja_id);
+  if (updErr) {
+    log.error('Pix da assinatura confirmado, mas falha ao ativar a loja', updErr, { txid, loja_id: fatura.loja_id });
+    return;
+  }
+
+  supabase.functions.invoke('fiscal-emitir-nfse', { body: { fatura_id: fatura.id } })
+    .catch((e: unknown) => log.error('Falha ao acionar NFS-e da assinatura (não bloqueia o pagamento)', e));
+
+  log.info('Assinatura confirmada por Pix', {
+    txid, loja_id: fatura.loja_id, ciclo: fatura.ciclo, vencimento: novoVencimento.toISOString(),
+  });
+}
+
 // HMAC-SHA256 Helper
 async function validarHmacSha256(message: string, signature: string, secret: string): Promise<boolean> {
   try {
@@ -165,6 +233,13 @@ Deno.serve(async (req) => {
 
     for (const pix of pixList) {
       if (!pix.txid) continue;
+
+      // Cobrança de assinatura (saas-pix) — o txid nasce com prefixo 'saas'.
+      // Não tem pedido nem linha em `pagamentos`: é a loja pagando a MiseOn.
+      if (pix.txid.startsWith('saas')) {
+        await confirmarAssinatura(supabase, creds.certPem, token, pix.txid, reqLogger);
+        continue;
+      }
 
       const { data: pgto } = await supabase
         .from('pagamentos')

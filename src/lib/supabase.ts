@@ -42,6 +42,12 @@ export const supabase = createClient(url, anon, {
     autoRefreshToken: true,
   },
   global: {
+    // Cabecalho global vai em TODA requisicao do SDK — inclusive no
+    // functions.invoke(). Como e um header customizado, o navegador so deixa
+    // a chamada sair se o preflight da Edge Function devolver esse nome no
+    // Access-Control-Allow-Headers. Header novo aqui = incluir tambem no
+    // corsHeaders de supabase/functions/*, senao a function passa a falhar
+    // com "Failed to send a request to the Edge Function" (o POST nem sai).
     headers: sessaoChat ? { 'x-chat-session': sessaoChat } : {},
   },
   realtime: {

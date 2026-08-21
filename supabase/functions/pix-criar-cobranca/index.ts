@@ -22,7 +22,7 @@ const EFI_URL = Deno.env.get('EFI_SANDBOX') === 'true'
 // CORS: sem isto o navegador bloqueia a chamada do checkout antes de chegar na Efí.
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-chat-session',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (data: unknown, init: ResponseInit = {}) =>

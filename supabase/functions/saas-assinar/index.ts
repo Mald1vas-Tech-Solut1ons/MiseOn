@@ -28,7 +28,7 @@ const PARCELAS_VALIDAS = new Set([1, 3, 6, 8, 12]);
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-chat-session',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (data: unknown, init: ResponseInit = {}) =>
