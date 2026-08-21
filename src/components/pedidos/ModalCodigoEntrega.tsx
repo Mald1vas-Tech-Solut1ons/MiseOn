@@ -26,7 +26,7 @@ type Fase =
   | { nome: 'digitando'; erro?: string }
   | { nome: 'enviando' }
   | { nome: 'falha'; mensagem: string; tecnico?: string }
-  | { nome: 'ok' };
+  | { nome: 'ok'; soLocal?: boolean };
 
 export function ModalCodigoEntrega({
   pedido,
@@ -74,6 +74,15 @@ export function ModalCodigoEntrega({
       inputRef.current?.focus();
       return;
     }
+    // A loja desligou o aviso ao iFood nas preferências. Não é falha: ela
+    // escolheu tocar o iFood pelo Portal do Parceiro. Travar a baixa aqui
+    // deixaria o entregador na porta do cliente sem conseguir fechar a entrega.
+    if (!r.ok && r.desligado) {
+      setFase({ nome: 'ok', soLocal: true });
+      await onValidado();
+      window.setTimeout(onFechar, 2200);
+      return;
+    }
     if (!r.ok) {
       setFase({ nome: 'falha', mensagem: r.erro ?? 'O iFood recusou a validação.', tecnico: r.tecnico });
       return;
@@ -105,9 +114,11 @@ export function ModalCodigoEntrega({
             {coleta ? tDynamic('Código confere — pode liberar') : tDynamic('Entrega confirmada')}
           </p>
           <p className="max-w-xs text-xs text-[var(--cor-texto-fraco)]">
-            {coleta
-              ? tDynamic('O entregador é o certo para este pedido.')
-              : tDynamic('O pedido foi concluído no iFood e no MiseOn.')}
+            {fase.soLocal
+              ? tDynamic('Concluído aqui. O aviso ao iFood está desligado nas preferências da loja — dê a baixa no Portal do Parceiro.')
+              : coleta
+                ? tDynamic('O entregador é o certo para este pedido.')
+                : tDynamic('O pedido foi concluído no iFood e no MiseOn.')}
           </p>
         </div>
       ) : fase.nome === 'falha' ? (

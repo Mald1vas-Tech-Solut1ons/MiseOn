@@ -293,6 +293,41 @@ function htmlEtiqueta(o: PrintOptions) {
 }
 
 // ------------------------------------------------------------------
+/**
+ * Observação de entrega, em destaque.
+ *
+ * "Deixar na portaria", "interfone quebrado, ligar ao chegar" — o iFood manda
+ * isso em `delivery.observations` e é critério de homologação exibir na comanda
+ * ("Exiba observações de entrega claramente na comanda"). Mais que critério: é
+ * a diferença entre a entrega acontecer e a moto voltar com a sacola.
+ *
+ * Vai emoldurado porque a via do entregador é lida de relance, em pé, com o
+ * capacete na mão. Texto solto no meio do endereço se perde.
+ */
+function observacaoEntregaHtml(pedido: Pedido): string {
+  if (!pedido.observacao_entrega) return '';
+  return `<div class="mt-2 font-bold uppercase" style="border:2px solid #000; padding:4px;">ATENÇÃO: ${esc(pedido.observacao_entrega)}</div>`;
+}
+
+/**
+ * O que só existe em pedido de marketplace.
+ *
+ * A bandeira do cartão e o CPF na nota são critérios de homologação do iFood, e
+ * o código de coleta é o que o entregador DELES apresenta na loja — quem está
+ * no balcão precisa do papel na mão para conferir, não de uma tela.
+ */
+function dadosIfoodHtml(pedido: Pedido): string {
+  if (pedido.origem !== 'ifood') return '';
+  const linhas = [
+    pedido.ifood_codigo_coleta ? `COD. COLETA: ${esc(pedido.ifood_codigo_coleta)}` : '',
+    pedido.ifood_cartao_bandeira ? `CARTÃO: ${esc(pedido.ifood_cartao_bandeira)}` : '',
+    pedido.documento_cliente ? `CPF/CNPJ: ${esc(pedido.documento_cliente)}` : '',
+    pedido.ifood_info_extra ? esc(pedido.ifood_info_extra) : '',
+  ].filter(Boolean);
+  if (linhas.length === 0) return '';
+  return `<div class="sm uppercase mt-1">${linhas.join('<br/>')}</div>`;
+}
+
 // 3. VIA DO ENTREGADOR (Foco no endereço e cobrança — sem custo interno)
 // ------------------------------------------------------------------
 function htmlViaEntregador(o: PrintOptions) {
@@ -311,7 +346,10 @@ function htmlViaEntregador(o: PrintOptions) {
     ${pedido.telefone_contato ? `<div class="sm">TEL: ${esc(pedido.telefone_contato)}</div>` : ''}
     <div class="mt-2 font-bold uppercase">ENDEREÇO:</div>
     <div class="font-bold uppercase">${esc(pedido.endereco_entrega || 'Retirada')}${pedido.bairro ? ' - ' + esc(pedido.bairro) : ''}</div>
+    ${pedido.complemento ? `<div class="sm uppercase">COMPL: ${esc(pedido.complemento)}</div>` : ''}
     ${pedido.ponto_referencia ? `<div class="sm uppercase">REF: ${esc(pedido.ponto_referencia)}</div>` : ''}
+    ${observacaoEntregaHtml(pedido)}
+    ${dadosIfoodHtml(pedido)}
     <div class="divider"></div>
     <div class="font-bold uppercase">Itens:</div>
     ${itensHtml}
@@ -359,7 +397,7 @@ function htmlReciboCliente(o: PrintOptions) {
     <div class="divider"></div>
     <div class="font-bold uppercase sm">CLIENTE: ${esc(pedido.identificador_cliente)}</div>
     ${pedido.telefone_contato ? `<div class="xs">TEL: ${esc(pedido.telefone_contato)}</div>` : ''}
-    ${pedido.tipo_pedido === 'DELIVERY' && pedido.endereco_entrega ? `<div class="xs uppercase">ENTREGA: ${esc(pedido.endereco_entrega)}${pedido.bairro ? ' - ' + esc(pedido.bairro) : ''}</div>` : ''}
+    ${pedido.tipo_pedido === 'DELIVERY' && pedido.endereco_entrega ? `<div class="xs uppercase">ENTREGA: ${esc(pedido.endereco_entrega)}${pedido.bairro ? ' - ' + esc(pedido.bairro) : ''}${pedido.complemento ? ' · ' + esc(pedido.complemento) : ''}</div>` : ''}
     <div class="divider"></div>
     <table>${itensHtml}</table>
     <div class="divider"></div>

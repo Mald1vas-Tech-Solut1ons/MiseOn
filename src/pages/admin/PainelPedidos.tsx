@@ -93,7 +93,8 @@ function CardPedido({
 
     if (doIfood && status === 'EM_ROTA' && entregaEhDaLoja(p)) {
       const r = await despacharNoIfood(p.id);
-      if (!r.ok) {
+      // Ver Entregas.tsx: preferência desligada não trava o despacho local.
+      if (!r.ok && !r.desligado) {
         onErro(new Error(r.erro ?? 'O iFood recusou o despacho.'));
         return;
       }

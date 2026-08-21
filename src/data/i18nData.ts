@@ -2266,6 +2266,7 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Entrega confirmada': 'Delivery confirmed',
   'O pedido foi concluído no iFood e no MiseOn.': 'The order was completed on iFood and on MiseOn.',
   'Não deu para validar': 'Could not validate',
+  'Concluído aqui. O aviso ao iFood está desligado nas preferências da loja — dê a baixa no Portal do Parceiro.': 'Completed here only. Notifying iFood is turned off in this store settings — close the order in the Partner Portal.',
   'E se o cliente não tiver o código?': 'What if the customer has no code?',
   'O código aparece no app do entregador, na tela da coleta. Se ele não conseguir mostrar, não libere a sacola: acione o suporte do iFood pelo Portal do Parceiro.': 'The code shows up in the courier app, on the pickup screen. If they cannot show it, do not hand over the bag: contact iFood support through the Partner Portal.',
   'O código fica no acompanhamento do pedido, no app do iFood. Sem ele, não confirme por aqui — o iFood conclui o pedido sozinho depois do prazo de entrega, e forçar a baixa aqui faria os dois sistemas discordarem.': 'The code is on the order tracking screen in the iFood app. Without it, do not confirm here — iFood completes the order on its own after the delivery window, and forcing it here would make the two systems disagree.',

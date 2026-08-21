@@ -26,6 +26,16 @@ export type RespostaIfood<T = Record<string, unknown>> = {
   erro?: string;
   /** Detalhe cru, para o suporte. Nunca é a mensagem principal. */
   tecnico?: string;
+  /**
+   * A loja desligou esta sincronização nas preferências.
+   *
+   * NÃO é falha, e a diferença importa: quando o iFood recusa, a operação da
+   * loja tem que parar para não divergir dos dois lados. Quando a própria loja
+   * desligou o aviso, ela já decidiu tocar o iFood pelo Portal do Parceiro — e
+   * travar o despacho local aqui seria o sistema impedindo a moto de sair por
+   * causa de uma preferência do próprio dono.
+   */
+  desligado?: boolean;
 } & Partial<T>;
 
 async function chamar<T = Record<string, unknown>>(

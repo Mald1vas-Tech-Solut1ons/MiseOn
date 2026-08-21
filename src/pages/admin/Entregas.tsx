@@ -248,7 +248,11 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
   const iniciarRota = async (p: Pedido) => {
     if (ehPedidoIfood(p) && entregaEhDaLoja(p)) {
       const r = await despacharNoIfood(p.id);
-      if (!r.ok) {
+      // `desligado` e recusa sao coisas diferentes. Recusa do iFood para a
+      // operacao, senao os dois sistemas divergem. Preferencia desligada e
+      // decisao do proprio lojista — a moto sai, e o iFood ele toca pelo
+      // Portal do Parceiro. Tratar os dois igual travava a entrega.
+      if (!r.ok && !r.desligado) {
         setErroIfood(r.erro ?? 'O iFood recusou o despacho deste pedido.');
         return;
       }
