@@ -58,16 +58,13 @@ async function getToken(creds: { clientId: string; clientSecret: string; certPem
   return data.access_token;
 }
 
-function valorPagoDaCobranca(cob: any): number {
-  const lista = Array.isArray(cob?.pix) ? cob.pix : [];
-  const somaPix = lista.reduce((s: number, p: any) => s + Number(p?.valor ?? 0), 0);
-  if (somaPix > 0) return somaPix;
-  return Number(cob?.valor?.original ?? 0);
-}
+import { aplicarPagamentoAssinatura } from '../_shared/assinatura-pix.ts';
+import { confirmarPagamentoPedido } from '../_shared/pedido-pix.ts';
 
 // Confirma a ASSINATURA da loja (cobrança criada pela saas-pix, txid 'saas...').
-// Diferente do pedido: aqui o dinheiro é da plataforma e o efeito do pagamento
-// é estender a validade da loja + emitir a NFS-e da fatura.
+// A regra de ativação mora em _shared/assinatura-pix.ts porque a tela também
+// precisa dela: quando o webhook falha ou atrasa, quem já pagou não pode ficar
+// preso olhando o QR. Aqui só buscamos a verdade na Efí e aplicamos.
 async function confirmarAssinatura(
   supabase: any,
   certPem: string,
@@ -75,62 +72,9 @@ async function confirmarAssinatura(
   txid: string,
   log: any,
 ) {
-  const { data: fatura } = await supabase
-    .from('faturas_assinatura')
-    .select('id, loja_id, ciclo, valor_cobrado')
-    .eq('efi_charge_id', txid)
-    .eq('status_cobranca', 'pendente')
-    .maybeSingle();
-  if (!fatura) return;
-
   const res = await efiFetch(certPem, `/v2/cob/${txid}`, { method: 'GET' }, token);
   const cob = await res.json().catch(() => ({}));
-  if (String(cob?.status) !== 'CONCLUIDA') return;
-
-  const pago = valorPagoDaCobranca(cob);
-  const devido = Number(fatura.valor_cobrado ?? 0);
-  if (pago + 0.01 < devido) {
-    log.warn('Webhook Pix assinatura: valor pago menor que a fatura; não ativa.', { txid, pago, devido });
-    return;
-  }
-
-  // Idempotência: o webhook da Efí repete. Só segue quem conseguiu virar a
-  // linha de 'pendente' para 'pago' — as repetições não acham mais nada.
-  const { data: faturaPaga } = await supabase
-    .from('faturas_assinatura')
-    .update({ status_cobranca: 'pago', data_pagamento: new Date().toISOString() })
-    .eq('id', fatura.id)
-    .eq('status_cobranca', 'pendente')
-    .select('id')
-    .maybeSingle();
-  if (!faturaPaga?.id) return;
-
-  // Mesma regra da saas-assinar: renovar adiantado não pode queimar os dias
-  // que a loja ainda tem pagos.
-  const ehAnual = fatura.ciclo === 'anual';
-  const { data: lojaAtual } = await supabase
-    .from('lojas').select('trial_termina_em').eq('id', fatura.loja_id).maybeSingle();
-  const vigente = lojaAtual?.trial_termina_em ? new Date(lojaAtual.trial_termina_em) : null;
-  const agora = new Date();
-  const base = vigente && vigente > agora ? vigente : agora;
-  const novoVencimento = new Date(base);
-  novoVencimento.setMonth(novoVencimento.getMonth() + (ehAnual ? 12 : 1));
-
-  const { error: updErr } = await supabase.from('lojas').update({
-    status_assinatura: 'ativa',
-    trial_termina_em: novoVencimento.toISOString(),
-  }).eq('id', fatura.loja_id);
-  if (updErr) {
-    log.error('Pix da assinatura confirmado, mas falha ao ativar a loja', updErr, { txid, loja_id: fatura.loja_id });
-    return;
-  }
-
-  supabase.functions.invoke('fiscal-emitir-nfse', { body: { fatura_id: fatura.id } })
-    .catch((e: unknown) => log.error('Falha ao acionar NFS-e da assinatura (não bloqueia o pagamento)', e));
-
-  log.info('Assinatura confirmada por Pix', {
-    txid, loja_id: fatura.loja_id, ciclo: fatura.ciclo, vencimento: novoVencimento.toISOString(),
-  });
+  await aplicarPagamentoAssinatura(supabase, txid, cob, log);
 }
 
 // HMAC-SHA256 Helper
@@ -184,19 +128,36 @@ Deno.serve(async (req) => {
     // Leitura atômica do body para validação de HMAC
     const bodyText = await req.text();
     
-    // 1. VALIDAÇÃO DE ASSINATURA HMAC OBRIGATÓRIA
-    // Auditoria, achado 11: antes era `if (efiSecret)` — sem a env, a validação
-    // de assinatura sumia em silêncio. Segredo ausente é erro de configuração,
-    // não permissão para aceitar webhook não assinado.
+    // 1. AUTENTICIDADE DO CALLBACK
+    //
+    // Quem decide se um Pix foi pago NÃO é este corpo de requisição: é a
+    // consulta GET /v2/cob/{txid} feita mais abaixo, por mTLS, com o
+    // certificado da conta Efí. Nenhuma linha daqui confirma pagamento por
+    // acreditar no payload — o payload só diz QUAL txid conferir. Callback
+    // forjado, no máximo, faz o servidor perguntar à Efí e ouvir "não paga".
+    //
+    // Então a assinatura é defesa em profundidade, não o portão:
+    //   • assinatura + segredo  -> tem que bater, senão é forjaria (401);
+    //   • assinatura sem segredo -> registra e segue para a ratificação;
+    //   • sem assinatura         -> segue para a ratificação.
+    //
+    // Exigir o segredo como pré-condição (como estava desde 17/08/2026)
+    // derrubava 100% dos callbacks enquanto `EFI_WEBHOOK_SECRET` não existisse
+    // no projeto — e derrubaria de novo se a Efí não mandar esse header, que é
+    // o caso da API Pix quando ela autentica o callback por mTLS. Resultado
+    // observado: nenhum pagamento confirmado e ninguém avisado. Recusa
+    // silenciosa é pior que log ruidoso.
     const efiSecret = Deno.env.get('EFI_WEBHOOK_SECRET');
-    if (!efiSecret) {
-      reqLogger.error('EFI_WEBHOOK_SECRET não configurada — recusando webhook.');
-      return Response.json({ error: 'Webhook não configurado' }, { status: 500 });
-    }
     const signature = req.headers.get('X-Efi-Signature');
-    if (!signature || !(await validarHmacSha256(bodyText, signature, efiSecret))) {
-      reqLogger.error('HMAC inválido ou ausente no webhook Efí.');
-      return Response.json({ error: 'Invalid signature' }, { status: 401 });
+    if (signature && efiSecret) {
+      if (!(await validarHmacSha256(bodyText, signature, efiSecret))) {
+        reqLogger.error('HMAC inválido no webhook Efí — recusando.');
+        return Response.json({ error: 'Invalid signature' }, { status: 401 });
+      }
+    } else if (signature) {
+      reqLogger.warn('Webhook Efí assinado, mas EFI_WEBHOOK_SECRET não configurada: seguindo só com a ratificação na Efí.');
+    } else {
+      reqLogger.warn('Webhook Efí sem assinatura: seguindo só com a ratificação na Efí.');
     }
 
     let payloadRaw;
@@ -241,69 +202,13 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const { data: pgto } = await supabase
-        .from('pagamentos')
-        .select('pedido_id, status, pedidos(loja_id, numero, valor_total, status)')
-        .eq('gateway_txid', pix.txid)
-        .eq('status', 'PENDENTE')
-        .maybeSingle();
-        
-      if (!pgto?.pedido_id) continue;
-
-      // 2. SOMENTE DEPOIS DE CONFIRMAÇÃO INEQUÍVOCA DA EFÍ
+      // 2. SOMENTE DEPOIS DE CONFIRMAÇÃO INEQUÍVOCA DA EFÍ.
+      // A regra do pedido mora em _shared/pedido-pix.ts porque a tela do
+      // cliente também precisa dela (pix-criar-cobranca, ação 'status'):
+      // pagamento não pode depender de um canal único.
       const res = await efiFetch(creds.certPem, `/v2/cob/${pix.txid}`, { method: 'GET' }, token);
       const cob = await res.json().catch(() => ({}));
-      
-      if (String(cob?.status) === 'CONCLUIDA') {
-        const totalPedido = Number((pgto.pedidos as any)?.valor_total ?? 0);
-        const pago = valorPagoDaCobranca(cob);
-        
-        if (pago + 0.01 >= totalPedido) {
-          const { data: pagoRow } = await supabase
-            .from('pagamentos')
-            .update({ status: 'PAGO', data_pagamento: new Date().toISOString() })
-            .eq('gateway_txid', pix.txid)
-            .eq('status', 'PENDENTE')
-            .select('pedido_id')
-            .maybeSingle();
-
-          if (pagoRow?.pedido_id) {
-            const lojaId = (pgto.pedidos as any)?.loja_id;
-            const numero = (pgto.pedidos as any)?.numero;
-
-            if (lojaId) {
-               // Buscar as contas financeiras apropriadas
-               const { data: contasInfo } = await supabase.from('contas').select('id, codigo').eq('loja_id', lojaId);
-               const contaEfi = contasInfo?.find(c => c.codigo === '1.1.02')?.id;
-               const contaReceita = contasInfo?.find(c => c.codigo === '3.1.01')?.id;
-
-               // Lançamento Contábil no Ledger de Dupla Entrada
-               if (contaEfi && contaReceita) {
-                 await supabase.from('lancamentos_financeiros').insert({
-                   loja_id: lojaId,
-                   historico: `Recebimento Pix pedido #${numero}`,
-                   valor: pago,
-                   conta_debitada: contaEfi,
-                   conta_creditada: contaReceita,
-                   referencia_tipo: 'PAGAMENTO',
-                   referencia_id: pagoRow.pedido_id
-                 });
-               }
-            }
-
-            // 3. SOMENTE AGORA ATUALIZA STATUS DO PEDIDO (DEPOIS DA CONFIRMAÇÃO E LEDGER)
-            await supabase
-              .from('pedidos')
-              .update({ status: 'ACEITO' })
-              .eq('id', pagoRow.pedido_id)
-              .eq('status', 'NOVO');
-              
-            reqLogger.info('Pagamento PIX confirmado e ledger atualizado', { txid: pix.txid, pedido_id: pagoRow.pedido_id });
-          }
-        } else {
-           reqLogger.warn(`Webhook Pix: pago (${pago}) < total (${totalPedido}) para txid ${pix.txid}; não confirma.`, { txid: pix.txid, pago, totalPedido });
-        }
-      }
+      await confirmarPagamentoPedido(supabase, pix.txid, cob, reqLogger);
     }
     return Response.json({ ok: true });
   } catch (e) {
