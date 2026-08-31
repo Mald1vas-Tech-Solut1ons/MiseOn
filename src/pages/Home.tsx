@@ -779,6 +779,25 @@ export default function Home() {
             </Link>
           </div>
 
+          {/*
+            "Entrar" fora do menu, abaixo de 1024px.
+
+            O bloco da direita só aparece em `lg`, então em notebook de tela
+            menor, tablet e celular o acesso ficava escondido atrás do
+            hambúrguer. Quem já é assinante não vem para a landing ler a
+            proposta: vem para entrar no sistema, e esconder essa porta em
+            metade dos aparelhos é atrito no cliente que já pagou.
+
+            O "Cadastrar minha loja" continua só em `lg` de propósito — é texto
+            longo e brigaria com o hambúrguer nas telas estreitas.
+          */}
+          <Link
+            to="/acesso"
+            className="rounded-full border border-gray-300 px-3.5 py-1.5 text-sm font-bold text-gray-700 transition hover:bg-gray-100 lg:hidden dark:border-white/15 dark:text-gray-200 dark:hover:bg-white/10"
+          >
+            {t('nav.entrar')}
+          </Link>
+
           {/* Toggle mobile */}
           <button
             onClick={() => setMenuAberto((a) => !a)}

@@ -50,3 +50,8 @@ cypress/videos/
 # pagamento. Nunca versionar. Guarde fora do repositorio, criptografado.
 backups/
 *.json.gz
+
+# Foto de cupom usada em teste manual: traz CPF do consumidor impresso.
+# Fica fora do versionamento por privacidade.
+docs/nf-test_img.jpeg
+docs/*-test_img.*
