@@ -106,6 +106,7 @@ export default function EstoquePage() {
           </Link>
 
           <div className="hidden items-center gap-6 lg:flex text-sm font-semibold">
+            <a href="#entrada-nota" className="text-gray-300 hover:text-white transition">0. Escanear nota</a>
             <a href="#fracionamento" className="text-gray-300 hover:text-white transition">1. Insumos</a>
             <a href="#preparos" className="text-gray-300 hover:text-white transition">2. Preparos</a>
             <a href="#compras" className="text-gray-300 hover:text-white transition">3. Compras & Desmonte</a>
@@ -136,6 +137,7 @@ export default function EstoquePage() {
         {menuAberto && (
           <div className="border-t border-white/10 bg-[#070C18]/95 px-4 pb-5 pt-3 lg:hidden">
             <div className="flex flex-col gap-2 font-semibold text-sm">
+              <a href="#entrada-nota" onClick={() => setMenuAberto(false)} className="py-2">0. Escanear nota fiscal</a>
               <a href="#fracionamento" onClick={() => setMenuAberto(false)} className="py-2">1. Insumos & Fracionamento</a>
               <a href="#preparos" onClick={() => setMenuAberto(false)} className="py-2">2. Receitas & Preparos</a>
               <a href="#compras" onClick={() => setMenuAberto(false)} className="py-2">3. Compras & Desmonte</a>
@@ -179,7 +181,7 @@ export default function EstoquePage() {
               {tDynamic('Começar Agora Grátis')} <ArrowRight size={18} />
             </Link>
             <a
-              href="#fracionamento"
+              href="#entrada-nota"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-8 py-4 font-['Sora'] text-base font-bold text-white backdrop-blur-md transition hover:bg-white/15 sm:w-auto"
             >
               Ver Guia Visual <HelpCircle size={18} />
@@ -189,6 +191,185 @@ export default function EstoquePage() {
       </header>
 
       {/* ══════════ PASSO 1: CADASTRO E FRACIONAMENTO DE INSUMOS ══════════ */}
+      {/*
+        Passo 00 — a entrada da mercadoria.
+
+        Esta seção existe porque a objeção número um de quem já tem sistema não
+        é preço: é o trabalho de alimentar o estoque. Ninguém digita 53 itens
+        por nota, então o estoque nunca fica em dia, e o sistema inteiro vira
+        uma tela bonita com número errado. É esse nó que o escaneamento desata,
+        e é por isso que ele vem antes de tudo na página.
+      */}
+      <section id="entrada-nota" className="scroll-mt-24 border-t border-white/10 bg-[#070C18] py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-400/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-violet-300">
+              <ScanLine size={14} /> {tDynamic('Passo 00 · A nota vira estoque')}
+            </span>
+            <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold text-white sm:text-4xl">
+              {tDynamic('53 itens do atacado no estoque')}{' '}
+              <span className="bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
+                {tDynamic('em um escaneamento.')}
+              </span>
+            </h2>
+            <p className="mt-5 text-base leading-relaxed text-slate-300">
+              O motivo real de estoque nenhum ficar em dia é o teclado. Ninguém volta do atacado e
+              digita cinquenta e três linhas — então o lançamento fica para depois, depois vira nunca,
+              e o sistema passa a mostrar um número que ninguém acredita.{' '}
+              <b className="text-white">{tDynamic('Aqui você aponta a câmera para o QR Code do cupom')}</b> e a
+              compra inteira entra: item, quantidade, unidade e o que cada grama custou.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition hover:border-violet-400/40">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-400/10 text-violet-400">
+                <ScanLine size={20} />
+              </div>
+              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">
+                {tDynamic('QR do cupom, direto da SEFAZ')}
+              </h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+                Os dados vêm assinados do portal fiscal: descrição, quantidade, unidade e valor de
+                cada linha, mais CNPJ e data da compra. Nada de digitar, nada de conferir soma.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition hover:border-violet-400/40">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-fuchsia-400/10 text-fuchsia-400">
+                <Sparkles size={20} />
+              </div>
+              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">
+                {tDynamic('QR ilegível? A foto resolve')}
+              </h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+                Cupom amassado, papel térmico apagado, nota emitida em contingência ou de outro
+                estado: fotografe o papel e a inteligência artificial lê a lista de produtos. O
+                caminho nunca termina em “não deu”.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition hover:border-violet-400/40">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-400">
+                <Boxes size={20} />
+              </div>
+              <h3 className="mt-4 font-['Sora'] text-base font-bold text-white">
+                {tDynamic('Tomate é tomate, em qualquer mercado')}
+              </h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+                “TOM ITAL GRANEL”, “TOMATE SALADA KG” e “TOM DEBORA” caem no mesmo insumo, em quilo.
+                O sistema entende a abreviação do cupom e não enche seu estoque de sinônimos.
+              </p>
+            </div>
+          </div>
+
+          {/*
+            A tabela é o argumento mais forte da página: mostra a tradução que o
+            sistema faz sozinho, com linhas reais de cupom de atacado. Quem
+            trabalha com isso reconhece as abreviações na hora.
+          */}
+          <div className="mt-12 overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md">
+            <div className="border-b border-white/10 px-6 py-4">
+              <p className="font-['Sora'] text-sm font-bold text-white">
+                {tDynamic('O que o cupom diz')} <span className="text-slate-500">→</span>{' '}
+                {tDynamic('o que entra no seu estoque')}
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                {tDynamic('Linhas reais de um cupom de atacado, traduzidas sem ninguém digitar nada.')}
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead className="bg-white/5 text-xs uppercase tracking-wider text-slate-400">
+                  <tr>
+                    <th className="px-6 py-3 font-bold">{tDynamic('Impresso na nota')}</th>
+                    <th className="px-6 py-3 font-bold">{tDynamic('Vira no estoque')}</th>
+                    <th className="px-6 py-3 font-bold">{tDynamic('Por quê')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {[
+                    ['APP1 OVOS EXTRA BRANCO PVC 20UN — 2 BD', '40 ovos (un)', 'A bandeja traz 20; 2 bandejas são 40 ovos'],
+                    ['AGUA SANIT SELECT 2L — 1 UN', '2 litros (L)', 'A embalagem diz 2 L, e é em litro que se usa'],
+                    ['ARROZ TIO JOAO T1 5KG — 2 PC', '10 quilos (kg)', 'Pacote não é medida: 2 × 5 kg'],
+                    ['MUC FAT TIROLEZ 500G — 4 UN', 'Queijo mussarela, 2 kg', '“MUC” é mussarela; queijo se controla em quilo'],
+                    ['DETERG LIQ MINUANO NEUTRO — 1 UN', 'Detergente (un)', 'Entende a abreviação sem cadastro prévio'],
+                  ].map(([nota, estoque, porque]) => (
+                    <tr key={nota} className="transition hover:bg-white/5">
+                      <td className="px-6 py-3 font-mono text-xs text-slate-400">{nota}</td>
+                      <td className="px-6 py-3 font-bold text-emerald-300">{tDynamic(estoque)}</td>
+                      <td className="px-6 py-3 text-xs text-slate-400">{tDynamic(porque)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/*
+            Os três avisos são o que separa "importou a nota" de "cuidou do
+            estoque": desconto, aumento do fornecedor e validade. Cada um é
+            dinheiro que some sem ninguém ver.
+          */}
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-5">
+              <p className="flex items-center gap-2 font-['Sora'] text-sm font-bold text-emerald-300">
+                <Wallet size={16} /> {tDynamic('O desconto entra na conta')}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-300">
+                Cupom com R$ 14,88 de desconto sobre R$ 472,37: o sistema rateia o abatimento entre os
+                itens. Sem isso, o custo do prato nasce 3% acima do que você pagou — e ninguém percebe.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-amber-400/20 bg-amber-400/5 p-5">
+              <p className="flex items-center gap-2 font-['Sora'] text-sm font-bold text-amber-300">
+                <TrendingDown size={16} /> {tDynamic('O aumento aparece na hora')}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-300">
+                “Subiu 14%: R$ 6,99 → R$ 7,99 por kg desde 12/07.” O aviso é na conferência da nota,
+                que é quando ainda dá para ligar para o fornecedor — não no relatório do mês seguinte.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-5">
+              <p className="flex items-center gap-2 font-['Sora'] text-sm font-bold text-violet-300">
+                <ShieldCheck size={16} /> {tDynamic('A validade vem preenchida')}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-300">
+                O sistema sabe que frango resfriado dura poucos dias e arroz dura um ano, e já propõe a
+                data. Você confirma com um toque, e o alerta de vencimento passa a existir de verdade.
+              </p>
+            </div>
+          </div>
+
+          {/*
+            A objeção de quem já tem estoque montado. Sem resposta para isto, a
+            migração morre na primeira conversa.
+          */}
+          <div className="mt-8 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-transparent p-6 sm:p-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-400/10 text-blue-400">
+                <RefreshCw size={20} />
+              </div>
+              <div>
+                <h3 className="font-['Sora'] text-lg font-bold text-white">
+                  {tDynamic('“Mas eu já tenho estoque montado. Vou ter que lançar tudo de novo?”')}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-300">
+                  Não. Escaneie as notas das compras recentes — o que ainda está na prateleira — e conte
+                  o resto no inventário. As notas antigas você registra em{' '}
+                  <b className="text-white">modo histórico</b>: o sistema guarda o preço que você pagou,
+                  para comparar com as próximas compras, <b className="text-white">sem inflar o saldo</b>{' '}
+                  com mercadoria que já virou prato vendido. Cada nota entra com a data em que a compra
+                  aconteceu, não com a data em que você digitou.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="fracionamento" className="scroll-mt-24 py-20 border-t border-white/10 bg-[#0A101D]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
