@@ -524,7 +524,17 @@ export interface TipoItemCatalogo {
 
 export interface Insumo {
   id: string;
+  /** Nome completo e único na loja: gênero + variedade + marca. */
   nome: string;
+  /**
+   * Gênero no catálogo universal ('tomate'). É o que agrupa todas as
+   * variedades do mesmo item para custo e compras. Null = cadastro livre.
+   */
+  catalogo_ref?: string | null;
+  /** Variedade, tipo ou corte dentro do gênero ('Italiano', 'Asterix'). */
+  variedade?: string | null;
+  /** Marca ou fabricante. Distingue preço e rendimento do mesmo gênero. */
+  marca?: string | null;
   unidade_medida: string;
   quantidade_atual: number;
   estoque_minimo: number;
