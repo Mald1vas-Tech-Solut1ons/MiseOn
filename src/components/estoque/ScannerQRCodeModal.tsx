@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { QrCode, Camera, Keyboard, X, ArrowRight, Loader2, AlertCircle, Image as ImageIcon, Zap, ZapOff } from 'lucide-react';
+import { QrCode, Camera, Keyboard, X, ArrowRight, Loader2, AlertCircle, Image as ImageIcon, Zap, ZapOff, Sparkles, Trash2, CheckCircle2 } from 'lucide-react';
 import { temDetectorNativo, lerQrDeImagem, lerQrDeVideo, type EtapaLeitura } from '../../lib/lerQrCode';
+import { prepararFotosCupom, MAX_FOTOS } from '../../lib/fotoCupom';
+import { interpretarEntradaNota } from '../../lib/entradaNota';
 
 import { useI18n } from '../../contexts/I18nContext';
 /**
@@ -64,14 +66,38 @@ const TEXTO_ETAPA: Record<EtapaLeitura, string> = {
 interface Props {
   onFechar: () => void;
   onLido: (urlOuChave: string) => void;
+  /** Fotos do papel para leitura por IA, quando o QR não é caminho. */
+  onFotosCupom: (fotosBase64: string[], mime: string) => void;
   carregando?: boolean;
+  /** Texto mostrado enquanto o app consulta — muda entre SEFAZ e IA. */
+  textoCarregando?: string;
+  /**
+   * Abre direto na leitura por foto. Usado quando a SEFAZ já recusou a nota:
+   * insistir no QR que acabou de falhar seria fazer o lojista repetir o erro.
+   */
+  comecarNoCupom?: boolean;
+  /** Motivo da falha anterior, explicado no topo da aba de foto. */
+  motivoFallback?: string | null;
 }
 
-type Modo = 'CAMERA' | 'FOTO' | 'DIGITACAO';
+type Modo = 'CAMERA' | 'FOTO' | 'CUPOM' | 'DIGITACAO';
 
-export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Props) {
+export default function ScannerQRCodeModal({
+  onFechar, onLido, onFotosCupom, carregando, textoCarregando, comecarNoCupom, motivoFallback,
+}: Props) {
   const { tDynamic } = useI18n();
-  const [modo, setModo] = useState<Modo>('CAMERA');
+  const [modo, setModo] = useState<Modo>(comecarNoCupom ? 'CUPOM' : 'CAMERA');
+  const [fotosCupom, setFotosCupom] = useState<File[]>([]);
+  const [erroCupom, setErroCupom] = useState<string | null>(null);
+  const [preparandoCupom, setPreparandoCupom] = useState(false);
+  /**
+   * O que o sistema entendeu do texto, enquanto ele é digitado.
+   *
+   * Digitar 44 dígitos e só então descobrir que não serviu é o atrito que faz
+   * o lojista desistir da importação. Aqui ele vê a chave sendo reconhecida
+   * caractere a caractere — e, quando falta o código de segurança, sabe disso
+   * antes de terminar de digitar.
+   */
   const [chaveManual, setChaveManual] = useState('');
   const [erroCamera, setErroCamera] = useState<string | null>(null);
   const [erroFoto, setErroFoto] = useState<string | null>(null);
@@ -89,6 +115,7 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
   const pararLeituraRef = useRef<(() => void) | null>(null);
   const fallbackRef = useRef<Html5Qrcode | null>(null);
   const inputFotoRef = useRef<HTMLInputElement | null>(null);
+  const inputCupomRef = useRef<HTMLInputElement | null>(null);
   const containerFallbackId = 'reader-nfce-fallback';
 
   useEffect(() => {
@@ -226,6 +253,28 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
     }
   };
 
+  /**
+   * Manda o papel para a leitura por IA.
+   *
+   * As fotos passam por redução antes de subir: no 4G da rua, onde o lojista
+   * está quando acabou de comprar, foto crua de celular não sobe — e desistir
+   * no meio do upload é desistir da importação inteira.
+   */
+  const enviarFotosCupom = async () => {
+    setErroCupom(null);
+    setPreparandoCupom(true);
+    try {
+      const { base64, mime } = await prepararFotosCupom(fotosCupom);
+      onFotosCupom(base64, mime);
+    } catch (e) {
+      setErroCupom((e as Error)?.message ?? 'Não consegui preparar as fotos.');
+    } finally {
+      setPreparandoCupom(false);
+    }
+  };
+
+  const leituraManual = interpretarEntradaNota(chaveManual);
+
   const handleSubmitManual = (e: React.FormEvent) => {
     e.preventDefault();
     if (!chaveManual.trim()) return;
@@ -263,6 +312,9 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
           <button onClick={() => setModo('FOTO')} className={classeAba('FOTO')}>
             <ImageIcon size={14} /> Foto
           </button>
+          <button onClick={() => setModo('CUPOM')} className={classeAba('CUPOM')}>
+            <Sparkles size={14} /> {tDynamic('Cupom')}
+          </button>
           <button onClick={() => setModo('DIGITACAO')} className={classeAba('DIGITACAO')}>
             <Keyboard size={14} /> URL
           </button>
@@ -271,7 +323,9 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
         {carregando ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Loader2 size={36} className="animate-spin text-orange-600 mb-3" />
-            <p className="font-bold text-sm text-gray-900 dark:text-gray-100">{tDynamic('Consultando nota na SEFAZ SP...')}</p>
+            <p className="font-bold text-sm text-gray-900 dark:text-gray-100">
+              {textoCarregando ?? tDynamic('Consultando nota na SEFAZ SP...')}
+            </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Buscando itens, quantidades e valores.</p>
           </div>
         ) : modo === 'CAMERA' ? (
@@ -369,6 +423,114 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
               </div>
             )}
           </div>
+        ) : modo === 'CUPOM' ? (
+          /*
+            Leitura do papel por IA. É a saída para tudo que o QR não resolve:
+            cupom amassado, papel térmico apagado, nota em contingência que a
+            SEFAZ ainda não publicou, e nota de fora de São Paulo. Como a lista
+            de produtos está impressa no papel, ela sempre pode ser lida.
+          */
+          <div className="space-y-4">
+            {motivoFallback && (
+              <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/40 dark:bg-amber-900/20">
+                <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                <div>
+                  <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300">
+                    {tDynamic('A consulta pelo QR Code não deu certo desta vez')}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-400/90">{motivoFallback}</p>
+                  <p className="mt-1 text-[11px] font-bold text-amber-800 dark:text-amber-300">
+                    {tDynamic('Sem problema: fotografe o cupom que eu leio os itens para você.')}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-xl border-2 border-dashed border-violet-300 p-5 dark:border-violet-900/50">
+              <div className="mb-4 flex items-start gap-2">
+                <Sparkles size={22} className="mt-0.5 shrink-0 text-violet-500" />
+                <div>
+                  <p className="text-xs font-bold text-gray-900 dark:text-gray-100">
+                    {tDynamic('Leitura do cupom por inteligência artificial')}
+                  </p>
+                  <ol className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-gray-600 dark:text-gray-400">
+                    <li><strong>1.</strong> {tDynamic('Estique o cupom numa superfície plana, sem dobra.')}</li>
+                    <li><strong>2.</strong> {tDynamic('Fotografe a LISTA DE PRODUTOS de perto, de cima.')}</li>
+                    <li><strong>3.</strong> {tDynamic('Cupom longo? Fotografe em partes, de cima para baixo.')}</li>
+                  </ol>
+                  <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-500">
+                    {tDynamic('Não precisa do QR Code. Funciona com cupom de qualquer estado.')}
+                  </p>
+                </div>
+              </div>
+
+              <input
+                ref={inputCupomRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  const novos = Array.from(e.target.files ?? []);
+                  setErroCupom(null);
+                  setFotosCupom((atuais) => [...atuais, ...novos].slice(0, MAX_FOTOS));
+                  e.target.value = '';
+                }}
+              />
+
+              {fotosCupom.length > 0 && (
+                <ul className="mb-3 space-y-1.5">
+                  {fotosCupom.map((f, i) => (
+                    <li key={`${f.name}-${i}`} className="flex items-center gap-2 rounded-lg bg-gray-50 px-2.5 py-1.5 dark:bg-gray-800">
+                      <ImageIcon size={13} className="shrink-0 text-gray-400" />
+                      <span className="min-w-0 flex-1 truncate text-[11px] text-gray-600 dark:text-gray-300">
+                        {tDynamic('Parte')} {i + 1} · {(f.size / 1024).toFixed(0)} KB
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setFotosCupom((atuais) => atuais.filter((_, idx) => idx !== i))}
+                        className="shrink-0 rounded p-1 text-gray-400 hover:bg-white hover:text-red-500 dark:hover:bg-gray-700"
+                        aria-label={`Remover parte ${i + 1}`}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => inputCupomRef.current?.click()}
+                  disabled={preparandoCupom || fotosCupom.length >= MAX_FOTOS}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-violet-300 py-2.5 text-xs font-bold text-violet-700 transition hover:bg-violet-50 disabled:opacity-50 dark:border-violet-900/60 dark:text-violet-300 dark:hover:bg-violet-900/20"
+                >
+                  <Camera size={15} />
+                  {fotosCupom.length === 0
+                    ? tDynamic('Fotografar / escolher o cupom')
+                    : `${tDynamic('Adicionar outra parte')} (${fotosCupom.length}/${MAX_FOTOS})`}
+                </button>
+
+                {fotosCupom.length > 0 && (
+                  <button
+                    onClick={enviarFotosCupom}
+                    disabled={preparandoCupom}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 py-3 font-bold text-white shadow-md transition hover:bg-violet-700 disabled:opacity-50"
+                  >
+                    {preparandoCupom ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                    {preparandoCupom ? tDynamic('Preparando as fotos...') : tDynamic('Ler itens do cupom')}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {erroCupom && (
+              <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/40 dark:bg-amber-900/20">
+                <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                <p className="text-[11px] text-amber-800 dark:text-amber-300">{erroCupom}</p>
+              </div>
+            )}
+          </div>
         ) : (
           <form onSubmit={handleSubmitManual} className="space-y-4">
             <div>
@@ -382,19 +544,60 @@ export default function ScannerQRCodeModal({ onFechar, onLido, carregando }: Pro
                 placeholder="https://www.nfce.fazenda.sp.gov.br/qrcode?p=3526...|2|1|1|A1B2C3..."
                 className="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-xs font-mono focus:border-orange-500 focus:outline-none"
               />
-              <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                Dica: leia o QR com a câmera do próprio celular, copie o endereço que abrir e cole aqui.
-                A chave de 44 dígitos sozinha não serve — a SEFAZ exige o código de segurança que só
-                existe dentro do QR.
-              </p>
+              {chaveManual.trim() ? (
+                <div className={`mt-2 flex items-start gap-2 rounded-lg border p-2.5 ${
+                  leituraManual.podeConsultar
+                    ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/15'
+                    : 'border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-900/15'
+                }`}>
+                  {leituraManual.podeConsultar
+                    ? <CheckCircle2 size={15} className="mt-px shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    : <AlertCircle size={15} className="mt-px shrink-0 text-amber-600 dark:text-amber-400" />}
+                  <div className="min-w-0">
+                    <p className={`text-[11px] font-bold ${
+                      leituraManual.podeConsultar
+                        ? 'text-emerald-800 dark:text-emerald-300'
+                        : 'text-amber-800 dark:text-amber-300'
+                    }`}>
+                      {leituraManual.descricao}
+                    </p>
+                    {leituraManual.chave && (
+                      <p className="mt-0.5 break-all font-mono text-[10px] text-gray-500 dark:text-gray-400">
+                        {leituraManual.chave.replace(/(\d{4})/g, '$1 ').trim()}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                  Cole o endereço que o QR Code abre, ou digite a chave de 44 dígitos impressa no
+                  cupom — eu entendo os dois, com ou sem espaços.
+                </p>
+              )}
             </div>
-            <button
-              type="submit"
-              disabled={!chaveManual.trim()}
-              className="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl shadow-md transition disabled:opacity-50"
-            >
-              Consultar Nota Fiscal <ArrowRight size={16} />
-            </button>
+
+            {/*
+              Sem o código de segurança a SEFAZ não atende, e insistir no botão
+              seria empurrar o lojista para um erro certo. O caminho que resolve
+              fica no lugar do botão que não resolveria.
+            */}
+            {chaveManual.trim() && !leituraManual.podeConsultar ? (
+              <button
+                type="button"
+                onClick={() => setModo('CUPOM')}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 py-3 font-bold text-white shadow-md transition hover:bg-violet-700"
+              >
+                <Sparkles size={16} /> {tDynamic('Ler pela foto do cupom')}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={!leituraManual.podeConsultar}
+                className="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl shadow-md transition disabled:opacity-50"
+              >
+                Consultar Nota Fiscal <ArrowRight size={16} />
+              </button>
+            )}
           </form>
         )}
       </div>

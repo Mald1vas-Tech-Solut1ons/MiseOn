@@ -28,11 +28,25 @@ const json = (data: unknown, init: ResponseInit = {}) =>
 const erro = (msg: string, status = 400) => json({ error: msg }, { status });
 
 /**
- * Cupom de mercado tem dezenas de linhas em fonte de matriz, com abreviações
- * ("APP1 OVOS EXTRA BRANCO PV") e colunas coladas. Isso derruba modelo lite:
- * ele pula linha e inventa quantidade. Vale o modelo maior.
+ * Cascata de modelos, em ordem de preferência.
+ *
+ * ─── POR QUE MAIS DE UM ───────────────────────────────────────────────────
+ * Esta função nasceu apontando para `gemini-2.5-pro`, que o Google fechou para
+ * novos projetos: a chamada volta 404 e a leitura do cupom morre inteira.
+ * Modelo hospedado é dependência que muda sem aviso — e quando muda, quem está
+ * com a sacola na mão no meio da rua é o lojista.
+ *
+ * A cascata cobre os três modos de falha reais, todos observados na prática:
+ *   404  o modelo foi descontinuado ou renomeado;
+ *   503  pico de demanda ("high demand", resposta do próprio Google);
+ *   429  cota estourada na janela.
+ *
+ * ─── POR QUE FLASH E NÃO PRO ──────────────────────────────────────────────
+ * Medido com cupom de 8 itens: o flash leu 8/8 com descrição, quantidade,
+ * unidade, valores, CNPJ, data e chave corretos. Não há precisão a ganhar
+ * pagando mais — e importação de nota é operação de todo dia, não eventual.
  */
-const MODELO = 'gemini-2.5-pro';
+const MODELOS = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-3.1-pro-preview'];
 
 const SCHEMA_RESPOSTA = {
   type: 'object',
@@ -48,6 +62,8 @@ const SCHEMA_RESPOSTA = {
     data_emissao: { type: 'string', nullable: true },
     chave: { type: 'string', nullable: true },
     valor_total: { type: 'number', nullable: true },
+    valor_produtos: { type: 'number', nullable: true },
+    desconto: { type: 'number', nullable: true },
     itens: {
       type: 'array',
       items: {
@@ -87,6 +103,10 @@ Regras rígidas:
 - valor_total do item é o valor da linha, já com a quantidade multiplicada.
 - Se aparecerem "total de itens", "valor total", CNPJ, nome do mercado, data/hora e a chave de
   acesso de 44 dígitos, preencha os campos correspondentes. Se não aparecer, deixe nulo.
+- O rodapé costuma trazer três linhas de dinheiro: "produtos" (soma das linhas), "Desconto" e
+  "Valor total" (o que foi pago). Preencha valor_produtos com a primeira, desconto com a segunda
+  e valor_total com a terceira. Sem desconto no cupom, deixe desconto nulo.
+  O desconto muda o custo do estoque: não o ignore e não o invente.
 - data_emissao no formato ISO (aaaa-mm-ddThh:mm:ss) quando a data estiver visível.
 
 Responda apenas o JSON do schema.`;
@@ -135,26 +155,41 @@ Deno.serve(async (req) => {
       partes.push({ inline_data: { mime_type: mime_type || 'image/jpeg', data: foto } });
     }
 
-    const respGemini = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent?key=${geminiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: partes }],
-          generationConfig: {
-            temperature: 0,
-            responseMimeType: 'application/json',
-            responseSchema: SCHEMA_RESPOSTA,
-          },
-        }),
+    const corpo = JSON.stringify({
+      contents: [{ parts: partes }],
+      generationConfig: {
+        temperature: 0,
+        responseMimeType: 'application/json',
+        responseSchema: SCHEMA_RESPOSTA,
       },
-    );
+    });
 
-    const dataGemini = await respGemini.json();
-    if (dataGemini.error) return erro(`Gemini: ${dataGemini.error.message}`, 502);
+    let dataGemini: { error?: { message?: string }; candidates?: unknown[] } | null = null;
+    let modeloUsado = '';
+    let ultimoErro = '';
 
-    const textoResposta = dataGemini.candidates?.[0]?.content?.parts?.[0]?.text;
+    for (const modelo of MODELOS) {
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${geminiKey}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: corpo },
+      );
+      const dados = await resp.json();
+
+      if (!dados.error) {
+        dataGemini = dados;
+        modeloUsado = modelo;
+        break;
+      }
+
+      ultimoErro = dados.error.message ?? `HTTP ${resp.status}`;
+      // Modelo fora do ar, cheio ou aposentado: o próximo da fila pode servir.
+      // Qualquer outro erro é da requisição em si — insistir só perde tempo.
+      if (![404, 429, 503].includes(resp.status)) break;
+    }
+
+    if (!dataGemini) return erro(`Gemini: ${ultimoErro}`, 502);
+
+    const textoResposta = (dataGemini as any).candidates?.[0]?.content?.parts?.[0]?.text;
     if (!textoResposta) return erro('A IA não conseguiu ler nada nessa foto do cupom', 502);
 
     let leitura: {
@@ -162,6 +197,8 @@ Deno.serve(async (req) => {
       data_emissao?: string | null;
       chave?: string | null;
       valor_total?: number | null;
+      valor_produtos?: number | null;
+      desconto?: number | null;
       itens?: ItemOcr[];
     };
     try {
@@ -187,6 +224,28 @@ Deno.serve(async (req) => {
       }));
 
     if (itens.length === 0) {
+      // Zero itens com rodapé legível tem causa conhecida: a foto pegou a parte
+      // de baixo do cupom — totais, QR, forma de pagamento — e a lista de
+      // produtos ficou fora do quadro. Dizer isso, com os números que foram
+      // lidos, é o que faz a segunda tentativa dar certo. "Nenhum item
+      // reconhecido" mandaria o lojista repetir exatamente o mesmo erro.
+      const totalLido = Number(leitura.valor_total) || 0;
+      const achouRodape = totalLido > 0 || !!leitura.emitente?.cnpj || !!leitura.data_emissao;
+
+      if (achouRodape) {
+        const resumo = [
+          totalLido > 0 ? `total de R$ ${totalLido.toFixed(2).replace('.', ',')}` : '',
+          leitura.data_emissao ? `emitida em ${String(leitura.data_emissao).slice(0, 10).split('-').reverse().join('/')}` : '',
+        ].filter(Boolean).join(', ');
+
+        return erro(
+          `Li o rodapé desta nota${resumo ? ` (${resumo})` : ''}, mas a LISTA DE PRODUTOS não aparece ` +
+          'nesta foto — ela fica na parte de cima do cupom. Fotografe a parte de cima e envie de novo; ' +
+          'se o cupom for longo, mande em partes que eu junto tudo.',
+          422,
+        );
+      }
+
       return erro(
         'Nenhum item foi reconhecido nessa foto. Fotografe a lista de produtos de perto, ' +
         'com o cupom esticado e sem sombra — se o cupom for longo, mande em partes.',
@@ -206,8 +265,12 @@ Deno.serve(async (req) => {
       },
       data_emissao: leitura.data_emissao ?? null,
       valor_total: Number(leitura.valor_total) || itens.reduce((acc, i) => acc + i.valor_total, 0),
+      valor_produtos: Number(leitura.valor_produtos) || undefined,
+      // O desconto da nota é rateado entre os itens no momento de gravar o
+      // custo. Sem ele, o CMV nasce acima do que a compra custou.
+      desconto: Number(leitura.desconto) > 0 ? Number(leitura.desconto) : undefined,
       itens,
-      ia_modelo: MODELO,
+      ia_modelo: modeloUsado,
     });
   } catch (e) {
     return json({ error: String((e as Error)?.message ?? e) }, { status: 500 });

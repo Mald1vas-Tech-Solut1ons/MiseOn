@@ -57,7 +57,7 @@ serve(async (req) => {
       (categoria ? `O produto é da categoria: ${categoria}. ` : '') +
       `A descrição deve ser curta (no máximo 3 linhas), direta, sem emojis exagerados, focando em texturas, sabores e desejo. Não use aspas na resposta.`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
