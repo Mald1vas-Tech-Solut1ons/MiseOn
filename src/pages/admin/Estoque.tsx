@@ -21,8 +21,17 @@ import ModalRaioXProduto from '../../components/estoque/ModalRaioXProduto';
 import ModalNutricaoInsumo from '../../components/estoque/ModalNutricaoInsumo';
 import ScannerQRCodeModal from '../../components/estoque/ScannerQRCodeModal';
 import ModalImportarNFCe from '../../components/estoque/ModalImportarNFCe';
+import SeletorItemUniversal, { type IdentidadeForm } from '../../components/estoque/SeletorItemUniversal';
+import {
+  montarNomeInsumo,
+  separarIdentidade,
+  unidadeSegura,
+  CATEGORIAS_CATALOGO,
+  type ItemCatalogo,
+} from '../../lib/catalogoInsumos';
 import { BarChart3, QrCode } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
+import { useImportacaoNota } from '../../hooks/useImportacaoNota';
 
 // Só insumo que vira comida tem tabela nutricional — álcool em gel,
 // uniforme e material de escritório não entram (mesmo critério do
@@ -55,44 +64,27 @@ export default function Estoque() {
   const [transformando, setTransformando] = useState<Insumo | null | undefined>(undefined);
   const [avisoEstoque, setAvisoEstoque] = useState<string | null>(null);
 
-  // NFC-e Scanner & Importação
+  // NFC-e Scanner & Importação. As duas rotas (QR/SEFAZ e foto/IA) e a regra
+  // de nunca deixar o lojista sem saída vivem no hook — Compras usa o mesmo.
   const [modalScannerAberto, setModalScannerAberto] = useState(false);
-  const [dadosNotaImportada, setDadosNotaImportada] = useState<any | null>(null);
-  const [consultandoNota, setConsultandoNota] = useState(false);
-
-  const processarQRCode = async (entrada: string) => {
-    setConsultandoNota(true);
-    try {
-      const isUrl = entrada.includes('http://') || entrada.includes('https://');
-      if (!isUrl) {
-        alert(
-          'Só a chave de acesso não basta. A SEFAZ exige o código de segurança que fica dentro do QR Code, ' +
-          'e ele não pode ser deduzido da chave. Escaneie o QR Code impresso no cupom.'
-        );
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('nfe-importar-qrcode', {
-        body: { url_qrcode: entrada }
-      });
-
-      const msgErro = (data as any)?.error;
-      if (error || !data || msgErro) {
-        alert(`Erro ao consultar nota na SEFAZ: ${msgErro || error?.message || 'Tente novamente.'}`);
-      } else {
-        setModalScannerAberto(false);
-        setDadosNotaImportada(data);
-      }
-    } catch (err: any) {
-      alert(`Falha de conexão com a SEFAZ: ${err?.message || err}`);
-    } finally {
-      setConsultandoNota(false);
-    }
-  };
+  const nota = useImportacaoNota(lojaId);
 
   // States para Novo Insumo Dinâmico
   const [modoCadastro, setModoCadastro] = useState<'RAPIDO' | 'AVANCADO'>('RAPIDO');
-  const [nome, setNome] = useState('');
+  /**
+   * Identidade do item: gênero universal + variedade + marca.
+   *
+   * Antes era um campo de texto livre, e o resultado eram três "tomates" sem
+   * parentesco no cadastro. O gênero (`slug`) é o que agrupa; variedade e marca
+   * são o que distingue. O `nome` gravado continua sendo a soma dos três, então
+   * ficha técnica, PDV e custeio não percebem diferença nenhuma.
+   */
+  const [identidade, setIdentidade] = useState<IdentidadeForm>({
+    base: '', slug: null, variedade: '', marca: '',
+  });
+  const nome = montarNomeInsumo({
+    base: identidade.base, variedade: identidade.variedade, marca: identidade.marca,
+  });
   const [categoriaInsumo, setCategoriaInsumo] = useState('Ingrediente');
   const [setor, setSetor] = useState('');
   const [unidadeDireta, setUnidadeDireta] = useState('un');
@@ -256,6 +248,31 @@ export default function Estoque() {
   const normalizeString = (str: string) => 
     str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 
+  /**
+   * Escolher o gênero decide a unidade — e é esse o ponto.
+   *
+   * Tomate é kg em qualquer mercado do Brasil; leite é litro; ovo é unidade.
+   * Deixar isso como pergunta era transferir para o lojista uma decisão que o
+   * sistema já sabe responder, e era assim que nascia "tomate em rodela": um
+   * cadastro que a próxima compra, vinda em quilo, não consegue alimentar.
+   *
+   * Com saldo em estoque a unidade não se mexe: o número já gravado significa a
+   * unidade antiga, e reinterpretá-lo seria falsificar o saldo. Aí só o vínculo
+   * do gênero é aplicado — que é justamente o que faltava no cadastro legado.
+   */
+  const aplicarGenero = (item: ItemCatalogo) => {
+    const unidade = unidadeSegura(item.unidade);
+    setIsNovaCategoria(false);
+    setCategoriaInsumo(item.categoria);
+
+    const temSaldo = !!editando && Number(editando.quantidade_atual ?? 0) > 0;
+    if (temSaldo) return;
+
+    setUnidadeDireta(unidade);
+    setUnidadeCompra(unidade);
+    setPassosRendimento([{ id: '1', rendimento: '1', unidade }]);
+  };
+
   const criar = async () => {
     // btrim tambem roda no banco (trigger tg_insumos_normaliza_nome), mas o nome
     // limpo aqui e o que vai para a checagem de duplicata e para a mensagem de erro.
@@ -334,6 +351,12 @@ export default function Estoque() {
     const payload = {
       loja_id: lojaId,
       nome: nomeLimpo,
+      // O gênero é o que agrupa as variedades no relatório de custo; variedade
+      // e marca são o que as distingue. Vazio vira null para o índice parcial
+      // de catalogo_ref não carregar string em branco.
+      catalogo_ref: identidade.slug || null,
+      variedade: identidade.variedade.trim() || null,
+      marca: identidade.marca.trim() || null,
       unidade_medida: unidadeUso,
       quantidade_atual: estoqueFinal,
       estoque_minimo: Number(estoqueMinimo || 0),
@@ -366,7 +389,16 @@ export default function Estoque() {
 
   const iniciarEdicao = (i: Insumo) => {
     setEditando(i);
-    setNome(i.nome);
+    // Insumo cadastrado antes deste campo existir não tem gênero gravado:
+    // deduz do nome ("Tomate Italiano" reabre como Tomate + Italiano) em vez de
+    // jogar a string inteira num campo só e perder o vínculo com o catálogo.
+    const deduzido = separarIdentidade(i.nome);
+    setIdentidade({
+      base: i.catalogo_ref ? (deduzido.base || i.nome) : (deduzido.slug ? deduzido.base : i.nome),
+      slug: i.catalogo_ref ?? deduzido.slug,
+      variedade: i.variedade ?? (i.catalogo_ref ? '' : deduzido.variedade ?? ''),
+      marca: i.marca ?? '',
+    });
     setCategoriaInsumo(i.categoria_insumo || 'Ingrediente');
     setSetor(i.setor ?? '');
     setIsNovaCategoria(false);
@@ -397,7 +429,7 @@ export default function Estoque() {
   const cancelarEdicao = () => {
     setEditando(null);
     setModoCadastro('RAPIDO');
-    setNome(''); setQtdEstoqueCompra(''); setEstoqueMinimo(''); setPrecoCompra(''); setCategoriaInsumo('Ingrediente'); setSetor('');
+    setIdentidade({ base: '', slug: null, variedade: '', marca: '' }); setQtdEstoqueCompra(''); setEstoqueMinimo(''); setPrecoCompra(''); setCategoriaInsumo('Ingrediente'); setSetor('');
     setUnidadeDireta('un');
     setIsNovaCategoria(false); setNomeNovaCategoria('');
     setPassosRendimento([{ id: '1', rendimento: '1', unidade: 'un' }]); setUnidadeCompra('pct');
@@ -480,7 +512,13 @@ export default function Estoque() {
   );
 
   const categoriasDoBanco = Array.from(new Set([...insumos, ...inativos].map(i => i.categoria_insumo).filter(Boolean))) as string[];
-  const categoriasUnicas = Array.from(new Set(['Ingrediente', 'Revenda Direta', 'Embalagem', 'Limpeza', ...categoriasDoBanco]));
+  // As categorias do catálogo entram na lista: um lojista de food service pensa
+  // em "Hortifrúti" e "Laticínios", não em "Ingrediente". Sem isso, escolher um
+  // gênero deixaria o select apontando para uma categoria que não existe nele.
+  const categoriasUnicas = Array.from(new Set([
+    'Ingrediente', 'Revenda Direta', 'Embalagem', 'Limpeza',
+    ...CATEGORIAS_CATALOGO, ...categoriasDoBanco,
+  ]));
 
   return (
     <div className="p-4 max-w-4xl mx-auto pb-24">
@@ -596,12 +634,18 @@ export default function Estoque() {
         </div>
         
         <div className="space-y-5">
-           {/* Linha 1: Dados básicos */}
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <label data-tour="tour-estoque-campo-nome" className="block">
-                 <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{tDynamic('Nome do Insumo / Produto')}</span>
-                 <input id="input-nome-insumo" className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 focus:border-[var(--cor-primaria)] focus:outline-none transition-colors" placeholder={tDynamic('ex: Queijo Mussarela, Coca-Cola Lata')} value={nome} onChange={e => setNome(e.target.value)} />
-              </label>
+           {/* Linha 1: Identidade do item */}
+           <div data-tour="tour-estoque-campo-nome">
+              <SeletorItemUniversal
+                 valor={identidade}
+                 onChange={patch => setIdentidade(prev => ({ ...prev, ...patch }))}
+                 onEscolherGenero={aplicarGenero}
+                 insumosExistentes={[...insumos, ...inativos]}
+                 editandoId={editando?.id}
+              />
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="block">
                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{tDynamic('Categoria')}</span>
                  <select className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 focus:border-[var(--cor-primaria)] focus:outline-none"
@@ -1140,23 +1184,29 @@ export default function Estoque() {
       )}
 
       {/* MODAL SCANNER DE QR CODE */}
-      {modalScannerAberto && (
+      {modalScannerAberto && !nota.dadosNota && (
         <ScannerQRCodeModal
-          onFechar={() => setModalScannerAberto(false)}
-          onLido={processarQRCode}
-          carregando={consultandoNota}
+          onFechar={() => { setModalScannerAberto(false); nota.limparFalha(); }}
+          onLido={nota.processarQRCode}
+          onFotosCupom={nota.processarFotoCupom}
+          carregando={nota.consultando}
+          textoCarregando={nota.textoConsulta}
+          // A SEFAZ recusou: abre direto na leitura por foto. Devolver o
+          // lojista para a câmera do QR seria mandá-lo repetir o que falhou.
+          comecarNoCupom={!!nota.motivoFallback}
+          motivoFallback={nota.motivoFallback}
         />
       )}
 
       {/* MODAL DE CONFERÊNCIA DE IMPORTAÇÃO DA NFC-E */}
-      {dadosNotaImportada && (
+      {nota.dadosNota !== null && (
         <ModalImportarNFCe
           lojaId={lojaId}
-          dadosNota={dadosNotaImportada}
+          dadosNota={nota.dadosNota}
           insumosExistentes={[...insumos, ...inativos]}
-          onFechar={() => setDadosNotaImportada(null)}
+          onFechar={nota.descartarNota}
           onSucesso={(msg) => {
-            setDadosNotaImportada(null);
+            nota.descartarNota();
             setAvisoEstoque(msg);
             carregar();
           }}

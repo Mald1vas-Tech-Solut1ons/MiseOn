@@ -19,6 +19,7 @@ import {
   Truck, Plus, Pencil, Archive, FileText, Clock, Zap, TrendingDown, CalendarClock, MessageCircle,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useImportacaoNota } from '../../hooks/useImportacaoNota';
 import { Insumo, fmt } from '../../types';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
@@ -69,40 +70,11 @@ export default function Compras() {
   const [editandoFornecedor, setEditandoFornecedor] = useState<Fornecedor | null | undefined>(undefined);
   const [recebendo, setRecebendo] = useState<CompraResumo | null>(null);
 
-  // NFC-e Scanner & Importação
+  // NFC-e Scanner & Importação. Mesmo hook do Estoque: as duas rotas (QR pela
+  // SEFAZ e foto do papel pela IA) e a regra de nunca deixar o lojista sem
+  // saída quando o portal recusa a nota.
   const [modalScannerAberto, setModalScannerAberto] = useState(false);
-  const [dadosNotaImportada, setDadosNotaImportada] = useState<any | null>(null);
-  const [consultandoNota, setConsultandoNota] = useState(false);
-
-  const processarQRCode = async (entrada: string) => {
-    setConsultandoNota(true);
-    try {
-      const isUrl = entrada.includes('http://') || entrada.includes('https://');
-      if (!isUrl) {
-        alert(
-          'Só a chave de acesso não basta. A SEFAZ exige o código de segurança que fica dentro do QR Code, ' +
-          'e ele não pode ser deduzido da chave. Escaneie o QR Code impresso no cupom.'
-        );
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('nfe-importar-qrcode', {
-        body: { url_qrcode: entrada }
-      });
-
-      const msgErro = (data as any)?.error;
-      if (error || !data || msgErro) {
-        alert(`Erro ao consultar nota na SEFAZ: ${msgErro || error?.message || 'Tente novamente.'}`);
-      } else {
-        setModalScannerAberto(false);
-        setDadosNotaImportada(data);
-      }
-    } catch (err: any) {
-      alert(`Falha de conexão com a SEFAZ: ${err?.message || err}`);
-    } finally {
-      setConsultandoNota(false);
-    }
-  };
+  const nota = useImportacaoNota(lojaId);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -672,23 +644,27 @@ export default function Compras() {
       )}
 
       {/* MODAL SCANNER DE QR CODE */}
-      {modalScannerAberto && (
+      {modalScannerAberto && !nota.dadosNota && (
         <ScannerQRCodeModal
-          onFechar={() => setModalScannerAberto(false)}
-          onLido={processarQRCode}
-          carregando={consultandoNota}
+          onFechar={() => { setModalScannerAberto(false); nota.limparFalha(); }}
+          onLido={nota.processarQRCode}
+          onFotosCupom={nota.processarFotoCupom}
+          carregando={nota.consultando}
+          textoCarregando={nota.textoConsulta}
+          comecarNoCupom={!!nota.motivoFallback}
+          motivoFallback={nota.motivoFallback}
         />
       )}
 
       {/* MODAL DE CONFERÊNCIA DE IMPORTAÇÃO DA NFC-E */}
-      {dadosNotaImportada && (
+      {nota.dadosNota !== null && (
         <ModalImportarNFCe
           lojaId={lojaId}
-          dadosNota={dadosNotaImportada}
+          dadosNota={nota.dadosNota}
           insumosExistentes={insumos}
-          onFechar={() => setDadosNotaImportada(null)}
+          onFechar={nota.descartarNota}
           onSucesso={(msg) => {
-            setDadosNotaImportada(null);
+            nota.descartarNota();
             setAviso(msg);
             carregar();
           }}
