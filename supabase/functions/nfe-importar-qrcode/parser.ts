@@ -35,8 +35,19 @@ export interface DadosNFCe {
     cnpj?: string | null;
   };
   data_emissao?: string | null;
+  /** O que foi efetivamente pago: já com o desconto abatido. */
   valor_total: number;
-  itens: ItemNFCe[];
+  /** Soma das linhas de produto, antes do desconto. */
+  valor_produtos?: number;
+  /**
+   * Desconto da nota inteira.
+   *
+   * O cupom do atacado traz "produtos 472,37 / Desconto 14,88 / Valor total
+   * 457,49". Sem ler esta linha, o estoque entra pelos 472,37 e o CMV nasce 3%
+   * acima do que a compra custou de verdade — um erro que não aparece em lugar
+   * nenhum da tela e contamina toda decisão de preço tomada depois.
+   */
+  desconto?: number;
 }
 
 export function extrairChave(urlOuChave: string): { chave: string; uf: string } | null {
@@ -147,6 +158,10 @@ export function parseHtmlSefazSp(html: string, chave: string): DadosNFCe {
 
   const cnpj = plano.match(/CNPJ:\s*([\d./-]{14,20})/i)?.[1]?.trim() ?? null;
 
+  // "Desconto R$ 14,88" / "Descontos 14,88" — o rótulo varia entre emissores.
+  const descontoTexto = plano.match(/Descontos?\s*(?:R\$)?\s*\|?\s*([\d.,]+)/i)?.[1];
+  const produtosTexto = plano.match(/(?:Valor\s+dos\s+)?produtos\s*(?:R\$)?\s*\|?\s*([\d.,]+)/i)?.[1];
+
   const totalTexto =
     plano.match(/Valor\s+total\s*(?:R\$)?\s*\|?\s*([\d.,]+)/i)?.[1] ??
     h.match(/txtMax[^>]*>\s*([\d.,]+)/i)?.[1];
@@ -164,6 +179,8 @@ export function parseHtmlSefazSp(html: string, chave: string): DadosNFCe {
     emitente: { razao_social: razaoSocial, cnpj },
     data_emissao: dataEmissao,
     valor_total: numeroBr(totalTexto) || itens.reduce((acc, i) => acc + i.valor_total, 0),
+    valor_produtos: numeroBr(produtosTexto) || undefined,
+    desconto: numeroBr(descontoTexto) || undefined,
     itens,
   };
 }
