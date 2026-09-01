@@ -9,10 +9,21 @@ declare global {
   }
 }
 
+// Dispensa o banner de LGPD por `data-testid`, NAO por texto.
+//
+// A versao anterior procurava o titulo em portugues. Quando o app subia em
+// ingles (runner do CI, `navigator.language`), o `includes` dava falso, o
+// helper achava que nao havia banner e seguia — mas o banner continuava na
+// tela, cobrindo o rodape do carrinho e o rodape dos modais. O teste entao
+// falhava la na frente, num assert que nada tinha a ver com cookie.
+//
+// A suite hoje fixa pt-BR (ver support/e2e.ts); o testid e a segunda barreira,
+// para que uma troca de copy ou de idioma nao derrube o E2E de novo.
 Cypress.Commands.add('dismissCookieBanner', () => {
   cy.get('body').then(($body) => {
-    if ($body.text().includes('Sua Privacidade Importa (LGPD)')) {
-      cy.contains('Aceitar Todos').click();
+    if ($body.find('[data-testid="cookie-aceitar-todos"]').length) {
+      cy.get('[data-testid="cookie-aceitar-todos"]').click();
+      cy.get('[data-testid="cookie-aceitar-todos"]').should('not.exist');
     }
   });
 });

@@ -129,6 +129,7 @@ export function CookieBanner() {
               </button>
               <button
                 type="button"
+                data-testid="cookie-aceitar-todos"
                 onClick={handleAceitarTodos}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 transition hover:brightness-110 active:scale-95"
               >
