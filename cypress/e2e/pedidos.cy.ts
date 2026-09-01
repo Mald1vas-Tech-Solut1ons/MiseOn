@@ -103,6 +103,11 @@ describe('Fluxo de Pedidos', () => {
     cy.wait('@getAdminPedidos');
     cy.dismissCookieBanner();
 
+    cy.window().then((w) => {
+      cy.task('log', 'nav=' + w.navigator.language
+        + ' ls=' + w.localStorage.getItem('miseon_idioma')
+        + ' html=' + w.document.documentElement.lang);
+    });
     cy.contains('#1002').should('be.visible');
     cy.get('button[title*="Cancelar"]').click();
 
