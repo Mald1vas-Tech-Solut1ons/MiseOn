@@ -107,70 +107,44 @@ const STATUS_MAP: Record<string, string> = {
 
 // ─── Handler principal ────────────────────────────────────────────────────────
 
-serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+// ─── Resposta ao iFood ────────────────────────────────────────────────────────
+//
+// 202, NUNCA 200.
+//
+// A documentacao do iFood e explicita: o endpoint deve responder `202 Accepted`,
+// e e a resposta 202 que gera o heartbeat de presenca — uma unica resposta 202
+// marca como online os merchants com escopo de pedido. QUALQUER outro codigo,
+// 200 incluido, nao gera heartbeat nenhum.
+//
+// Este arquivo respondia 200 em todos os caminhos, com um comentario afirmando
+// que "o iFood exige 200". Era falso. O preco foi o aviso de 01/09/2026 —
+// "webhook falhando em responder requests de healthcheck", app miseon
+// (c44831bc-9cc2-47c0-ac61-5e73b71645d3). Healthcheck com erro reincidente por
+// 72h DESATIVA o webhook, e webhook desativado e pedido que nao chega na
+// cozinha.
+const aceito = () => new Response('Accepted', { status: 202, headers: corsHeaders });
 
-  const reqLogger = logger.withContext({ req_id: crypto.randomUUID() });
+// `EdgeRuntime` existe no runtime do Supabase, nao na tipagem do Deno.
+declare const EdgeRuntime: { waitUntil?: (p: Promise<unknown>) => void } | undefined;
 
-  // Endpoint aberto por necessidade: o iFood chama sem JWT do Supabase, então
-  // verify_jwt=false não tem alternativa. O que dá para fazer sem arriscar a
-  // integração é limitar a vazão — cada evento aqui dispara chamadas à API do
-  // iFood (busca do pedido), e sem freio um terceiro queima a cota da conta.
-  //
-  // Validação de assinatura continua fora DE PROPÓSITO: o esquema do iFood
-  // precisa ser conferido contra tráfego real antes de virar bloqueio, senão o
-  // risco vira pedido deixando de entrar em produção sem ninguém perceber.
-  // No lugar dela, TODO evento é confirmado contra a API do iFood antes de
-  // agir (ver "AUTENTICIDADE DO EVENTO" no laço abaixo) — orderId forjado não
-  // existe lá e o evento é descartado.
-  const ipOrigem = ipDaRequisicao(req);
-  const rl = await checkRateLimit(`ifood:${ipOrigem}`, { windowMs: 60_000, maxRequests: 120 });
-  if (!rl.allowed) {
-    reqLogger.warn('Rate limit atingido no webhook iFood', { context: { ip: ipOrigem } });
-    // 429 e não 200: aqui queremos que o iFood reenvie o evento depois.
-    return new Response('Too Many Requests', { status: 429, headers: corsHeaders });
-  }
+type EventoIfood = { code: string; orderId: string } & Record<string, unknown>;
 
+// ─── Processamento: fora do caminho da resposta ──────────────────────────────
+//
+// O iFood espera resposta em 1–2s e corta em 5s. Cada evento aqui faz uma ou
+// duas chamadas a API deles (token + busca do pedido) ANTES de tocar no banco;
+// um lote de eventos estourava esse teto com folga, e webhook que estoura o
+// prazo e webhook marcado como falho — o mesmo balde do e-mail de healthcheck.
+//
+// Por isso a resposta sai primeiro e o trabalho continua depois dela, preso ao
+// `EdgeRuntime.waitUntil`, que mantem o isolate vivo ate a promessa terminar.
+// Sem ele o runtime pode encerrar a invocacao junto com a resposta e o
+// processamento morre no meio — pedido perdido, silenciosamente.
+async function processarEventos(
+  events: EventoIfood[],
+  reqLogger: ReturnType<typeof logger.withContext>,
+) {
   try {
-    let rawBody: unknown;
-    try { rawBody = await req.json(); } catch { rawBody = null; }
-
-    // LOG TEMPORÁRIO: mostrar payload bruto para debug (remover após homologação)
-    reqLogger.info('RAW_PAYLOAD recebido', { context: { raw: JSON.stringify(rawBody).slice(0, 500) } });
-
-    // iFood "Testar conexão" envia um objeto único; eventos reais chegam como array.
-    // Normalizar para array em ambos os casos.
-    let normalizedBody = rawBody;
-    if (rawBody && !Array.isArray(rawBody) && typeof rawBody === 'object') {
-      normalizedBody = [rawBody];
-    }
-
-    // KEEPALIVE: o iFood bate aqui a cada ~30s só para saber se estamos de pé.
-    // Vem sem orderId, então o schema reprovava e cada batida gerava um
-    // `error` no log com stack de ZodError. Duas dezenas de erros por minuto
-    // escondendo os erros de verdade — e, num painel de saúde da integração,
-    // dando a impressão de webhook quebrado justo no período de homologação.
-    // Não é evento de pedido: responde e sai.
-    const eventosBrutos = Array.isArray(normalizedBody) ? normalizedBody : [];
-    const soKeepalive =
-      eventosBrutos.length > 0 &&
-      eventosBrutos.every((e) => (e as { code?: string })?.code === 'KEEPALIVE');
-    if (soKeepalive) {
-      return new Response('OK', { status: 200, headers: corsHeaders });
-    }
-
-    const validation = ifoodEventSchema.safeParse(normalizedBody);
-    if (!validation.success) {
-      reqLogger.error('Payload inválido após normalização', validation.error);
-      // Sempre retornar 200 para o iFood não retentar indefinidamente
-      return new Response('OK', { status: 200, headers: corsHeaders });
-    }
-
-    const events = validation.data;
-    reqLogger.info(`Webhook processando ${events.length} evento(s)`, {
-      context: { codes: events.map((e) => e.code).join(',') },
-    });
-
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -179,7 +153,7 @@ serve(async (req: Request) => {
     const clientSecret = Deno.env.get('IFOOD_CLIENT_SECRET')!;
     if (!clientId || !clientSecret) {
       reqLogger.error('Credenciais iFood ausentes!');
-      return new Response('OK', { status: 200, headers: corsHeaders });
+      return;
     }
 
     // Token único por invocação (evita múltiplas chamadas de auth)
@@ -595,13 +569,79 @@ serve(async (req: Request) => {
         // NÃO lançar exceção — continuar processando os demais eventos do batch
       }
     }
-
-    // O iFood exige 200 para não retentar. SEMPRE retornar 200.
-    return new Response('OK', { status: 200, headers: corsHeaders });
-
   } catch (error: any) {
-    reqLogger.error('Erro geral no ifood-webhook', error);
-    // Mesmo em erro geral: retornar 200 para o iFood não retentar indefinidamente
-    return new Response('OK', { status: 200, headers: corsHeaders });
+    reqLogger.error('Erro geral ao processar eventos do iFood', error);
   }
+}
+
+serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  const reqLogger = logger.withContext({ req_id: crypto.randomUUID() });
+
+  let rawBody: unknown;
+  try { rawBody = await req.json(); } catch { rawBody = null; }
+
+  // "Testar conexao" e healthcheck mandam um objeto unico; evento real chega
+  // como array. Normalizar para array nos dois casos.
+  const normalizedBody =
+    rawBody && !Array.isArray(rawBody) && typeof rawBody === 'object' ? [rawBody] : rawBody;
+  const eventosBrutos = Array.isArray(normalizedBody) ? normalizedBody : [];
+
+  // ── HEALTHCHECK ────────────────────────────────────────────────────────────
+  // O iFood bate aqui a cada ~25s so para saber se estamos de pe. Vem sem
+  // orderId (codigo KEEPALIVE) e, em algumas variacoes, sem corpo util nenhum.
+  //
+  // Responde 202 ANTES de qualquer trabalho: sem rate limit, sem banco, sem
+  // rede. E este caminho que decide se a loja aparece online no iFood, e ele
+  // nao pode depender de nenhuma dependencia nossa estar de pe.
+  const soKeepalive =
+    eventosBrutos.length === 0 ||
+    eventosBrutos.every((e) => (e as { code?: string })?.code === 'KEEPALIVE');
+  if (soKeepalive) return aceito();
+
+  // ── Rate limit: so para evento, nunca para healthcheck ─────────────────────
+  // 429 e resposta legitima para evento — o iFood reenvia depois. No
+  // healthcheck seria veneno: qualquer nao-202 tira os merchants do ar. Por
+  // isso o freio mora aqui embaixo, depois do desvio do keepalive.
+  //
+  // Endpoint aberto por necessidade: o iFood chama sem JWT do Supabase, entao
+  // verify_jwt=false nao tem alternativa. Sem freio, um terceiro queima a cota
+  // da conta, porque cada evento dispara chamada a API do iFood.
+  //
+  // Validacao de assinatura continua fora DE PROPOSITO: todo evento e conferido
+  // contra a API do iFood antes de agir (ver "AUTENTICIDADE DO EVENTO"), entao
+  // orderId forjado nao existe la e o evento e descartado.
+  const ipOrigem = ipDaRequisicao(req);
+  const rl = await checkRateLimit(`ifood:${ipOrigem}`, { windowMs: 60_000, maxRequests: 120 });
+  if (!rl.allowed) {
+    reqLogger.warn('Rate limit atingido no webhook iFood', { context: { ip: ipOrigem } });
+    return new Response('Too Many Requests', { status: 429, headers: corsHeaders });
+  }
+
+  const validation = ifoodEventSchema.safeParse(normalizedBody);
+  if (!validation.success) {
+    // `warn`, nao `error`: corpo desconhecido do iFood nao e falha nossa, e
+    // subir como erro so afoga o log — foi assim que o keepalive escondeu
+    // problema de verdade durante a homologacao.
+    reqLogger.warn('Payload iFood nao reconhecido — nada a processar', {
+      context: { raw: JSON.stringify(rawBody).slice(0, 500) },
+    });
+    return aceito();
+  }
+
+  const events = validation.data as EventoIfood[];
+  reqLogger.info(`Webhook recebeu ${events.length} evento(s)`, {
+    context: { codes: events.map((e) => e.code).join(',') },
+  });
+
+  // Resposta primeiro, trabalho depois.
+  const tarefa = processarEventos(events, reqLogger);
+  if (typeof EdgeRuntime !== 'undefined' && typeof EdgeRuntime?.waitUntil === 'function') {
+    EdgeRuntime.waitUntil(tarefa);
+  } else {
+    await tarefa; // runtime sem waitUntil: melhor demorar do que perder o evento
+  }
+
+  return aceito();
 });
