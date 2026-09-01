@@ -187,6 +187,15 @@ export default function PDV() {
   };
 
   /* ── fechamento da venda ── */
+
+  // A venda vale; o estoque é que não desceu. Avisa sem derrubar a tela de
+  // sucesso: o operador precisa saber para acertar o inventário depois, mas o
+  // cliente já pagou e não pode ficar esperando.
+  const avisarEstoqueNaoBaixado = (motivo: string) => {
+    console.error('Baixa de estoque falhou:', motivo);
+    toast('Venda registrada, mas o estoque NÃO baixou. Confira o inventário.', 'alerta');
+  };
+
   const registrarVenda = async (met: MetodoPgto) => {
     if (carrinho.length === 0) return;
     if (met === 'DINHEIRO' && recebidoNum < total) { setErro('Valor recebido menor que o total.'); return; }
@@ -247,13 +256,21 @@ export default function PDV() {
         }).eq('id', ped.id);
         if (eUpd) console.error('Falha ao enviar pedido à cozinha:', eUpd);
         if (!temCozinha) {
-          // Bypass completo pra revenda direta de balcão: o cliente já pegou a Coca-Cola e pagou
-          await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: ped.id, p_novo_status: 'PRONTO' });
-          await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: ped.id, p_novo_status: 'FINALIZADO' });
+          // Bypass completo pra revenda direta de balcão: o cliente já pegou a Coca-Cola e pagou.
+          // Se a trigger de transição recusar, o pedido fica em aberto e some do
+          // fechamento do dia — então a recusa precisa aparecer, não sumir.
+          const r1 = await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: ped.id, p_novo_status: 'PRONTO' });
+          const r2 = r1.error ? null : await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: ped.id, p_novo_status: 'FINALIZADO' });
+          const falha = r1.error ?? r2?.error;
+          if (falha) {
+            console.error('Falha ao finalizar venda de balcão:', falha);
+            toast(`Venda registrada, mas o pedido #${ped.numero} ficou em aberto. Finalize pelo Painel de Pedidos.`, 'alerta');
+          }
         }
         setVenda({ pedidoId: ped.id, numero: ped.numero, total, metodo: met, troco, itens: carrinho, temCozinha });
         setEtapa('SUCESSO');
         toast(`Venda concluída! Pedido #${ped.numero}`, 'sucesso');
+        if (ped.avisoEstoque) avisarEstoqueNaoBaixado(ped.avisoEstoque);
         tocarSom();
         carregarCaixa();
       }
@@ -288,6 +305,7 @@ export default function PDV() {
 
       setPedidoMesaOk({ numero: ped.numero, mesaNumero: mesaSelecionada.numero });
       toast(`Pedido #${ped.numero} enviado para mesa ${mesaSelecionada.numero}`, 'sucesso');
+      if (ped.avisoEstoque) avisarEstoqueNaoBaixado(ped.avisoEstoque);
       tocarSom();
       setCarrinho([]); setNomeCliente(''); setDesconto('');
     } catch (e) {
@@ -307,9 +325,12 @@ export default function PDV() {
     if (!pixInfo) return;
     setProcessando(true);
     try {
-      await supabase.from('pagamentos').update({ status: 'PAGO', data_pagamento: new Date().toISOString() })
+      const { error: ePgto } = await supabase.from('pagamentos')
+        .update({ status: 'PAGO', data_pagamento: new Date().toISOString() })
         .eq('pedido_id', pixInfo.pedidoId).eq('metodo', 'PIX');
-      await supabase.from('pedidos').update({ status: 'ACEITO' }).eq('id', pixInfo.pedidoId);
+      if (ePgto) throw ePgto;
+      const { error: eAceite } = await supabase.from('pedidos').update({ status: 'ACEITO' }).eq('id', pixInfo.pedidoId);
+      if (eAceite) throw eAceite;
       if (venda && !venda.temCozinha) {
         const r1 = await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: pixInfo.pedidoId, p_novo_status: 'PRONTO' });
         if (r1.error) throw r1.error;
@@ -398,14 +419,34 @@ export default function PDV() {
 
   const abrirTurno = async () => {
     setSalvandoCaixa(true);
+    setErro('');
+
+    // Dois cliques no botão abriam dois turnos. A leitura do caixa pega só o
+    // mais recente, então o primeiro virava um turno fantasma que nunca fecha
+    // — e ficava acumulando venda para sempre. Confere antes de abrir.
+    const { data: jaAberto } = await supabase.from('caixa_turnos')
+      .select('id').eq('loja_id', lojaId).eq('status', 'ABERTO').limit(1).maybeSingle();
+    if (jaAberto) {
+      setSalvandoCaixa(false);
+      setModalCaixa(null);
+      toast('Já existe um caixa aberto nesta loja.', 'alerta');
+      carregarCaixa();
+      return;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from('caixa_turnos').insert({
+    const { error } = await supabase.from('caixa_turnos').insert({
       loja_id: lojaId,
       aberto_por: user?.id ?? null,
       aberto_por_nome: (user?.user_metadata?.nome as string) ?? user?.email ?? null,
       fundo_troco: Number(String(valorCaixa).replace(',', '.') || 0),
     });
     setSalvandoCaixa(false);
+    if (error) {
+      console.error('Falha ao abrir o caixa:', error);
+      setErro('Não foi possível abrir o caixa. Tente de novo.');
+      return;
+    }
     setModalCaixa(null); setValorCaixa('');
     carregarCaixa();
   };
@@ -414,11 +455,18 @@ export default function PDV() {
     if (!turno || Number(valorCaixa || 0) <= 0) return;
     setSalvandoCaixa(true);
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from('caixa_movimentacoes').insert({
+    const { error } = await supabase.from('caixa_movimentacoes').insert({
       loja_id: lojaId, turno_id: turno.id, tipo,
       valor: Number(String(valorCaixa).replace(',', '.')), motivo: motivoCaixa.trim() || null, user_id: user?.id ?? null,
     });
     setSalvandoCaixa(false);
+    // Sangria que não grava soma como dinheiro na gaveta e estoura a conferência
+    // do fim do dia. O operador tem que saber na hora.
+    if (error) {
+      console.error(`Falha ao registrar ${tipo}:`, error);
+      setErro(`Não foi possível registrar a ${tipo === 'SANGRIA' ? 'sangria' : 'entrada'}. Tente de novo.`);
+      return;
+    }
     setModalCaixa(null); setValorCaixa(''); setMotivoCaixa('');
     carregarCaixa();
   };
@@ -428,7 +476,7 @@ export default function PDV() {
     setSalvandoCaixa(true);
     const { data: { user } } = await supabase.auth.getUser();
     const contado = Number(String(valorCaixa).replace(',', '.') || 0);
-    await supabase.from('caixa_turnos').update({
+    const { error } = await supabase.from('caixa_turnos').update({
       status: 'FECHADO',
       fechado_em: new Date().toISOString(),
       fechado_por: user?.id ?? null,
@@ -438,6 +486,13 @@ export default function PDV() {
       observacao: obsFechamento.trim() || null,
     }).eq('id', turno.id);
     setSalvandoCaixa(false);
+    // Fechamento que falha em silêncio deixa o turno aberto para sempre e o
+    // dia seguinte começa somando a venda de ontem.
+    if (error) {
+      console.error('Falha ao fechar o caixa:', error);
+      setErro('Não foi possível fechar o caixa. O turno continua aberto — tente de novo.');
+      return;
+    }
     setModalCaixa(null); setValorCaixa(''); setObsFechamento('');
     carregarCaixa();
   };

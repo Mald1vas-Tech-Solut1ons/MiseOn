@@ -126,10 +126,17 @@ export default function Dashboard() {
       waPedidos: waPedidosCount ?? 0,
     });
 
-    const pagamentosOk = !(loja?.aceita_online ?? true)
-      || !!loja?.efi_payee_code
-      || !!(loja?.efi_titular_documento && loja?.efi_conta)
-      || !!loja?.pix_chave;
+    // Cartão e Pix têm mecanismos de repasse SEPARADOS e independentes:
+    //   cartão → efi_payee_code
+    //   Pix    → efi_titular_documento + efi_conta (split)
+    // Ter um NÃO implica ter o outro. A regra antiga aceitava qualquer um dos
+    // dois e dava "pagamentos ✓" — então uma loja com o cartão configurado e o
+    // Pix sem repasse aparecia como pronta, enquanto todo Pix caía na conta da
+    // plataforma. O checklist afirmava o que não era verdade.
+    // Só está pronto quem tem repasse para TODO meio online que aceita.
+    const cartaoOk = !!loja?.efi_payee_code;
+    const pixOk = !!(loja?.efi_titular_documento && loja?.efi_conta);
+    const pagamentosOk = !(loja?.aceita_online ?? true) || (cartaoOk && pixOk);
     setOnboarding({
       logo: !!loja?.logo_url,
       cardapio: (qtdProdutos ?? 0) > 0,
