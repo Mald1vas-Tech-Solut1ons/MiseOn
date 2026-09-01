@@ -343,7 +343,12 @@ export default function PainelTV() {
   const pedidosEmPreparo = pedidos.filter((p) => ['NOVO', 'ACEITO', 'PREPARANDO'].includes(p.status));
   const pedidosProntos = pedidos.filter((p) => ['PRONTO', 'EM_ROTA'].includes(p.status));
   const catAtual = categorias[categoriaIndex] || categorias[0];
-  const urlCardapio = `${window.location.origin}/loja/${loja.slug}`;
+  // A rota do cardapio e `/:slug`, NAO `/loja/:slug` (ver main.tsx). Com o
+  // prefixo errado a URL nao casa com rota nenhuma e o cliente cai na landing
+  // page do MiseOn — o QR da TV, que diz "escaneie para pedir na mesa sem
+  // pegar fila", mandava todo mundo para a pagina errada. Medido em producao
+  // em 01/09/2026.
+  const urlCardapio = `${window.location.origin}/${loja.slug}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(urlCardapio)}`;
 
   return (
