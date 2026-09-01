@@ -12,6 +12,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import nodemailer from 'npm:nodemailer@6.9.14';
 import { montarEmail, EVENTOS, SITE, type Loja } from './render.ts';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 // Eventos cujo conteúdo é montado a partir do pedido no instante do
 // envio — no INSERT os itens ainda não existem em itens_pedido.
@@ -214,6 +215,19 @@ async function falhou(db: ReturnType<typeof admin>, item: any, erro: string) {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  // Freio de vazao. A funcao ja exige autorizacao propria (abaixo); o limite
+  // existe para que tentativa em massa contra essa autorizacao — ou um token
+  // vazado — nao vire custo nem volume ilimitado. Em falha de banco o
+  // limitador DEIXA PASSAR (ver _shared/rate-limit.ts), entao ele nao vira um
+  // novo ponto unico de queda.
+  // 30/min por IP: o drenador da fila roda por cron a cada poucos minutos e
+  // manda UMA requisicao por rodada, esvaziando o lote inteiro por dentro.
+  const rl = await checkRateLimit(`email-worker:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 30,
+  });
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, 429);
 
   try {
     const body = await req.json().catch(() => ({}));

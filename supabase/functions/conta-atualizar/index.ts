@@ -3,6 +3,7 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import nodemailer from 'npm:nodemailer@6.9.14';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -44,6 +45,19 @@ function transportador() {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  // Freio de vazao. A funcao ja exige autorizacao propria; o limite existe
+  // para que tentativa em massa contra ela — inclusive contra o OTP de e-mail,
+  // que e um codigo curto e adivinhavel por forca bruta — nao fique de graca.
+  // Em falha de banco o limitador DEIXA PASSAR (ver _shared/rate-limit.ts),
+  // entao ele nao vira um novo ponto unico de queda.
+  //
+  // 20/min por IP: e uma tela de conta, mexida de vez em quando por pessoa.
+  const rl = await checkRateLimit(`conta-atualizar:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 20,
+  });
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, 429);
 
   try {
     const authHeader = req.headers.get('Authorization') ?? '';

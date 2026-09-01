@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { checkRateLimit, ipDaRequisicao } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,6 +36,19 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  // Freio de vazao. A funcao ja exige autorizacao propria (abaixo); o limite
+  // existe para que tentativa em massa contra essa autorizacao — ou um token
+  // vazado — nao vire custo nem volume ilimitado. Em falha de banco o
+  // limitador DEIXA PASSAR (ver _shared/rate-limit.ts), entao ele nao vira um
+  // novo ponto unico de queda.
+  // 60/min por IP: uma loja em hora de pico dispara confirmacao, status e
+  // aviso de entrega — bem abaixo disso.
+  const rl = await checkRateLimit(`whatsapp-send:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 60,
+  });
+  if (!rl.allowed) return json({ error: "Muitas requisicoes. Tente em instantes." }, 429);
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
