@@ -175,7 +175,11 @@ export default function Cardapio() {
       setLoja(l);
       const [h, b, c, p, t, f, est, nut] = await Promise.all([
         supabase.from('horarios_funcionamento').select('*').eq('loja_id', l.id),
-        supabase.from('banners_destaque').select('*').eq('loja_id', l.id).order('ordem_exibicao'),
+        // `.eq('is_ativo', true)` explicito, e nao so a RLS: a policy publica
+        // filtra `is_ativo`, mas o LOJISTA logado cai na policy de admin e
+        // enxerga tudo. Era ele quem via banner desligado na propria vitrine e
+        // achava que o botao de desativar nao funcionava.
+        supabase.from('banners_destaque').select('*').eq('loja_id', l.id).eq('is_ativo', true).order('ordem_exibicao'),
         supabase.from('categorias').select('*').eq('loja_id', l.id).order('ordem'),
         supabase.from('produtos').select('*, grupos_opcoes(*, opcoes(*))').eq('loja_id', l.id).order('ordem'),
         supabase.from('taxas_entrega').select('*').eq('loja_id', l.id),

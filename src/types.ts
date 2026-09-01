@@ -875,6 +875,8 @@ export type ModoPDV = 'BALCAO' | 'MESA';
 export interface VendaConcluida {
   pedidoId: string;
   numero: number;
+  /** Senha de chamada no balcao. NULL em tipo de pedido que ninguem chama. */
+  senha?: number | null;
   total: number;
   metodo: MetodoPgto;
   troco: number;

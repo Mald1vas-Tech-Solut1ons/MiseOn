@@ -27,8 +27,16 @@ export function PedidoHeader({ pedido: p }: PedidoHeaderProps) {
                 color: '#EAF1FB',
                 letterSpacing: '.02em',
               }}>
-                #{p.numero}
+                {p.senha != null ? `SENHA ${p.senha}` : `#${p.numero}`}
               </span>
+              {/* Com senha, o `#numero` continua visivel — menor — porque e ele
+                  que casa com o cupom fiscal, o financeiro e o suporte. Sem
+                  senha (delivery), o numero ja e o titulo acima. */}
+              {p.senha != null && (
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#94a3b8' }}>
+                  #{p.numero}
+                </span>
+              )}
               {p.origem === 'ifood' && (
                 <span className="rounded bg-red-600 px-1.5 py-0.5 font-['JetBrains_Mono'] text-[10px] font-bold text-white shadow-sm">
                   iFood

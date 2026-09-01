@@ -21,6 +21,7 @@ export function FooterSEO() {
     { title: tDynamic('Integração iFood Nativa'), href: '/integracao-ifood' },
     { title: tDynamic('Cardápio Digital QR Code'), href: '/cardapio-qr-code' },
     { title: tDynamic('Atendimento WhatsApp com IA'), href: '/api-whatsapp-restaurantes' },
+    { title: tDynamic('Painel de Senhas na TV'), href: '/painel-de-senhas-tv' },
     { title: tDynamic('Gestão Fiscal NFC-e / NF-e'), href: '/gestao-fiscal-nfe' },
   ];
 

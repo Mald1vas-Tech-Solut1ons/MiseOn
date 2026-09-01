@@ -93,6 +93,10 @@ export function imprimir(options: PrintOptions) {
           .logo { max-width: 150px; max-height: 90px; margin: 0 auto 4px; display: block; filter: grayscale(1) contrast(1.3); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .logo-mini { width: 28px; height: auto; margin: 4px auto 2px; display: block; filter: grayscale(1) contrast(1.4); }
           .num-box { border-top: 2px dashed #000; border-bottom: 2px dashed #000; padding: 4px 0; margin: 6px 0; }
+          /* A senha e lida a distancia, de pe, com o papel na mao e a TV do
+             outro lado do balcao. 46px e o maior corpo que cabe em bobina de
+             58mm sem quebrar linha em senha de 3 digitos. */
+          .senha-num { font-size: 46px; line-height: 1.05; letter-spacing: 2px; }
           .os-header { background-color: #000; color: #fff; padding: 4px; text-align: center; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           table { width: 100%; border-collapse: collapse; }
           .col-qtd { width: 15%; }
@@ -165,7 +169,26 @@ function rodapeMiseOn(nota?: string): string {
     </div>`;
 }
 
+/** Cabeça da via impressa.
+ *
+ *  A SENHA vem primeiro e enorme; `#numero` desce para linha de apoio.
+ *  Motivo: quem espera no balcao compara o papel na mao com a TV, e a TV
+ *  chama a SENHA (1..999, zera todo dia). O `numero` e identidade contabil e
+ *  ja chegou a 9279 no Natureba — sair sozinho no papel fazia o cliente
+ *  procurar "9279" num painel que mostrava "12" e vir perguntar no balcao.
+ *
+ *  Delivery nao tem senha (ninguem e chamado): ai o box volta a ser o numero,
+ *  que e o que o entregador e o suporte usam. */
 function numeroPedidoBox(p: Pedido): string {
+  if (p.senha != null) {
+    return `
+      <div class="num-box text-center">
+        <div class="font-bold sm uppercase" style="letter-spacing:4px;">SENHA</div>
+        <div class="font-bold senha-num">${esc(p.senha)}</div>
+        <div class="font-bold sm uppercase">* ${tipoLabel(p)} *</div>
+        <div class="xs uppercase">Pedido #${esc(p.numero)}</div>
+      </div>`;
+  }
   return `
     <div class="num-box text-center">
       <div class="font-bold text-xl uppercase">PEDIDO #${esc(p.numero)}</div>

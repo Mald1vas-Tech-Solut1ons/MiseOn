@@ -242,6 +242,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/integracao-ifood"          element={<NicheLandingPage forcedSlug="integracao-ifood" />} />
               <Route path="/cardapio-qr-code"          element={<NicheLandingPage forcedSlug="cardapio-qr-code" />} />
               <Route path="/api-whatsapp-restaurantes" element={<NicheLandingPage forcedSlug="api-whatsapp-restaurantes" />} />
+              <Route path="/painel-de-senhas-tv"     element={<NicheLandingPage forcedSlug="painel-de-senhas-tv" />} />
               <Route path="/gestao-fiscal-nfe"         element={<NicheLandingPage forcedSlug="gestao-fiscal-nfe" />} />
               <Route path="/gestao-de-estoque-3d"      element={<EstoquePage />} />
               <Route path="/estrategia-de-marketing-para-restaurantes" element={<MarketingStrategyPage />} />

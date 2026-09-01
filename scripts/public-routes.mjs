@@ -108,6 +108,7 @@ export const PUBLIC_ROUTES = [
   { path: '/integracao-ifood', changefreq: 'weekly', priority: 0.9 },
   { path: '/cardapio-qr-code', changefreq: 'weekly', priority: 0.9 },
   { path: '/api-whatsapp-restaurantes', changefreq: 'weekly', priority: 0.9 },
+  { path: '/painel-de-senhas-tv', changefreq: 'weekly', priority: 0.9 },
   { path: '/gestao-fiscal-nfe', changefreq: 'weekly', priority: 0.9 },
   { path: '/gestao-de-estoque-3d', changefreq: 'weekly', priority: 0.8 },
   { path: '/blog', changefreq: 'daily', priority: 0.9 },

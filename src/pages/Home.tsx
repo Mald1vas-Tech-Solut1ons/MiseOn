@@ -1137,6 +1137,9 @@ export default function Home() {
                 <Link to="/gestao-fiscal-nfe" className="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-blue-500 hover:text-blue-400">
                   🧾 {tDynamic('Emissão Fiscal NFC-e')}
                 </Link>
+                <Link to="/painel-de-senhas-tv" className="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-amber-500 hover:text-amber-400">
+                  📺 {tDynamic('Painel de Senhas na TV')}
+                </Link>
               </div>
             </div>
           </div>

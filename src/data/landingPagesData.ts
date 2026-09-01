@@ -898,6 +898,127 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     ],
   },
 
+  // Painel de senha na TV: o recurso estava no produto e em lugar nenhum do
+  // marketing. Quem procura por isso digita "painel de senha", "chamar senha
+  // na TV" ou "cardapio digital para TV" — termos que a landing de cardapio
+  // QR Code nao cobre, porque ali a TV nem aparece.
+  'painel-de-senhas-tv': {
+    slug: 'painel-de-senhas-tv',
+    category: 'funcionalidade',
+    seo: {
+      title: 'Painel de Senha na TV e Cardápio Digital 4K para Balcão — MiseOn',
+      description: 'Chame o cliente pela TV com senha grande, som e nome. A mesma TV vira cardápio digital em 4K quando não há pedido pronto. Sem app e sem computador extra.',
+      keywords: 'painel de senha para tv, chamada de senha restaurante, painel de senhas lanchonete, cardápio digital para tv, menu board tv restaurante, painel de retirada balcão',
+      canonicalUrl: 'https://miseon.app.br/painel-de-senhas-tv',
+    },
+    badge: 'Painel de Senha + Menu Board na mesma TV',
+    h1Title: 'A TV do seu balcão chama a senha',
+    h1Highlight: 'e vende o cardápio no resto do tempo',
+    subheadline: 'Abra um link na Smart TV e pronto. A senha aparece gigante, com gongo e o nome do cliente, no instante em que a cozinha marca o pedido como pronto. Sem ninguém na fila, a mesma tela vira menu board em 4K.',
+    heroMetrics: [
+      { label: 'Equipamento extra', value: 'Nenhum' },
+      { label: 'Senha na tela após o PRONTO', value: '4s' },
+      { label: 'Senha impressa e senha da TV', value: 'A mesma' },
+    ],
+    painPointsTitle: 'O que acontece no balcão sem painel de senha',
+    painPointsSubtitle: 'O prejuízo não é o grito do atendente. É o tempo que ele para de vender para gritar:',
+    painPoints: [
+      {
+        semMiseOn: 'Atendente grita o nome do pedido no meio do barulho e repete três vezes até alguém ouvir.',
+        comMiseOn: 'A TV chama sozinha: senha em corpo gigante, gongo curto e o primeiro nome do cliente falado em voz alta.',
+      },
+      {
+        semMiseOn: 'Cliente com o papel na mão não sabe se já chamaram, e volta ao balcão a cada dois minutos para perguntar.',
+        comMiseOn: 'Duas colunas na tela: EM PREPARAÇÃO e PRONTO PARA RETIRADA. O cliente confere de longe, sozinho.',
+      },
+      {
+        semMiseOn: 'Senha impressa no papel diferente do número que aparece no painel — o cliente procura um número que nunca vai aparecer.',
+        comMiseOn: 'A mesma senha na nota, na tela do celular do cliente, no monitor da cozinha e na TV. Uma senha só, do pedido até a retirada.',
+      },
+      {
+        semMiseOn: 'TV do salão passando canal aberto, com propaganda do concorrente rodando dentro da sua loja.',
+        comMiseOn: 'Sem ninguém na fila, a TV volta ao cardápio em 4K com foto, preço e os seus banners de promoção.',
+      },
+    ],
+    featuresTitle: 'Como funciona o Painel de Senhas na TV',
+    featuresSubtitle: 'Feito para Smart TV de loja: liga, abre o link e trabalha o dia inteiro sozinho.',
+    features: [
+      {
+        iconName: 'Tv',
+        title: 'Abre em qualquer Smart TV',
+        description: 'Samsung, LG, Android TV ou um Fire Stick barato numa TV antiga. É um link no navegador da TV — sem PC, sem player e sem instalação.',
+        tag: 'Sem hardware',
+      },
+      {
+        iconName: 'Volume2',
+        title: 'Chamada sonora com nome',
+        description: 'Gongo curto e voz anunciando "Senha 42, Marina, por favor retirar no balcão". Se o aparelho não tiver voz, a tela avisa e a chamada segue visual.',
+        tag: 'Voz + som',
+      },
+      {
+        iconName: 'KeyRound',
+        title: 'Senha que zera todo dia',
+        description: 'A senha vai de 1 a 999 e reinicia na virada do seu dia de operação (padrão 4h da manhã, configurável). Nunca vira número de quatro dígitos ilegível de longe.',
+        tag: 'Legível de longe',
+      },
+      {
+        iconName: 'QrCode',
+        title: 'Menu board 4K com QR Code',
+        description: 'No modo cardápio, a TV alterna as categorias sozinha e exibe um QR Code que leva ao seu cardápio digital — o cliente pede do celular sem pegar fila.',
+        tag: 'Vende na espera',
+      },
+      {
+        iconName: 'ShieldCheck',
+        title: 'Painel com token por loja',
+        description: 'A TV opera sem login, então o acesso vai por token na URL. Nenhum dado de cliente é exposto: a tela recebe apenas senha, status e primeiro nome.',
+        tag: 'LGPD',
+      },
+      {
+        iconName: 'Ban',
+        title: 'Nunca mente quando cai a internet',
+        description: 'Se a rede da loja falhar, o selo AO VIVO vira SEM CONEXÃO na hora. Painel congelado fingindo estar atualizado é pior que painel desligado.',
+        tag: 'Honesto por padrão',
+      },
+    ],
+    businessRules: {
+      title: 'Detalhes que só aparecem depois de um mês em operação',
+      description: 'O que o painel resolve sem ninguém precisar tocar nele:',
+      items: [
+        'Reiniciou por queda de energia? A TV volta no mesmo modo em que estava — cardápio ou senhas.',
+        'Uma TV no balcão em modo senha e outra no salão em modo cardápio, cada uma com o próprio link.',
+        'Só aparecem os tipos de pedido que a sua casa chama no balcão: retirada e salão entram, delivery não.',
+        'Ligou a TV com pedidos antigos na fila? O painel não sai gritando senha velha — só chama quem ficar pronto dali em diante.',
+        'A senha sai impressa na nota do cliente, aparece no monitor da cozinha e no acompanhamento pelo celular.',
+      ],
+    },
+    faqs: [
+      {
+        pergunta: 'Preciso comprar algum equipamento para usar o painel de senhas?',
+        resposta: 'Não. Qualquer Smart TV com navegador serve, e um Fire TV Stick ou Chromecast resolve numa TV mais antiga. Você abre o link do painel, aperta F11 para tela cheia e pronto — não existe computador, player ou licença extra.',
+      },
+      {
+        pergunta: 'A senha do painel é a mesma que sai impressa para o cliente?',
+        resposta: 'Sim, e isso é proposital. A senha é gerada uma vez pelo sistema e aparece igual na nota impressa, no monitor da cozinha, no acompanhamento do pedido pelo celular do cliente e na TV. O número do pedido continua existindo, em corpo menor, porque é ele que o financeiro e a nota fiscal usam.',
+      },
+      {
+        pergunta: 'A senha vai crescendo para sempre?',
+        resposta: 'Não. Ela vai de 1 a 999 e reinicia na virada do dia de operação, que por padrão é às 4h da manhã — quem fatura depois da meia-noite mantém aquele pedido no serviço da noite anterior. A hora da virada é configurável por loja.',
+      },
+      {
+        pergunta: 'A TV fala o nome do cliente em voz alta?',
+        resposta: 'Fala o primeiro nome, quando existe: "Senha 42, Marina, por favor retirar no balcão". Aparelhos variam muito em síntese de voz — quando a TV não tem voz instalada, o painel avisa na tela que a chamada é apenas visual, em vez de fingir que está falando.',
+      },
+      {
+        pergunta: 'Dá para usar a mesma TV como cardápio digital?',
+        resposta: 'Sim, é o modo padrão. A TV mostra o cardápio em 4K com foto, preço e um QR Code para pedir pelo celular, e você alterna para o painel de senhas com um toque — ou deixa cada TV fixa em um modo pelo próprio link.',
+      },
+      {
+        pergunta: 'Funciona para restaurante por quilo, cafeteria e food truck?',
+        resposta: 'Funciona em qualquer operação de balcão em que o cliente espera e é chamado: lanchonete, hamburgueria, cafeteria, restaurante por quilo, açaí, food truck e praça de alimentação.',
+      },
+    ],
+  },
+
   'api-whatsapp-restaurantes': {
     slug: 'api-whatsapp-restaurantes',
     category: 'funcionalidade',

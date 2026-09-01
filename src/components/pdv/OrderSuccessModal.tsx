@@ -4,9 +4,11 @@ import { PartyPopper, ChefHat, Receipt } from 'lucide-react';
 import { fmt } from '../../types';
 import type { OrderSuccessModalProps } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { useI18n } from '../../contexts/I18nContext';
 import { Loader2, FileText } from 'lucide-react';
 
 export function OrderSuccessModal({ venda, imprimirVenda, limparVenda }: OrderSuccessModalProps) {
+  const { tDynamic } = useI18n();
   useEffect(() => {
     if (venda) {
       confetti({
@@ -51,6 +53,19 @@ export function OrderSuccessModal({ venda, imprimirVenda, limparVenda }: OrderSu
           <PartyPopper size={28} />
         </div>
         <h3 className="mt-3 text-xl font-black dark:text-gray-100">Venda #{venda.numero} registrada!</h3>
+
+        {/* A senha é o que o operador FALA para o cliente e o que a TV vai
+            chamar. Sem ela na tela, o atendente dizia o número do pedido em
+            voz alta e o cliente ficava esperando um número que nunca aparece
+            no painel. Fica grande porque é ditada de cabeça, no barulho. */}
+        {venda.senha != null && (
+          <div className="mt-3 rounded-2xl border-2 border-dashed border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">{tDynamic('Senha do cliente')}</p>
+            <p className="font-['Sora'] text-5xl font-black leading-tight text-[var(--cor-primaria)]">{venda.senha}</p>
+            <p className="text-[11px] font-semibold text-gray-500">{tDynamic('Diga esta senha ao cliente — é ela que aparece na TV')}</p>
+          </div>
+        )}
+
         <p className="mt-1 text-sm text-gray-500">
           {fmt(venda.total)} · {venda.metodo === 'DINHEIRO' ? 'Dinheiro' : venda.metodo === 'PIX' ? 'Pix' : venda.metodo === 'CREDITO' ? 'Crédito' : 'Débito'}
           {venda.temCozinha ? ' · já está na cozinha 🔥' : ' · Pronto! Entregue ao cliente ✅'}

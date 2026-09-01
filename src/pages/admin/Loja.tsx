@@ -150,6 +150,13 @@ export default function Loja() {
   const [salvando, setSalvando] = useState(false);
   const [ok, setOk] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  /** Qual link de TV acabou de ser copiado ('cardapio' | 'senhas' | null).
+   *
+   *  Os botoes de TV so ABRIAM o painel — no computador de quem clicou, que
+   *  nao e a TV. Para instalar de verdade o lojista precisa do TEXTO do link
+   *  (mandar no WhatsApp, digitar no navegador da TV), e ele nao pode sair da
+   *  barra de endereco: a credencial some de la e a TV fica sem senhas. */
+  const [tvCopiado, setTvCopiado] = useState<'cardapio' | 'senhas' | 'auto' | null>(null);
   // Credencial do painel de TV. Fica fora do `form` de proposito: nao e campo
   // que o lojista edita, e um save comum nunca deve reescreve-la por acidente
   // — reescrever aqui derruba todas as TVs da loja de uma vez.
@@ -159,9 +166,12 @@ export default function Loja() {
   /** URL da TV com a credencial embutida. Sem o token a RPC recusa e a TV
    *  mostra o cardapio sem senhas — por isso o link NUNCA pode sair daqui
    *  sem ele. */
-  const urlTv = (modo?: 'senhas') => {
+  const urlTv = (modo?: 'senhas' | 'cardapio' | 'auto') => {
     const base = `${window.location.origin}/tv/${slug}`;
     const params = new URLSearchParams();
+    // Sempre explicito na URL: sem `modo`, a TV cai no que estiver guardado no
+    // aparelho, e o link "Cardapio 4K" abria no modo automatico numa TV que ja
+    // tinha sido usada. Link copiado tem que fazer o que o botao promete.
     if (modo) params.set('modo', modo);
     if (tokenTv) params.set('token', tokenTv);
     const q = params.toString();
@@ -514,6 +524,11 @@ export default function Loja() {
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2000);
   };
+  const copiarLinkTv = (qual: 'cardapio' | 'senhas' | 'auto') => {
+    navigator.clipboard.writeText(urlTv(qual));
+    setTvCopiado(qual);
+    setTimeout(() => setTvCopiado(null), 2000);
+  };
   const compartilharWhatsapp = () => {
     const msg = `Peça pelo nosso cardápio online: ${linkPublico}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
@@ -555,14 +570,39 @@ export default function Loja() {
             <Share2 size={15} />
           </button>
           <a
-            href={urlTv()}
+            href={urlTv('auto')}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-600 dark:text-amber-300 hover:bg-amber-500/20 transition-all"
+            title="Recomendado para uma TV só: mostra o cardápio e corta sozinho para a senha quando um pedido fica pronto"
+          >
+            <Tv size={15} /> {tDynamic('TV Automática (recomendado)')}
+          </a>
+          <button
+            type="button"
+            onClick={() => copiarLinkTv('auto')}
+            title="Copiar o link da TV automática (com a credencial)"
+            className="shrink-0 rounded-lg border border-amber-500/30 p-2 text-amber-600 dark:text-amber-300"
+          >
+            {tvCopiado === 'auto' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
+          </button>
+          <a
+            href={urlTv('cardapio')}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-xs font-bold text-purple-600 dark:text-purple-300 hover:bg-purple-500/20 transition-all"
-            title="Abrir no navegador da Smart TV"
+            title="Fixa a TV no cardápio — para a segunda TV, a do salão"
           >
             <Tv size={15} /> {tDynamic('Cardápio na TV 4K')}
           </a>
+          <button
+            type="button"
+            onClick={() => copiarLinkTv('cardapio')}
+            title="Copiar o link do cardápio na TV (com a credencial)"
+            className="shrink-0 rounded-lg border border-purple-500/30 p-2 text-purple-600 dark:text-purple-300"
+          >
+            {tvCopiado === 'cardapio' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
+          </button>
           <a
             href={urlTv('senhas')}
             target="_blank"
@@ -572,6 +612,14 @@ export default function Loja() {
           >
             <Tv size={15} /> {tDynamic('Painel de Senhas na TV')}
           </a>
+          <button
+            type="button"
+            onClick={() => copiarLinkTv('senhas')}
+            title="Copiar o link do painel de senhas (com a credencial)"
+            className="shrink-0 rounded-lg border border-emerald-500/30 p-2 text-emerald-600 dark:text-emerald-300"
+          >
+            {tvCopiado === 'senhas' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
+          </button>
         </div>
 
         {/* ── Quais pedidos são chamados na TV ──────────────────────────────

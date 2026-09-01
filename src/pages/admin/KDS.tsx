@@ -15,7 +15,7 @@ import { useI18n } from '../../contexts/I18nContext';
 
 // Select principal: inclui adicionais (itens_pedido_opcoes) e estação de preparo do produto
 // para separar Cozinha vs Revenda Direta sem depender só de palavras-chave.
-const SELECT = 'id, numero, status, tipo_pedido, identificador_cliente, origem, mesa_numero, agendado_para, criado_em, estacao_atual, requer_cozinha, etapa_kds_atual, timestamps_etapas_kds, ' +
+const SELECT = 'id, numero, senha, status, tipo_pedido, identificador_cliente, origem, mesa_numero, agendado_para, criado_em, estacao_atual, requer_cozinha, etapa_kds_atual, timestamps_etapas_kds, ' +
   'itens_pedido(id, nome_produto, quantidade, observacao, itens_pedido_opcoes(nome_opcao), produtos(estacao_preparo))';
 
 // Fallback: idêntico ao SELECT, apenas sem as colunas KDS (usado quando a migration Kanban ainda não foi aplicada)
@@ -385,8 +385,19 @@ export default function KDS() {
         style={{ border: `2px solid ${finalizadoCozinha ? 'rgba(16,185,129,0.4)' : cor.borda}`, animation: cor.pulso && !finalizadoCozinha ? 'pulse 1.6s infinite' : undefined }}
       >
         <div className="flex items-center justify-between">
-          <span className="font-['Sora'] text-2xl font-black text-white">#{p.numero}</span>
-          
+          {/* A senha e o que a TV canta e o que esta no papel do cliente. Quem
+              aperta PRONTO aqui precisa ver o MESMO numero, senao entrega o
+              pedido errado ao conferir com quem chegou no balcao. O #numero
+              fica de apoio, para o suporte e o fechamento do dia. */}
+          <span className="flex items-baseline gap-2">
+            <span className="font-['Sora'] text-2xl font-black text-white">
+              {p.senha != null ? p.senha : `#${p.numero}`}
+            </span>
+            {p.senha != null && (
+              <span className="font-['JetBrains_Mono'] text-[11px] font-bold text-slate-500">#{p.numero}</span>
+            )}
+          </span>
+
           <div className="text-right">
             <span className="font-['JetBrains_Mono'] text-base font-bold block" style={{ color: cor.texto }}>
               {minTotal >= 0 ? `${Math.floor(minTotal)}min` : `em ${Math.ceil(-minTotal)}min`}

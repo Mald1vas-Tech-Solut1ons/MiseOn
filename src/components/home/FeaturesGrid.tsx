@@ -1,4 +1,4 @@
-import { Check, MonitorSmartphone, Receipt, DollarSign, Store, Box, Boxes } from 'lucide-react';
+import { Check, MonitorSmartphone, Receipt, DollarSign, Store, Box, Boxes, Tv } from 'lucide-react';
 
 import { useI18n } from '../../contexts/I18nContext';
 export default function FeaturesGrid() {
@@ -47,6 +47,12 @@ export default function FeaturesGrid() {
               titulo: 'KDS (Monitor de Cozinha)',
               deles: 'Impressoras de papel que engasgam, perdem comandas e geram atrasos invisíveis.',
               nosso: 'MiseOn: Telas sincronizadas para a equipe de produção. Controle exato de tempo por pedido e organização absoluta no rush.',
+            },
+            {
+              icon: <Tv size={24} className="text-orange-500" />,
+              titulo: 'Painel de Senhas na TV & Menu Board 4K',
+              deles: 'Atendente gritando o nome do pedido no barulho, ou um painel de senha vendido à parte, com equipamento próprio e mensalidade separada.',
+              nosso: 'MiseOn: A TV do balcão chama a senha sozinha, com gongo e o nome do cliente em voz alta — e vira cardápio digital 4K com QR Code quando não há ninguém na fila. É só um link na Smart TV, sem hardware extra.',
             },
             {
               icon: <Receipt size={24} className="text-blue-500" />,

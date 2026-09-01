@@ -8,6 +8,8 @@ import {
   Ban,
   KeyRound,
   Maximize2,
+  Tv,
+  Volume2,
 } from 'lucide-react';
 import { LANDING_PAGES_DATA, type LandingPageData } from '../../data/landingPagesData';
 import SEO from '../../components/SEO';
@@ -34,6 +36,8 @@ const ICON_MAP: Record<string, any> = {
   Percent,
   Ban,
   KeyRound,
+  Tv,
+  Volume2,
 };
 
 import { useI18n } from '../../contexts/I18nContext';

@@ -338,7 +338,18 @@ export default function AcompanharPedido() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/75">{tDynamic('Acompanhamento em tempo real')}</p>
-              <h1 className="mt-2 text-3xl font-black">{tDynamic('Pedido')} #{pedido.numero}</h1>
+              {/* Com senha, ela é o título: é o número que a TV do balcão
+                  chama e o que está impresso no papel. Mostrar só o `#numero`
+                  aqui fazia o cliente esperar um número que nunca aparece no
+                  painel — e ir perguntar no balcão. */}
+              {pedido.senha != null ? (
+                <>
+                  <h1 className="mt-2 text-4xl font-black leading-none">{tDynamic('Senha')} {pedido.senha}</h1>
+                  <p className="mt-1 text-xs font-semibold text-white/70">{tDynamic('Pedido')} #{pedido.numero}</p>
+                </>
+              ) : (
+                <h1 className="mt-2 text-3xl font-black">{tDynamic('Pedido')} #{pedido.numero}</h1>
+              )}
               <p className="mt-1 text-sm text-white/85">{pedido.identificador_cliente}</p>
             </div>
             <div className="flex items-center gap-2">

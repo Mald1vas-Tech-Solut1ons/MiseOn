@@ -21,6 +21,17 @@ export function CookieBanner() {
   const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
+    // O painel da TV nao tem ninguem para clicar em nada.
+    //
+    // A TV do balcao roda sozinha o dia inteiro, sem teclado e sem mouse, e o
+    // banner ficava plantado em cima do cardapio para sempre — cobrindo a
+    // vitrine que a tela existe para mostrar, na frente do cliente. E nao ha
+    // consentimento a colher ali: e o aparelho da propria loja exibindo o
+    // proprio cardapio, sem visitante navegando e sem cookie de marketing.
+    // Nada e ligado por omissao: sem escolha registrada, analiticos e
+    // marketing seguem desligados, que e o padrao mais conservador.
+    if (window.location.pathname.startsWith('/tv/')) return;
+
     const estado = obterConsentimento();
     if (estado.tipo === 'indefinido') {
       setVisivel(true);

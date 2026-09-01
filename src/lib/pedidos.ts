@@ -41,7 +41,7 @@ export async function createPedidoPedido(dados: CreatePedidoParams) {
   const { data: ped, error: e1 } = await supabase.from('pedidos').insert({
     ...baseInsert,
     etapa_kds_atual: 'etapa_fila',
-  }).select('id, numero').single();
+  }).select('id, numero, senha').single();
 
   if (e1 || !ped) throw e1 ?? new Error('Falha ao criar o pedido');
 

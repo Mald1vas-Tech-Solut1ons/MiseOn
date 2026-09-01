@@ -11,14 +11,24 @@ import { getOptimizedImageUrl } from '../lib/cdn';
 import LanguageToggle from '../components/LanguageToggle';
 import { useI18n } from '../contexts/I18nContext';
 
-type ModoExibicao = 'MENU_BOARD' | 'SENHAS';
+/** `AUTO` nao e uma terceira tela: e quem decide, a cada segundo, entre as
+ *  outras duas. Ver `modoEfetivo`. */
+type ModoExibicao = 'MENU_BOARD' | 'SENHAS' | 'AUTO';
 
 type SenhaTV = {
   numero: number;
   status: string;
   primeiro_nome: string | null;
   criado_em: string;
+  /** Ausente em TV que ainda roda com a RPC antiga: tratar como balcao. */
+  tipo_pedido?: string | null;
 };
+
+/** Pedido de entrega quem retira e o entregador, nao o cliente. A chamada, o
+ *  rotulo e ate a cor mudam por causa disso — misturar os dois no mesmo card
+ *  fazia o motoboy do iFood e quem espera o proprio lanche olharem para a
+ *  mesma coluna sem saber qual senha e de quem. */
+const ehEntrega = (p: SenhaTV) => p.tipo_pedido === 'DELIVERY';
 
 export default function PainelTV() {
   const { tDynamic, idioma } = useI18n();
@@ -55,24 +65,79 @@ export default function PainelTV() {
   //      do salao no cardapio, cada uma com o proprio link, sem ninguem tocar.
   //   2. localStorage por loja — lembra a ultima escolha manual naquele
   //      aparelho, entao reboot volta para onde estava.
+  //   3. `AUTO` (padrao): ninguem escolhe. Ver `modoEfetivo`.
   const CHAVE_MODO = `miseon_tv_modo_${slug ?? ''}`;
   const [modo, setModo] = useState<ModoExibicao>(() => {
     const daUrl = (searchParams.get('modo') ?? '').toUpperCase();
     if (daUrl === 'SENHAS') return 'SENHAS';
     if (daUrl === 'CARDAPIO' || daUrl === 'MENU_BOARD') return 'MENU_BOARD';
+    if (daUrl === 'AUTO') return 'AUTO';
     try {
       const salvo = localStorage.getItem(CHAVE_MODO);
-      if (salvo === 'SENHAS' || salvo === 'MENU_BOARD') return salvo;
+      if (salvo === 'SENHAS' || salvo === 'MENU_BOARD' || salvo === 'AUTO') return salvo;
     } catch {
       // TV com storage bloqueado: cai no padrao, sem quebrar a tela.
     }
-    return 'MENU_BOARD';
+    return 'AUTO';
   });
 
   const trocarModo = useCallback((novo: ModoExibicao) => {
     setModo(novo);
     try { localStorage.setItem(CHAVE_MODO, novo); } catch { /* storage bloqueado */ }
   }, [CHAVE_MODO]);
+
+  // ── Modo AUTO: a TV decide, e decide pelo BALCAO ──────────────────────────
+  //
+  // Rodizio cego de N em N segundos e a solucao obvia e a errada: ele mostra
+  // cardapio exatamente na hora em que alguem precisa ver a propria senha. A
+  // regra aqui olha a fila antes do relogio, nesta ordem:
+  //
+  //   1. Tem pedido PRONTO      -> painel de senhas, sem negociar. Ha gente
+  //                                para chamar, e chamar ganha de vender.
+  //   2. Balcao vazio           -> cardapio. Nao existe senha para mostrar, e
+  //                                painel vazio nao vende nada.
+  //   3. So gente esperando     -> ai sim intercala: o cardapio trabalha a
+  //                                maior parte do tempo e o painel entra em
+  //                                janelas curtas, para quem espera conferir
+  //                                que o pedido dele esta na fila.
+  //
+  // O relogio so manda no caso 3. Nos outros dois a fila manda.
+  const AUTO_CARDAPIO_MS = 24_000;
+  const AUTO_SENHAS_MS = 12_000;
+  const [autoTela, setAutoTela] = useState<'MENU_BOARD' | 'SENHAS'>('MENU_BOARD');
+  const autoTelaRef = useRef<'MENU_BOARD' | 'SENHAS'>('MENU_BOARD');
+  const autoDesdeRef = useRef<number>(Date.now());
+
+  useEffect(() => {
+    if (modo !== 'AUTO') return;
+
+    const aplicar = (nova: 'MENU_BOARD' | 'SENHAS') => {
+      if (autoTelaRef.current === nova) return;
+      autoTelaRef.current = nova;
+      autoDesdeRef.current = Date.now();
+      setAutoTela(nova);
+    };
+
+    const decidir = () => {
+      const prontos = pedidos.filter((p) => ['PRONTO', 'EM_ROTA'].includes(p.status)).length;
+      const esperando = pedidos.filter((p) => ['NOVO', 'ACEITO', 'PREPARANDO'].includes(p.status)).length;
+
+      if (prontos > 0) return aplicar('SENHAS');
+      if (esperando === 0) return aplicar('MENU_BOARD');
+
+      const atual = autoTelaRef.current;
+      const limite = atual === 'SENHAS' ? AUTO_SENHAS_MS : AUTO_CARDAPIO_MS;
+      if (Date.now() - autoDesdeRef.current < limite) return;
+      aplicar(atual === 'SENHAS' ? 'MENU_BOARD' : 'SENHAS');
+    };
+
+    decidir();
+    const t = setInterval(decidir, 1_000);
+    return () => clearInterval(t);
+  }, [modo, pedidos, AUTO_CARDAPIO_MS, AUTO_SENHAS_MS]);
+
+  /** O que esta na tela AGORA. Fora do AUTO, e a escolha manual. */
+  const modoEfetivo: 'MENU_BOARD' | 'SENHAS' = modo === 'AUTO' ? autoTela : modo;
   const [categoriaIndex, setCategoriaIndex] = useState(0);
   const [somAtivo, setSomAtivo] = useState(true);
   const [ultimoChamado, setUltimoChamado] = useState<SenhaTV | null>(null);
@@ -85,7 +150,7 @@ export default function PainelTV() {
   // som ficava verde como se estivesse falando, e ninguem era chamado. O
   // lojista descobriria pelo cliente reclamando.
   const [vozDisponivel, setVozDisponivel] = useState<boolean | null>(null);
-  const prontosConhecidosRef = useRef<Set<number> | null>(null);
+  const prontosConhecidosRef = useRef<Set<string> | null>(null);
   const ultimaAtualizacaoRef = useRef<number | null>(null);
 
   useEffect(() => { ultimaAtualizacaoRef.current = ultimaAtualizacao; }, [ultimaAtualizacao]);
@@ -186,7 +251,7 @@ export default function PainelTV() {
     // chamado — 10s ali e tempo de mais alguem desistir de esperar. No modo
     // cardapio ninguem esta esperando chamada, entao nao ha motivo para dobrar
     // a carga: o cardapio nao muda a cada 4 segundos.
-    const intervaloMs = modo === 'SENHAS' ? 4_000 : 15_000;
+    const intervaloMs = modo === 'MENU_BOARD' ? 15_000 : 4_000;
     const interval = setInterval(carregarComGuarda, intervaloMs);
 
     // Vigia independente do resultado da busca: mesmo que a chamada trave sem
@@ -250,7 +315,12 @@ export default function PainelTV() {
     synthRef.current.cancel();
 
     const nomeFormatado = senha.primeiro_nome ? `, ${senha.primeiro_nome}` : '';
-    const texto = `${tDynamic('Senha')} ${senha.numero}${nomeFormatado}, ${tDynamic('por favor retirar no balcão')}`;
+    // Entrega chama o ENTREGADOR. Anunciar "por favor retirar no balcao" para
+    // um pedido de delivery mandava recado para quem esta em casa, enquanto o
+    // motoboy parado na frente da TV nao sabia que era a coleta dele.
+    const texto = ehEntrega(senha)
+      ? `${tDynamic('Entrega')} ${senha.numero}${nomeFormatado}, ${tDynamic('pedido pronto para coleta')}`
+      : `${tDynamic('Senha')} ${senha.numero}${nomeFormatado}, ${tDynamic('por favor retirar no balcão')}`;
 
     const utterance = new SpeechSynthesisUtterance(texto);
     // O texto vem do `tDynamic`, entao acompanha o idioma da tela. Fixar
@@ -272,8 +342,12 @@ export default function PainelTV() {
   // "ainda não carregou": a primeira carga só registra o estado, para a TV não
   // sair gritando senha antiga assim que é ligada.
   useEffect(() => {
+    // Identidade do pedido, nao a senha: a senha zera as 4h e o painel guarda
+    // 12h de historico, entao a senha 1 da manha bate com a senha 1 da
+    // madrugada anterior — e a chamada nova era engolida como "ja conhecida".
+    const chave = (p: SenhaTV) => `${p.criado_em}-${p.numero}`;
     const prontosAgora = new Set(
-      pedidos.filter((p) => p.status === 'PRONTO').map((p) => p.numero),
+      pedidos.filter((p) => p.status === 'PRONTO').map(chave),
     );
 
     // A inicialização do retrato vem ANTES de qualquer saída antecipada: com o
@@ -286,7 +360,7 @@ export default function PainelTV() {
     }
 
     const novos = pedidos.filter(
-      (p) => p.status === 'PRONTO' && !prontosConhecidosRef.current!.has(p.numero),
+      (p) => p.status === 'PRONTO' && !prontosConhecidosRef.current!.has(chave(p)),
     );
     prontosConhecidosRef.current = prontosAgora;
 
@@ -305,14 +379,14 @@ export default function PainelTV() {
 
   // 4. Carrossel automático
   useEffect(() => {
-    if (modo !== 'MENU_BOARD' || categorias.length <= 1) return;
+    if (modoEfetivo !== 'MENU_BOARD' || categorias.length <= 1) return;
 
     const timer = setInterval(() => {
       setCategoriaIndex((prev) => (prev + 1) % categorias.length);
     }, 12000);
 
     return () => clearInterval(timer);
-  }, [modo, categorias.length]);
+  }, [modoEfetivo, categorias.length]);
 
   const alternarTelaCheia = () => {
     if (!document.fullscreenElement) {
@@ -381,6 +455,10 @@ export default function PainelTV() {
 
         <div className="flex items-center gap-3">
           <LanguageToggle variant="minimal" />
+          {/* Tres posicoes, e AUTO no meio de proposito: e o padrao, e quem
+              chega na TV para "arrumar" acha o caminho de volta olhando para
+              o centro. Fixar em Cardapio ou Senhas continua valendo para
+              quem tem duas TVs, uma em cada papel. */}
           <div className="flex items-center rounded-xl bg-white/5 border border-white/10 p-1">
             <button
               onClick={() => trocarModo('MENU_BOARD')}
@@ -389,6 +467,20 @@ export default function PainelTV() {
               }`}
             >
               {tDynamic('Cardápio 4K')}
+            </button>
+            <button
+              onClick={() => trocarModo('AUTO')}
+              title="A TV alterna sozinha: chama a senha quando alguém fica pronto e volta ao cardápio quando o balcão esvazia."
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                modo === 'AUTO' ? 'bg-[#FC5B24] text-white shadow-md' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {tDynamic('Automático')}
+              {modo === 'AUTO' && (
+                <span className="ml-1.5 text-[10px] font-extrabold text-white/70">
+                  {modoEfetivo === 'SENHAS' ? tDynamic('· senhas') : tDynamic('· cardápio')}
+                </span>
+              )}
             </button>
             <button
               onClick={() => trocarModo('SENHAS')}
@@ -443,12 +535,18 @@ export default function PainelTV() {
               </div>
               <div>
                 <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-100 mb-1">
-                  🔔 PEDIDO PRONTO PARA RETIRADA
+                  {ehEntrega(ultimoChamado)
+                    ? tDynamic('🛵 ENTREGA PRONTA PARA COLETA')
+                    : tDynamic('🔔 PEDIDO PRONTO PARA RETIRADA')}
                 </span>
                 <h2 className="font-['Sora'] text-3xl font-black tracking-tight text-white">
                   {ultimoChamado.primeiro_nome || 'Cliente'}
                 </h2>
-                <p className="text-sm text-emerald-100 font-medium mt-0.5">{tDynamic('Por favor, retire seu pedido no balcão de atendimento.')}</p>
+                <p className="text-sm text-emerald-100 font-medium mt-0.5">
+                  {ehEntrega(ultimoChamado)
+                    ? tDynamic('Entregador: retire este pedido no balcão para sair.')
+                    : tDynamic('Por favor, retire seu pedido no balcão de atendimento.')}
+                </p>
               </div>
             </div>
             <div className="text-right flex flex-col items-end">
@@ -460,7 +558,7 @@ export default function PainelTV() {
       )}
 
       {/* ══════════ CONTEÚDO PRINCIPAL (MODO MENU BOARD) ══════════ */}
-      {modo === 'MENU_BOARD' && (
+      {modoEfetivo === 'MENU_BOARD' && (
         <main className="my-auto grid grid-cols-12 gap-8 py-4 z-10">
           {/* Lado Esquerdo: Carrossel do Cardápio */}
           <div className="col-span-9 space-y-6">
@@ -572,7 +670,7 @@ export default function PainelTV() {
                 <div className="space-y-2 max-h-48 overflow-hidden">
                   {pedidosProntos.slice(0, 4).map((p) => (
                     <div
-                      key={p.numero}
+                      key={`${p.criado_em}-${p.numero}`}
                       className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 text-xs font-bold text-emerald-400"
                     >
                       <span className="font-['Sora'] text-base">#{p.numero}</span>
@@ -587,7 +685,7 @@ export default function PainelTV() {
       )}
 
       {/* ══════════ MODO EXCLUSIVO DE SENHAS (DUAS COLUNAS GIGANTES) ══════════ */}
-      {modo === 'SENHAS' && (
+      {modoEfetivo === 'SENHAS' && (
         <main className="my-auto grid grid-cols-2 gap-8 py-4 z-10">
           {/* Coluna 1: Em Preparação */}
           <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-8 flex flex-col h-[70vh]">
@@ -604,11 +702,16 @@ export default function PainelTV() {
             <div className="grid grid-cols-3 gap-4 overflow-y-auto pr-2">
               {pedidosEmPreparo.map((p) => (
                 <div
-                  key={p.numero}
+                  key={`${p.criado_em}-${p.numero}`}
                   className="rounded-2xl border border-amber-500/20 bg-black/40 p-4 text-center space-y-1"
                 >
                   <span className="font-['Sora'] text-3xl font-black text-amber-400">#{p.numero}</span>
                   <p className="text-xs text-slate-300 font-bold truncate">{p.primeiro_nome || 'Cliente'}</p>
+                  {ehEntrega(p) && (
+                    <span className="inline-block rounded-full bg-sky-500/20 px-2 py-0.5 text-[10px] font-extrabold text-sky-300 border border-sky-500/30">
+                      🛵 {tDynamic('ENTREGA')}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -629,11 +732,20 @@ export default function PainelTV() {
             <div className="grid grid-cols-3 gap-4 overflow-y-auto pr-2">
               {pedidosProntos.map((p) => (
                 <div
-                  key={p.numero}
-                  className="rounded-2xl border-2 border-emerald-400 bg-emerald-500/20 p-4 text-center space-y-1 shadow-[0_0_20px_rgba(16,185,129,0.3)] animate-pulse"
+                  key={`${p.criado_em}-${p.numero}`}
+                  className={`rounded-2xl border-2 p-4 text-center space-y-1 animate-pulse ${
+                    ehEntrega(p)
+                      ? 'border-sky-400 bg-sky-500/20 shadow-[0_0_20px_rgba(56,189,248,0.3)]'
+                      : 'border-emerald-400 bg-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                  }`}
                 >
                   <span className="font-['Sora'] text-4xl font-black text-white">#{p.numero}</span>
                   <p className="text-xs text-emerald-100 font-extrabold truncate">{p.primeiro_nome || 'Cliente'}</p>
+                  {ehEntrega(p) && (
+                    <span className="inline-block rounded-full bg-sky-500/30 px-2 py-0.5 text-[10px] font-extrabold text-sky-100 border border-sky-300/40">
+                      🛵 {tDynamic('COLETA')}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>

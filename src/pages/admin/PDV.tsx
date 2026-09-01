@@ -5,6 +5,10 @@ import { supabase } from '../../lib/supabase';
 import {
   fmt, precoItem, type Produto, type Opcao, type ItemCarrinho, type Loja, type Mesa,
   type CaixaTurno, type CaixaMovimentacao, type MetodoPgto, type ClientePDV,
+  // Vem de types.ts, nao de uma copia local: havia uma interface homonima aqui
+  // que sombreava a oficial, entao campo novo (a senha) compilava como erro
+  // mesmo ja existindo no tipo compartilhado com o modal de sucesso.
+  type VendaConcluida,
 } from '../../types';
 import { imprimir } from '../../lib/print';
 import { obterOuCriarComandaAberta } from '../../lib/comandas';
@@ -40,16 +44,6 @@ import { useI18n } from '../../contexts/I18nContext';
 
 type EtapaVenda = 'CARRINHO' | 'PAGANDO' | 'PIX_AGUARDANDO' | 'SUCESSO';
 type ModoPDV = 'BALCAO' | 'MESA';
-
-interface VendaConcluida {
-  pedidoId: string;
-  numero: number;
-  total: number;
-  metodo: MetodoPgto;
-  troco: number;
-  itens: ItemCarrinho[];
-  temCozinha?: boolean;
-}
 
 export default function PDV() {
   const { tDynamic } = useI18n();
@@ -241,7 +235,7 @@ export default function PDV() {
         const { data: pix, error: e5 } = await supabase.functions.invoke('pix-criar-cobranca', { body: { pedido_id: ped.id } });
         if (e5 || pix?.error) throw new Error(String(pix?.error ?? e5?.message ?? 'Falha ao gerar o Pix'));
         setPixInfo({ pedidoId: ped.id, copiaECola: pix.copia_e_cola, qrImagem: pix.qr_imagem });
-        setVenda({ pedidoId: ped.id, numero: ped.numero, total, metodo: met, troco: 0, itens: carrinho, temCozinha });
+        setVenda({ pedidoId: ped.id, numero: ped.numero, senha: ped.senha, total, metodo: met, troco: 0, itens: carrinho, temCozinha });
         setEtapa('PIX_AGUARDANDO');
       } else {
         const atualizacaoCozinha = {
@@ -267,7 +261,7 @@ export default function PDV() {
             toast(`Venda registrada, mas o pedido #${ped.numero} ficou em aberto. Finalize pelo Painel de Pedidos.`, 'alerta');
           }
         }
-        setVenda({ pedidoId: ped.id, numero: ped.numero, total, metodo: met, troco, itens: carrinho, temCozinha });
+        setVenda({ pedidoId: ped.id, numero: ped.numero, senha: ped.senha, total, metodo: met, troco, itens: carrinho, temCozinha });
         setEtapa('SUCESSO');
         toast(`Venda concluída! Pedido #${ped.numero}`, 'sucesso');
         if (ped.avisoEstoque) avisarEstoqueNaoBaixado(ped.avisoEstoque);
