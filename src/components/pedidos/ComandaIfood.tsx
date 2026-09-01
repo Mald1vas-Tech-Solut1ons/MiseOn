@@ -65,6 +65,15 @@ export function ComandaIfood({ pedido: p }: { pedido: Pedido }) {
               {tDynamic('localizador')} {p.ifood_localizador}
             </span>
           )}
+          {/* O numero que o cliente ve no app. Ele liga dizendo "meu pedido e
+              o 9279" — sem isto na tela, ninguem acha o pedido, porque o
+              numero do MiseOn e outro. */}
+          {p.ifood_display_id && (
+            <span className="text-[var(--cor-texto-fraco)]">
+              {' · '}
+              {tDynamic('nº no iFood')} {p.ifood_display_id}
+            </span>
+          )}
         </Linha>
       )}
 

@@ -377,6 +377,14 @@ export interface Pedido {
   ifood_entregue_por?: 'MERCHANT' | 'IFOOD' | null;
   /** customer.phone.localizer — o código que conclui a entrega própria. */
   ifood_localizador?: string | null;
+  /** Numero que o cliente ve no app do iFood. NAO e o `numero` do pedido: a
+   *  numeracao deles e independente da nossa e gravar as duas na mesma coluna
+   *  colidia com o indice unico (loja_id, numero), rejeitando o pedido. */
+  ifood_display_id?: number | null;
+  /** Senha de chamada no balcao (1..999, zera por dia de operacao).
+   *  NULL quando o tipo do pedido nao e chamado no balcao — delivery nao tem
+   *  ninguem esperando ser chamado. */
+  senha?: number | null;
   /** delivery.pickupCode — código que o entregador do iFood mostra na coleta. */
   ifood_codigo_coleta?: string | null;
   ifood_cartao_bandeira?: string | null;

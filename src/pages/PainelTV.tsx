@@ -11,7 +11,7 @@ import { getOptimizedImageUrl } from '../lib/cdn';
 import LanguageToggle from '../components/LanguageToggle';
 import { useI18n } from '../contexts/I18nContext';
 
-type ModoExibicao = 'MENU_BOARD' | 'SENHAS' | 'BANNERS';
+type ModoExibicao = 'MENU_BOARD' | 'SENHAS';
 
 type SenhaTV = {
   numero: number;
@@ -33,8 +33,37 @@ export default function PainelTV() {
   const [pedidos, setPedidos] = useState<SenhaTV[]>([]);
   const [carregando, setCarregando] = useState(true);
 
-  // Modos e Controle de Tela
-  const [modo, setModo] = useState<ModoExibicao>('MENU_BOARD');
+  // ── Modo de exibicao: sobrevive a reboot da TV ────────────────────────────
+  //
+  // Era `useState('MENU_BOARD')` puro. A TV do balcao fica ligada o dia
+  // inteiro e reinicia por queda de energia, atualizacao do sistema ou
+  // screensaver que recarrega a pagina — e voltava SEMPRE para o cardapio.
+  // Quem escolheu o painel de senhas descobria pelo cliente reclamando que
+  // ninguem chamou, e tinha que ir la trocar o toggle de novo.
+  //
+  // Duas fontes, nesta ordem:
+  //   1. `?modo=` na URL — a TV do balcao abre direto no painel de senhas e a
+  //      do salao no cardapio, cada uma com o proprio link, sem ninguem tocar.
+  //   2. localStorage por loja — lembra a ultima escolha manual naquele
+  //      aparelho, entao reboot volta para onde estava.
+  const CHAVE_MODO = `miseon_tv_modo_${slug ?? ''}`;
+  const [modo, setModo] = useState<ModoExibicao>(() => {
+    const daUrl = (searchParams.get('modo') ?? '').toUpperCase();
+    if (daUrl === 'SENHAS') return 'SENHAS';
+    if (daUrl === 'CARDAPIO' || daUrl === 'MENU_BOARD') return 'MENU_BOARD';
+    try {
+      const salvo = localStorage.getItem(CHAVE_MODO);
+      if (salvo === 'SENHAS' || salvo === 'MENU_BOARD') return salvo;
+    } catch {
+      // TV com storage bloqueado: cai no padrao, sem quebrar a tela.
+    }
+    return 'MENU_BOARD';
+  });
+
+  const trocarModo = useCallback((novo: ModoExibicao) => {
+    setModo(novo);
+    try { localStorage.setItem(CHAVE_MODO, novo); } catch { /* storage bloqueado */ }
+  }, [CHAVE_MODO]);
   const [categoriaIndex, setCategoriaIndex] = useState(0);
   const [somAtivo, setSomAtivo] = useState(true);
   const [ultimoChamado, setUltimoChamado] = useState<SenhaTV | null>(null);
@@ -226,7 +255,7 @@ export default function PainelTV() {
           <LanguageToggle variant="minimal" />
           <div className="flex items-center rounded-xl bg-white/5 border border-white/10 p-1">
             <button
-              onClick={() => setModo('MENU_BOARD')}
+              onClick={() => trocarModo('MENU_BOARD')}
               className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                 modo === 'MENU_BOARD' ? 'bg-[#FC5B24] text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}
@@ -234,7 +263,7 @@ export default function PainelTV() {
               {tDynamic('Cardápio 4K')}
             </button>
             <button
-              onClick={() => setModo('SENHAS')}
+              onClick={() => trocarModo('SENHAS')}
               className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                 modo === 'SENHAS' ? 'bg-[#FC5B24] text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}

@@ -57,6 +57,8 @@ const PRESETS_SEGMENTOS: Record<SegmentoNegocio, { rotulo: string; descricao: st
 };
 
 interface FormLoja {
+  /** Tipos de pedido chamados no painel de senhas da TV. */
+  painel_tv_tipos: string[];
   nome: string;
   descricao: string;
   logo_url: string;
@@ -118,6 +120,7 @@ interface FaixaEntregaForm {
 }
 
 const vazio: FormLoja = {
+  painel_tv_tipos: ['RETIRADA_BALCAO', 'SALAO'],
   nome: '', descricao: '', logo_url: '', banner_url: '', banner_pos_y: 50,
   cor_primaria: PALETA_CORES[5], cor_secundaria: PALETA_CORES[1],
   fonte: 'Inter', cor_texto: PALETA_CORES[13], cor_fundo_claro: PALETA_FUNDO_POR_TEMA.claro[0], cor_fundo_escuro: PALETA_FUNDO_POR_TEMA.escuro[0], tema_cardapio: 'claro',
@@ -157,6 +160,7 @@ export default function Loja() {
       if (data) {
         setSlug(data.slug ?? '');
         setForm({
+          painel_tv_tipos: data.painel_tv_tipos ?? ['RETIRADA_BALCAO', 'SALAO'],
           nome: data.nome ?? '', descricao: data.descricao ?? '',
           logo_url: data.logo_url ?? '', banner_url: data.banner_url ?? '',
           banner_pos_y: data.banner_pos_y ?? 50,
@@ -356,6 +360,7 @@ export default function Loja() {
     };
 
     const { error: erroLoja } = await supabase.from('lojas').update({
+      painel_tv_tipos: form.painel_tv_tipos,
       nome: form.nome,
       descricao: form.descricao || null,
       logo_url: form.logo_url || null,
@@ -522,6 +527,65 @@ export default function Loja() {
           >
             <Tv size={15} /> {tDynamic('Cardápio na TV 4K')}
           </a>
+          <a
+            href={`${window.location.origin}/tv/${slug}?modo=senhas`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/20 transition-all"
+            title="Abrir já no painel de senhas — a TV lembra deste modo mesmo depois de reiniciar"
+          >
+            <Tv size={15} /> {tDynamic('Painel de Senhas na TV')}
+          </a>
+        </div>
+
+        {/* ── Quais pedidos são chamados na TV ──────────────────────────────
+            Senha é chamada de balcão: só faz sentido para quem está no salão
+            esperando. Delivery entra aqui como escolha explícita da loja, e
+            fica DESLIGADO por padrão — antes, o painel anunciava em voz alta
+            "retire no balcão" para pedido de iFood, com o cliente em casa. */}
+        <div className="mt-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+          <p className="text-xs font-bold text-gray-700 dark:text-gray-200">
+            {tDynamic('Chamar na TV os pedidos de')}
+          </p>
+          <p className="mb-2 text-[11px] text-gray-500 dark:text-gray-400">
+            {tDynamic('A senha zera todo dia e vai de 1 a 999. Delivery não é chamado: o cliente não está no balcão.')}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {([
+              ['RETIRADA_BALCAO', 'Balcão'],
+              ['SALAO', 'Mesa / Salão'],
+              ['DELIVERY', 'Delivery'],
+            ] as const).map(([valor, rotulo]) => {
+              const ativo = form.painel_tv_tipos.includes(valor);
+              const ultimoLigado = ativo && form.painel_tv_tipos.length === 1;
+              return (
+                <button
+                  key={valor}
+                  type="button"
+                  // Nunca deixar a lista vazia: painel sem tipo nenhum nunca
+                  // mostra nada, e o lojista descobriria no meio do serviço.
+                  // O banco também recusa (ck_lojas_painel_tv_tipos_nao_vazio).
+                  disabled={ultimoLigado}
+                  title={ultimoLigado ? 'Pelo menos um tipo precisa ficar ligado.' : undefined}
+                  onClick={() =>
+                    setForm((f) => ({
+                      ...f,
+                      painel_tv_tipos: ativo
+                        ? f.painel_tv_tipos.filter((t) => t !== valor)
+                        : [...f.painel_tv_tipos, valor],
+                    }))
+                  }
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                    ativo
+                      ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)]'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  {tDynamic(rotulo)}
+                </button>
+              );
+            })}
+          </div>
         </div>
         {copiado && <p className="text-[11px] font-medium text-green-600">Link copiado!</p>}
       </div>
