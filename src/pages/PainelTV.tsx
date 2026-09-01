@@ -156,9 +156,55 @@ export default function PainelTV() {
     // 10s, não 5s: a TV do balcão fica ligada o dia inteiro e o polling é o
     // único caminho aqui (sem sessão, o Realtime respeita RLS e nada chega).
     // Dobrar a frequência dobrava a carga sem melhorar nada para quem retira.
-    const interval = setInterval(carregarDados, 10_000);
+    // A cadencia acompanha o que a TV esta mostrando. No painel de senhas, o
+    // intervalo e o atraso entre a cozinha marcar PRONTO e o cliente ser
+    // chamado — 10s ali e tempo de mais alguem desistir de esperar. No modo
+    // cardapio ninguem esta esperando chamada, entao nao ha motivo para dobrar
+    // a carga: o cardapio nao muda a cada 4 segundos.
+    const intervaloMs = modo === 'SENHAS' ? 4_000 : 15_000;
+    const interval = setInterval(carregarDados, intervaloMs);
     return () => clearInterval(interval);
-  }, [carregarDados]);
+  }, [carregarDados, modo]);
+
+  /** Gongo curto antes da chamada.
+   *
+   *  Existe porque sintese de voz e o recurso MENOS suportado da pilha: varia
+   *  entre Tizen, webOS e Android TV, e depende de voz instalada no aparelho.
+   *  Um tom gerado pelo Web Audio nao depende de voz nem de arquivo, tem
+   *  suporte muito mais amplo, e resolve o essencial — virar a cabeca de quem
+   *  esta esperando na direcao da TV. Se ate o Web Audio faltar, sobra o
+   *  banner visual, que sempre funciona.
+   *
+   *  Dois tons curtos, sem estridencia: a TV fica ligada o dia inteiro e um
+   *  alerta agressivo vira algo que o balcao desliga na primeira hora. */
+  const tocarGongo = useCallback(() => {
+    if (!somAtivo) return;
+    try {
+      const Ctx = window.AudioContext
+        ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx();
+      const agora = ctx.currentTime;
+      [880, 1174].forEach((hz, i) => {
+        const osc = ctx.createOscillator();
+        const vol = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = hz;
+        const inicio = agora + i * 0.18;
+        vol.gain.setValueAtTime(0.0001, inicio);
+        vol.gain.exponentialRampToValueAtTime(0.25, inicio + 0.02);
+        vol.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.16);
+        osc.connect(vol).connect(ctx.destination);
+        osc.start(inicio);
+        osc.stop(inicio + 0.18);
+      });
+      // Fecha o contexto depois de tocar: a TV fica ligada o dia inteiro e um
+      // AudioContext por chamada acabaria estourando o limite do navegador.
+      window.setTimeout(() => ctx.close().catch(() => {}), 900);
+    } catch {
+      // Sem Web Audio: a chamada segue visual, sem quebrar a tela.
+    }
+  }, [somAtivo]);
 
   // 2. Falar chamada sonora
   const falarPedido = useCallback((senha: SenhaTV) => {
@@ -212,11 +258,13 @@ export default function PainelTV() {
     const chamado = novos[0];
     setUltimoChamado(chamado);
     setBannerChamadaVisivel(true);
-    falarPedido(chamado);
+    tocarGongo();
+    // Fala depois do gongo para nao sobrepor os dois.
+    window.setTimeout(() => falarPedido(chamado), 500);
 
     const t = setTimeout(() => setBannerChamadaVisivel(false), 9000);
     return () => clearTimeout(t);
-  }, [pedidos, falarPedido]);
+  }, [pedidos, falarPedido, tocarGongo]);
 
   // 4. Carrossel automático
   useEffect(() => {

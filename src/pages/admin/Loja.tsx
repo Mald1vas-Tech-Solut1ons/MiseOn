@@ -150,6 +150,41 @@ export default function Loja() {
   const [salvando, setSalvando] = useState(false);
   const [ok, setOk] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  // Credencial do painel de TV. Fica fora do `form` de proposito: nao e campo
+  // que o lojista edita, e um save comum nunca deve reescreve-la por acidente
+  // — reescrever aqui derruba todas as TVs da loja de uma vez.
+  const [tokenTv, setTokenTv] = useState<string | null>(null);
+  const [regenerandoTv, setRegenerandoTv] = useState(false);
+
+  /** URL da TV com a credencial embutida. Sem o token a RPC recusa e a TV
+   *  mostra o cardapio sem senhas — por isso o link NUNCA pode sair daqui
+   *  sem ele. */
+  const urlTv = (modo?: 'senhas') => {
+    const base = `${window.location.origin}/tv/${slug}`;
+    const params = new URLSearchParams();
+    if (modo) params.set('modo', modo);
+    if (tokenTv) params.set('token', tokenTv);
+    const q = params.toString();
+    return q ? `${base}?${q}` : base;
+  };
+
+  const regenerarTokenTv = async () => {
+    if (!lojaId) return;
+    // Confirmacao explicita: isto invalida TODA TV ja configurada da loja, e
+    // quem descobre e o balcao no meio do movimento.
+    const ok = window.confirm(
+      'Gerar uma credencial nova invalida os links de TV que ja estao em uso. '
+      + 'Toda TV da loja vai precisar do link novo. Continuar?',
+    );
+    if (!ok) return;
+    setRegenerandoTv(true);
+    const novo = crypto.randomUUID();
+    const { error } = await supabase
+      .from('lojas').update({ painel_tv_token: novo }).eq('id', lojaId);
+    setRegenerandoTv(false);
+    if (error) { alert('Nao foi possivel gerar a credencial: ' + error.message); return; }
+    setTokenTv(novo);
+  };
   const [erro, setErro] = useState('');
   const [temaPreview, setTemaPreview] = useState<TemaLoja>('claro');
   const [faixasEntrega, setFaixasEntrega] = useState<FaixaEntregaForm[]>([]);
@@ -159,6 +194,7 @@ export default function Loja() {
       const { data } = await supabase.from('lojas').select('*').eq('id', lojaId).single();
       if (data) {
         setSlug(data.slug ?? '');
+        setTokenTv(data.painel_tv_token ?? null);
         setForm({
           painel_tv_tipos: data.painel_tv_tipos ?? ['RETIRADA_BALCAO', 'SALAO'],
           nome: data.nome ?? '', descricao: data.descricao ?? '',
@@ -507,7 +543,7 @@ export default function Loja() {
       {/* Link público — o cliente acessa por aqui, sem login */}
       <div className="mb-5 rounded-2xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3.5 shadow-sm space-y-2">
         <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Links de Acesso Rápido')}</p>
-        <div className="flex flex-wrap items-center gap-2">
+        <div data-tour="tour-loja-tv-links" className="flex flex-wrap items-center gap-2">
           <code className="flex-1 truncate rounded-lg bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs text-gray-700 dark:text-gray-300 font-mono">{linkPublico}</code>
           <button onClick={copiarLink} title="Copiar link" className="shrink-0 rounded-lg border p-2 text-gray-500 dark:text-gray-400">
             {copiado ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
@@ -519,7 +555,7 @@ export default function Loja() {
             <Share2 size={15} />
           </button>
           <a
-            href={`${window.location.origin}/tv/${slug}`}
+            href={urlTv()}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-xs font-bold text-purple-600 dark:text-purple-300 hover:bg-purple-500/20 transition-all"
@@ -528,7 +564,7 @@ export default function Loja() {
             <Tv size={15} /> {tDynamic('Cardápio na TV 4K')}
           </a>
           <a
-            href={`${window.location.origin}/tv/${slug}?modo=senhas`}
+            href={urlTv('senhas')}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/20 transition-all"
@@ -543,7 +579,7 @@ export default function Loja() {
             esperando. Delivery entra aqui como escolha explícita da loja, e
             fica DESLIGADO por padrão — antes, o painel anunciava em voz alta
             "retire no balcão" para pedido de iFood, com o cliente em casa. */}
-        <div className="mt-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+        <div data-tour="tour-loja-tv-tipos" className="mt-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
           <p className="text-xs font-bold text-gray-700 dark:text-gray-200">
             {tDynamic('Chamar na TV os pedidos de')}
           </p>
@@ -585,6 +621,26 @@ export default function Loja() {
                 </button>
               );
             })}
+          </div>
+
+          {/* O lojista precisa entender POR QUE o link tem um codigo no fim,
+              senao ele copia a URL "limpa" da barra do navegador e a TV para
+              de mostrar senhas sem explicacao. */}
+          <div data-tour="tour-loja-tv-credencial" className="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
+            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+              {tDynamic('Os links acima levam uma credencial no final. Ela é o que impede qualquer pessoa de abrir o painel da sua loja — copie o link por aqui, não da barra do navegador da TV.')}
+            </p>
+            <button
+              type="button"
+              onClick={regenerarTokenTv}
+              disabled={regenerandoTv}
+              className="mt-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-[11px] font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+            >
+              {regenerandoTv ? tDynamic('Gerando...') : tDynamic('Gerar credencial nova')}
+            </button>
+            <span className="ml-2 text-[11px] text-gray-400">
+              {tDynamic('Use se o link vazou. As TVs atuais vão precisar do link novo.')}
+            </span>
           </div>
         </div>
         {copiado && <p className="text-[11px] font-medium text-green-600">Link copiado!</p>}

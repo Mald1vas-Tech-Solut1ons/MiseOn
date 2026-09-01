@@ -242,6 +242,38 @@ export const TOUR_STEPS: TourStep[] = [
     posicao: 'bottom',
     clicarElementoTarget: true,
   },
+
+  // ── Módulo 11: TV do Salão (Cardápio 4K & Painel de Senhas) ──
+  {
+    id: 'passo-loja-tv-links',
+    categoria: 'TV do Salão',
+    titulo: '21. Os dois links da TV 📺',
+    descricao: 'A TV do salão não faz login: ela só abre um link no próprio navegador. Por isso existem dois — "Cardápio na TV 4K" abre no cardápio girando, e "Painel de Senhas na TV" abre direto chamando os pedidos prontos. Escolha o link pelo lugar onde a TV está: cardápio na fila, senhas no balcão de retirada.',
+    dicaExtra: 'A TV lembra o modo mesmo depois de desligar da tomada. Antes ela voltava sempre para o cardápio e o balcão ficava sem chamar ninguém sem que ninguém percebesse.',
+    rota: '/admin/loja',
+    targetDataTour: 'tour-loja-tv-links',
+    posicao: 'bottom',
+  },
+  {
+    id: 'passo-loja-tv-tipos',
+    categoria: 'TV do Salão',
+    titulo: '22. Quem é chamado na TV 🔔',
+    descricao: 'Senha é chamada de balcão: só faz sentido para quem está no salão esperando o pedido. Por isso o padrão é Balcão + Mesa, e Delivery vem desligado — não adianta a TV anunciar "retire no balcão" para um cliente que está em casa esperando o entregador.',
+    dicaExtra: 'A senha é curta de propósito: vai de 1 a 999 e zera todo dia às 4h da manhã. Quem fecha depois da meia-noite continua no mesmo dia de operação, como a casa conta.',
+    rota: '/admin/loja',
+    targetDataTour: 'tour-loja-tv-tipos',
+    posicao: 'top',
+  },
+  {
+    id: 'passo-loja-tv-credencial',
+    categoria: 'TV do Salão',
+    titulo: '23. A credencial no fim do link 🔑',
+    descricao: 'Repare que os links terminam com um código. É ele que impede qualquer pessoa de abrir o painel da sua loja e ver seus pedidos. Copie sempre o link por aqui — se copiar da barra de endereço da TV, o código fica de fora e o painel para de mostrar as senhas.',
+    dicaExtra: 'Se o link vazar, clique em "Gerar credencial nova". As TVs já instaladas vão precisar receber o link novo, então faça isso fora do horário de pico.',
+    rota: '/admin/loja',
+    targetDataTour: 'tour-loja-tv-credencial',
+    posicao: 'top',
+  },
 ];
 
 export function useGuidedTour(lojaId?: string) {

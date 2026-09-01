@@ -2343,6 +2343,12 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
     'The number resets daily and runs from 1 to 999. Delivery is not called: the customer is not at the counter.',
   'nº no iFood': 'iFood no.',
   'Chamada apenas visual neste aparelho': 'Visual-only call on this device',
+  'Gerar credencial nova': 'Generate new credential',
+  'Gerando...': 'Generating...',
+  'Os links acima levam uma credencial no final. Ela é o que impede qualquer pessoa de abrir o painel da sua loja — copie o link por aqui, não da barra do navegador da TV.':
+    'The links above carry a credential at the end. It is what stops anyone from opening your store panel — always copy the link from here, not from the TV browser address bar.',
+  'Use se o link vazou. As TVs atuais vão precisar do link novo.':
+    'Use it if the link leaked. TVs already set up will need the new link.',
   'Consultando os motivos no iFood…': 'Fetching reasons from iFood…',
   'Consultar de novo': 'Fetch again',
   'Lista fornecida pelo iFood para este pedido — só estes motivos são aceitos por lá.': 'List provided by iFood for this order — only these reasons are accepted there.',

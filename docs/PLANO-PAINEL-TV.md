@@ -18,8 +18,9 @@ Dois modos, num toggle no cabeçalho:
 
 **Dados.** `fn_painel_tv_senhas(slug, token)` — RPC `SECURITY DEFINER`. A tabela `pedidos`
 não tem policy de SELECT público (nem deve ter): a RPC devolve só número, status e
-primeiro nome. Polling a cada 10s, não Realtime — sem sessão, o Realtime respeita RLS e
-nada chegaria.
+primeiro nome. **Polling, não Realtime** — sem sessão, o Realtime respeita RLS e nada
+chegaria. A cadência acompanha o modo: 4s no painel de senhas (é o atraso entre a cozinha
+marcar PRONTO e o cliente ser chamado) e 15s no cardápio.
 
 **Chamada por voz.** O painel guarda um retrato dos pedidos `PRONTO`. Quando um número
 aparece que não estava no retrato anterior, ele é anunciado. A primeira carga só registra
@@ -79,51 +80,57 @@ sem colisão. Dados de teste removidos.
 
 ## 4. O que falta — plano
 
-### P1 · Token do painel não tem como ser configurado
+> Atualizado em 01/09/2026 depois da segunda rodada. P1, P4 e P5 fechados; P3 mitigado
+> em código, falta só o teste no aparelho; P2 é o único ainda inteiro.
 
-`fn_painel_tv_senhas` aceita `?token=` e `lojas.painel_tv_token` existe, mas **não há UI
-para gerar ou ver esse token**, e o link que o lojista copia não o inclui. Na prática o
-recurso é inalcançável e **nenhuma loja tem token** — o painel é público por slug, expondo
-números de pedido e primeiro nome de clientes a quem souber o slug.
+### ~~P1 · Token do painel não tem como ser configurado~~ — FECHADO
 
-*Plano:* botão "Gerar token do painel" na tela da Loja, que grava o UUID e passa a montar
-os dois links já com `?token=`. Migração precisa lidar com a TV já instalada sem token —
-por isso a RPC hoje só exige token quando ele existe. Ao gerar, avisar que os links
-antigos param de mostrar senhas.
+`painel_tv_token` passou a ter `default gen_random_uuid()` e todas as lojas receberam o
+seu. A RPC já recusava sem token quando ele existia, então o painel deixou de ser público
+no mesmo movimento — verificado: sem token a chamada levanta exceção, com o token certo
+responde. Os dois links na tela da Loja saem com `?token=`, e há botão para gerar
+credencial nova com aviso de que isso derruba as TVs já instaladas.
 
-### P2 · Nenhum teste automatizado cobre a senha
+### P2 · Nenhum teste automatizado cobre a senha — ABERTO
 
-Validei manualmente em produção. Não há teste que trave a regra — a próxima mudança em
+Validado manualmente em produção, mas nada trava a regra. A próxima mudança em
 `fn_trg_numero_pedido` pode quebrar a atribuição sem ninguém perceber.
 
 *Plano:* teste de integração cobrindo (a) balcão e mesa recebem senha, delivery não;
 (b) senha zera na virada do dia de operação; (c) volta ao 1 depois de 999; (d) pedido de
-iFood com `displayId` colidente é criado sem erro.
+iFood com `displayId` colidente é criado sem erro; (e) `fn_proximo_numero` nunca reemite
+número existente.
 
-### P3 · Voz na TV real não foi verificada
+### P3 · Voz na TV real — MITIGADO, falta o teste no aparelho
 
-Medido: funciona em Chromium desktop sem gesto do usuário, 2 vozes. **Isso não prova nada
-sobre Tizen, webOS ou Android TV.** O código agora detecta ausência de voz e avisa na tela
-("Chamada apenas visual neste aparelho"), então o pior caso é honesto — mas continua sendo
-suposição até rodar num aparelho de verdade.
+Síntese de voz é o recurso menos suportado da pilha e depende de voz instalada. Agora há
+três camadas, da mais frágil para a mais robusta: **fala** → **gongo** (dois tons via Web
+Audio, não depende de voz nem de arquivo) → **banner visual**, que sempre funciona. Se não
+houver voz, a TV avisa na tela em vez de fingir que está chamando.
 
-*Plano:* testar numa Smart TV antes da primeira instalação. Se não houver voz pt-BR,
-considerar tocar um gongo curto em `<audio>` antes do banner — áudio simples tem suporte
-muito mais amplo que síntese de fala.
+*Plano:* ainda assim, testar numa Smart TV antes da primeira instalação. O que resta saber
+é se o Web Audio responde sem gesto do usuário naquele navegador.
 
-### P4 · Latência de até 10s na chamada
+### ~~P4 · Latência de até 10s na chamada~~ — FECHADO
 
-Polling de 10s. Entre a cozinha marcar PRONTO e a TV anunciar podem passar 10 segundos.
-Aceitável, mas é bom o lojista saber que não é instantâneo.
+A cadência passou a acompanhar o modo: **4s no painel de senhas**, 15s no cardápio. No
+painel o intervalo é o atraso entre a cozinha marcar PRONTO e o cliente ser chamado; no
+cardápio ninguém está esperando chamada e não há motivo para dobrar a carga.
 
-*Plano:* só mexer se incomodar na operação. Realtime exigiria sessão na TV (hoje ela não
-loga), o que é mais superfície de risco do que ganho.
+### ~~P5 · Colisões históricas de número~~ — FECHADO
 
-### P5 · Colisões históricas de número
+As 30 linhas com número repetido foram renumeradas (a mais antiga de cada grupo manteve o
+número; as demais foram para cima do maior da loja, preservando a cronologia) e o índice
+`uq_pedidos_loja_numero` deixou de ser parcial: agora vale para a tabela inteira. A
+migração tem trava — se sobrar qualquer colisão, ela falha em vez de deixar o índice cair
+de volta para parcial.
 
-18 pedidos no Lanche do Paulista e 4 no Natureba compartilham número com outro pedido da
-mesma loja. **Todas anteriores a 22/07/2026**, antes do índice único existir — por isso o
-índice é parcial (`WHERE criado_em >= '2026-07-22'`). Não afeta operação nova.
+---
 
-*Plano:* como é tudo dado de teste pré-lançamento, limpar antes do primeiro cliente real e
-então remover a cláusula parcial do índice, deixando a regra valer para toda a tabela.
+## 5. Onde o lojista aprende isso
+
+O tour guiado ganhou o **Módulo 11 — TV do Salão**, com três passos: os dois links e qual
+usar em cada TV; quem é chamado e por que delivery fica de fora; e o que é o código no fim
+do link. A tela da Loja explica a credencial no próprio lugar onde o link é copiado —
+porque o erro previsível é copiar a URL da barra do navegador da TV, sem o token, e o
+painel parar de mostrar senhas sem explicação.
