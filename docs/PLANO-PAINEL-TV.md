@@ -91,15 +91,32 @@ no mesmo movimento — verificado: sem token a chamada levanta exceção, com o 
 responde. Os dois links na tela da Loja saem com `?token=`, e há botão para gerar
 credencial nova com aviso de que isso derruba as TVs já instaladas.
 
-### P2 · Nenhum teste automatizado cobre a senha — ABERTO
+### P2 · Teste da senha — ESCRITO, mas ainda não roda no CI
 
-Validado manualmente em produção, mas nada trava a regra. A próxima mudança em
-`fn_trg_numero_pedido` pode quebrar a atribuição sem ninguém perceber.
+`__tests__/integration/senha.test.ts` cobre: balcão e mesa recebem senha e delivery não;
+senhas sequenciais no mesmo dia de operação; número e senha independentes; número nunca
+reemitido; loja que desliga mesa deixa de dar senha para mesa; e o banco recusar lista de
+tipos vazia.
 
-*Plano:* teste de integração cobrindo (a) balcão e mesa recebem senha, delivery não;
-(b) senha zera na virada do dia de operação; (c) volta ao 1 depois de 999; (d) pedido de
-iFood com `displayId` colidente é criado sem erro; (e) `fn_proximo_numero` nunca reemite
-número existente.
+Todas essas regras **foram verificadas contra o banco real** antes de escrever o arquivo —
+e a verificação encontrou um bug meu: a restrição `array_length(painel_tv_tipos, 1) >= 1`
+não travava nada, porque `array_length('{}', 1)` devolve `NULL` e `NULL >= 1` é `NULL`, que
+o CHECK aceita. Corrigido com `coalesce(..., 0)`.
+
+Achado colateral: **`__tests__/integration/ledger.test.ts` estava quebrado desde sempre** —
+usava `tipo_pedido: 'BALCAO'`, valor que não existe no enum, então falharia na primeira
+inserção. Ninguém percebeu porque a suíte inteira é pulada quando falta a
+`SUPABASE_SERVICE_ROLE_KEY`. O cabeçalho dele também prometia "transação isolada com
+rollback" que não existia em lugar nenhum do arquivo. Ambos corrigidos, e agora ele limpa
+o que cria.
+
+*O que falta:* a suíte é pulada em toda execução, local e no CI, por não haver service key.
+Rodar contra produção não é opção.
+
+*Plano:* criar um projeto Supabase dedicado a teste, aplicar as migrações nele e expor a
+chave como secret do Actions (`SUPABASE_SERVICE_ROLE_KEY` + `VITE_SUPABASE_URL`) num job
+separado do e2e. Enquanto isso não existir, **estes testes são documentação executável, não
+uma rede de proteção** — e é assim que devem ser tratados.
 
 ### P3 · Voz na TV real — MITIGADO, falta o teste no aparelho
 

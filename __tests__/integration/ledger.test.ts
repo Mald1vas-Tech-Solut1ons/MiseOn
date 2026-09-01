@@ -1,8 +1,14 @@
 /**
  * MiseOn — Suíte de Testes de Integração do Ledger Financeiro
  *
- * Estratégia: Cada teste roda em transação isolada (rollback ao final) para
- * garantir idempotência e isolamento sem precisar de um banco limpo.
+ * Estratégia: os testes escrevem no banco apontado por VITE_SUPABASE_URL e
+ * limpam o que criaram no afterAll.
+ *
+ * O cabeçalho antigo dizia "cada teste roda em transação isolada (rollback ao
+ * final)". Não rodava: não há transação nem rollback em lugar nenhum deste
+ * arquivo, e o próprio nutricao.test.ts já registrava isso ao se descrever
+ * como "ao contrário do ledger.test.ts". Comentário que promete garantia
+ * inexistente é pior que comentário nenhum — quem lê para de conferir.
  *
  * Cobertura:
  *  ✅ Lançamento de receita ao finalizar pedido próprio
@@ -13,7 +19,7 @@
  *  ✅ Sequência de pedidos: sem race condition (números únicos por loja/dia)
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // ─── Setup do cliente de testes (usa service-role para bypass de RLS) ─────────
@@ -23,6 +29,9 @@ const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
 let db: SupabaseClient;
 let lojaId: string;
 let pedidoId: string;
+/** Tudo que este arquivo criar entra aqui e sai no afterAll. Pedido deixado
+ *  para tras suja faturamento e o painel de quem for olhar depois. */
+const pedidosCriados: string[] = [];
 
 
 async function criarPedidoTeste(overrides: Record<string, unknown> = {}) {
@@ -30,7 +39,11 @@ async function criarPedidoTeste(overrides: Record<string, unknown> = {}) {
     .from('pedidos')
     .insert({
       loja_id: lojaId,
-      tipo_pedido: 'BALCAO',
+      // 'BALCAO' NAO existe no enum tipo_pedido (DELIVERY | SALAO |
+      // RETIRADA_BALCAO). Este arquivo inteiro falharia na primeira insercao,
+      // e ninguem percebeu porque a suite e pulada quando falta a
+      // SUPABASE_SERVICE_ROLE_KEY — que e o caso no CI.
+      tipo_pedido: 'RETIRADA_BALCAO',
       status: 'NOVO',
       identificador_cliente: 'Teste Integração',
       subtotal: 50.00,
@@ -43,6 +56,7 @@ async function criarPedidoTeste(overrides: Record<string, unknown> = {}) {
     .select('id, numero')
     .single();
   if (error) throw new Error(`Erro ao criar pedido: ${error.message}`);
+  pedidosCriados.push(data.id);
   return data;
 }
 
@@ -71,6 +85,12 @@ beforeAll(async () => {
     .single();
   if (error || !loja) throw new Error('Nenhuma loja encontrada no banco de teste. Execute o seed.');
   lojaId = loja.id;
+});
+
+afterAll(async () => {
+  if (!isConfigured || !pedidosCriados.length) return;
+  // Lançamentos e pagamentos caem por cascata/FK do próprio pedido.
+  await db.from('pedidos').delete().in('id', pedidosCriados);
 });
 
 // ─── Testes ──────────────────────────────────────────────────────────────────
