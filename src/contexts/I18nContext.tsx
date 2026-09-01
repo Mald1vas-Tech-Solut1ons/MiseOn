@@ -22,6 +22,25 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [idioma, setIdiomaState] = useState<Idioma>(() => {
     const salvo = localStorage.getItem('miseon_idioma') as Idioma;
     if (salvo === 'pt-BR' || salvo === 'en-US') return salvo;
+
+    // Idioma padrao fixado no build, quando houver. Vence o `navigator` mas
+    // NAO vence a escolha do usuario (o `salvo` acima), entao o seletor de
+    // idioma continua mandando.
+    //
+    // Existe porque o E2E precisa ser deterministico: o runner do GitHub
+    // Actions e en-US e a maquina de desenvolvimento e pt-BR, e a suite
+    // inteira afirma texto em portugues. As tentativas de fixar isso pelo
+    // Cypress (`window:before:load` gravando no localStorage e sobrescrevendo
+    // `navigator.language`) funcionavam na maquina local e NAO chegavam na
+    // janela do app no runner Linux — medido no proprio CI:
+    // `nav=en-US ls=null html=en-US`, com os dois pins no lugar.
+    //
+    // O build e o unico ponto que as duas maquinas enxergam igual.
+    // Em producao a variavel nao e definida e o comportamento fica identico
+    // ao de antes.
+    const padraoDoBuild = import.meta.env.VITE_IDIOMA_PADRAO as Idioma | undefined;
+    if (padraoDoBuild === 'pt-BR' || padraoDoBuild === 'en-US') return padraoDoBuild;
+
     if (navigator.language.startsWith('en')) return 'en-US';
     return 'pt-BR';
   });

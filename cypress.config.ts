@@ -21,7 +21,6 @@ export default defineConfig({
     pageLoadTimeout: 90000,
     setupNodeEvents(on, config) {
       coverageTask(on, config);
-      on('task', { log(m: string) { console.log('[DIAG] ' + m); return null; } });
       return config;
     },
     retries: {

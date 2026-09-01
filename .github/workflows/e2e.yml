@@ -51,6 +51,9 @@ jobs:
         env:
           VITE_SUPABASE_URL: 'https://placeholder.supabase.co'
           VITE_SUPABASE_ANON_KEY: 'placeholder'
+          # Fixa o idioma do bundle. O runner e en-US e a suite afirma texto
+          # em portugues; sem isto o E2E depende da locale de quem roda.
+          VITE_IDIOMA_PADRAO: 'pt-BR'
           CYPRESS_E2E: 'true'
           CYPRESS_BASE_URL: 'http://localhost:4173'
           # Liga a instrumentação de cobertura só aqui. No build de produção
