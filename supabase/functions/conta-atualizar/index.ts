@@ -11,11 +11,24 @@ const cors = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const json = (data: unknown, init: ResponseInit = {}) =>
-  new Response(JSON.stringify(data), {
-    ...init,
-    headers: { 'Content-Type': 'application/json', ...cors, ...(init.headers ?? {}) },
+/** Aceita `json(x, 429)` E `json(x, { status: 429 })`.
+ *
+ *  Nao e conveniencia: e trava contra um erro que ja aconteceu aqui. Este
+ *  helper recebia so `ResponseInit`, e uma chamada passou `429` cru. Espalhar
+ *  um numero produz objeto vazio, entao a resposta saiu com o padrao 200 — o
+ *  rate limit BARRAVA a requisicao e devolvia "sucesso". Medido em 01/09/2026:
+ *  30 chamadas em 2s contra um teto de 20/min deram 11 respostas 200 no lugar
+ *  de 429, e nenhum erro em lugar nenhum denunciava isso.
+ *
+ *  Outras funcoes do projeto usam `json(x, status)` com numero; misturar as
+ *  duas convencoes sem que uma delas falhe alto e pedir para repetir. */
+const json = (data: unknown, init: ResponseInit | number = {}) => {
+  const opcoes: ResponseInit = typeof init === 'number' ? { status: init } : init;
+  return new Response(JSON.stringify(data), {
+    ...opcoes,
+    headers: { 'Content-Type': 'application/json', ...cors, ...(opcoes.headers ?? {}) },
   });
+};
 
 /** Erro de NEGOCIO (dado invalido, senha errada, e-mail ja usado).
  *  Fica em 200 de proposito: a requisicao foi entendida e respondida, e a tela
@@ -73,7 +86,7 @@ Deno.serve(async (req) => {
     windowMs: 60_000,
     maxRequests: 20,
   });
-  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, 429);
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, { status: 429 });
 
   try {
     const authHeader = req.headers.get('Authorization') ?? '';
