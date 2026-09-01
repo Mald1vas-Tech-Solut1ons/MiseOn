@@ -262,23 +262,32 @@ export default function Mesas() {
       const isPagamentoParcial = recebidoNum < saldoDevedor;
       const valorAPagar = isPagamentoParcial ? recebidoNum : saldoDevedor;
 
+      // O cliente Supabase NÃO lança em erro — devolve { error }. O try/catch
+      // em volta deste bloco nunca pegou nada: a conta era impressa e a tela
+      // dizia "fechado" mesmo quando a mesa continuava ocupada no sistema ou o
+      // pagamento não constava. Cada escrita é conferida antes da seguinte.
+
       // Cria o registro do pagamento atrelado ao último pedido (apenas para constar na comanda)
-      await supabase.from('pagamentos').insert({
+      const { error: ePgto } = await supabase.from('pagamentos').insert({
         pedido_id: pedidoBase.id, metodo, valor_pago: valorAPagar, status: 'PAGO', data_pagamento: new Date().toISOString(),
       });
+      if (ePgto) throw ePgto;
 
       if (!isPagamentoParcial) {
         // Fechamento Total
         if (valorServico > 0) {
           // Acrescenta a taxa no último pedido
-          await supabase.from('pedidos').update({ valor_total: Number(pedidoBase.valor_total) + valorServico }).eq('id', pedidoBase.id);
+          const { error: eTaxa } = await supabase.from('pedidos').update({ valor_total: Number(pedidoBase.valor_total) + valorServico }).eq('id', pedidoBase.id);
+          if (eTaxa) throw eTaxa;
         }
-        await supabase.from('pedidos').update({ status: 'FINALIZADO' }).eq('comanda_id', comanda.id).not('status', 'in', '(CANCELADO,FINALIZADO)');
+        const { error: eFin } = await supabase.from('pedidos').update({ status: 'FINALIZADO' }).eq('comanda_id', comanda.id).not('status', 'in', '(CANCELADO,FINALIZADO)');
+        if (eFin) throw eFin;
         const { data: { user } } = await supabase.auth.getUser();
-        await supabase.from('comandas').update({
+        const { error: eCom } = await supabase.from('comandas').update({
           status: 'FECHADA', fechada_em: new Date().toISOString(), fechada_por: user?.id ?? null,
           metodo_pagamento: metodo, valor_servico: valorServico, taxa_servico_pct: Number(taxaEditavel || 0),
         }).eq('id', comanda.id);
+        if (eCom) throw eCom;
       }
 
       imprimir({

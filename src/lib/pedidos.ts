@@ -72,8 +72,17 @@ export async function createPedidoPedido(dados: CreatePedidoParams) {
     }
   }
 
-  // Desconta os insumos da Ficha Técnica e Adicionais, gerando movimentação de estoque
-  await supabase.rpc('fn_baixar_estoque', { p_pedido_id: ped.id });
+  // Desconta os insumos da Ficha Técnica e Adicionais, gerando movimentação de estoque.
+  //
+  // A venda NÃO é desfeita se a baixa falhar: o cliente está no balcão e o
+  // pedido já existe. Mas o erro também não pode sumir — `fn_baixar_estoque`
+  // levanta exceção quando um insumo ficaria negativo, e essa exceção vinha
+  // sendo descartada aqui. O efeito era o pior possível: a venda concluía, o
+  // estoque não baixava e ninguém ficava sabendo. O inventário ia divergindo
+  // do real em silêncio — justamente o número que o lojista compra da gente.
+  //
+  // Agora a falha sobe junto com o pedido, para a tela avisar o operador.
+  const { error: erroEstoque } = await supabase.rpc('fn_baixar_estoque', { p_pedido_id: ped.id });
 
-  return ped;
+  return { ...ped, avisoEstoque: erroEstoque?.message ?? null };
 }
