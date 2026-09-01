@@ -34,16 +34,37 @@ const cors = {
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
 
-async function getPlatformToken(clientId: string, clientSecret: string): Promise<string> {
+type Autenticacao =
+  | { ok: true; token: string }
+  | { ok: false; status: number; motivo: string };
+
+/** Autentica no iFood devolvendo o MOTIVO, nao so o numero.
+ *
+ *  Antes isto lancava `Error("Falha ao autenticar no iFood: 403")` e o catch
+ *  la embaixo respondia 500. Resultado medido em 01/09/2026: 500 a cada
+ *  minuto, para sempre, com stack trace no lugar da explicacao — e o log
+ *  cheio de 500 esconde justamente o erro que importa.
+ *
+ *  A mensagem do iFood dizia tudo:
+ *    {"error":{"code":"Forbidden",
+ *     "message":"No permissions granted to client c44831bc-..."}}
+ *  ou seja, aplicativo sem permissoes concedidas no portal. Agora ela chega
+ *  ao log inteira. */
+async function getPlatformToken(clientId: string, clientSecret: string): Promise<Autenticacao> {
   const body = new URLSearchParams({ grantType: 'client_credentials', clientId, clientSecret });
   const res = await fetch(`${IFOOD}/authentication/v1.0/oauth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   });
-  if (!res.ok) throw new Error(`Falha ao autenticar no iFood: ${res.status}`);
+  if (!res.ok) {
+    const corpo = await res.text().catch(() => '');
+    let motivo = corpo.slice(0, 300);
+    try { motivo = JSON.parse(corpo)?.error?.message ?? motivo; } catch { /* corpo nao-JSON */ }
+    return { ok: false, status: res.status, motivo };
+  }
   const { accessToken } = await res.json();
-  return accessToken;
+  return { ok: true, token: accessToken };
 }
 
 Deno.serve(async (req) => {
@@ -79,8 +100,24 @@ Deno.serve(async (req) => {
     .not('ifood_merchant_id', 'is', null);
   if (!count) return json({ ok: true, motivo: 'nenhuma loja com iFood integrado' });
 
+  const auth = await getPlatformToken(clientId, clientSecret);
+  if (!auth.ok) {
+    // 401/403 sao condicao de CONFIGURACAO — credencial revogada ou
+    // aplicativo sem permissao no portal do iFood. A execucao terminou e
+    // concluiu corretamente que nao ha o que fazer; nao e falha do servidor,
+    // entao nao volta 5xx. Mesmo tratamento que ja se da a "nenhum modulo de
+    // polling liberado" logo abaixo.
+    const configuracao = auth.status === 401 || auth.status === 403;
+    const linha = `iFood recusou a autenticacao da plataforma (${auth.status}): ${auth.motivo}`;
+    if (configuracao) console.warn(linha); else console.error(linha);
+    return json(
+      { ok: false, motivo: auth.motivo, status: auth.status },
+      configuracao ? 200 : 502,
+    );
+  }
+  const token = auth.token;
+
   try {
-    const token = await getPlatformToken(clientId, clientSecret);
 
     // 1. Coleta. `x-polling-merchants` limita aos merchants que são nossos —
     // sem isso o integrador recebe evento de loja que não opera aqui.

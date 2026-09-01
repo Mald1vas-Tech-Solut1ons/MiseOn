@@ -19,7 +19,15 @@ async function getPlatformToken(clientId: string, clientSecret: string): Promise
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   });
-  if (!res.ok) throw new Error(`Falha ao autenticar no iFood: ${res.status}`);
+  if (!res.ok) {
+    // A mensagem do iFood vai junto: `403` sozinho nao distingue credencial
+    // revogada de aplicativo sem permissao no portal, e foi assim que um 403
+    // ficou horas no log sem ninguem saber o que ele queria dizer.
+    const corpo = await res.text().catch(() => '');
+    let motivo = corpo.slice(0, 300);
+    try { motivo = JSON.parse(corpo)?.error?.message ?? motivo; } catch { /* corpo nao-JSON */ }
+    throw new Error(`Falha ao autenticar no iFood (${res.status}): ${motivo}`);
+  }
   const { accessToken } = await res.json();
   return accessToken;
 }
@@ -86,24 +94,6 @@ const ifoodEventSchema = z.array(
   z.object({ code: z.string(), orderId: z.string() }).passthrough()
 );
 
-// ─── Mapeamento de status iFood → MiseOn ────────────────────────────────────
-
-// Mapeamento iFood → enum status_pedido do banco
-const STATUS_MAP: Record<string, string> = {
-  PLC: 'NOVO',
-  // CFM e o codigo que o iFood realmente manda na confirmacao
-  // (fullCode CONFIRMED). `CFR` estava aqui desde o inicio e NUNCA casou com
-  // nada: toda confirmacao caia em "evento nao tratado". Medido no log da
-  // homologacao de 21/08: {"code":"CFM","fullCode":"CONFIRMED"}.
-  // CFR fica como apelido porque contas antigas ainda o emitem.
-  CFM: 'ACEITO',
-  CFR: 'ACEITO',
-  PRS: 'PREPARANDO',  // PREPARATION_STARTED
-  RTP: 'PRONTO',     // Pronto para entrega/retirada
-  DSP: 'EM_ROTA',    // Entregador a caminho
-  CON: 'FINALIZADO', // Concluído
-  CAN: 'CANCELADO',
-};
 
 // ─── Handler principal ────────────────────────────────────────────────────────
 
@@ -157,11 +147,29 @@ async function processarEventos(
     }
 
     // Token único por invocação (evita múltiplas chamadas de auth)
-    let platformToken: string | null = null;
-    const getToken = async () => {
-      if (!platformToken) platformToken = await getPlatformToken(clientId, clientSecret);
-      return platformToken;
-    };
+    // Token uma vez, ANTES do laco — e a falha dele nao passa pelo catch de
+    // evento.
+    //
+    // Antes o token era buscado preguicosamente dentro do `try` de cada
+    // evento. Quando o problema era de PLATAFORMA (credencial revogada,
+    // aplicativo sem permissao no portal — o 403 medido em 01/09/2026), a
+    // excecao caia no catch por evento e disparava sendFailureEmail() UMA VEZ
+    // POR EVENTO DO LOTE, todas dizendo a mesma coisa e nenhuma dizendo o que
+    // era. Um lote de dez eventos virava dez e-mails de alerta inuteis.
+    //
+    // Isto aqui nao e falha de um pedido: e a integracao inteira parada.
+    // Registra uma vez, com a mensagem do iFood, e encerra o lote — sem ack,
+    // o iFood reentrega quando a permissao voltar.
+    let token: string;
+    try {
+      token = await getPlatformToken(clientId, clientSecret);
+    } catch (e) {
+      reqLogger.error(
+        `iFood recusou a autenticacao da plataforma — lote de ${events.length} evento(s) nao processado`,
+        e,
+      );
+      return;
+    }
 
     // ── Processar cada evento ────────────────────────────────────────────────
     for (const event of events) {
@@ -169,7 +177,6 @@ async function processarEventos(
       let lojaNomeFallback = 'Desconhecida';
 
       try {
-        const token = await getToken();
 
         // ── AUTENTICIDADE DO EVENTO ───────────────────────────────────────
         // Este endpoint e aberto por necessidade (o iFood chama sem JWT do
