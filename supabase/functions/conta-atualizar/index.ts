@@ -17,8 +17,24 @@ const json = (data: unknown, init: ResponseInit = {}) =>
     headers: { 'Content-Type': 'application/json', ...cors, ...(init.headers ?? {}) },
   });
 
+/** Erro de NEGOCIO (dado invalido, senha errada, e-mail ja usado).
+ *  Fica em 200 de proposito: a requisicao foi entendida e respondida, e a tela
+ *  mostra a mensagem. */
 function erro(msg: string) {
   return json({ error: msg }, { status: 200 });
+}
+
+/** Erro de AUTENTICACAO. Responde 401.
+ *
+ *  Antes tambem saia como 200. Isso significava que requisicao sem token, ou
+ *  com sessao expirada, entrava no log de Edge Functions como sucesso — nao
+ *  havia como distinguir uso normal de alguem batendo no endpoint, nem alarme
+ *  possivel em cima disso.
+ *
+ *  A mensagem continua chegando na tela: o front le o corpo tambem em resposta
+ *  nao-2xx (src/lib/edgeFunctionErro.ts). */
+function naoAutenticado(msg: string) {
+  return json({ error: msg }, { status: 401 });
 }
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -61,7 +77,7 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('Authorization') ?? '';
-    if (!authHeader) return erro('Não autenticado.');
+    if (!authHeader) return naoAutenticado('Não autenticado.');
 
     // Cliente com JWT do usuário chamador
     const supabaseAuth = createClient(
@@ -70,7 +86,7 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
     const { data: { user: caller } } = await supabaseAuth.auth.getUser();
-    if (!caller) return erro('Sessão expirada. Faça login novamente.');
+    if (!caller) return naoAutenticado('Sessão expirada. Faça login novamente.');
 
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
     const body = await req.json().catch(() => ({}));

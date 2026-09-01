@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
+import { mensagemDeErro } from '../../lib/edgeFunctionErro';
 import { User as UserIcon, Lock, Mail, Phone, ShieldCheck, Loader2, CheckCircle2, AlertCircle, KeyRound, X, RefreshCw, ArrowRight } from 'lucide-react';
 import MiseOnLoader from '../../components/MiseOnLoader';
 
@@ -65,8 +66,9 @@ export default function MinhaConta() {
 
     setSalvandoSenha(false);
 
-    if (error || data?.error) {
-      setMsgSenha({ tipo: 'erro', texto: data?.error || error?.message || 'Erro ao alterar senha. Verifique se a senha atual está correta.' });
+    const falha = await mensagemDeErro(error, data, 'Erro ao alterar senha. Verifique se a senha atual está correta.');
+    if (falha) {
+      setMsgSenha({ tipo: 'erro', texto: falha });
     } else {
       setMsgSenha({ tipo: 'sucesso', texto: 'Senha alterada com sucesso e segurança!' });
       setSenhaAtual('');
@@ -101,8 +103,9 @@ export default function MinhaConta() {
       setEnviandoOtp(false);
       setSalvandoPerfil(false);
 
-      if (errOtp || resOtp?.error) {
-        setMsgPerfil({ tipo: 'erro', texto: resOtp?.error || errOtp?.message || 'Erro ao solicitar código de verificação para o novo e-mail.' });
+      const falhaOtp = await mensagemDeErro(errOtp, resOtp, 'Erro ao solicitar código de verificação para o novo e-mail.');
+      if (falhaOtp) {
+        setMsgPerfil({ tipo: 'erro', texto: falhaOtp });
         return;
       }
 
@@ -143,8 +146,9 @@ export default function MinhaConta() {
 
     setVerificandoOtp(false);
 
-    if (error || data?.error) {
-      setMsgOtp({ tipo: 'erro', texto: data?.error || error?.message || 'Erro ao verificar código.' });
+    const falhaVerificar = await mensagemDeErro(error, data, 'Erro ao verificar código.');
+    if (falhaVerificar) {
+      setMsgOtp({ tipo: 'erro', texto: falhaVerificar });
     } else {
       setMsgOtp({ tipo: 'sucesso', texto: 'E-mail alterado com sucesso!' });
       setTimeout(async () => {
@@ -170,8 +174,9 @@ export default function MinhaConta() {
 
     setEnviandoOtp(false);
 
-    if (error || data?.error) {
-      setMsgOtp({ tipo: 'erro', texto: data?.error || error?.message || 'Erro ao reenviar código.' });
+    const falhaReenvio = await mensagemDeErro(error, data, 'Erro ao reenviar código.');
+    if (falhaReenvio) {
+      setMsgOtp({ tipo: 'erro', texto: falhaReenvio });
     } else {
       setMsgOtp({ tipo: 'sucesso', texto: 'Novo código de 6 dígitos enviado para sua caixa de entrada!' });
     }
