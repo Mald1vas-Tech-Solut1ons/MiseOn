@@ -19,7 +19,18 @@
  * recebem pedido de verdade em produção — sempre usaram client_credentials.
  * Só o onboarding tinha ficado para trás.
  *
- * ─── AS TRÊS AÇÕES ────────────────────────────────────────────────────────
+ * ─── O QUE DESTRAVA A CONEXÃO ─────────────────────────────────────────────
+ * Enquanto nenhum restaurante tiver autorizado o aplicativo, o próprio
+ * `/oauth/token` responde 403 "No permissions granted to client" — não sai nem
+ * token. A permissão vem DO MERCHANT, não de uma lista de módulos marcada por
+ * nós. O caminho é sempre: o responsável pela loja recebe um e-mail do iFood
+ * ("Um novo aplicativo pediu acesso a dados da sua loja") e aprova.
+ *
+ * Por isso o 403 aqui não é tratado como erro de configuração: é o estado
+ * normal de quem ainda não foi autorizado, e a tela precisa dizer isso com
+ * essas palavras em vez de mostrar uma falha técnica.
+ *
+ * ─── AS AÇÕES ──────────────────────────────────────────────────────────────────────
  *   diagnostico  responde se o servidor tem credencial, se ela autentica e
  *                quais lojas o aplicativo enxerga. É o que se roda ANTES de ir
  *                ao cliente, para não descobrir problema na frente dele.
@@ -175,7 +186,45 @@ Deno.serve(async (req) => {
       return json(passos);
     }
 
-    const token = await getPlatformToken(clientId, clientSecret);
+    // Anotar o ID vem ANTES de qualquer chamada ao iFood, e isso é essencial:
+    // enquanto ninguém autorizou, o `/oauth/token` responde 403 e nem token
+    // sai. Se este bloco ficasse depois, o lojista não conseguiria nem
+    // registrar o próprio ID — travaria no primeiro passo, justamente o que
+    // ele precisa fazer para destravar o resto.
+    if (acao === 'anotar') {
+      if (!merchantId) return erro('Informe o ID da sua loja no iFood.');
+
+      const { error: errAnotar } = await admin
+        .from('lojas')
+        .update({
+          ifood_merchant_id_solicitado: String(merchantId).trim(),
+          ifood_autorizacao_pedida_em: new Date().toISOString(),
+        })
+        .eq('id', lojaId);
+      if (errAnotar) return erro(`Não consegui salvar: ${errAnotar.message}`, 500);
+
+      return json({ success: true, aguardando: true });
+    }
+
+    let token: string;
+    try {
+      token = await getPlatformToken(clientId, clientSecret);
+    } catch (e) {
+      const msg = String((e as Error)?.message ?? e);
+      // 403 "No permissions granted" não é falha nossa: é o iFood dizendo que
+      // nenhuma loja autorizou o aplicativo ainda. A tela mostra o passo a
+      // passo da autorização em vez de um erro técnico.
+      if (msg.includes('No permissions granted') || msg.includes('HTTP 403')) {
+        return json({
+          aguardandoAutorizacao: true,
+          merchants: [],
+          mensagem:
+            'Nenhuma loja autorizou o MiseOn ainda. Peça a autorização no iFood ' +
+            'e aprove o e-mail que o iFood enviar ao responsável pela loja.',
+        });
+      }
+      throw e;
+    }
 
     if (acao === 'listar') {
       const merchants = await listarMerchants(token);
