@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -39,6 +40,17 @@ async function encryptAES(text: string): Promise<string> {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  // Freio de vazao. A funcao ja exige autorizacao propria; o limite existe
+  // para que tentativa em massa contra ela — ou um token vazado — nao vire
+  // custo nem volume ilimitado. Em falha de banco o limitador DEIXA PASSAR
+  // (ver _shared/rate-limit.ts), entao nao vira um novo ponto unico de queda.
+  // 10/min por IP: onboarding fiscal, uma vez por empresa.
+  const rl = await checkRateLimit(`fiscal-onboarding:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 10,
+  });
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, { status: 429 });
 
   try {
     const body = await req.json();

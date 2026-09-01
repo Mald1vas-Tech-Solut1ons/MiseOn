@@ -13,6 +13,7 @@
 // real ainda.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 const EFI_COB_URL = Deno.env.get('EFI_SANDBOX') === 'true'
   ? 'https://cobrancas-h.api.efipay.com.br'
@@ -55,6 +56,19 @@ const STATUS_PAGO = new Set(['paid', 'pago', 'liquidado', 'active']);
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  // Freio de vazao. 120/min: quem chama e a Efi, avisando mudanca de
+  // assinatura — volume baixo por natureza, entao o teto e contra abuso de
+  // um endpoint que e publico por necessidade.
+  //
+  // 429 e nao 200 de proposito: a Efi reentrega a notificacao, e a confirmacao
+  // de pagamento nao depende so deste webhook (ha tambem a consulta ativa a
+  // Efi), entao atrasar um aviso nao perde dinheiro.
+  const rl = await checkRateLimit(`efi-assinatura:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 120,
+  });
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes.' }, { status: 429 });
 
   try {
     const body = await req.json().catch(() => ({}));

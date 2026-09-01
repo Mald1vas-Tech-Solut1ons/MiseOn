@@ -38,6 +38,7 @@
  *   vincular     grava o merchantId escolhido.
  */
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 const IFOOD = 'https://merchant-api.ifood.com.br';
 
@@ -121,6 +122,17 @@ async function listarMerchants(token: string): Promise<MerchantIFood[]> {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  // Freio de vazao. A funcao ja exige autorizacao propria; o limite existe
+  // para que tentativa em massa contra ela — ou um token vazado — nao vire
+  // custo nem volume ilimitado. Em falha de banco o limitador DEIXA PASSAR
+  // (ver _shared/rate-limit.ts), entao nao vira um novo ponto unico de queda.
+  // 30/min por IP: e vinculacao de loja, feita algumas vezes por lojista.
+  const rl = await checkRateLimit(`ifood-auth:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 30,
+  });
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, { status: 429 });
 
   try {
     const { lojaId, acao = 'listar', merchantId } = await req.json();

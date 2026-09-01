@@ -27,6 +27,7 @@
 // isso, cada execução criaria o cardápio inteiro de novo, duplicado.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 const IFOOD = 'https://merchant-api.ifood.com.br';
 
@@ -51,6 +52,17 @@ async function getPlatformToken(clientId: string, clientSecret: string): Promise
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  // Freio de vazao. A funcao ja exige autorizacao propria; o limite existe
+  // para que tentativa em massa contra ela — ou um token vazado — nao vire
+  // custo nem volume ilimitado. Em falha de banco o limitador DEIXA PASSAR
+  // (ver _shared/rate-limit.ts), entao nao vira um novo ponto unico de queda.
+  // 10/min por IP: sincronizacao de cardapio e pesada e rara.
+  const rl = await checkRateLimit(`ifood-catalog-sync:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 10,
+  });
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, 429);
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

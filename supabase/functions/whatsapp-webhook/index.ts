@@ -4,6 +4,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { checkRateLimit, ipDaRequisicao } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -186,6 +187,25 @@ async function concluirConexao(
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  // Freio de vazao — SO no POST.
+  //
+  // O GET e o handshake de verificacao da Meta, e ele NUNCA pode ser barrado:
+  // qualquer resposta que nao seja o challenge derruba a configuracao do
+  // webhook no painel deles. E a mesma armadilha do healthcheck do iFood, onde
+  // responder algo diferente de 202 tirava as lojas do ar.
+  //
+  // 300/min porque quem manda o volume aqui e a Meta, nao a loja: mensagem de
+  // cliente chega em rajada. A funcao so valida HMAC e enfileira, entao o teto
+  // e contra abuso, nao contra uso.
+  if (req.method === "POST") {
+    const rl = await checkRateLimit(`whatsapp-webhook:${ipDaRequisicao(req)}`, {
+      windowMs: 60_000,
+      maxRequests: 300,
+    });
+    // 429 e nao 200: a Meta reentrega, entao a mensagem nao se perde.
+    if (!rl.allowed) return json({ error: "Muitas requisicoes." }, 429);
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

@@ -5,6 +5,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { checkRateLimit, ipDaRequisicao } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -94,6 +95,17 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  // Freio de vazao. A funcao ja exige autorizacao propria; o limite existe
+  // para que tentativa em massa contra ela — ou um token vazado — nao vire
+  // custo nem volume ilimitado. Em falha de banco o limitador DEIXA PASSAR
+  // (ver _shared/rate-limit.ts), entao nao vira um novo ponto unico de queda.
+  // 60/min por IP: drenador da fila, chamado por cron.
+  const rl = await checkRateLimit(`whatsapp-worker:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 60,
+  });
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, 429);
   if (req.method !== "POST") {
     return json({ error: "método não suportado" }, 405);
   }

@@ -21,6 +21,7 @@
 // segunda. A tela precisa saber a diferença entre "já respondida" e "falhou".
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 const IFOOD = 'https://merchant-api.ifood.com.br';
 
@@ -82,6 +83,17 @@ function explicar(status: number, corpo: string): string {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  // Freio de vazao. A funcao ja exige autorizacao propria; o limite existe
+  // para que tentativa em massa contra ela — ou um token vazado — nao vire
+  // custo nem volume ilimitado. Em falha de banco o limitador DEIXA PASSAR
+  // (ver _shared/rate-limit.ts), entao nao vira um novo ponto unico de queda.
+  // 30/min por IP: resposta a negociacao, uma por reclamacao.
+  const rl = await checkRateLimit(`ifood-disputa:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 30,
+  });
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, 429);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

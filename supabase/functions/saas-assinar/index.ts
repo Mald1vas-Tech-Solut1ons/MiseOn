@@ -16,6 +16,7 @@
 // número de parcelas, o valor total pode variar do anunciado.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
 
 const EFI_COB_URL = Deno.env.get('EFI_SANDBOX') === 'true'
   ? 'https://cobrancas-h.api.efipay.com.br'
@@ -81,6 +82,17 @@ async function getOrCreatePlan(token: string): Promise<number> {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  // Freio de vazao. A funcao ja exige autorizacao propria; o limite existe
+  // para que tentativa em massa contra ela — ou um token vazado — nao vire
+  // custo nem volume ilimitado. Em falha de banco o limitador DEIXA PASSAR
+  // (ver _shared/rate-limit.ts), entao nao vira um novo ponto unico de queda.
+  // 20/min por IP: assinatura, uma vez por lojista.
+  const rl = await checkRateLimit(`saas-assinar:${ipDaRequisicao(req)}`, {
+    windowMs: 60_000,
+    maxRequests: 20,
+  });
+  if (!rl.allowed) return json({ error: 'Muitas requisicoes. Tente em instantes.' }, { status: 429 });
   try {
     const { loja_id, ciclo, parcelas, payment_token, customer } = await req.json();
     if (!loja_id || !payment_token || !customer?.name || !customer?.cpf) {
