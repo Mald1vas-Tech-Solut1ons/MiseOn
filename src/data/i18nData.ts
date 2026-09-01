@@ -2342,6 +2342,7 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'A senha zera todo dia e vai de 1 a 999. Delivery não é chamado: o cliente não está no balcão.':
     'The number resets daily and runs from 1 to 999. Delivery is not called: the customer is not at the counter.',
   'nº no iFood': 'iFood no.',
+  'Chamada apenas visual neste aparelho': 'Visual-only call on this device',
   'Consultando os motivos no iFood…': 'Fetching reasons from iFood…',
   'Consultar de novo': 'Fetch again',
   'Lista fornecida pelo iFood para este pedido — só estes motivos são aceitos por lá.': 'List provided by iFood for this order — only these reasons are accepted there.',

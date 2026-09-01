@@ -21,7 +21,7 @@ type SenhaTV = {
 };
 
 export default function PainelTV() {
-  const { tDynamic } = useI18n();
+  const { tDynamic, idioma } = useI18n();
   const { slug } = useParams<{ slug: string }>();
   // Token do painel: a TV do balcao roda sem login, entao o controle de
   // acesso vai na URL. Loja sem token configurado continua abrindo so pelo
@@ -70,10 +70,35 @@ export default function PainelTV() {
   const [bannerChamadaVisivel, setBannerChamadaVisivel] = useState(false);
 
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  // `null` = ainda medindo. A TV do balcao pode simplesmente nao ter sintese de
+  // voz (varia entre Tizen, webOS e Android TV) ou nao ter voz instalada.
+  // Antes isso falhava em silencio: o banner de chamada aparecia, o icone de
+  // som ficava verde como se estivesse falando, e ninguem era chamado. O
+  // lojista descobriria pelo cliente reclamando.
+  const [vozDisponivel, setVozDisponivel] = useState<boolean | null>(null);
   const prontosConhecidosRef = useRef<Set<number> | null>(null);
 
   useEffect(() => {
-    synthRef.current = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
+    const synth = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
+    synthRef.current = synth;
+
+    if (!synth) {
+      setVozDisponivel(false);
+      return;
+    }
+
+    // `getVoices()` costuma vir vazio na primeira chamada e so popular depois
+    // do evento — medir uma vez so daria "sem voz" em aparelho que tem voz.
+    const medir = () => setVozDisponivel(synth.getVoices().length > 0);
+    medir();
+    synth.addEventListener?.('voiceschanged', medir);
+    // Rede lenta de TV: da um ultimo veredito depois de 3s para o indicador
+    // nao ficar eternamente em "medindo".
+    const t = setTimeout(medir, 3000);
+    return () => {
+      synth.removeEventListener?.('voiceschanged', medir);
+      clearTimeout(t);
+    };
   }, []);
 
   // 1. Carregar dados da Loja e Cardápio
@@ -145,12 +170,19 @@ export default function PainelTV() {
     const texto = `${tDynamic('Senha')} ${senha.numero}${nomeFormatado}, ${tDynamic('por favor retirar no balcão')}`;
 
     const utterance = new SpeechSynthesisUtterance(texto);
-    utterance.lang = 'pt-BR';
+    // O texto vem do `tDynamic`, entao acompanha o idioma da tela. Fixar
+    // `pt-BR` aqui fazia a TV em ingles ler texto ingles com fonetica
+    // brasileira.
+    utterance.lang = idioma;
+    const vozDoIdioma = synthRef.current
+      .getVoices()
+      .find((v) => v.lang?.replace('_', '-').toLowerCase().startsWith(idioma.slice(0, 2)));
+    if (vozDoIdioma) utterance.voice = vozDoIdioma;
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
 
     synthRef.current.speak(utterance);
-  }, [somAtivo, tDynamic]);
+  }, [somAtivo, tDynamic, idioma]);
 
   // 4. Detecta transição para PRONTO comparando com o retrato anterior e
   // dispara a chamada por voz. `prontosConhecidosRef === null` significa
@@ -277,10 +309,23 @@ export default function PainelTV() {
             className={`p-2.5 rounded-xl border transition-all ${
               somAtivo ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-slate-500'
             }`}
-            title={somAtivo ? 'Voz ativada' : 'Voz desativada'}
+            title={
+              vozDisponivel === false
+                ? 'Este aparelho nao tem sintese de voz — a chamada aparece na tela, sem audio.'
+                : somAtivo ? 'Voz ativada' : 'Voz desativada'
+            }
           >
-            {somAtivo ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            {somAtivo && vozDisponivel !== false ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
+
+          {/* Dizer a verdade sobre o audio vale mais que um icone verde
+              mentindo: sem voz, a chamada e visual e o lojista precisa saber
+              disso ANTES do cliente reclamar que nao foi chamado. */}
+          {vozDisponivel === false && (
+            <span className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-[11px] font-bold text-amber-300">
+              {tDynamic('Chamada apenas visual neste aparelho')}
+            </span>
+          )}
 
           <button
             onClick={alternarTelaCheia}
