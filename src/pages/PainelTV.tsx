@@ -32,6 +32,15 @@ export default function PainelTV() {
   const [categorias, setCategorias] = useState<(Categoria & { produtos: Produto[] })[]>([]);
   const [pedidos, setPedidos] = useState<SenhaTV[]>([]);
   const [carregando, setCarregando] = useState(true);
+  /** Quando os dados foram atualizados com sucesso pela ultima vez.
+   *
+   *  Sem isto a TV mentia: se a internet da loja caisse, a busca falhava em
+   *  silencio, as senhas antigas ficavam congeladas na tela e o selo verde
+   *  'AO VIVO' continuava piscando. O cliente olha o painel, nao ve a senha
+   *  dele, e ninguem descobre que a TV parou. Painel de balcao que mente e
+   *  pior que painel desligado — desligado, alguem vai conferir no balcao. */
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<number | null>(null);
+  const [offline, setOffline] = useState(false);
 
   // ── Modo de exibicao: sobrevive a reboot da TV ────────────────────────────
   //
@@ -77,6 +86,9 @@ export default function PainelTV() {
   // lojista descobriria pelo cliente reclamando.
   const [vozDisponivel, setVozDisponivel] = useState<boolean | null>(null);
   const prontosConhecidosRef = useRef<Set<number> | null>(null);
+  const ultimaAtualizacaoRef = useRef<number | null>(null);
+
+  useEffect(() => { ultimaAtualizacaoRef.current = ultimaAtualizacao; }, [ultimaAtualizacao]);
 
   useEffect(() => {
     const synth = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
@@ -148,11 +160,24 @@ export default function PainelTV() {
     }
 
     if (peds) setPedidos(peds as SenhaTV[]);
+    setUltimaAtualizacao(Date.now());
+    setOffline(false);
     setCarregando(false);
   }, [slug, painelToken]);
 
+  /** Envolve a carga para que falha de rede vire ESTADO VISIVEL, nao silencio.
+   *  A promessa rejeitada tambem parava o `setInterval` de ter efeito util. */
+  const carregarComGuarda = useCallback(async () => {
+    try {
+      await carregarDados();
+    } catch {
+      setOffline(true);
+      setCarregando(false);
+    }
+  }, [carregarDados]);
+
   useEffect(() => {
-    carregarDados();
+    carregarComGuarda();
     // 10s, não 5s: a TV do balcão fica ligada o dia inteiro e o polling é o
     // único caminho aqui (sem sessão, o Realtime respeita RLS e nada chega).
     // Dobrar a frequência dobrava a carga sem melhorar nada para quem retira.
@@ -162,9 +187,21 @@ export default function PainelTV() {
     // cardapio ninguem esta esperando chamada, entao nao ha motivo para dobrar
     // a carga: o cardapio nao muda a cada 4 segundos.
     const intervaloMs = modo === 'SENHAS' ? 4_000 : 15_000;
-    const interval = setInterval(carregarDados, intervaloMs);
-    return () => clearInterval(interval);
-  }, [carregarDados, modo]);
+    const interval = setInterval(carregarComGuarda, intervaloMs);
+
+    // Vigia independente do resultado da busca: mesmo que a chamada trave sem
+    // rejeitar (rede da loja caindo devagar e o pedido ficando pendurado), o
+    // relogio continua andando e o selo deixa de dizer AO VIVO.
+    const vigia = setInterval(() => {
+      setOffline((antes) => {
+        const ref = ultimaAtualizacaoRef.current;
+        if (ref === null) return antes;
+        return Date.now() - ref > 60_000 ? true : antes;
+      });
+    }, 10_000);
+
+    return () => { clearInterval(interval); clearInterval(vigia); };
+  }, [carregarComGuarda, modo]);
 
   /** Gongo curto antes da chamada.
    *
@@ -323,9 +360,15 @@ export default function PainelTV() {
           <div>
             <h1 className="font-['Sora'] text-2xl font-black tracking-tight text-white flex items-center gap-2">
               {loja.nome}
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/30">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> {tDynamic('AO VIVO')}
-              </span>
+              {offline ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-500/20 px-2.5 py-0.5 text-[11px] font-bold text-red-300 border border-red-500/40">
+                  <span className="w-2 h-2 rounded-full bg-red-400" /> {tDynamic('SEM CONEXÃO — senhas podem estar desatualizadas')}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/30">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> {tDynamic('AO VIVO')}
+                </span>
+              )}
             </h1>
             <p className="text-xs text-slate-400 font-medium">{tDynamic('Cardápio Digital & Chamada de Pedidos no Balcão')}</p>
           </div>

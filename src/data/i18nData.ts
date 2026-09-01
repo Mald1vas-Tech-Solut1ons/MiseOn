@@ -2345,6 +2345,7 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Chamada apenas visual neste aparelho': 'Visual-only call on this device',
   'Gerar credencial nova': 'Generate new credential',
   'Gerando...': 'Generating...',
+  'SEM CONEXÃO — senhas podem estar desatualizadas': 'OFFLINE — numbers may be out of date',
   'Os links acima levam uma credencial no final. Ela é o que impede qualquer pessoa de abrir o painel da sua loja — copie o link por aqui, não da barra do navegador da TV.':
     'The links above carry a credential at the end. It is what stops anyone from opening your store panel — always copy the link from here, not from the TV browser address bar.',
   'Use se o link vazou. As TVs atuais vão precisar do link novo.':
