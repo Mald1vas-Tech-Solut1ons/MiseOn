@@ -450,29 +450,91 @@ export default function Cardapio() {
         </div>
       )}
 
-      {/* Carrossel de banners promocionais */}
-      {banners.length > 0 && (
-        <div className="mx-auto max-w-6xl">
-          <div className="flex snap-x gap-4 overflow-x-auto p-4 sm:px-6 pb-6 hide-scrollbar">
-            {banners.map((b) => (
-              <div key={b.id} className="shrink-0 snap-center flex w-72 flex-col gap-2 sm:w-96">
-                {b.link_redirecionamento ? (
-                  <a href={b.link_redirecionamento} target="_blank" rel="noreferrer" className="vitrine-card block w-full rounded-[22px]">
-                    <img src={getOptimizedImageUrl(b.imagem_url)} alt={b.titulo ?? ''} className="vitrine-card-media h-32 w-full object-cover sm:h-40" />
-                  </a>
-                ) : (
-                  <div className="vitrine-card rounded-[22px]">
-                    <img src={getOptimizedImageUrl(b.imagem_url)} alt={b.titulo ?? ''} className="vitrine-card-media h-32 w-full object-cover sm:h-40" />
-                  </div>
-                )}
-                {b.titulo && (
-                  <p className="truncate px-2 text-sm font-bold" style={{ color: 'var(--cor-texto)' }}>{b.titulo}</p>
-                )}
-              </div>
-            ))}
+      {/* Banners promocionais — o layout segue a QUANTIDADE.
+          Antes era sempre carrossel com card de largura fixa (w-72/sm:w-96) e
+          altura fixa (h-32): com um banner só, a peça ficava encolhida num
+          canto e sobrava mais da metade da linha vazia. Carrossel é resposta
+          para excesso de itens, não para um item.
+            1  -> hero de largura total, proporção cinematográfica
+            2  -> lado a lado, os dois grandes
+            3+ -> aí sim carrossel, com o card seguinte espiando na borda
+          O título deixa de ser legenda truncada embaixo e passa a ser
+          sobreposto sobre gradiente, que é onde ele compete com a imagem. */}
+      {banners.length > 0 && (() => {
+        const unico = banners.length === 1;
+        const par = banners.length === 2;
+
+        const Peca = ({ b, className = '', proporcao }: { b: Banner; className?: string; proporcao: string }) => {
+          const Wrapper = b.link_redirecionamento ? 'a' : 'div';
+          const props = b.link_redirecionamento
+            ? { href: b.link_redirecionamento, target: '_blank' as const, rel: 'noreferrer' }
+            : {};
+          return (
+            <Wrapper
+              {...props}
+              className={`vitrine-card group relative block overflow-hidden rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${className}`}
+              style={{ outlineColor: 'var(--cor-primaria)' }}
+            >
+              <img
+                src={getOptimizedImageUrl(b.imagem_url)}
+                alt={b.titulo || 'Destaque da loja'}
+                loading="lazy"
+                className={`vitrine-card-media w-full object-cover ${proporcao}`}
+              />
+              {b.titulo && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-5 pb-4 pt-12">
+                  <p className={`font-extrabold leading-tight text-white drop-shadow-sm ${unico ? 'text-xl sm:text-3xl' : 'text-base sm:text-xl'}`}>
+                    {b.titulo}
+                  </p>
+                </div>
+              )}
+            </Wrapper>
+          );
+        };
+
+        // Um banner: protagonista, ocupando a largura toda.
+        //
+        // 1.91:1 e não algo mais panorâmico (21:9) de propósito: banner de
+        // promoção quase sempre TEM TEXTO e sai de ferramenta tipo Canva nos
+        // formatos 1200x628 (1.91:1) ou 16:9. Um corte mais largo que isso
+        // comeria a chamada escrita — o layout não pode apagar a promoção que
+        // o lojista acabou de montar.
+        if (unico) {
+          return (
+            <div className="mx-auto max-w-6xl px-4 pt-4 pb-6 sm:px-6">
+              <Peca b={banners[0]} proporcao="aspect-[16/9] sm:aspect-[1.91/1]" />
+            </div>
+          );
+        }
+
+        // Dois: dividem a linha em partes iguais, sem sobra.
+        if (par) {
+          return (
+            <div className="mx-auto grid max-w-6xl gap-4 px-4 pt-4 pb-6 sm:grid-cols-2 sm:px-6">
+              {banners.map((b) => (
+                <Peca key={b.id} b={b} proporcao="aspect-[16/9]" />
+              ))}
+            </div>
+          );
+        }
+
+        // Três ou mais: carrossel de verdade. O card ocupa quase toda a tela no
+        // celular para o seguinte aparecer pela borda e convidar ao arraste.
+        return (
+          <div className="mx-auto max-w-6xl">
+            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pt-4 pb-6 sm:px-6 hide-scrollbar">
+              {banners.map((b) => (
+                <Peca
+                  key={b.id}
+                  b={b}
+                  className="w-[86%] shrink-0 snap-center sm:w-[48%] lg:w-[32%]"
+                  proporcao="aspect-[16/9]"
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <div className="mx-auto max-w-6xl lg:grid lg:grid-cols-[1fr_360px] lg:items-start lg:gap-6 lg:px-6 lg:pt-4">
         <main className="min-w-0">
