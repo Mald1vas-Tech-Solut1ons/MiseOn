@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import { mensagemDeErro } from '../../lib/edgeFunctionErro';
-import { User as UserIcon, Lock, Mail, Phone, ShieldCheck, Loader2, CheckCircle2, AlertCircle, KeyRound, X, RefreshCw, ArrowRight } from 'lucide-react';
+import { User as UserIcon, Lock, Mail, Phone, ShieldCheck, Loader2, CheckCircle2, AlertCircle, KeyRound, X, RefreshCw, ArrowRight, LogOut } from 'lucide-react';
 import MiseOnLoader from '../../components/MiseOnLoader';
 
 import { useI18n } from '../../contexts/I18nContext';
@@ -17,6 +17,42 @@ export default function MinhaConta() {
   const [confirmaSenha, setConfirmaSenha] = useState('');
   const [salvandoSenha, setSalvandoSenha] = useState(false);
   const [msgSenha, setMsgSenha] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null);
+
+  // Encerrar sessao em TODOS os aparelhos.
+  //
+  // Existe porque a sessao do MiseOn nao expira sozinha: limitar duracao de
+  // sessao no servidor e recurso de plano Pro do Supabase, e o projeto esta no
+  // Free — conferido pela API deles em 01/09/2026, que responde
+  // "User sessions can only be configured on Pro Plans and up".
+  //
+  // Nao foi implementado um "desloga por inatividade" no lugar DE PROPOSITO: o
+  // KDS da cozinha e o painel de TV ficam horas abertos sem ninguem tocar, e um
+  // timer desses derrubaria justamente as telas que precisam ficar de pe no
+  // meio do servico. Trocaria risco de seguranca por falha de operacao.
+  //
+  // Isto aqui nao encurta a sessao — da o controle de cortar quando importa:
+  // celular perdido, aparelho vendido, funcionario desligado.
+  const [saindoDeTodos, setSaindoDeTodos] = useState(false);
+
+  const sairDeTodosOsDispositivos = async () => {
+    const ok = window.confirm(
+      'Isto encerra a sua sessão em TODOS os aparelhos, inclusive neste. '
+      + 'Telas que ficam abertas na operação (KDS da cozinha, painel de TV, PDV) '
+      + 'vão precisar entrar de novo. Continuar?',
+    );
+    if (!ok) return;
+    setSaindoDeTodos(true);
+    // `scope: 'global'` invalida os refresh tokens da conta no servidor, nao
+    // so o token deste navegador — e o que faz um aparelho perdido perder o
+    // acesso de verdade.
+    const { error } = await supabase.auth.signOut({ scope: 'global' });
+    setSaindoDeTodos(false);
+    if (error) {
+      setMsgSenha({ tipo: 'erro', texto: 'Não foi possível encerrar as sessões: ' + error.message });
+      return;
+    }
+    window.location.href = '/admin/login';
+  };
 
   // Perfil (Metadata)
   const [email, setEmail] = useState('');
@@ -341,6 +377,27 @@ export default function MinhaConta() {
               Atualizar Senha
             </button>
           </form>
+
+          {/* ── Encerrar sessão em todos os aparelhos ── */}
+          <div className="mt-6 border-t border-gray-100 dark:border-gray-800 pt-5">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-gray-100">
+              <LogOut size={15} /> {tDynamic('Aparelhos conectados')}
+            </h3>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {tDynamic('Sua conta continua conectada em todo aparelho onde você entrou, até sair. Se perdeu um celular, vendeu um tablet ou desligou alguém da equipe, encerre tudo aqui e entre de novo só onde precisa.')}
+            </p>
+            <button
+              type="button"
+              onClick={sairDeTodosOsDispositivos}
+              disabled={saindoDeTodos}
+              className="mt-3 inline-flex items-center gap-2 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 px-4 py-2.5 text-xs font-bold text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/50 transition-all disabled:opacity-60"
+            >
+              {saindoDeTodos
+                ? <Loader2 size={15} className="animate-spin" />
+                : <LogOut size={15} />}
+              {tDynamic('Desconectar todos os aparelhos')}
+            </button>
+          </div>
         </div>
       </div>
 

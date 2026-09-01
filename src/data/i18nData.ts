@@ -2346,6 +2346,10 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Gerar credencial nova': 'Generate new credential',
   'Gerando...': 'Generating...',
   'SEM CONEXÃO — senhas podem estar desatualizadas': 'OFFLINE — numbers may be out of date',
+  'Aparelhos conectados': 'Connected devices',
+  'Desconectar todos os aparelhos': 'Sign out of all devices',
+  'Sua conta continua conectada em todo aparelho onde você entrou, até sair. Se perdeu um celular, vendeu um tablet ou desligou alguém da equipe, encerre tudo aqui e entre de novo só onde precisa.':
+    'Your account stays signed in on every device you logged into, until you sign out. If you lost a phone, sold a tablet or let a team member go, end everything here and sign back in only where you need to.',
   'Os links acima levam uma credencial no final. Ela é o que impede qualquer pessoa de abrir o painel da sua loja — copie o link por aqui, não da barra do navegador da TV.':
     'The links above carry a credential at the end. It is what stops anyone from opening your store panel — always copy the link from here, not from the TV browser address bar.',
   'Use se o link vazou. As TVs atuais vão precisar do link novo.':
