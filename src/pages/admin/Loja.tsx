@@ -163,6 +163,10 @@ export default function Loja() {
    *  certo — inclusive com conta errada. Quem diz se o dado presta é o Efí. */
   const [repasse, setRepasse] = useState<{ status: string; detalhe: string } | null>(null);
   const [validandoRepasse, setValidandoRepasse] = useState(false);
+  /** Antecipação exige aplicação própria contratada no Efí. Se a plataforma não
+   *  tem essa conta, a opção precisa aparecer indisponível — antes ela podia ser
+   *  marcada, salvava, e a cobrança rodava como padrão sem avisar ninguém. */
+  const [antecipacaoDisponivel, setAntecipacaoDisponivel] = useState(true);
   const [copiado, setCopiado] = useState(false);
   /** Qual link de TV acabou de ser copiado ('cardapio' | 'senhas' | null).
    *
@@ -215,6 +219,12 @@ export default function Loja() {
 
   useEffect(() => {
     (async () => {
+      const { data: cfgPagamento } = await supabase
+        .from('plataforma_pagamento_publico')
+        .select('efi_payee_code_antecipado')
+        .maybeSingle();
+      setAntecipacaoDisponivel(!!cfgPagamento?.efi_payee_code_antecipado);
+
       const { data } = await supabase.from('lojas').select('*').eq('id', lojaId).single();
       if (data) {
         setRepasse(
@@ -1742,6 +1752,11 @@ export default function Loja() {
                   </p>
                 </button>
               </div>
+              {!antecipacaoDisponivel && (
+                <p className="mt-2 rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] font-semibold leading-relaxed text-amber-700 dark:text-amber-300">
+                  {tDynamic('A antecipação ainda não está contratada na conta da plataforma. Enquanto isso, mesmo marcando esta opção o cartão é processado na modalidade padrão, com repasse em até 31 dias — e cada cobrança fica registrada com esse aviso.')}
+                </p>
+              )}
               <p className="mt-2 text-[10px] text-gray-400">
                 {tDynamic('A escolha vale para as')} <b>próximas</b> vendas no cartão — o que já foi vendido mantém o prazo original.
                 {' '}Tarifas da tabela pública da Efí ({EFI_TARIFAS.referencia}), negociáveis por volume — confira em{' '}

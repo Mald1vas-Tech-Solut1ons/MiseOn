@@ -1242,8 +1242,32 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
       // é usado só no repasse, dentro da edge function cartao-pagar.
       // Se a loja optou por antecipação, a cobrança é processada pela conta antecipada
       // da plataforma (~2 dias úteis) — o token precisa ser gerado para ELA.
-      const payeeAntecipado = (import.meta.env.VITE_MISEON_EFI_PAYEE_CODE_ANTECIPADO as string | undefined)?.trim();
-      const payeePadrao = (import.meta.env.VITE_MISEON_EFI_PAYEE_CODE as string | undefined)?.trim();
+      // A conta processadora vinha SO de variavel de build da Vercel: trocar de
+      // conta Efi exigia redeploy, e mexer no secret do Supabase nao surtia
+      // efeito nenhum — armadilha silenciosa que derrubava o cartao inteiro.
+      // Agora a fonte e o banco, lido em tempo de execucao; a env continua como
+      // ultimo recurso para nao quebrar ambiente antigo.
+      const { data: cfgPlataforma } = await supabase
+        .from('plataforma_pagamento_publico')
+        .select('efi_payee_code, efi_payee_code_antecipado, sandbox')
+        .maybeSingle();
+      // Ambiente do gateway tambem sai do banco. Antes era variavel de build:
+      // virar sandbox/producao exigia redeploy, e a chave ficava num lugar
+      // diferente da conta que ela precisa acompanhar — receita de token
+      // gerado para o ambiente errado.
+      const ambienteEfi = (
+        cfgPlataforma?.sandbox === true ? 'sandbox'
+        : cfgPlataforma?.sandbox === false ? 'production'
+        : efiEnvironment
+      ) as 'sandbox' | 'production';
+      const payeeAntecipado = (
+        cfgPlataforma?.efi_payee_code_antecipado
+        ?? (import.meta.env.VITE_MISEON_EFI_PAYEE_CODE_ANTECIPADO as string | undefined)
+      )?.trim();
+      const payeePadrao = (
+        cfgPlataforma?.efi_payee_code
+        ?? (import.meta.env.VITE_MISEON_EFI_PAYEE_CODE as string | undefined)
+      )?.trim();
       // A conta que PROCESSA é sempre da plataforma. O payee_code da loja entra
       // só no repasse, dentro da edge function — e por isso não é mais exposto
       // à vitrine (auditoria, achado 01). Sem a env da plataforma não há como
@@ -1254,7 +1278,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
       }
       const result = await EfiPay.CreditCard
         .setAccount(contaProcessadora)
-        .setEnvironment(efiEnvironment)
+        .setEnvironment(ambienteEfi)
         .setCreditCardData({
           brand: brand || bandeira?.id,
           number: digitos,

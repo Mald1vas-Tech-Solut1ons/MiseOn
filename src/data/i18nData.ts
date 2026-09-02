@@ -272,6 +272,7 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Dados da loja salvos com sucesso': 'Store settings saved successfully',
+  'A antecipação ainda não está contratada na conta da plataforma. Enquanto isso, mesmo marcando esta opção o cartão é processado na modalidade padrão, com repasse em até 31 dias — e cada cobrança fica registrada com esse aviso.': 'Advance settlement is not contracted on the platform account yet. Until then, even with this option selected, card charges run on the standard schedule (payout within 31 days) — and every charge is recorded with this notice.',
   'O Efí aceitou os dados do seu repasse Pix': 'Efí accepted your Pix payout details',
   'O Efí recusou os dados do repasse': 'Efí rejected the payout details',
   'Salvo, mas não consegui confirmar o repasse no Efí agora': 'Saved, but the payout could not be confirmed with Efí right now',

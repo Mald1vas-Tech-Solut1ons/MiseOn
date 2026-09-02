@@ -112,9 +112,33 @@ const handler = async (req: Request, ctx: { user: any, supabase: any }, body: z.
     if (!(valorCobrancaCentavos > 0)) return json({ error: 'Valor do pedido inválido para cobrança.' }, { status: 400 });
 
 
+    // Conta que PROCESSA o cartao. Antes vinha so de env; agora o banco e a
+    // fonte de verdade e a env fica como fallback, para trocar de conta Efi
+    // sem redeploy e sem depender de variavel de build da Vercel.
+    const { data: cfgPlataforma } = await supabaseAdmin
+      .from('configuracoes_fiscais_plataforma')
+      .select('efi_payee_code, efi_payee_code_antecipado')
+      .eq('id', true)
+      .maybeSingle();
+
+    const payeeAntecipadoCfg = (Deno.env.get('EFI_ANTECIPADO_PAYEE_CODE')
+      ?? (cfgPlataforma as any)?.efi_payee_code_antecipado ?? '')?.trim();
+
     const querAntecipado = !!(pedido as any).lojas?.antecipacao_cartao;
-    const antecipadoDisponivel = !!(Deno.env.get('EFI_ANTECIPADO_CLIENT_ID') && Deno.env.get('EFI_ANTECIPADO_CLIENT_SECRET'));
+    // Antecipacao exige aplicacao PROPRIA no Efi (produto contratado a parte),
+    // nao e um escopo da aplicacao de cobrancas. Sem as tres pecas ela nao roda.
+    const antecipadoDisponivel = !!(
+      Deno.env.get('EFI_ANTECIPADO_CLIENT_ID')
+      && Deno.env.get('EFI_ANTECIPADO_CLIENT_SECRET')
+      && payeeAntecipadoCfg
+    );
     const usarAntecipado = querAntecipado && antecipadoDisponivel;
+    // Antes este caso caia no padrao SEM AVISAR NINGUEM: a loja pedia
+    // antecipado, recebia em 31 dias e ninguem registrava a divergencia.
+    const avisoModalidade = querAntecipado && !antecipadoDisponivel
+      ? 'A loja pediu recebimento antecipado, mas a antecipacao nao esta contratada/configurada na conta da plataforma. A cobranca rodou na modalidade padrao (repasse em ate 31 dias).'
+      : null;
+    if (avisoModalidade) reqLogger.warn(avisoModalidade, { pedido_id });
 
     const token = usarAntecipado
       ? await getToken(Deno.env.get('EFI_ANTECIPADO_CLIENT_ID')!.trim(), Deno.env.get('EFI_ANTECIPADO_CLIENT_SECRET')!.trim())
@@ -125,8 +149,8 @@ const handler = async (req: Request, ctx: { user: any, supabase: any }, body: z.
 
     const payeeCode = (pedido as any).lojas?.efi_payee_code?.trim();
     const payeePlataforma = (usarAntecipado
-      ? Deno.env.get('EFI_ANTECIPADO_PAYEE_CODE')
-      : Deno.env.get('EFI_PLATFORM_PAYEE_CODE'))?.trim();
+      ? payeeAntecipadoCfg
+      : (Deno.env.get('EFI_PLATFORM_PAYEE_CODE') ?? (cfgPlataforma as any)?.efi_payee_code ?? ''))?.trim();
     const usarSplit = !!payeeCode && payeeCode.length > 5 && payeeCode !== payeePlataforma;
     const marketplace = usarSplit
       ? { marketplace: { repasses: [{ payee_code: payeeCode, percentage: 10000 }] } }
@@ -190,6 +214,9 @@ const handler = async (req: Request, ctx: { user: any, supabase: any }, body: z.
         gateway_txid: String(data.charge_id),
         status: aprovado ? 'PAGO' : 'PENDENTE',
         data_pagamento: aprovado ? new Date().toISOString() : null,
+        modalidade: usarAntecipado ? 'antecipado' : 'padrao',
+        aviso: avisoModalidade,
+        split_status: usarSplit ? 'marketplace_repasse' : 'sem_dados_repasse',
       })
       .eq('pedido_id', pedido_id)
       .eq('metodo', 'CREDITO');
@@ -207,6 +234,9 @@ const handler = async (req: Request, ctx: { user: any, supabase: any }, body: z.
       total: data.total,
       aprovado,
       modalidade: usarAntecipado ? 'antecipado' : 'padrao',
+      modalidade_solicitada: querAntecipado ? 'antecipado' : 'padrao',
+      aviso: avisoModalidade,
+      split_status: usarSplit ? 'marketplace_repasse' : 'sem_dados_repasse',
     });
   } catch (e) {
     reqLogger.error('Erro na função cartao-pagar', e);

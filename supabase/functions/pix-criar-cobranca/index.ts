@@ -275,9 +275,12 @@ Deno.serve(async (req) => {
       qrImagem = qrData.imagemQrcode ?? null;
     }
 
+    // O split_status era calculado e jogado fora: 'vinculo_falhou' significava
+    // dinheiro parado na conta da plataforma e ninguem ficava sabendo. Agora
+    // fica gravado na cobranca, que e a unica fonte de verdade sobre repasse.
     await supabase
       .from('pagamentos')
-      .update({ gateway_txid: charge.txid })
+      .update({ gateway_txid: charge.txid, split_status: splitStatus })
       .eq('pedido_id', pedido_id)
       .eq('metodo', 'PIX');
 
