@@ -306,12 +306,25 @@ versionada em `20260902010000_nutricao_ajustes_pos_medicao.sql`: refrigerante a�
 de virtude, `%VD` de gorduras trans (a IN 75/2020 não estabelece valor diário) e nutriente
 opcional zerado poluindo a tabela.
 
-### 5.2 O que ficou sem verificação de navegador
+### 5.2 Verificação no navegador — tudo, em produção
 
-O painel do lojista (Fatia 3) e a configuração da loja foram verificados por tipo, por lint e
-pelas consultas acima, **não por navegador**: a credencial de `credenciais_testes.md` não
-autentica mais (o banco foi zerado em 01/09). A vitrine, essa sim, foi verificada no navegador
-em 375 px e em desktop, incluindo a tabela reagindo ao adicional escolhido.
+Feita em `https://miseon.app.br` com a conta do dono (a credencial de
+`credenciais_testes.md` está desatualizada desde o zeramento de 01/09 e não autentica mais).
+
+| Superfície | O que foi conferido |
+|---|---|
+| **Vitrine** (375 px e desktop) | Selo de kcal e alergênicos nos cards; tabela com %VD, indentação e alternância porção ⇄ 100 g; método de cálculo expansível |
+| **Vitrine — adicionais** | Marcar "ovo grelhado" no burger fit levou de 407 para 478 kcal e de 271 para 321 g, ao vivo |
+| **Admin → Cardápio** | Painel "Nutrição do cardápio — 16/16 publicando", barra de progresso e o prato a prato com a contagem de itens |
+| **Admin → editor de produto** | Preview ao vivo: "Publicando no cardápio · 13 de 13 ingredientes · 271 g servidos · 407 kcal". Ao inserir na ficha um insumo sem nutrição, virou **"Ainda não publica · 13 de 14"** com a lacuna nomeada — *"Álcool em Gel — sem dado nutricional"* — e o caminho para resolver. Fechado sem salvar; conferido por SQL que nada persistiu |
+| **Admin → editor, ajustes** | Porções, peso da porção e os cinco presets de cocção, com o fator (0,88×) explicado |
+| **Admin → Loja → Segmento & Módulos** | Os três modos de publicação, o interruptor dos selos e a observação da loja |
+| **PDV** | Ao abrir o X-PAULISTA: *"Contém leite, ovo, trigo/glúten. Pode conter soja. Lista do que foi avaliado — ausência não é garantia."* |
+
+Uma ressalva de método: a primeira tentativa de provar o preview mudou o select errado (o
+vínculo de estoque de um adicional, não a linha da ficha) e o preview corretamente **não**
+acusou lacuna nenhuma. O teste é que estava errado, não o produto — refeito no select certo,
+o comportamento foi o esperado.
 
 ---
 
@@ -337,5 +350,5 @@ Além do DoD do épico (§11 do plano-mãe):
 2. Golden test novo para: alérgeno vindo de preparo aninhado, rendimento em kg, item sem massa,
    revenda sem ficha, combo.
 3. `npm run typecheck`, `npm run lint`, `npm test` limpos; `get_advisors` sem alerta novo.
-4. Testado no navegador com sessão real — as Sprints 1 e 2 fecharam sem isso e é dívida aberta.
+4. Testado no navegador com sessão real — feito em produção nesta onda (§5.2); as Sprints 1 e 2 fecharam sem isso.
 5. Antes/depois medido no Lanche do Paulista, com os números da §5 registrados neste doc.
