@@ -144,6 +144,22 @@ on conflict (insumo_id) do update set
   fonte_versao = excluded.fonte_versao, fonte_url = excluded.fonte_url,
   confianca = 1, revisado = true, revisado_em = now(), atualizado_em = now();
 
+-- O registro da Coca-Cola veio do Open Food Facts sem ACUCARES_ADICIONADOS, e
+-- sem esse campo a regra que impede selo de virtude em produto açucarado não
+-- dispara: o refrigerante exibia "baixo em sódio". Em refrigerante todo açúcar
+-- é adicionado — o rótulo brasileiro declara os dois iguais.
+update public.alimentos_referencia
+set nutrientes = nutrientes || jsonb_build_object('ACUCARES_ADICIONADOS', nutrientes->'ACUCARES_TOTAIS'),
+    atualizado_em = now()
+where codigo_fonte = '7894900010015' and not (nutrientes ? 'ACUCARES_ADICIONADOS');
+
+update public.insumos_nutricao n
+set nutrientes = n.nutrientes || jsonb_build_object('ACUCARES_ADICIONADOS', n.nutrientes->'ACUCARES_TOTAIS'),
+    atualizado_em = now()
+from public.insumos i
+where i.id = n.insumo_id and i.loja_id = :'loja'::uuid
+  and i.nome = 'Coca-Cola lata' and not (n.nutrientes ? 'ACUCARES_ADICIONADOS');
+
 -- A porção de batata frita é de 200 g. Mantém a origem IA de propósito: a
 -- vitrine mostra "94% estimado" nesse prato, e isso é a feature funcionando.
 update public.insumos_nutricao set peso_medio_un_g = 200, atualizado_em = now()
