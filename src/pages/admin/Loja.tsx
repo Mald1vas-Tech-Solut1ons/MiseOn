@@ -17,6 +17,7 @@ import { maskCPFouCNPJ, maskTelefone, validarCPFouCNPJ } from '../../lib/mascara
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
 import { geocode } from '../../lib/geo';
 import { useI18n } from '../../contexts/I18nContext';
+import { useToast } from '../../components/ui/Toast';
 
 const PRESETS_SEGMENTOS: Record<SegmentoNegocio, { rotulo: string; descricao: string; modulos: ModulosAtivos }> = {
   HAMBURGUERIA: {
@@ -149,6 +150,7 @@ const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sáb
 
 export default function Loja() {
   const { tDynamic } = useI18n();
+  const toast = useToast();
   const { lojaId } = useOutletContext<CtxLoja>();
   const [aba, setAba] = useState<Aba>('aparencia');
   const [form, setForm] = useState<FormLoja>(vazio);
@@ -468,6 +470,7 @@ export default function Loja() {
     if (erroLoja) {
       setSalvando(false);
       setErro('Erro ao salvar: ' + erroLoja.message);
+      toast(tDynamic('Não foi possível salvar os dados da loja'), 'erro');
       return;
     }
 
@@ -522,6 +525,10 @@ export default function Loja() {
     document.documentElement.style.setProperty('--cor-primaria', form.cor_primaria);
     document.documentElement.style.setProperty('--cor-secundaria', form.cor_secundaria);
     setOk(true); setTimeout(() => setOk(false), 2500);
+    // O botao "Salvo!" dura 2,5s e fica no rodape de uma pagina longa: quem
+    // salva os dados da Efi la em cima nao ve confirmacao nenhuma. O toast
+    // aparece no canto superior, independente de onde a pagina esteja rolada.
+    toast(tDynamic('Dados da loja salvos com sucesso'), 'sucesso');
   };
 
   if (carregando) {

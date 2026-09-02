@@ -118,7 +118,22 @@
   font-weight: 600;
   max-width: 190px;
 }
-.mo-r3d-receita-sel select option { color: #0b1020; }
+/* O painel 3D e sempre escuro, entao a lista suspensa tambem precisa ser.
+   Antes so a cor do texto era definida (#0b1020, quase preto): no tema escuro
+   o Chrome pinta o popup com fundo escuro e o texto sumia. color-scheme: dark
+   manda o navegador desenhar o popup no tema escuro, e as duas cores abaixo
+   deixam de depender do sistema operacional. */
+.mo-r3d-busca input,
+.mo-r3d-receita-sel select { color-scheme: dark; }
+.mo-r3d-receita-sel select option {
+  color: #eaf1ff;
+  background-color: #0b1020;
+}
+.mo-r3d-receita-sel select option:checked,
+.mo-r3d-receita-sel select option:hover {
+  color: #ffffff;
+  background-color: #1e3a5f;
+}
 
 /* ── Paginação ──────────────────────────────────────────────────── */
 .mo-r3d-paginas {

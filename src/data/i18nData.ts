@@ -271,6 +271,8 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  'Dados da loja salvos com sucesso': 'Store settings saved successfully',
+  'Não foi possível salvar os dados da loja': 'Could not save the store settings',
   // ── Identidade jurídica da operadora (CNPJ 68.923.239/0001-77) ──
   'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA': 'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA',
   'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA — nome fantasia Maldivas Tech': 'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA — trade name Maldivas Tech',
