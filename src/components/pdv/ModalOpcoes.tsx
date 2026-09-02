@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { X, Plus, Minus } from 'lucide-react';
+import { X, Plus, Minus, AlertTriangle } from 'lucide-react';
 import { fmt, fmtQtd, type Produto, type Opcao } from '../../types';
+import type { NutricaoProduto } from '../../lib/nutricao';
 
-export function ModalOpcoes({ produto, onConfirmar, onFechar }: {
+export function ModalOpcoes({ produto, nutricao, onConfirmar, onFechar }: {
   produto: Produto;
+  /** Alergênicos do prato, para o atendente responder na hora. */
+  nutricao?: NutricaoProduto;
   onConfirmar: (opcoes: Opcao[], qtd: number, obs: string) => void;
   onFechar: () => void;
 }) {
@@ -43,6 +46,25 @@ export function ModalOpcoes({ produto, onConfirmar, onFechar }: {
           </div>
           <button onClick={onFechar} className="text-gray-400"><X size={20} /></button>
         </div>
+
+        {/* Quem pergunta "tem leite?" pergunta no balcão, para uma pessoa. Ela
+            precisa da resposta na tela, não no cardápio do cliente. */}
+        {((nutricao?.alergenos_contem?.length ?? 0) > 0 || (nutricao?.alergenos_pode_conter?.length ?? 0) > 0) && (
+          <div className="mx-5 mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-800/60 dark:bg-amber-950/30">
+            <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-amber-900 dark:text-amber-200">
+              <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+              <span>
+                {(nutricao?.alergenos_contem?.length ?? 0) > 0 && (
+                  <strong className="font-bold">Contém {nutricao!.alergenos_contem.join(', ').toLowerCase()}. </strong>
+                )}
+                {(nutricao?.alergenos_pode_conter?.length ?? 0) > 0 && (
+                  <>Pode conter {nutricao!.alergenos_pode_conter.join(', ').toLowerCase()}. </>
+                )}
+                <span className="opacity-80">{'Lista do que foi avaliado — ausência não é garantia.'}</span>
+              </span>
+            </p>
+          </div>
+        )}
 
         <div className="flex-1 space-y-4 overflow-y-auto p-5">
           {isPeso && (

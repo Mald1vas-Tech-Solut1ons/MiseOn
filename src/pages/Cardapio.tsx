@@ -24,7 +24,11 @@ import ChatInterface from '../components/chat/ChatInterface';
 import MiseOnLoader from '../components/MiseOnLoader';
 import SEO from '../components/SEO';
 import { getOptimizedImageUrl } from '../lib/cdn';
-import TabelaNutricional, { type NutricaoProduto } from '../components/cardapio/TabelaNutricional';
+import TabelaNutricional from '../components/cardapio/TabelaNutricional';
+import SeloNutricional from '../components/cardapio/SeloNutricional';
+import ResumoNutricionalPedido from '../components/cardapio/ResumoNutricionalPedido';
+import type { NutricaoOpcao, NutricaoProduto, NutrienteCatalogo } from '../lib/nutricao';
+import { montarJsonLdCardapio } from '../lib/jsonLdCardapio';
 
 import { useI18n } from '../contexts/I18nContext';
 
@@ -107,6 +111,12 @@ export default function Cardapio() {
   // Nutrição por produto, indexada por id. Vazio quando a loja ainda não tem
   // ficha técnica com dado nutricional — e aí nenhuma tabela é exibida.
   const [nutricao, setNutricao] = useState<Map<string, NutricaoProduto>>(new Map());
+  // Ordem, rótulo, indentação e VDR vêm da tabela `nutrientes` (leitura
+  // pública). Reimplementar essa lista no front era garantia de divergir do
+  // rótulo oficial na primeira mudança de norma.
+  const [catalogoNutrientes, setCatalogoNutrientes] = useState<NutrienteCatalogo[]>([]);
+  // O que cada adicional acrescenta — a tabela reage ao que o cliente escolhe.
+  const [nutricaoOpcoes, setNutricaoOpcoes] = useState<Map<string, NutricaoOpcao>>(new Map());
   const [taxas, setTaxas] = useState<TaxaEntrega[]>([]);
   const [faixasDistancia, setFaixasDistancia] = useState<FaixaEntrega[]>([]);
   const [busca, setBusca] = useState('');
@@ -173,7 +183,7 @@ export default function Cardapio() {
       const { data: l } = await supabase.from('lojas_publicas').select('*').eq('slug', slug).single();
       if (!l) return;
       setLoja(l);
-      const [h, b, c, p, t, f, est, nut] = await Promise.all([
+      const [h, b, c, p, t, f, est, nut, cat, nutOpc] = await Promise.all([
         supabase.from('horarios_funcionamento').select('*').eq('loja_id', l.id),
         // `.eq('is_ativo', true)` explicito, e nao so a RLS: a policy publica
         // filtra `is_ativo`, mas o LOJISTA logado cai na policy de admin e
@@ -189,6 +199,8 @@ export default function Cardapio() {
         // técnica e a função só devolve o que tem cobertura suficiente, então
         // produto sem dado simplesmente não aparece com tabela.
         supabase.rpc('fn_nutricao_cardapio', { p_loja_id: l.id }),
+        supabase.from('nutrientes').select('*').eq('ativo', true).order('ordem'),
+        supabase.rpc('fn_nutricao_opcoes_cardapio', { p_loja_id: l.id }),
       ]);
       setHorarios(h.data ?? []);
       setBanners(b.data ?? []);
@@ -198,6 +210,8 @@ export default function Cardapio() {
       const mapaEstoque = new Map<string, boolean>((est.data ?? []).map((e: any) => [e.produto_id, e.tem_estoque]));
       setProdutos((p.data ?? []).map((prod: Produto) => ({ ...prod, tem_estoque: mapaEstoque.get(prod.id) ?? true })));
       setNutricao(new Map(((nut.data as NutricaoProduto[]) ?? []).map((n) => [n.produto_id, n])));
+      setCatalogoNutrientes((cat.data as NutrienteCatalogo[]) ?? []);
+      setNutricaoOpcoes(new Map(((nutOpc.data as NutricaoOpcao[]) ?? []).map((o) => [o.opcao_id, o])));
       setTaxas(t.data ?? []);
       setFaixasDistancia((f.data as FaixaEntrega[]) ?? []);
       document.title = `${l.nome} — Peça online`;
@@ -212,6 +226,19 @@ export default function Cardapio() {
       }
     })();
   }, [slug, numeroMesaUrl]);
+
+  // JSON-LD do cardápio com a informação nutricional de cada prato (NUT-25).
+  // Ver src/lib/jsonLdCardapio.ts sobre o alcance real disso hoje.
+  useEffect(() => {
+    if (!loja || !produtos.length) return;
+    const el = document.createElement('script');
+    el.type = 'application/ld+json';
+    el.id = 'jsonld-cardapio';
+    el.textContent = JSON.stringify(montarJsonLdCardapio(loja, categorias, produtos, nutricao));
+    document.getElementById('jsonld-cardapio')?.remove();
+    document.head.appendChild(el);
+    return () => el.remove();
+  }, [loja, categorias, produtos, nutricao]);
 
   useEffect(() => {
     if (!loja) return;
@@ -597,7 +624,7 @@ export default function Cardapio() {
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2">
                 {maisPedidos.map((p) => (
-                  <MaisPedidoCard key={p.id} p={p} onClick={() => setProdutoAberto(p)} />
+                  <MaisPedidoCard key={p.id} p={p} nutricao={nutricao.get(p.id)} onClick={() => setProdutoAberto(p)} />
                 ))}
               </div>
             </section>
@@ -617,7 +644,7 @@ export default function Cardapio() {
                   </div>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {doGrupo.map((p) => (
-                      <ProdutoCard key={p.id} p={p} onClick={() => setProdutoAberto(p)} />
+                      <ProdutoCard key={p.id} p={p} nutricao={nutricao.get(p.id)} onClick={() => setProdutoAberto(p)} />
                     ))}
                   </div>
                 </section>
@@ -665,6 +692,12 @@ export default function Cardapio() {
                     </div>
                   ))}
                 </div>
+                <ResumoNutricionalPedido
+                  carrinho={carrinho}
+                  nutricao={nutricao}
+                  nutricaoOpcoes={nutricaoOpcoes}
+                  catalogo={catalogoNutrientes}
+                />
                 <div className="mt-4 flex items-center justify-between border-t pt-4 font-black" style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto)' }}>
                   <span>Total</span><span>{fmt(totalCarrinho)}</span>
                 </div>
@@ -690,7 +723,15 @@ export default function Cardapio() {
       )}
 
       {produtoAberto && (
-        <ModalProduto produto={produtoAberto} nutricao={nutricao.get(produtoAberto.id)} onClose={() => setProdutoAberto(null)} onAdd={addAoCarrinho} />
+        <ModalProduto
+          produto={produtoAberto}
+          nutricao={nutricao.get(produtoAberto.id)}
+          catalogoNutrientes={catalogoNutrientes}
+          nutricaoOpcoes={nutricaoOpcoes}
+          observacaoNutricional={loja?.nutricao_disclaimer}
+          onClose={() => setProdutoAberto(null)}
+          onAdd={addAoCarrinho}
+        />
       )}
       
       {checkoutAberto && mesaAtual && (
@@ -812,9 +853,12 @@ export default function Cardapio() {
 }
 
 // ── Modal do produto (opções/extras + observação) ───────────
-function ModalProduto({ produto, nutricao, onClose, onAdd }: {
+function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, observacaoNutricional, onClose, onAdd }: {
   produto: Produto;
   nutricao?: NutricaoProduto;
+  catalogoNutrientes: NutrienteCatalogo[];
+  nutricaoOpcoes: Map<string, NutricaoOpcao>;
+  observacaoNutricional?: string | null;
   onClose: () => void;
   onAdd: (i: ItemCarrinho) => void;
 }) {
@@ -881,7 +925,18 @@ function ModalProduto({ produto, nutricao, onClose, onAdd }: {
             <button onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
           </div>
           {produto.descricao && <p className="mt-1 whitespace-pre-line text-sm text-gray-500 dark:text-gray-400">{produto.descricao}</p>}
-          {nutricao && <TabelaNutricional dados={nutricao} />}
+          {nutricao && (
+            <TabelaNutricional
+              dados={nutricao}
+              catalogo={catalogoNutrientes}
+              /* O bacon extra e a bebida do combo mudam o que o cliente vai
+                 comer — e por isso mudam a tabela na frente dele. */
+              extras={opcoesSelecionadas
+                .map((o) => nutricaoOpcoes.get(o.id))
+                .filter((n): n is NutricaoOpcao => !!n)}
+              observacaoLoja={observacaoNutricional}
+            />
+          )}
 
           {grupos.map((g) => (
             <div key={g.id} className="mt-4">
@@ -1019,7 +1074,7 @@ const luhnValido = (digits: string): boolean => {
 };
 
 // ── Otimização de Performance (React.memo) ──
-const MaisPedidoCard = memo(({ p, onClick }: { p: Produto; onClick: () => void }) => (
+const MaisPedidoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: NutricaoProduto; onClick: () => void }) => (
   <button onClick={() => p.tem_estoque !== false && onClick()}
     disabled={p.tem_estoque === false}
     className={`vitrine-card relative w-40 shrink-0 rounded-[24px] p-2.5 text-left ${p.tem_estoque === false ? 'opacity-50' : ''}`}>
@@ -1031,6 +1086,7 @@ const MaisPedidoCard = memo(({ p, onClick }: { p: Produto; onClick: () => void }
       <span className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2 py-0.5 text-[9px] font-bold text-white shadow-sm">R$/kg</span>
     )}
     <p className="line-clamp-2 text-sm font-bold" style={{ color: 'var(--cor-texto)' }}>{p.nome}</p>
+    <SeloNutricional dados={nutricao} compacto />
     <div className="mt-2 flex items-center justify-between">
       <p className="text-sm font-black text-[var(--cor-primaria-texto)]">
         {p.tipo_venda === 'POR_PESO' ? `${fmt(Number(p.preco_por_quilo || 0))}/kg` : fmt(Number(p.preco))}
@@ -1042,7 +1098,7 @@ const MaisPedidoCard = memo(({ p, onClick }: { p: Produto; onClick: () => void }
   </button>
 ));
 
-const ProdutoCard = memo(({ p, onClick }: { p: Produto; onClick: () => void }) => (
+const ProdutoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: NutricaoProduto; onClick: () => void }) => (
   <button onClick={() => p.tem_estoque !== false && onClick()}
     disabled={p.tem_estoque === false}
     className={`vitrine-card flex w-full gap-3 rounded-[24px] p-2.5 text-left ${p.tem_estoque === false ? 'opacity-50' : ''}`}>
@@ -1060,6 +1116,7 @@ const ProdutoCard = memo(({ p, onClick }: { p: Produto; onClick: () => void }) =
         )}
       </p>
       {p.descricao && <p className="line-clamp-2 text-xs" style={{ color: 'var(--cor-texto-suave)' }}>{p.descricao}</p>}
+      <SeloNutricional dados={nutricao} />
       <div className="mt-2 flex items-center justify-between gap-3">
         <p className="font-black text-[var(--cor-primaria-texto)]">
           {p.tipo_venda === 'POR_PESO' ? `${fmt(Number(p.preco_por_quilo || 0))}/kg` : fmt(Number(p.preco))}

@@ -111,6 +111,12 @@ export interface Loja {
   modulos_ativos?: ModulosAtivos | null;
   meta_pixel_id?: string | null;
   ga4_measurement_id?: string | null;
+  // Vitrine nutricional — ver docs/PLANO-NUTRICIONAL-VITRINE.md §3.1.
+  nutricao_ativo?: boolean | null;
+  /** COMPLETA = número só em prato fechado (padrão); SO_ALERGENOS; PARCIAL_COM_AVISO. */
+  nutricao_exibicao?: 'COMPLETA' | 'SO_ALERGENOS' | 'PARCIAL_COM_AVISO' | null;
+  nutricao_selos_atributo?: boolean | null;
+  nutricao_disclaimer?: string | null;
 }
 
 export type SegmentoNegocio =

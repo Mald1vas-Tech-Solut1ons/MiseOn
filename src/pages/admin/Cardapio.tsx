@@ -9,6 +9,9 @@ import ImageUpload from '../../components/ImageUpload';
 import type { CtxLoja } from './AdminLayout';
 import { getOptimizedImageUrl } from '../../lib/cdn';
 import { useI18n } from '../../contexts/I18nContext';
+import NutricaoDoPrato from '../../components/admin/NutricaoDoPrato';
+import { CONFIG_NUTRICAO_PADRAO, type ConfigNutricaoPrato } from '../../lib/nutricao';
+import PainelNutricaoCardapio, { type CoberturaProduto } from '../../components/admin/PainelNutricaoCardapio';
 
 type Tab = 'produtos' | 'categorias';
 
@@ -24,9 +27,10 @@ export default function CardapioAdmin() {
   const [editando, setEditando] = useState<Produto | 'novo' | null>(null);
   const [rateioFixo, setRateioFixo] = useState(0);
   const [lojaInfo, setLojaInfo] = useState<any>(null);
+  const [cobertura, setCobertura] = useState<CoberturaProduto[]>([]);
 
   const carregar = async () => {
-    const [{ data: c }, { data: p }, { data: i }, { data: est }, { data: config }, { data: loja }] = await Promise.all([
+    const [{ data: c }, { data: p }, { data: i }, { data: est }, { data: config }, { data: loja }, { data: cob }] = await Promise.all([
       supabase.from('categorias').select('*').eq('loja_id', lojaId).order('ordem'),
       supabase.from('produtos').select('*, grupos_opcoes(*, opcoes(*)), fichas_tecnicas(*)').eq('loja_id', lojaId).order('ordem'),
       supabase.from('insumos').select('*').eq('loja_id', lojaId).eq('ativo', true).order('nome'),
@@ -36,6 +40,8 @@ export default function CardapioAdmin() {
       // inteiro (a tela ficava sem as taxas do iFood). Alias mantém o resto do
       // código intacto.
       supabase.from('lojas').select('plano_tipo:plano, ifood_addon_ativo, ifood_taxa_pct, ifood_taxa_fixa').eq('id', lojaId).single(),
+      // Semáforo de nutrição por prato: o que publica, o que falta e por quê.
+      supabase.from('vw_nutricao_cobertura').select('*').eq('loja_id', lojaId).order('produto'),
     ]);
     const mapaEstoque = new Map<string, boolean>((est ?? []).map((e: any) => [e.produto_id, e.tem_estoque]));
     
@@ -48,6 +54,7 @@ export default function CardapioAdmin() {
     setProdutos(((p as Produto[]) ?? []).map((prod) => ({ ...prod, tem_estoque: mapaEstoque.get(prod.id) ?? true })));
     setInsumos((i as Insumo[]) ?? []);
     setLojaInfo(loja);
+    setCobertura((cob as CoberturaProduto[]) ?? []);
   };
   useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
 
@@ -139,6 +146,8 @@ export default function CardapioAdmin() {
               </button>
             </div>
           )}
+
+          <PainelNutricaoCardapio cobertura={cobertura} />
 
           <div className="space-y-2">
             {visiveis.map((p) => (
@@ -300,6 +309,25 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
   const [salvando, setSalvando] = useState(false);
   const [gerandoIA, setGerandoIA] = useState(false);
   const [erro, setErro] = useState('');
+  // Como o prato é servido (porções, cocção, revenda) — produtos_nutricao_config.
+  const [nutriConfig, setNutriConfig] = useState<ConfigNutricaoPrato>(CONFIG_NUTRICAO_PADRAO);
+
+  useEffect(() => {
+    if (!produto?.id) { setNutriConfig(CONFIG_NUTRICAO_PADRAO); return; }
+    let vivo = true;
+    supabase.from('produtos_nutricao_config').select('*').eq('produto_id', produto.id).maybeSingle()
+      .then(({ data }) => {
+        if (!vivo || !data) return;
+        setNutriConfig({
+          exibir: data.exibir, porcoes: Number(data.porcoes ?? 1),
+          peso_porcao_g: data.peso_porcao_g != null ? Number(data.peso_porcao_g) : null,
+          fator_coccao: Number(data.fator_coccao ?? 1), metodo_coccao: data.metodo_coccao ?? null,
+          insumo_id: data.insumo_id ?? null,
+          quantidade_insumo: data.quantidade_insumo != null ? Number(data.quantidade_insumo) : null,
+        });
+      });
+    return () => { vivo = false; };
+  }, [produto?.id]);
 
   const gerarDescricaoIA = async () => {
     if (!nome.trim()) return setErro('Preencha o nome do produto primeiro para a IA saber o que gerar.');
@@ -419,6 +447,22 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
         })));
         if (ef) throw ef;
       }
+
+      // Como o prato é servido. O upsert dispara o recálculo do cache por
+      // trigger — não existe "salvar e esquecer de atualizar a vitrine".
+      const { error: en } = await supabase.from('produtos_nutricao_config').upsert({
+        produto_id: produtoId,
+        loja_id: lojaId,
+        exibir: nutriConfig.exibir,
+        porcoes: nutriConfig.porcoes,
+        peso_porcao_g: nutriConfig.peso_porcao_g,
+        fator_coccao: nutriConfig.fator_coccao,
+        metodo_coccao: nutriConfig.metodo_coccao,
+        insumo_id: nutriConfig.insumo_id,
+        quantidade_insumo: nutriConfig.insumo_id ? (nutriConfig.quantidade_insumo ?? 1) : null,
+        atualizado_em: new Date().toISOString(),
+      }, { onConflict: 'produto_id' });
+      if (en) throw en;
 
       onSalvo();
     } catch (e: any) {
@@ -606,6 +650,16 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
             )}
           </div>
         )}
+
+        {/* Nutrição — fora do bloco de estoque de propósito: revenda não tem
+            ficha técnica e mesmo assim publica tabela (vem do rótulo). */}
+        <NutricaoDoPrato
+          lojaId={lojaId}
+          ficha={ficha}
+          insumos={insumos}
+          config={nutriConfig}
+          onConfigChange={setNutriConfig}
+        />
 
         {/* Adicionais */}
         <div className="mt-4 rounded-2xl border p-3 dark:border-gray-800">

@@ -22,6 +22,7 @@ import { PaymentModal } from '../../components/pdv/PaymentModal';
 import { OrderSuccessModal } from '../../components/pdv/OrderSuccessModal';
 import { CaixaModal } from '../../components/pdv/CaixaModal';
 import { ModalOpcoes } from '../../components/pdv/ModalOpcoes';
+import type { NutricaoProduto } from '../../lib/nutricao';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
 import { useToast } from '../../components/ui/Toast';
 import { tocarSom } from '../../lib/som';
@@ -85,21 +86,25 @@ export default function PDV() {
 
   // modal de opções do produto
   const [escolhendo, setEscolhendo] = useState<Produto | null>(null);
+  const [nutricao, setNutricao] = useState<Map<string, NutricaoProduto>>(new Map());
 
   useRealtimeNotifications({ lojaId, contexto: 'PDV', modoPdv: modo });
 
   /* ── carregamento ── */
   const carregarCatalogo = useCallback(async () => {
-    const [{ data: prods }, { data: cats }, { data: lj }, { data: mesasData }] = await Promise.all([
+    const [{ data: prods }, { data: cats }, { data: lj }, { data: mesasData }, { data: nut }] = await Promise.all([
       supabase.from('produtos').select('*, grupos_opcoes(*, opcoes(*))').eq('loja_id', lojaId).eq('disponivel', true).order('ordem'),
       supabase.from('categorias').select('id, nome').eq('loja_id', lojaId).eq('ativo', true).order('ordem'),
       supabase.from('lojas').select('*').eq('id', lojaId).single(),
       supabase.from('mesas').select('*').eq('loja_id', lojaId).eq('ativo', true).order('numero'),
+      // Alergênicos por produto: o balcão responde na hora, sem abrir o cardápio.
+      supabase.rpc('fn_nutricao_cardapio', { p_loja_id: lojaId }),
     ]);
     setProdutos((prods as Produto[]) ?? []);
     setCategorias(cats ?? []);
     setLoja((lj as Loja) ?? null);
     setMesas((mesasData as Mesa[]) ?? []);
+    setNutricao(new Map(((nut as NutricaoProduto[]) ?? []).map((n) => [n.produto_id, n])));
   }, [lojaId]);
 
   const carregarCaixa = useCallback(async () => {
@@ -588,7 +593,7 @@ export default function PDV() {
 
       {/* ── Modal: opções do produto ── */}
       {escolhendo && (
-        <ModalOpcoes produto={escolhendo} onFechar={() => setEscolhendo(null)}
+        <ModalOpcoes produto={escolhendo} nutricao={nutricao.get(escolhendo.id)} onFechar={() => setEscolhendo(null)}
           onConfirmar={(opcoes, qtd, obs) => { adicionarProduto(escolhendo, opcoes, qtd, obs); setEscolhendo(null); }} />
       )}
 

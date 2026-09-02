@@ -106,6 +106,10 @@ interface FormLoja {
   ifood_taxa_fixa: string;
   segmento_negocio: SegmentoNegocio;
   modulos_ativos: ModulosAtivos;
+  nutricao_ativo: boolean;
+  nutricao_exibicao: 'COMPLETA' | 'SO_ALERGENOS' | 'PARCIAL_COM_AVISO';
+  nutricao_selos_atributo: boolean;
+  nutricao_disclaimer: string;
 }
 
 interface FaixaEntregaForm {
@@ -133,6 +137,10 @@ const vazio: FormLoja = {
   ifood_merchant_id: '', ifood_addon_ativo: false, ifood_taxa_pct: '0', ifood_taxa_fixa: '0',
   segmento_negocio: 'GERAL',
   modulos_ativos: PRESETS_SEGMENTOS.GERAL.modulos,
+  nutricao_ativo: true,
+  nutricao_exibicao: 'COMPLETA',
+  nutricao_selos_atributo: true,
+  nutricao_disclaimer: '',
 };
 
 type Aba = 'aparencia' | 'identidade' | 'segmento' | 'logistica' | 'horarios' | 'pagamentos' | 'fiscal' | 'ifood';
@@ -248,6 +256,10 @@ export default function Loja() {
           ifood_taxa_fixa: String(data.ifood_taxa_fixa ?? 0),
           segmento_negocio: data.segmento_negocio ?? 'GERAL',
           modulos_ativos: data.modulos_ativos ?? PRESETS_SEGMENTOS.GERAL.modulos,
+          nutricao_ativo: data.nutricao_ativo ?? true,
+          nutricao_exibicao: data.nutricao_exibicao ?? 'COMPLETA',
+          nutricao_selos_atributo: data.nutricao_selos_atributo ?? true,
+          nutricao_disclaimer: data.nutricao_disclaimer ?? '',
         });
         setTemaPreview(resolverTemaLoja(data.tema_cardapio, data.cor_texto ?? vazio.cor_fundo_claro));
       }
@@ -447,6 +459,10 @@ export default function Loja() {
       ifood_addon_ativo: form.ifood_addon_ativo,
       segmento_negocio: form.segmento_negocio,
       modulos_ativos: form.modulos_ativos,
+      nutricao_ativo: form.nutricao_ativo,
+      nutricao_exibicao: form.nutricao_exibicao,
+      nutricao_selos_atributo: form.nutricao_selos_atributo,
+      nutricao_disclaimer: form.nutricao_disclaimer || null,
     }).eq('id', lojaId);
 
     if (erroLoja) {
@@ -875,6 +891,88 @@ export default function Loja() {
                 );
               })}
             </div>
+          </div>
+
+          {/* Informação nutricional na vitrine */}
+          <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-gray-900 dark:border dark:border-gray-800">
+            <div className="flex items-center gap-2 text-sm font-bold dark:text-gray-100">
+              <Sliders size={18} className="text-emerald-600" />
+              <span>{tDynamic('Informação nutricional no cardápio')}</span>
+            </div>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {tDynamic('Calculada a partir das suas fichas técnicas. O padrão publica o número apenas quando todos os ingredientes do prato têm dado rastreável — e sempre mostra os alergênicos já declarados, mesmo em prato incompleto.')}
+            </p>
+
+            <label className="mt-4 flex items-center gap-2 text-sm dark:text-gray-200">
+              <input
+                type="checkbox"
+                checked={form.nutricao_ativo}
+                onChange={(e) => setForm({ ...form, nutricao_ativo: e.target.checked })}
+              />
+              {tDynamic('Exibir informação nutricional no cardápio')}
+            </label>
+
+            {form.nutricao_ativo && (
+              <div className="mt-4 space-y-4">
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">{tDynamic('O que publicar')}</p>
+                  <div className="mt-1.5 space-y-1.5">
+                    {([
+                      ['COMPLETA', 'Recomendado — número quando o prato fecha', 'Publica a tabela completa só nos pratos com todos os ingredientes cadastrados. Nos demais, mostra apenas os alergênicos.'],
+                      ['SO_ALERGENOS', 'Somente alergênicos', 'Nunca publica valores; mostra só o aviso de alergênicos. Útil enquanto você ainda está montando as fichas.'],
+                      ['PARCIAL_COM_AVISO', 'Publicar também prato incompleto', 'Mostra o valor calculado mesmo faltando ingrediente, com aviso de parcial. O número sai menor do que o real — use com cuidado.'],
+                    ] as const).map(([valor, titulo, ajuda]) => (
+                      <label
+                        key={valor}
+                        className={`flex cursor-pointer gap-2 rounded-xl border p-2.5 transition ${
+                          form.nutricao_exibicao === valor
+                            ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5'
+                            : 'border-gray-200 dark:border-gray-800'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="nutricao_exibicao"
+                          className="mt-0.5"
+                          checked={form.nutricao_exibicao === valor}
+                          onChange={() => setForm({ ...form, nutricao_exibicao: valor })}
+                        />
+                        <span className="min-w-0">
+                          <span className="block text-xs font-bold dark:text-gray-100">{tDynamic(titulo)}</span>
+                          <span className="block text-[11px] text-gray-500 dark:text-gray-400">{tDynamic(ajuda)}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <label className="flex items-start gap-2 text-sm dark:text-gray-200">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={form.nutricao_selos_atributo}
+                    onChange={(e) => setForm({ ...form, nutricao_selos_atributo: e.target.checked })}
+                  />
+                  <span className="min-w-0">
+                    <span className="block">{tDynamic('Mostrar selos como "alto em proteína" e "fonte de fibras"')}</span>
+                    <span className="block text-[11px] text-gray-500 dark:text-gray-400">
+                      {tDynamic('Calculados pelos limites da RDC 54/2012 e exibidos com o critério ao lado. Aparecem apenas em pratos completos.')}
+                    </span>
+                  </span>
+                </label>
+
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">{tDynamic('Observação sua no rodapé da tabela (opcional)')}</p>
+                  <textarea
+                    rows={2}
+                    value={form.nutricao_disclaimer}
+                    onChange={(e) => setForm({ ...form, nutricao_disclaimer: e.target.value })}
+                    placeholder={tDynamic('Ex.: Nossos molhos podem variar conforme a produção do dia.')}
+                    className="mt-1 w-full rounded-xl border p-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
