@@ -68,9 +68,9 @@ export const PAGE_META: Record<string, PageMeta> = {
   },
 
   '/sobre': {
-    title: 'Sobre o MiseOn | Engenharia de Software por Maldivas Tech Solutions',
+    title: 'Sobre o MiseOn | Engenharia de Software por Maldivas Tech',
     description:
-      'Conheça a história e o propósito do MiseOn. Plataforma SaaS de gestão de restaurantes criada pela Maldivas Tech Solutions (Rafael Maldivas) com tecnologia de ponta.',
+      'Conheça a história e o propósito do MiseOn. Plataforma SaaS de gestão de restaurantes criada pela Maldivas Tech (Rafael Maldivas) com tecnologia de ponta.',
     keywords: 'sobre miseon, maldivas tech solutions, rafael maldivas, sistema para restaurantes, empresa miseon cnpj',
     canonicalUrl: `${BASE}/sobre`,
     h1: 'Engenharia de software criada para o ritmo real do Food Service',
@@ -79,7 +79,7 @@ export const PAGE_META: Record<string, PageMeta> = {
   '/contato': {
     title: 'Contato & Suporte | MiseOn — Sistema para Restaurantes',
     description:
-      'Fale com a equipe do MiseOn. Canais oficiais de atendimento comercial e suporte técnico via WhatsApp, e-mail e formulário. CNPJ 63.310.253/0001-81.',
+      'Fale com a equipe do MiseOn. Canais oficiais de atendimento comercial e suporte técnico via WhatsApp, e-mail e formulário. CNPJ 68.923.239/0001-77.',
     keywords: 'contato miseon, suporte miseon, whatsapp miseon, endereco miseon, cnpj miseon',
     canonicalUrl: `${BASE}/contato`,
     h1: 'Fale com a nossa equipe',

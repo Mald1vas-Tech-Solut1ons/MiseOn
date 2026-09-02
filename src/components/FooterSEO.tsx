@@ -148,14 +148,14 @@ export function FooterSEO() {
               <div className="flex items-center gap-2">
                 <Building2 size={16} className="text-orange-400" />
                 <span className="font-['Sora'] text-sm font-bold text-white">
-                  {tDynamic('MiseOn Tecnologia e Soluções para Food Service')}
+                  {tDynamic('MiseOn · operado por Maldivas Tech')}
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 font-mono">
-                <span><strong>CNPJ:</strong> 63.310.253/0001-81</span>
+                <span><strong>CNPJ:</strong> 68.923.239/0001-77</span>
                 <span className="text-slate-600">|</span>
                 <span className="flex items-center gap-1">
-                  <MapPin size={13} className="text-slate-400" /> Manaus / AM — Brasil
+                  <MapPin size={13} className="text-slate-400" /> São Paulo / SP — Brasil
                 </span>
               </div>
             </div>
@@ -182,7 +182,7 @@ export function FooterSEO() {
         {/* Direitos Autorais e Resumo SEO */}
         <div className="mt-8 border-t border-white/10 pt-6 text-center text-[11px] leading-relaxed text-slate-500">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            <p>© {new Date().getFullYear()} MiseOn · Todos os direitos reservados. CNPJ 63.310.253/0001-81</p>
+            <p>© {new Date().getFullYear()} MiseOn · Todos os direitos reservados. CNPJ 68.923.239/0001-77</p>
             <span className="text-slate-700">|</span>
             <button
               type="button"

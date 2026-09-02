@@ -13,20 +13,21 @@ export default function Sobre() {
   return (
     <div className="min-h-screen bg-[#070C18] font-sans text-slate-200 selection:bg-orange-500 selection:text-white">
       <SEO
-        title="Sobre o MiseOn | Engenharia de Software por Maldivas Tech Solutions"
-        description="Conheça a história e o propósito do MiseOn. Plataforma SaaS de gestão de restaurantes criada pela Maldivas Tech Solutions (Rafael Maldivas) com tecnologia de ponta."
+        title="Sobre o MiseOn | Engenharia de Software por Maldivas Tech"
+        description="Conheça a história e o propósito do MiseOn. Plataforma SaaS de gestão de restaurantes criada pela Maldivas Tech (Rafael Maldivas) com tecnologia de ponta."
         keywords="sobre miseon, maldivas tech solutions, rafael maldivas, sistema para restaurantes, empresa miseon cnpj"
         canonicalUrl="https://miseon.app.br/sobre"
         schemaJson={{
           '@context': 'https://schema.org',
           '@type': 'AboutPage',
           'name': 'Sobre o MiseOn',
-          'description': 'Informações institucionais da plataforma MiseOn e engenharia Maldivas Tech Solutions.',
+          'description': 'Informações institucionais da plataforma MiseOn, operada pela Maldivas Tech.',
           'url': 'https://miseon.app.br/sobre',
           'mainEntity': {
             '@type': 'Organization',
-            'name': 'MiseOn — Maldivas Tech Solutions',
-            'taxID': '63.310.253/0001-81',
+            'name': 'MiseOn — Maldivas Tech',
+            'legalName': 'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA',
+            'taxID': '68.923.239/0001-77',
             'url': 'https://miseon.app.br',
             'sameAs': [
               'https://rafael-maldivas.vercel.app/',
@@ -34,7 +35,7 @@ export default function Sobre() {
             ],
             'address': {
               '@type': 'PostalAddress',
-              'addressLocality': 'Manaus',
+              'addressLocality': 'São Paulo',
               'addressRegion': 'AM',
               'addressCountry': 'BR'
             }
@@ -80,7 +81,7 @@ export default function Sobre() {
         </div>
       </section>
 
-      {/* Seção Maldivas Tech Solutions */}
+      {/* Seção Maldivas Tech */}
       <section className="border-y border-white/10 bg-slate-900/40 py-16 backdrop-blur-sm">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
@@ -90,10 +91,10 @@ export default function Sobre() {
                 <Code2 size={28} />
               </div>
               <h2 className="font-['Sora'] text-2xl font-bold text-white sm:text-3xl">
-                {tDynamic('Assinatura Técnica Maldivas Tech Solutions')}
+                {tDynamic('Assinatura Técnica Maldivas Tech')}
               </h2>
               <p className="text-sm leading-relaxed text-slate-300">
-                {tDynamic('A plataforma MiseOn é desenvolvida e mantida por')} <strong>Rafael Maldivas</strong> (fundador da <i>Maldivas Tech Solutions / MaldivaSky</i>), especialista em arquiteturas SaaS distribuídas, análise de dados e sistemas de alta disponibilidade.
+                {tDynamic('A plataforma MiseOn é desenvolvida e mantida por')} <strong>Rafael Maldivas</strong> (fundador da <i>Maldivas Tech / MaldivaSky</i>), especialista em arquiteturas SaaS distribuídas, análise de dados e sistemas de alta disponibilidade.
               </p>
               <p className="text-sm leading-relaxed text-slate-300">
                 Com base em uma sólida experiência em engenharia fullstack e inteligência de negócios B2B, a arquitetura do MiseOn foi desenhada para oferecer latência ultrabaixa no KDS de cozinha, sincronia em tempo real via WebSockets e máxima segurança em transações financeiras e fiscais.
@@ -158,18 +159,18 @@ export default function Sobre() {
             <div className="mt-8 grid gap-6 sm:grid-cols-2 text-sm text-slate-300">
               <div className="space-y-1">
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{tDynamic('Razão Social & Nome Fantasia')}</span>
-                <p className="font-bold text-white">{tDynamic('MiseOn Tecnologia e Soluções para Food Service')}</p>
+                <p className="font-bold text-white">{tDynamic('Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA — nome fantasia Maldivas Tech')}</p>
               </div>
 
               <div className="space-y-1">
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{tDynamic('Cadastro de Pessoa Jurídica (CNPJ)')}</span>
-                <p className="font-mono font-bold text-emerald-400">63.310.253/0001-81</p>
+                <p className="font-mono font-bold text-emerald-400">68.923.239/0001-77</p>
               </div>
 
               <div className="space-y-1">
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Sede Operacional</span>
                 <p className="flex items-center gap-1.5 font-medium text-white">
-                  <MapPin size={16} className="text-orange-400 shrink-0" /> Manaus / Amazonas — Brasil
+                  <MapPin size={16} className="text-orange-400 shrink-0" /> São Paulo / SP — Brasil
                 </p>
               </div>
 

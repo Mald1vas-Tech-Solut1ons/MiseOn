@@ -26,7 +26,7 @@ export default function Termos() {
           <div className="bg-[var(--cor-primaria)] px-8 py-10 text-center text-white">
             <FileText size={48} className="mx-auto mb-4 opacity-90" />
             <h1 className="font-['Sora'] text-3xl font-extrabold">{tDynamic('Termos de Uso e Serviço')}</h1>
-            <p className="mt-2 text-white/80">{tDynamic('Última atualização: 22 de julho de 2026')}</p>
+            <p className="mt-2 text-white/80">{tDynamic('Última atualização: 2 de setembro de 2026')}</p>
           </div>
 
           <div className="space-y-8 p-8 text-gray-600 sm:p-12 dark:text-gray-300">
@@ -34,9 +34,11 @@ export default function Termos() {
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">1. Partes e Aceitação</h2>
               <p>
-                {tDynamic('Estes Termos de Uso e Serviço ("Termos") regulam a relação entre')} <strong>MiseOn</strong>,
-                pessoa jurídica de direito privado, inscrita no CNPJ sob o nº <strong>63.310.253/0001-81</strong>,
-                com sede em Manaus/AM, Brasil ("MiseOn", "nós"), e a pessoa física ou jurídica que se cadastra
+                {tDynamic('Estes Termos de Uso e Serviço ("Termos") regulam a relação entre a plataforma')} <strong>MiseOn</strong>,
+                operada por <strong>Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA</strong>{' '}
+                (nome fantasia <strong>Maldivas Tech</strong>), pessoa jurídica de direito privado inscrita no
+                CNPJ sob o nº <strong>68.923.239/0001-77</strong>, com sede na R. Pais Leme, 215, cj. 1713 — Pinheiros, São Paulo/SP, CEP 05424-150
+                ("MiseOn", "nós"), e a pessoa física ou jurídica que se cadastra
                 na plataforma ("Lojista", "você").
               </p>
               <p className="mt-3">
@@ -158,7 +160,7 @@ export default function Termos() {
               <p>
                 Estes Termos são regidos pelas leis da República Federativa do Brasil. Podemos atualizá-los
                 periodicamente, mediante aviso na plataforma; o uso continuado após a atualização constitui
-                aceitação. Fica eleito o foro da Comarca de <strong>Manaus/AM</strong> para dirimir quaisquer
+                aceitação. Fica eleito o foro da Comarca de <strong>São Paulo/SP</strong> para dirimir quaisquer
                 controvérsias oriundas destes Termos, com renúncia a qualquer outro, por mais privilegiado que seja.
               </p>
             </section>
@@ -166,7 +168,7 @@ export default function Termos() {
             <div className="mt-10 rounded-xl border border-gray-100 bg-gray-50 p-6 text-sm dark:border-gray-700 dark:bg-gray-800">
               <p className="mb-1 font-semibold text-gray-900 dark:text-white">Contato</p>
               <p>
-                MiseOn · CNPJ 63.310.253/0001-81 · Manaus/AM, Brasil<br />
+                MiseOn · operado por Maldivas Tech · CNPJ 68.923.239/0001-77 · São Paulo/SP, Brasil<br />
                 Dúvidas sobre estes Termos? Escreva para{' '}
                 <a href="mailto:contato@miseon.app.br" className="text-[var(--cor-secundaria)] hover:underline">
                   contato@miseon.app.br

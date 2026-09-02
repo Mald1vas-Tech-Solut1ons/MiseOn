@@ -145,11 +145,12 @@ export default function FiscalPlataforma() {
         </div>
 
         <div className="rounded-2xl border border-dashed border-white/10 p-4">
-          <p className="text-sm font-bold text-white mb-1">{tDynamic('Enquadramento de serviço (CNAE 8219-9/99)')}</p>
-          <p className="mb-4 flex items-center gap-1.5 text-[11px] text-gray-400">
-            <Info size={14} /> Manaus exige NFS-e Padrão Nacional desde 01/01/2026 (LC 214/2025), inclusive pra
-            MEI. Já pré-preenchido com o código de tributação nacional 170202 ("apoio administrativo",
-            equivalente ao antigo item LC116 17.02) e alíquota 5% — confira antes de habilitar produção.
+          <p className="text-sm font-bold text-white mb-1">{tDynamic('Enquadramento de serviço (CNAE 62.01-5-01)')}</p>
+          <p className="mb-4 flex items-center gap-1.5 text-[11px] text-amber-300/90">
+            <Info size={14} /> Emissora: Maldivas Tech · CNPJ 68.923.239/0001-77 · São Paulo/SP · Simples
+            Nacional. Pendente antes de habilitar produção: inscrição municipal (CCM de São Paulo),
+            certificado digital A1, e o código de tributação nacional + item LC 116 do serviço de software
+            confirmados com a contabilidade. Não habilite produção com estes campos presumidos.
           </p>
           <div className="grid gap-4 md:grid-cols-3">
             <label className="block">

@@ -57,7 +57,7 @@ export default function Contato() {
     <div className="min-h-screen bg-[#070C18] font-sans text-slate-200 selection:bg-orange-500 selection:text-white">
       <SEO
         title="Contato & Suporte | MiseOn — Sistema para Restaurantes"
-        description="Fale com a equipe do MiseOn. Canais oficiais de atendimento comercial e suporte técnico via WhatsApp, e-mail e formulário. CNPJ 63.310.253/0001-81."
+        description="Fale com a equipe do MiseOn. Canais oficiais de atendimento comercial e suporte técnico via WhatsApp, e-mail e formulário. CNPJ 68.923.239/0001-77."
         keywords="contato miseon, suporte miseon, whatsapp miseon, endereco miseon, cnpj miseon"
         canonicalUrl="https://miseon.app.br/contato"
         schemaJson={{
@@ -68,13 +68,14 @@ export default function Contato() {
           'url': 'https://miseon.app.br/contato',
           'mainEntity': {
             '@type': 'Organization',
-            'name': 'MiseOn Tecnologia e Soluções para Food Service',
-            'taxID': '63.310.253/0001-81',
+            'name': 'MiseOn — Maldivas Tech',
+            'legalName': 'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA',
+            'taxID': '68.923.239/0001-77',
             'email': 'contato@miseon.app.br',
             'telephone': '+55-11-91988-9233',
             'address': {
               '@type': 'PostalAddress',
-              'addressLocality': 'Manaus',
+              'addressLocality': 'São Paulo',
               'addressRegion': 'AM',
               'addressCountry': 'BR'
             }
@@ -252,10 +253,11 @@ export default function Contato() {
               </div>
 
               <div className="text-xs text-slate-300 space-y-1 font-mono">
-                <p><strong>{tDynamic('Razão Social:')}</strong> {tDynamic('MiseOn Tecnologia e Soluções para Food Service')}</p>
-                <p><strong>CNPJ:</strong> 63.310.253/0001-81</p>
+                <p><strong>{tDynamic('Razão Social:')}</strong> {tDynamic('Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA')}</p>
+                <p><strong>{tDynamic('Nome fantasia:')}</strong> Maldivas Tech</p>
+                <p><strong>CNPJ:</strong> 68.923.239/0001-77</p>
                 <p className="flex items-center gap-1 font-sans text-slate-400 mt-2">
-                  <MapPin size={14} className="text-orange-400" /> Manaus / AM — Brasil
+                  <MapPin size={14} className="text-orange-400" /> São Paulo / SP — Brasil
                 </p>
               </div>
             </div>

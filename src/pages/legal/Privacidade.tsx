@@ -28,7 +28,7 @@ export default function Privacidade() {
             <ShieldCheck size={48} className="mx-auto mb-4 opacity-90" />
             <h1 className="font-['Sora'] text-3xl font-extrabold">{tDynamic('Política de Privacidade')}</h1>
             <p className="mt-2 text-white/80">
-              {tDynamic('Conformidade com a LGPD (Lei nº 13.709/2018) · Última atualização: 22/07/2026')}
+              {tDynamic('Conformidade com a LGPD (Lei nº 13.709/2018) · Última atualização: 02/09/2026')}
             </p>
           </div>
 
@@ -37,8 +37,10 @@ export default function Privacidade() {
             <section>
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">1. Controlador e Encarregado</h2>
               <p>
-                {tDynamic('O controlador dos dados pessoais tratados nesta plataforma é')} <strong>MiseOn</strong>,
-                inscrito no CNPJ sob o nº <strong>63.310.253/0001-81</strong>, com sede em Manaus/AM, Brasil.
+                {tDynamic('O controlador dos dados pessoais tratados nesta plataforma é')}{' '}
+                <strong>Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA</strong> (nome fantasia
+                <strong> Maldivas Tech</strong>), operadora da plataforma <strong>MiseOn</strong>, inscrita no
+                CNPJ sob o nº <strong>68.923.239/0001-77</strong>, com sede na R. Pais Leme, 215, cj. 1713 — Pinheiros, São Paulo/SP, CEP 05424-150.
               </p>
               <p className="mt-3">
                 Para qualquer assunto relacionado a dados pessoais — inclusive para exercer seus direitos
@@ -191,7 +193,7 @@ export default function Privacidade() {
             <div className="mt-10 rounded-xl border border-gray-100 bg-gray-50 p-6 text-sm dark:border-gray-700 dark:bg-gray-800">
               <p className="mb-1 font-semibold text-gray-900 dark:text-white">{tDynamic('Encarregado de Dados (DPO)')}</p>
               <p>
-                MiseOn · CNPJ 63.310.253/0001-81 · Manaus/AM, Brasil<br />
+                MiseOn · operado por Maldivas Tech · CNPJ 68.923.239/0001-77 · São Paulo/SP, Brasil<br />
                 E-mail:{' '}
                 <a href="mailto:contato@miseon.app.br" className="text-[var(--cor-secundaria)] hover:underline">
                   contato@miseon.app.br
@@ -201,7 +203,7 @@ export default function Privacidade() {
                   (11) 91988-9233
                 </a>
                 <br />
-                {tDynamic('Última atualização desta Política:')} <strong>22/07/2026</strong>.
+                {tDynamic('Última atualização desta Política:')} <strong>02/09/2026</strong>.
               </p>
             </div>
 

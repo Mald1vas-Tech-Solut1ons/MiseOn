@@ -1459,7 +1459,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Aprovação costuma sair no mesmo dia.': 'Approval usually comes through the same day.',
   'As atualizações continuam aparecendo em tempo real em': 'Updates keep appearing in real time on',
   'As conversas do WhatsApp e do chat do site aparecem aqui em tempo real.': 'WhatsApp and website chat conversations appear here in real time.',
-  'Assinatura Técnica Maldivas Tech Solutions': 'Technical signature by Maldivas Tech Solutions',
+  'Assinatura Técnica Maldivas Tech': 'Technical signature by Maldivas Tech',
   'Assinatura do Sistema (SaaS)': 'System Subscription (SaaS)',
   'Atende no salão (garçom)': 'Serves in the dining room (waiter)',
   'Atendente IA · Lanche da Praça': 'AI Assistant · Lanche da Praça',
