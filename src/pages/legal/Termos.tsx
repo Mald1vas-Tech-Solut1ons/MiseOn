@@ -35,7 +35,7 @@ export default function Termos() {
               <h2 className="mb-3 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">1. Partes e Aceitação</h2>
               <p>
                 {tDynamic('Estes Termos de Uso e Serviço ("Termos") regulam a relação entre a plataforma')} <strong>MiseOn</strong>,
-                operada por <strong>Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA</strong>{' '}
+                operada por <strong>{tDynamic('Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA')}</strong>{' '}
                 (nome fantasia <strong>Maldivas Tech</strong>), pessoa jurídica de direito privado inscrita no
                 CNPJ sob o nº <strong>68.923.239/0001-77</strong>, com sede na R. Pais Leme, 215, cj. 1713 — Pinheiros, São Paulo/SP, CEP 05424-150
                 ("MiseOn", "nós"), e a pessoa física ou jurídica que se cadastra
@@ -168,7 +168,7 @@ export default function Termos() {
             <div className="mt-10 rounded-xl border border-gray-100 bg-gray-50 p-6 text-sm dark:border-gray-700 dark:bg-gray-800">
               <p className="mb-1 font-semibold text-gray-900 dark:text-white">Contato</p>
               <p>
-                MiseOn · operado por Maldivas Tech · CNPJ 68.923.239/0001-77 · São Paulo/SP, Brasil<br />
+                {tDynamic('MiseOn · operado por Maldivas Tech · CNPJ 68.923.239/0001-77 · São Paulo/SP, Brasil')}<br />
                 Dúvidas sobre estes Termos? Escreva para{' '}
                 <a href="mailto:contato@miseon.app.br" className="text-[var(--cor-secundaria)] hover:underline">
                   contato@miseon.app.br

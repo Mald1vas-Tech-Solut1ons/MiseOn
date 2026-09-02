@@ -271,6 +271,17 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // ── Identidade jurídica da operadora (CNPJ 68.923.239/0001-77) ──
+  'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA': 'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA',
+  'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA — nome fantasia Maldivas Tech': 'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA — trade name Maldivas Tech',
+  'MiseOn · operado por Maldivas Tech': 'MiseOn · operated by Maldivas Tech',
+  'MiseOn · operado por Maldivas Tech · CNPJ 68.923.239/0001-77 · São Paulo/SP, Brasil': 'MiseOn · operated by Maldivas Tech · Tax ID (CNPJ) 68.923.239/0001-77 · São Paulo/SP, Brazil',
+  'São Paulo / SP — Brasil': 'São Paulo / SP — Brazil',
+  'Nome fantasia:': 'Trade name:',
+  'Estes Termos de Uso e Serviço ("Termos") regulam a relação entre a plataforma': 'These Terms of Use and Service ("Terms") govern the relationship between the platform',
+  'Última atualização: 2 de setembro de 2026': 'Last updated: September 2, 2026',
+  'Conformidade com a LGPD (Lei nº 13.709/2018) · Última atualização: 02/09/2026': 'LGPD compliance (Law No. 13,709/2018) · Last updated: 2026-09-02',
+  'Enquadramento de serviço (CNAE 62.01-5-01)': 'Service classification (CNAE 62.01-5-01)',
   // ── Vitrine nutricional (docs/PLANO-NUTRICIONAL-VITRINE.md) ──
   'Informação nutricional no cardápio': 'Nutrition facts on the menu',
   'Calculada a partir das suas fichas técnicas. O padrão publica o número apenas quando todos os ingredientes do prato têm dado rastreável — e sempre mostra os alergênicos já declarados, mesmo em prato incompleto.': 'Calculated from your recipe sheets. By default the numbers are published only when every ingredient has traceable data — and declared allergens always show, even on an incomplete dish.',

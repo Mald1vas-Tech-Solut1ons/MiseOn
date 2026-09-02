@@ -257,7 +257,7 @@ export default function Contato() {
                 <p><strong>{tDynamic('Nome fantasia:')}</strong> Maldivas Tech</p>
                 <p><strong>CNPJ:</strong> 68.923.239/0001-77</p>
                 <p className="flex items-center gap-1 font-sans text-slate-400 mt-2">
-                  <MapPin size={14} className="text-orange-400" /> São Paulo / SP — Brasil
+                  <MapPin size={14} className="text-orange-400" /> {tDynamic('São Paulo / SP — Brasil')}
                 </p>
               </div>
             </div>

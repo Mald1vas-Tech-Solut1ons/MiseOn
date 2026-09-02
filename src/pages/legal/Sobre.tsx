@@ -170,7 +170,7 @@ export default function Sobre() {
               <div className="space-y-1">
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Sede Operacional</span>
                 <p className="flex items-center gap-1.5 font-medium text-white">
-                  <MapPin size={16} className="text-orange-400 shrink-0" /> São Paulo / SP — Brasil
+                  <MapPin size={16} className="text-orange-400 shrink-0" /> {tDynamic('São Paulo / SP — Brasil')}
                 </p>
               </div>
 

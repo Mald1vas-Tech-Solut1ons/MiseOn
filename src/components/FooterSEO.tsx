@@ -155,7 +155,7 @@ export function FooterSEO() {
                 <span><strong>CNPJ:</strong> 68.923.239/0001-77</span>
                 <span className="text-slate-600">|</span>
                 <span className="flex items-center gap-1">
-                  <MapPin size={13} className="text-slate-400" /> São Paulo / SP — Brasil
+                  <MapPin size={13} className="text-slate-400" /> {tDynamic('São Paulo / SP — Brasil')}
                 </span>
               </div>
             </div>
