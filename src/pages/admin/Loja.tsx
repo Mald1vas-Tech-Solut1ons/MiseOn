@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone, Calculator, Tv } from 'lucide-react';
+import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone, Calculator, Tv, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PALETA_CORES, PALETA_FUNDO_POR_TEMA, isLightColor, fonteFamilia, obterFundoLojaPorTema, obterTokensLoja, resolverTemaLoja, type TemaLoja } from '../../lib/personalizacao';
 import ColorSwatchPicker from '../../components/ColorSwatchPicker';
@@ -166,7 +166,6 @@ export default function Loja() {
   /** Antecipação exige aplicação própria contratada no Efí. Se a plataforma não
    *  tem essa conta, a opção precisa aparecer indisponível — antes ela podia ser
    *  marcada, salvava, e a cobrança rodava como padrão sem avisar ninguém. */
-  const [antecipacaoDisponivel, setAntecipacaoDisponivel] = useState(true);
   const [copiado, setCopiado] = useState(false);
   /** Qual link de TV acabou de ser copiado ('cardapio' | 'senhas' | null).
    *
@@ -219,11 +218,6 @@ export default function Loja() {
 
   useEffect(() => {
     (async () => {
-      const { data: cfgPagamento } = await supabase
-        .from('plataforma_pagamento_publico')
-        .select('efi_payee_code_antecipado')
-        .maybeSingle();
-      setAntecipacaoDisponivel(!!cfgPagamento?.efi_payee_code_antecipado);
 
       const { data } = await supabase.from('lojas').select('*').eq('id', lojaId).single();
       if (data) {
@@ -1719,46 +1713,32 @@ export default function Loja() {
             </div>
 
             <div className="mt-4">
-              <p className="mb-2 text-xs font-bold text-gray-700 dark:text-gray-200">⚡ Escolha como quer receber o crédito:</p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <button type="button" onClick={() => setForm((f) => ({ ...f, antecipacao_cartao: false }))}
-                  className={`rounded-xl border-2 p-3.5 text-left transition ${!form.antecipacao_cartao
-                    ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5'
-                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'}`}>
-                  <p className="flex items-center gap-2 text-sm font-bold dark:text-gray-100">
-                    Prazo padrão
-                    {!form.antecipacao_cartao && <Check size={14} className="text-[var(--cor-primaria)]" />}
-                  </p>
-                  <p className="mt-1 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-                    Recebe <b>uma parcela a cada ~31 dias</b>.
-                  </p>
-                  <p className="mt-2 rounded-lg bg-gray-100 px-2 py-1.5 text-[10px] font-semibold leading-relaxed text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                    {tDynamic('Tarifa Efí: à vista')} <b>{EFI_TARIFAS.creditoAVista}</b> · 2–6x <b>{EFI_TARIFAS.creditoParcelado2a6}</b> · 7–12x <b>{EFI_TARIFAS.creditoParcelado7a12}</b>
-                  </p>
-                </button>
-                <button type="button" onClick={() => setForm((f) => ({ ...f, antecipacao_cartao: true }))}
-                  className={`rounded-xl border-2 p-3.5 text-left transition ${form.antecipacao_cartao
-                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/10'
-                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'}`}>
-                  <p className="flex items-center gap-2 text-sm font-bold dark:text-gray-100">
-                    Antecipado ⚡
-                    {form.antecipacao_cartao && <Check size={14} className="text-amber-500" />}
-                  </p>
-                  <p className="mt-1 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-                    Recebe o <b>valor total em ~2 dias úteis</b>, mesmo em vendas parceladas.
-                  </p>
-                  <p className="mt-2 rounded-lg bg-amber-100 px-2 py-1.5 text-[10px] font-semibold leading-relaxed text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                    Tarifa Efí: <b>{EFI_TARIFAS.creditoAVista}</b> + <b>{EFI_TARIFAS.antecipacaoPorParcela} por parcela antecipada</b>
-                  </p>
-                </button>
+              <p className="mb-2 text-xs font-bold text-gray-700 dark:text-gray-200">⚡ Antecipação de Recebíveis</p>
+              
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-900/20">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 shrink-0 text-amber-500">
+                    <AlertCircle size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                      Antecipação Requer Contratação na Efí Bank
+                    </p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+                      A antecipação de cartão (receber o valor total em ~2 dias úteis, mesmo em vendas parceladas) é um <b>produto de prateleira</b> que você deve contratar diretamente no painel da sua conta Efí Empresas.
+                    </p>
+                    <p className="mt-2 text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+                      Nenhuma alteração de código ou configuração na plataforma habilitará isso se o contrato não estiver firmado e as chaves "Antecipadas" não forem geradas pelo banco. 
+                    </p>
+                    <a href="https://sejaefi.com.br" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 hover:underline dark:text-amber-400">
+                      Acessar minha conta Efí <ArrowRight size={12} />
+                    </a>
+                  </div>
+                </div>
               </div>
-              {!antecipacaoDisponivel && (
-                <p className="mt-2 rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] font-semibold leading-relaxed text-amber-700 dark:text-amber-300">
-                  {tDynamic('A antecipação ainda não está contratada na conta da plataforma. Enquanto isso, mesmo marcando esta opção o cartão é processado na modalidade padrão, com repasse em até 31 dias — e cada cobrança fica registrada com esse aviso.')}
-                </p>
-              )}
+              
               <p className="mt-2 text-[10px] text-gray-400">
-                {tDynamic('A escolha vale para as')} <b>próximas</b> vendas no cartão — o que já foi vendido mantém o prazo original.
+                O repasse padrão das vendas no cartão continua funcionando perfeitamente (~31 dias).
                 {' '}Tarifas da tabela pública da Efí ({EFI_TARIFAS.referencia}), negociáveis por volume — confira em{' '}
                 <a href={EFI_LINKS.tarifas} target="_blank" rel="noreferrer" className="font-semibold underline">sejaefi.com.br/tarifas</a>.
               </p>
