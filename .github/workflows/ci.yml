@@ -26,6 +26,16 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      - name: Trigger Vercel Deploy Hook
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_jyG5U3oewYe3MLKVZTVngpIBvw7Y/JmbsxoTKoO"
+      # Nao ha passo de deploy aqui, de proposito.
+      #
+      # Quem publica e a integracao Git da Vercel, que observa os pushes na
+      # main direto. O passo antigo disparava um deploy hook por curl, com o
+      # token em texto claro neste arquivo — enquanto o repositorio foi
+      # publico, qualquer pessoa podia disparar deploys da producao. O hook
+      # foi revogado em 01/09/2026 e o curl passaria a falhar, pintando o CI
+      # de vermelho sem nada de errado no codigo.
+      #
+      # ATENCAO ao que isso significa: a Vercel publica no INSTANTE do push,
+      # sem esperar os passos acima. Este workflow deixou de ser um portao e
+      # virou um alarme — ele avisa que quebrou, mas depois de ja estar no ar.
+      # Push na main vai para o cliente; valide antes de empurrar.
