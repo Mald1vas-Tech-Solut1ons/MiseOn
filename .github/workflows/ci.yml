@@ -26,30 +26,6 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      # Deploy autenticado, e NAO o antigo deploy hook.
-      #
-      # O hook so mandava um recado: "Vercel, publique a branch main do
-      # repositorio conectado". Quem ia buscar o codigo era a Vercel, indo ao
-      # GitHub. Isso parou de funcionar quando o repositorio virou privado: a
-      # Vercel recusa com 409 — repo privado de ORGANIZACAO nao e suportado no
-      # plano Hobby — e a conexao Git nao pode nem ser refeita enquanto for
-      # assim. Nenhum ajuste de permissao no GitHub resolve isso.
-      #
-      # Aqui o sentido se inverte e o impasse desaparece: o Actions JA tem o
-      # codigo (o checkout acima le o repo privado nativamente) e ENVIA os
-      # arquivos para a Vercel. Ela nunca precisa clonar nada, entao a
-      # restricao de plano deixa de valer.
-      #
-      # De quebra o segredo sai do arquivo versionado. O hook antigo morava
-      # aqui em texto claro: enquanto o repositorio foi publico, qualquer um
-      # podia disparar deploys da producao.
-      - name: Deploy para producao (Vercel)
+      - name: Trigger Vercel Deploy Hook
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: npx vercel@latest deploy --prod --yes --token="$VERCEL_TOKEN"
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          # Identificadores, nao credenciais: sozinhos nao dao acesso a nada, e
-          # sem eles o CLI nao sabe para qual projeto publicar — `.vercel/`
-          # esta no .gitignore, entao nao chega ao runner.
-          VERCEL_ORG_ID: team_eEi5jUcSgsZDia5ES37Fa7YI
-          VERCEL_PROJECT_ID: prj_jyG5U3oewYe3MLKVZTVngpIBvw7Y
+        run: curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_jyG5U3oewYe3MLKVZTVngpIBvw7Y/JmbsxoTKoO"
