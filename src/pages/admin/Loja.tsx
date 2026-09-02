@@ -159,6 +159,10 @@ export default function Loja() {
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [ok, setOk] = useState(false);
+  /** Veredito do Efí sobre os dados de repasse. Gravar no banco sempre dá
+   *  certo — inclusive com conta errada. Quem diz se o dado presta é o Efí. */
+  const [repasse, setRepasse] = useState<{ status: string; detalhe: string } | null>(null);
+  const [validandoRepasse, setValidandoRepasse] = useState(false);
   const [copiado, setCopiado] = useState(false);
   /** Qual link de TV acabou de ser copiado ('cardapio' | 'senhas' | null).
    *
@@ -213,6 +217,11 @@ export default function Loja() {
     (async () => {
       const { data } = await supabase.from('lojas').select('*').eq('id', lojaId).single();
       if (data) {
+        setRepasse(
+          data.efi_repasse_status
+            ? { status: String(data.efi_repasse_status), detalhe: String(data.efi_repasse_detalhe ?? '') }
+            : null,
+        );
         setSlug(data.slug ?? '');
         setTokenTv(data.painel_tv_token ?? null);
         setForm({
@@ -529,6 +538,31 @@ export default function Loja() {
     // salva os dados da Efi la em cima nao ve confirmacao nenhuma. O toast
     // aparece no canto superior, independente de onde a pagina esteja rolada.
     toast(tDynamic('Dados da loja salvos com sucesso'), 'sucesso');
+
+    // O toast acima confirma a GRAVAÇÃO, e só isso. Um CPF válido com número de
+    // conta errado grava igualzinho a um dado certo — e o lojista só descobria
+    // quando o dinheiro de uma venda real não chegava. Aqui a pergunta vai para
+    // quem tem autoridade sobre a resposta: o próprio Efí.
+    if (docPix && contaPix) {
+      setValidandoRepasse(true);
+      const { data: veredito, error: erroValidacao } = await supabase.functions.invoke(
+        'efi-validar-repasse',
+        { body: { loja_id: lojaId } },
+      );
+      setValidandoRepasse(false);
+      const status = erroValidacao ? 'indisponivel' : String(veredito?.status ?? 'indisponivel');
+      const detalhe = erroValidacao
+        ? String(erroValidacao.message ?? erroValidacao)
+        : String(veredito?.detalhe ?? '');
+      setRepasse({ status, detalhe });
+      if (status === 'aceito') {
+        toast(tDynamic('O Efí aceitou os dados do seu repasse Pix'), 'sucesso');
+      } else if (status === 'recusado') {
+        toast(detalhe || tDynamic('O Efí recusou os dados do repasse'), 'erro');
+      } else {
+        toast(tDynamic('Salvo, mas não consegui confirmar o repasse no Efí agora'), 'alerta');
+      }
+    }
   };
 
   if (carregando) {
@@ -1615,6 +1649,36 @@ export default function Loja() {
               {renderCampo('CPF ou CNPJ do titular da conta', 'efi_titular_documento', 'ex: 12.345.678/0001-90')}
               {renderCampo('Número da conta Efí (só números)', 'efi_conta', 'ex: 1234567')}
             </div>
+
+            {/* Selo do veredito do Efí. Nunca diz "conta verificada": o Efí
+                aceitar o favorecido não prova a titularidade. A confirmação
+                definitiva é o split_status de uma cobrança real. */}
+            {(validandoRepasse || repasse) && (
+              <div
+                className={
+                  'mt-3 flex items-start gap-2 rounded-xl p-3 text-[11px] ' +
+                  (validandoRepasse
+                    ? 'bg-gray-500/10 text-gray-600 dark:text-gray-300'
+                    : repasse?.status === 'aceito'
+                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                      : repasse?.status === 'recusado'
+                        ? 'bg-red-500/10 text-red-700 dark:text-red-300'
+                        : 'bg-amber-500/10 text-amber-700 dark:text-amber-300')
+                }
+              >
+                {validandoRepasse ? (
+                  <span>{tDynamic('Conferindo os dados do repasse no Efí…')}</span>
+                ) : repasse?.status === 'aceito' ? (
+                  <span><b>{tDynamic('O Efí aceitou este favorecido.')}</b> {repasse.detalhe}</span>
+                ) : repasse?.status === 'recusado' ? (
+                  <span><b>{tDynamic('O Efí recusou estes dados — o repasse não vai funcionar.')}</b> {repasse.detalhe}</span>
+                ) : repasse?.status === 'nao_configurado' ? (
+                  <span>{tDynamic('Sem dados de repasse: cada venda no Pix fica na conta da plataforma até o repasse manual.')}</span>
+                ) : (
+                  <span><b>{tDynamic('Não deu para confirmar no Efí agora.')}</b> {repasse?.detalhe}</span>
+                )}
+              </div>
+            )}
 
             <div className="mt-3 flex items-start gap-2 rounded-xl bg-emerald-500/10 p-3">
               <Check size={14} className="mt-0.5 shrink-0 text-emerald-600" />

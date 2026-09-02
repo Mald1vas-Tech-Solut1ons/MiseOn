@@ -272,6 +272,14 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Dados da loja salvos com sucesso': 'Store settings saved successfully',
+  'O Efí aceitou os dados do seu repasse Pix': 'Efí accepted your Pix payout details',
+  'O Efí recusou os dados do repasse': 'Efí rejected the payout details',
+  'Salvo, mas não consegui confirmar o repasse no Efí agora': 'Saved, but the payout could not be confirmed with Efí right now',
+  'Conferindo os dados do repasse no Efí…': 'Checking the payout details with Efí…',
+  'O Efí aceitou este favorecido.': 'Efí accepted this payee.',
+  'O Efí recusou estes dados — o repasse não vai funcionar.': 'Efí rejected these details — the payout will not work.',
+  'Sem dados de repasse: cada venda no Pix fica na conta da plataforma até o repasse manual.': 'No payout details: each Pix sale stays in the platform account until a manual transfer.',
+  'Não deu para confirmar no Efí agora.': 'Could not confirm with Efí right now.',
   'Não foi possível salvar os dados da loja': 'Could not save the store settings',
   // ── Identidade jurídica da operadora (CNPJ 68.923.239/0001-77) ──
   'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA': 'Rafael Paiva Dias da Silva Consultoria em Tecnologia da Informação LTDA',
