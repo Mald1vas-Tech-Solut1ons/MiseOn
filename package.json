@@ -63,6 +63,7 @@
     "nyc": "^18.0.0",
     "puppeteer": "^25.3.0",
     "react-hook-form": "^7.82.0",
+    "sdk-node-apis-efi": "^2.0.1",
     "tailwindcss": "^4.0.0",
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.65.0",
