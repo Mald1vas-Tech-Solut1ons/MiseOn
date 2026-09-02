@@ -1048,7 +1048,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Assumir integral responsabilidade civil, fiscal e criminal pelos produtos vendidos e serviços prestados por meio da plataforma;': 'Take full civil, tax and criminal responsibility for products sold and services provided through the platform;',
   'Atendimento automatizado via inteligência artificial no WhatsApp, por meio da WhatsApp Business Platform (Meta).': 'Automated service through artificial intelligence on WhatsApp, via the WhatsApp Business Platform (Meta).',
   'Bloqueia pedidos com distância superior a este raio.': 'Blocks orders beyond this radius.',
-  'Cadastre a chave Pix da loja em Configurações → Pagamentos para mostrar aqui.': 'Register the store Pix key under Settings → Payments to show it here.',
+  'Cadastre os dados de repasse da loja em Configurações → Pagamentos para aceitar Pix.': 'Register the store payout details under Settings → Payments to accept Pix.',
   'Cadastre insumos por categoria (': 'Register ingredients by category (',
   'Cadastre sua loja em menos de 3 minutos e comece a vender no automático.': 'Register your store in under 3 minutes and start selling on autopilot.',
   'Calculando pela distância…': 'Calculating by distance…',
