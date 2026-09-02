@@ -55,3 +55,7 @@ backups/
 # Fica fora do versionamento por privacidade.
 docs/nf-test_img.jpeg
 docs/*-test_img.*
+
+# Ignorar scripts sensíveis e testes da Efí
+scripts/*.cjs
+scripts/*.ps1
