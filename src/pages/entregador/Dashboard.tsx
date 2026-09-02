@@ -203,7 +203,7 @@ export default function EntregadorDashboard() {
         
         {loading ? (
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-8 flex items-center justify-center">
-            <RefreshCw size={24} className="animate-spin text-gray-700" />
+            <RefreshCw size={24} className="animate-spin text-gray-400" />
           </div>
         ) : rotaAtiva ? (
           <div className="rounded-2xl bg-gray-900 border border-gray-800 overflow-hidden shadow-lg">
@@ -256,7 +256,7 @@ export default function EntregadorDashboard() {
           </div>
         ) : (
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-8 flex flex-col items-center justify-center text-center">
-            <CheckCircle2 size={48} className="text-gray-700 mb-4" />
+            <CheckCircle2 size={48} className="text-gray-500 mb-4" />
             <p className="text-lg font-bold text-gray-300">Nenhuma rota ativa</p>
             <p className="text-sm text-gray-500 mt-1 max-w-[200px]">{tDynamic('Aguarde o restaurante despachar novos pedidos para você.')}</p>
           </div>

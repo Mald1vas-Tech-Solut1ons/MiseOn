@@ -125,7 +125,7 @@ export default function Historico() {
               <p className="text-sm">{p.identificador_cliente} · {p.telefone_contato}</p>
               <div className="mt-1 flex items-center justify-between text-xs text-gray-400">
                 <span>{new Date(p.criado_em).toLocaleString('pt-BR')} · {p.itens_pedido?.length ?? 0} item(ns)</span>
-                <span className="font-bold text-gray-700">{fmt(Number(p.valor_total))}</span>
+                <span className="font-bold text-gray-700 dark:text-gray-200">{fmt(Number(p.valor_total))}</span>
               </div>
             </div>
           ))}

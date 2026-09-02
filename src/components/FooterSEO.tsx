@@ -183,7 +183,7 @@ export function FooterSEO() {
         <div className="mt-8 border-t border-white/10 pt-6 text-center text-[11px] leading-relaxed text-slate-500">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <p>© {new Date().getFullYear()} MiseOn · Todos os direitos reservados. CNPJ 68.923.239/0001-77</p>
-            <span className="text-slate-700">|</span>
+            <span className="text-slate-500">|</span>
             <button
               type="button"
               onClick={abrirGerenciadorCookies}
