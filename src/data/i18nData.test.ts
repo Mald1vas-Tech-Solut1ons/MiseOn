@@ -164,7 +164,7 @@ describe('texto escrito direto no JSX', () => {
    * Então o combinado é: não pode aumentar. Ao envolver um trecho em tDynamic,
    * baixe o teto junto. Ao adicionar texto novo solto, este teste reprova.
    */
-  const TETO = 20;
+  const TETO = 19;
 
   it('não cresce o volume de texto não traduzível', () => {
     const rxJsx = />\s*([A-ZÀ-Ý][^<>{}\n]{14,150}?)\s*</g;

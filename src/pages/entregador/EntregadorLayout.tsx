@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
 import LanguageToggle from '../../components/LanguageToggle';
+import { useI18n } from '../../contexts/I18nContext';
 
 export interface CtxEntregador {
   user: User;
@@ -15,6 +16,7 @@ export interface CtxEntregador {
 }
 
 export default function EntregadorLayout() {
+  const { tDynamic } = useI18n();
   const navigate = useNavigate();
   const loc = useLocation();
   const [loading, setLoading] = useState(true);
@@ -92,16 +94,15 @@ export default function EntregadorLayout() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-gray-950 p-8 text-center text-gray-100">
         <Bike size={40} className="text-orange-500" />
-        <h1 className="text-lg font-bold">Esta conta nao e de entregador</h1>
+        <h1 className="text-lg font-bold">{tDynamic('Esta conta não é de entregador')}</h1>
         <p className="max-w-sm text-sm text-gray-400">
-          Voce continua conectado normalmente na sua conta. Para usar o app de entregas,
-          peca para a loja te cadastrar como entregador e entre com aquele acesso.
+          {tDynamic('Você continua conectado normalmente na sua conta. Para usar o app de entregas, peça para a loja te cadastrar como entregador e entre com aquele acesso.')}
         </p>
         <button
           onClick={handleLogout}
           className="mt-3 rounded-xl border border-gray-700 px-6 py-2.5 text-sm font-bold hover:bg-gray-800 transition-colors"
         >
-          Entrar com outra conta
+          {tDynamic('Entrar com outra conta')}
         </button>
       </div>
     );

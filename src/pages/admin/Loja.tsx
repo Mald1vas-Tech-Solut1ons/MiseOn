@@ -1722,16 +1722,16 @@ export default function Loja() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
-                      Antecipação Requer Contratação na Efí Bank
+                      {tDynamic('Antecipação Requer Contratação na Efí Bank')}
                     </p>
                     <p className="mt-1 text-xs opacity-95 leading-relaxed text-amber-800 dark:text-amber-300">
-                      A antecipação de cartão (receber o valor total em ~2 dias úteis, mesmo em vendas parceladas) é um <b>produto de prateleira</b> que você deve contratar diretamente no painel da sua conta Efí Empresas.
+                      {tDynamic('A antecipação de cartão (receber o valor total em ~2 dias úteis, mesmo em vendas parceladas) é um produto de prateleira que você deve contratar diretamente no painel da sua conta Efí Empresas.')}
                     </p>
                     <p className="mt-2 text-xs opacity-95 leading-relaxed text-amber-800 dark:text-amber-300">
                       Nenhuma alteração de código ou configuração na plataforma habilitará isso se o contrato não estiver firmado e as chaves "Antecipadas" não forem geradas pelo banco. 
                     </p>
                     <a href="https://sejaefi.com.br" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1 text-xs opacity-95 font-bold text-amber-700 hover:underline dark:text-amber-400">
-                      Acessar minha conta Efí <ArrowRight size={12} />
+                      {tDynamic('Acessar minha conta Efí')} <ArrowRight size={12} />
                     </a>
                   </div>
                 </div>

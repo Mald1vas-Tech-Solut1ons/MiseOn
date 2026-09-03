@@ -271,6 +271,22 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // Cashback e copia de codigo (tela de Marketing)
+  'Copiar': 'Copy',
+  'Copiado!': 'Copied!',
+  'Percentual de Cashback': 'Cashback percentage',
+  'Prazo de Expiração do Saldo': 'Balance expiry period',
+  'Recomendado: 5% a 10% de retorno.': 'Recommended: 5% to 10% back.',
+  'Saldos expirados incentivam o retorno rápido e reduzem o passivo contábil da loja.': 'Expiring balances encourage quicker return visits and reduce the store’s accounting liability.',
+  'Sem expiração (Saldo vitalício)': 'No expiry (balance never expires)',
+  // Antecipacao de cartao (tela de Configuracoes da Loja)
+  'Antecipação Requer Contratação na Efí Bank': 'Advance payment requires a contract with Efí Bank',
+  'A antecipação de cartão (receber o valor total em ~2 dias úteis, mesmo em vendas parceladas) é um produto de prateleira que você deve contratar diretamente no painel da sua conta Efí Empresas.': 'Card advance payment (receiving the full amount in about 2 business days, even on instalment sales) is an off-the-shelf product you must contract directly in your Efí Empresas account panel.',
+  'Acessar minha conta Efí': 'Open my Efí account',
+  // Acesso negado no app do entregador
+  'Esta conta não é de entregador': 'This account is not a courier account',
+  'Você continua conectado normalmente na sua conta. Para usar o app de entregas, peça para a loja te cadastrar como entregador e entre com aquele acesso.': 'You are still signed in to your account. To use the delivery app, ask the store to register you as a courier and sign in with that account.',
+  'Entrar com outra conta': 'Sign in with another account',
   // ── Tour Guiado — UI do Modal ──
   'Encerrar Tour': 'Close Tour',
   'Pular Tour': 'Skip Tour',

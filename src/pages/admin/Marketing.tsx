@@ -444,7 +444,7 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
               <option value="60">60 dias (Recomendado)</option>
               <option value="90">90 dias</option>
               <option value="180">180 dias (6 meses)</option>
-              <option value="0">Sem expiração (Saldo vitalício)</option>
+              <option value="0">{tDynamic('Sem expiração (Saldo vitalício)')}</option>
             </select>
             <p className="mt-1.5 text-xs text-gray-400">{tDynamic('Saldos expirados incentivam o retorno rápido e reduzem o passivo contábil da loja.')}</p>
           </div>
