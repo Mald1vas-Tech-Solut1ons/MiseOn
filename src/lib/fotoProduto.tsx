@@ -29,22 +29,51 @@ const FOTOS_PRODUTOS: Record<string, string> = {
   'ÁGUA MINERAL 500ML': 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&auto=format&fit=crop&q=80',
 };
 
+/**
+ * Ultimo recurso por FAMILIA do item. O default antigo era um hamburguer para
+ * qualquer nome desconhecido: "Bombom Sonho de Valsa" aparecia como um X-Burger
+ * na TV do balcao. Errar a familia do prato e pior que nao ter foto — o cliente
+ * pede achando que e outra coisa.
+ */
+const FOTOS_POR_FAMILIA: [RegExp, string][] = [
+  [/BOMBOM|CHOCOLATE|SOBREMESA|DOCE|PUDIM|BROWNIE|MOUSSE|SORVETE|A[CÇ]A[IÍ]/,
+   'https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=600&auto=format&fit=crop&q=80'],
+  [/REFRIGERANTE|COCA|GUARAN|SUCO|BEBIDA|[AÁ]GUA|CERVEJA|LATA|GARRAFA|MILK|SHAKE|CAF[EÉ]/,
+   'https://images.unsplash.com/photo-1437418747212-8d9709afab22?w=600&auto=format&fit=crop&q=80'],
+  [/BATATA|FRITAS|ONION|NUGGET|PORCAO|POR[CÇ][AÃ]O|ACOMPANHAMENTO/,
+   'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop&q=80'],
+  [/SALADA|BOWL|FIT|VEGANO|VEGETARIAN/,
+   'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=80'],
+  [/PIZZA|CALZONE/,
+   'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&auto=format&fit=crop&q=80'],
+  [/COMBO|BURGER|X-|SMASH|LANCHE|SANDU|HAMBURG/,
+   'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80'],
+];
+
+/** Prato generico: nem hamburguer, nem sobremesa. Nao induz o cliente a nada. */
+const FOTO_GENERICA =
+  'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80';
+
 export function obterFotoFallback(nome: string): string {
   const nomeUpper = (nome || '').toUpperCase().trim();
   if (FOTOS_PRODUTOS[nomeUpper]) return FOTOS_PRODUTOS[nomeUpper];
   for (const [chave, url] of Object.entries(FOTOS_PRODUTOS)) {
     if (nomeUpper.includes(chave)) return url;
   }
-  return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80';
+  for (const [padrao, url] of FOTOS_POR_FAMILIA) {
+    if (padrao.test(nomeUpper)) return url;
+  }
+  return FOTO_GENERICA;
 }
 
 export function obterFotoProduto(p: Produto): string {
   const fotoCurada = obterFotoFallback(p.nome);
-  // Se não tem imagem no banco ou se a imagem no banco não é curada em alta definição, usa a foto gastronômica curada
-  if (!p.imagem_url || p.imagem_url.includes('supabase.co')) {
-    return fotoCurada;
-  }
-  return getOptimizedImageUrl(p.imagem_url) || fotoCurada;
+  // A foto do lojista vem PRIMEIRO, inclusive a que ele subiu para o storage.
+  // A regra antiga descartava qualquer URL contendo `supabase.co` e trocava por
+  // banco de imagem: o lojista fotografava o proprio prato, subia, e a loja dele
+  // exibia foto de catalogo. A foto curada existe para quem NAO tem foto.
+  if (!p.imagem_url) return fotoCurada;
+  return getOptimizedImageUrl(p.imagem_url) || p.imagem_url || fotoCurada;
 }
 
 /**

@@ -196,6 +196,20 @@ export default function PainelTV() {
   const modoEfetivoRef = useRef<TelaAuto>(modoEfetivo);
   useEffect(() => { modoEfetivoRef.current = modoEfetivo; }, [modoEfetivo]);
   const [categoriaIndex, setCategoriaIndex] = useState(0);
+  // Numa TV nada pode aparecer pela metade — nao ha barra de rolagem para
+  // resgatar o que sobrou. Em vez de cortar o card no meio (era o que o
+  // `overflow-hidden` fazia), medimos a area util e mostramos so as linhas que
+  // cabem INTEIRAS; o resto vira proxima pagina da mesma categoria.
+  // O card em si nao muda: mexer na altura dele espremia a foto ate sumir.
+  const ALTURA_CARD = 300;
+  const ALTURA_CARD_COMPACTO = 170;
+  const gradeRef = useRef<HTMLDivElement>(null);
+  const [linhasGrade, setLinhasGrade] = useState(2);
+  // Tela baixa (monitor, janela do navegador) nao comporta o card cheio. Em vez
+  // de corta-lo pela metade, ele encolhe: foto menor e sem a descricao. O preco
+  // e o nome, que sao o que vende, ficam.
+  const [cardCompacto, setCardCompacto] = useState(false);
+  const [paginaIndex, setPaginaIndex] = useState(0);
   const [somAtivo, setSomAtivo] = useState(true);
   const [ultimoChamado, setUltimoChamado] = useState<SenhaTV | null>(null);
   const [bannerChamadaVisivel, setBannerChamadaVisivel] = useState(false);
@@ -493,16 +507,42 @@ export default function PainelTV() {
     if (!aindaNaFila) setBannerChamadaVisivel(false);
   }, [pedidos, bannerChamadaVisivel, ultimoChamado]);
 
-  // 4. Carrossel automático
+  // 4. Carrossel: vira a pagina dentro da categoria antes de trocar de categoria.
   useEffect(() => {
-    if (modoEfetivo !== 'MENU_BOARD' || categorias.length <= 1) return;
+    if (modoEfetivo !== 'MENU_BOARD' || categorias.length === 0) return;
 
     const timer = setInterval(() => {
-      setCategoriaIndex((prev) => (prev + 1) % categorias.length);
+      setPaginaIndex((atual) => {
+        const cat = categorias[categoriaIndex] ?? categorias[0];
+        const porPagina = Math.max(1, linhasGrade * 3);
+        const paginas = Math.max(1, Math.ceil((cat?.produtos.length ?? 0) / porPagina));
+        if (atual + 1 < paginas) return atual + 1;
+        if (categorias.length > 1) setCategoriaIndex((c) => (c + 1) % categorias.length);
+        return 0;
+      });
     }, 12000);
 
     return () => clearInterval(timer);
-  }, [modoEfetivo, categorias.length]);
+  }, [modoEfetivo, categorias, categoriaIndex, linhasGrade]);
+
+  useEffect(() => { setPaginaIndex(0); }, [categoriaIndex]);
+
+  // Mede a area da grade e decide quantas linhas cabem inteiras.
+  useEffect(() => {
+    const alvo = gradeRef.current;
+    if (!alvo) return;
+    const medir = () => {
+      const h = alvo.getBoundingClientRect().height;
+      const compacto = h < ALTURA_CARD;
+      setCardCompacto(compacto);
+      const alturaUnidade = compacto ? ALTURA_CARD_COMPACTO : ALTURA_CARD;
+      setLinhasGrade(Math.max(1, Math.min(2, Math.floor(h / alturaUnidade))));
+    };
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(alvo);
+    return () => ro.disconnect();
+  }, [modoEfetivo, categoriaIndex]);
 
   const alternarTelaCheia = () => {
     if (!document.fullscreenElement) {
@@ -542,11 +582,11 @@ export default function PainelTV() {
   const urlCardapio = `${window.location.origin}/${loja.slug}`;
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-[#050811] text-white font-['Inter'] select-none flex flex-col justify-between p-6 sm:p-8">
+    <div className="relative h-screen w-screen overflow-hidden bg-[#050811] text-white font-['Inter'] select-none flex flex-col justify-between p-4 sm:p-5">
       <header className="flex items-center justify-between border-b border-white/10 pb-4 z-20">
         <div className="flex items-center gap-4">
           {loja.logo_url ? (
-            <img src={getOptimizedImageUrl(loja.logo_url)} alt={loja.nome} className="h-12 w-12 rounded-2xl object-cover border border-white/20 shadow-lg" />
+            <img src={getOptimizedImageUrl(loja.logo_url)} alt={loja.nome} className="h-10 w-10 rounded-xl object-cover border border-white/20 shadow-lg" />
           ) : (
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FC5B24] font-black text-white text-xl shadow-lg">
               {loja.nome.charAt(0)}
@@ -742,13 +782,13 @@ export default function PainelTV() {
           )}
 
           {/* Lado Esquerdo: Carrossel do Cardápio */}
-          <div className="col-span-9 min-h-0 flex flex-col gap-4 overflow-hidden">
+          <div className="col-span-9 min-h-0 flex flex-col gap-3 overflow-hidden">
             {/* Header da Categoria Ativa */}
             {catAtual && (
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex shrink-0 items-center justify-between border-b border-white/10 pb-2">
                 <div className="flex items-center gap-3">
                   <span className="h-3 w-3 rounded-full bg-[#FC5B24] shadow-[0_0_12px_#FC5B24]" />
-                  <h2 className="font-['Sora'] text-3xl font-black tracking-tight text-white uppercase">
+                  <h2 className="font-['Sora'] text-2xl font-black tracking-tight text-white uppercase">
                     {catAtual.nome}
                   </h2>
                 </div>
@@ -771,11 +811,13 @@ export default function PainelTV() {
 
             {/* Grid de Pratos/Itens da Categoria */}
             {catAtual?.produtos && (
-              <div className="grid min-h-0 flex-1 grid-cols-2 lg:grid-cols-3 gap-5 overflow-hidden content-start">
-                {catAtual.produtos.slice(0, 6).map((produto) => (
+              <div ref={gradeRef} className="grid min-h-0 flex-1 grid-cols-2 lg:grid-cols-3 gap-4 overflow-hidden content-start">
+                {catAtual.produtos
+                  .slice(paginaIndex * linhasGrade * 3, paginaIndex * linhasGrade * 3 + linhasGrade * 3)
+                  .map((produto) => (
                   <div
                     key={produto.id}
-                    className="group relative flex flex-col justify-between rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10"
+                    className={`group relative flex flex-col justify-between rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10 ${cardCompacto ? 'p-3' : 'p-5'}`}
                   >
                     <div>
                       {/* Produto sem foto mostrava um icone cinza numa TV de 50
@@ -786,7 +828,7 @@ export default function PainelTV() {
                         src={obterFotoProduto(produto as never)}
                         fallback={obterFotoFallback(produto.nome)}
                         alt={produto.nome}
-                        className="h-36 w-full rounded-2xl object-cover mb-4 border border-white/10 shadow-md group-hover:scale-[1.02] transition-transform"
+                        className={`w-full rounded-2xl object-cover border border-white/10 shadow-md group-hover:scale-[1.02] transition-transform ${cardCompacto ? 'h-20 mb-2' : 'h-36 mb-4'}`}
                       />
 
                       <div className="flex items-start justify-between gap-2">
@@ -800,14 +842,14 @@ export default function PainelTV() {
                         )}
                       </div>
 
-                      {produto.descricao && (
+                      {produto.descricao && !cardCompacto && (
                         <p className="mt-1.5 text-xs text-slate-400 line-clamp-2 leading-relaxed">
                           {produto.descricao}
                         </p>
                       )}
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
+                    <div className={`flex items-center justify-between border-t border-white/10 ${cardCompacto ? 'mt-2 pt-2' : 'mt-4 pt-3'}`}>
                       <span className="text-xs opacity-95 font-bold text-slate-400 uppercase tracking-wider">A partir de</span>
                       <span className="font-['Sora'] text-xl font-black text-[#FC5B24]">
                         {fmt(Number(produto.preco))}
@@ -946,7 +988,7 @@ export default function PainelTV() {
       )}
 
       {/* ══════════ FOOTER INSTITUCIONAL DA TV ══════════ */}
-      <footer className="flex items-center justify-between border-t border-white/10 pt-4 text-xs text-slate-400 z-20">
+      <footer className="flex shrink-0 items-center justify-between border-t border-white/10 pt-2 text-[11px] text-slate-400 z-20">
         <div className="flex items-center gap-2 font-mono">
           <span className="h-2 w-2 rounded-full bg-[#FC5B24]" />
           <span>MiseOn Smart TV Engine v2.4</span>
