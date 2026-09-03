@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import {
   Tv, Volume2, VolumeX, Maximize2, Sparkles,
@@ -16,6 +16,8 @@ import { useI18n } from '../contexts/I18nContext';
 /** `AUTO` nao e uma terceira tela: e quem decide, a cada segundo, entre as
  *  outras duas. Ver `modoEfetivo`. */
 type ModoExibicao = 'MENU_BOARD' | 'SENHAS' | 'AUTO';
+/** O que o AUTO pode colocar na tela. `BANNER` e a passagem so do banner. */
+type TelaAuto = 'MENU_BOARD' | 'SENHAS' | 'BANNER';
 
 type SenhaTV = {
   numero: number;
@@ -77,6 +79,17 @@ export default function PainelTV() {
   // de terceiro para o cliente conseguir pedir e frágil demais, basta a
   // internet da loja bloquear o dominio ou o servico cair.
   const [qrCodeUrl, setQrCodeUrl] = useState('');
+  // Banner tem tela propria; cupom e cashback sao texto curto e vivem na faixa
+  // acima do cardapio. Um nao entra no espaco do outro.
+  const banners = useMemo(
+    () => promocoes.filter((x) => x.tipo_item === 'BANNER' && !!x.imagem_url),
+    [promocoes],
+  );
+  const promosDeTexto = useMemo(
+    () => promocoes.filter((x) => x.tipo_item !== 'BANNER'),
+    [promocoes],
+  );
+  const [bannerIndex, setBannerIndex] = useState(0);
 
   // ── Modo de exibicao: sobrevive a reboot da TV ────────────────────────────
   //
@@ -128,16 +141,20 @@ export default function PainelTV() {
   //                                que o pedido dele esta na fila.
   //
   // O relogio so manda no caso 3. Nos outros dois a fila manda.
+  // A passagem do banner e uma tela INTEIRA, propria. Banner e arte que o
+  // lojista pagou para fazer: espremido numa faixa junto com cupom vira ruido.
+  // Ele entra entre uma volta e outra do cardapio, curto, e sai.
   const AUTO_CARDAPIO_MS = 24_000;
   const AUTO_SENHAS_MS = 12_000;
-  const [autoTela, setAutoTela] = useState<'MENU_BOARD' | 'SENHAS'>('MENU_BOARD');
-  const autoTelaRef = useRef<'MENU_BOARD' | 'SENHAS'>('MENU_BOARD');
+  const AUTO_BANNER_MS = 9_000;
+  const [autoTela, setAutoTela] = useState<TelaAuto>('MENU_BOARD');
+  const autoTelaRef = useRef<TelaAuto>('MENU_BOARD');
   const autoDesdeRef = useRef<number>(Date.now());
 
   useEffect(() => {
     if (modo !== 'AUTO') return;
 
-    const aplicar = (nova: 'MENU_BOARD' | 'SENHAS') => {
+    const aplicar = (nova: TelaAuto) => {
       if (autoTelaRef.current === nova) return;
       autoTelaRef.current = nova;
       autoDesdeRef.current = Date.now();
@@ -147,23 +164,37 @@ export default function PainelTV() {
     const decidir = () => {
       const prontos = pedidos.filter((p) => ['PRONTO', 'EM_ROTA'].includes(p.status)).length;
       const esperando = pedidos.filter((p) => ['NOVO', 'ACEITO', 'PREPARANDO'].includes(p.status)).length;
+      const temBanner = banners.length > 0;
 
+      // Chamar ganha de qualquer coisa: ha gente esperando para ser atendida.
       if (prontos > 0) return aplicar('SENHAS');
-      if (esperando === 0) return aplicar('MENU_BOARD');
 
       const atual = autoTelaRef.current;
-      const limite = atual === 'SENHAS' ? AUTO_SENHAS_MS : AUTO_CARDAPIO_MS;
+      const limite =
+        atual === 'SENHAS' ? AUTO_SENHAS_MS : atual === 'BANNER' ? AUTO_BANNER_MS : AUTO_CARDAPIO_MS;
       if (Date.now() - autoDesdeRef.current < limite) return;
-      aplicar(atual === 'SENHAS' ? 'MENU_BOARD' : 'SENHAS');
+
+      // Balcao vazio: cardapio, com a passagem do banner entre as voltas.
+      if (esperando === 0) {
+        if (atual === 'BANNER') return aplicar('MENU_BOARD');
+        return aplicar(temBanner ? 'BANNER' : 'MENU_BOARD');
+      }
+
+      // Gente esperando: cardapio -> senhas -> banner -> cardapio.
+      if (atual === 'MENU_BOARD') return aplicar('SENHAS');
+      if (atual === 'SENHAS') return aplicar(temBanner ? 'BANNER' : 'MENU_BOARD');
+      return aplicar('MENU_BOARD');
     };
 
     decidir();
     const t = setInterval(decidir, 1_000);
     return () => clearInterval(t);
-  }, [modo, pedidos, AUTO_CARDAPIO_MS, AUTO_SENHAS_MS]);
+  }, [modo, pedidos, banners.length, AUTO_CARDAPIO_MS, AUTO_SENHAS_MS, AUTO_BANNER_MS]);
 
   /** O que esta na tela AGORA. Fora do AUTO, e a escolha manual. */
-  const modoEfetivo: 'MENU_BOARD' | 'SENHAS' = modo === 'AUTO' ? autoTela : modo;
+  const modoEfetivo: TelaAuto = modo === 'AUTO' ? autoTela : modo;
+  const modoEfetivoRef = useRef<TelaAuto>(modoEfetivo);
+  useEffect(() => { modoEfetivoRef.current = modoEfetivo; }, [modoEfetivo]);
   const [categoriaIndex, setCategoriaIndex] = useState(0);
   const [somAtivo, setSomAtivo] = useState(true);
   const [ultimoChamado, setUltimoChamado] = useState<SenhaTV | null>(null);
@@ -180,6 +211,13 @@ export default function PainelTV() {
   const ultimaAtualizacaoRef = useRef<number | null>(null);
 
   useEffect(() => { ultimaAtualizacaoRef.current = ultimaAtualizacao; }, [ultimaAtualizacao]);
+
+  // Cada passagem mostra o proximo banner: com dois ou tres cadastrados, todos
+  // aparecem ao longo do turno em vez de so o primeiro.
+  useEffect(() => {
+    if (modoEfetivoRef.current !== 'BANNER') return;
+    setBannerIndex((i) => (banners.length ? (i + 1) % banners.length : 0));
+  }, [autoTela, banners.length]);
 
   // QR do cardapio, gerado localmente a partir do slug da loja.
   useEffect(() => {
@@ -635,14 +673,39 @@ export default function PainelTV() {
         </div>
       )}
 
+      {/* ══════════ PASSAGEM SÓ DO BANNER (TELA INTEIRA) ══════════ */}
+      {modoEfetivo === 'BANNER' && banners.length > 0 && (
+        <main className="flex-1 min-h-0 py-4 z-10">
+          {(() => {
+            const b = banners[bannerIndex % banners.length];
+            return (
+              <div className="relative h-full w-full overflow-hidden rounded-3xl border border-white/10 animate-in fade-in duration-700">
+                <img
+                  src={getOptimizedImageUrl(b.imagem_url!) || b.imagem_url!}
+                  alt={b.titulo ?? ''}
+                  className="h-full w-full object-cover"
+                />
+                {b.titulo?.trim() && (
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-12 pb-12 pt-24">
+                    <h2 className="font-['Sora'] text-6xl font-black tracking-tight text-white drop-shadow-2xl">
+                      {b.titulo}
+                    </h2>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </main>
+      )}
+
       {/* ══════════ CONTEÚDO PRINCIPAL (MODO MENU BOARD) ══════════ */}
       {modoEfetivo === 'MENU_BOARD' && (
-        <main className="my-auto grid grid-cols-12 gap-8 py-4 z-10">
+        <main className="flex-1 min-h-0 grid grid-cols-12 grid-rows-[auto_minmax(0,1fr)] gap-x-8 gap-y-4 py-4 z-10">
           {/* Faixa de promocoes da casa. Fica no topo das duas colunas porque a
               fila do balcao olha a tela inteira, nao so o cardapio. */}
-          {promocoes.length > 0 && (
+          {promosDeTexto.length > 0 && (
             <div className="col-span-12 flex flex-wrap items-center gap-3">
-              {promocoes.map((promo, i) => {
+              {promosDeTexto.map((promo: PromoTV, i: number) => {
                 if (promo.tipo_item === 'CASHBACK') {
                   return (
                     <span key={`p${i}`} className="flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/10 px-5 py-2.5 font-['Sora'] text-xl font-black text-emerald-300">
@@ -679,7 +742,7 @@ export default function PainelTV() {
           )}
 
           {/* Lado Esquerdo: Carrossel do Cardápio */}
-          <div className="col-span-9 space-y-6">
+          <div className="col-span-9 min-h-0 flex flex-col gap-4 overflow-hidden">
             {/* Header da Categoria Ativa */}
             {catAtual && (
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -708,7 +771,7 @@ export default function PainelTV() {
 
             {/* Grid de Pratos/Itens da Categoria */}
             {catAtual?.produtos && (
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid min-h-0 flex-1 grid-cols-2 lg:grid-cols-3 gap-5 overflow-hidden content-start">
                 {catAtual.produtos.slice(0, 6).map((produto) => (
                   <div
                     key={produto.id}
@@ -757,7 +820,7 @@ export default function PainelTV() {
           </div>
 
           {/* Lado Direito: QR Code Peça no Celular + Resumo de Senhas Chamadas */}
-          <div className="col-span-3 flex flex-col justify-between gap-6 border-l border-white/10 pl-8">
+          <div className="col-span-3 min-h-0 flex flex-col justify-between gap-6 overflow-hidden border-l border-white/10 pl-8">
             {/* Card QR Code de Autoatendimento */}
             <div className="rounded-3xl border border-orange-500/30 bg-gradient-to-b from-orange-500/10 to-transparent p-6 text-center shadow-xl space-y-4">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FC5B24]/20 px-3 py-1 text-xs font-extrabold text-[#FC5B24] border border-[#FC5B24]/30">

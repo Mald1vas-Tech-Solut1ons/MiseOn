@@ -60,6 +60,7 @@ const PRESETS_SEGMENTOS: Record<SegmentoNegocio, { rotulo: string; descricao: st
 interface FormLoja {
   /** Tipos de pedido chamados no painel de senhas da TV. */
   painel_tv_tipos: string[];
+  painel_tv_promocoes: boolean;
   nome: string;
   descricao: string;
   logo_url: string;
@@ -126,6 +127,7 @@ interface FaixaEntregaForm {
 
 const vazio: FormLoja = {
   painel_tv_tipos: ['RETIRADA_BALCAO', 'SALAO'],
+  painel_tv_promocoes: true,
   nome: '', descricao: '', logo_url: '', banner_url: '', banner_pos_y: 50,
   cor_primaria: PALETA_CORES[5], cor_secundaria: PALETA_CORES[1],
   fonte: 'Inter', cor_texto: PALETA_CORES[13], cor_fundo_claro: PALETA_FUNDO_POR_TEMA.claro[0], cor_fundo_escuro: PALETA_FUNDO_POR_TEMA.escuro[0], tema_cardapio: 'claro',
@@ -230,6 +232,7 @@ export default function Loja() {
         setTokenTv(data.painel_tv_token ?? null);
         setForm({
           painel_tv_tipos: data.painel_tv_tipos ?? ['RETIRADA_BALCAO', 'SALAO'],
+          painel_tv_promocoes: data.painel_tv_promocoes ?? true,
           nome: data.nome ?? '', descricao: data.descricao ?? '',
           logo_url: data.logo_url ?? '', banner_url: data.banner_url ?? '',
           banner_pos_y: data.banner_pos_y ?? 50,
@@ -434,6 +437,7 @@ export default function Loja() {
 
     const { error: erroLoja } = await supabase.from('lojas').update({
       painel_tv_tipos: form.painel_tv_tipos,
+      painel_tv_promocoes: form.painel_tv_promocoes,
       nome: form.nome,
       descricao: form.descricao || null,
       logo_url: form.logo_url || null,
@@ -730,6 +734,28 @@ export default function Loja() {
                 </button>
               );
             })}
+          </div>
+
+          {/* Promocoes na TV sao escolha do lojista: tem casa que quer a tela
+              so com o cardapio, e cupom exposto na parede nem sempre e o que
+              se quer. Ligado por padrao porque a TV do balcao e tela de venda. */}
+          <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.painel_tv_promocoes}
+                onChange={(e) => setForm((f) => ({ ...f, painel_tv_promocoes: e.target.checked }))}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--cor-primaria)]"
+              />
+              <span>
+                <span className="block text-sm font-bold text-gray-800 dark:text-gray-100">
+                  {tDynamic('Mostrar promoções na TV')}
+                </span>
+                <span className="block text-xs opacity-95 text-gray-500 dark:text-gray-400">
+                  {tDynamic('Exibe o banner da loja, o cashback e os cupons públicos numa faixa acima do cardápio. Cupom de primeira compra e cupom vencido nunca aparecem.')}
+                </span>
+              </span>
+            </label>
           </div>
 
           {/* O lojista precisa entender POR QUE o link tem um codigo no fim,

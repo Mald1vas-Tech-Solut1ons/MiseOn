@@ -271,6 +271,9 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // Configuracao de promocoes na TV
+  'Mostrar promoções na TV': 'Show promotions on the TV',
+  'Exibe o banner da loja, o cashback e os cupons públicos numa faixa acima do cardápio. Cupom de primeira compra e cupom vencido nunca aparecem.': 'Shows the store banner, cashback and public coupons in a strip above the menu. First-order coupons and expired coupons never appear.',
   // Faixa de promocoes da TV do balcao
   'Ganhe': 'Get',
   'de volta em cada pedido': 'back on every order',
