@@ -60,18 +60,35 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
-    const supabaseUser = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
 
-    const { data: { user }, error: userErr } = await supabaseUser.auth.getUser();
-    if (userErr || !user) return json({ error: 'Não autorizado' }, { status: 401 });
+    // Chamada function-to-function (ex.: script de bootstrap operado pelo
+    // próprio dono da plataforma) usa a service role key e passa direto,
+    // mesmo padrão já usado em fiscal-emitir-nfse. Chamada com JWT de
+    // usuário real precisa ser superadmin.
+    const jwtPayload = authHeader.replace(/^Bearer\s+/i, '').split('.')[1];
+    // base64url → base64 com padding correto antes de atob
+    const isServiceRole = (() => {
+      if (!jwtPayload) return false;
+      try {
+        const b64 = jwtPayload.replace(/-/g, '+').replace(/_/g, '/').padEnd(
+          Math.ceil(jwtPayload.length / 4) * 4, '='
+        );
+        return JSON.parse(atob(b64))?.role === 'service_role';
+      } catch { return false; }
+    })();
+    if (!isServiceRole) {
+      const supabaseUser = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: { user }, error: userErr } = await supabaseUser.auth.getUser();
+      if (userErr || !user) return json({ error: 'Não autorizado' }, { status: 401 });
 
-    const { data: souSuperadmin } = await supabaseAdmin
-      .from('plataforma_admins').select('user_id').eq('user_id', user.id).maybeSingle();
-    if (!souSuperadmin) return json({ error: 'Só o superadmin pode configurar o fiscal da plataforma' }, { status: 403 });
+      const { data: souSuperadmin } = await supabaseAdmin
+        .from('plataforma_admins').select('user_id').eq('user_id', user.id).maybeSingle();
+      if (!souSuperadmin) return json({ error: 'Só o superadmin pode configurar o fiscal da plataforma' }, { status: 403 });
+    }
 
     const cleanCnpj = (cnpj || '').replace(/\D/g, '');
     const cleanCep = (cep || '').replace(/\D/g, '');

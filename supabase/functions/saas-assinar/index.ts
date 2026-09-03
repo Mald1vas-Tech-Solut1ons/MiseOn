@@ -25,7 +25,7 @@ const EFI_COB_URL = Deno.env.get('EFI_SANDBOX') === 'true'
 const PLAN_NAME = 'MiseOn Profissional';
 const VALOR_MENSAL = 16990;      // R$ 169,90 em centavos (assinatura recorrente)
 const VALOR_ANUAL_TOTAL = 179880; // R$ 1.798,80 em centavos (cobrança única parcelada)
-const PARCELAS_VALIDAS = new Set([1, 3, 6, 8, 12]);
+const PARCELAS_VALIDAS = new Set([1, 2, 3]);
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
       if (!dadosCadastro?.logradouro || !dadosCadastro?.cidade || !dadosCadastro?.uf || !dadosCadastro?.cep) {
         return json({ error: 'Complete seu endereço no cadastro antes de assinar o plano anual.' }, { status: 422 });
       }
-      const nParcelas = PARCELAS_VALIDAS.has(Number(parcelas)) ? Number(parcelas) : 12;
+      const nParcelas = PARCELAS_VALIDAS.has(Number(parcelas)) ? Number(parcelas) : 1;
 
       const chargeRes = await fetch(`${EFI_COB_URL}/v1/charge/one-step`, {
         method: 'POST',
