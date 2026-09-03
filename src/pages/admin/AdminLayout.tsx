@@ -114,7 +114,7 @@ export default function AdminLayout() {
       // "auto" roda instantaneamente ANTES da pintura, evitando que o usuário veja a barra "pulando"
       container.scrollTo({ top: scrollTarget, behavior: 'auto' });
     }
-  }, [loc.pathname]);
+  }, [loc.pathname, isMinLoadingDone, ctx]);
 
   useEffect(() => {
     let minLoadTimer: NodeJS.Timeout;
