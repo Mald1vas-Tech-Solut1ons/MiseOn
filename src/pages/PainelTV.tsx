@@ -862,28 +862,28 @@ export default function PainelTV() {
           </div>
 
           {/* Lado Direito: QR Code Peça no Celular + Resumo de Senhas Chamadas */}
-          <div className="col-span-3 min-h-0 flex flex-col justify-between gap-6 overflow-hidden border-l border-white/10 pl-8">
+          <div className="col-span-3 min-h-0 flex flex-col gap-4 overflow-hidden border-l border-white/10 pl-5">
             {/* Card QR Code de Autoatendimento */}
-            <div className="rounded-3xl border border-orange-500/30 bg-gradient-to-b from-orange-500/10 to-transparent p-6 text-center shadow-xl space-y-4">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FC5B24]/20 px-3 py-1 text-xs font-extrabold text-[#FC5B24] border border-[#FC5B24]/30">
-                <QrIcon size={14} /> {tDynamic('PEÇA PELO CELULAR')}
+            <div className="shrink-0 rounded-3xl border border-orange-500/30 bg-gradient-to-b from-orange-500/10 to-transparent p-4 text-center shadow-xl space-y-3">
+              <div className="inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full bg-[#FC5B24]/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-[#FC5B24] border border-[#FC5B24]/30">
+                <QrIcon size={12} className="shrink-0" /> {tDynamic('PEÇA PELO CELULAR')}
               </div>
-              <p className="text-xs text-slate-300 font-medium">{tDynamic('Escaneie o QR Code abaixo para ver o cardápio e fazer seu pedido na mesa sem pegar fila:')}</p>
+              <p className="text-xs leading-snug text-slate-300 font-medium">{tDynamic('Aponte a câmera e peça sem pegar fila.')}</p>
               
-              <div className="bg-white p-3 rounded-2xl inline-block shadow-2xl border-4 border-white/10">
+              <div className="mx-auto inline-block rounded-2xl border-4 border-white/10 bg-white p-2 shadow-2xl">
                 {qrCodeUrl
-                  ? <img src={qrCodeUrl} alt="QR Code do Cardápio" className="w-40 h-40" />
-                  : <div className="w-40 h-40 animate-pulse rounded-xl bg-white/10" />}
+                  ? <img src={qrCodeUrl} alt="QR Code do Cardápio" className="h-32 w-32" />
+                  : <div className="h-32 w-32 animate-pulse rounded-xl bg-black/10" />}
               </div>
 
-              <p className="text-xs opacity-95 font-mono text-slate-400 truncate">
-                {urlCardapio.replace('https://', '')}
+              <p className="break-all font-mono text-[11px] leading-tight text-slate-400">
+                {urlCardapio.replace(/^https?:\/\//, '')}
               </p>
             </div>
 
             {/* Quadro Lateral de ÚLTIMAS SENHAS PRONTAS */}
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 space-y-3">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-4">
+              <h4 className="flex shrink-0 items-center justify-between gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 <span>{tDynamic('Últimas Senhas Prontas')}</span>
                 <CheckCircle2 size={14} className="text-emerald-400" />
               </h4>
