@@ -5,6 +5,7 @@ import {
   CheckCircle2, Clock, QrCode as QrIcon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { gerarQrDataUrl } from '../lib/qr';
 import { FotoProduto, obterFotoFallback, obterFotoProduto } from '../lib/fotoProduto';
 import { Loja, Categoria, Produto, fmt } from '../types';
 import MiseOnLoader from '../components/MiseOnLoader';
@@ -70,6 +71,12 @@ export default function PainelTV() {
   // Banner, cupom e cashback cadastrados no Marketing. A TV do balcao e tela de
   // venda: quem esta na fila precisa saber da promocao da casa.
   const [promocoes, setPromocoes] = useState<PromoTV[]>([]);
+  // QR gerado no proprio aparelho. Antes vinha de api.qrserver.com: medido em
+  // 03/09 na TV, a imagem nao carregou (naturalWidth 0) e sobrou um quadrado
+  // branco. Uma TV de balcao fica ligada o dia inteiro — depender de servico
+  // de terceiro para o cliente conseguir pedir e frágil demais, basta a
+  // internet da loja bloquear o dominio ou o servico cair.
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
 
   // ── Modo de exibicao: sobrevive a reboot da TV ────────────────────────────
   //
@@ -173,6 +180,17 @@ export default function PainelTV() {
   const ultimaAtualizacaoRef = useRef<number | null>(null);
 
   useEffect(() => { ultimaAtualizacaoRef.current = ultimaAtualizacao; }, [ultimaAtualizacao]);
+
+  // QR do cardapio, gerado localmente a partir do slug da loja.
+  useEffect(() => {
+    const slugLoja = loja?.slug;
+    if (!slugLoja) return;
+    let vivo = true;
+    gerarQrDataUrl(`${window.location.origin}/${slugLoja}`, 320)
+      .then((url) => { if (vivo) setQrCodeUrl(url); })
+      .catch(() => { if (vivo) setQrCodeUrl(''); });
+    return () => { vivo = false; };
+  }, [loja?.slug]);
 
   useEffect(() => {
     const synth = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
@@ -482,8 +500,8 @@ export default function PainelTV() {
   // page do MiseOn — o QR da TV, que diz "escaneie para pedir na mesa sem
   // pegar fila", mandava todo mundo para a pagina errada. Medido em producao
   // em 01/09/2026.
+
   const urlCardapio = `${window.location.origin}/${loja.slug}`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(urlCardapio)}`;
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-[#050811] text-white font-['Inter'] select-none flex flex-col justify-between p-6 sm:p-8">
@@ -748,7 +766,9 @@ export default function PainelTV() {
               <p className="text-xs text-slate-300 font-medium">{tDynamic('Escaneie o QR Code abaixo para ver o cardápio e fazer seu pedido na mesa sem pegar fila:')}</p>
               
               <div className="bg-white p-3 rounded-2xl inline-block shadow-2xl border-4 border-white/10">
-                <img src={qrCodeUrl} alt="QR Code do Cardápio" className="w-40 h-40" />
+                {qrCodeUrl
+                  ? <img src={qrCodeUrl} alt="QR Code do Cardápio" className="w-40 h-40" />
+                  : <div className="w-40 h-40 animate-pulse rounded-xl bg-white/10" />}
               </div>
 
               <p className="text-xs opacity-95 font-mono text-slate-400 truncate">
