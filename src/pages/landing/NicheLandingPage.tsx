@@ -16,6 +16,8 @@ import SEO from '../../components/SEO';
 import FooterSEO from '../../components/FooterSEO';
 import MiseOnLogo from '../../components/MiseOnLogo';
 import LanguageToggle from '../../components/LanguageToggle';
+import DiagnosticoOperacional from '../../components/home/DiagnosticoOperacional';
+import CalculadoraVazamento from '../../components/home/CalculadoraVazamento';
 
 const ICON_MAP: Record<string, any> = {
   ChefHat,
@@ -226,18 +228,23 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
             {tDynamic(data.subheadline)}
           </p>
 
-          <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              to="/cadastre-se"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105 sm:w-auto"
-            >
-              {tDynamic('Criar Minha Conta Grátis')} <ArrowRight size={18} />
-            </Link>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="flex flex-col items-center">
+              <Link
+                to="/cadastre-se"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105 sm:w-auto"
+              >
+                {tDynamic('Quero testar o MiseOn grátis')} <ArrowRight size={18} />
+              </Link>
+              <span className="mt-2 text-xs font-semibold text-slate-400">
+                {tDynamic('30 dias. Todas as funcionalidades. Sem cartão e sem fidelidade.')}
+              </span>
+            </div>
             <a
               href="#comparativo"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-8 py-4 font-['Sora'] text-base font-bold text-white backdrop-blur-md transition hover:bg-white/15 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-8 py-4 font-['Sora'] text-base font-bold text-white backdrop-blur-md transition hover:bg-white/15 sm:w-auto self-start sm:self-auto"
             >
-              {tDynamic('Ver Diferenciais')}
+              {tDynamic('Quero ver funcionando')}
             </a>
           </div>
 
@@ -252,6 +259,12 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
           </div>
         </div>
       </header>
+
+      {/* ══════════ 2.5 DIAGNÓSTICO DA OPERAÇÃO ══════════ */}
+      <DiagnosticoOperacional />
+
+      {/* ══════════ 2.6 CALCULADORA DE VAZAMENTO ══════════ */}
+      <CalculadoraVazamento />
 
       {/* ══════════ 3. DORES VS SOLUÇÃO ══════════ */}
       <section id="comparativo" className="scroll-mt-24 py-20 bg-white dark:bg-transparent">

@@ -24,6 +24,79 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'calculadora-vazamento-de-caixa-diagnostico-operacional-restaurantes',
+    title: 'Calculadora de Vazamento de Caixa: Como Identificar e Estancar Perdas Invisíveis no seu Restaurante',
+    description: 'Saiba como pequenos desvios de CMV, faltas de estoque no rush e reajustes de fornecedores não repassados consomem até R$ 5.500/mês da margem do seu estabelecimento.',
+    category: 'Gestão Financeira',
+    publishedAt: '2026-09-03',
+    readTime: '8 min de leitura',
+    coverImage: '/blog-covers/calculadora-vazamento-cover.jpg',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Vazamento de Caixa', 'Calculadora Interativa', 'CMV Real', 'Diagnóstico Operacional', 'Gestão Financeira'],
+    seo: {
+      title: 'Calculadora de Vazamento de Caixa & Diagnóstico Operacional — MiseOn',
+      description: 'Descubra quanto dinheiro seu restaurante perde todo mês sem perceber. Use nossa calculadora interativa e aprenda a estancar vazamentos de caixa.',
+      keywords: 'calculadora vazamento caixa restaurante, diagnostico operacional food service, perdas invisiveis restaurante, cmv real restaurante, gestão financeira restaurante',
+      canonicalUrl: 'https://miseon.app.br/blog/calculadora-vazamento-de-caixa-diagnostico-operacional-restaurantes',
+    },
+    summary: 'A maioria dos donos de restaurantes sabe quanto faturou ontem, mas não consegue explicar exatamente quanto sobrou no bolso. Neste artigo, detalhamos a matemática por trás da Calculadora de Vazamento de Caixa do MiseOn e apresentamos o Diagnóstico Operacional de 4 passos para estancar perdas invisíveis.',
+    content: `
+# Calculadora de Vazamento de Caixa: Como Identificar e Estancar Perdas Invisíveis no seu Restaurante
+
+Se você administra um restaurante, hamburgueria, pizzaria ou buffet por quilo no Brasil, provavelmente já viveu esta situação angustiante:
+
+> *"As mesas estavam cheias, as entregas saíram sem parar e o faturamento do mês bateu R$ 60.000 ou R$ 100.000. Porém, ao fechar as contas no dia 5, sobrou quase nada no caixa."*
+
+Para onde foi o dinheiro?
+
+Na maioria das vezes, o dinheiro não sumiu em um grande roubo ou em um desastre isolado. Ele escapou aos poucos, em **vazamentos silenciosos e invisíveis na rotina diária**.
+
+---
+
+## Os 4 Vazamentos Silenciosos do Food Service
+
+### 1. O Aumento Surpresa do Fornecedor
+O preço da carne, do queijo prato ou do óleo de fritura subiu 8% no distribuidor. Como você não atualiza a ficha técnica dinamicamente a cada nota, você continua vendendo o prato pelo preço antigo durante 3 a 4 semanas. **Resultado**: sua margem de contribuição despenca de 60% para 38% sem ninguém perceber.
+
+### 2. A Ilusão do Estoque no Olhômetro
+A memória ou a planilha dizia que havia insumos suficientes para o fim de semana. No meio do pico de sábado às 21h30, o ingrediente principal acaba. A cozinha improvisa, compra no mercado de bairro pagando 40% mais caro ou perde o cliente.
+
+### 3. O Caos no Pico e Comandas Reffeitas
+Pedidos do iFood, WhatsApp e balcão se misturam. Comandas de papel rasuram, o ponto da carne sai errado e pratos inteiros vão para o lixo. Um prejuízo médio de R$ 35,00 por comanda errada repetido 4 vezes por semana resulta em **R$ 560,00/mês jogados fora**.
+
+### 4. O Mistério do Fechamento de Caixa
+O caixa bateu no final do turno, mas o DRE do mês não fecha porque as taxas de cartão de crédito, comissões de delivery e frete por km não foram abatidas pedido a pedido.
+
+---
+
+## Como Funciona a Calculadora Interativa MiseOn
+
+Para ajudar empresários da gastronomia a enxergar esses números com clareza, desenvolvemos a **Calculadora Interativa de Vazamento de Caixa** na página principal do MiseOn.
+
+Nela, você pode ajustar 4 sliders simples com a realidade da sua loja:
+1. **Faturamento Mensal** (ex: R$ 50.000, R$ 100.000 ou R$ 150.000).
+2. **Desperdício em Pré-Preparo e Validades** (médias entre 2% e 6%).
+3. **Aumento de Insumos Não Repassado** (reajustes de fornecedores).
+4. **Erros de Comanda por Semana** (pratos refeitos na cozinha).
+
+O algoritmo calcula a sangria estimada do seu caixa por mês e por ano — e mostra como uma plataforma com **baixa por Ficha Técnica PEPS**, **KDS sem papel** e **entrada por NFC-e** se paga cerca de 10x a 30x todo mês ao estancar essas perdas.
+
+---
+
+## Como Estancar Esses Vazamentos em Menos de 24 Horas
+
+1. **Faça o Diagnóstico Operacional** na Home do MiseOn marcando os gargalos do seu estabelecimento.
+2. **Cadastre sua Loja Grátis por 30 Dias** sem necessidade de cartão de crédito.
+3. **Escaneie a nota do mercado pelo celular (NFC-e)** e deixe o sistema atualizar seu estoque e o custo real dos pratos automaticamente.
+
+Não deixe sua margem de lucro escorrer pelo ralo. Coloque a engenharia de dados do MiseOn para trabalhar a favor do seu restaurante!
+`,
+  },
+  {
     slug: 'dark-kitchen-hamburgueria-gestao-multi-marcas-logistica-delivery',
     title: 'Dark Kitchens e Hamburguerias de Escala: Como Operar Multi-Marcas no Mesmo Estoque com KDS Centralizado',
     description: 'Guia avançado de engenharia de delivery: gestão de múltiplas marcas virtuais, unificação de insumos em chapa de alta produção e roteamento de despacho sem erros.',
