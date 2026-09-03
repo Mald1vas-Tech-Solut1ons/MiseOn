@@ -271,6 +271,15 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // Importar XML de fornecedor (Estoque/Compras) — segunda via de entrada
+  // de estoque, ao lado do cupom NFC-e
+  'Importar Compra para o Estoque': 'Import Purchase to Stock',
+  'Escanear Cupom (NFC-e)': 'Scan Receipt (NFC-e)',
+  'Importar XML (Fornecedor)': 'Import XML (Supplier)',
+  'Cupom de mercado (NFC-e) ou nota de fornecedor (NFe): escaneie o QR Code ou envie o XML e o MiseOn lança tudo no estoque em segundos.': 'Store receipt (NFC-e) or supplier invoice (NFe): scan the QR Code or upload the XML and MiseOn logs everything into stock in seconds.',
+  'Compra grande, direto da distribuidora?': 'Big purchase, straight from the distributor?',
+  'Envie o XML da nota fiscal (NF-e) que ela te manda': 'Upload the XML invoice (NF-e) it sends you',
+  ' — mesma conferência inteligente, sem precisar de cupom nem QR Code.': ' — same smart review, no receipt or QR Code needed.',
   // Cardapio base por segmento
   'Comece com um cardápio pronto do seu segmento': 'Start with a ready-made menu for your segment',
   'Cria categorias, insumos, produtos com preço sugerido e a ficha técnica ligando um ao outro. Estoque e custo de compra ficam zerados — esses só você sabe.': 'Creates categories, ingredients, products with suggested prices and the recipe linking them. Stock and purchase cost stay at zero — only you know those.',
