@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import {
   Store, Link2, Percent, ClipboardList, Search, Loader2, Save,
   AlertTriangle, Package, ArrowRight, Ban, RefreshCw, Clock, Info,
+  Download, CheckCircle2, Plus, RotateCcw, X as XIcon, Sparkles,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmt, type Pedido, type Produto } from '../../types';
@@ -327,6 +328,9 @@ export default function Ifood() {
                 </button>
               )}
 
+              {/* ── Importar cardápio DO iFood → MiseOn ── */}
+              {conectado && <ImportarCardapioModal lojaId={lojaId} />}
+
               <Interruptor
                 titulo="Pausar quando o estoque acabar"
                 ajuda="Insumo zerou na ficha técnica e o item sairia do ar no iFood sozinho. A automação ainda não está no ar: o interruptor guarda sua escolha, mas hoje o item só sai de lá quando você sincronizar o cardápio."
@@ -410,6 +414,256 @@ function Interruptor({
         <span className={`h-5 w-5 rounded-full bg-white shadow transition-transform ${ligado ? 'translate-x-5' : ''}`} />
       </span>
     </button>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   COMPONENTE: ImportarCardapioModal
+   Lê o catálogo do iFood e importa para o MiseOn em dois passos:
+   1. Prévia (diff sem gravar nada)
+   2. Confirmação (persiste no banco)
+   ══════════════════════════════════════════════════════════════════ */
+function ImportarCardapioModal({ lojaId }: { lojaId: string }) {
+  const { tDynamic } = useI18n();
+  const toast = useToast();
+  const [aberto, setAberto] = useState(false);
+  const [fase, setFase] = useState<'idle' | 'previa' | 'confirmando' | 'concluido'>('idle');
+  const [carregando, setCarregando] = useState(false);
+  const [diff, setDiff] = useState<any>(null);
+
+  const buscarPrevia = async () => {
+    setCarregando(true);
+    setFase('previa');
+    try {
+      const { data, error } = await supabase.functions.invoke('ifood-catalog-import', {
+        body: { loja_id: lojaId, confirmar: false },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      setDiff(data.diff);
+    } catch (e: any) {
+      toast(e.message ?? tDynamic('Erro ao importar o cardápio do iFood.'), 'erro');
+      setFase('idle');
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const confirmar = async () => {
+    setCarregando(true);
+    setFase('confirmando');
+    try {
+      const { data, error } = await supabase.functions.invoke('ifood-catalog-import', {
+        body: { loja_id: lojaId, confirmar: true },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      setFase('concluido');
+      toast(tDynamic('O cardápio do iFood foi importado com sucesso!'), 'sucesso');
+    } catch (e: any) {
+      toast(e.message ?? tDynamic('Erro ao importar o cardápio do iFood.'), 'erro');
+      setFase('previa');
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const fechar = () => {
+    setAberto(false);
+    setFase('idle');
+    setDiff(null);
+  };
+
+  const resumo = diff?.resumo;
+
+  return (
+    <>
+      {/* ── Botão de abertura ── */}
+      <button
+        onClick={() => { setAberto(true); buscarPrevia(); }}
+        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-emerald-600 p-3 text-sm font-black text-emerald-600 transition hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/50 dark:hover:bg-emerald-500/10"
+      >
+        <Download size={17} />
+        {tDynamic('Importar Cardápio do iFood')}
+      </button>
+
+      {/* ── Modal ── */}
+      {aberto && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-3xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+
+            {/* Header */}
+            <div className="flex items-center justify-between gap-3 px-5 pt-5 pb-4 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <Download size={20} />
+                </span>
+                <div>
+                  <p className="font-['Sora'] text-base font-black text-gray-900 dark:text-white">
+                    {tDynamic('Importar Cardápio do iFood')}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {tDynamic('O importador lê o cardápio atual do iFood e cria ou atualiza os produtos no MiseOn. Nada é apagado — só adicionado ou atualizado.')}
+                  </p>
+                </div>
+              </div>
+              <button onClick={fechar} className="p-2 rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <XIcon size={20} />
+              </button>
+            </div>
+
+            {/* Corpo */}
+            <div className="px-5 py-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+
+              {/* Carregando */}
+              {carregando && (
+                <div className="flex flex-col items-center gap-3 py-10">
+                  <Loader2 size={32} className="animate-spin text-emerald-500" />
+                  <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                    {fase === 'confirmando' ? tDynamic('Importando cardápio...') : tDynamic('Consultando o iFood...')}
+                  </p>
+                </div>
+              )}
+
+              {/* Prévia do diff */}
+              {!carregando && diff && fase !== 'concluido' && (
+                <div className="space-y-4">
+                  {/* Cards de resumo */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="rounded-2xl bg-emerald-50 p-3 text-center dark:bg-emerald-900/15">
+                      <p className="font-['JetBrains_Mono'] text-xl font-black text-emerald-600 dark:text-emerald-400">
+                        {resumo?.novos ?? 0}
+                      </p>
+                      <p className="text-xs font-semibold text-emerald-600/70 dark:text-emerald-400/70">
+                        <Plus size={10} className="inline mr-0.5" />{tDynamic('Novos produtos')}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-amber-50 p-3 text-center dark:bg-amber-900/15">
+                      <p className="font-['JetBrains_Mono'] text-xl font-black text-amber-600 dark:text-amber-400">
+                        {resumo?.atualizados ?? 0}
+                      </p>
+                      <p className="text-xs font-semibold text-amber-600/70 dark:text-amber-400/70">
+                        <RotateCcw size={10} className="inline mr-0.5" />{tDynamic('Produtos atualizados')}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-gray-50 p-3 text-center dark:bg-white/5">
+                      <p className="font-['JetBrains_Mono'] text-xl font-black text-gray-500 dark:text-gray-300">
+                        {resumo?.sem_alteracao ?? 0}
+                      </p>
+                      <p className="text-xs font-semibold text-gray-400">
+                        {tDynamic('Sem alteração')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Sem mudanças */}
+                  {resumo?.novos === 0 && resumo?.atualizados === 0 && (
+                    <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-white/5">
+                      <CheckCircle2 size={16} className="text-gray-400" />
+                      <p className="text-sm text-gray-500">{tDynamic('Nenhuma alteração detectada')}</p>
+                    </div>
+                  )}
+
+                  {/* Lista de produtos a importar (novos + atualizados) */}
+                  {(diff.produtos ?? []).filter((p: any) => p.acao !== 'SEM_ALTERACAO').length > 0 && (
+                    <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800">
+                      <div className="hidden grid-cols-[1fr_80px_80px] gap-2 border-b border-gray-100 bg-gray-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-gray-400 sm:grid dark:border-gray-800 dark:bg-white/5">
+                        <span>{tDynamic('Produtos')}</span>
+                        <span className="text-right">Preço</span>
+                        <span className="text-center">Ação</span>
+                      </div>
+                      {(diff.produtos ?? [])
+                        .filter((p: any) => p.acao !== 'SEM_ALTERACAO')
+                        .slice(0, 30)
+                        .map((p: any, i: number) => (
+                          <div key={i} className="grid grid-cols-1 gap-1 border-b border-gray-50 px-4 py-2.5 last:border-0 sm:grid-cols-[1fr_80px_80px] sm:items-center dark:border-white/5">
+                            <div>
+                              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{p.nome}</p>
+                              <p className="text-xs text-gray-400">{p.categoria}{p.opcoes_count > 0 ? ` · ${p.opcoes_count} opções` : ''}</p>
+                            </div>
+                            <p className="text-right font-['JetBrains_Mono'] text-xs text-gray-600 dark:text-gray-300">
+                              {p.preco > 0 ? `R$ ${Number(p.preco).toFixed(2)}` : '—'}
+                            </p>
+                            <div className="flex justify-center">
+                              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
+                                p.acao === 'NOVO'
+                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                  : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                              }`}>
+                                {p.acao === 'NOVO' ? <Plus size={9} /> : <RotateCcw size={9} />}
+                                {p.acao === 'NOVO' ? 'Novo' : 'Atualizar'}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      {(diff.produtos ?? []).filter((p: any) => p.acao !== 'SEM_ALTERACAO').length > 30 && (
+                        <p className="px-4 py-2 text-center text-xs text-gray-400">
+                          + {(diff.produtos ?? []).filter((p: any) => p.acao !== 'SEM_ALTERACAO').length - 30} produtos adicionais
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Dica De-Para */}
+                  {resumo?.novos > 0 && (
+                    <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/15">
+                      <Sparkles size={15} className="mt-0.5 shrink-0 text-blue-500" />
+                      <p className="text-xs leading-relaxed text-blue-700 dark:text-blue-300">
+                        Os produtos novos já chegam com o <b>Código PDV preenchido</b> — sua tabela De-Para fica pronta automaticamente.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Concluído */}
+              {fase === 'concluido' && (
+                <div className="flex flex-col items-center gap-3 py-10 text-center">
+                  <CheckCircle2 size={40} className="text-emerald-500" />
+                  <p className="font-['Sora'] text-base font-black text-gray-900 dark:text-white">
+                    {tDynamic('O cardápio do iFood foi importado com sucesso!')}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {resumo?.novos ?? 0} novo(s) · {resumo?.atualizados ?? 0} atualizado(s)
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            {!carregando && fase !== 'concluido' && (
+              <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  onClick={fechar}
+                  className="text-sm font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition"
+                >
+                  {tDynamic('Cancelar')}
+                </button>
+                <button
+                  onClick={confirmar}
+                  disabled={!diff || (resumo?.novos === 0 && resumo?.atualizados === 0)}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-black text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                >
+                  <CheckCircle2 size={16} />
+                  {tDynamic('Confirmar importação')}
+                </button>
+              </div>
+            )}
+
+            {fase === 'concluido' && (
+              <div className="flex justify-center px-5 py-4 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  onClick={fechar}
+                  className="rounded-2xl bg-gray-100 px-6 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 transition"
+                >
+                  {tDynamic('Fechar')}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

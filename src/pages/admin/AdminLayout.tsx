@@ -12,6 +12,7 @@ import { BrandLoader } from '../../components/BrandLoader';
 import { podeAcessar, HOME_POR_PAPEL, type Papel } from '../../lib/permissoes';
 import { useGuidedTour } from '../../hooks/useGuidedTour';
 import { GuidedTourModal } from '../../components/tour/GuidedTourModal';
+import { StoreSetupWizard } from '../../components/admin/StoreSetupWizard';
 import TornarSeLojista from '../../components/admin/TornarSeLojista';
 import LanguageToggle from '../../components/LanguageToggle';
 import { useI18n } from '../../contexts/I18nContext';
@@ -809,6 +810,11 @@ export default function AdminLayout() {
         onAnterior={tour.passoAnterior}
         onEncerrar={tour.encerrarTour}
       />
+
+      {/* ── ASSISTENTE DE CONFIGURAÇÃO DA LOJA ── */}
+      {ctx && ctx.papel === 'admin' && !tour.ativo && (
+        <StoreSetupWizard lojaId={ctx.lojaId} />
+      )}
     </div>
   );
 }
