@@ -1706,8 +1706,8 @@ export default function Loja() {
               <div className="flex items-start gap-2">
                 <span className="mt-0.5 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">CRÉDITO</span>
                 <p>
-                  <b>{tDynamic('Depende da modalidade escolhida abaixo.')}</b> {tDynamic('À vista a tarifa Efí é')} <b>{EFI_TARIFAS.creditoAVista}</b>;
-                  no parcelado, a tarifa e o prazo mudam conforme a opção.
+                  <b>{tDynamic('Prazo padrão de ~31 dias por parcela.')}</b> {tDynamic('À vista a tarifa Efí é')} <b>{EFI_TARIFAS.creditoAVista}</b>;
+                  no parcelado, a tarifa e o prazo variam conforme a tabela.
                 </p>
               </div>
             </div>
