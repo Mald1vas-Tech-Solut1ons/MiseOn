@@ -620,7 +620,7 @@ export default function Estoque() {
                  className={`rounded px-3 py-1 text-xs font-bold transition-all ${modoCadastro === 'RAPIDO' ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
                  ⚡ {tDynamic('Rápido (Direto)')}
                </button>
-               <button type="button" onClick={() => setModoCadastro('AVANCADO')}
+               <button type="button" data-tour="tour-estoque-btn-modo-avancado" onClick={() => setModoCadastro('AVANCADO')}
                  className={`rounded px-3 py-1 text-xs font-bold transition-all ${modoCadastro === 'AVANCADO' ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
                  ⚙️ {tDynamic('Conversão de Embalagem')}
                </button>
@@ -691,7 +691,7 @@ export default function Estoque() {
            
            {/* MODO RÁPIDO: Cadastro 1:1 Sem Complicação */}
            {modoCadastro === 'RAPIDO' ? (
-             <div className="space-y-4 rounded-xl border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
+             <div data-tour="tour-estoque-campo-compra" className="space-y-4 rounded-xl border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                  <label className="block">
                    <span className="text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Unidade de Estoque')}</span>
@@ -716,7 +716,7 @@ export default function Estoque() {
                    <input className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm font-bold dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 focus:outline-none focus:border-[var(--cor-primaria)]" type="number" placeholder="0.00" value={precoCompra} onChange={e => setPrecoCompra(e.target.value)} />
                  </label>
 
-                 <label className="block">
+                 <label data-tour="tour-estoque-campo-minimo" className="block">
                    <span className="text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Alerta Estoque Mínimo')}</span>
                    <div className="mt-1 flex rounded-lg border border-gray-300 overflow-hidden dark:border-gray-700 bg-white dark:bg-gray-950">
                      <input className="w-full p-2.5 text-sm font-bold dark:bg-gray-950 dark:text-gray-100 focus:outline-none bg-transparent" type="number" placeholder="0" value={estoqueMinimo} onChange={e => setEstoqueMinimo(e.target.value)} />

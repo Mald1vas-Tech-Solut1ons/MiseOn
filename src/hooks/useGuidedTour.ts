@@ -565,60 +565,50 @@ export function useGuidedTour(lojaId?: string) {
 
     let cancelado = false;
     let tentativa = 0;
+    let abaClicada = false;
 
-    // Delay inicial maior para rotas com lazy loading e dados assíncronos
-    const delayInicial = ['tour-estoque-campo-nome', 'tour-estoque-campo-compra', 'tour-estoque-campo-conversao', 'tour-estoque-campo-minimo', 'tour-estoque-3d-canvas', 'tour-estoque-3d-legenda', 'tour-estoque-aba-rastreio3d', 'tour-loja-aba-pagamentos'].includes(passoAtual.targetDataTour) ? 500 : 150;
+    const delayInicial = ['tour-estoque-campo-nome', 'tour-estoque-campo-compra', 'tour-estoque-campo-conversao', 'tour-estoque-campo-minimo', 'tour-estoque-3d-canvas', 'tour-estoque-3d-legenda', 'tour-estoque-aba-rastreio3d', 'tour-loja-aba-pagamentos'].includes(passoAtual.targetDataTour) ? 300 : 100;
 
     const buscarElemento = () => {
       if (cancelado) return;
 
-      // ── Ativar abas PAI incondicionalmente (antes do querySelector) ──
+      // ── Clicar na aba/modo pai APENAS UMA VEZ por mudança de passo ──
+      if (!abaClicada) {
+        abaClicada = true;
 
-      // Matérias-Primas (Insumos): campos dentro do formulário de insumos
-      if (['tour-estoque-campo-nome', 'tour-estoque-campo-compra', 'tour-estoque-campo-conversao', 'tour-estoque-campo-minimo'].includes(passoAtual.targetDataTour)) {
-        const abaInsumos = document.querySelector<HTMLElement>('[data-tour="tour-estoque-aba-insumos"]');
-        if (abaInsumos) {
-          try { abaInsumos.click(); } catch (e) { console.warn(e); }
+        if (['tour-estoque-campo-nome', 'tour-estoque-campo-compra', 'tour-estoque-campo-conversao', 'tour-estoque-campo-minimo'].includes(passoAtual.targetDataTour)) {
+          const abaInsumos = document.querySelector<HTMLElement>('[data-tour="tour-estoque-aba-insumos"]');
+          if (abaInsumos) { try { abaInsumos.click(); } catch (e) { console.warn(e); } }
         }
-      }
 
-      // Custo 3D
-      if (['tour-estoque-3d-canvas', 'tour-estoque-3d-legenda'].includes(passoAtual.targetDataTour)) {
-        const aba3D = document.querySelector<HTMLElement>('[data-tour="tour-estoque-aba-3d"]');
-        if (aba3D) {
-          try { aba3D.click(); } catch (e) { console.warn(e); }
+        if (passoAtual.targetDataTour === 'tour-estoque-campo-conversao') {
+          const btnAvancado = document.querySelector<HTMLElement>('[data-tour="tour-estoque-btn-modo-avancado"]') || Array.from(document.querySelectorAll<HTMLElement>('button')).find(b => b.textContent?.includes('Conversão de Embalagem'));
+          if (btnAvancado) { try { btnAvancado.click(); } catch (e) { console.warn(e); } }
         }
-      }
 
-      // Rastreio 3D
-      if (['tour-estoque-3d-legenda-rastreio', 'tour-estoque-3d-cartoes', 'tour-estoque-aba-rastreio3d'].includes(passoAtual.targetDataTour)) {
-        const abaRastreio = document.querySelector<HTMLElement>('[data-tour="tour-estoque-aba-rastreio3d"]');
-        if (abaRastreio) {
-          try { abaRastreio.click(); } catch (e) { console.warn(e); }
+        if (['tour-estoque-3d-canvas', 'tour-estoque-3d-legenda'].includes(passoAtual.targetDataTour)) {
+          const aba3D = document.querySelector<HTMLElement>('[data-tour="tour-estoque-aba-3d"]');
+          if (aba3D) { try { aba3D.click(); } catch (e) { console.warn(e); } }
         }
-      }
 
-      // Configurações da Loja — Aba Pagamentos
-      if (['tour-loja-aba-pagamentos', 'tour-loja-efi-payee', 'tour-loja-pagamentos'].includes(passoAtual.targetDataTour)) {
-        const abaPagamentos = document.querySelector<HTMLElement>('[data-tour="tour-loja-aba-pagamentos"]');
-        if (abaPagamentos) {
-          try { abaPagamentos.click(); } catch (e) { console.warn(e); }
+        if (['tour-estoque-3d-legenda-rastreio', 'tour-estoque-3d-cartoes', 'tour-estoque-aba-rastreio3d'].includes(passoAtual.targetDataTour)) {
+          const abaRastreio = document.querySelector<HTMLElement>('[data-tour="tour-estoque-aba-rastreio3d"]');
+          if (abaRastreio) { try { abaRastreio.click(); } catch (e) { console.warn(e); } }
         }
-      }
 
-      // iFood — Aba De-Para
-      if (passoAtual.targetDataTour === 'tour-ifood-aba-depara') {
-        const abaDepara = document.querySelector<HTMLElement>('[data-tour="tour-ifood-aba-depara"]');
-        if (abaDepara) {
-          try { abaDepara.click(); } catch (e) { console.warn(e); }
+        if (['tour-loja-aba-pagamentos', 'tour-loja-efi-payee', 'tour-loja-pagamentos'].includes(passoAtual.targetDataTour)) {
+          const abaPagamentos = document.querySelector<HTMLElement>('[data-tour="tour-loja-aba-pagamentos"]');
+          if (abaPagamentos) { try { abaPagamentos.click(); } catch (e) { console.warn(e); } }
         }
-      }
 
-      // iFood — Aba Credenciais
-      if (passoAtual.targetDataTour === 'tour-ifood-aba-credenciais') {
-        const abaCred = document.querySelector<HTMLElement>('[data-tour="tour-ifood-aba-credenciais"]');
-        if (abaCred) {
-          try { abaCred.click(); } catch (e) { console.warn(e); }
+        if (passoAtual.targetDataTour === 'tour-ifood-aba-depara') {
+          const abaDepara = document.querySelector<HTMLElement>('[data-tour="tour-ifood-aba-depara"]');
+          if (abaDepara) { try { abaDepara.click(); } catch (e) { console.warn(e); } }
+        }
+
+        if (passoAtual.targetDataTour === 'tour-ifood-aba-credenciais') {
+          const abaCred = document.querySelector<HTMLElement>('[data-tour="tour-ifood-aba-credenciais"]');
+          if (abaCred) { try { abaCred.click(); } catch (e) { console.warn(e); } }
         }
       }
 
@@ -633,9 +623,11 @@ export function useGuidedTour(lojaId?: string) {
         } catch (e) {
           console.warn(e);
         }
-      } else if (tentativa < 60) {
+      } else if (tentativa < 15) {
         tentativa++;
-        setTimeout(buscarElemento, 250);
+        setTimeout(buscarElemento, 200);
+      } else {
+        setTargetElement(null);
       }
     };
 

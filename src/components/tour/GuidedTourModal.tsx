@@ -80,6 +80,16 @@ export function GuidedTourModal({
     };
   }, [ativo, targetElement, passoAtual]);
 
+  // Medir altura real do card para posicionamento perfeito sem cortar no viewport
+  const [cardRealHeight, setCardRealHeight] = useState<number>(460);
+
+  useEffect(() => {
+    if (cardRef.current) {
+      const h = cardRef.current.getBoundingClientRect().height;
+      if (h > 0) setCardRealHeight(h);
+    }
+  }, [passoIndex, targetRect]);
+
   if (!ativo || !passoAtual) return null;
 
   const pctProgresso = Math.round(((passoIndex + 1) / totalPassos) * 100);
@@ -98,15 +108,13 @@ export function GuidedTourModal({
   const passoIndexNoModulo = passosDoModulo.findIndex((s) => s.id === passoAtual.id);
 
   // ── Posicionamento Inteligente do Card ──────────────────────────────────
-  const cardEstilo: React.CSSProperties = {
-    position: 'fixed',
-    zIndex: 99999,
-  };
+  const cardWidth = Math.min(520, window.innerWidth * 0.94);
+  const heightParaCalc = Math.min(cardRealHeight, window.innerHeight - 32);
+
+  let finalTop = (window.innerHeight - heightParaCalc) / 2;
+  let finalLeft = (window.innerWidth - cardWidth) / 2;
 
   if (targetRect) {
-    const cardWidth = Math.min(520, window.innerWidth * 0.94);
-    const cardMaxHeight = Math.min(560, window.innerHeight - 32);
-
     const targetRight = targetRect.left + targetRect.width;
     const targetBottom = targetRect.top + targetRect.height;
 
@@ -115,45 +123,37 @@ export function GuidedTourModal({
     const espacoAbaixo = window.innerHeight - targetBottom;
     const espacoAcima = targetRect.top;
 
-    let finalLeft = 20;
-    let finalTop = 20;
-
-    if (espacoDireita >= cardWidth + 24) {
-      finalLeft = targetRight + 20;
-      finalTop = Math.max(16, Math.min(window.innerHeight - cardMaxHeight - 16, targetRect.top - 10));
-    } else if (espacoEsquerda >= cardWidth + 24) {
-      finalLeft = Math.max(16, targetRect.left - cardWidth - 20);
-      finalTop = Math.max(16, Math.min(window.innerHeight - cardMaxHeight - 16, targetRect.top - 10));
-    } else if (espacoAbaixo >= cardMaxHeight + 24) {
+    if (espacoAbaixo >= heightParaCalc + 24) {
       finalTop = targetBottom + 16;
-      if (window.innerWidth - targetRect.left >= cardWidth + 16) {
-        finalLeft = targetRect.left;
-      } else {
-        finalLeft = Math.max(16, window.innerWidth - cardWidth - 16);
-      }
-    } else if (espacoAcima >= cardMaxHeight + 24) {
-      finalTop = Math.max(16, targetRect.top - cardMaxHeight - 16);
       finalLeft = Math.max(16, Math.min(window.innerWidth - cardWidth - 16, targetRect.left));
+    } else if (espacoAcima >= heightParaCalc + 24) {
+      finalTop = targetRect.top - heightParaCalc - 16;
+      finalLeft = Math.max(16, Math.min(window.innerWidth - cardWidth - 16, targetRect.left));
+    } else if (espacoDireita >= cardWidth + 24) {
+      finalLeft = targetRight + 16;
+      finalTop = Math.max(16, Math.min(window.innerHeight - heightParaCalc - 16, targetRect.top));
+    } else if (espacoEsquerda >= cardWidth + 24) {
+      finalLeft = targetRect.left - cardWidth - 16;
+      finalTop = Math.max(16, Math.min(window.innerHeight - heightParaCalc - 16, targetRect.top));
     } else {
-      finalTop = Math.max(16, Math.min(window.innerHeight - cardMaxHeight - 16, targetRect.top));
-      if (targetRect.left > window.innerWidth / 2) {
-        finalLeft = Math.max(16, targetRect.left - cardWidth - 20);
-      } else {
-        finalLeft = Math.min(window.innerWidth - cardWidth - 16, targetRight + 20);
-      }
+      // Se não couber ao redor, joga para o quadrante oposto do target para NUNCA cobri-lo
+      finalTop = targetRect.top > window.innerHeight / 2 ? 16 : window.innerHeight - heightParaCalc - 16;
+      finalLeft = targetRect.left > window.innerWidth / 2 ? 16 : window.innerWidth - cardWidth - 16;
     }
-
-    cardEstilo.top = `${finalTop}px`;
-    cardEstilo.left = `${finalLeft}px`;
-    cardEstilo.width = `${cardWidth}px`;
-    cardEstilo.maxHeight = `${cardMaxHeight}px`;
-  } else {
-    cardEstilo.top = '50%';
-    cardEstilo.left = '50%';
-    cardEstilo.transform = 'translate(-50%, -50%)';
-    cardEstilo.width = `${Math.min(520, window.innerWidth * 0.94)}px`;
-    cardEstilo.maxHeight = `${Math.min(560, window.innerHeight - 32)}px`;
   }
+
+  // TRAVA DE SEGURANÇA ABSOLUTA: Garante que o card NUNCA saia da tela (topo ou rodapé)
+  finalTop = Math.max(16, Math.min(window.innerHeight - heightParaCalc - 16, finalTop));
+  finalLeft = Math.max(16, Math.min(window.innerWidth - cardWidth - 16, finalLeft));
+
+  const cardEstilo: React.CSSProperties = {
+    position: 'fixed',
+    zIndex: 99999,
+    top: `${finalTop}px`,
+    left: `${finalLeft}px`,
+    width: `${cardWidth}px`,
+    maxHeight: `${Math.max(280, window.innerHeight - finalTop - 16)}px`,
+  };
 
   const isUltimoPasso = passoIndex === totalPassos - 1;
 
@@ -192,12 +192,12 @@ export function GuidedTourModal({
         <>
           {/* Vignette escura em SVG com máscara de recorte */}
           <svg
-            className="fixed inset-0 h-full w-full pointer-events-none z-[99991]"
+            className="fixed inset-0 w-screen h-screen pointer-events-none z-[99991]"
             style={{ animation: 'tour-spotlight-pulse 3s ease-in-out infinite' }}
           >
             <defs>
               <mask id="tour-spotlight-mask">
-                <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                <rect x="0" y="0" width="100vw" height="100vh" fill="white" />
                 <rect
                   x={targetRect.left - 10}
                   y={targetRect.top - 10}
@@ -213,7 +213,7 @@ export function GuidedTourModal({
               </radialGradient>
             </defs>
             <rect
-              x="0" y="0" width="100%" height="100%"
+              x="0" y="0" width="100vw" height="100vh"
               fill="url(#tour-vignette)"
               mask="url(#tour-spotlight-mask)"
             />
@@ -273,13 +273,12 @@ export function GuidedTourModal({
               return (
                 <div key={mod.rota} className="flex items-center gap-1 shrink-0">
                   <div
-                    className={`h-1.5 rounded-full transition-all duration-500 ${
-                      isAtivo
+                    className={`h-1.5 rounded-full transition-all duration-500 ${isAtivo
                         ? 'bg-orange-500 w-8 shadow-[0_0_8px_rgba(249,115,22,0.8)]'
                         : isConcluido
                           ? 'bg-emerald-500/70 w-4'
                           : 'bg-white/15 w-3'
-                    }`}
+                      }`}
                   />
                 </div>
               );
@@ -360,13 +359,12 @@ export function GuidedTourModal({
               {passosDoModulo.map((_, i) => (
                 <div
                   key={i}
-                  className={`rounded-full transition-all duration-300 ${
-                    i === passoIndexNoModulo
+                  className={`rounded-full transition-all duration-300 ${i === passoIndexNoModulo
                       ? 'w-4 h-1.5 bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.8)]'
                       : i < passoIndexNoModulo
                         ? 'w-1.5 h-1.5 bg-emerald-500/70'
                         : 'w-1.5 h-1.5 bg-white/20'
-                  }`}
+                    }`}
                 />
               ))}
             </div>
