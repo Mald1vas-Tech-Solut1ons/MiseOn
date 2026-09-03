@@ -4,7 +4,7 @@ import {
   MessageCircle, Loader2, Save, AlertTriangle, RefreshCw,
   Unplug, Activity, Sparkles, Mail, PhoneOff, QrCode } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { useToast } from '../../components/ui/Toast';
+import { useToast } from '../../contexts/ToastContext';
 import { MiseOnLoader } from '../../components/MiseOnLoader';
 import type { CtxLoja } from './AdminLayout';
 

@@ -8,7 +8,7 @@ import {
 import { supabase } from '../../lib/supabase';
 import { fmt, type Pedido, type Produto } from '../../types';
 import { STATUS_LABEL, classeDoStatus, resumoCancelamento } from '../../components/pedidos/constants';
-import { useToast } from '../../components/ui/Toast';
+import { useToast } from '../../contexts/ToastContext';
 import { MiseOnLoader } from '../../components/MiseOnLoader';
 import { IfoodOnboarding } from '../../components/admin/IfoodOnboarding';
 import type { CtxLoja } from './AdminLayout';

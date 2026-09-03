@@ -24,7 +24,7 @@ import { CaixaModal } from '../../components/pdv/CaixaModal';
 import { ModalOpcoes } from '../../components/pdv/ModalOpcoes';
 import type { NutricaoProduto } from '../../lib/nutricao';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
-import { useToast } from '../../components/ui/Toast';
+import { useToast } from '../../contexts/ToastContext';
 import { tocarSom } from '../../lib/som';
 import { traduzirErro } from '../../lib/erros';
 import { createPedidoPedido } from '../../lib/pedidos';

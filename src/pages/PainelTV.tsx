@@ -6,7 +6,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { gerarQrDataUrl } from '../lib/qr';
-import { FotoProduto, obterFotoFallback, obterFotoProduto } from '../lib/fotoProduto';
+import { FotoProduto } from '../lib/fotoProduto';
+import { obterFotoFallback, obterFotoProduto } from '../lib/fotoProdutoUtils';
 import { Loja, Categoria, Produto, fmt } from '../types';
 import MiseOnLoader from '../components/MiseOnLoader';
 import { getOptimizedImageUrl } from '../lib/cdn';

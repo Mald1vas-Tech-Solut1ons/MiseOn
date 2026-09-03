@@ -71,5 +71,5 @@ export function BandeiraMark({ id, className = 'h-6 w-auto' }: { id: string; cla
       );
   }
 }
-export const BANDEIRAS_ACEITAS = ['visa', 'mastercard', 'amex', 'elo', 'hipercard'];
+
 export default BandeiraMark;

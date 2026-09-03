@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   Plus, Pencil, Trash2, X, Star, EyeOff, Eye, Search, ChevronUp, ChevronDown, Save, Sparkles, ChefHat, Store,
@@ -29,7 +29,7 @@ export default function CardapioAdmin() {
   const [lojaInfo, setLojaInfo] = useState<any>(null);
   const [cobertura, setCobertura] = useState<CoberturaProduto[]>([]);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     const [{ data: c }, { data: p }, { data: i }, { data: est }, { data: config }, { data: loja }, { data: cob }] = await Promise.all([
       supabase.from('categorias').select('*').eq('loja_id', lojaId).order('ordem'),
       supabase.from('produtos').select('*, grupos_opcoes(*, opcoes(*)), fichas_tecnicas(*)').eq('loja_id', lojaId).order('ordem'),
@@ -55,8 +55,9 @@ export default function CardapioAdmin() {
     setInsumos((i as Insumo[]) ?? []);
     setLojaInfo(loja);
     setCobertura((cob as CoberturaProduto[]) ?? []);
-  };
-  useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
+  }, [lojaId]);
+
+  useEffect(() => { carregar(); }, [carregar]);
 
   const visiveis = useMemo(
     () => produtos.filter((p) =>

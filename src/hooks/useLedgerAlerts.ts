@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { useToast } from '../components/ui/Toast';
+import { useToast } from '../contexts/ToastContext';
 
 /** Tipos de alertas financeiros monitorados em tempo real */
 export type TipoAlertaLedger =

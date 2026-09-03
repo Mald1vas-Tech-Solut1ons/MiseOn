@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { FileText, CheckCircle2, XCircle, Loader2, IdCard } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -23,7 +23,7 @@ export default function AprovacaoEntregadores({ lojaId }: { lojaId: string }) {
   const [rejeitando, setRejeitando] = useState<string | null>(null);
   const [motivo, setMotivo] = useState('');
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     setCarregando(true);
     const { data } = await supabase
       .from('entregadores')
@@ -33,8 +33,9 @@ export default function AprovacaoEntregadores({ lojaId }: { lojaId: string }) {
       .not('cnh_arquivo_url', 'is', null);
     setItens((data as EntregadorPendente[]) ?? []);
     setCarregando(false);
-  };
-  useEffect(() => { carregar(); }, [lojaId]);
+  }, [lojaId]);
+
+  useEffect(() => { carregar(); }, [carregar]);
 
   const abrirDocumento = async (path: string | null) => {
     if (!path) return;

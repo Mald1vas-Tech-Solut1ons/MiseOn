@@ -1,9 +1,5 @@
-import { createContext, useContext } from 'react';
 import { Toaster, toast as sonnerToast } from 'sonner';
-
-type Tom = 'sucesso' | 'erro' | 'info' | 'alerta';
-
-const Ctx = createContext<(msg: string, tom?: Tom) => void>(() => {});
+import { ToastContext, type Tom } from '../../contexts/ToastContext';
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const empurrar = (msg: string, tom: Tom = 'info') => {
@@ -25,7 +21,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <Ctx.Provider value={empurrar}>
+    <ToastContext.Provider value={empurrar}>
       <Toaster 
         position="top-right" 
         richColors 
@@ -36,10 +32,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         }}
       />
       {children}
-    </Ctx.Provider>
+    </ToastContext.Provider>
   );
 }
 
-export function useToast() {
-  return useContext(Ctx);
-}
+export default ToastProvider;

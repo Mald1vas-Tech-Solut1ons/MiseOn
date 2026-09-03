@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link, Navigate, useOutletContext } from 'react-router-dom';
 import {
   DollarSign, ShoppingBag, Ticket, Flame, AlertTriangle, Timer, ArrowRight,
@@ -76,7 +76,7 @@ export default function Dashboard() {
     return streak;
   }, [metricasCozinha]);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     const inicioHoje = new Date(); inicioHoje.setHours(0, 0, 0, 0);
     const limiteVencimento = new Date(Date.now() + 6 * 3600e3).toISOString();
 
@@ -144,7 +144,7 @@ export default function Dashboard() {
       pagamentos: pagamentosOk,
       primeiraVenda: (qtdPedidosTotal ?? 0) > 0,
     });
-  };
+  }, [lojaId]);
 
   useEffect(() => {
     if (papel !== 'admin') return;
@@ -154,7 +154,7 @@ export default function Dashboard() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${lojaId}` }, () => carregar())
       .subscribe();
     return () => { supabase.removeChannel(canal); };
-  }, [lojaId, papel]);
+  }, [carregar, lojaId, papel]);
 
   const resumo = useMemo(() => {
     const lista = dados?.pedidosHoje ?? [];

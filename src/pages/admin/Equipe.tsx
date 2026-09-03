@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   Plus, Trash2, Mail, KeyRound, Pencil, X, Eye, EyeOff, RefreshCw,
@@ -71,15 +71,15 @@ export default function Equipe() {
   const [enviandoConvite, setEnviandoConvite] = useState(false);
   const [msgConvite, setMsgConvite] = useState('');
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     setCarregando(true);
     setErroLista('');
     const { data, error } = await supabase.functions.invoke('equipe-listar', { body: { loja_id: lojaId } });
     if (error || data?.error) setErroLista(String(data?.error ?? error?.message ?? 'Erro ao carregar a equipe'));
     else setEquipe(data?.equipe ?? []);
     setCarregando(false);
-  };
-  useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
+  }, [lojaId]);
+  useEffect(() => { carregar(); }, [carregar]);
 
   const abrirCriacao = () => {
     setForm({ ...FORM_VAZIO, senha: gerarSenha() });

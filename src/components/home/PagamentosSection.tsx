@@ -1,6 +1,7 @@
 import { QrCode, CreditCard, ShieldCheck, Landmark, ArrowRight } from 'lucide-react';
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
-import { RotuloSecao, zap } from './shared';
+import { RotuloSecao } from './shared';
+import { zap } from '../../constants/homeShared';
 
 import { useI18n } from '../../contexts/I18nContext';
 export function PagamentosSection() {

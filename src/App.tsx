@@ -4,7 +4,7 @@ import { ScreenTransition } from './components/ScreenTransition';
 import { ToastProvider } from './components/ui/Toast';
 import { I18nProvider } from './contexts/I18nContext';
 import CookieBanner from './components/CookieBanner';
-import { AcessibilidadeProvider } from './contexts/AcessibilidadeContext';
+import { AcessibilidadeProvider } from './contexts/AcessibilidadeProvider';
 import { BrandLoader } from './components/BrandLoader';
 
 // ── Chunk: PUBLIC (carrega imediatamente — rotas do cliente final) ─────────────

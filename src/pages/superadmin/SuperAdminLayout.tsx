@@ -24,7 +24,7 @@ export default function SuperAdminLayout() {
         setOk(false);
       }
     })();
-  }, []);
+  }, [nav]);
 
   const sair = async () => { await supabase.auth.signOut(); nav('/superadmin/login'); };
 

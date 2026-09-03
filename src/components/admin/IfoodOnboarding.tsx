@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Loader2, CheckCircle2, Store, Percent, AlertCircle, Save } from 'lucide-react';
-import { useToast } from '../../components/ui/Toast';
+import { useToast } from '../../contexts/ToastContext';
 
 import { useI18n } from '../../contexts/I18nContext';
 import IfoodConectar from './IfoodConectar';

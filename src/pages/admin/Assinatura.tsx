@@ -20,7 +20,7 @@ export default function Assinatura() {
   const [carregando, setCarregando] = useState(true);
   const [metodo, setMetodo] = useState<'cartao' | 'pix'>('cartao');
   const [ciclo, setCiclo] = useState<'mensal' | 'anual'>('anual');
-  const [parcelas, setParcelas] = useState<number>(12);
+  const [parcelas, setParcelas] = useState<number>(3);
   
   // Estados para o Cartão de Crédito
   const [numero, setNumero] = useState('');
@@ -350,7 +350,7 @@ export default function Assinatura() {
               {metodo === 'cartao' ? (
                 <div className="space-y-4 animate-in slide-in-from-right-4">
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-2">
-                    {ciclo === 'anual' ? 'Plano Anual: R$ 1.798,80 (equivalente a R$ 149,90/mês). Parcele abaixo em 3x, 6x, 8x ou 12x.' : 'Plano Mensal: R$ 169,90/mês. Cancele quando quiser.'}
+                    {ciclo === 'anual' ? 'Plano Anual: R$ 1.798,80 (equivalente a R$ 149,90/mês). Parcele abaixo em até 3x.' : 'Plano Mensal: R$ 169,90/mês. Cancele quando quiser.'}
                   </p>
                   
                   <label className="block">
@@ -402,10 +402,8 @@ export default function Assinatura() {
                          onChange={(e) => setParcelas(Number(e.target.value))}
                          className="mt-1 w-full rounded-xl border border-gray-300 p-3.5 text-sm font-bold focus:border-[var(--cor-primaria)] focus:ring-4 focus:ring-[var(--cor-primaria)]/10 focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 transition-all"
                        >
-                         <option value={12}>12x de R$ 149,90 / mês (Total R$ 1.798,80)</option>
-                         <option value={8}>8x de R$ 224,85 / mês (Total R$ 1.798,80)</option>
-                         <option value={6}>6x de R$ 299,80 / mês (Total R$ 1.798,80)</option>
                          <option value={3}>3x de R$ 599,60 / mês (Total R$ 1.798,80)</option>
+                         <option value={2}>2x de R$ 899,40 / mês (Total R$ 1.798,80)</option>
                          <option value={1}>1x de R$ 1.798,80 à vista</option>
                        </select>
                     </label>

@@ -4,7 +4,8 @@ import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js';
 import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { FotoProduto, obterFotoFallback, obterFotoProduto } from '../lib/fotoProduto';
+import { FotoProduto } from '../lib/fotoProduto';
+import { obterFotoFallback, obterFotoProduto } from '../lib/fotoProdutoUtils';
 import { maskCartaoCredito, maskValidadeCartao, maskCPF, validarCPF } from '../lib/mascaras';
 import ModalAuthCliente from '../components/ModalAuthCliente';
 import ModalMinhaConta from '../components/ModalMinhaConta';

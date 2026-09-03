@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { Navigation, MapPin, CheckCircle2, MessageCircle, AlertTriangle, ArrowLeft, Send, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -36,7 +36,7 @@ export default function EntregadorRota() {
     }
   };
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
       .from('rotas_entrega')
@@ -50,7 +50,7 @@ export default function EntregadorRota() {
       setRota(data);
     }
     setLoading(false);
-  };
+  }, [id, ctx.entregadorId]);
 
   const sincronizarPedidoAtivo = async (pedidos: any[], pedidoAtivoId?: string | null) => {
     const ativos = (pedidos || []).filter((p: any) => !['FINALIZADO', 'CANCELADO'].includes(p.status));
@@ -75,11 +75,11 @@ export default function EntregadorRota() {
   };
 
   useEffect(() => {
-    setTimeout(carregar, 0);
+    carregar();
     return () => pararGps();
-  }, [id]);
+  }, [carregar]);
 
-  const iniciarGpsParaPedido = (pedidoId: string) => {
+  const iniciarGpsParaPedido = useCallback((pedidoId: string) => {
     if (!('geolocation' in navigator)) return;
     pararGps();
     watchId.current = navigator.geolocation.watchPosition(
@@ -94,7 +94,7 @@ export default function EntregadorRota() {
       (err) => console.error(err),
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
     );
-  };
+  }, []);
 
   useEffect(() => {
     if (rota && rota.status === 'EM_ANDAMENTO') {
@@ -108,7 +108,7 @@ export default function EntregadorRota() {
         pararGps();
       }
     }
-  }, [rota]);
+  }, [rota, carregar, iniciarGpsParaPedido]);
 
   // CHAT LOGIC
   useEffect(() => {

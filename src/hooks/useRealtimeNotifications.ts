@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { useToast } from '../components/ui/Toast';
+import { useToast } from '../contexts/ToastContext';
 import { tocarSom } from '../lib/som';
 import { Pedido } from '../types';
 
@@ -102,5 +102,5 @@ export function useRealtimeNotifications({ lojaId, pedidoId, contexto, entregado
     return () => {
       canais.forEach(c => supabase.removeChannel(c));
     };
-  }, [lojaId, contexto, entregadorId, modoPdv, toast]);
+  }, [lojaId, pedidoId, contexto, entregadorId, modoPdv, toast]);
 }

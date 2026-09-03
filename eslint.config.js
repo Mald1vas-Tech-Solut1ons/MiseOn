@@ -33,6 +33,7 @@ export default tseslint.config(
       // but strict typings are enforced by tsc.
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   }
 );

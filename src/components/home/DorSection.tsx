@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
-import { RotuloSecao, zap } from './shared';
+import { RotuloSecao } from './shared';
+import { zap } from '../../constants/homeShared';
 
 import { useI18n } from '../../contexts/I18nContext';
 export function DorSection() {

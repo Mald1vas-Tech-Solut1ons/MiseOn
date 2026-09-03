@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { X, User, MapPin, Phone, History, LogOut, Loader2, Save, Heart, Plus, Trash2, CheckCircle2, Mail } from 'lucide-react';
 import type { EnderecoCliente, Pedido, FavoritoCliente } from '../types';
@@ -71,7 +71,7 @@ export default function ModalMinhaConta({
     return data.id;
   };
 
-  const carregarDados = async () => {
+  const carregarDados = useCallback(async () => {
     setCarregando(true);
 
     const { data: cliente } = await supabase
@@ -109,11 +109,13 @@ export default function ModalMinhaConta({
     }
 
     setCarregando(false);
-  };
+  }, [lojaId, userId]);
 
   useEffect(() => {
-    if (isOpen) setTimeout(carregarDados, 0);
-  }, [isOpen, lojaId, userId]);
+    if (isOpen) {
+      carregarDados();
+    }
+  }, [isOpen, carregarDados]);
 
   if (!isOpen) return null;
 

@@ -6,7 +6,7 @@ import {
   Box, DollarSign, Layers, Trash2, Building2
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { useToast } from '../../components/ui/Toast';
+import { useToast } from '../../contexts/ToastContext';
 import { CtxLoja } from './AdminLayout';
 import ModalImportarNFCe from '../../components/estoque/ModalImportarNFCe';
 import type { Insumo } from '../../types';

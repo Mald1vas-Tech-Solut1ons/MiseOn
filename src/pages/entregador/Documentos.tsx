@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { FileText, UploadCloud, CheckCircle2, Clock, XCircle, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -34,7 +34,7 @@ export default function EntregadorDocumentos() {
   const cnhRef = useRef<HTMLInputElement>(null);
   const veiculoRef = useRef<HTMLInputElement>(null);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     setCarregando(true);
     const { data } = await supabase
       .from('entregadores')
@@ -51,8 +51,8 @@ export default function EntregadorDocumentos() {
       setPlaca(data.placa ?? '');
     }
     setCarregando(false);
-  };
-  useEffect(() => { carregar(); }, [ctx.entregadorId]);
+  }, [ctx.entregadorId]);
+  useEffect(() => { carregar(); }, [carregar]);
 
   const enviar = async () => {
     if (!cnhNumero.trim()) return setErro('Informe o número da CNH.');

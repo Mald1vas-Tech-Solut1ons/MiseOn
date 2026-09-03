@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs",
     "indexnow": "node scripts/indexnow.js",
     "preview": "vite preview",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "test:integration": "vitest run __tests__/integration",
     "k6": "k6 run k6/load-test.js",
@@ -60,6 +60,7 @@
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "lint-staged": "^17.1.0",
+    "node-forge": "^1.4.0",
     "nyc": "^18.0.0",
     "puppeteer": "^25.3.0",
     "react-hook-form": "^7.82.0",
@@ -71,6 +72,7 @@
     "vite-plugin-istanbul": "^9.0.1",
     "vite-plugin-pwa": "^0.21.2",
     "vitest": "^4.1.10",
+    "xml-crypto": "^6.1.2",
     "zod": "^4.4.3"
   },
   "lint-staged": {

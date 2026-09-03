@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { CalendarClock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -191,7 +191,7 @@ export default function PainelPedidos() {
     return () => clearTimeout(t);
   }, [erroAcao]);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     const cutoff24h = new Date(Date.now() - 24 * 3600e3).toISOString();
     const { data } = await supabase
       .from('pedidos').select(SELECT)
@@ -202,10 +202,10 @@ export default function PainelPedidos() {
       .order('criado_em', { ascending: false });
     setPedidos((data as Pedido[]) ?? []);
     setCarregando(false);
-  };
+  }, [lojaId]);
 
   useEffect(() => {
-    setTimeout(carregar, 0);
+    carregar();
     if ('Notification' in window) Notification.requestPermission?.();
     const canal = supabase
       .channel('pedidos-loja')
@@ -225,7 +225,7 @@ export default function PainelPedidos() {
         })
       .subscribe();
     return () => { supabase.removeChannel(canal); };
-  }, [lojaId]);
+  }, [lojaId, carregar]);
 
   // Toda mudança de status passa pela RPC fn_avancar_status_pedido — o banco
   // valida a transição (trigger) e devolve o erro em PT, traduzido para o

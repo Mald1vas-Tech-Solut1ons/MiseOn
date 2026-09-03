@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Scale, RefreshCw, X, Check, Utensils, AlertTriangle, ArchiveRestore, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { type Insumo, type ReposicaoBuffet } from '../../types';
@@ -36,11 +36,7 @@ export function ModalReposicaoBuffet({
 
   const preparoSelecionado = preparosAtivos.find((p) => p.id === preparoId) || preparosAtivos[0];
 
-  useEffect(() => {
-    if (aba === 'RECOLHER') carregarCubasAtivas();
-  }, [aba, lojaId]);
-
-  const carregarCubasAtivas = async () => {
+  const carregarCubasAtivas = useCallback(async () => {
     setCarregandoCubas(true);
     const { data } = await supabase
       .from('reposicoes_buffet')
@@ -50,7 +46,11 @@ export function ModalReposicaoBuffet({
       .order('criado_em', { ascending: false });
     if (data) setCubasNaPista(data as any[]);
     setCarregandoCubas(false);
-  };
+  }, [lojaId]);
+
+  useEffect(() => {
+    if (aba === 'RECOLHER') carregarCubasAtivas();
+  }, [aba, carregarCubasAtivas]);
 
   const confirmarEnvio = async () => {
     setErro('');

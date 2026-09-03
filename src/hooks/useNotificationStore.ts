@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { tocarSom } from '../lib/som';
-import { useToast } from '../components/ui/Toast';
+import { useToast } from '../contexts/ToastContext';
 
 export type CategoriaNotificacao = 'TODAS' | 'PEDIDO' | 'CHAT' | 'ESTOQUE' | 'CARDAPIO' | 'IFOOD' | 'GERAL';
 

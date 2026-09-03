@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   Flame, ChefHat, AlertTriangle, CheckCircle2, Printer, Minus, Plus,
@@ -397,7 +397,7 @@ export default function KDSProducao() {
   const [loja, setLoja] = useState<Loja | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     const { data } = await supabase
       .from('insumos')
       .select('*, fichas_preparos!fichas_preparos_preparo_id_fkey(*)')
@@ -405,9 +405,9 @@ export default function KDSProducao() {
       .order('nome');
     setInsumos((data as Insumo[]) ?? []);
     setCarregando(false);
-  };
+  }, [lojaId]);
 
-  useEffect(() => { setTimeout(carregar, 0); }, [lojaId]);
+  useEffect(() => { carregar(); }, [carregar]);
   useEffect(() => {
     supabase.from('lojas').select('*').eq('id', lojaId).single()
       .then(({ data }) => setLoja((data as Loja) ?? null));

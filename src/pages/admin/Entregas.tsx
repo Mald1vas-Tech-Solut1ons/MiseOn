@@ -187,7 +187,7 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
   const [erroIfood, setErroIfood] = useState<string | null>(null);
   const watchIds = useRef<Record<string, number>>({});
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     const { data } = await supabase
       .from('pedidos')
       .select('*, itens_pedido(*), pagamentos(metodo,status,valor_pago)')
@@ -196,21 +196,21 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
       .in('status', ['PRONTO', 'EM_ROTA'])
       .order('criado_em');
     setPedidos((data as Pedido[]) ?? []);
-  };
-
+  }, [lojaId]);
 
   useEffect(() => {
-    setTimeout(carregar, 0);
+    carregar();
     const canal = supabase.channel('entregas-loja-fila')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${lojaId}` }, () => carregar())
       .subscribe();
+    const currentWatchIds = watchIds.current;
     return () => {
       supabase.removeChannel(canal);
-      Object.values(watchIds.current).forEach((id) => navigator.geolocation?.clearWatch(id));
+      Object.values(currentWatchIds).forEach((id) => navigator.geolocation?.clearWatch(id));
     };
-  }, [lojaId]);
+  }, [lojaId, carregar]);
 
-  const transmitirLocalizacao = (pedidoId: string) => {
+  const transmitirLocalizacao = useCallback((pedidoId: string) => {
     if (!navigator.geolocation || watchIds.current[pedidoId]) return;
     let ultimoEnvio = 0;
     const id = navigator.geolocation.watchPosition(
@@ -227,7 +227,7 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
       { enableHighAccuracy: true, maximumAge: 5000 },
     );
     watchIds.current[pedidoId] = id;
-  };
+  }, []);
 
   const pararLocalizacao = (pedidoId: string) => {
     const id = watchIds.current[pedidoId];
@@ -286,8 +286,9 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
 
   const emRota = pedidos.filter(p => p.status === 'EM_ROTA');
   const aguardando = pedidos.filter(p => p.status === 'PRONTO');
+  const emRotaIds = emRota.map(p => p.id).join(',');
   // Retoma transmissão ao recarregar
-  useEffect(() => { emRota.forEach(p => transmitirLocalizacao(p.id)); }, [emRota.map(p => p.id).join(',')]);
+  useEffect(() => { emRota.forEach(p => transmitirLocalizacao(p.id)); }, [emRota, emRotaIds, transmitirLocalizacao]);
 
   const CardPedido = ({ p }: { p: Pedido }) => {
     const pgto = p.pagamentos?.[0];
@@ -579,7 +580,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
   const [mensagens, setMensagens] = useState<MensagemPedido[]>([]);
   const [msgInput, setMsgInput] = useState('');
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     setLoadingEntregadores(true);
     const [{ data: entList }, { data: rotasList }, { data: pedList }, { data: lojaData }] = await Promise.all([
       supabase.from('entregadores').select('*').eq('loja_id', lojaId).eq('ativo', true).order('nome'),
@@ -592,16 +593,16 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
     setPedidosProntos((pedList as Pedido[]) ?? []);
     if (lojaData?.nome) setLojaNome(lojaData.nome);
     setLoadingEntregadores(false);
-  };
+  }, [lojaId]);
 
   useEffect(() => {
-    setTimeout(carregar, 0);
+    carregar();
     const canal = supabase.channel('entregas-loja-gestao')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${lojaId}` }, () => carregar())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'rotas_entrega', filter: `loja_id=eq.${lojaId}` }, () => carregar())
       .subscribe();
     return () => { supabase.removeChannel(canal); };
-  }, [lojaId]);
+  }, [lojaId, carregar]);
 
   // Chat
   useEffect(() => {
@@ -617,7 +618,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
       })
       .subscribe();
     return () => { supabase.removeChannel(canal); };
-  }, [chatPedido?.id]);
+  }, [chatPedido]);
 
   const enviarChat = async (texto: string) => {
     if (!texto.trim() || !chatPedido) return;

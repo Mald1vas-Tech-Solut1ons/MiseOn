@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { MapPin, Navigation, CheckCircle2, Clock, Map, TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -28,7 +28,7 @@ export default function EntregadorDashboard() {
   const [rotaAtiva, setRotaAtiva] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     setLoading(true);
     
     // 1. Busca configurações da loja (para saber a remuneração)
@@ -119,9 +119,9 @@ export default function EntregadorDashboard() {
     }
 
     setLoading(false);
-  };
+  }, [ctx.lojaId, ctx.entregadorId]);
 
-  useEffect(() => { setTimeout(carregar, 0); }, [ctx.entregadorId]);
+  useEffect(() => { carregar(); }, [carregar]);
 
   const iniciarRota = async () => {
     if (!rotaAtiva) return;

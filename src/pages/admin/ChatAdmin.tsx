@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { tocarSom } from '../../lib/som';
-import { useToast } from '../../components/ui/Toast';
+import { useToast } from '../../contexts/ToastContext';
 import type { CtxLoja } from './AdminLayout';
 
 import { useI18n } from '../../contexts/I18nContext';

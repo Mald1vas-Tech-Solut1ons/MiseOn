@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -29,7 +29,7 @@ export default function Historico() {
   const [carregando, setCarregando] = useState(true);
   const [tmp, setTmp] = useState<number | null>(null);
 
-  const carregarTMP = async () => {
+  const carregarTMP = useCallback(async () => {
     // Busca historico das ultimas 24h
     const hj = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
     const { data } = await supabase.from('historico_pedidos')
@@ -52,9 +52,9 @@ export default function Historico() {
       }
     });
     setTmp(qtd > 0 ? Math.round(soma / qtd / 60000) : null);
-  };
+  }, [lojaId]);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
     setCarregando(true);
     let q = supabase.from('pedidos').select('*, itens_pedido(*), pagamentos(metodo, status, valor_pago)')
       .eq('loja_id', lojaId).order('criado_em', { ascending: false }).limit(300);
@@ -64,13 +64,12 @@ export default function Historico() {
     const { data } = await q;
     setPedidos((data as Pedido[]) ?? []);
     setCarregando(false);
-  };
-  useEffect(() => {
-    setTimeout(() => {
-      carregar();
-      carregarTMP();
-    }, 0);
   }, [lojaId, status, de, ate]);
+
+  useEffect(() => {
+    carregar();
+    carregarTMP();
+  }, [carregar, carregarTMP]);
 
   const visiveis = pedidos.filter((p) =>
     !busca || p.identificador_cliente?.toLowerCase().includes(busca.toLowerCase()) || String(p.numero).includes(busca));

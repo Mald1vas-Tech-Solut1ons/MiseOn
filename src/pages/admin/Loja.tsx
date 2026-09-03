@@ -17,7 +17,7 @@ import { maskCPFouCNPJ, maskTelefone, validarCPFouCNPJ } from '../../lib/mascara
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
 import { geocode } from '../../lib/geo';
 import { useI18n } from '../../contexts/I18nContext';
-import { useToast } from '../../components/ui/Toast';
+import { useToast } from '../../contexts/ToastContext';
 
 const PRESETS_SEGMENTOS: Record<SegmentoNegocio, { rotulo: string; descricao: string; modulos: ModulosAtivos }> = {
   HAMBURGUERIA: {
