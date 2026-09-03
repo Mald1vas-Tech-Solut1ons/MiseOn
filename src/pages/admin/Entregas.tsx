@@ -563,7 +563,6 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
   // Formulário novo entregador
   const [novoNome, setNovoNome] = useState('');
   const [novoTel, setNovoTel] = useState('');
-  const [novoEmail, setNovoEmail] = useState('');
   const [novoVeiculo, setNovoVeiculo] = useState('moto');
   const [salvandoEntregador, setSalvandoEntregador] = useState(false);
   const [showFormEntregador, setShowFormEntregador] = useState(false);
@@ -631,26 +630,31 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
     setSalvandoEntregador(true);
     setErroEntregador('');
 
-    let user_id: string | null = null;
-    if (novoEmail.trim()) {
-      // Convida via magic link / cria conta
-      const { data: inviteData } = await supabase.auth.admin?.inviteUserByEmail?.(novoEmail.trim()) ?? { data: null };
-      user_id = inviteData?.user?.id ?? null;
-    }
-
+    // Aqui NAO se cria login. O que existia era `supabase.auth.admin
+    // .inviteUserByEmail` chamado do navegador: admin API exige service role, o
+    // metodo vinha undefined e o `user_id` saia nulo em silencio.
+    //
+    // Pior que nao criar conta era criar pela metade: em 03/09 achamos um
+    // entregador ATIVO, com user_id, e sem vinculo em `usuarios_loja`. Ele
+    // logava no app e via a tela vazia — a RLS de `pedidos` olha o vinculo, nao
+    // a tabela `entregadores`. O motoboy achava que o sistema estava quebrado.
+    //
+    // Acesso ao app se cria em Equipe & Acessos, que passa pela function
+    // `equipe-convidar` e grava as DUAS pontas com service role. Aqui fica so o
+    // cadastro operacional do entregador, que e legitimo por si (motoboy da
+    // praca, que a loja aciona sem app).
     const { error } = await supabase.from('entregadores').insert({
       loja_id: lojaId,
       nome: novoNome.trim(),
       telefone: novoTel.trim(),
       veiculo: novoVeiculo,
-      user_id,
       ativo: true,
     });
 
     if (error) {
       setErroEntregador('Erro ao salvar. Verifique os dados.');
     } else {
-      setNovoNome(''); setNovoTel(''); setNovoEmail(''); setNovoVeiculo('moto');
+      setNovoNome(''); setNovoTel(''); setNovoVeiculo('moto');
       setShowFormEntregador(false);
       setFeedback({ tipo: 'sucesso', msg: `Entregador "${novoNome}" cadastrado com sucesso!` });
       setTimeout(() => setFeedback(null), 4000);
@@ -893,10 +897,13 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
               type="tel" placeholder="WhatsApp (para receber o link da rota) *" value={novoTel} onChange={e => setNovoTel(e.target.value)}
               className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--cor-primaria)] dark:text-white"
             />
-            <input
-              type="email" placeholder="E-mail (para criar login no app — opcional)" value={novoEmail} onChange={e => setNovoEmail(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--cor-primaria)] dark:text-white"
-            />
+            {/* O campo de e-mail daqui prometia "criar login no app" e nao criava:
+                a admin API do Auth nao roda no navegador. Quem cria acesso e a
+                tela de Equipe, que grava conta, vinculo e cadastro de entregador
+                de uma vez. Dizer onde e melhor que um campo que nao funciona. */}
+            <p className="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
+              {tDynamic('Este cadastro serve para acionar o entregador pelo WhatsApp. Para dar acesso ao aplicativo, crie o login em Equipe & Acessos.')}
+            </p>
             <select
               value={novoVeiculo} onChange={e => setNovoVeiculo(e.target.value)}
               className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2.5 px-3 text-sm focus:outline-none dark:text-white"

@@ -271,6 +271,7 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  'Este cadastro serve para acionar o entregador pelo WhatsApp. Para dar acesso ao aplicativo, crie o login em Equipe & Acessos.': 'This record is for reaching the courier on WhatsApp. To grant app access, create the login under Team & Access.',
   'Aponte a câmera e peça sem pegar fila.': 'Point your camera and order without queuing.',
   // Configuracao de promocoes na TV
   'Mostrar promoções na TV': 'Show promotions on the TV',
