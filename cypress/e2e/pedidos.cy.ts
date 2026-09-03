@@ -1,3 +1,4 @@
+
 import { mockSupabase } from '../support/mockDB';
 
 describe('Fluxo de Pedidos', () => {

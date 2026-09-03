@@ -49,6 +49,7 @@ export default function AdminLayout() {
   // Intelligent transition state
   const prevPathRef = useRef(loc.pathname);
   const [transitionClass, setTransitionClass] = useState('mo-screen');
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Splash Screen session control
   const [isMinLoadingDone, setIsMinLoadingDone] = useState(() => {
@@ -95,35 +96,24 @@ export default function AdminLayout() {
     prevPathRef.current = loc.pathname;
   }, [loc.pathname]);
 
-  // Auto-scroll imediato e inteligente com UX Avançada: move APENAS a sidebar,
-  // centralizando o menu ativo sem piscar no topo.
+  // UX Avançada: Auto-scroll imediato e de alta performance
   useLayoutEffect(() => {
-    // 1. Tenta achar o link exato pelo ID gerado. Se for sub-rota, tenta o fallback pelo .is-active
-    const expectedId = `nav-link-${loc.pathname.replace(/\//g, '-')}`;
-    
-    // Executa imediatamente e no próximo frame para garantir renderização do DOM
-    const tryScroll = () => {
-      const el = document.getElementById(expectedId) || document.querySelector('.nav-link-premium.is-active') as HTMLElement;
-      
-      if (el) {
-        const sidebarContainer = el.closest('.overflow-y-auto');
-        if (sidebarContainer) {
-          const containerRect = sidebarContainer.getBoundingClientRect();
-          const elRect = el.getBoundingClientRect();
-          
-          // Se o item estiver fora da visão ou perto das bordas, centraliza
-          if (elRect.top < containerRect.top + 50 || elRect.bottom > containerRect.bottom - 50) {
-            const scrollTop = sidebarContainer.scrollTop + (elRect.top - containerRect.top) - (containerRect.height / 2) + (elRect.height / 2);
-            sidebarContainer.scrollTo({ top: scrollTop, behavior: 'auto' }); // auto = instantâneo, para evitar ver rolando
-          }
-        }
-      }
-    };
+    const container = sidebarRef.current;
+    if (!container) return;
 
-    tryScroll();
-    const frame = requestAnimationFrame(tryScroll); // Tenta novamente caso o DOM ainda esteja populando
-    
-    return () => cancelAnimationFrame(frame);
+    // Busca o link recém-ativado no DOM
+    const activeLink = container.querySelector('.nav-link-premium.is-active') as HTMLElement;
+    if (!activeLink) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+
+    // Se o item não estiver totalmente visível (com uma pequena margem), ajusta o scroll
+    if (linkRect.top < containerRect.top + 10 || linkRect.bottom > containerRect.bottom - 10) {
+      const scrollTarget = container.scrollTop + (linkRect.top - containerRect.top) - (containerRect.height / 2) + (linkRect.height / 2);
+      // "auto" roda instantaneamente ANTES da pintura, evitando que o usuário veja a barra "pulando"
+      container.scrollTo({ top: scrollTarget, behavior: 'auto' });
+    }
   }, [loc.pathname]);
 
   useEffect(() => {
@@ -506,7 +496,7 @@ export default function AdminLayout() {
         </div>
 
         {/* Navegação Scrollável */}
-        <div className="flex-1 overflow-y-auto py-2 space-y-6 custom-scrollbar overflow-x-hidden">
+        <div ref={sidebarRef} className="flex-1 overflow-y-auto py-2 space-y-6 custom-scrollbar overflow-x-hidden">
 
           {ctx.papel === 'admin' ? (
             <>
