@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Check, ShieldCheck } from 'lucide-react';
+import { SAAS_PRICING } from '../../lib/efiInfo';
 
 import { useI18n } from '../../contexts/I18nContext';
 const CHECKLIST = [
@@ -17,6 +18,11 @@ const CHECKLIST = [
 export default function Pricing() {
   const { tDynamic } = useI18n();
   const [anual, setAnual] = useState(true);
+
+  const precoMensalStr = SAAS_PRICING.mensal.bruto.toFixed(2).replace('.', ',');
+  const precoAnualStr = SAAS_PRICING.anual.mensalEquivalente.toFixed(2).replace('.', ',');
+  const totalAnualStr = SAAS_PRICING.anual.totalBruto.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  const economiaAnoStr = (SAAS_PRICING.anual.economiaMensal * 12).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 
   return (
     <section className="py-28" style={{ background: '#070C18' }}>
@@ -45,7 +51,7 @@ export default function Pricing() {
             style={{ fontFamily: "'Sora', sans-serif" }}
             className={`flex items-center gap-2 rounded-full px-8 py-3 text-sm font-bold transition ${anual ? 'bg-[#0A5CC4] text-white shadow-[0_0_20px_rgba(10,92,196,0.5)]' : 'text-gray-400 hover:text-white'}`}
           >
-            Anual <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-23% OFF</span>
+            Anual <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-12% OFF</span>
           </button>
         </div>
 
@@ -59,14 +65,14 @@ export default function Pricing() {
             </p>
             <div style={{ fontFamily: "'Sora', sans-serif" }} className="mt-8 flex items-center justify-center text-7xl font-black tracking-tight text-white">
               <span style={{ color: 'rgba(234,241,251,0.5)' }} className="mr-3 text-3xl">R$</span>
-              <span>{anual ? '99,90' : '129,90'}</span>
+              <span>{anual ? precoAnualStr : precoMensalStr}</span>
               <span style={{ color: 'rgba(234,241,251,0.5)' }} className="text-xl font-medium mt-auto mb-2 ml-2">/mês</span>
             </div>
             <div className="mt-4 flex flex-col items-center justify-center text-sm font-medium h-12">
               {anual ? (
                 <>
-                  <span className="text-gray-400">{tDynamic('Faturamento anual em parcela única (R$ 1.198,80).')}</span>
-                  <span className="text-blue-400 font-bold mt-1">{tDynamic('Sua economia: R$ 360,00/ano')}</span>
+                  <span className="text-gray-400">{tDynamic(`Faturamento anual em até 12x no cartão (R$ ${totalAnualStr}) ou Pix 5% OFF.`)}</span>
+                  <span className="text-blue-400 font-bold mt-1">{tDynamic(`Sua economia: R$ ${economiaAnoStr}/ano`)}</span>
                 </>
               ) : (
                 <span className="text-gray-400">{tDynamic('Assinatura mensal flexível com cancelamento online.')}</span>
@@ -89,7 +95,7 @@ export default function Pricing() {
               style={{ background: '#0A5CC4', fontFamily: "'Sora', sans-serif", boxShadow: '0 8px 32px rgba(10,92,196,0.4)' }}
               className="mt-12 block w-full rounded-2xl py-5 text-center text-xl font-black text-white transition hover:scale-105 hover:bg-blue-600 hover:shadow-[0_8px_40px_rgba(10,92,196,0.6)]"
             >
-              {tDynamic('Criar Conta (14 Dias Grátis)')}
+              {tDynamic(`Criar Conta (${SAAS_PRICING.trialDias} Dias Grátis)`)}
             </a>
             <div className="mt-6 flex items-center justify-center gap-2 text-xs font-bold text-gray-500">
               <ShieldCheck size={14} className="text-gray-400" /> {tDynamic('Cancele quando quiser. Cartão não exigido no teste.')}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, Check, Landmark, ShieldCheck } from 'lucide-react';
-import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
+import { EFI_TARIFAS, EFI_LINKS, SAAS_PRICING } from '../../lib/efiInfo';
 import { zap } from './zap';
 
 import { useI18n } from '../../contexts/I18nContext';
@@ -26,6 +26,11 @@ const INCLUSO = [
 export function ComoFuncionaPreco() {
   const { tDynamic } = useI18n();
   const [anual, setAnual] = useState(true);
+
+  const precoMensalStr = SAAS_PRICING.mensal.bruto.toFixed(2).replace('.', ',');
+  const precoAnualStr = SAAS_PRICING.anual.mensalEquivalente.toFixed(2).replace('.', ',');
+  const totalAnualStr = SAAS_PRICING.anual.totalBruto.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  const economiaAnoStr = (SAAS_PRICING.anual.economiaMensal * 12).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 
   return (
     <>
@@ -79,14 +84,14 @@ export function ComoFuncionaPreco() {
                 style={{ fontFamily: "'Sora', sans-serif" }}
                 className={`rounded-full px-6 py-2.5 text-xs sm:text-sm font-bold transition ${!anual ? 'bg-[#FC5B24] text-white' : 'text-gray-400 hover:text-white'}`}
               >
-                {tDynamic('Mensal (R$ 129,90/mês)')}
+                {tDynamic(`Mensal (R$ ${precoMensalStr}/mês)`)}
               </button>
               <button
                 onClick={() => setAnual(true)}
                 style={{ fontFamily: "'Sora', sans-serif" }}
                 className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-xs sm:text-sm font-bold transition ${anual ? 'bg-[#0A5CC4] text-white shadow-[0_0_20px_rgba(10,92,196,0.5)]' : 'text-gray-400 hover:text-white'}`}
               >
-                {tDynamic('Anual (R$ 99,90/mês)')} <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-23% OFF</span>
+                {tDynamic(`Anual (R$ ${precoAnualStr}/mês)`)} <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-12% OFF</span>
               </button>
             </div>
           </div>
@@ -104,11 +109,11 @@ export function ComoFuncionaPreco() {
                 </p>
                 <div style={{ fontFamily: "'Sora', sans-serif" }} className="mt-4 flex items-center text-6xl font-extrabold tracking-tight">
                   <span style={{ color: 'rgba(234,241,251,0.4)' }} className="mr-2 text-2xl">R$</span>
-                  <span>{anual ? '99,90' : '129,90'}</span>
+                  <span>{anual ? precoAnualStr : precoMensalStr}</span>
                   <span style={{ color: 'rgba(234,241,251,0.4)' }} className="text-xl font-medium">/mês</span>
                 </div>
                 <p style={{ color: 'rgba(234,241,251,0.4)' }} className="mt-3 text-sm">
-                  {anual ? 'Faturado em parcela única (R$ 1.198,80/ano). Economia de R$ 360,00 por ano!' : 'Assinatura mensal sem fidelidade. Cancele quando quiser.'}
+                  {anual ? `Faturado em até 12x no cartão (R$ ${totalAnualStr}) ou Pix 5% OFF. Economia de R$ ${economiaAnoStr} por ano!` : 'Assinatura mensal sem fidelidade. Cancele quando quiser.'}
                 </p>
 
                 <ul className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -128,7 +133,7 @@ export function ComoFuncionaPreco() {
                   {tDynamic('Começar teste grátis')} <ArrowRight size={18} />
                 </a>
                 <p style={{ color: 'rgba(234,241,251,0.35)' }} className="mt-3 text-center text-xs">
-                  14 dias grátis. Sem cartão de crédito.
+                  {SAAS_PRICING.trialDias} dias grátis. Sem cartão de crédito.
                 </p>
               </div>
             </div>

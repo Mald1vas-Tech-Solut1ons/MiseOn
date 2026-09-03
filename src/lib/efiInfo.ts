@@ -23,14 +23,13 @@ export const SAAS_PRICING = {
   anual: {
     mensalEquivalente: 149.90,
     totalBruto: 1798.80, // 12 x 149.90
-    descontoPixPct: 0.05,
+    economiaMensal: 20.00,
     pix: 1708.86, // 1798.80 com 5% de desconto à vista (Economia de R$ 329.94/ano)
-    parcelas: [
-      { qtd: 3, valorParcela: 599.60, total: 1798.80 },
-      { qtd: 6, valorParcela: 299.80, total: 1798.80 },
-      { qtd: 8, valorParcela: 224.85, total: 1798.80 },
-      { qtd: 12, valorParcela: 149.90, total: 1798.80 },
-    ],
+    cartao: [
+      { qtd: 1, valorParcela: 1798.80, total: 1798.80 },
+      { qtd: 2, valorParcela: 899.40, total: 1798.80 },
+      { qtd: 3, valorParcela: 599.60, total: 1798.80 }
+    ]
   },
   trialDias: 30,
   toleranciaDias: 7,

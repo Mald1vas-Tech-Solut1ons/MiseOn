@@ -125,8 +125,8 @@ O MiseOn eleva o padrão dos sistemas B2B gastronômicos incorporando tecnologia
 ### C. Modelo Comercial SaaS & Checkout Híbrido (`Assinatura.tsx`)
 - **Checkout Integrado Efí Bank**: Faturamento transparente sem retenção de recebíveis por marketplaces.
 - **Estrutura de Planos**:
-  - **Plano Mensal**: R$ 129,90 /mês (Cobrança recorrente flexível sem fidelidade).
-  - **Plano Anual**: R$ 99,90 /mês (Parcela única de R$ 1.198,80/ano com **23% OFF / R$ 360,00 de economia por ano**).
+  - **Plano Mensal**: R$ 169,90 /mês (Cobrança recorrente flexível sem fidelidade; R$ 161,40 no Pix com 5% OFF).
+  - **Plano Anual**: R$ 149,90 /mês (Cobrança em até 12x no cartão de R$ 1.798,80/ano ou R$ 1.708,86 no Pix com 5% OFF; **R$ 240,00 de economia por ano**).
 - **Liberdade de Meio de Pagamento**: Suporte instantâneo a Pix (QR Code dinâmico + copia-e-cola com confirmação por Webhook) e Cartão de Crédito tokenizado.
 
 ---
