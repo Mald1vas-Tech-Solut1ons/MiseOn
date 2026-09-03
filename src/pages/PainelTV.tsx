@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import {
-  Tv, Volume2, VolumeX, Maximize2, Sparkles, ShoppingBag,
+  Tv, Volume2, VolumeX, Maximize2, Sparkles,
   CheckCircle2, Clock, QrCode as QrIcon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { FotoProduto, obterFotoFallback, obterFotoProduto } from '../lib/fotoProduto';
 import { Loja, Categoria, Produto, fmt } from '../types';
 import MiseOnLoader from '../components/MiseOnLoader';
 import { getOptimizedImageUrl } from '../lib/cdn';
@@ -388,9 +389,31 @@ export default function PainelTV() {
     // Fala depois do gongo para nao sobrepor os dois.
     window.setTimeout(() => falarPedido(chamado), 500);
 
-    const t = setTimeout(() => setBannerChamadaVisivel(false), 9000);
-    return () => clearTimeout(t);
   }, [pedidos, falarPedido, tocarGongo]);
+
+  // O timer que esconde a tarja precisa viver FORA do efeito acima.
+  // Ele estava la dentro, num efeito que depende de `pedidos`: como o painel
+  // recarrega a fila a cada poucos segundos, o cleanup matava o setTimeout e a
+  // passagem seguinte saia antes em `if (!novos.length) return`, sem agendar
+  // outro. Resultado visto na TV: a tarja "#2 PEDIDO PRONTO" ficava presa para
+  // sempre, chamando um cliente que ja tinha ido embora, com a coluna ao lado
+  // dizendo "PRONTO PARA RETIRADA (0)".
+  useEffect(() => {
+    if (!bannerChamadaVisivel) return;
+    const t = window.setTimeout(() => setBannerChamadaVisivel(false), 9000);
+    return () => window.clearTimeout(t);
+  }, [bannerChamadaVisivel, ultimoChamado]);
+
+  // E se o pedido chamado sair da fila antes dos 9s (foi retirado, finalizado
+  // ou cancelado), a chamada cai na hora: continuar chamando quem ja foi
+  // embora e pior do que nao chamar.
+  useEffect(() => {
+    if (!bannerChamadaVisivel || !ultimoChamado) return;
+    const aindaNaFila = pedidos.some(
+      (p) => p.numero === ultimoChamado.numero && ['PRONTO', 'EM_ROTA'].includes(p.status),
+    );
+    if (!aindaNaFila) setBannerChamadaVisivel(false);
+  }, [pedidos, bannerChamadaVisivel, ultimoChamado]);
 
   // 4. Carrossel automático
   useEffect(() => {
@@ -612,17 +635,16 @@ export default function PainelTV() {
                     className="group relative flex flex-col justify-between rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10"
                   >
                     <div>
-                      {produto.imagem_url ? (
-                        <img
-                          src={getOptimizedImageUrl(produto.imagem_url)}
-                          alt={produto.nome}
-                          className="h-36 w-full rounded-2xl object-cover mb-4 border border-white/10 shadow-md group-hover:scale-[1.02] transition-transform"
-                        />
-                      ) : (
-                        <div className="h-28 w-full rounded-2xl bg-white/5 flex items-center justify-center text-slate-600 mb-4">
-                          <ShoppingBag size={32} />
-                        </div>
-                      )}
+                      {/* Produto sem foto mostrava um icone cinza numa TV de 50
+                          polegadas — cardapio inteiro sem comida. Agora usa a
+                          mesma regra da vitrine: foto do lojista quando existe e
+                          carrega, foto gastronomica curada quando nao. */}
+                      <FotoProduto
+                        src={obterFotoProduto(produto as never)}
+                        fallback={obterFotoFallback(produto.nome)}
+                        alt={produto.nome}
+                        className="h-36 w-full rounded-2xl object-cover mb-4 border border-white/10 shadow-md group-hover:scale-[1.02] transition-transform"
+                      />
 
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-['Sora'] text-lg font-bold text-white line-clamp-1">

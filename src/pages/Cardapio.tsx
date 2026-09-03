@@ -4,6 +4,7 @@ import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js';
 import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { FotoProduto, obterFotoFallback, obterFotoProduto } from '../lib/fotoProduto';
 import { maskCartaoCredito, maskValidadeCartao, maskCPF, validarCPF } from '../lib/mascaras';
 import ModalAuthCliente from '../components/ModalAuthCliente';
 import ModalMinhaConta from '../components/ModalMinhaConta';
@@ -1210,82 +1211,8 @@ const luhnValido = (digits: string): boolean => {
 };
 
 // ── Resolução de fotos gastronômicas por produto com fallback inteligente ──
-const FOTOS_PRODUTOS: Record<string, string> = {
-  'X-BACON': 'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=600&auto=format&fit=crop&q=80',
-  'COMBO X-BACON': 'https://images.unsplash.com/photo-1610614819513-58e34989848b?w=600&auto=format&fit=crop&q=80',
-  'SMASH DUPLO': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80',
-  'X-SALADA': 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=600&auto=format&fit=crop&q=80',
-  'X-PAULISTA': 'https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=600&auto=format&fit=crop&q=80',
-  'SMASH FIT DE PATINHO': 'https://images.unsplash.com/photo-1521305916504-4a1121188589?w=600&auto=format&fit=crop&q=80',
-  'BURGER FIT DE FRANGO': 'https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?w=600&auto=format&fit=crop&q=80',
-  'BOWL FIT DE FRANGO': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
-  'SALADA CAESAR FIT': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=80',
-  'BATATA FRITA': 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop&q=80',
-  'BATATA CHEDDAR E BACON': 'https://images.unsplash.com/photo-1585109649139-366815a0d713?w=600&auto=format&fit=crop&q=80',
-  'BATATA DOCE RÚSTICA': 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=600&auto=format&fit=crop&q=80',
-  'COCA-COLA LATA 350ML': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600&auto=format&fit=crop&q=80',
-  'GUARANÁ LATA 350ML': 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&auto=format&fit=crop&q=80',
-  'ÁGUA MINERAL 500ML': 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&auto=format&fit=crop&q=80',
-};
-
-function obterFotoFallback(nome: string): string {
-  const nomeUpper = (nome || '').toUpperCase().trim();
-  if (FOTOS_PRODUTOS[nomeUpper]) return FOTOS_PRODUTOS[nomeUpper];
-  for (const [chave, url] of Object.entries(FOTOS_PRODUTOS)) {
-    if (nomeUpper.includes(chave)) return url;
-  }
-  return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80';
-}
-
-/**
- * Foto de produto com prazo para carregar.
- *
- * `onError` so dispara quando o servidor RESPONDE com falha. Se a URL externa
- * simplesmente nao responde — foi o caso medido em 03/09, com 6 produtos
- * apontando para loremflickr.com, que deu TIMEOUT — nenhum evento acontece: a
- * imagem fica pendurada para sempre e o cardapio exibe um retangulo preto no
- * lugar do prato. Numa vitrine, isso e venda perdida.
- *
- * Entao alem do onError existe um prazo: se a foto do lojista nao aparecer em
- * `prazoMs`, entra a foto curada. Vale para qualquer URL externa, nao so para o
- * placeholder de hoje — foto propria hospedada em servidor lento cai na mesma
- * armadilha.
- */
-function FotoProduto({
-  src, fallback, alt, className, prazoMs = 2500,
-}: { src: string; fallback: string; alt: string; className?: string; prazoMs?: number }) {
-  const [atual, setAtual] = useState(src);
-  const carregou = useRef(false);
-
-  useEffect(() => {
-    setAtual(src);
-    carregou.current = false;
-    if (!src || src === fallback) return;
-    const t = window.setTimeout(() => {
-      if (!carregou.current) setAtual(fallback);
-    }, prazoMs);
-    return () => window.clearTimeout(t);
-  }, [src, fallback, prazoMs]);
-
-  return (
-    <img
-      src={atual}
-      alt={alt}
-      className={className}
-      onLoad={() => { carregou.current = true; }}
-      onError={() => { carregou.current = true; setAtual(fallback); }}
-    />
-  );
-}
-
-function obterFotoProduto(p: Produto): string {
-  const fotoCurada = obterFotoFallback(p.nome);
-  // Se não tem imagem no banco ou se a imagem no banco não é curada em alta definição, usa a foto gastronômica curada
-  if (!p.imagem_url || p.imagem_url.includes('supabase.co')) {
-    return fotoCurada;
-  }
-  return getOptimizedImageUrl(p.imagem_url) || fotoCurada;
-}
+// Foto de produto (catalogo curado, fallback e <FotoProduto>) vive em src/lib/fotoProduto.tsx
+// porque a TV do balcao usa exatamente a mesma regra.
 
 // ── Otimização de Performance (React.memo) ──
 const MaisPedidoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: NutricaoProduto; onClick: () => void }) => {
