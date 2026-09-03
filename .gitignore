@@ -1,8 +1,8 @@
-node_modules/
+ï»¿node_modules/
 dist/
 dev-dist/
 
-# Environment â€” nunca versionar credenciais
+# Environment - nunca versionar credenciais
 .env
 .env.local
 .env.*.local
@@ -23,14 +23,15 @@ Thumbs.db
 # Supabase local
 supabase/.temp/
 
-# Scripts temporÃ¡rios e lixo
+# Scripts temporarios e lixo
 scratch/
 capture.js
 *.mp4
 *.mov
 
-#arquivos md
+# Credenciais operacionais e documentos de credencial
 credenciais_testes.md
+CREDENCIAIS.md
 
 # Certificados
 cert/
@@ -45,17 +46,16 @@ coverage/
 cypress/screenshots/
 cypress/videos/
 
-# Backup logico do banco (scripts/qa/backup-logico.mjs).
-# Contem a base INTEIRA: dados de cliente, token do WhatsApp, credencial de
-# pagamento. Nunca versionar. Guarde fora do repositorio, criptografado.
+# Backup logico do banco
 backups/
 *.json.gz
 
-# Foto de cupom usada em teste manual: traz CPF do consumidor impresso.
-# Fica fora do versionamento por privacidade.
+# Fotos de testes
 docs/nf-test_img.jpeg
 docs/*-test_img.*
 
-# Ignorar scripts sensíveis e testes da Efí
+# Ignorar scripts sensiveis e testes locais
 scripts/*.cjs
 scripts/*.ps1
+scripts/_*.mjs
+scripts/emitir-nfse-*.mjs
