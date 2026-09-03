@@ -1180,7 +1180,7 @@ export default function Home() {
       </section>
 
       {/* ══════════ 5. PLATAFORMA COMPLETA (ESCURO, GLASS) ══════════ */}
-      <section id="plataforma" className="relative scroll-mt-24 overflow-hidden bg-gradient-to-br from-[#0B1120] via-[#0D1830] to-[#070C18] py-20 sm:py-24">
+      <section id="plataforma" className="relative scroll-mt-24 overflow-clip bg-gradient-to-br from-[#0B1120] via-[#0D1830] to-[#070C18] py-20 sm:py-24">
         <div className="pointer-events-none absolute -left-20 top-0 h-80 w-80 rounded-full bg-[#0A5CC4]/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 right-[-6%] h-80 w-80 rounded-full bg-[#FC5B24]/15 blur-3xl" />
 
@@ -1221,7 +1221,7 @@ export default function Home() {
       </section>
 
       {/* ══════════ 6. WHATSAPP IA (ESCURO, GLASS) ══════════ */}
-      <section id="whatsapp-ia" className="relative scroll-mt-24 overflow-hidden bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#052e16] py-20 sm:py-24">
+      <section id="whatsapp-ia" className="relative scroll-mt-24 overflow-clip bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#052e16] py-20 sm:py-24">
         <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-64 w-64 rounded-full bg-teal-300/10 blur-3xl" />
 
@@ -1465,7 +1465,7 @@ export default function Home() {
            Vem ANTES do módulo de estoque 3D de propósito: primeiro o visitante
            entende como o estoque ENTRA (a objeção que faz gente desistir de
            sistema de gestão), depois vê o que o MiseOn faz com ele. */}
-      <section id="estoque-nfce" className="relative scroll-mt-24 overflow-hidden bg-gradient-to-br from-[#1a0f02] via-[#2b1503] to-[#0B1120] py-20 sm:py-24 border-t border-white/10">
+      <section id="estoque-nfce" className="relative scroll-mt-24 overflow-clip bg-gradient-to-br from-[#1a0f02] via-[#2b1503] to-[#0B1120] py-20 sm:py-24 border-t border-white/10">
         <div className="pointer-events-none absolute -left-16 -top-16 h-72 w-72 rounded-full bg-orange-500/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -right-10 h-64 w-64 rounded-full bg-amber-400/10 blur-3xl" />
 
@@ -1558,7 +1558,7 @@ export default function Home() {
       </section>
 
       {/* ══════════ 6.6 SEÇÃO ENGENHARIA DE ESTOQUE 3D & PREPAROS ══════════ */}
-      <section id="estoque-3d" className="relative scroll-mt-24 overflow-hidden bg-[#070C18] py-20 sm:py-28 border-t border-white/10">
+      <section id="estoque-3d" className="relative scroll-mt-24 overflow-clip bg-[#070C18] py-20 sm:py-28 border-t border-white/10">
         <div className="pointer-events-none absolute left-1/4 top-0 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
         <div className="pointer-events-none absolute right-10 bottom-0 h-96 w-96 rounded-full bg-purple-500/10 blur-3xl" />
 
