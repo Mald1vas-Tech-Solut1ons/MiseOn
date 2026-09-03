@@ -236,6 +236,7 @@ const PLATAFORMA = [
       'Cozinha KDS sem papel com estações de preparo',
       'Suporte a Dark Kitchen Multi-Brand (Múltiplas Marcas)',
       'Gestão de entregas por Km com GPS Tracking ao vivo',
+      'Acessibilidade Visual (Escala de Fonte em 1-Clique)',
       'Status do pedido que o cliente acompanha',
       'Impressão de pedido para produção (WebSerial HID)',
       'Equipe com papéis e permissões de acesso',

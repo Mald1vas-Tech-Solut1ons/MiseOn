@@ -274,6 +274,18 @@ export const TOUR_STEPS: TourStep[] = [
     targetDataTour: 'tour-loja-tv-credencial',
     posicao: 'top',
   },
+
+  // ── Módulo 12: Acessibilidade & Configurações da Conta ──
+  {
+    id: 'passo-acessibilidade',
+    categoria: 'Acessibilidade (WCAG)',
+    titulo: '24. Escala de Fonte em 1-Clique 🔍',
+    descricao: 'O MiseOn é 100% acessível. Se você ou seus funcionários preferirem letras maiores, basta ajustar a Escala de Fonte na sua Conta. Todo o sistema se ajusta proporcionalmente sem quebrar o layout.',
+    dicaExtra: 'Acesse o menu inferior e clique em "Configurações da Conta" para encontrar o bloco "Acessibilidade Visual (WCAG 2.1)".',
+    rota: '/admin/conta',
+    targetDataTour: 'tour-acessibilidade',
+    posicao: 'top',
+  },
 ];
 
 export function useGuidedTour(lojaId?: string) {

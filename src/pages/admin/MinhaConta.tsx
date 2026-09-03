@@ -6,8 +6,11 @@ import { User as UserIcon, Lock, Mail, Phone, ShieldCheck, Loader2, CheckCircle2
 import MiseOnLoader from '../../components/MiseOnLoader';
 
 import { useI18n } from '../../contexts/I18nContext';
+import { useAcessibilidade } from '../../contexts/AcessibilidadeContext';
+import { MonitorUp } from 'lucide-react';
 export default function MinhaConta() {
   const { tDynamic } = useI18n();
+  const { escalaFonte, setEscalaFonte } = useAcessibilidade();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -305,6 +308,58 @@ export default function MinhaConta() {
               Salvar Perfil
             </button>
           </form>
+
+          {/* ACESSIBILIDADE WCAG */}
+          <div data-tour="tour-acessibilidade" className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+              <MonitorUp size={18} className="text-[var(--cor-primaria)]" /> {tDynamic('Acessibilidade Visual (WCAG 2.1)')}
+            </h3>
+            
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+              {tDynamic('Ajuste o tamanho de todas as letras do sistema de acordo com a sua preferência. O MiseOn adapta toda a interface proporcionalmente sem quebrar telas.')}
+            </p>
+
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setEscalaFonte('padrao')}
+                className={`py-2 px-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
+                  escalaFonte === 'padrao' 
+                    ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)] font-bold' 
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                <span className="text-xs font-bold uppercase tracking-wider">{tDynamic('Padrão')}</span>
+                <span className="text-[10px] opacity-70">100%</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setEscalaFonte('grande')}
+                className={`py-2 px-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
+                  escalaFonte === 'grande' 
+                    ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)] font-bold' 
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                <span className="text-sm font-bold uppercase tracking-wider">{tDynamic('Grande')}</span>
+                <span className="text-[10px] opacity-70">110%</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setEscalaFonte('maximo')}
+                className={`py-2 px-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
+                  escalaFonte === 'maximo' 
+                    ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)] font-bold' 
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                <span className="text-base font-bold uppercase tracking-wider">{tDynamic('Máximo')}</span>
+                <span className="text-[10px] opacity-70">120%</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* COLUNA 2: SEGURANÇA E SENHA */}
