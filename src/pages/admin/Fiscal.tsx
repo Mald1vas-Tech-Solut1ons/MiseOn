@@ -10,7 +10,7 @@ import { useToast } from '../../components/ui/Toast';
 import { CtxLoja } from './AdminLayout';
 import ModalImportarNFCe from '../../components/estoque/ModalImportarNFCe';
 import type { Insumo } from '../../types';
-import type { NotaLida } from '../../hooks/useImportacaoNota';
+import { useImportacaoNota } from '../../hooks/useImportacaoNota';
 
 import { useI18n } from '../../contexts/I18nContext';
 interface ConfigFiscal {
@@ -106,12 +106,12 @@ export default function Fiscal() {
   const [justificativaCancelamento, setJustificativaCancelamento] = useState('');
   const [cancelando, setCancelando] = useState(false);
 
-  // Importador de XML — le o arquivo e entrega pro mesmo motor inteligente
-  // de importacao (fn_importar_nfce) que ja atende QR Code e foto de cupom.
-  // Reaproveitar ali evita a divergencia que quebrou a primeira versao deste
-  // importador: uma copia solta que gravava a nota mas nunca somava estoque.
-  const [xmlFile, setXmlFile] = useState<File | null>(null);
-  const [xmlDataParsed, setXmlDataParsed] = useState<NotaLida | null>(null);
+  // Importador de XML — mesmo hook que atende QR Code e foto de cupom em
+  // Estoque/Compras (useImportacaoNota), so que pela terceira rota (arquivo
+  // .xml da NFe do fornecedor). Reaproveitar evita a divergencia que quebrou
+  // a primeira versao deste importador: uma copia solta que gravava a nota
+  // mas nunca somava estoque.
+  const nota = useImportacaoNota(ctx?.lojaId || '');
   const [insumosLoja, setInsumosLoja] = useState<Insumo[]>([]);
 
   const carregarConfiguracoes = useCallback(async () => {
@@ -335,96 +335,22 @@ export default function Fiscal() {
     }
   };
 
-  // Parser XML de Fornecedor (NFe Modelo 55). So le e organiza no formato
-  // que a conferencia inteligente (ModalImportarNFCe) ja sabe consumir — a
-  // baixa de estoque em si acontece so depois que o lojista confirma la.
-  const handleXmlUpload = (file: File) => {
-    setXmlFile(file);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const text = e.target?.result as string;
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(text, 'text/xml');
-        if (xmlDoc.querySelector('parsererror')) throw new Error('XML mal formado');
-
-        const emitenteNome = xmlDoc.querySelector('emit > xNome')?.textContent || 'Fornecedor Desconhecido';
-        const emitenteCnpj = xmlDoc.querySelector('emit > CNPJ')?.textContent || null;
-        const dhEmi = xmlDoc.querySelector('ide > dhEmi')?.textContent || null;
-        const vNF = parseFloat(xmlDoc.querySelector('total > ICMSTot > vNF')?.textContent || '0');
-        const vProd = parseFloat(xmlDoc.querySelector('total > ICMSTot > vProd')?.textContent || '0');
-        const vDesc = parseFloat(xmlDoc.querySelector('total > ICMSTot > vDesc')?.textContent || '0');
-
-        // Chave de acesso vem no atributo Id do infNFe ("NFe" + 44 dígitos) —
-        // é o que evita lançar a mesma nota duas vezes no estoque.
-        const infNFeId = xmlDoc.querySelector('infNFe')?.getAttribute('Id') || '';
-        const chave = infNFeId.replace(/^NFe/, '');
-        const uf = chave.slice(0, 2);
-
-        const detList = xmlDoc.querySelectorAll('det');
-        const itens: NotaLida['itens'] = [];
-
-        detList.forEach((det, idx) => {
-          const prod = det.querySelector('prod');
-          if (!prod) return;
-          const codigo = prod.querySelector('cProd')?.textContent || '';
-          const descricao = prod.querySelector('xProd')?.textContent || `Item ${idx + 1}`;
-          const qtd = parseFloat(prod.querySelector('qCom')?.textContent || '1');
-          const unidade = prod.querySelector('uCom')?.textContent || 'UN';
-          const valorUnitario = parseFloat(prod.querySelector('vUnCom')?.textContent || '0');
-          const valorTotal = parseFloat(prod.querySelector('vProd')?.textContent || '0');
-          const cEAN = prod.querySelector('cEAN')?.textContent || '';
-          const gtin = /^\d{8,14}$/.test(cEAN) ? cEAN : null;
-
-          itens.push({
-            num_item: idx + 1,
-            descricao,
-            gtin,
-            codigo_fornecedor: codigo || null,
-            qtd,
-            unidade,
-            valor_unitario: valorUnitario,
-            valor_total: valorTotal,
-          });
-        });
-
-        if (itens.length === 0) throw new Error('Nenhum item (det/prod) encontrado no XML');
-
-        setXmlDataParsed({
-          chave,
-          uf,
-          emitente: { razao_social: emitenteNome, cnpj: emitenteCnpj },
-          data_emissao: dhEmi,
-          valor_total: vNF || vProd,
-          valor_produtos: vProd || undefined,
-          desconto: vDesc || undefined,
-          itens,
-        });
-
-        toast('XML lido com sucesso! Confira o de-para dos itens antes de lançar no estoque.', 'sucesso');
-      } catch (err: any) {
-        console.error(err);
-        toast(err?.message || 'Erro ao ler o arquivo XML da NFe', 'erro');
-      }
-    };
-    reader.readAsText(file);
-  };
-
   // Registra no histórico fiscal depois que o estoque já foi de fato
   // atualizado pela RPC — nunca antes, senão a nota "importada" mente de
   // novo caso a baixa no estoque falhe no meio do caminho.
   const registrarHistoricoEntradaXml = async () => {
-    if (!xmlDataParsed) return;
+    const dados = nota.dadosNota;
+    if (!dados) return;
     try {
       await supabase.from('notas_fiscais').insert({
         loja_id: ctx.lojaId,
         tipo: 'ENTRADA_FORNECEDOR',
         status: 'IMPORTADA',
-        chave_nfe: xmlDataParsed.chave || null,
-        numero: xmlDataParsed.chave ? xmlDataParsed.chave.slice(25, 34) : null,
-        valor_total: xmlDataParsed.valor_total,
-        emitente_nome: xmlDataParsed.emitente.razao_social,
-        emitente_cnpj: xmlDataParsed.emitente.cnpj,
+        chave_nfe: dados.chave || null,
+        numero: dados.chave ? dados.chave.slice(25, 34) : null,
+        valor_total: dados.valor_total,
+        emitente_nome: dados.emitente.razao_social,
+        emitente_cnpj: dados.emitente.cnpj,
         ambiente: 'producao',
       });
     } catch (err) {
@@ -1047,32 +973,37 @@ export default function Fiscal() {
                 accept=".xml"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) handleXmlUpload(f);
+                  if (f) nota.processarArquivoXml(f);
                 }}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
               <FileCode size={36} className="text-[#004198] dark:text-[#6B9EFF] mb-3 animate-bounce" />
               <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
-                {xmlFile ? xmlFile.name : 'Arraste ou selecione o arquivo .xml da NFe'}
+                {nota.consultando ? (nota.textoConsulta || 'Lendo...') : 'Arraste ou selecione o arquivo .xml da NFe'}
               </span>
               <span className="text-xs text-gray-400 mt-1">{tDynamic('Formato suportado: XML NFe Modelo 55 da SEFAZ')}</span>
             </div>
+
+            {nota.motivoFallback && (
+              <p className="flex items-center gap-1.5 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-xs font-bold text-red-600 dark:text-red-400">
+                <AlertTriangle size={15} /> {nota.motivoFallback}
+              </p>
+            )}
           </div>
 
           {/* Conferencia inteligente: mesmo motor (de-para + IA + RPC
               atomica) que ja atende a importacao por QR Code em Estoque e
               Compras — o XML so entrega a nota nesse mesmo formato. */}
-          {xmlDataParsed && ctx?.lojaId && (
+          {nota.dadosNota && ctx?.lojaId && (
             <ModalImportarNFCe
               lojaId={ctx.lojaId}
-              dadosNota={xmlDataParsed}
+              dadosNota={nota.dadosNota}
               insumosExistentes={insumosLoja}
-              onFechar={() => { setXmlDataParsed(null); setXmlFile(null); }}
+              onFechar={nota.descartarNota}
               onSucesso={async (mensagem) => {
                 toast(mensagem, 'sucesso');
                 await registrarHistoricoEntradaXml();
-                setXmlDataParsed(null);
-                setXmlFile(null);
+                nota.descartarNota();
                 await Promise.all([carregarNotas(), carregarInsumos()]);
               }}
             />

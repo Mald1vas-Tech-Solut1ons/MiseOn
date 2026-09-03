@@ -29,7 +29,7 @@ import {
   CATEGORIAS_CATALOGO,
   type ItemCatalogo,
 } from '../../lib/catalogoInsumos';
-import { BarChart3, QrCode } from 'lucide-react';
+import { BarChart3, QrCode, FileCode } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 import { useImportacaoNota } from '../../hooks/useImportacaoNota';
 
@@ -589,23 +589,51 @@ export default function Estoque() {
         </div>
       )}
 
-      {/* BANNER DE IMPORTAÇÃO RÁPIDA NFC-E */}
+      {/* BANNER DE IMPORTAÇÃO RÁPIDA — duas notas fiscais diferentes, duas
+          entradas: cupom de mercado (NFC-e, você que comprou) e nota do
+          fornecedor/distribuidora (NFe, o arquivo .xml que ele te manda).
+          As duas caem na mesma conferência inteligente. */}
       <div className="mb-6 rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 p-4 text-white shadow-lg shadow-orange-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <p className="flex items-center gap-2 font-black text-lg">
-            <QrCode size={22} className="animate-bounce" /> {tDynamic('Importar Cupom de Mercado (NFC-e SP)')}
+            <QrCode size={22} className="animate-bounce" /> {tDynamic('Importar Compra para o Estoque')}
           </p>
           <p className="text-xs text-orange-100 mt-0.5">
-            {tDynamic('Escaneie o QR Code do cupom fiscal e lance 15 compras de supermercado em menos de 5 segundos no estoque.')}
+            {tDynamic('Cupom de mercado (NFC-e) ou nota de fornecedor (NFe): escaneie o QR Code ou envie o XML e o MiseOn lança tudo no estoque em segundos.')}
           </p>
         </div>
-        <button
-          onClick={() => setModalScannerAberto(true)}
-          className="shrink-0 flex items-center gap-2 bg-white text-orange-600 hover:bg-orange-50 font-black text-sm px-5 py-3 rounded-xl shadow-md transition-all hover:scale-105"
-        >
-          <QrCode size={18} /> {tDynamic('Escanear Nota Fiscal')}
-        </button>
+        <div className="shrink-0 flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setModalScannerAberto(true)}
+            className="flex items-center gap-2 bg-white text-orange-600 hover:bg-orange-50 font-black text-sm px-5 py-3 rounded-xl shadow-md transition-all hover:scale-105"
+          >
+            <QrCode size={18} /> {tDynamic('Escanear Cupom (NFC-e)')}
+          </button>
+          <label className="relative flex items-center gap-2 bg-white/15 text-white hover:bg-white/25 font-black text-sm px-5 py-3 rounded-xl shadow-md transition-all hover:scale-105 cursor-pointer border border-white/30">
+            <input
+              type="file"
+              accept=".xml"
+              className="absolute inset-0 opacity-0 cursor-pointer"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) nota.processarArquivoXml(f);
+                e.target.value = '';
+              }}
+            />
+            <FileCode size={18} /> {tDynamic('Importar XML (Fornecedor)')}
+          </label>
+        </div>
       </div>
+      {nota.consultando && nota.textoConsulta && (
+        <p className="-mt-4 mb-4 text-xs font-bold text-orange-600 dark:text-orange-400 flex items-center gap-1.5">
+          <Loader2 size={13} className="animate-spin" /> {nota.textoConsulta}
+        </p>
+      )}
+      {nota.motivoFallback && !modalScannerAberto && (
+        <p className="-mt-4 mb-4 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5">
+          <AlertTriangle size={13} /> {nota.motivoFallback}
+        </p>
+      )}
 
       {/* NOVO INSUMO COM MOTOR DINÂMICO */}
       <div id="form-novo-insumo" data-tour="tour-estoque-btn-novo-insumo" className={`mb-8 rounded-2xl ${editando ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 ring-2 ring-blue-500/20' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'} border p-5 shadow-sm transition-all duration-300`}>

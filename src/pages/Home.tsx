@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  QrCode, ClipboardList, ChefHat, Bike, Boxes, Wallet, ScanLine, HeartPulse,
+  QrCode, ClipboardList, ChefHat, Bike, Boxes, Wallet, ScanLine, HeartPulse, FileCode,
   MessageCircle, ShieldCheck, ArrowRight, Check, Sparkles,
   Menu as MenuIcon, X, UtensilsCrossed, Megaphone, ShoppingBag,
   Mail, ChevronDown, Headset, BarChart3, Star, Quote, BadgeCheck, Scale,
@@ -245,7 +245,7 @@ const PLATAFORMA = [
   {
     grupo: 'Gerir',
     itens: [
-      'Entrada de estoque escaneando o cupom fiscal do mercado (NFC-e)',
+      'Entrada de estoque pelo cupom do mercado (NFC-e) ou XML da nota do fornecedor (NF-e)',
       'Estoque com baixa automática por lote PEPS',
       'Inteligência Preditiva de Compras (Ordem no WhatsApp)',
       'Ficha técnica, alergênicos e CMV real por prato',
@@ -338,9 +338,9 @@ const SUPORTE_CANAIS = [
 
 const FAQ = [
   {
-    pergunta: 'Preciso cadastrar item por item quando volto do mercado?',
+    pergunta: 'Preciso cadastrar item por item quando volto do mercado ou recebo uma entrega de fornecedor?',
     resposta:
-      'Não. Escaneie o QR Code do cupom fiscal (NFC-e) com a câmera do celular — ou envie uma foto dele — e o MiseOn consulta a nota na SEFAZ e traz a lista completa: descrição, quantidade, unidade e custo de cada item. Na conferência você desmarca o que não é da cozinha, ajusta a conversão (uma bandeja de ovos vira 20 unidades) e dá entrada de todos de uma vez. Na compra seguinte no mesmo mercado, o reconhecimento já é automático — e a mesma nota nunca entra duas vezes.',
+      'Não, e tem um caminho pra cada caso. Voltou do mercado com o cupom na mão? Escaneie o QR Code do cupom fiscal (NFC-e) com a câmera do celular — ou envie uma foto dele — e o MiseOn consulta a nota na SEFAZ e traz a lista completa: descrição, quantidade, unidade e custo de cada item. Recebeu carga de uma distribuidora ou atacadista? Envie o arquivo XML da nota fiscal (NF-e) que ela te manda por e-mail, sem precisar de QR Code nenhum. Nos dois casos você cai na mesma conferência: desmarca o que não é da cozinha, ajusta a conversão (uma bandeja de ovos vira 20 unidades) e dá entrada de todos de uma vez. Na compra seguinte no mesmo fornecedor, o reconhecimento já é automático — e a mesma nota nunca entra duas vezes.',
   },
   {
     pergunta: 'Preciso comprar ou instalar algum equipamento?',
@@ -1487,6 +1487,14 @@ export default function Home() {
               <p className="mt-4 text-base leading-relaxed text-orange-100/85">
                 {tDynamic('No MiseOn, você volta do mercado e')} <b className="text-white">{tDynamic('escaneia o QR Code do cupom fiscal')}</b>.
                 {tDynamic('O sistema busca a nota na SEFAZ e traz a compra inteira — produto, quantidade, unidade e o custo real de cada item. Você confere, ajusta o que quiser e dá entrada de tudo de uma vez.')}
+              </p>
+              <p className="mt-4 flex items-start gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-relaxed text-orange-100/85 backdrop-blur-md">
+                <FileCode size={18} className="mt-0.5 shrink-0 text-amber-300" />
+                <span>
+                  {tDynamic('Compra grande, direto da distribuidora?')}{' '}
+                  <b className="text-white">{tDynamic('Envie o XML da nota fiscal (NF-e) que ela te manda')}</b>
+                  {tDynamic(' — mesma conferência inteligente, sem precisar de cupom nem QR Code.')}
+                </span>
               </p>
 
               <div className="mt-6 grid gap-2.5 sm:grid-cols-3">

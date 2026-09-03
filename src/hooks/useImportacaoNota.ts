@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { interpretarEntradaNota } from '../lib/entradaNota';
+import { parseNFeXml } from '../lib/parseNFeXml';
 
 /** Item como as duas rotas entregam — o formato que a conferência consome. */
 export interface ItemLidoNota {
@@ -46,6 +47,7 @@ export interface ImportacaoNota {
   dadosNota: NotaLida | null;
   processarQRCode: (entrada: string) => Promise<void>;
   processarFotoCupom: (fotosBase64: string[], mime: string) => Promise<void>;
+  processarArquivoXml: (arquivo: File) => Promise<void>;
   limparFalha: () => void;
   descartarNota: () => void;
 }
@@ -137,6 +139,28 @@ export function useImportacaoNota(lojaId: string): ImportacaoNota {
     }
   };
 
+  /**
+   * Terceira rota: XML da NFe do fornecedor/distribuidora (nota de compra
+   * por atacado — documento diferente do cupom NFC-e das rotas 1 e 2).
+   * Não depende de portal nem de foto: o lojista já tem o arquivo que a
+   * distribuidora mandou por e-mail. Cai na mesma conferência das outras.
+   */
+  const processarArquivoXml = async (arquivo: File) => {
+    setConsultando(true);
+    setTextoConsulta('Lendo o XML da nota...');
+    setMotivoFallback(null);
+    try {
+      const texto = await arquivo.text();
+      const lida = parseNFeXml(texto);
+      setDadosNota(lida);
+    } catch (err) {
+      setMotivoFallback(`Não consegui ler esse XML: ${(err as Error)?.message ?? err}`);
+    } finally {
+      setConsultando(false);
+      setTextoConsulta(undefined);
+    }
+  };
+
   return {
     consultando,
     textoConsulta,
@@ -144,6 +168,7 @@ export function useImportacaoNota(lojaId: string): ImportacaoNota {
     dadosNota,
     processarQRCode,
     processarFotoCupom,
+    processarArquivoXml,
     limparFalha: () => setMotivoFallback(null),
     descartarNota: () => setDadosNota(null),
   };

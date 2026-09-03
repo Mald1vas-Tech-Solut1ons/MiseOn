@@ -27,7 +27,7 @@ import ModalFornecedor from '../../components/compras/ModalFornecedor';
 import ModalRecebimento from '../../components/compras/ModalRecebimento';
 import ScannerQRCodeModal from '../../components/estoque/ScannerQRCodeModal';
 import ModalImportarNFCe from '../../components/estoque/ModalImportarNFCe';
-import { QrCode } from 'lucide-react';
+import { QrCode, FileCode } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 import {
   CompraResumo, Fornecedor, InsumoGiro, LoteValidade, ROTULO_STATUS,
@@ -276,6 +276,19 @@ export default function Compras() {
           >
             <QrCode size={16} /> Escanear Cupom (NFC-e)
           </button>
+          <label className="relative flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition hover:scale-105 cursor-pointer">
+            <input
+              type="file"
+              accept=".xml"
+              className="absolute inset-0 opacity-0 cursor-pointer"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) nota.processarArquivoXml(f);
+                e.target.value = '';
+              }}
+            />
+            <FileCode size={16} /> Importar XML (Fornecedor)
+          </label>
           <div className="flex rounded-xl bg-gray-100 p-1 shadow-inner dark:bg-gray-800">
             {([['repor', 'Repor'], ['pedidos', 'Pedidos'], ['fornecedores', 'Fornecedores']] as const).map(([k, label]) => (
               <button key={k} onClick={() => setAba(k)}
