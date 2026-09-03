@@ -371,6 +371,8 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
   const { tDynamic } = useI18n();
   const [pct, setPct] = useState('0');
   const [pctOriginal, setPctOriginal] = useState('0');
+  const [diasExpiracao, setDiasExpiracao] = useState<string>('60');
+  const [diasOriginal, setDiasOriginal] = useState<string>('60');
   const [stats, setStats] = useState({ clientesComSaldo: 0, passivoTotal: 0 });
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
@@ -378,11 +380,13 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
 
   const carregar = useCallback(async () => {
     const [{ data: loja }, { data: saldos }] = await Promise.all([
-      supabase.from('lojas').select('cashback_pct').eq('id', lojaId).single(),
+      supabase.from('lojas').select('cashback_pct, cashback_dias_expiracao').eq('id', lojaId).single(),
       supabase.from('cashback_saldos').select('saldo').eq('loja_id', lojaId).gt('saldo', 0),
     ]);
     const p = String(loja?.cashback_pct ?? 0);
+    const d = String(loja?.cashback_dias_expiracao ?? 60);
     setPct(p); setPctOriginal(p);
+    setDiasExpiracao(d); setDiasOriginal(d);
     setStats({
       clientesComSaldo: saldos?.length ?? 0,
       passivoTotal: (saldos ?? []).reduce((s, x) => s + Number(x.saldo), 0),
@@ -394,11 +398,15 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
 
   const salvar = async () => {
     setSalvando(true); setMsg('');
-    const { error } = await supabase.from('lojas').update({ cashback_pct: Number(pct || 0) }).eq('id', lojaId);
+    const { error } = await supabase.from('lojas').update({
+      cashback_pct: Number(pct || 0),
+      cashback_dias_expiracao: diasExpiracao === '0' ? null : Number(diasExpiracao || 60),
+    }).eq('id', lojaId);
     setSalvando(false);
     if (error) return setMsg('Erro ao salvar: ' + error.message);
     setPctOriginal(pct);
-    setMsg('Regra de Cashback salva com sucesso!');
+    setDiasOriginal(diasExpiracao);
+    setMsg('Regra de Cashback e Expiração salva com sucesso!');
     setTimeout(() => setMsg(''), 2500);
   };
 
@@ -413,22 +421,40 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
         </p>
       </div>
 
-      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-4">
-        <div>
-          <span className="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">{tDynamic('Percentual de Cashback por Pedido')}</span>
-          <div className="mt-3 flex items-center gap-3">
-            <input type="number" min="0" max="100" step="0.5" value={pct} onChange={(e) => setPct(e.target.value)}
-              className="w-32 rounded-2xl border-2 border-[var(--cor-primaria)] bg-green-50 p-3 text-center text-3xl font-black text-[var(--cor-primaria)] outline-none dark:bg-green-900/10" />
-            <span className="text-2xl font-black text-gray-400">% de retorno</span>
+      <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <span className="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">{tDynamic('Percentual de Cashback')}</span>
+            <div className="mt-2 flex items-center gap-2">
+              <input type="number" min="0" max="100" step="0.5" value={pct} onChange={(e) => setPct(e.target.value)}
+                className="w-28 rounded-2xl border-2 border-[var(--cor-primaria)] bg-green-50 p-3 text-center text-2xl font-black text-[var(--cor-primaria)] outline-none dark:bg-green-900/10" />
+              <span className="text-sm font-bold text-gray-500">% de retorno</span>
+            </div>
+            <p className="mt-1.5 text-xs text-gray-400">{tDynamic('Recomendado: 5% a 10% de retorno.')}</p>
           </div>
-          <p className="mt-2 text-xs text-gray-400">{tDynamic('Dica: 5% a 10% é o valor ideal utilizado pelas maiores redes para garantir a volta do cliente.')}</p>
+
+          <div>
+            <span className="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">{tDynamic('Prazo de Expiração do Saldo')}</span>
+            <select
+              value={diasExpiracao}
+              onChange={(e) => setDiasExpiracao(e.target.value)}
+              className="mt-2 w-full rounded-2xl border-2 border-gray-200 bg-gray-50 p-3 text-sm font-bold text-gray-900 outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            >
+              <option value="30">30 dias (Gera alta urgência de recompra)</option>
+              <option value="60">60 dias (Recomendado)</option>
+              <option value="90">90 dias</option>
+              <option value="180">180 dias (6 meses)</option>
+              <option value="0">Sem expiração (Saldo vitalício)</option>
+            </select>
+            <p className="mt-1.5 text-xs text-gray-400">{tDynamic('Saldos expirados incentivam o retorno rápido e reduzem o passivo contábil da loja.')}</p>
+          </div>
         </div>
 
         {msg && <p className={`text-xs font-bold ${msg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
 
-        <button onClick={salvar} disabled={salvando || pct === pctOriginal}
+        <button onClick={salvar} disabled={salvando || (pct === pctOriginal && diasExpiracao === diasOriginal)}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 disabled:opacity-40">
-          <Save size={16} /> {salvando ? 'Salvando…' : 'Salvar Regra de Cashback'}
+          <Save size={16} /> {salvando ? 'Salvando…' : 'Salvar Regra de Cashback & Expiração'}
         </button>
       </div>
 

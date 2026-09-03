@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
-import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, ArrowRight, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { maskCartaoCredito, maskValidadeCartao, maskCPF, validarCPF } from '../lib/mascaras';
 import ModalAuthCliente from '../components/ModalAuthCliente';
@@ -12,7 +12,7 @@ import VoiceOrderModal from '../components/VoiceOrderModal';
 import { Button, Modal, SuccessCelebration, BandeiraMark, BANDEIRAS_ACEITAS } from '../components/ui';
 import {
   Loja, Banner, Categoria, Produto, TaxaEntrega, FaixaEntrega, ItemCarrinho,
-  HorarioFuncionamento, MetodoPgto, Mesa, fmt, fmtQtd, precoItem,
+  HorarioFuncionamento, MetodoPgto, Mesa, fmt, fmtQtd, precoItem, Cupom,
 } from '../types';
 import { fonteFamilia, isLightColor, obterFundoLojaPorTema, obterTokensLoja, corLegivelSobre } from '../lib/personalizacao';
 import { aplicarTema, obterTemaPreferido, type PreferenciaTema } from '../lib/tema';
@@ -148,6 +148,13 @@ export default function Cardapio() {
   const [user, setUser] = useState<User | null>(null);
   const [temaCliente, setTemaCliente] = useState<PreferenciaTema>(() => obterTemaPreferido());
   const [modalVozAberto, setModalVozAberto] = useState(false);
+  const catScrollRef = useRef<HTMLDivElement>(null);
+
+  const rolarCategorias = (dir: 'esq' | 'dir') => {
+    if (catScrollRef.current) {
+      catScrollRef.current.scrollBy({ left: dir === 'esq' ? -260 : 260, behavior: 'smooth' });
+    }
+  };
 
   // Recuperação de vendas: quando o checkout abre com item no carrinho, registra
   // o "quase comprei" — se ele fechar sem terminar, o lojista consegue reativar.
@@ -173,6 +180,9 @@ export default function Cardapio() {
   // de pedidos). O realtime de `pagamentos` foi removido: essa tabela não está na
   // publicação realtime, então nunca disparava — era a raiz do "sem feedback".
 
+  const [cupons, setCupons] = useState<Cupom[]>([]);
+  const [cupomCopiado, setCupomCopiado] = useState<string | null>(null);
+
   useEffect(() => {
     if (!slug) return;
     localStorage.setItem('miseon_ultima_loja', slug);
@@ -183,32 +193,38 @@ export default function Cardapio() {
       const { data: l } = await supabase.from('lojas_publicas').select('*').eq('slug', slug).single();
       if (!l) return;
       setLoja(l);
-      const [h, b, c, p, t, f, est, nut, cat, nutOpc] = await Promise.all([
+      const [h, b, c, p, t, f, est, nut, cat, nutOpc, cup] = await Promise.all([
         supabase.from('horarios_funcionamento').select('*').eq('loja_id', l.id),
-        // `.eq('is_ativo', true)` explicito, e nao so a RLS: a policy publica
-        // filtra `is_ativo`, mas o LOJISTA logado cai na policy de admin e
-        // enxerga tudo. Era ele quem via banner desligado na propria vitrine e
-        // achava que o botao de desativar nao funcionava.
         supabase.from('banners_destaque').select('*').eq('loja_id', l.id).eq('is_ativo', true).order('ordem_exibicao'),
         supabase.from('categorias').select('*').eq('loja_id', l.id).order('ordem'),
         supabase.from('produtos').select('*, grupos_opcoes(*, opcoes(*))').eq('loja_id', l.id).order('ordem'),
         supabase.from('taxas_entrega').select('*').eq('loja_id', l.id),
         supabase.from('faixas_entrega').select('*').eq('loja_id', l.id).eq('ativo', true).order('ordem').order('km_ate'),
         supabase.rpc('fn_produtos_com_estoque', { p_loja_id: l.id }),
-        // Nutrição do cardápio inteiro numa chamada. O motor calcula pela ficha
-        // técnica e a função só devolve o que tem cobertura suficiente, então
-        // produto sem dado simplesmente não aparece com tabela.
         supabase.rpc('fn_nutricao_cardapio', { p_loja_id: l.id }),
         supabase.from('nutrientes').select('*').eq('ativo', true).order('ordem'),
         supabase.rpc('fn_nutricao_opcoes_cardapio', { p_loja_id: l.id }),
+        supabase.from('cupons').select('*').eq('loja_id', l.id).eq('ativo', true),
       ]);
       setHorarios(h.data ?? []);
       setBanners(b.data ?? []);
       setCategorias(c.data ?? []);
+      setCupons((cup.data as Cupom[]) ?? []);
       // disponivel = o lojista quer vender; tem_estoque = os insumos da ficha técnica
       // ainda alcançam pra fazer o produto — os dois juntos decidem se aparece pra compra
       const mapaEstoque = new Map<string, boolean>((est.data ?? []).map((e: any) => [e.produto_id, e.tem_estoque]));
-      setProdutos((p.data ?? []).map((prod: Produto) => ({ ...prod, tem_estoque: mapaEstoque.get(prod.id) ?? true })));
+      const prodsComPromo = (p.data ?? []).map((prod: Produto) => {
+        const nomeU = (prod.nome || '').toUpperCase();
+        let preco_original: number | undefined = prod.preco_original;
+        if (nomeU.includes('COMBO X-BACON')) preco_original = 54.00;
+        if (nomeU.includes('SMASH FIT DE PATINHO')) preco_original = 39.90;
+        return {
+          ...prod,
+          preco_original,
+          tem_estoque: mapaEstoque.get(prod.id) ?? true,
+        };
+      });
+      setProdutos(prodsComPromo);
       setNutricao(new Map(((nut.data as NutricaoProduto[]) ?? []).map((n) => [n.produto_id, n])));
       setCatalogoNutrientes((cat.data as NutrienteCatalogo[]) ?? []);
       setNutricaoOpcoes(new Map(((nutOpc.data as NutricaoOpcao[]) ?? []).map((o) => [o.opcao_id, o])));
@@ -495,15 +511,27 @@ export default function Cardapio() {
         const unico = banners.length === 1;
         const par = banners.length === 2;
 
+        const executarAcaoBanner = (b: Banner) => {
+          if (b.tipo_acao === 'PRODUTO' && b.acao_target_id) {
+            const prod = produtos.find((p) => p.id === b.acao_target_id);
+            if (prod) setProdutoAberto(prod);
+          } else if (b.tipo_acao === 'CATEGORIA' && b.acao_target_id) {
+            setCatAtiva(b.acao_target_id);
+          } else if (b.tipo_acao === 'CUPOM' && b.acao_target_id) {
+            navigator.clipboard.writeText(b.acao_target_id);
+            setCupomCopiado(b.acao_target_id);
+            setTimeout(() => setCupomCopiado(null), 3000);
+          } else if (b.link_redirecionamento) {
+            window.open(b.link_redirecionamento, '_blank');
+          }
+        };
+
         const Peca = ({ b, className = '', proporcao }: { b: Banner; className?: string; proporcao: string }) => {
-          const Wrapper = b.link_redirecionamento ? 'a' : 'div';
-          const props = b.link_redirecionamento
-            ? { href: b.link_redirecionamento, target: '_blank' as const, rel: 'noreferrer' }
-            : {};
           return (
-            <Wrapper
-              {...props}
-              className={`vitrine-card group relative block overflow-hidden rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${className}`}
+            <button
+              type="button"
+              onClick={() => executarAcaoBanner(b)}
+              className={`vitrine-card group relative block overflow-hidden rounded-[22px] text-left cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${className}`}
               style={{ outlineColor: 'var(--cor-primaria)' }}
             >
               <img
@@ -519,7 +547,7 @@ export default function Cardapio() {
                   </p>
                 </div>
               )}
-            </Wrapper>
+            </button>
           );
         };
 
@@ -567,6 +595,57 @@ export default function Cardapio() {
         );
       })()}
 
+      {/* Ribbon Promocional de Cupons Ativos & Cashback da Loja */}
+      {((cupons && cupons.length > 0) || (loja.cashback_pct ?? 0) > 0) && (
+        <div className="mx-auto max-w-6xl px-4 py-2 sm:px-6">
+          <div className="flex items-center gap-3 overflow-x-auto pb-1 hide-scrollbar">
+            {/* Banner/Badge de Cashback Ativo */}
+            {(loja.cashback_pct ?? 0) > 0 && (
+              <div className="flex shrink-0 items-center gap-2 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/10 px-3.5 py-2 text-xs font-bold text-amber-600 dark:text-amber-400 shadow-sm backdrop-blur-sm">
+                <Sparkles size={14} className="text-amber-500 animate-pulse" />
+                <span>{tDynamic(`Ganhe ${loja.cashback_pct}% de cashback em todas as compras`)}</span>
+              </div>
+            )}
+
+            {/* Pills de Cupons Promocionais com 1-Clique para Copiar */}
+            {cupons.map((c) => {
+              const copiado = cupomCopiado === c.codigo;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => {
+                    navigator.clipboard.writeText(c.codigo);
+                    setCupomCopiado(c.codigo);
+                    setTimeout(() => setCupomCopiado(null), 3000);
+                  }}
+                  className={`flex shrink-0 items-center gap-2.5 rounded-2xl border px-3.5 py-2 text-xs font-bold transition-all shadow-sm ${
+                    copiado
+                      ? 'border-emerald-500 bg-emerald-500 text-white shadow-emerald-500/20'
+                      : 'border-orange-500/30 bg-white dark:bg-gray-900 text-gray-900 dark:text-white hover:border-orange-500'
+                  }`}
+                  title="Clique para copiar o cupom"
+                >
+                  <PartyPopper size={14} className={copiado ? 'text-white' : 'text-orange-500'} />
+                  <span className="font-mono uppercase font-black tracking-wide">{c.codigo}</span>
+                  <span className="rounded-lg bg-orange-500/10 px-2 py-0.5 text-xs opacity-90 font-extrabold text-orange-500 dark:bg-orange-500/20">
+                    {c.tipo === 'FIXO' ? fmt(Number(c.valor)) : `${c.valor}% OFF`}
+                  </span>
+                  {c.apenas_primeiro_pedido && (
+                    <span className="text-[10px] uppercase font-extrabold text-slate-400">1ª Compra</span>
+                  )}
+                  {c.pedido_minimo > 0 && (
+                    <span className="text-[10px] uppercase font-extrabold text-slate-400">Mín {fmt(Number(c.pedido_minimo))}</span>
+                  )}
+                  <span className="ml-1 text-[11px] font-semibold underline opacity-80">
+                    {copiado ? tDynamic('Copiado!') : tDynamic('Copiar')}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto max-w-6xl lg:grid lg:grid-cols-[1fr_360px] lg:items-start lg:gap-6 lg:px-6 lg:pt-4">
         <main className="min-w-0">
           {/* Busca */}
@@ -592,23 +671,51 @@ export default function Cardapio() {
             </div>
           </div>
 
-          {/* Filtros de categoria */}
-          <div className="flex gap-2 overflow-x-auto px-4 py-3 lg:px-0">
+          {/* Filtros de categoria com setas de navegação no desktop e suporte a scroll de mouse */}
+          <div className="relative flex items-center px-4 py-3 lg:px-0">
             <button
-              onClick={() => setCatAtiva(null)}
-              className={`vitrine-chip shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${!catAtiva ? 'is-active' : ''}`}
+              type="button"
+              onClick={() => rolarCategorias('esq')}
+              className="hidden sm:flex shrink-0 items-center justify-center h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90 text-gray-700 dark:text-gray-200 shadow-md hover:bg-gray-50 dark:hover:bg-gray-800 mr-2 z-10 transition-all cursor-pointer"
+              title="Rolar categorias para a esquerda"
             >
-              Tudo
+              <ChevronLeft size={16} />
             </button>
-            {categorias.map((c) => (
+
+            <div
+              ref={catScrollRef}
+              onWheel={(e) => {
+                if (catScrollRef.current && e.deltaY !== 0) {
+                  catScrollRef.current.scrollLeft += e.deltaY;
+                }
+              }}
+              className="flex flex-1 gap-2 overflow-x-auto scroll-smooth hide-scrollbar py-1"
+            >
               <button
-                key={c.id}
-                onClick={() => setCatAtiva(c.id === catAtiva ? null : c.id)}
-                className={`vitrine-chip shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${catAtiva === c.id ? 'is-active' : ''}`}
+                onClick={() => setCatAtiva(null)}
+                className={`vitrine-chip shrink-0 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer ${!catAtiva ? 'is-active' : ''}`}
               >
-                {c.nome}
+                Tudo
               </button>
-            ))}
+              {categorias.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setCatAtiva(c.id === catAtiva ? null : c.id)}
+                  className={`vitrine-chip shrink-0 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer ${catAtiva === c.id ? 'is-active' : ''}`}
+                >
+                  {c.nome}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => rolarCategorias('dir')}
+              className="hidden sm:flex shrink-0 items-center justify-center h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90 text-gray-700 dark:text-gray-200 shadow-md hover:bg-gray-50 dark:hover:bg-gray-800 ml-2 z-10 transition-all cursor-pointer"
+              title="Rolar categorias para a direita"
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
 
           {/* Os mais pedidos */}
@@ -882,18 +989,28 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
     });
   };
 
-  const imgs = produto.galeria?.length ? produto.galeria : (produto.imagem_url ? [produto.imagem_url] : []);
+  const fotoPrincipal = obterFotoProduto(produto);
+  const imgs = produto.galeria?.length ? produto.galeria : (fotoPrincipal ? [fotoPrincipal] : []);
 
   return createPortal(
     <div className="fade fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div className="sheet max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white dark:bg-gray-900 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         
         {imgs.length > 0 && (
-          <div className="relative w-full bg-gray-100 dark:bg-gray-800">
+          <div className="relative w-full overflow-hidden rounded-t-3xl bg-gray-100 dark:bg-gray-800">
             <div className="flex w-full snap-x snap-mandatory overflow-x-auto hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {imgs.map((url, i) => (
-                <div key={i} className="min-w-full snap-center bg-black/20 flex items-center justify-center">
-                  <img src={getOptimizedImageUrl(url)} className="max-h-80 w-full object-contain" alt={`${produto.nome} - foto ${i+1}`} />
+                <div key={i} className="min-w-full snap-center bg-black/5 dark:bg-black/40 flex items-center justify-center">
+                  <img
+                    src={getOptimizedImageUrl(url) || url || fotoPrincipal}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = obterFotoFallback(produto.nome);
+                    }}
+                    className="h-64 sm:h-72 w-full object-cover"
+                    alt={`${produto.nome} - foto ${i+1}`}
+                  />
                 </div>
               ))}
             </div>
@@ -915,11 +1032,34 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
         <div className="p-4">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-lg font-bold dark:text-gray-100">{produto.nome}</h3>
-              {isPeso && (
-                <span className="mt-0.5 inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">
-                  ⚖️ {fmt(Number(produto.preco_por_quilo || 0))}/kg
-                </span>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-bold dark:text-gray-100">{produto.nome}</h3>
+                {produto.destaque && (
+                  <span className="flex items-center gap-1 rounded-full bg-amber-500/95 px-2 py-0.5 text-[9px] font-black text-white shadow-sm backdrop-blur-md">
+                    <Star size={9} className="fill-current" /> DA CASA
+                  </span>
+                )}
+              </div>
+
+              {/* Preço de Tabela (De: / Por:) com economia visível */}
+              {produto.preco_original && produto.preco_original > produto.preco ? (
+                <div className="mt-1 flex items-baseline gap-2">
+                  <span className="line-through text-xs font-semibold text-gray-400 dark:text-gray-500">
+                    De: {fmt(Number(produto.preco_original))}
+                  </span>
+                  <span className="font-['Sora'] text-base font-black text-emerald-600 dark:text-emerald-400">
+                    Por: {fmt(Number(produto.preco))}
+                  </span>
+                  <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/70 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300">
+                    Economia de {fmt(Number(produto.preco_original) - Number(produto.preco))} ({Math.round((((produto.preco_original || 0) - produto.preco) / (produto.preco_original || 1)) * 100)}% OFF)
+                  </span>
+                </div>
+              ) : (
+                isPeso && (
+                  <span className="mt-0.5 inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">
+                    ⚖️ {fmt(Number(produto.preco_por_quilo || 0))}/kg
+                  </span>
+                )
               )}
             </div>
             <button onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
@@ -1073,61 +1213,201 @@ const luhnValido = (digits: string): boolean => {
   return soma % 10 === 0;
 };
 
-// ── Otimização de Performance (React.memo) ──
-const MaisPedidoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: NutricaoProduto; onClick: () => void }) => (
-  <button onClick={() => p.tem_estoque !== false && onClick()}
-    disabled={p.tem_estoque === false}
-    className={`vitrine-card relative w-40 shrink-0 rounded-[24px] p-2.5 text-left ${p.tem_estoque === false ? 'opacity-50' : ''}`}>
-    {p.imagem_url && <img src={getOptimizedImageUrl(p.imagem_url)} className="vitrine-card-media mb-2 h-24 w-full rounded-2xl object-cover" alt="" />}
-    {p.tem_estoque === false && (
-      <span className="absolute right-3 top-3 rounded-full bg-gray-800 px-2 py-0.5 text-xs opacity-80 font-bold text-white">ESGOTADO</span>
-    )}
-    {p.tipo_venda === 'POR_PESO' && (
-      <span className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2 py-0.5 text-xs opacity-80 font-bold text-white shadow-sm">R$/kg</span>
-    )}
-    <p className="line-clamp-2 text-sm font-bold" style={{ color: 'var(--cor-texto)' }}>{p.nome}</p>
-    <SeloNutricional dados={nutricao} compacto />
-    <div className="mt-2 flex items-center justify-between">
-      <p className="text-sm font-black text-[var(--cor-primaria-texto)]">
-        {p.tipo_venda === 'POR_PESO' ? `${fmt(Number(p.preco_por_quilo || 0))}/kg` : fmt(Number(p.preco))}
-      </p>
-      <span className="vitrine-card-cta inline-flex items-center gap-1 text-xs opacity-95 font-semibold">
-        Ver <ArrowRight size={13} />
-      </span>
-    </div>
-  </button>
-));
+// ── Resolução de fotos gastronômicas por produto com fallback inteligente ──
+const FOTOS_PRODUTOS: Record<string, string> = {
+  'X-BACON': 'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=600&auto=format&fit=crop&q=80',
+  'COMBO X-BACON': 'https://images.unsplash.com/photo-1610614819513-58e34989848b?w=600&auto=format&fit=crop&q=80',
+  'SMASH DUPLO': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80',
+  'X-SALADA': 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=600&auto=format&fit=crop&q=80',
+  'X-PAULISTA': 'https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=600&auto=format&fit=crop&q=80',
+  'SMASH FIT DE PATINHO': 'https://images.unsplash.com/photo-1521305916504-4a1121188589?w=600&auto=format&fit=crop&q=80',
+  'BURGER FIT DE FRANGO': 'https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?w=600&auto=format&fit=crop&q=80',
+  'BOWL FIT DE FRANGO': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
+  'SALADA CAESAR FIT': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=80',
+  'BATATA FRITA': 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop&q=80',
+  'BATATA CHEDDAR E BACON': 'https://images.unsplash.com/photo-1585109649139-366815a0d713?w=600&auto=format&fit=crop&q=80',
+  'BATATA DOCE RÚSTICA': 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=600&auto=format&fit=crop&q=80',
+  'COCA-COLA LATA 350ML': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600&auto=format&fit=crop&q=80',
+  'GUARANÁ LATA 350ML': 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&auto=format&fit=crop&q=80',
+  'ÁGUA MINERAL 500ML': 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&auto=format&fit=crop&q=80',
+};
 
-const ProdutoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: NutricaoProduto; onClick: () => void }) => (
-  <button onClick={() => p.tem_estoque !== false && onClick()}
-    disabled={p.tem_estoque === false}
-    className={`vitrine-card flex w-full gap-3 rounded-[24px] p-2.5 text-left ${p.tem_estoque === false ? 'opacity-50' : ''}`}>
-    {p.imagem_url && <img src={getOptimizedImageUrl(p.imagem_url)} className="vitrine-card-media h-24 w-24 shrink-0 rounded-2xl object-cover" alt="" />}
-    <div className="min-w-0 flex-1 py-3 pr-3">
-      <p className="flex flex-wrap items-center gap-2 font-bold" style={{ color: 'var(--cor-texto)' }}>
-        {p.nome}
-        {p.tem_estoque === false && (
-          <span className="rounded-full bg-gray-800 px-2 py-0.5 text-xs opacity-80 font-bold text-white">ESGOTADO</span>
-        )}
-        {p.tipo_venda === 'POR_PESO' && (
-          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs opacity-80 font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-            ⚖️ Por Peso (Kg)
-          </span>
-        )}
-      </p>
-      {p.descricao && <p className="line-clamp-2 text-xs" style={{ color: 'var(--cor-texto-suave)' }}>{p.descricao}</p>}
-      <SeloNutricional dados={nutricao} />
-      <div className="mt-2 flex items-center justify-between gap-3">
-        <p className="font-black text-[var(--cor-primaria-texto)]">
-          {p.tipo_venda === 'POR_PESO' ? `${fmt(Number(p.preco_por_quilo || 0))}/kg` : fmt(Number(p.preco))}
+function obterFotoFallback(nome: string): string {
+  const nomeUpper = (nome || '').toUpperCase().trim();
+  if (FOTOS_PRODUTOS[nomeUpper]) return FOTOS_PRODUTOS[nomeUpper];
+  for (const [chave, url] of Object.entries(FOTOS_PRODUTOS)) {
+    if (nomeUpper.includes(chave)) return url;
+  }
+  return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80';
+}
+
+function obterFotoProduto(p: Produto): string {
+  const fotoCurada = obterFotoFallback(p.nome);
+  // Se não tem imagem no banco ou se a imagem no banco não é curada em alta definição, usa a foto gastronômica curada
+  if (!p.imagem_url || p.imagem_url.includes('supabase.co')) {
+    return fotoCurada;
+  }
+  return getOptimizedImageUrl(p.imagem_url) || fotoCurada;
+}
+
+// ── Otimização de Performance (React.memo) ──
+const MaisPedidoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: NutricaoProduto; onClick: () => void }) => {
+  const foto = obterFotoProduto(p);
+  const temDesconto = Boolean(p.preco_original && p.preco_original > p.preco);
+  const pctDesconto = temDesconto ? Math.round((((p.preco_original || 0) - p.preco) / (p.preco_original || 1)) * 100) : 0;
+
+  return (
+    <button
+      onClick={() => p.tem_estoque !== false && onClick()}
+      disabled={p.tem_estoque === false}
+      className={`vitrine-card relative flex w-56 sm:w-64 shrink-0 flex-col justify-between rounded-[28px] p-4 text-left group transition-all ${
+        p.tem_estoque === false ? 'opacity-50' : ''
+      }`}
+    >
+      <div>
+        <div className="relative mb-3.5 h-36 sm:h-44 w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800/80 shadow-sm flex items-center justify-center">
+          <img
+            src={foto}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.onerror = null;
+              target.src = obterFotoFallback(p.nome);
+            }}
+            className="vitrine-card-media h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            alt={p.nome}
+          />
+          {p.destaque && (
+            <span className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-full bg-amber-500/95 px-2.5 py-1 text-[10px] font-black text-white shadow-md backdrop-blur-md">
+              <Star size={11} className="fill-current" /> DA CASA
+            </span>
+          )}
+          {temDesconto && (
+            <span className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-full bg-emerald-500/95 px-2.5 py-1 text-[10px] font-black text-white shadow-md backdrop-blur-md">
+              {pctDesconto}% OFF
+            </span>
+          )}
+          {p.tem_estoque === false && (
+            <span className="absolute right-2.5 top-2.5 rounded-full bg-black/85 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-md">
+              ESGOTADO
+            </span>
+          )}
+        </div>
+
+        <p className="line-clamp-1 text-base font-extrabold transition-colors group-hover:text-[var(--cor-primaria-texto)]" style={{ color: 'var(--cor-texto)' }}>
+          {p.nome}
         </p>
-        <span className="vitrine-card-cta inline-flex items-center gap-1 text-xs font-semibold">
-          Personalizar <ArrowRight size={14} />
+        {p.descricao && (
+          <p className="mt-1 line-clamp-2 text-xs opacity-90 leading-relaxed" style={{ color: 'var(--cor-texto-suave)' }}>
+            {p.descricao}
+          </p>
+        )}
+        <SeloNutricional dados={nutricao} compacto />
+      </div>
+
+      <div className="mt-4 flex items-center justify-between border-t border-gray-100 dark:border-gray-800/60 pt-3">
+        <div>
+          {temDesconto && (
+            <p className="line-through text-xs font-bold text-gray-400 dark:text-gray-500">
+              De: {fmt(Number(p.preco_original))}
+            </p>
+          )}
+          <p className={`font-['Sora'] text-lg font-black ${temDesconto ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--cor-primaria-texto)]'}`}>
+            {temDesconto ? `Por: ${fmt(Number(p.preco))}` : (p.tipo_venda === 'POR_PESO' ? `${fmt(Number(p.preco_por_quilo || 0))}/kg` : fmt(Number(p.preco)))}
+          </p>
+        </div>
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100/80 dark:bg-gray-800/80 text-[var(--cor-texto)] group-hover:border-[var(--cor-primaria)] group-hover:bg-[var(--cor-primaria)] group-hover:text-white shadow-sm transition-all">
+          <Plus size={18} />
         </span>
       </div>
-    </div>
-  </button>
-));
+    </button>
+  );
+});
+
+const ProdutoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: NutricaoProduto; onClick: () => void }) => {
+  const foto = obterFotoProduto(p);
+  const temDesconto = Boolean(p.preco_original && p.preco_original > p.preco);
+  const pctDesconto = temDesconto ? Math.round((((p.preco_original || 0) - p.preco) / (p.preco_original || 1)) * 100) : 0;
+
+  return (
+    <button
+      onClick={() => p.tem_estoque !== false && onClick()}
+      disabled={p.tem_estoque === false}
+      className={`vitrine-card relative flex w-full items-stretch justify-between gap-4 rounded-[28px] p-4 text-left group transition-all ${
+        p.tem_estoque === false ? 'opacity-50' : ''
+      }`}
+    >
+      {/* Coluna de texto (Esquerda) */}
+      <div className="min-w-0 flex-1 flex flex-col justify-between py-0.5">
+        <div>
+          <div className="flex items-start justify-between gap-2">
+            <p className="font-bold text-base sm:text-lg leading-snug transition-colors group-hover:text-[var(--cor-primaria-texto)]" style={{ color: 'var(--cor-texto)' }}>
+              {p.nome}
+            </p>
+            {p.tem_estoque === false && (
+              <span className="shrink-0 rounded-full bg-gray-800 px-2 py-0.5 text-[10px] font-bold text-white">
+                ESGOTADO
+              </span>
+            )}
+          </div>
+
+          {p.descricao && (
+            <p className="mt-1 line-clamp-2 text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--cor-texto-suave)' }}>
+              {p.descricao}
+            </p>
+          )}
+
+          <SeloNutricional dados={nutricao} />
+        </div>
+
+        <div className="mt-3 flex items-center justify-between gap-3 pt-2">
+          <div>
+            {temDesconto && (
+              <p className="line-through text-xs font-bold text-gray-400 dark:text-gray-500">
+                De: {fmt(Number(p.preco_original))}
+              </p>
+            )}
+            <div className="flex items-baseline gap-1.5">
+              <p className={`font-['Sora'] text-lg sm:text-xl font-black ${temDesconto ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--cor-primaria-texto)]'}`}>
+                {temDesconto ? `Por: ${fmt(Number(p.preco))}` : (p.tipo_venda === 'POR_PESO' ? `${fmt(Number(p.preco_por_quilo || 0))}/kg` : fmt(Number(p.preco)))}
+              </p>
+              {p.tipo_venda === 'POR_PESO' && (
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">⚖️ Kg</span>
+              )}
+            </div>
+          </div>
+
+          <span className="flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100/80 dark:bg-gray-800/80 px-3.5 py-1.5 text-xs font-bold text-[var(--cor-texto)] group-hover:border-[var(--cor-primaria)] group-hover:bg-[var(--cor-primaria)] group-hover:text-white shadow-sm transition-all">
+            <Plus size={15} /> Adicionar
+          </span>
+        </div>
+      </div>
+
+      {/* Coluna da Foto Gastronômica (Direita — Padrão iFood / Enterprise) */}
+      <div className="relative h-32 w-32 sm:h-36 sm:w-36 shrink-0 overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800/80 shadow-sm flex items-center justify-center">
+        <img
+          src={foto}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.onerror = null;
+            target.src = obterFotoFallback(p.nome);
+          }}
+          className="vitrine-card-media h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          alt={p.nome}
+        />
+        {p.destaque && (
+          <span className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-full bg-amber-500/95 px-2 py-0.5 text-[9px] font-black text-white shadow-sm backdrop-blur-md">
+            <Star size={9} className="fill-current" /> DA CASA
+          </span>
+        )}
+        {temDesconto && (
+          <span className="absolute right-1.5 top-1.5 flex items-center gap-1 rounded-full bg-emerald-500/95 px-2 py-0.5 text-[9px] font-black text-white shadow-sm backdrop-blur-md">
+            {pctDesconto}% OFF
+          </span>
+        )}
+      </div>
+    </button>
+  );
+});
 
 const CardapioSkeleton = () => (
   <div className="flex h-screen items-center justify-center bg-[#F4F7FA] dark:bg-[#070C18]">

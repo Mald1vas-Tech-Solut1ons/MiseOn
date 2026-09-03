@@ -83,6 +83,7 @@ export interface Loja {
   ifood_confirmar_automatico?: boolean;
 
   cashback_pct?: number | null; // % do pedido creditado como saldo pro cliente (0 = desligado)
+  cashback_dias_expiracao?: number | null; // Prazo de expiração do cashback em dias (ex: 30, 60, 90 dias). null = sem expiração
   meta_preparo_min?: number; // meta de tempo de preparo da cozinha (min), default 20
   pix_chave?: string;
   efi_payee_code?: string; // só no painel admin — NUNCA na vitrine (ver `lojas_publicas`)
@@ -161,11 +162,15 @@ export interface HorarioFuncionamento {
   fecha: string;
 }
 
+export type TipoAcaoBanner = 'NENHUM' | 'PRODUTO' | 'CATEGORIA' | 'CUPOM' | 'LINK_EXTERNO';
+
 export interface Banner {
   id: string;
   imagem_url: string;
   titulo?: string;
   link_redirecionamento?: string;
+  tipo_acao?: TipoAcaoBanner;
+  acao_target_id?: string;
   ordem_exibicao: number;
   is_ativo?: boolean;
 }
@@ -241,6 +246,7 @@ export interface Produto {
   nome: string;
   descricao?: string;
   preco: number;
+  preco_original?: number; // Preço "De:" para promoções riscadas (De: R$ X Por: R$ Y)
   imagem_url?: string;
   galeria?: string[];
   is_combo: boolean;
