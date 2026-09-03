@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { tocarSom } from '../lib/som';
 import { useToast } from '../components/ui/Toast';
@@ -36,6 +36,17 @@ export function useNotificationStore(lojaId?: string) {
   const [notificacoes, setNotificacoes] = useState<AppNotification[]>([]);
   const [excluidos, setExcluidos] = useState<string[]>([]);
   const [novasContador, setNovasContador] = useState(0);
+
+  // Espelhos dos valores volateis. `adicionarNotificacao` precisa de identidade
+  // estavel: dois efeitos dependem dela — a checagem inicial de itens criticos
+  // e a assinatura do canal realtime. Enquanto ela mudava a cada render (por
+  // causa de `excluidos` e do `toast` do contexto), esses efeitos rodavam de
+  // novo sem parar: o painel parado fazia ~12 requisicoes por segundo ao
+  // Supabase e derrubava/reassinava o websocket no mesmo ritmo.
+  const excluidosRef = useRef(excluidos);
+  useEffect(() => { excluidosRef.current = excluidos; }, [excluidos]);
+  const toastRef = useRef(toast);
+  useEffect(() => { toastRef.current = toast; });
 
   // Carregar notificações salvas e lista de excluídos do LocalStorage
   useEffect(() => {
@@ -102,7 +113,7 @@ export function useNotificationStore(lojaId?: string) {
           : `notif_${n.tipo}_${n.titulo.replace(/\s+/g, '_')}`);
 
       // Se a notificação já foi excluída pelo usuário (marcada como resolvida), ignora inserção
-      if (excluidos.includes(idDeterministico)) {
+      if (excluidosRef.current.includes(idDeterministico)) {
         return;
       }
 
@@ -130,11 +141,11 @@ export function useNotificationStore(lojaId?: string) {
       // Feedback sonoro + toast APENAS para notificações novas e não-silenciosas
       if (foiAdicionada && !options?.silencioso) {
         tocarSom();
-        toast(`${nova.titulo}: ${nova.mensagem}`, n.categoria === 'CHAT' || n.categoria === 'ESTOQUE' ? 'alerta' : 'info');
+        toastRef.current(`${nova.titulo}: ${nova.mensagem}`, n.categoria === 'CHAT' || n.categoria === 'ESTOQUE' ? 'alerta' : 'info');
         setNovasContador((c) => c + 1);
       }
     },
-    [lojaId, excluidos, salvarCache, toast]
+    [lojaId, salvarCache]
   );
 
   // Marcar como lida

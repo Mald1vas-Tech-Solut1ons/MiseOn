@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, Navigate, useNavigate, NavLink } from 'react-router-dom';
+import { Outlet, Navigate, useNavigate, NavLink, useLocation } from 'react-router-dom';
 import { Bike, LogOut, Loader2, UserCircle, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { User } from '@supabase/supabase-js';
@@ -16,7 +16,9 @@ export interface CtxEntregador {
 
 export default function EntregadorLayout() {
   const navigate = useNavigate();
+  const loc = useLocation();
   const [loading, setLoading] = useState(true);
+  const [semPerfilEntregador, setSemPerfilEntregador] = useState(false);
   const [ctx, setCtx] = useState<CtxEntregador | null>(null);
 
   useEffect(() => {
@@ -46,12 +48,19 @@ export default function EntregadorLayout() {
       .maybeSingle();
 
     if (error || !data || !data.ativo) {
-      // Loga out se não for entregador ativo
-      await supabase.auth.signOut();
+      // NAO deslogar aqui. A sessao do Supabase e uma so por navegador: o
+      // signOut que existia neste ponto derrubava tambem a sessao do painel.
+      // Na pratica, um lojista que abrisse /entregador (link errado, aba velha
+      // do PWA) era expulso do sistema inteiro no meio do expediente.
+      // Aqui so negamos o acesso a esta area — quem quiser trocar de conta usa
+      // o botao de sair da propria tela.
+      setSemPerfilEntregador(true);
       setCtx(null);
       setLoading(false);
       return;
     }
+
+    setSemPerfilEntregador(false);
 
     setCtx({
       user,
@@ -75,6 +84,25 @@ export default function EntregadorLayout() {
           <Loader2 className="animate-spin text-orange-500" size={32} />
           <p className="text-sm font-semibold text-gray-400">Carregando MiseOn Logistics...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (semPerfilEntregador) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-gray-950 p-8 text-center text-gray-100">
+        <Bike size={40} className="text-orange-500" />
+        <h1 className="text-lg font-bold">Esta conta nao e de entregador</h1>
+        <p className="max-w-sm text-sm text-gray-400">
+          Voce continua conectado normalmente na sua conta. Para usar o app de entregas,
+          peca para a loja te cadastrar como entregador e entre com aquele acesso.
+        </p>
+        <button
+          onClick={handleLogout}
+          className="mt-3 rounded-xl border border-gray-700 px-6 py-2.5 text-sm font-bold hover:bg-gray-800 transition-colors"
+        >
+          Entrar com outra conta
+        </button>
       </div>
     );
   }
@@ -112,7 +140,10 @@ export default function EntregadorLayout() {
       </header>
 
       <main className="flex-1 w-full max-w-lg mx-auto">
-        <Outlet context={ctx} />
+        {/* Anima a troca de tela sem remontar o layout (header/sessao ficam de pe) */}
+        <div key={loc.pathname} className="mo-screen h-full">
+          <Outlet context={ctx} />
+        </div>
       </main>
     </div>
   );

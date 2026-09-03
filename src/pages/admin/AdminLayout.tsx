@@ -114,7 +114,9 @@ export default function AdminLayout() {
       // "auto" roda instantaneamente ANTES da pintura, evitando que o usuário veja a barra "pulando"
       container.scrollTo({ top: scrollTarget, behavior: 'auto' });
     }
-  }, [loc.pathname, isMinLoadingDone, ctx]);
+    // `isCollapsed` entra aqui porque recolher/expandir muda a altura util da
+    // lista: sem isso o item ativo podia sair da area visivel na transicao.
+  }, [loc.pathname, isMinLoadingDone, ctx, isCollapsed]);
 
   useEffect(() => {
     let minLoadTimer: NodeJS.Timeout;
@@ -183,10 +185,6 @@ export default function AdminLayout() {
         const stats = avaliarAssinatura(lj);
         const p = (ativo.papel ?? 'operador') as Papel;
 
-        if (!podeAcessar(p, loc.pathname)) {
-          if (!unmounted) nav(HOME_POR_PAPEL[p] ?? '/admin/inicio');
-        }
-
         if (!unmounted) {
           // Erro capturado a partir daqui ja sai carimbado com a loja —
           // sem isso, o superadmin ve o defeito e nao sabe de quem e.
@@ -219,7 +217,21 @@ export default function AdminLayout() {
     return () => {
       unmounted = true;
     };
-  }, [nav, loc.pathname]);
+    // Sessao e vinculo da loja mudam por LOGIN, nao por rota. Enquanto
+    // `loc.pathname` estava aqui, cada clique no menu refazia getUser() +
+    // usuarios_loja e trocava o objeto `ctx`, o que forcava toda a tela filha
+    // (que recebe ctx via Outlet) a recarregar do zero.
+  }, [nav]);
+
+  // Guarda de permissao por rota: roda a cada navegacao, mas em cima do ctx ja
+  // carregado — sem ida ao banco.
+  useEffect(() => {
+    if (!ctx) return;
+    const p = ctx.papel as Papel;
+    if (!podeAcessar(p, loc.pathname)) {
+      nav(HOME_POR_PAPEL[p] ?? '/admin/inicio');
+    }
+  }, [ctx, loc.pathname, nav]);
 
   if (erroConexao) {
     return (
@@ -366,8 +378,21 @@ export default function AdminLayout() {
   const emRotaSoDoMenu = !bottomNav.some((p) => p.to === loc.pathname)
     && (principal.some((p) => p.to === loc.pathname) || mais.some((p) => p.to === loc.pathname));
 
-  const isMainRoute = principal.some(p => p.to === loc.pathname) || loc.pathname === '/admin';
-  const innerRouteTitle = mais.find(m => m.to === loc.pathname)?.label;
+  // Qual modulo esta aberto agora. Fonte unica de verdade pro titulo do topo e
+  // pro grupo aceso na sidebar — assim menu e cabecalho nunca discordam sobre
+  // onde o usuario esta. Antes o topo dizia "Painel de Controle" em todo modulo
+  // principal, entao quem entrava no Estoque nao tinha nenhuma pista de lugar.
+  const rotaAtual = [...principal, ...mais].find(
+    (r) => loc.pathname === r.to || loc.pathname.startsWith(`${r.to}/`),
+  );
+  const naMinhaConta = loc.pathname === '/admin/conta';
+  const tituloTela = naMinhaConta
+    ? tDynamic('Minha Conta')
+    : rotaAtual?.label ?? 'Painel de Controle';
+  const corTela = naMinhaConta ? '#FC5B24' : rotaAtual?.colorHex ?? C.blue;
+  // So e tela interna quando existe nivel abaixo do modulo (ex.: /admin/pedidos/123).
+  // Modulo de primeiro nivel nao ganha seta de "voltar": isso e atrito, nao ajuda.
+  const ehSubRota = !!rotaAtual && loc.pathname !== rotaAtual.to;
 
   const renderSidebarLink = (r: RouteDef, onClick?: () => void) => {
     // Para a rota de início, queremos correspondência exata para não acender em tudo.
@@ -524,14 +549,18 @@ export default function AdminLayout() {
                 }
               ].map((grupo, index) => {
                 const rotasDesteGrupo = [...principal, ...mais].filter(p => grupo.routes.includes(p.to));
-                
+
                 if (rotasDesteGrupo.length === 0) return null;
+
+                // O grupo que contem a rota atual fica aceso. Da orientacao mesmo
+                // quando o item ativo esta fora da area visivel da lista.
+                const grupoAtivo = !!rotaAtual && grupo.routes.includes(rotaAtual.to);
 
                 return (
                   <div key={grupo.id} className="space-y-1">
                     <div className={`px-5 mb-2 ${index > 0 ? 'mt-4' : ''} flex items-center gap-2 transition-all duration-300 ${isCollapsed ? 'justify-center' : ''}`}>
-                      {!isCollapsed && <div className={`w-1.5 h-1.5 rounded-full bg-${grupo.color}-500 shadow-[0_0_8px_rgba(var(--tw-colors-${grupo.color}-500),0.8)] shrink-0`} />}
-                      <p className={`text-[10px] font-black tracking-[0.2em] uppercase text-${grupo.color}-600/90 dark:text-${grupo.color}-400/80 ${isCollapsed ? 'text-center opacity-80' : ''}`}>
+                      {!isCollapsed && <div className={`w-1.5 h-1.5 rounded-full bg-${grupo.color}-500 shrink-0 transition-transform duration-300 ${grupoAtivo ? 'scale-150' : ''}`} />}
+                      <p className={`text-[10px] font-black tracking-[0.2em] uppercase text-${grupo.color}-600/90 dark:text-${grupo.color}-400/80 transition-opacity duration-300 ${grupoAtivo ? 'opacity-100' : 'opacity-55'} ${isCollapsed ? 'text-center' : ''}`}>
                         {isCollapsed ? '---' : grupo.label}
                       </p>
                     </div>
@@ -598,25 +627,29 @@ export default function AdminLayout() {
             </button>
 
             {/* Mobile Brand / Back Button */}
-            <div className="flex lg:hidden items-center gap-2">
-              {!isMainRoute ? (
-                <button onClick={() => nav(-1)} className="flex items-center gap-1 text-sm font-bold text-[#004198] dark:text-[#6B9EFF]">
-                  <ChevronLeft size={18} /> Voltar
+            <div className="flex lg:hidden items-center gap-2 min-w-0">
+              {ehSubRota && (
+                <button onClick={() => nav(-1)} aria-label="Voltar" className="flex items-center shrink-0 text-sm font-bold text-[#004198] dark:text-[#6B9EFF]">
+                  <ChevronLeft size={20} />
                 </button>
-              ) : (
-                <span className="font-extrabold text-lg text-gray-900 dark:text-white truncate">{ctx.lojaNome}</span>
               )}
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: corTela }} />
+              <span className="font-extrabold text-lg text-gray-900 dark:text-white truncate">{tituloTela}</span>
             </div>
 
             {/* Desktop Page Title (Optional) */}
             <div className="hidden lg:flex items-center gap-3">
-              {!isMainRoute && (
-                <button onClick={() => nav(-1)} className="mr-2 p-2 rounded-xl text-gray-400 hover:bg-white/50 dark:hover:bg-white/10 transition-colors shadow-sm">
+              {ehSubRota && (
+                <button onClick={() => nav(-1)} aria-label="Voltar" className="mr-1 p-2 rounded-xl text-gray-400 hover:bg-white/50 dark:hover:bg-white/10 transition-colors shadow-sm">
                   <ChevronLeft size={20} />
                 </button>
               )}
+              <span
+                className="h-2.5 w-2.5 rounded-full shrink-0"
+                style={{ background: corTela, boxShadow: `0 0 12px ${corTela}` }}
+              />
               <h1 className="font-['Sora'] font-bold text-2xl text-gray-900 dark:text-white tracking-tight drop-shadow-sm">
-                {!isMainRoute ? innerRouteTitle : 'Painel de Controle'}
+                {tituloTela}
               </h1>
             </div>
           </div>

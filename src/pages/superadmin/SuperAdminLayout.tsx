@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Building2, UserPlus, TrendingDown, ScrollText, LogOut, Receipt, Users, BookOpen, MessageCircle, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -9,6 +9,7 @@ import { useI18n } from '../../contexts/I18nContext';
 export default function SuperAdminLayout() {
   const { tDynamic } = useI18n();
   const nav = useNavigate();
+  const loc = useLocation();
   const [ok, setOk] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -80,7 +81,10 @@ export default function SuperAdminLayout() {
         </aside>
 
         <main className="flex-1">
-          <Outlet />
+          {/* Anima a troca de tela sem remontar o layout (sidebar/sessao ficam de pe) */}
+          <div key={loc.pathname} className="mo-screen h-full">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
