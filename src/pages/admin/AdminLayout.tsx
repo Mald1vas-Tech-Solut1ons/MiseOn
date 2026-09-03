@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, Suspense } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef, Suspense } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { ClipboardList, Boxes, Bike, Store, LogOut, UtensilsCrossed, MoreHorizontal, X, TrendingUp, Megaphone, Users, History, CreditCard, ShoppingCart, Flame, ChevronLeft, Menu, UserCircle, LifeBuoy, LayoutDashboard, Calculator, ChefHat, LayoutGrid, MessageSquare, MessageCircle, Plug, FileText, Compass, Scale, Smartphone } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -95,14 +95,35 @@ export default function AdminLayout() {
     prevPathRef.current = loc.pathname;
   }, [loc.pathname]);
 
-  // Auto-scroll inteligente: garante que a funcionalidade ativa esteja visível na sidebar
-  useEffect(() => {
-    setTimeout(() => {
-      const el = document.querySelector('.is-active');
+  // Auto-scroll imediato e inteligente com UX Avançada: move APENAS a sidebar,
+  // centralizando o menu ativo sem piscar no topo.
+  useLayoutEffect(() => {
+    // 1. Tenta achar o link exato pelo ID gerado. Se for sub-rota, tenta o fallback pelo .is-active
+    const expectedId = `nav-link-${loc.pathname.replace(/\//g, '-')}`;
+    
+    // Executa imediatamente e no próximo frame para garantir renderização do DOM
+    const tryScroll = () => {
+      const el = document.getElementById(expectedId) || document.querySelector('.nav-link-premium.is-active') as HTMLElement;
+      
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const sidebarContainer = el.closest('.overflow-y-auto');
+        if (sidebarContainer) {
+          const containerRect = sidebarContainer.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+          
+          // Se o item estiver fora da visão ou perto das bordas, centraliza
+          if (elRect.top < containerRect.top + 50 || elRect.bottom > containerRect.bottom - 50) {
+            const scrollTop = sidebarContainer.scrollTop + (elRect.top - containerRect.top) - (containerRect.height / 2) + (elRect.height / 2);
+            sidebarContainer.scrollTo({ top: scrollTop, behavior: 'auto' }); // auto = instantâneo, para evitar ver rolando
+          }
+        }
       }
-    }, 300);
+    };
+
+    tryScroll();
+    const frame = requestAnimationFrame(tryScroll); // Tenta novamente caso o DOM ainda esteja populando
+    
+    return () => cancelAnimationFrame(frame);
   }, [loc.pathname]);
 
   useEffect(() => {
@@ -359,24 +380,33 @@ export default function AdminLayout() {
   const innerRouteTitle = mais.find(m => m.to === loc.pathname)?.label;
 
   const renderSidebarLink = (r: RouteDef, onClick?: () => void) => {
-    const isLinkActive = loc.pathname === r.to || loc.pathname.startsWith(r.to + '/');
+    // Para a rota de início, queremos correspondência exata para não acender em tudo.
+    // Para as outras rotas, queremos que acendam quando estivermos nelas ou em suas sub-rotas.
+    const isInicio = r.to === '/admin/inicio' || r.to === '/admin';
+    const isLinkActive = isInicio 
+      ? loc.pathname === r.to || loc.pathname === r.to + '/'
+      : loc.pathname === r.to || loc.pathname.startsWith(r.to + '/');
+
     return (
       <NavLink
         key={r.to}
         to={r.to}
+        end={isInicio} // Importante para o React Router DOM v7
         onClick={onClick}
         id={`nav-link-${r.to.replace(/\//g, '-')}`}
         style={{ '--route-color': r.colorHex } as React.CSSProperties}
-        className={() => `
+        className={({ isActive }) => `
           group relative flex items-center gap-3 px-3.5 py-3 mx-3 my-1 rounded-2xl text-sm font-semibold transition-all duration-500 overflow-hidden
-          nav-link-premium ${isLinkActive ? 'is-active' : ''}
+          nav-link-premium ${(isActive || isLinkActive) ? 'is-active' : ''}
         `}
       >
-        {() => (
+        {({ isActive }) => {
+          const active = isActive || isLinkActive;
+          return (
           <>
             <div className="nav-link-bg absolute inset-0 opacity-0 transition-all duration-500 pointer-events-none rounded-2xl" />
 
-            <div className={`nav-link-icon relative z-10 flex-shrink-0 transition-transform duration-500 ease-out ${isLinkActive ? 'scale-110 drop-shadow-md' : 'group-hover:scale-110'}`}>
+            <div className={`nav-link-icon relative z-10 flex-shrink-0 transition-transform duration-500 ease-out ${active ? 'scale-110 drop-shadow-md' : 'group-hover:scale-110'}`}>
               {r.icon}
             </div>
 
@@ -395,13 +425,18 @@ export default function AdminLayout() {
               </div>
             )}
           </>
-        )}
+          );
+        }}
       </NavLink>
     );
   };
-
   return (
     <div className="flex h-screen bg-transparent text-gray-900 dark:text-gray-100 font-sans overflow-hidden selection:bg-[#FC5B24] selection:text-white">
+      {/* 
+        Safelist invisível para o Tailwind não remover as cores dinâmicas dos grupos (bg-{color}-500, text-{color}-600/90, etc)
+        Usado: slate, orange, emerald, blue, purple, indigo, sky
+      */}
+      <div className="hidden bg-slate-500 bg-orange-500 bg-emerald-500 bg-blue-500 bg-purple-500 bg-indigo-500 bg-sky-500 text-slate-600/90 text-orange-600/90 text-emerald-600/90 text-blue-600/90 text-purple-600/90 text-indigo-600/90 text-sky-600/90 dark:text-slate-400/80 dark:text-orange-400/80 dark:text-emerald-400/80 dark:text-blue-400/80 dark:text-purple-400/80 dark:text-indigo-400/80 dark:text-sky-400/80" />
       <style>{`
         .nav-link-premium { color: var(--cor-texto-suave); border: 1px solid transparent; }
         .dark .nav-link-premium { color: var(--cor-texto-fraco); }
@@ -410,6 +445,19 @@ export default function AdminLayout() {
           box-shadow: 0 8px 32px -8px color-mix(in srgb, var(--route-color) 50%, transparent); 
           border-color: color-mix(in srgb, var(--route-color) 40%, transparent); 
           background: linear-gradient(135deg, color-mix(in srgb, var(--route-color) 10%, transparent), transparent);
+        }
+        /* Ponteiro Visual Apontando pro Módulo */
+        .nav-link-premium.is-active::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          height: 50%;
+          width: 4px;
+          background: var(--route-color);
+          border-radius: 0 4px 4px 0;
+          box-shadow: 0 0 10px var(--route-color);
         }
         .nav-link-premium .nav-link-bg { background: linear-gradient(90deg, color-mix(in srgb, var(--route-color) 15%, transparent), transparent); }
         .dark .nav-link-premium .nav-link-bg { background: linear-gradient(90deg, color-mix(in srgb, var(--route-color) 25%, transparent), transparent); }
@@ -462,61 +510,45 @@ export default function AdminLayout() {
 
           {ctx.papel === 'admin' ? (
             <>
-              {/* Visão Geral */}
-              <div className="space-y-1">
-                <p className={`px-5 mb-2 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
-                  {isCollapsed ? '---' : 'Visão Geral'}
-                </p>
-                {[...principal, ...mais].filter(p => ['/admin/inicio'].includes(p.to)).map(p => renderSidebarLink(p))}
-              </div>
+              {[
+                { 
+                  id: 'visao-geral', label: 'Visão Geral', color: 'slate', routes: ['/admin/inicio']
+                },
+                { 
+                  id: 'operacao', label: 'Operação', color: 'orange', routes: ['/admin/pdv', '/admin/mesas', '/admin/balanca', '/admin/garcom-mobile', '/admin/pedidos', '/admin/kds', '/admin/producao', '/admin/entregas']
+                },
+                { 
+                  id: 'atendimento', label: 'Atendimento e Canais', color: 'emerald', routes: ['/admin/chat', '/admin/ifood', '/admin/whatsapp']
+                },
+                { 
+                  id: 'catalogo', label: 'Cardápio e Estoque', color: 'blue', routes: ['/admin/cardapio', '/admin/estoque', '/admin/compras']
+                },
+                { 
+                  id: 'gestao', label: 'Gestão e Relatórios', color: 'purple', routes: ['/admin/financeiro', '/admin/historico', '/admin/marketing']
+                },
+                { 
+                  id: 'admin', label: 'Configurações', color: 'indigo', routes: ['/admin/equipe', '/admin/loja', '/admin/fiscal', '/admin/assinatura']
+                },
+                { 
+                  id: 'suporte', label: 'Ajuda', color: 'sky', routes: ['/admin/ajuda']
+                }
+              ].map((grupo, index) => {
+                const rotasDesteGrupo = [...principal, ...mais].filter(p => grupo.routes.includes(p.to));
+                
+                if (rotasDesteGrupo.length === 0) return null;
 
-              {/* Operação */}
-              <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
-                  {isCollapsed ? '---' : 'Operação'}
-                </p>
-                {[...principal, ...mais].filter(p => ['/admin/pdv', '/admin/mesas', '/admin/balanca', '/admin/garcom-mobile', '/admin/pedidos', '/admin/kds', '/admin/producao', '/admin/entregas'].includes(p.to)).map(p => renderSidebarLink(p))}
-              </div>
-
-              {/* Atendimento e Canais */}
-              <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
-                  {isCollapsed ? '---' : 'Atendimento e Canais'}
-                </p>
-                {[...principal, ...mais].filter(p => ['/admin/chat', '/admin/ifood', '/admin/whatsapp'].includes(p.to)).map(p => renderSidebarLink(p))}
-              </div>
-
-              {/* Catálogo & Suprimentos */}
-              <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
-                  {isCollapsed ? '---' : 'Cardápio e Estoque'}
-                </p>
-                {[...principal, ...mais].filter(p => ['/admin/cardapio', '/admin/estoque', '/admin/compras'].includes(p.to)).map(p => renderSidebarLink(p))}
-              </div>
-
-              {/* Gestão Estratégica */}
-              <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
-                  {isCollapsed ? '---' : 'Gestão e Relatórios'}
-                </p>
-                {[...principal, ...mais].filter(p => ['/admin/financeiro', '/admin/historico', '/admin/marketing'].includes(p.to)).map(p => renderSidebarLink(p))}
-              </div>
-
-              {/* Administração */}
-              <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
-                  {isCollapsed ? '---' : 'Configurações'}
-                </p>
-                {[...principal, ...mais].filter(p => ['/admin/equipe', '/admin/loja', '/admin/fiscal', '/admin/assinatura'].includes(p.to)).map(p => renderSidebarLink(p))}
-              </div>
-
-              {/* Suporte */}
-              <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
-                  {isCollapsed ? '---' : 'Ajuda'}
-                </p>
-                {[...principal, ...mais].filter(p => ['/admin/ajuda'].includes(p.to)).map(p => renderSidebarLink(p))}
-              </div>
+                return (
+                  <div key={grupo.id} className="space-y-1">
+                    <div className={`px-5 mb-2 ${index > 0 ? 'mt-4' : ''} flex items-center gap-2 transition-all duration-300 ${isCollapsed ? 'justify-center' : ''}`}>
+                      {!isCollapsed && <div className={`w-1.5 h-1.5 rounded-full bg-${grupo.color}-500 shadow-[0_0_8px_rgba(var(--tw-colors-${grupo.color}-500),0.8)] shrink-0`} />}
+                      <p className={`text-[10px] font-black tracking-[0.2em] uppercase text-${grupo.color}-600/90 dark:text-${grupo.color}-400/80 ${isCollapsed ? 'text-center opacity-80' : ''}`}>
+                        {isCollapsed ? '---' : grupo.label}
+                      </p>
+                    </div>
+                    {rotasDesteGrupo.map(p => renderSidebarLink(p))}
+                  </div>
+                );
+              })}
             </>
           ) : (
             <div className="space-y-1">
