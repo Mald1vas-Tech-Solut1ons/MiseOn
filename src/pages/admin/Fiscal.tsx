@@ -8,6 +8,9 @@ import {
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../components/ui/Toast';
 import { CtxLoja } from './AdminLayout';
+import ModalImportarNFCe from '../../components/estoque/ModalImportarNFCe';
+import type { Insumo } from '../../types';
+import type { NotaLida } from '../../hooks/useImportacaoNota';
 
 import { useI18n } from '../../contexts/I18nContext';
 interface ConfigFiscal {
@@ -54,17 +57,6 @@ interface NotaFiscal {
   valor_total: number;
   emitente_nome?: string;
   created_at: string;
-}
-
-interface ItemXmlParsed {
-  codigo: string;
-  descricao: string;
-  ncm: string;
-  quantidade: number;
-  unidade: string;
-  valorUnitario: number;
-  valorTotal: number;
-  categoriaDestino: 'insumo' | 'venda_direta' | 'embalagem' | 'limpeza' | 'outros';
 }
 
 export default function Fiscal() {
@@ -114,17 +106,13 @@ export default function Fiscal() {
   const [justificativaCancelamento, setJustificativaCancelamento] = useState('');
   const [cancelando, setCancelando] = useState(false);
 
-  // Importador de XML
+  // Importador de XML — le o arquivo e entrega pro mesmo motor inteligente
+  // de importacao (fn_importar_nfce) que ja atende QR Code e foto de cupom.
+  // Reaproveitar ali evita a divergencia que quebrou a primeira versao deste
+  // importador: uma copia solta que gravava a nota mas nunca somava estoque.
   const [xmlFile, setXmlFile] = useState<File | null>(null);
-  const [xmlDataParsed, setXmlDataParsed] = useState<{
-    fornecedorNome: string;
-    fornecedorCnpj: string;
-    numeroNota: string;
-    dataEmissao: string;
-    valorTotal: number;
-    itens: ItemXmlParsed[];
-  } | null>(null);
-  const [importandoXml, setImportandoXml] = useState(false);
+  const [xmlDataParsed, setXmlDataParsed] = useState<NotaLida | null>(null);
+  const [insumosLoja, setInsumosLoja] = useState<Insumo[]>([]);
 
   const carregarConfiguracoes = useCallback(async () => {
     try {
@@ -184,12 +172,23 @@ export default function Fiscal() {
     }
   }, [ctx?.lojaId]);
 
+  const carregarInsumos = useCallback(async () => {
+    if (!ctx?.lojaId) return;
+    const { data } = await supabase
+      .from('insumos')
+      .select('*')
+      .eq('loja_id', ctx.lojaId)
+      .eq('ativo', true);
+    setInsumosLoja((data || []) as Insumo[]);
+  }, [ctx?.lojaId]);
+
   useEffect(() => {
     if (ctx?.lojaId) {
       carregarConfiguracoes();
       carregarNotas();
+      carregarInsumos();
     }
-  }, [ctx?.lojaId, carregarConfiguracoes, carregarNotas]);
+  }, [ctx?.lojaId, carregarConfiguracoes, carregarNotas, carregarInsumos]);
 
   const buscarCepAuto = async (cepBruto: string) => {
     const cepLimpo = cepBruto.replace(/\D/g, '');
@@ -336,7 +335,9 @@ export default function Fiscal() {
     }
   };
 
-  // Parser XML de Fornecedor
+  // Parser XML de Fornecedor (NFe Modelo 55). So le e organiza no formato
+  // que a conferencia inteligente (ModalImportarNFCe) ja sabe consumir — a
+  // baixa de estoque em si acontece so depois que o lojista confirma la.
   const handleXmlUpload = (file: File) => {
     setXmlFile(file);
     const reader = new FileReader();
@@ -345,124 +346,91 @@ export default function Fiscal() {
         const text = e.target?.result as string;
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(text, 'text/xml');
+        if (xmlDoc.querySelector('parsererror')) throw new Error('XML mal formado');
 
         const emitenteNome = xmlDoc.querySelector('emit > xNome')?.textContent || 'Fornecedor Desconhecido';
-        const emitenteCnpj = xmlDoc.querySelector('emit > CNPJ')?.textContent || '';
-        const nNF = xmlDoc.querySelector('ide > nNF')?.textContent || '0';
-        const dhEmi = xmlDoc.querySelector('ide > dhEmi')?.textContent || new Date().toISOString();
+        const emitenteCnpj = xmlDoc.querySelector('emit > CNPJ')?.textContent || null;
+        const dhEmi = xmlDoc.querySelector('ide > dhEmi')?.textContent || null;
         const vNF = parseFloat(xmlDoc.querySelector('total > ICMSTot > vNF')?.textContent || '0');
+        const vProd = parseFloat(xmlDoc.querySelector('total > ICMSTot > vProd')?.textContent || '0');
+        const vDesc = parseFloat(xmlDoc.querySelector('total > ICMSTot > vDesc')?.textContent || '0');
+
+        // Chave de acesso vem no atributo Id do infNFe ("NFe" + 44 dígitos) —
+        // é o que evita lançar a mesma nota duas vezes no estoque.
+        const infNFeId = xmlDoc.querySelector('infNFe')?.getAttribute('Id') || '';
+        const chave = infNFeId.replace(/^NFe/, '');
+        const uf = chave.slice(0, 2);
 
         const detList = xmlDoc.querySelectorAll('det');
-        const items: ItemXmlParsed[] = [];
+        const itens: NotaLida['itens'] = [];
 
-        detList.forEach((det) => {
+        detList.forEach((det, idx) => {
           const prod = det.querySelector('prod');
-          if (prod) {
-            const codigo = prod.querySelector('cProd')?.textContent || '';
-            const descricao = prod.querySelector('xProd')?.textContent || '';
-            const ncm = prod.querySelector('NCM')?.textContent || '';
-            const quantidade = parseFloat(prod.querySelector('qCom')?.textContent || '1');
-            const unidade = prod.querySelector('uCom')?.textContent || 'UN';
-            const valorUnitario = parseFloat(prod.querySelector('vUnCom')?.textContent || '0');
-            const valorTotal = parseFloat(prod.querySelector('vProd')?.textContent || '0');
+          if (!prod) return;
+          const codigo = prod.querySelector('cProd')?.textContent || '';
+          const descricao = prod.querySelector('xProd')?.textContent || `Item ${idx + 1}`;
+          const qtd = parseFloat(prod.querySelector('qCom')?.textContent || '1');
+          const unidade = prod.querySelector('uCom')?.textContent || 'UN';
+          const valorUnitario = parseFloat(prod.querySelector('vUnCom')?.textContent || '0');
+          const valorTotal = parseFloat(prod.querySelector('vProd')?.textContent || '0');
+          const cEAN = prod.querySelector('cEAN')?.textContent || '';
+          const gtin = /^\d{8,14}$/.test(cEAN) ? cEAN : null;
 
-            items.push({
-              codigo,
-              descricao,
-              ncm,
-              quantidade,
-              unidade,
-              valorUnitario,
-              valorTotal,
-              categoriaDestino: 'insumo'
-            });
-          }
+          itens.push({
+            num_item: idx + 1,
+            descricao,
+            gtin,
+            codigo_fornecedor: codigo || null,
+            qtd,
+            unidade,
+            valor_unitario: valorUnitario,
+            valor_total: valorTotal,
+          });
         });
+
+        if (itens.length === 0) throw new Error('Nenhum item (det/prod) encontrado no XML');
 
         setXmlDataParsed({
-          fornecedorNome: emitenteNome,
-          fornecedorCnpj: emitenteCnpj,
-          numeroNota: nNF,
-          dataEmissao: dhEmi,
-          valorTotal: vNF,
-          itens: items
+          chave,
+          uf,
+          emitente: { razao_social: emitenteNome, cnpj: emitenteCnpj },
+          data_emissao: dhEmi,
+          valor_total: vNF || vProd,
+          valor_produtos: vProd || undefined,
+          desconto: vDesc || undefined,
+          itens,
         });
 
-        toast('XML lido com sucesso! Verifique os itens abaixo.', 'sucesso');
-      } catch (err) {
+        toast('XML lido com sucesso! Confira o de-para dos itens antes de lançar no estoque.', 'sucesso');
+      } catch (err: any) {
         console.error(err);
-        toast('Erro ao ler o arquivo XML da NFe', 'erro');
+        toast(err?.message || 'Erro ao ler o arquivo XML da NFe', 'erro');
       }
     };
     reader.readAsText(file);
   };
 
-  const processarEntradaEstoqueXml = async () => {
+  // Registra no histórico fiscal depois que o estoque já foi de fato
+  // atualizado pela RPC — nunca antes, senão a nota "importada" mente de
+  // novo caso a baixa no estoque falhe no meio do caminho.
+  const registrarHistoricoEntradaXml = async () => {
     if (!xmlDataParsed) return;
-    setImportandoXml(true);
     try {
-      // Grava no histórico de notas fiscais
-      const { error: errNota } = await supabase
-        .from('notas_fiscais')
-        .insert({
-          loja_id: ctx.lojaId,
-          tipo: 'ENTRADA_FORNECEDOR',
-          status: 'IMPORTADA',
-          numero: xmlDataParsed.numeroNota,
-          valor_total: xmlDataParsed.valorTotal,
-          emitente_nome: xmlDataParsed.fornecedorNome,
-          emitente_cnpj: xmlDataParsed.fornecedorCnpj,
-          ambiente: 'producao'
-        })
-        .select()
-        .single();
-
-      if (errNota) throw errNota;
-
-      // Atualiza / Dá entrada no Estoque
-      for (const item of xmlDataParsed.itens) {
-        // Verifica se o insumo já existe ou cria entrada
-        const { data: insumosExistentes } = await supabase
-          .from('insumos')
-          .select('*')
-          .eq('loja_id', ctx.lojaId)
-          .ilike('nome', `%${item.descricao.split(' ')[0]}%`)
-          .limit(1);
-
-        if (insumosExistentes && insumosExistentes.length > 0) {
-          const insumo = insumosExistentes[0];
-          const novaQtd = Number(insumo.quantidade || 0) + item.quantidade;
-          await supabase
-            .from('insumos')
-            .update({ 
-              quantidade: novaQtd, 
-              custo_unitario: item.valorUnitario 
-            })
-            .eq('id', insumo.id);
-        } else {
-          // Cria novo insumo no estoque automaticamente
-          await supabase
-            .from('insumos')
-            .insert({
-              loja_id: ctx.lojaId,
-              nome: item.descricao,
-              unidade_medida: item.unidade,
-              quantidade: item.quantidade,
-              custo_unitario: item.valorUnitario,
-              estoque_minimo: 5
-            });
-        }
-      }
-
-      toast('Estoque atualizado e Nota Fiscal de Fornecedor importada com sucesso!', 'sucesso');
-      setXmlFile(null);
-      setXmlDataParsed(null);
-      await carregarNotas();
-    } catch (err: any) {
-      console.error(err);
-      toast(err.message || 'Erro ao importar XML para o estoque', 'erro');
-    } finally {
-      setImportandoXml(false);
+      await supabase.from('notas_fiscais').insert({
+        loja_id: ctx.lojaId,
+        tipo: 'ENTRADA_FORNECEDOR',
+        status: 'IMPORTADA',
+        chave_nfe: xmlDataParsed.chave || null,
+        numero: xmlDataParsed.chave ? xmlDataParsed.chave.slice(25, 34) : null,
+        valor_total: xmlDataParsed.valor_total,
+        emitente_nome: xmlDataParsed.emitente.razao_social,
+        emitente_cnpj: xmlDataParsed.emitente.cnpj,
+        ambiente: 'producao',
+      });
+    } catch (err) {
+      // Historico e so registro; falha aqui nao pode passar a impressao de
+      // que o estoque (que ja foi lancado pela RPC) tambem falhou.
+      console.error('Falha ao registrar histórico da entrada XML:', err);
     }
   };
 
@@ -1091,78 +1059,23 @@ export default function Fiscal() {
             </div>
           </div>
 
-          {/* Dados Lidos do XML */}
-          {xmlDataParsed && (
-            <div className="bg-white dark:bg-[#0B1120] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 space-y-6 shadow-sm">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
-                <div>
-                  <h3 className="font-bold text-lg text-gray-900 dark:text-white">{xmlDataParsed.fornecedorNome}</h3>
-                  <p className="text-xs text-gray-500">CNPJ: {xmlDataParsed.fornecedorCnpj} | NFe Nº: {xmlDataParsed.numeroNota}</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs text-gray-400 uppercase font-bold block">{tDynamic('Valor Total da Nota')}</span>
-                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">R$ {xmlDataParsed.valorTotal.toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Tabela de Itens */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 font-bold text-gray-400 uppercase">
-                      <th className="p-3">Código</th>
-                      <th className="p-3">{tDynamic('Descrição do Produto (NFe)')}</th>
-                      <th className="p-3">Qtd</th>
-                      <th className="p-3">Unid</th>
-                      <th className="p-3">Custo Unit.</th>
-                      <th className="p-3">Total</th>
-                      <th className="p-3">{tDynamic('Destino no Estoque')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800 font-semibold">
-                    {xmlDataParsed.itens.map((item, idx) => (
-                      <tr key={idx}>
-                        <td className="p-3 font-mono text-gray-400">{item.codigo}</td>
-                        <td className="p-3 font-bold text-gray-900 dark:text-white">{item.descricao}</td>
-                        <td className="p-3 font-bold text-blue-600 dark:text-blue-400">{item.quantidade}</td>
-                        <td className="p-3">{item.unidade}</td>
-                        <td className="p-3">R$ {item.valorUnitario.toFixed(2)}</td>
-                        <td className="p-3 font-bold">R$ {item.valorTotal.toFixed(2)}</td>
-                        <td className="p-3">
-                          <select
-                            value={item.categoriaDestino}
-                            onChange={(e) => {
-                              const cat = e.target.value as any;
-                              const novosItens = [...xmlDataParsed.itens];
-                              novosItens[idx].categoriaDestino = cat;
-                              setXmlDataParsed({ ...xmlDataParsed, itens: novosItens });
-                            }}
-                            className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-xs font-bold outline-none"
-                          >
-                            <option value="insumo">{tDynamic('Insumo de Preparo')}</option>
-                            <option value="venda_direta">Venda Direta / Revenda</option>
-                            <option value="embalagem">Embalagem</option>
-                            <option value="limpeza">{tDynamic('Material de Limpeza')}</option>
-                            <option value="outros">Outros</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <button
-                  onClick={processarEntradaEstoqueXml}
-                  disabled={importandoXml}
-                  className="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 disabled:opacity-50"
-                >
-                  {importandoXml ? <RefreshCw className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
-                  Confirmar Entrada no Estoque
-                </button>
-              </div>
-            </div>
+          {/* Conferencia inteligente: mesmo motor (de-para + IA + RPC
+              atomica) que ja atende a importacao por QR Code em Estoque e
+              Compras — o XML so entrega a nota nesse mesmo formato. */}
+          {xmlDataParsed && ctx?.lojaId && (
+            <ModalImportarNFCe
+              lojaId={ctx.lojaId}
+              dadosNota={xmlDataParsed}
+              insumosExistentes={insumosLoja}
+              onFechar={() => { setXmlDataParsed(null); setXmlFile(null); }}
+              onSucesso={async (mensagem) => {
+                toast(mensagem, 'sucesso');
+                await registrarHistoricoEntradaXml();
+                setXmlDataParsed(null);
+                setXmlFile(null);
+                await Promise.all([carregarNotas(), carregarInsumos()]);
+              }}
+            />
           )}
         </div>
       )}
