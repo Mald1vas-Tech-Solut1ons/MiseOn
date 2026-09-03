@@ -180,6 +180,40 @@ export default function Loja() {
   // que o lojista edita, e um save comum nunca deve reescreve-la por acidente
   // — reescrever aqui derruba todas as TVs da loja de uma vez.
   const [tokenTv, setTokenTv] = useState<string | null>(null);
+  // Semeadura do cardapio base. So aparece para loja que ainda nao tem produto:
+  // depois que o dono cadastrou o dele, oferecer "aplicar base" so assusta.
+  const [temProduto, setTemProduto] = useState<boolean | null>(null);
+  const [semeando, setSemeando] = useState(false);
+  const [resultadoSeed, setResultadoSeed] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lojaId) return;
+    supabase.from('produtos').select('id', { count: 'exact', head: true }).eq('loja_id', lojaId)
+      .then(({ count }) => setTemProduto((count ?? 0) > 0));
+  }, [lojaId]);
+
+  const aplicarBaseDoSegmento = async () => {
+    setSemeando(true);
+    setResultadoSeed(null);
+    const { data, error } = await supabase.rpc('fn_semear_loja', {
+      p_loja: lojaId,
+      p_segmento: form.segmento_negocio,
+    });
+    setSemeando(false);
+    if (error) {
+      setResultadoSeed(tDynamic('Não foi possível aplicar a base agora.'));
+      return;
+    }
+    const r = data as { semeado?: boolean; produtos?: number; insumos?: number; motivo?: string } | null;
+    if (r?.semeado) {
+      setTemProduto(true);
+      setResultadoSeed(
+        `${tDynamic('Pronto: cardápio base aplicado com')} ${r.produtos} ${tDynamic('produtos e')} ${r.insumos} ${tDynamic('insumos. Ajuste preços e estoque no Cardápio e no Estoque.')}`,
+      );
+    } else {
+      setResultadoSeed(tDynamic('Esta loja já tem produtos cadastrados — a base não foi aplicada.'));
+    }
+  };
   const [regenerandoTv, setRegenerandoTv] = useState(false);
 
   /** URL da TV com a credencial embutida. Sem o token a RPC recusa e a TV
@@ -890,6 +924,34 @@ export default function Loja() {
                 );
               })}
             </div>
+
+            {/* Comecar do zero e o passo em que mais gente desiste: cadastrar
+                cardapio inteiro na mao antes de vender o primeiro item. A base
+                do segmento existe para o dono AJUSTAR em vez de criar. So
+                aparece enquanto nao ha produto — depois disso seria ruido. */}
+            {temProduto === false && (
+              <div className="mt-4 rounded-2xl border border-dashed border-[var(--cor-primaria)]/40 bg-[var(--cor-primaria)]/5 p-4">
+                <p className="text-sm font-bold dark:text-gray-100">
+                  {tDynamic('Comece com um cardápio pronto do seu segmento')}
+                </p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {tDynamic('Cria categorias, insumos, produtos com preço sugerido e a ficha técnica ligando um ao outro. Estoque e custo de compra ficam zerados — esses só você sabe.')}
+                </p>
+                <button
+                  type="button"
+                  onClick={aplicarBaseDoSegmento}
+                  disabled={semeando}
+                  className="mt-3 rounded-xl bg-[var(--cor-primaria)] px-5 py-2.5 text-sm font-bold text-white transition-all hover:brightness-110 disabled:opacity-50"
+                >
+                  {semeando ? tDynamic('Aplicando…') : tDynamic('Aplicar cardápio base')}
+                </button>
+              </div>
+            )}
+            {resultadoSeed && (
+              <p className="mt-3 rounded-xl bg-emerald-500/10 px-4 py-2.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                {resultadoSeed}
+              </p>
+            )}
           </div>
 
           {/* Módulos Híbridos Configuráveis */}

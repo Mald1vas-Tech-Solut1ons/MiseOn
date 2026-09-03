@@ -748,7 +748,7 @@ export default function Cardapio() {
                 <section key={c.id} className="px-4 pt-4 lg:px-0">
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <h2 className="font-black" style={{ color: 'var(--cor-texto)' }}>{c.nome}</h2>
-                    <span className="text-xs font-semibold" style={{ color: 'var(--cor-texto-fraco)' }}>{doGrupo.length} opcoes</span>
+                    <span className="text-xs font-semibold" style={{ color: 'var(--cor-texto-fraco)' }}>{doGrupo.length} {doGrupo.length === 1 ? tDynamic('opção') : tDynamic('opções')}</span>
                   </div>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {doGrupo.map((p) => (

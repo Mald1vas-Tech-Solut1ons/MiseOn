@@ -271,6 +271,18 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // Cardapio base por segmento
+  'Comece com um cardápio pronto do seu segmento': 'Start with a ready-made menu for your segment',
+  'Cria categorias, insumos, produtos com preço sugerido e a ficha técnica ligando um ao outro. Estoque e custo de compra ficam zerados — esses só você sabe.': 'Creates categories, ingredients, products with suggested prices and the recipe linking them. Stock and purchase cost stay at zero — only you know those.',
+  'Aplicar cardápio base': 'Apply base menu',
+  'Aplicando…': 'Applying…',
+  'Não foi possível aplicar a base agora.': 'Could not apply the base menu right now.',
+  'Pronto: cardápio base aplicado com': 'Done: base menu applied with',
+  'produtos e': 'products and',
+  'insumos. Ajuste preços e estoque no Cardápio e no Estoque.': 'ingredients. Adjust prices and stock under Menu and Stock.',
+  'Esta loja já tem produtos cadastrados — a base não foi aplicada.': 'This store already has products — the base menu was not applied.',
+  'opção': 'option',
+  'opções': 'options',
   'Este cadastro serve para acionar o entregador pelo WhatsApp. Para dar acesso ao aplicativo, crie o login em Equipe & Acessos.': 'This record is for reaching the courier on WhatsApp. To grant app access, create the login under Team & Access.',
   'Aponte a câmera e peça sem pegar fila.': 'Point your camera and order without queuing.',
   // Configuracao de promocoes na TV
