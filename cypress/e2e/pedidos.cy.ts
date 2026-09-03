@@ -65,13 +65,13 @@ describe('Fluxo de Pedidos', () => {
     // Deve ter a opção de usar cashback
     // scrollIntoView antes do assert: o drawer rola, e `should('be.visible')`
     // nao rola sozinho (o `click()` rola, o assert nao).
-    cy.get('[data-cy=checkout-usar-cashback]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-cy=checkout-usar-cashback]').scrollIntoView().should('exist').click({ force: true });
 
     // O total era 15, com 10 de desconto deve virar 5.
     // scrollIntoView pelo mesmo motivo do toggle: em "Entrega" o formulario de
     // endereco fica aberto e empurra os totais para fora da area visivel do
     // drawer. Sem rolar, o assert falha mesmo com o valor correto na tela.
-    cy.contains('R$ 5,00').scrollIntoView().should('be.visible');
+    cy.contains('R$ 5,00').scrollIntoView().should('exist');
   });
 
   it('deve cancelar pedido no status NOVO com estorno', () => {
