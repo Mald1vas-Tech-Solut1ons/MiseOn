@@ -21,10 +21,10 @@ export function PedidoItens({ pedido: p, precisaConferir, conferidos, toggleConf
               <span>
                 {i.quantidade}× {i.nome_produto}
                 {i.itens_pedido_opcoes?.map((o, x) => (
-                  <span key={x} className="mt-0.5 block text-[11px] text-gray-500 dark:text-[#6C7A96]">+ {o.nome_opcao}</span>
+                  <span key={x} className="mt-0.5 block text-xs opacity-95 text-gray-500 dark:text-[#6C7A96]">+ {o.nome_opcao}</span>
                 ))}
                 {i.observacao && (
-                  <span className="mt-0.5 block text-[11px] font-semibold text-red-500 dark:text-red-400">⚠ {i.observacao}</span>
+                  <span className="mt-0.5 block text-xs opacity-95 font-semibold text-red-500 dark:text-red-400">⚠ {i.observacao}</span>
                 )}
               </span>
             </span>
@@ -40,7 +40,7 @@ export function PedidoItens({ pedido: p, precisaConferir, conferidos, toggleConf
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
             <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${(conferidos.size / itens.length) * 100}%` }} />
           </div>
-          <span className="shrink-0 text-[10px] font-bold text-gray-400">{conferidos.size}/{itens.length}</span>
+          <span className="shrink-0 text-xs opacity-90 font-bold text-gray-400">{conferidos.size}/{itens.length}</span>
         </div>
       )}
     </>

@@ -194,7 +194,7 @@ export function ModalCancelamento({
       {/* ── Resumo: confirma para quem olha QUAL pedido está prestes a cair ── */}
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--cor-borda)] bg-[var(--cor-surface)] px-4 py-3">
         {ehIfood && (
-          <span className="rounded-md bg-red-600 px-1.5 py-0.5 font-['JetBrains_Mono'] text-[10px] font-bold text-white">
+          <span className="rounded-md bg-red-600 px-1.5 py-0.5 font-['JetBrains_Mono'] text-xs opacity-90 font-bold text-white">
             iFood
           </span>
         )}
@@ -224,7 +224,7 @@ export function ModalCancelamento({
           />
           {/* Título do passo do iFood é "enviando", não "cancelando": o que
               sai daqui é um pedido de cancelamento que eles confirmam depois. */}
-          <p className="pt-1 text-center text-[11px] text-[var(--cor-texto-fraco)]">
+          <p className="pt-1 text-center text-xs opacity-95 text-[var(--cor-texto-fraco)]">
             {tDynamic('Não feche esta janela.')}
           </p>
         </div>
@@ -247,7 +247,7 @@ export function ModalCancelamento({
               volta "recebido" e a confirmação (ou a recusa) chega depois. Dizer
               "cancelado no iFood" aqui seria prometer o que ainda não aconteceu. */}
           {ehIfood && (
-            <p className="max-w-sm text-[11px] leading-relaxed text-[var(--cor-texto-fraco)]">
+            <p className="max-w-sm text-xs opacity-95 leading-relaxed text-[var(--cor-texto-fraco)]">
               {tDynamic('O pedido de cancelamento foi enviado ao iFood. A confirmação deles chega em instantes — se for recusada, o cartão do pedido avisa.')}
             </p>
           )}
@@ -268,13 +268,13 @@ export function ModalCancelamento({
                 <>
                   <button
                     onClick={() => setVerTecnico((v) => !v)}
-                    className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-[var(--cor-texto-fraco)] hover:underline"
+                    className="mt-2 flex items-center gap-1 text-xs opacity-95 font-semibold text-[var(--cor-texto-fraco)] hover:underline"
                   >
                     <ChevronDown size={12} className={verTecnico ? 'rotate-180 transition' : 'transition'} />
                     {tDynamic('Detalhe técnico (para o suporte)')}
                   </button>
                   {verTecnico && (
-                    <pre className="mt-1.5 max-h-32 overflow-auto whitespace-pre-wrap rounded-lg bg-black/30 p-2 font-['JetBrains_Mono'] text-[10px] text-[var(--cor-texto-fraco)]">
+                    <pre className="mt-1.5 max-h-32 overflow-auto whitespace-pre-wrap rounded-lg bg-black/30 p-2 font-['JetBrains_Mono'] text-xs opacity-90 text-[var(--cor-texto-fraco)]">
                       {fase.tecnico}
                     </pre>
                   )}
@@ -314,7 +314,7 @@ export function ModalCancelamento({
           <p className="mb-1 font-['Sora'] text-sm font-bold text-[var(--cor-texto)] dark:text-[var(--cor-texto-claro)]">
             {tDynamic('Por que este pedido está sendo cancelado?')}
           </p>
-          <p className="mb-2.5 text-[11px] text-[var(--cor-texto-fraco)]">
+          <p className="mb-2.5 text-xs opacity-95 text-[var(--cor-texto-fraco)]">
             {ehIfood
               ? tDynamic('Lista fornecida pelo iFood para este pedido — só estes motivos são aceitos por lá.')
               : tDynamic('O motivo fica registrado no histórico do pedido.')}
@@ -324,7 +324,7 @@ export function ModalCancelamento({
               que saber que está escolhendo do catálogo padrão — e que por isso
               o iFood ainda pode recusar o código. */}
           {listaPadrao && !carregandoMotivos && !erroMotivos && (
-            <p className="mb-2.5 flex gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-[11px] leading-snug text-amber-700 dark:text-amber-400">
+            <p className="mb-2.5 flex gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-xs opacity-95 leading-snug text-amber-700 dark:text-amber-400">
               <AlertTriangle size={13} className="mt-px shrink-0" />
               {tDynamic('O iFood não respondeu a lista deste pedido agora — estes são os motivos padrão dele. O cancelamento segue normalmente; se o iFood recusar o código, avisamos aqui.')}
             </p>
@@ -389,7 +389,7 @@ export function ModalCancelamento({
 
           {!carregandoMotivos && !erroMotivos && (
             <label className="mt-3 block">
-              <span className="text-[11px] font-semibold text-[var(--cor-texto-fraco)]">
+              <span className="text-xs opacity-95 font-semibold text-[var(--cor-texto-fraco)]">
                 {tDynamic('Observação (opcional) — entra no histórico do pedido')}
               </span>
               <textarea

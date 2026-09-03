@@ -250,7 +250,7 @@ export default function Ifood() {
               </div>
 
               {/* ── Grupo 1: pedidos ── */}
-              <p className="pt-1 text-[11px] font-black uppercase tracking-wider text-gray-400">
+              <p className="pt-1 text-xs opacity-95 font-black uppercase tracking-wider text-gray-400">
                 {tDynamic('Pedidos')}
               </p>
 
@@ -277,14 +277,14 @@ export default function Ifood() {
                   Item sem Código iFood não tem par do outro lado, então ligar o
                   interruptor com o De-Para vazio não produz efeito nenhum — e o
                   lojista merece ver isso ANTES de ligar, não depois. */}
-              <p className="pt-3 text-[11px] font-black uppercase tracking-wider text-gray-400">
+              <p className="pt-3 text-xs opacity-95 font-black uppercase tracking-wider text-gray-400">
                 {tDynamic('Cardápio')}
               </p>
 
               {mapeados.total > 0 && mapeados.comCodigo < mapeados.total && (
                 <div className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
                   <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-500" />
-                  <p className="flex-1 text-[11px] leading-snug text-amber-800 dark:text-amber-300">
+                  <p className="flex-1 text-xs opacity-95 leading-snug text-amber-800 dark:text-amber-300">
                     <strong>{mapeados.comCodigo} de {mapeados.total}</strong>{' '}
                     {tDynamic('produtos têm Código iFood. Os que não têm ficam de fora da sincronização — o iFood não tem como saber a qual item dele cada produto daqui corresponde.')}{' '}
                     <button onClick={() => setAba('depara')} className="font-bold underline">
@@ -340,7 +340,7 @@ export default function Ifood() {
                   grava no toque. O que existia era um "Salvar Taxas" — que
                   salvava os campos de OUTRO cartao — plantado no fim deste,
                   sugerindo que os interruptores dependiam dele. */}
-              <p className="pt-1 text-center text-[10px] text-gray-400">
+              <p className="pt-1 text-center text-xs opacity-90 text-gray-400">
                 {tDynamic('Cada interruptor é salvo no momento em que você toca.')}
               </p>
             </div>
@@ -395,12 +395,12 @@ function Interruptor({
         <span className="flex flex-wrap items-center gap-1.5">
           <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{titulo}</span>
           {pendente && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs opacity-80 font-black uppercase tracking-wide text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
               <Clock size={9} /> ainda não automático
             </span>
           )}
         </span>
-        <span className="mt-0.5 block text-[11px] leading-snug text-gray-500 dark:text-gray-400">{ajuda}</span>
+        <span className="mt-0.5 block text-xs opacity-95 leading-snug text-gray-500 dark:text-gray-400">{ajuda}</span>
       </span>
       <span
         className={`mt-0.5 flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors ${
@@ -534,15 +534,15 @@ function DeParaProdutos({ lojaId, loja }: { lojaId: string; loja: LojaIfood }) {
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="rounded-xl bg-gray-50 p-3 text-center dark:bg-white/5">
             <p className="font-['JetBrains_Mono'] text-xl font-black text-gray-900 dark:text-white">{produtos.length}</p>
-            <p className="text-[11px] font-semibold text-gray-500">Produtos</p>
+            <p className="text-xs opacity-95 font-semibold text-gray-500">Produtos</p>
           </div>
           <div className="rounded-xl bg-emerald-50 p-3 text-center dark:bg-emerald-900/10">
             <p className="font-['JetBrains_Mono'] text-xl font-black text-emerald-600 dark:text-emerald-400">{mapeados}</p>
-            <p className="text-[11px] font-semibold text-emerald-600/80 dark:text-emerald-400/80">Mapeados</p>
+            <p className="text-xs opacity-95 font-semibold text-emerald-600/80 dark:text-emerald-400/80">Mapeados</p>
           </div>
           <div className="col-span-2 rounded-xl bg-amber-50 p-3 text-center sm:col-span-1 dark:bg-amber-900/10">
             <p className="font-['JetBrains_Mono'] text-xl font-black text-amber-600 dark:text-amber-400">{produtos.length - mapeados}</p>
-            <p className="text-[11px] font-semibold text-amber-600/80 dark:text-amber-400/80">Sem código</p>
+            <p className="text-xs opacity-95 font-semibold text-amber-600/80 dark:text-amber-400/80">Sem código</p>
           </div>
         </div>
       </div>
@@ -608,7 +608,7 @@ function DeParaProdutos({ lojaId, loja }: { lojaId: string; loja: LojaIfood }) {
 
       {/* Lista */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <div className="hidden grid-cols-[1fr_110px_110px_160px] gap-3 border-b border-gray-100 bg-gray-50 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 sm:grid dark:border-gray-800 dark:bg-white/5">
+        <div className="hidden grid-cols-[1fr_110px_110px_160px] gap-3 border-b border-gray-100 bg-gray-50 px-4 py-2.5 text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400 sm:grid dark:border-gray-800 dark:bg-white/5">
           <span>Produto</span>
           <span className="text-right">Preço PDV</span>
           <span className="text-right">{tDynamic('Preço iFood (sugerido)')}</span>
@@ -631,7 +631,7 @@ function DeParaProdutos({ lojaId, loja }: { lojaId: string; loja: LojaIfood }) {
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-100">{p.nome}</p>
-                <p className="text-[11px] text-gray-400">
+                <p className="text-xs opacity-95 text-gray-400">
                   {(p as any).categorias?.nome ?? 'Sem categoria'}
                   {!p.disponivel && ' · indisponível'}
                 </p>
@@ -775,15 +775,15 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <p className="font-['JetBrains_Mono'] text-lg font-black text-gray-900 dark:text-white">{fmt(totais.bruto)}</p>
-          <p className="text-[11px] font-semibold text-gray-500">Bruto (30 dias)</p>
+          <p className="text-xs opacity-95 font-semibold text-gray-500">Bruto (30 dias)</p>
         </div>
         <div className="rounded-2xl border border-red-100 bg-red-50 p-4 text-center dark:border-red-900/30 dark:bg-red-900/10">
           <p className="font-['JetBrains_Mono'] text-lg font-black text-red-600 dark:text-red-400">-{fmt(totais.taxas)}</p>
-          <p className="text-[11px] font-semibold text-red-500/80 dark:text-red-400/80">Taxas iFood</p>
+          <p className="text-xs opacity-95 font-semibold text-red-500/80 dark:text-red-400/80">Taxas iFood</p>
         </div>
         <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center dark:border-emerald-900/30 dark:bg-emerald-900/10">
           <p className="font-['JetBrains_Mono'] text-lg font-black text-emerald-600 dark:text-emerald-400">{fmt(totais.liquido)}</p>
-          <p className="text-[11px] font-semibold text-emerald-600/80 dark:text-emerald-400/80">{tDynamic('Líquido estimado')}</p>
+          <p className="text-xs opacity-95 font-semibold text-emerald-600/80 dark:text-emerald-400/80">{tDynamic('Líquido estimado')}</p>
         </div>
       </div>
 
@@ -792,7 +792,7 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
           lojista conta 19 cartões na tela, vê o dinheiro de 3 e conclui que o
           sistema perdeu vendas. Aqui a diferença tem nome. */}
       {(totais.testes > 0 || totais.cancelados > 0) && (
-        <p className="flex flex-wrap items-center gap-x-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+        <p className="flex flex-wrap items-center gap-x-1.5 text-xs opacity-95 text-gray-500 dark:text-gray-400">
           <Info size={12} className="shrink-0" />
           {tDynamic('Fora da conta:')}
           {totais.testes > 0 && (
@@ -858,18 +858,18 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
             <div key={p.id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
-                  <span className="rounded-lg bg-red-600 px-2 py-1 font-['JetBrains_Mono'] text-[10px] font-black text-white">iFood</span>
+                  <span className="rounded-lg bg-red-600 px-2 py-1 font-['JetBrains_Mono'] text-xs opacity-90 font-black text-white">iFood</span>
                   <span className="font-['Sora'] text-sm font-black text-gray-900 dark:text-white">#{p.numero}</span>
                   <span className="text-xs text-gray-400">
                     {new Date(p.criado_em).toLocaleDateString('pt-BR')} {new Date(p.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
                 {p.ifood_pedido_teste && (
-                  <span className="rounded-full bg-amber-100 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                  <span className="rounded-full bg-amber-100 px-2 py-1 text-xs opacity-80 font-black uppercase tracking-wide text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
                     {tDynamic('teste')}
                   </span>
                 )}
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${classeDoStatus(p.status)}`}>
+                <span className={`rounded-full px-2.5 py-1 text-xs opacity-90 font-black uppercase tracking-wide ${classeDoStatus(p.status)}`}>
                   {STATUS_LABEL[p.status] ?? p.status}
                 </span>
               </div>
@@ -884,7 +884,7 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
                   <div className="mt-2.5 space-y-2">
                     <div className="flex gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 dark:border-red-900/30 dark:bg-red-900/10">
                       <Ban size={14} className="mt-px shrink-0 text-red-500" />
-                      <p className="text-[11px] leading-snug text-red-700 dark:text-red-300">
+                      <p className="text-xs opacity-95 leading-snug text-red-700 dark:text-red-300">
                         <strong className="font-bold">{tDynamic(c.quem)}</strong>
                         {c.motivo ? ` · ${c.motivo}` : ''}
                         {p.ifood_cancelamento_em && (
@@ -899,7 +899,7 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
                     {c.recusa && (
                       <div className="flex gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-900/15">
                         <AlertTriangle size={14} className="mt-px shrink-0 text-amber-600 dark:text-amber-400" />
-                        <p className="text-[11px] font-semibold leading-snug text-amber-800 dark:text-amber-300">
+                        <p className="text-xs opacity-95 font-semibold leading-snug text-amber-800 dark:text-amber-300">
                           {c.recusa}
                         </p>
                       </div>
@@ -911,15 +911,15 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 <div className="rounded-xl bg-gray-50 p-2 dark:bg-white/5">
                   <p className="font-['JetBrains_Mono'] text-xs font-bold text-gray-800 dark:text-gray-100">{fmt(bruto)}</p>
-                  <p className="text-[10px] text-gray-400">Bruto</p>
+                  <p className="text-xs opacity-90 text-gray-400">Bruto</p>
                 </div>
                 <div className="rounded-xl bg-gray-50 p-2 dark:bg-white/5">
                   <p className="font-['JetBrains_Mono'] text-xs font-bold text-red-500">-{fmt(taxa)}</p>
-                  <p className="text-[10px] text-gray-400">Taxa retida</p>
+                  <p className="text-xs opacity-90 text-gray-400">Taxa retida</p>
                 </div>
                 <div className="rounded-xl bg-gray-50 p-2 dark:bg-white/5">
                   <p className="font-['JetBrains_Mono'] text-xs font-bold text-emerald-600 dark:text-emerald-400">{fmt(bruto - taxa)}</p>
-                  <p className="text-[10px] text-gray-400">Líquido</p>
+                  <p className="text-xs opacity-90 text-gray-400">Líquido</p>
                 </div>
               </div>
 
@@ -928,11 +928,11 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
                   onClick={onIrParaDepara}
                   className="mt-3 flex w-full items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-left transition hover:bg-amber-100 dark:border-amber-900/30 dark:bg-amber-900/10 dark:hover:bg-amber-900/20"
                 >
-                  <span className="flex items-center gap-2 text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                  <span className="flex items-center gap-2 text-xs opacity-95 font-bold text-amber-700 dark:text-amber-400">
                     <AlertTriangle size={14} className="shrink-0" />
                     {semMatch.length} item(ns) sem produto vinculado: {semMatch.slice(0, 2).map((i: any) => i.nome_produto).join(', ')}{semMatch.length > 2 ? '…' : ''}
                   </span>
-                  <span className="flex items-center gap-1 text-[11px] font-black text-amber-700 dark:text-amber-400">
+                  <span className="flex items-center gap-1 text-xs opacity-95 font-black text-amber-700 dark:text-amber-400">
                     Corrigir <ArrowRight size={13} />
                   </span>
                 </button>

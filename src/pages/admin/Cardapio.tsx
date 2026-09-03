@@ -159,10 +159,10 @@ export default function CardapioAdmin() {
                   <p className="flex items-center gap-1.5 truncate text-sm font-medium dark:text-gray-100">
                     {p.nome}
                     {p.tem_estoque === false && (
-                      <span className="shrink-0 rounded-full bg-red-100 px-1.5 py-0.5 text-[9px] font-bold text-red-600">SEM INSUMO</span>
+                      <span className="shrink-0 rounded-full bg-red-100 px-1.5 py-0.5 text-xs opacity-80 font-bold text-red-600">SEM INSUMO</span>
                     )}
                     {p.estacao_preparo === 'DIRETO' && (
-                      <span title="Revenda direta — não entra na fila da cozinha" className="flex shrink-0 items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                      <span title="Revenda direta — não entra na fila da cozinha" className="flex shrink-0 items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs opacity-80 font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
                         <Store size={9} /> REVENDA
                       </span>
                     )}
@@ -533,13 +533,13 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
           </div>
           <div className="pt-1">
             <input value={pdvCode} onChange={(e) => setPdvCode(e.target.value)} placeholder="Código PDV / iFood (opcional)" className="w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-            <p className="mt-1 text-[10px] text-gray-400">{tDynamic('Use este código para mapear este produto com integrações externas como o iFood.')}</p>
+            <p className="mt-1 text-xs opacity-90 text-gray-400">{tDynamic('Use este código para mapear este produto com integrações externas como o iFood.')}</p>
             {isIfoodActive && pdvCode && (
               <div className="mt-2 rounded-xl bg-amber-50 p-3 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-900/30">
-                <p className="text-[10px] font-bold text-amber-800 dark:text-amber-500">
+                <p className="text-xs opacity-90 font-bold text-amber-800 dark:text-amber-500">
                   Bloqueio iFood Ativo
                 </p>
-                <p className="text-[10px] text-amber-700 dark:text-amber-400 mt-1">
+                <p className="text-xs opacity-90 text-amber-700 dark:text-amber-400 mt-1">
                   {tDynamic('O markup está ligado.')} <b>{tDynamic('Não altere o preço deste item manualmente no Portal do iFood')}</b>, pois o MiseOn será a fonte oficial do preço, sob pena de dessincronização financeira.
                 </p>
               </div>
@@ -597,7 +597,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                 <Store size={14} /> Revenda direta
               </button>
             </div>
-            <p className="mt-1.5 text-[11px] text-gray-400">
+            <p className="mt-1.5 text-xs opacity-95 text-gray-400">
               {estacaoPreparo === 'DIRETO'
                 ? 'Não entra na fila do KDS — o balcão separa e entrega direto (ex.: bebidas, sobremesas prontas).'
                 : 'Entra na fila da cozinha (KDS). Use para itens que precisam de preparo.'}
@@ -626,11 +626,11 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
             {!insumos.length && <p className="mt-1 text-xs text-gray-400">{tDynamic('Cadastre insumos em Estoque primeiro.')}</p>}
              {ficha.length > 0 && (
               <div className="mt-4 border-t border-gray-100 dark:border-gray-800 pt-3">
-                 <div className="grid grid-cols-4 gap-2 text-center text-[10px] sm:text-xs">
+                 <div className="grid grid-cols-4 gap-2 text-center text-xs opacity-90 sm:text-xs">
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2 border border-gray-100 dark:border-gray-700">
                       <p className="uppercase tracking-wide text-gray-400 mb-1">Preço PDV</p>
                       <p className="font-semibold dark:text-gray-200">{fmt(precoNum)}</p>
-                      {isIfoodActive && <p className="text-[9px] text-red-500 font-bold mt-0.5">iFood: {fmt(markupIfood)}</p>}
+                      {isIfoodActive && <p className="text-xs opacity-80 text-red-500 font-bold mt-0.5">iFood: {fmt(markupIfood)}</p>}
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2 border border-gray-100 dark:border-gray-700">
                       <p className="uppercase tracking-wide text-gray-400 mb-1">Insumos</p>
@@ -643,7 +643,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                     <div className={`${lucroLiquidoReal < 0 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900/50' : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900/50'} rounded-lg p-2 border`}>
                       <p className="uppercase tracking-wide text-gray-400 mb-1 flex items-center justify-center gap-1">Líq. Real</p>
                       <p className={`font-black ${lucroLiquidoReal < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-700 dark:text-green-400'}`}>{fmt(lucroLiquidoReal)}</p>
-                      <p className={`text-[9px] font-bold mt-0.5 ${margemReal < 20 ? 'text-red-500' : 'text-green-600'}`}>{margemReal.toFixed(0)}%</p>
+                      <p className={`text-xs opacity-80 font-bold mt-0.5 ${margemReal < 20 ? 'text-red-500' : 'text-green-600'}`}>{margemReal.toFixed(0)}%</p>
                     </div>
                  </div>
               </div>

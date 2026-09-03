@@ -249,14 +249,14 @@ const MockupEstoque3D = () => {
         {/* Nó 1: Lote de Compra */}
         <div className="bg-gray-900/90 backdrop-blur-md border-2 border-cyan-500/60 rounded-2xl p-3.5 shadow-[0_0_20px_rgba(6,182,212,0.15)] flex flex-col justify-between h-36">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase text-cyan-400 tracking-wider">{tDynamic('Nó #1 • Lote PEPS')}</span>
+            <span className="text-xs opacity-90 font-black uppercase text-cyan-400 tracking-wider">{tDynamic('Nó #1 • Lote PEPS')}</span>
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
           </div>
           <div>
             <p className="text-white font-black text-xs leading-tight">Lote #2026-07A</p>
-            <p className="text-gray-400 text-[11px] font-medium mt-0.5">Caixa Carne 25kg</p>
+            <p className="text-gray-400 text-xs opacity-95 font-medium mt-0.5">Caixa Carne 25kg</p>
           </div>
-          <div className="border-t border-gray-800 pt-1.5 flex justify-between items-center text-[10px]">
+          <div className="border-t border-gray-800 pt-1.5 flex justify-between items-center text-xs opacity-90">
             <span className="text-gray-500">Custo Lote:</span>
             <span className="text-cyan-300 font-bold">R$ 625,00</span>
           </div>
@@ -265,14 +265,14 @@ const MockupEstoque3D = () => {
         {/* Nó 2: Insumo Processado */}
         <div className="bg-gray-900/90 backdrop-blur-md border-2 border-orange-500/60 rounded-2xl p-3.5 shadow-[0_0_20px_rgba(252,91,36,0.15)] flex flex-col justify-between h-36 relative">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase text-orange-400 tracking-wider">{tDynamic('Nó #2 • Ficha Técnica')}</span>
-            <span className="bg-orange-500/20 text-orange-400 text-[9px] font-bold px-1.5 py-0.5 rounded">Rendimento 96.8%</span>
+            <span className="text-xs opacity-90 font-black uppercase text-orange-400 tracking-wider">{tDynamic('Nó #2 • Ficha Técnica')}</span>
+            <span className="bg-orange-500/20 text-orange-400 text-xs opacity-80 font-bold px-1.5 py-0.5 rounded">Rendimento 96.8%</span>
           </div>
           <div>
             <p className="text-white font-black text-xs leading-tight">Blend Smash 180g</p>
-            <p className="text-gray-400 text-[11px] font-medium mt-0.5">138 porções ativas</p>
+            <p className="text-gray-400 text-xs opacity-95 font-medium mt-0.5">138 porções ativas</p>
           </div>
-          <div className="border-t border-gray-800 pt-1.5 flex justify-between items-center text-[10px]">
+          <div className="border-t border-gray-800 pt-1.5 flex justify-between items-center text-xs opacity-90">
             <span className="text-gray-500">Custo/Un:</span>
             <span className="text-orange-300 font-bold">{tDynamic('R$ 4,50 /porção')}</span>
           </div>
@@ -281,14 +281,14 @@ const MockupEstoque3D = () => {
         {/* Nó 3: Produto Final */}
         <div className="bg-gray-900/90 backdrop-blur-md border-2 border-emerald-500/60 rounded-2xl p-3.5 shadow-[0_0_20px_rgba(16,185,129,0.15)] flex flex-col justify-between h-36">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">{tDynamic('Nó #3 • Produto Final')}</span>
-            <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded">Margem 79.1%</span>
+            <span className="text-xs opacity-90 font-black uppercase text-emerald-400 tracking-wider">{tDynamic('Nó #3 • Produto Final')}</span>
+            <span className="bg-emerald-500/20 text-emerald-400 text-xs opacity-80 font-bold px-1.5 py-0.5 rounded">Margem 79.1%</span>
           </div>
           <div>
             <p className="text-white font-black text-xs leading-tight">Burger Master X-Bacon</p>
-            <p className="text-gray-400 text-[11px] font-medium mt-0.5">{tDynamic('Preço: R$ 38,90')}</p>
+            <p className="text-gray-400 text-xs opacity-95 font-medium mt-0.5">{tDynamic('Preço: R$ 38,90')}</p>
           </div>
-          <div className="border-t border-gray-800 pt-1.5 flex justify-between items-center text-[10px]">
+          <div className="border-t border-gray-800 pt-1.5 flex justify-between items-center text-xs opacity-90">
             <span className="text-gray-500">CMV Exato:</span>
             <span className="text-emerald-300 font-bold">R$ 8,12 (20.8%)</span>
           </div>
@@ -301,7 +301,7 @@ const MockupEstoque3D = () => {
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
           <span className="text-xs text-gray-200 font-bold">{tDynamic('Conservação de Valor PEPS:')} <strong className="text-emerald-400">100.0% Auditado</strong></span>
         </div>
-        <span className="text-[11px] text-gray-400 font-mono">Rastreio Causal Lote → Venda</span>
+        <span className="text-xs opacity-95 text-gray-400 font-mono">Rastreio Causal Lote → Venda</span>
       </div>
     </div>
   </div>
@@ -332,7 +332,7 @@ const MockupSalao3D = () => {
               <div className="w-3 h-3 rounded-full bg-orange-500 shadow-[0_0_10px_#FC5B24] animate-pulse"></div>
               <span className="text-white font-black text-lg">Mesa 04 (Redonda)</span>
             </div>
-            <span className="bg-orange-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">OCUPADA</span>
+            <span className="bg-orange-500 text-white text-xs opacity-90 font-black px-2.5 py-0.5 rounded-full">OCUPADA</span>
           </div>
           <div className="flex items-baseline justify-between mt-3">
             <span className="text-orange-400 font-black text-2xl">R$ 214,00</span>
@@ -352,7 +352,7 @@ const MockupSalao3D = () => {
               <div className="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_10px_#10B981]"></div>
               <span className="text-white font-black text-lg">Mesa 05 (Booth)</span>
             </div>
-            <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-black px-2.5 py-0.5 rounded-full">LIVRE</span>
+            <span className="bg-emerald-500/20 text-emerald-400 text-xs opacity-90 font-black px-2.5 py-0.5 rounded-full">LIVRE</span>
           </div>
           <div className="mt-4">
             <p className="text-gray-400 font-medium text-sm">{tDynamic('Pronta para Atendimento')}</p>
@@ -366,7 +366,7 @@ const MockupSalao3D = () => {
           <div className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-0.5">{tDynamic('App Garçom • Divisão por Assento')}</div>
           <div className="text-xs text-gray-300">Cadeira #1: R$ 65,00 · Cadeira #2: R$ 82,00 · Cadeira #3: R$ 67,00</div>
         </div>
-        <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 px-2.5 py-1.5 rounded-lg border border-orange-500/20 shrink-0">
+        <span className="text-xs opacity-90 font-bold text-orange-400 bg-orange-500/10 px-2.5 py-1.5 rounded-lg border border-orange-500/20 shrink-0">
           3 Modos de Fechamento
         </span>
       </div>

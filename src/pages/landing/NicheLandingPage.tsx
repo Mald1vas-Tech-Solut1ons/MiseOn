@@ -315,7 +315,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                   <div className="inline-flex rounded-2xl bg-orange-500/10 p-3 text-[var(--cor-primaria)]">
                     <IconComp size={24} />
                   </div>
-                  <span className="mt-4 block text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <span className="mt-4 block text-xs opacity-90 font-black uppercase tracking-wider text-slate-400">
                     {tDynamic(feat.tag)}
                   </span>
                   <h3 className="mt-1 font-['Sora'] text-lg font-bold text-gray-900 dark:text-white">
@@ -384,7 +384,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
                         height={shot.altura}
                         className="h-auto w-full object-cover"
                       />
-                      <span className="flex items-center justify-center gap-1.5 border-t border-white/10 bg-slate-900/80 p-3 text-[11px] font-bold text-slate-300 transition group-hover:text-white">
+                      <span className="flex items-center justify-center gap-1.5 border-t border-white/10 bg-slate-900/80 p-3 text-xs opacity-95 font-bold text-slate-300 transition group-hover:text-white">
                         <Maximize2 size={12} /> {tDynamic('Ampliar a tela')}
                       </span>
                     </button>
@@ -430,7 +430,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
               className="h-auto w-auto max-w-none cursor-default rounded-xl shadow-2xl md:max-h-[92vh] md:max-w-full md:object-contain"
             />
           </div>
-          <p className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-[11px] font-semibold text-white/80">
+          <p className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-xs opacity-95 font-semibold text-white/80">
             <span className="md:hidden">{tDynamic('Arraste para ver a tela inteira · toque fora para fechar')}</span>
             <span className="hidden md:inline">{tDynamic('Toque fora ou aperte Esc para fechar')}</span>
           </p>

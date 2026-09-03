@@ -202,7 +202,7 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
           <h3 className="font-black text-xl text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <Boxes size={22} className="text-blue-500" /> Observabilidade 3D de Estoque Físico
             {atualizando && (
-              <span className="flex items-center gap-1 text-[11px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full animate-pulse">
+              <span className="flex items-center gap-1 text-xs opacity-95 font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full animate-pulse">
                 <RefreshCw size={11} className="animate-spin" /> {tDynamic('Atualizando ao vivo…')}
               </span>
             )}
@@ -230,19 +230,19 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
               <span className="font-bold text-blue-300 block mb-1">⚽ Tamanho da Esfera</span>
-              <p className="text-gray-300 text-[11px]">Representa a <b>quantidade física em depósito</b>. Esferas maiores retêm mais volume físico.</p>
+              <p className="text-gray-300 text-xs opacity-95">Representa a <b>quantidade física em depósito</b>. Esferas maiores retêm mais volume físico.</p>
             </div>
             <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
               <span className="font-bold text-emerald-300 block mb-1">🌡️ Escala de Temperatura</span>
-              <p className="text-gray-300 text-[11px]">🟢 Custo unitário econômico $\to$ 🟡 Moderado $\to$ 🔴 Alta densidade financeira/unidade.</p>
+              <p className="text-gray-300 text-xs opacity-95">🟢 Custo unitário econômico $\to$ 🟡 Moderado $\to$ 🔴 Alta densidade financeira/unidade.</p>
             </div>
             <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
               <span className="font-bold text-amber-300 block mb-1">🔗 Dutos de Conversão</span>
-              <p className="text-gray-300 text-[11px]">Conectam a <b>compra original</b> (raiz) às suas frações físicas (ex: Caixa $\to$ Unidade $\to$ Fatia).</p>
+              <p className="text-gray-300 text-xs opacity-95">Conectam a <b>compra original</b> (raiz) às suas frações físicas (ex: Caixa $\to$ Unidade $\to$ Fatia).</p>
             </div>
             <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
               <span className="font-bold text-purple-300 block mb-1">✨ Brilho Pulsante</span>
-              <p className="text-gray-300 text-[11px]">Indica <b>compras recentes</b> (últimos 7 dias) que estão entrando na esteira de produção.</p>
+              <p className="text-gray-300 text-xs opacity-95">Indica <b>compras recentes</b> (últimos 7 dias) que estão entrando na esteira de produção.</p>
             </div>
           </div>
         </div>
@@ -251,45 +251,45 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
       {/* Painel Executivo de KPIs da Operação */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
+          <p className="text-xs opacity-90 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
             <DollarSign size={12} className="text-green-500" /> Capital Investido
           </p>
           <p className="text-lg font-black text-green-700 dark:text-green-400 mt-1">
             {kpis.totalInvestido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </p>
-          <p className="text-[10px] text-gray-400 mt-0.5">{kpis.totalLotes} lotes ativos em estoque</p>
+          <p className="text-xs opacity-90 text-gray-400 mt-0.5">{kpis.totalLotes} lotes ativos em estoque</p>
         </div>
 
         <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
+          <p className="text-xs opacity-90 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
             <Layers size={12} className="text-blue-500" /> Lotes Mapeados
           </p>
           <p className="text-lg font-black text-gray-900 dark:text-gray-100 mt-1">
             {kpis.totalLotes} <span className="text-xs font-normal text-gray-500">lotes</span>
           </p>
-          <p className="text-[10px] text-gray-400 mt-0.5">Em {filtroCategoria ?? 'todas as categorias'}</p>
+          <p className="text-xs opacity-90 text-gray-400 mt-0.5">Em {filtroCategoria ?? 'todas as categorias'}</p>
         </div>
 
         <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
+          <p className="text-xs opacity-90 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
             <Flame size={12} className="text-red-500" /> {tDynamic('Maior Custo Unitário')}
           </p>
           <p className="text-sm font-black text-red-600 dark:text-red-400 mt-1 truncate" title={kpis.maiorCustoUnitarioItem?.rotulo}>
             {kpis.maiorCustoUnitarioItem?.rotulo.split('(')[0] ?? 'N/A'}
           </p>
-          <p className="text-[11px] font-bold text-gray-700 dark:text-gray-300">
+          <p className="text-xs opacity-95 font-bold text-gray-700 dark:text-gray-300">
             {kpis.maiorCustoUnitarioItem ? `${kpis.maiorCustoUnitarioItem.custoUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 2 })}/${kpis.maiorCustoUnitarioItem.unidade}` : '—'}
           </p>
         </div>
 
         <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
+          <p className="text-xs opacity-90 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
             <Package size={12} className="text-amber-500" /> Maior Alocação
           </p>
           <p className="text-sm font-black text-amber-600 dark:text-amber-400 mt-1 truncate" title={kpis.maiorConcentracaoItem?.rotulo}>
             {kpis.maiorConcentracaoItem?.rotulo.split('(')[0] ?? 'N/A'}
           </p>
-          <p className="text-[11px] font-bold text-gray-700 dark:text-gray-300">
+          <p className="text-xs opacity-95 font-bold text-gray-700 dark:text-gray-300">
             {kpis.maiorConcentracaoItem ? kpis.maiorConcentracaoItem.custoAlocado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}
           </p>
         </div>

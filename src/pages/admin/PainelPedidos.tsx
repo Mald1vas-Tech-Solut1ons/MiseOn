@@ -309,7 +309,7 @@ export default function PainelPedidos() {
     <div className="min-h-screen bg-gray-50 px-4 py-5 dark:bg-[#070C18]">
       <div className="print:hidden mb-6">
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-['JetBrains_Mono'] text-[11px] tracking-[0.28em] text-orange-500 uppercase">{tDynamic('PAINEL · AO VIVO')}</span>
+          <span className="font-['JetBrains_Mono'] text-xs opacity-95 tracking-[0.28em] text-orange-500 uppercase">{tDynamic('PAINEL · AO VIVO')}</span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]" />
         </div>
         <h2 data-tour="tour-pedidos-header" className="m-0 font-['Sora'] text-[26px] font-extrabold text-gray-900 dark:text-white">Balcão</h2>
@@ -347,7 +347,7 @@ export default function PainelPedidos() {
                 }`}
               >
                 {f.label}
-                <span className={`rounded-full px-1.5 py-px font-['JetBrains_Mono'] text-[10px] ${ativo ? 'bg-white/25' : 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'}`}>
+                <span className={`rounded-full px-1.5 py-px font-['JetBrains_Mono'] text-xs opacity-90 ${ativo ? 'bg-white/25' : 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'}`}>
                   {qtd}
                 </span>
               </button>
@@ -373,7 +373,7 @@ export default function PainelPedidos() {
               <div key={p.id} className="w-64 shrink-0 rounded-2xl border border-purple-200 bg-purple-50 p-3 dark:border-purple-900/40 dark:bg-purple-900/10">
                 <div className="flex items-center justify-between">
                   <span className="font-['Sora'] text-sm font-black text-purple-700 dark:text-purple-400">#{p.numero}</span>
-                  <span className="rounded-full bg-purple-600 px-2 py-0.5 text-[10px] font-black text-white">
+                  <span className="rounded-full bg-purple-600 px-2 py-0.5 text-xs opacity-90 font-black text-white">
                     {new Date(p.agendado_para!).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · {new Date(p.agendado_para!).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>

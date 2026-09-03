@@ -45,17 +45,17 @@ export function Mesas3DHUD({ posicoes, mesas3D, onSelecionar }: Props) {
                   <span className="font-black text-orange-400 text-xs">
                     {fmt(m3d.totalParcial - m3d.totalPago)}
                   </span>
-                  <span className="rounded-full bg-gray-800 px-1.5 py-0.5 text-[9px] font-bold text-gray-300">
+                  <span className="rounded-full bg-gray-800 px-1.5 py-0.5 text-xs opacity-80 font-bold text-gray-300">
                     {assentosOcupadosCount}/{m3d.capacidade}
                   </span>
                   {m3d.tempoMinutos > 0 && (
-                    <span className="rounded-full bg-orange-500/20 px-1.5 py-0.5 text-[9px] font-bold text-orange-300">
+                    <span className="rounded-full bg-orange-500/20 px-1.5 py-0.5 text-xs opacity-80 font-bold text-orange-300">
                       ⏱️ {m3d.tempoMinutos >= 60 ? `${Math.floor(m3d.tempoMinutos / 60)}h ${m3d.tempoMinutos % 60}m` : `${m3d.tempoMinutos}m`}
                     </span>
                   )}
                 </div>
               ) : (
-                <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-xs opacity-90 font-bold text-emerald-400">
                   Livre
                 </span>
               )}

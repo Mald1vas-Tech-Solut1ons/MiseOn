@@ -86,14 +86,14 @@ export function EstoqueRastreio3D({ lojaId }: { lojaId: string }) {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400">
+          <p className="text-xs opacity-90 uppercase font-semibold text-gray-500 dark:text-gray-400">
             {tDynamic('Investido em estoque')}
           </p>
           <p className="text-lg font-black text-green-700 dark:text-green-400">
             {totalInvestido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </p>
           {totalAlertas > 0 && (
-            <p className="text-[11px] font-bold text-red-500">{totalAlertas} itens pedem atenção</p>
+            <p className="text-xs opacity-95 font-bold text-red-500">{totalAlertas} itens pedem atenção</p>
           )}
         </div>
       </div>

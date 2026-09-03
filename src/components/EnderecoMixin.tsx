@@ -140,7 +140,7 @@ export default function EnderecoMixin({ valorInicial, onMudanca, className = '' 
             placeholder="Número"
             className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm outline-none focus:border-[var(--cor-primaria)] disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
           />
-          <label className="flex cursor-pointer items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs opacity-90 text-gray-500 dark:text-gray-400">
             <input
               type="checkbox"
               checked={dados.sem_numero}

@@ -223,7 +223,7 @@ export default function Dashboard() {
                       : <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-gray-200 text-gray-300 dark:border-gray-700"><Circle size={8} /></span>}
                     <div>
                       <p className={`text-sm font-semibold dark:text-gray-100 ${feito ? 'line-through' : ''}`}>{passo.titulo}</p>
-                      {!feito && <p className="text-[11px] text-gray-400">{passo.descricao}</p>}
+                      {!feito && <p className="text-xs opacity-95 text-gray-400">{passo.descricao}</p>}
                     </div>
                   </div>
                   {!feito && <ArrowRight size={15} className="shrink-0 text-[var(--cor-primaria)]" />}
@@ -256,19 +256,19 @@ export default function Dashboard() {
       {/* ── KPIs do dia ── */}
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><DollarSign size={12} /> {tDynamic('Vendas hoje')}</p>
+          <p className="flex items-center gap-1.5 text-xs opacity-95 font-semibold text-gray-400"><DollarSign size={12} /> {tDynamic('Vendas hoje')}</p>
           <p className="mt-1.5 text-xl font-black dark:text-gray-100">{fmt(resumo.faturamento)}</p>
         </div>
         <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><ShoppingBag size={12} /> {tDynamic('Pedidos hoje')}</p>
+          <p className="flex items-center gap-1.5 text-xs opacity-95 font-semibold text-gray-400"><ShoppingBag size={12} /> {tDynamic('Pedidos hoje')}</p>
           <p className="mt-1.5 text-xl font-black dark:text-gray-100">{resumo.qtd}</p>
         </div>
         <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400"><Ticket size={12} /> {tDynamic('Ticket médio')}</p>
+          <p className="flex items-center gap-1.5 text-xs opacity-95 font-semibold text-gray-400"><Ticket size={12} /> {tDynamic('Ticket médio')}</p>
           <p className="mt-1.5 text-xl font-black dark:text-gray-100">{fmt(resumo.ticket)}</p>
         </div>
         <Link to="/admin/pedidos" className="group rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-[var(--cor-primaria)]/40 dark:border-gray-800 dark:bg-gray-900">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400">
+          <p className="flex items-center gap-1.5 text-xs opacity-95 font-semibold text-gray-400">
             <Flame size={12} /> {tDynamic('Em andamento')}
             {resumo.abertos > 0 && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />}
           </p>
@@ -290,7 +290,7 @@ export default function Dashboard() {
               <p className="flex items-center gap-1.5 text-sm font-black text-green-900 dark:text-green-100">
                 WhatsApp Hoje
                 {dados.waConversas > 0 && (
-                  <span className="flex items-center gap-0.5 rounded-full bg-green-200/50 px-1.5 py-0.5 text-[10px] font-black text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                  <span className="flex items-center gap-0.5 rounded-full bg-green-200/50 px-1.5 py-0.5 text-xs opacity-90 font-black text-green-800 dark:bg-green-900/50 dark:text-green-300">
                     {Math.round((dados.waPedidos / dados.waConversas) * 100)}% de conversão
                   </span>
                 )}
@@ -321,7 +321,7 @@ export default function Dashboard() {
                     • {i.nome}: <b>{Number(i.quantidade_atual)} {i.unidade_medida}</b> (mínimo {Number(i.estoque_minimo)})
                   </p>
                 ))}
-                {dados.insumosBaixos.length > 3 && <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-400">+ {dados.insumosBaixos.length - 3} outros — ver Central de Compras</p>}
+                {dados.insumosBaixos.length > 3 && <p className="text-xs opacity-95 font-semibold text-amber-700 dark:text-amber-400">+ {dados.insumosBaixos.length - 3} outros — ver Central de Compras</p>}
               </div>
             </Link>
           )}
@@ -358,7 +358,7 @@ export default function Dashboard() {
               <p className="flex items-center gap-1.5 text-sm font-black dark:text-gray-100">
                 Cozinha hoje
                 {streakCozinha > 0 && (
-                  <span className="flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-black text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <span className="flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs opacity-90 font-black text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
                     <Trophy size={10} /> {streakCozinha}d na meta
                   </span>
                 )}
@@ -394,7 +394,7 @@ export default function Dashboard() {
                   <span className="truncate text-sm font-semibold dark:text-gray-100">{p.identificador_cliente}</span>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${p.status === 'CANCELADO' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : p.status === 'FINALIZADO' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}`}>{p.status}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-bold ${p.status === 'CANCELADO' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : p.status === 'FINALIZADO' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}`}>{p.status}</span>
                   <span className="text-sm font-bold dark:text-gray-100">{fmt(Number(p.valor_total))}</span>
                 </div>
               </div>
@@ -415,7 +415,7 @@ export default function Dashboard() {
         ].map((a) => (
           <Link key={a.to} to={a.to} className="flex flex-col items-center gap-1.5 rounded-2xl border border-gray-100 bg-white py-3.5 text-gray-500 shadow-sm transition hover:border-[var(--cor-primaria)]/40 hover:text-[var(--cor-primaria)] dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
             {a.icon}
-            <span className="text-[11px] font-bold">{a.label}</span>
+            <span className="text-xs opacity-95 font-bold">{a.label}</span>
           </Link>
         ))}
       </div>

@@ -618,7 +618,7 @@ export default function Cardapio() {
                 <h2 className="flex items-center gap-2 font-black" style={{ color: 'var(--cor-texto)' }}>
                   <Star size={16} className="text-amber-500" /> {tDynamic('Os mais pedidos')}
                 </h2>
-                <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-texto-suave)' }}>
+                <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs opacity-95 font-semibold" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-texto-suave)' }}>
                   <Sparkles size={12} /> {tDynamic('Selecionados pela casa')}
                 </span>
               </div>
@@ -671,7 +671,7 @@ export default function Cardapio() {
                         <span className="font-black" style={{ color: 'var(--cor-texto)' }}>{fmt(precoItem(i))}</span>
                       </div>
                       {i.opcoesSelecionadas && i.opcoesSelecionadas.length > 0 && (
-                        <p className="line-clamp-1 text-[11px]" style={{ color: 'var(--cor-texto-fraco)' }}>{i.opcoesSelecionadas.map(o => o.nome).join(', ')}</p>
+                        <p className="line-clamp-1 text-xs opacity-95" style={{ color: 'var(--cor-texto-fraco)' }}>{i.opcoesSelecionadas.map(o => o.nome).join(', ')}</p>
                       )}
                       <div className="mt-2 flex items-center justify-between">
                         <div className="inline-flex items-center gap-3 rounded-full border px-2.5 py-1.5" style={{ background: 'var(--cor-surface-muted)', borderColor: 'var(--cor-borda)' }}>
@@ -807,7 +807,7 @@ export default function Cardapio() {
             <div className="mt-2 space-y-4">
               {/* Resumo do pedido */}
               <div className="rounded-2xl border border-[var(--cor-borda)] bg-[var(--cor-surface)] p-4 text-left">
-                <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--cor-texto-fraco)]">
+                <p className="mb-3 flex items-center gap-2 text-xs opacity-90 font-bold uppercase tracking-widest text-[var(--cor-texto-fraco)]">
                   <Receipt size={12} /> {tDynamic('Resumo do pedido')}
                 </p>
                 <div className="space-y-2 text-sm">
@@ -838,7 +838,7 @@ export default function Cardapio() {
                 </Button>
               </div>
 
-              <p className="flex items-center justify-center gap-1 text-[10px] font-semibold text-[var(--cor-texto-fraco)]">
+              <p className="flex items-center justify-center gap-1 text-xs opacity-90 font-semibold text-[var(--cor-texto-fraco)]">
                 <ShieldCheck size={12} /> {tDynamic('Transação protegida de ponta a ponta.')}
               </p>
             </div>
@@ -905,7 +905,7 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
               </div>
             )}
             {imgs.length > 1 && (
-              <div className="absolute top-2 right-2 rounded-full bg-black/50 px-2 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
+              <div className="absolute top-2 right-2 rounded-full bg-black/50 px-2 py-1 text-xs opacity-90 font-bold text-white backdrop-blur-sm">
                 1/{imgs.length} <span className="opacity-70">(deslize)</span>
               </div>
             )}
@@ -1080,10 +1080,10 @@ const MaisPedidoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: 
     className={`vitrine-card relative w-40 shrink-0 rounded-[24px] p-2.5 text-left ${p.tem_estoque === false ? 'opacity-50' : ''}`}>
     {p.imagem_url && <img src={getOptimizedImageUrl(p.imagem_url)} className="vitrine-card-media mb-2 h-24 w-full rounded-2xl object-cover" alt="" />}
     {p.tem_estoque === false && (
-      <span className="absolute right-3 top-3 rounded-full bg-gray-800 px-2 py-0.5 text-[9px] font-bold text-white">ESGOTADO</span>
+      <span className="absolute right-3 top-3 rounded-full bg-gray-800 px-2 py-0.5 text-xs opacity-80 font-bold text-white">ESGOTADO</span>
     )}
     {p.tipo_venda === 'POR_PESO' && (
-      <span className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2 py-0.5 text-[9px] font-bold text-white shadow-sm">R$/kg</span>
+      <span className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2 py-0.5 text-xs opacity-80 font-bold text-white shadow-sm">R$/kg</span>
     )}
     <p className="line-clamp-2 text-sm font-bold" style={{ color: 'var(--cor-texto)' }}>{p.nome}</p>
     <SeloNutricional dados={nutricao} compacto />
@@ -1091,7 +1091,7 @@ const MaisPedidoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: 
       <p className="text-sm font-black text-[var(--cor-primaria-texto)]">
         {p.tipo_venda === 'POR_PESO' ? `${fmt(Number(p.preco_por_quilo || 0))}/kg` : fmt(Number(p.preco))}
       </p>
-      <span className="vitrine-card-cta inline-flex items-center gap-1 text-[11px] font-semibold">
+      <span className="vitrine-card-cta inline-flex items-center gap-1 text-xs opacity-95 font-semibold">
         Ver <ArrowRight size={13} />
       </span>
     </div>
@@ -1107,10 +1107,10 @@ const ProdutoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: Nut
       <p className="flex flex-wrap items-center gap-2 font-bold" style={{ color: 'var(--cor-texto)' }}>
         {p.nome}
         {p.tem_estoque === false && (
-          <span className="rounded-full bg-gray-800 px-2 py-0.5 text-[9px] font-bold text-white">ESGOTADO</span>
+          <span className="rounded-full bg-gray-800 px-2 py-0.5 text-xs opacity-80 font-bold text-white">ESGOTADO</span>
         )}
         {p.tipo_venda === 'POR_PESO' && (
-          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs opacity-80 font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
             ⚖️ Por Peso (Kg)
           </span>
         )}
@@ -1333,7 +1333,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
         ? 'border-red-400 focus:border-red-500 dark:border-red-500/60'
         : 'border-gray-200 focus:border-[var(--cor-primaria)] dark:border-gray-700'
     }${!invalido(k, ok) && k === proximo ? ' campo-próximo' : ''}`;
-  const rotuloCls = 'mb-0.5 block text-[11px] font-semibold text-gray-500 dark:text-gray-400';
+  const rotuloCls = 'mb-0.5 block text-xs opacity-95 font-semibold text-gray-500 dark:text-gray-400';
 
   // Portal no body: garante que o fixed se refira à janela mesmo com
   // ancestral transformado (ex.: animação de transição de tela).
@@ -1368,7 +1368,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
                   {bandeira ? <BandeiraMark id={bandeira.id} className="h-7 w-auto" /> : <CreditCard size={22} className="opacity-70" />}
                 </div>
                 <div className="font-mono text-[15px] tracking-[0.12em]">{numeroDisplay}</div>
-                <div className="flex items-end justify-between gap-2 text-[11px]">
+                <div className="flex items-end justify-between gap-2 text-xs opacity-95">
                   <span className="truncate font-semibold uppercase">{nome || 'SEU NOME'}</span>
                   <span className="font-mono font-semibold">{validade || 'MM/AA'}</span>
                 </div>
@@ -1381,7 +1381,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
                     <span className="ml-auto">{cvv || '•••'}</span>
                   </div>
                 </div>
-                <p className="px-4 pt-1.5 text-right text-[10px] opacity-70">CVV</p>
+                <p className="px-4 pt-1.5 text-right text-xs opacity-90 opacity-70">CVV</p>
               </div>
             </div>
           </div>
@@ -1469,12 +1469,12 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
               className="h-4 w-4 shrink-0 accent-[var(--cor-primaria)]" />
             <span className="text-[12px] leading-tight text-gray-600 dark:text-gray-300">
               Salvar meu <b>nome e CPF</b> para a próxima compra
-              <span className="block text-[10px] text-gray-400">{tDynamic('Nunca guardamos o número nem o CVV do cartão.')}</span>
+              <span className="block text-xs opacity-90 text-gray-400">{tDynamic('Nunca guardamos o número nem o CVV do cartão.')}</span>
             </span>
           </label>
 
           {/* Selos de confiança */}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] text-gray-400">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs opacity-90 text-gray-400">
             <span className="flex items-center gap-1"><Lock size={11} className="text-emerald-500" /> SSL</span>
             <span>·</span>
             <span className="flex items-center gap-1"><ShieldCheck size={11} className="text-emerald-500" /> Tokenizado (PCI)</span>

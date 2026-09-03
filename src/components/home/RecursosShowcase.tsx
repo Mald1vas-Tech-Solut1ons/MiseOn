@@ -78,7 +78,7 @@ const RECURSOS = [
         <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-blue-600/30 p-3 text-xs text-gray-200">
           Oi, tudo bem? 😊 Tem sim! O Combo Baguete 30cm está <b>R$ 32,90</b> e temos em estoque. Quer que eu já anote o seu?
         </div>
-        <div className="rounded-lg border border-green-500/20 bg-green-900/10 p-2.5 text-[11px] text-green-400">
+        <div className="rounded-lg border border-green-500/20 bg-green-900/10 p-2.5 text-xs opacity-95 text-green-400">
           ✓ Resposta gerada lendo o cardápio e o estoque do banco de dados — não inventa preço.
         </div>
       </div>

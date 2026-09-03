@@ -99,7 +99,7 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
       <div className="space-y-2.5 p-3">
         {temNumero && (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-900 px-2.5 py-1 text-[11px] font-black text-white dark:bg-gray-100 dark:text-gray-900">
+            <span className="inline-flex items-center gap-1 rounded-full bg-gray-900 px-2.5 py-1 text-xs opacity-95 font-black text-white dark:bg-gray-100 dark:text-gray-900">
               <Flame size={12} strokeWidth={2.5} />
               {formatarValor(kcal, 'kcal')} kcal
               {!temExtras && dados.porcoes > 1 && <span className="font-semibold opacity-70">/porção</span>}
@@ -109,7 +109,7 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
               <span
                 key={a}
                 title={ATRIBUTOS[a].criterio}
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs opacity-95 font-bold ${
                   ATRIBUTOS[a].tom === 'forte'
                     ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-emerald-950'
                     : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:ring-emerald-900'
@@ -138,7 +138,7 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
                     Pode conter: {alergenos.pode.join(', ')}.
                   </p>
                 )}
-                <p className="mt-1 text-[11px] text-amber-800/80 dark:text-amber-300/70">
+                <p className="mt-1 text-xs opacity-95 text-amber-800/80 dark:text-amber-300/70">
                   Esta é a lista do que foi avaliado pelo estabelecimento. Não estar aqui significa{' '}
                   <strong className="font-semibold">não avaliado</strong>, e não ausência garantida.
                 </p>
@@ -148,7 +148,7 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
         )}
 
         {!temNumero && temAlergeno && (
-          <p className="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+          <p className="text-xs opacity-95 leading-relaxed text-gray-500 dark:text-gray-400">
             Os valores nutricionais deste item ainda estão sendo levantados
             {dados.itens_total > 0 && ` (${dados.itens_com_dado} de ${dados.itens_total} ingredientes prontos)`}.
           </p>
@@ -171,7 +171,7 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
           {aberto && (
             <div className="border-t border-gray-100 px-3 pb-3 pt-2.5 dark:border-gray-800">
               {temExtras ? (
-                <p className="mb-2 rounded-lg bg-gray-50 px-2 py-1.5 text-[11px] font-medium text-gray-600 dark:bg-gray-800/60 dark:text-gray-300">
+                <p className="mb-2 rounded-lg bg-gray-50 px-2 py-1.5 text-xs opacity-95 font-medium text-gray-600 dark:bg-gray-800/60 dark:text-gray-300">
                   Incluindo os adicionais que você escolheu · porção de {formatarValor(pesoPorcao, 'g')} g
                 </p>
               ) : (
@@ -185,7 +185,7 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
                       type="button"
                       onClick={() => setBase(valor)}
                       aria-pressed={base === valor}
-                      className={`flex-1 rounded-md px-2 py-1.5 text-[11px] font-bold transition-colors ${
+                      className={`flex-1 rounded-md px-2 py-1.5 text-xs opacity-95 font-bold transition-colors ${
                         base === valor
                           ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-50'
                           : 'text-gray-500 dark:text-gray-400'
@@ -197,7 +197,7 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
                 </div>
               )}
 
-              <p className="mb-2 text-[11px] text-gray-500 dark:text-gray-400">
+              <p className="mb-2 text-xs opacity-95 text-gray-500 dark:text-gray-400">
                 {base === 'porcao' || temExtras
                   ? `Porção de ${formatarValor(pesoPorcao, 'g')} g${dados.porcoes > 1 ? ` · o prato rende ${dados.porcoes} porções` : ''}`
                   : 'Valores por 100 g do produto como é servido'}
@@ -256,14 +256,14 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
                 </table>
               </div>
 
-              <p className="mt-2 text-[10px] leading-relaxed text-gray-500 dark:text-gray-500">
+              <p className="mt-2 text-xs opacity-90 leading-relaxed text-gray-500 dark:text-gray-500">
                 * Percentual de valores diários com base em uma dieta de 2.000 kcal. Seus valores
                 podem ser maiores ou menores conforme suas necessidades energéticas.
                 {linhas.some((n) => n.vdr === null) && ' ** Valor diário não estabelecido.'}
               </p>
 
               {fontes && (
-                <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-relaxed text-gray-600 dark:text-gray-400">
+                <p className="mt-2 flex items-start gap-1.5 text-xs opacity-95 leading-relaxed text-gray-600 dark:text-gray-400">
                   <Info size={12} className="mt-0.5 shrink-0" />
                   <span>
                     Origem dos dados: {fontes}.{' '}
@@ -278,25 +278,25 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
                 type="button"
                 onClick={() => setMetodoAberto((v) => !v)}
                 aria-expanded={metodoAberto}
-                className="mt-2 text-[11px] font-semibold text-gray-500 underline underline-offset-2 dark:text-gray-400"
+                className="mt-2 text-xs opacity-95 font-semibold text-gray-500 underline underline-offset-2 dark:text-gray-400"
               >
                 {metodoAberto ? 'Ocultar método de cálculo' : 'Como este valor foi calculado?'}
               </button>
 
               {observacaoLoja && (
-                <p className="mt-2 rounded-lg bg-gray-50 px-2 py-1.5 text-[10px] leading-relaxed text-gray-600 dark:bg-gray-800/50 dark:text-gray-400">
+                <p className="mt-2 rounded-lg bg-gray-50 px-2 py-1.5 text-xs opacity-90 leading-relaxed text-gray-600 dark:bg-gray-800/50 dark:text-gray-400">
                   {observacaoLoja}
                 </p>
               )}
 
               {metodoAberto ? (
-                <div className="mt-1.5 space-y-1.5 rounded-xl bg-gray-50 p-2.5 text-[10px] leading-relaxed text-gray-600 dark:bg-gray-800/50 dark:text-gray-400">
+                <div className="mt-1.5 space-y-1.5 rounded-xl bg-gray-50 p-2.5 text-xs opacity-90 leading-relaxed text-gray-600 dark:bg-gray-800/50 dark:text-gray-400">
                   {DISCLAIMER_LONGO.map((p, i) => (
                     <p key={i}>{p}</p>
                   ))}
                 </div>
               ) : (
-                <p className="mt-1.5 text-[10px] leading-relaxed text-gray-500 dark:text-gray-500">
+                <p className="mt-1.5 text-xs opacity-90 leading-relaxed text-gray-500 dark:text-gray-500">
                   {DISCLAIMER_CURTO}
                 </p>
               )}

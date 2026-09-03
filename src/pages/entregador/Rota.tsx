@@ -216,7 +216,7 @@ export default function EntregadorRota() {
           <div>
             <h2 className="text-xs font-bold text-orange-500 uppercase tracking-wider mb-2">Parada Atual ({rota.pedidos.length - pedidosNaoEntregues.length + 1} de {rota.pedidos.length})</h2>
             <div className="bg-gray-950 p-4 rounded-2xl border border-orange-500/30 relative overflow-hidden shadow-[0_0_15px_rgba(234,88,12,0.1)]">
-              <div className="absolute top-0 right-0 p-2 bg-orange-500 text-white text-[10px] font-bold rounded-bl-xl">NO GPS</div>
+              <div className="absolute top-0 right-0 p-2 bg-orange-500 text-white text-xs opacity-90 font-bold rounded-bl-xl">NO GPS</div>
               <p className="font-bold text-white text-lg">#{paradaAtual.numero} - {paradaAtual.identificador_cliente}</p>
               
               <div className="flex items-start gap-2 mt-3 text-gray-300">
@@ -290,7 +290,7 @@ export default function EntregadorRota() {
               const isEu = m.remetente_tipo === 'ENTREGADOR';
               return (
                 <div key={m.id} className={`flex flex-col ${isEu ? 'items-end' : 'items-start'}`}>
-                  <span className="text-[10px] text-gray-500 mb-1">{isEu ? 'Você' : m.remetente_tipo === 'LOJA' ? 'Restaurante' : 'Cliente'}</span>
+                  <span className="text-xs opacity-90 text-gray-500 mb-1">{isEu ? 'Você' : m.remetente_tipo === 'LOJA' ? 'Restaurante' : 'Cliente'}</span>
                   <div className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm ${isEu ? 'bg-orange-600 text-white rounded-tr-none' : m.remetente_tipo === 'LOJA' ? 'bg-blue-600/20 border border-blue-500/30 text-blue-100 rounded-tl-none' : 'bg-gray-800 text-gray-200 rounded-tl-none'}`}>
                     {m.mensagem}
                   </div>

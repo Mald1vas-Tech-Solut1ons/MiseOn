@@ -541,7 +541,7 @@ export default function PDV() {
             <p className="text-xs text-gray-400">{tDynamic('Nenhuma mesa cadastrada ainda — crie mesas no Mapa de Mesas.')}</p>
           ) : (
             <div className="flex items-center gap-2 overflow-x-auto">
-              <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-gray-400">{tDynamic('Mesa:')}</span>
+              <span className="shrink-0 text-xs opacity-95 font-bold uppercase tracking-wide text-gray-400">{tDynamic('Mesa:')}</span>
               {mesas.map((m) => (
                 <button key={m.id} onClick={() => setMesaSelecionada(m)}
                   className={`shrink-0 rounded-full border-2 px-3.5 py-1.5 text-xs font-black transition ${mesaSelecionada?.id === m.id ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)] text-white' : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'}`}>
@@ -623,7 +623,7 @@ export default function PDV() {
             <p className="mt-1 text-xs text-gray-500">{tDynamic('Peça para o cliente apontar a câmera para o QR Code.')}</p>
             {pixInfo.qrImagem
               ? <img src={getOptimizedImageUrl(pixInfo.qrImagem)} alt="QR Code Pix" className="mx-auto mt-4 w-56 rounded-2xl border border-gray-200 dark:border-gray-700" />
-              : <p className="mt-4 break-all rounded-xl bg-gray-100 p-3 font-mono text-[10px] dark:bg-gray-800 dark:text-gray-200">{pixInfo.copiaECola}</p>}
+              : <p className="mt-4 break-all rounded-xl bg-gray-100 p-3 font-mono text-xs opacity-90 dark:bg-gray-800 dark:text-gray-200">{pixInfo.copiaECola}</p>}
             <p className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-gray-500">
               Aguardando o pagamento cair… confirma sozinho.
             </p>

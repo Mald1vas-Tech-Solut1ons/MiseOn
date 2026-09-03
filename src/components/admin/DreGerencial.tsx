@@ -76,39 +76,39 @@ export default function DreGerencial() {
       {/* ══════════ 2. CARDS DE RESUMO FINANCEIRO ══════════ */}
       <div className="grid gap-4 sm:grid-cols-4">
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">Receita Bruta Total</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">Receita Bruta Total</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">
             R$ {receitaBruta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
-          <span className="text-[10px] text-emerald-500 font-semibold mt-1 flex items-center gap-0.5">
+          <span className="text-xs opacity-90 text-emerald-500 font-semibold mt-1 flex items-center gap-0.5">
             <ArrowUpRight size={12} /> +8.5% vs mês anterior
           </span>
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">CMV Real (Insumos)</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">CMV Real (Insumos)</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-orange-500">
             R$ {cmvInsumos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
-          <span className="text-[10px] text-slate-400 mt-1 block">33.0% da Receita Líquida</span>
+          <span className="text-xs opacity-90 text-slate-400 mt-1 block">33.0% da Receita Líquida</span>
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Margem de Contribuição')}</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">{tDynamic('Margem de Contribuição')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-blue-500">
             R$ {margemContribucao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
-          <span className="text-[10px] text-blue-400 font-semibold mt-1 block">
+          <span className="text-xs opacity-90 text-blue-400 font-semibold mt-1 block">
             {margemPorcentagem.toFixed(1)}% de Margem Bruta
           </span>
         </div>
 
         <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4 shadow-sm">
-          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">{tDynamic('Lucro Líquido (EBITDA)')}</span>
+          <span className="text-xs opacity-95 font-bold text-emerald-600 dark:text-emerald-400">{tDynamic('Lucro Líquido (EBITDA)')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-emerald-600 dark:text-emerald-400">
             R$ {lucroLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
-          <span className="text-[10px] text-emerald-500 font-bold mt-1 block">
+          <span className="text-xs opacity-90 text-emerald-500 font-bold mt-1 block">
             {margemLiquidaPorcentagem.toFixed(1)}% Margem Líquida Real
           </span>
         </div>
@@ -122,7 +122,7 @@ export default function DreGerencial() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-gray-200 text-[11px] uppercase tracking-wider text-slate-400 dark:border-white/10">
+            <thead className="border-b border-gray-200 text-xs opacity-95 uppercase tracking-wider text-slate-400 dark:border-white/10">
               <tr>
                 <th className="py-3 px-4">Conta DRE</th>
                 <th className="py-3 px-4 text-right">Valor R$</th>
@@ -155,7 +155,7 @@ export default function DreGerencial() {
                     <td className="py-3 px-4 text-right font-mono font-bold">
                       {linha.porcentagem.toFixed(1)}%
                     </td>
-                    <td className="py-3 px-4 text-center text-slate-400 text-[11px]">
+                    <td className="py-3 px-4 text-center text-slate-400 text-xs opacity-95">
                       {linha.ajuda || '—'}
                     </td>
                   </tr>

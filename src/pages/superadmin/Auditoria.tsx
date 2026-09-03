@@ -32,7 +32,7 @@ export default function Auditoria() {
               <span className="text-gray-400">{new Date(l.criado_em).toLocaleString('pt-BR')}</span>
             </div>
             <p className="mt-0.5 text-gray-500 dark:text-gray-400">{l.lojas?.nome ?? 'Plataforma'}</p>
-            {l.detalhes && <pre className="mt-1 whitespace-pre-wrap break-all text-[10px] text-gray-400">{JSON.stringify(l.detalhes)}</pre>}
+            {l.detalhes && <pre className="mt-1 whitespace-pre-wrap break-all text-xs opacity-90 text-gray-400">{JSON.stringify(l.detalhes)}</pre>}
           </div>
         ))}
         {logs.length === 0 && <p className="py-10 text-center text-sm text-gray-400">Nenhum evento registrado ainda.</p>}

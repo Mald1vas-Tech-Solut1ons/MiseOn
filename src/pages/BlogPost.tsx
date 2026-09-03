@@ -272,7 +272,7 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
                   to={`/blog/${rel.slug}`}
                   className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-white/5"
                 >
-                  <span className="text-[10px] font-bold text-[#FC5B24]">{rel.category}</span>
+                  <span className="text-xs opacity-90 font-bold text-[#FC5B24]">{rel.category}</span>
                   <h4 className="mt-2 font-['Sora'] text-sm font-bold text-gray-900 group-hover:text-[#FC5B24] dark:text-white line-clamp-2 transition-colors">
                     {rel.title}
                   </h4>

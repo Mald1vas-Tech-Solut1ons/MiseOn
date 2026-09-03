@@ -114,31 +114,31 @@ export default function Erros() {
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <AlertTriangle size={14} className="shrink-0 text-amber-400" />
-                    <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    <span className="font-mono text-xs opacity-95 font-bold uppercase tracking-wider text-slate-400">
                       {e.origem}
                     </span>
                     {e.contexto && (
-                      <span className="rounded-md bg-white/5 px-2 py-0.5 font-mono text-[11px] text-slate-300">
+                      <span className="rounded-md bg-white/5 px-2 py-0.5 font-mono text-xs opacity-95 text-slate-300">
                         {e.contexto}
                       </span>
                     )}
                     {e.ocorrencias > 1 && (
-                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-black text-amber-400">
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs opacity-95 font-black text-amber-400">
                         {e.ocorrencias}×
                       </span>
                     )}
                     {e.lojas?.nome && (
-                      <span className="text-[11px] text-slate-500">{e.lojas.nome}</span>
+                      <span className="text-xs opacity-95 text-slate-500">{e.lojas.nome}</span>
                     )}
                   </div>
                   <p className="mt-1.5 break-words font-mono text-sm text-slate-200">{e.mensagem}</p>
-                  <p className="mt-1 text-[11px] text-slate-500">{quando(e.visto_em)}</p>
+                  <p className="mt-1 text-xs opacity-95 text-slate-500">{quando(e.visto_em)}</p>
                 </button>
 
                 {!e.resolvido && (
                   <button
                     onClick={() => marcarResolvido(e.id)}
-                    className="shrink-0 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-bold text-emerald-400 hover:bg-emerald-500/20"
+                    className="shrink-0 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs opacity-95 font-bold text-emerald-400 hover:bg-emerald-500/20"
                   >
                     Marcar resolvido
                   </button>
@@ -148,13 +148,13 @@ export default function Erros() {
               {expandido === e.id && (
                 <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
                   {e.url && (
-                    <p className="break-all font-mono text-[11px] text-slate-400">URL: {e.url}</p>
+                    <p className="break-all font-mono text-xs opacity-95 text-slate-400">URL: {e.url}</p>
                   )}
                   {e.user_agent && (
-                    <p className="break-all font-mono text-[11px] text-slate-500">{e.user_agent}</p>
+                    <p className="break-all font-mono text-xs opacity-95 text-slate-500">{e.user_agent}</p>
                   )}
                   {e.stack && (
-                    <pre className="overflow-x-auto rounded-xl bg-black/40 p-3 font-mono text-[11px] leading-relaxed text-slate-400">
+                    <pre className="overflow-x-auto rounded-xl bg-black/40 p-3 font-mono text-xs opacity-95 leading-relaxed text-slate-400">
 {e.stack}
                     </pre>
                   )}

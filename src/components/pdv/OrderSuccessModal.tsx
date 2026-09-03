@@ -60,9 +60,9 @@ export function OrderSuccessModal({ venda, imprimirVenda, limparVenda }: OrderSu
             no painel. Fica grande porque é ditada de cabeça, no barulho. */}
         {venda.senha != null && (
           <div className="mt-3 rounded-2xl border-2 border-dashed border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 py-3">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">{tDynamic('Senha do cliente')}</p>
+            <p className="text-xs opacity-95 font-bold uppercase tracking-[0.2em] text-gray-500">{tDynamic('Senha do cliente')}</p>
             <p className="font-['Sora'] text-5xl font-black leading-tight text-[var(--cor-primaria)]">{venda.senha}</p>
-            <p className="text-[11px] font-semibold text-gray-500">{tDynamic('Diga esta senha ao cliente — é ela que aparece na TV')}</p>
+            <p className="text-xs opacity-95 font-semibold text-gray-500">{tDynamic('Diga esta senha ao cliente — é ela que aparece na TV')}</p>
           </div>
         )}
 

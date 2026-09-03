@@ -24,7 +24,7 @@ export default function Marketing() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-['JetBrains_Mono'] text-[11px] tracking-[0.25em] text-orange-500 uppercase">{tDynamic('GESTÃO · MARKETING & VENDAS')}</span>
+          <span className="font-['JetBrains_Mono'] text-xs opacity-95 tracking-[0.25em] text-orange-500 uppercase">{tDynamic('GESTÃO · MARKETING & VENDAS')}</span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]" />
         </div>
         <h2 className="font-['Sora'] text-2xl font-black text-gray-900 dark:text-white">Marketing & Engajamento</h2>
@@ -125,7 +125,7 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
                   {c.codigo}
                 </span>
                 {c.apenas_primeiro_pedido && (
-                  <span className="ml-2 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-[10px] font-bold px-2 py-0.5">
+                  <span className="ml-2 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs opacity-90 font-bold px-2 py-0.5">
                     1ª Compra
                   </span>
                 )}
@@ -436,12 +436,12 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
         <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <p className="text-xs font-bold text-gray-400 uppercase">{tDynamic('Clientes com Saldo Ativo')}</p>
           <p className="mt-2 text-3xl font-black dark:text-white">{stats.clientesComSaldo}</p>
-          <p className="text-[11px] text-gray-400 mt-1">{tDynamic('Clientes engajados prontos para pedir de novo.')}</p>
+          <p className="text-xs opacity-95 text-gray-400 mt-1">{tDynamic('Clientes engajados prontos para pedir de novo.')}</p>
         </div>
         <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <p className="text-xs font-bold text-gray-400 uppercase">{tDynamic('Passivo Total em Aberto')}</p>
           <p className="mt-2 text-3xl font-black text-[var(--cor-primaria)]">{fmt(stats.passivoTotal)}</p>
-          <p className="text-[11px] text-gray-400 mt-1">{tDynamic('Valor acumulado por clientes para futuros descontos.')}</p>
+          <p className="text-xs opacity-95 text-gray-400 mt-1">{tDynamic('Valor acumulado por clientes para futuros descontos.')}</p>
         </div>
       </div>
     </div>
@@ -653,7 +653,7 @@ function AnunciosTab({ lojaId }: { lojaId: string }) {
             placeholder="Ex: 123456789012345"
             className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
           />
-          <p className="text-[11px] text-gray-400 mt-1">{tDynamic('Encontrado no Gerenciador de Negócios da Meta em Fontes de Dados → Pixels.')}</p>
+          <p className="text-xs opacity-95 text-gray-400 mt-1">{tDynamic('Encontrado no Gerenciador de Negócios da Meta em Fontes de Dados → Pixels.')}</p>
         </div>
 
         <div>
@@ -664,7 +664,7 @@ function AnunciosTab({ lojaId }: { lojaId: string }) {
             placeholder="Ex: G-XXXXXXXXXX"
             className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
           />
-          <p className="text-[11px] text-gray-400 mt-1">{tDynamic('Encontrado no painel do Google Analytics em Administrador → Fluxos de dados.')}</p>
+          <p className="text-xs opacity-95 text-gray-400 mt-1">{tDynamic('Encontrado no painel do Google Analytics em Administrador → Fluxos de dados.')}</p>
         </div>
 
         {msg && <p className={`text-xs font-bold ${msg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
@@ -752,7 +752,7 @@ function DisparosTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string })
             <div key={c.id} className="flex items-center justify-between rounded-2xl border bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm">
               <div>
                 <p className="text-xs font-bold text-gray-900 dark:text-white">{c.nome || 'Cliente'}</p>
-                <p className="text-[11px] text-gray-400">{c.telefone}</p>
+                <p className="text-xs opacity-95 text-gray-400">{c.telefone}</p>
               </div>
               <button
                 onClick={() => enviarWhatsApp(c)}
@@ -879,7 +879,7 @@ function EmailsTab({ lojaId }: { lojaId: string }) {
                 2x X-Burger Artesanal — R$ 48,50
               </div>
               <div className="pt-2 text-center">
-                <span className="inline-block bg-[#FC5B24] text-white px-4 py-2 rounded-lg font-bold text-[11px]">
+                <span className="inline-block bg-[#FC5B24] text-white px-4 py-2 rounded-lg font-bold text-xs opacity-95">
                   Acompanhar Pedido
                 </span>
               </div>

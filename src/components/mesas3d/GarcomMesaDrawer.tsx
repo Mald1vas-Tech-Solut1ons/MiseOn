@@ -189,7 +189,7 @@ export function GarcomMesaDrawer({
 
         {/* Grade Visual de Assentos / Cadeiras */}
         <div className="border-b border-gray-800 bg-gray-900/50 p-3">
-          <p className="mb-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Selecione o Assento / Cadeira</p>
+          <p className="mb-2 text-xs opacity-95 font-bold text-gray-400 uppercase tracking-wider">Selecione o Assento / Cadeira</p>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => setAssentoAtivo(null)}
@@ -200,7 +200,7 @@ export function GarcomMesaDrawer({
               }`}
             >
               <span>Visão Geral</span>
-              <span className="text-[10px] opacity-75 font-normal">Mesa Toda</span>
+              <span className="text-xs opacity-90 opacity-75 font-normal">Mesa Toda</span>
             </button>
 
             {mesa3d.assentos.map((a) => (
@@ -216,7 +216,7 @@ export function GarcomMesaDrawer({
                 }`}
               >
                 <span>Cadeira #{a.numero}</span>
-                <span className="text-[10px] font-mono mt-0.5">
+                <span className="text-xs opacity-90 font-mono mt-0.5">
                   {a.valorConsumido > 0 ? fmt(a.valorConsumido) : 'Livre'}
                 </span>
                 {a.valorConsumido > 0 && (

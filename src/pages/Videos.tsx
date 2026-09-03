@@ -426,14 +426,14 @@ export default function Videos() {
                     <Play size={22} className="ml-0.5 fill-white" />
                   </div>
                 </div>
-                <span className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-0.5 text-[10px] font-bold text-slate-300 backdrop-blur-sm">
+                <span className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-0.5 text-xs opacity-90 font-bold text-slate-300 backdrop-blur-sm">
                   {v.duracao}
                 </span>
               </div>
 
               {/* Informações do Card */}
               <div className="p-5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400">
+                <span className="text-xs opacity-90 font-bold uppercase tracking-wider text-orange-400">
                   {v.categoria === 'marca'
                     ? 'Identidade Institucional'
                     : v.categoria === 'case'
@@ -487,7 +487,7 @@ export default function Videos() {
             ]).map((dep, idx) => (
               <div key={idx} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 relative">
                 <Quote size={32} className="text-slate-800 absolute top-4 right-4" />
-                <span className="inline-block rounded-full bg-slate-800 px-3 py-1 text-[10px] font-bold text-orange-400 mb-4">
+                <span className="inline-block rounded-full bg-slate-800 px-3 py-1 text-xs opacity-90 font-bold text-orange-400 mb-4">
                   {dep.badge}
                 </span>
                 <p className="text-xs text-slate-300 leading-relaxed italic mb-6">
@@ -499,7 +499,7 @@ export default function Videos() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-white">{dep.nome}</p>
-                    <p className="text-[11px] text-slate-400">{dep.restaurante}</p>
+                    <p className="text-xs opacity-95 text-slate-400">{dep.restaurante}</p>
                   </div>
                 </div>
               </div>

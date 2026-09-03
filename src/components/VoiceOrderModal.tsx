@@ -143,7 +143,7 @@ export default function VoiceOrderModal({
         {/* Transcrição da Fala */}
         {transcricao && (
           <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700 space-y-1">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Você falou:</span>
+            <span className="text-xs opacity-90 font-bold text-gray-400 uppercase tracking-wider">Você falou:</span>
             <p className="text-sm font-medium text-gray-800 dark:text-gray-200 italic">
               "{transcricao}"
             </p>

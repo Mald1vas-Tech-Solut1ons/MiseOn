@@ -155,9 +155,9 @@ export function CartSidebar({
                 <div className="min-w-0">
                   <p className="text-[13px] font-bold leading-tight dark:text-gray-100">{item.produto.nome}</p>
                   {item.opcoesSelecionadas.map((o) => (
-                    <p key={o.id} className="text-[11px] text-gray-400">+ {o.nome}</p>
+                    <p key={o.id} className="text-xs opacity-95 text-gray-400">+ {o.nome}</p>
                   ))}
-                  {item.observacao && <p className="text-[11px] font-semibold text-red-500">⚠ {item.observacao}</p>}
+                  {item.observacao && <p className="text-xs opacity-95 font-semibold text-red-500">⚠ {item.observacao}</p>}
                 </div>
                 <p className="shrink-0 text-[13px] font-black dark:text-gray-100">{fmt(precoItem(item))}</p>
               </div>
@@ -226,7 +226,7 @@ export function CartSidebar({
               <button
                 type="button"
                 onClick={aplicarCashback}
-                className="rounded-lg bg-emerald-600 px-2 py-0.5 text-[10px] font-black text-white hover:bg-emerald-700 shadow-sm"
+                className="rounded-lg bg-emerald-600 px-2 py-0.5 text-xs opacity-90 font-black text-white hover:bg-emerald-700 shadow-sm"
               >
                 {tDynamic('Usar')}
               </button>
@@ -247,10 +247,10 @@ export function CartSidebar({
                     <p className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1">
                       <UserCheck size={12} className="text-emerald-500" /> {c.nome}
                     </p>
-                    <p className="text-[10px] text-gray-400">{c.telefone || tDynamic('Sem telefone')}</p>
+                    <p className="text-xs opacity-90 text-gray-400">{c.telefone || tDynamic('Sem telefone')}</p>
                   </div>
                   {(c.saldoCashback ?? 0) > 0 && (
-                    <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-black text-emerald-600 dark:text-emerald-400">
+                    <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-xs opacity-90 font-black text-emerald-600 dark:text-emerald-400">
                       💰 {fmt(c.saldoCashback ?? 0)}
                     </span>
                   )}

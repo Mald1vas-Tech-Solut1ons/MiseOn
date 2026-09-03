@@ -436,10 +436,10 @@ export default function AdminLayout() {
 
         {/* Informações da Loja */}
         <div className={`px-4 py-5 flex flex-col gap-1 overflow-hidden transition-all duration-300 shrink-0 ${isCollapsed ? 'items-center opacity-0 h-0 p-0 m-0 border-0' : 'opacity-100'}`}>
-          <span className="text-[10px] font-bold tracking-wider text-gray-400 uppercase whitespace-nowrap">Loja Atual</span>
+          <span className="text-xs opacity-90 font-bold tracking-wider text-gray-400 uppercase whitespace-nowrap">Loja Atual</span>
           <h2 className="font-bold text-base truncate text-gray-900 dark:text-white whitespace-nowrap">{ctx.lojaNome}</h2>
           {ctx.papel !== 'admin' && (
-            <span className="inline-block mt-1 self-start rounded-md bg-[#004198]/10 px-2 py-0.5 text-[10px] font-bold text-[#004198] dark:text-[#6B9EFF] uppercase">
+            <span className="inline-block mt-1 self-start rounded-md bg-[#004198]/10 px-2 py-0.5 text-xs opacity-90 font-bold text-[#004198] dark:text-[#6B9EFF] uppercase">
               {ctx.papel}
             </span>
           )}
@@ -452,7 +452,7 @@ export default function AdminLayout() {
             <>
               {/* Visão Geral */}
               <div className="space-y-1">
-                <p className={`px-5 mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-[8px]' : ''}`}>
+                <p className={`px-5 mb-2 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
                   {isCollapsed ? '---' : 'Visão Geral'}
                 </p>
                 {[...principal, ...mais].filter(p => ['/admin/inicio'].includes(p.to)).map(p => renderSidebarLink(p))}
@@ -460,7 +460,7 @@ export default function AdminLayout() {
 
               {/* Operação */}
               <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-[10px] font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-[8px]' : ''}`}>
+                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
                   {isCollapsed ? '---' : 'Operação'}
                 </p>
                 {[...principal, ...mais].filter(p => ['/admin/pdv', '/admin/mesas', '/admin/balanca', '/admin/garcom-mobile', '/admin/pedidos', '/admin/kds', '/admin/producao', '/admin/entregas'].includes(p.to)).map(p => renderSidebarLink(p))}
@@ -468,7 +468,7 @@ export default function AdminLayout() {
 
               {/* Atendimento e Canais */}
               <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-[10px] font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-[8px]' : ''}`}>
+                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
                   {isCollapsed ? '---' : 'Atendimento e Canais'}
                 </p>
                 {[...principal, ...mais].filter(p => ['/admin/chat', '/admin/ifood', '/admin/whatsapp'].includes(p.to)).map(p => renderSidebarLink(p))}
@@ -476,7 +476,7 @@ export default function AdminLayout() {
 
               {/* Catálogo & Suprimentos */}
               <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-[10px] font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-[8px]' : ''}`}>
+                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
                   {isCollapsed ? '---' : 'Cardápio e Estoque'}
                 </p>
                 {[...principal, ...mais].filter(p => ['/admin/cardapio', '/admin/estoque', '/admin/compras'].includes(p.to)).map(p => renderSidebarLink(p))}
@@ -484,7 +484,7 @@ export default function AdminLayout() {
 
               {/* Gestão Estratégica */}
               <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-[10px] font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-[8px]' : ''}`}>
+                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
                   {isCollapsed ? '---' : 'Gestão e Relatórios'}
                 </p>
                 {[...principal, ...mais].filter(p => ['/admin/financeiro', '/admin/historico', '/admin/marketing'].includes(p.to)).map(p => renderSidebarLink(p))}
@@ -492,7 +492,7 @@ export default function AdminLayout() {
 
               {/* Administração */}
               <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-[10px] font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-[8px]' : ''}`}>
+                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
                   {isCollapsed ? '---' : 'Configurações'}
                 </p>
                 {[...principal, ...mais].filter(p => ['/admin/equipe', '/admin/loja', '/admin/fiscal', '/admin/assinatura'].includes(p.to)).map(p => renderSidebarLink(p))}
@@ -500,7 +500,7 @@ export default function AdminLayout() {
 
               {/* Suporte */}
               <div className="space-y-1">
-                <p className={`px-5 mb-2 mt-4 text-[10px] font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-[8px]' : ''}`}>
+                <p className={`px-5 mb-2 mt-4 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
                   {isCollapsed ? '---' : 'Ajuda'}
                 </p>
                 {[...principal, ...mais].filter(p => ['/admin/ajuda'].includes(p.to)).map(p => renderSidebarLink(p))}
@@ -508,7 +508,7 @@ export default function AdminLayout() {
             </>
           ) : (
             <div className="space-y-1">
-              <p className={`px-5 mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-[8px]' : ''}`}>
+              <p className={`px-5 mb-2 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
                 {isCollapsed ? '---' : 'Operação'}
               </p>
               {principal.map(p => renderSidebarLink(p))}
@@ -627,10 +627,10 @@ export default function AdminLayout() {
                     <h3 className="text-sm font-bold text-blue-700 dark:text-blue-400 leading-tight">
                       {diasRestantes <= 0 ? 'Seu teste grátis termina hoje' : `Seu teste grátis termina em ${diasRestantes} dia${diasRestantes === 1 ? '' : 's'}`}
                     </h3>
-                    <p className="text-[11px] text-blue-600/80 dark:text-blue-400/80 mt-0.5">{tDynamic('Garanta sua assinatura pra não perder o acesso.')}</p>
+                    <p className="text-xs opacity-95 text-blue-600/80 dark:text-blue-400/80 mt-0.5">{tDynamic('Garanta sua assinatura pra não perder o acesso.')}</p>
                   </div>
                 </div>
-                <button onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">
+                <button onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs opacity-95 uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">
                   Assinar agora
                 </button>
               </div>
@@ -646,10 +646,10 @@ export default function AdminLayout() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-amber-700 dark:text-amber-400 leading-tight">Assinatura Vencida (Tolerância: dia {ctx.diasAtraso} de 7)</h3>
-                  <p className="text-[11px] text-amber-600/80 dark:text-amber-400/80 mt-0.5">O acesso total será suspenso em {8 - ctx.diasAtraso} dias caso não seja regularizado.</p>
+                  <p className="text-xs opacity-95 text-amber-600/80 dark:text-amber-400/80 mt-0.5">O acesso total será suspenso em {8 - ctx.diasAtraso} dias caso não seja regularizado.</p>
                 </div>
               </div>
-              <button onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-[11px] uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">
+              <button onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs opacity-95 uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">
                 Regularizar Assinatura
               </button>
             </div>
@@ -683,12 +683,12 @@ export default function AdminLayout() {
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
               <div className="space-y-1">
-                <p className="px-2 mb-2 text-[10px] font-bold text-gray-400 uppercase">Operação</p>
+                <p className="px-2 mb-2 text-xs opacity-90 font-bold text-gray-400 uppercase">Operação</p>
                 {principal.map(p => renderSidebarLink(p, () => setMenuMobileAberto(false)))}
               </div>
               {ctx.papel === 'admin' && (
                 <div className="space-y-1">
-                  <p className="px-2 mb-2 text-[10px] font-bold text-gray-400 uppercase">Gestão</p>
+                  <p className="px-2 mb-2 text-xs opacity-90 font-bold text-gray-400 uppercase">Gestão</p>
                   {mais.map(p => renderSidebarLink(p, () => setMenuMobileAberto(false)))}
                 </div>
               )}
@@ -717,7 +717,7 @@ export default function AdminLayout() {
             {({ isActive }) => (
               <>
                 <div className={`${isActive ? 'scale-110' : 'scale-100'} transition-transform duration-200`}>{i.icon}</div>
-                <span className="text-[10px] font-bold tracking-tight">{i.label}</span>
+                <span className="text-xs opacity-90 font-bold tracking-tight">{i.label}</span>
               </>
             )}
           </NavLink>
@@ -727,7 +727,7 @@ export default function AdminLayout() {
           className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${emRotaSoDoMenu ? 'text-[#004198] dark:text-[#6B9EFF]' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'}`}
         >
           <MoreHorizontal size={20} className={emRotaSoDoMenu ? 'scale-110' : 'scale-100'} />
-          <span className="text-[10px] font-bold tracking-tight">Mais</span>
+          <span className="text-xs opacity-90 font-bold tracking-tight">Mais</span>
         </button>
       </nav>
 

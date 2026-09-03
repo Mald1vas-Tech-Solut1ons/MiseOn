@@ -91,7 +91,7 @@ export function TaxasSection() {
                 <span className="flex items-center gap-1.5 text-gray-400">{tDynamic('Preço sugerido no iFood')} <ArrowRight size={13} /></span>
                 <span style={{ fontFamily: "'JetBrains Mono', monospace" }} className="font-bold text-[#FC5B24]">R$ 35,24</span>
               </div>
-              <p className="mt-3 text-[11px] leading-relaxed text-gray-500">
+              <p className="mt-3 text-xs opacity-95 leading-relaxed text-gray-500">
                 Mesma margem, dois canais. Sem essa conta, cada promoção que você faz no marketplace
                 pode estar saindo do seu bolso sem você perceber.
               </p>

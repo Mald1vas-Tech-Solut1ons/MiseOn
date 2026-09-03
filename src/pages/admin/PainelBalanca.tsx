@@ -514,7 +514,7 @@ export function PainelBalanca() {
 
               <div className="flex items-center gap-6 border-t border-slate-700/50 pt-4 sm:border-0 sm:pt-0 sm:pl-4 sm:border-l">
                 <div className="flex flex-col">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 mb-1">{tDynamic('Preço Praticado/kg')}</label>
+                  <label className="text-xs opacity-90 uppercase font-bold text-slate-400 mb-1">{tDynamic('Preço Praticado/kg')}</label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-sm font-bold text-slate-500">R$</span>
                     <input
@@ -527,7 +527,7 @@ export function PainelBalanca() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Total do Prato</div>
+                  <div className="text-xs opacity-90 uppercase font-bold text-slate-400 mb-1">Total do Prato</div>
                   <div className="text-2xl font-black text-orange-400 leading-none">{fmt(valorEstimadoPrato)}</div>
                 </div>
               </div>

@@ -19,11 +19,11 @@ export function HeaderBar({ modo, setModo, turno, dinheiroGaveta, setModalCaixa,
           </button>
         </div>
         {turno ? (
-          <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+          <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs opacity-95 font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
             <Unlock size={11} /> {tDynamic('Caixa aberto')} · {tDynamic('gaveta')} {fmt(dinheiroGaveta)}
           </span>
         ) : (
-          <span className="flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-1 text-[11px] font-bold text-red-600 dark:bg-red-900/30 dark:text-red-400">
+          <span className="flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-1 text-xs opacity-95 font-bold text-red-600 dark:bg-red-900/30 dark:text-red-400">
             <Lock size={11} /> {tDynamic('Caixa fechado')}
           </span>
         )}

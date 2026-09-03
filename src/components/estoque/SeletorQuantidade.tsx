@@ -66,17 +66,17 @@ export default function SeletorQuantidade({
       {avulsa && (
         <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50/60 p-2 dark:border-blue-900/40 dark:bg-blue-900/10">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-medium text-blue-800 dark:text-blue-300">1 {valor.unidade} =</span>
+            <span className="text-xs opacity-95 font-medium text-blue-800 dark:text-blue-300">1 {valor.unidade} =</span>
             <input
               type="number" min="0" step="any" placeholder="0"
               className="w-20 rounded border border-blue-200 p-1 text-xs focus:outline-none dark:bg-gray-950 dark:border-blue-800/50 dark:text-gray-100"
               value={valor.fatorNovo}
               onChange={e => onChange({ ...valor, fatorNovo: e.target.value })}
             />
-            <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300">{alvo.unidade_medida}</span>
+            <span className="text-xs opacity-95 font-semibold text-gray-700 dark:text-gray-300">{alvo.unidade_medida}</span>
           </div>
           {validacao && !validacao.ok && (
-            <p className="mt-1.5 flex items-start gap-1 text-[10px] font-medium text-red-600 dark:text-red-400">
+            <p className="mt-1.5 flex items-start gap-1 text-xs opacity-90 font-medium text-red-600 dark:text-red-400">
               <AlertTriangle size={11} className="shrink-0 mt-px" />
               <span>{validacao.mensagem}</span>
             </p>
@@ -85,7 +85,7 @@ export default function SeletorQuantidade({
       )}
 
       {!compacto && fator !== 1 && base > 0 && (
-        <p className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-xs opacity-90 text-gray-500 dark:text-gray-400">
           = <b className="text-green-700 dark:text-green-400">
             {base.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} {alvo.unidade_medida}
           </b>

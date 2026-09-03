@@ -69,7 +69,7 @@ export function AiSection() {
               </div>
               <div>
                 <p className="text-sm font-bold text-white">{tDynamic('Atendente IA · Lanche da Praça')}</p>
-                <p className="flex items-center gap-1.5 text-[11px] text-green-400">
+                <p className="flex items-center gap-1.5 text-xs opacity-95 text-green-400">
                   <span className="h-1.5 w-1.5 rounded-full bg-green-400" /> respondendo em segundos
                 </p>
               </div>
@@ -88,7 +88,7 @@ export function AiSection() {
               <div className="ml-auto max-w-[88%] rounded-2xl rounded-tr-sm bg-blue-600/25 p-3 text-[13px] leading-relaxed text-gray-200">
                 Perfeito! Fica <b>R$ 44,80</b>. É pra entrega ou retirada? Se quiser, já te mando o link pra finalizar com Pix. 🚀
               </div>
-              <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-[11px] leading-relaxed text-gray-500">
+              <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-xs opacity-95 leading-relaxed text-gray-500">
                 Tudo o que a IA disse acima veio do cadastro real da loja: preço do X-Bacon, milk shake de
                 chocolate esgotado no estoque e sabores disponíveis. Se você mudar o preço agora, a próxima
                 resposta já usa o valor novo.

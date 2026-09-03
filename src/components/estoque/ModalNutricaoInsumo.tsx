@@ -398,7 +398,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                       </button>
                     ))}
                   </div>
-                  <p className="mt-2 text-[11px] text-amber-700/80 dark:text-amber-400/70">
+                  <p className="mt-2 text-xs opacity-95 text-amber-700/80 dark:text-amber-400/70">
                     Nenhum bateu? O nome do insumo pode estar genérico demais — considere renomear (ex.: "Açúcar" → "Açúcar Refinado") ou use a captura por código de barras/foto abaixo.
                   </p>
                 </div>
@@ -439,11 +439,11 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                     Estimar com IA
                   </button>
                 </div>
-                <p className="mt-2 text-[11px] text-gray-400">
+                <p className="mt-2 text-xs opacity-95 text-gray-400">
                   {tDynamic('Ordem recomendada: código de barras → foto do rótulo → estimativa por IA (menos confiável, sempre marcada em amarelo).')}
                 </p>
                 {origemAtual && origemAtual !== 'MANUAL' && (
-                  <p className={`mt-2.5 text-[11px] ${origemAtual === 'IA' ? 'font-bold text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                  <p className={`mt-2.5 text-xs opacity-95 ${origemAtual === 'IA' ? 'font-bold text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
                     {origemAtual === 'IA' && '⚠ '}
                     Fonte atual: <b>{{ ROTULO_EAN: 'código de barras (Open Food Facts)', ROTULO_FOTO: 'foto do rótulo (lida por IA)', USDA: 'base científica USDA', TBCA: 'base científica TBCA', IA: 'estimativa por IA — NÃO é dado medido' }[origemAtual]}</b>
                     {!revisadoAtual && ' — ainda não revisado. Confira e clique em Salvar para confirmar.'}
@@ -515,7 +515,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                           type="text" inputMode="decimal" placeholder="0"
                           className="w-full rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white pl-3 pr-10 py-2 text-sm"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">{n.unidade}</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs opacity-90 font-bold text-gray-400">{n.unidade}</span>
                       </div>
                     </div>
                   ))}
@@ -552,7 +552,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 text-[11px] text-gray-400">
+                <p className="mt-2 text-xs opacity-95 text-gray-400">
                   {tDynamic('Alérgeno não marcado aqui significa "não avaliado" — nunca "não contém".')}
                 </p>
               </div>

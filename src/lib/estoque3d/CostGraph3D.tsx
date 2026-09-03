@@ -133,7 +133,7 @@ export function CostGraph3D(props: Props) {
             <div className="flex items-center gap-1.5">
               <span className="mo-cg3d-badge">{ROTULO_TIPO[selecionado.tipo]}</span>
               {selecionado.categoria && (
-                <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-md font-bold uppercase">
+                <span className="text-xs opacity-90 bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-md font-bold uppercase">
                   {selecionado.categoria}
                 </span>
               )}
@@ -155,7 +155,7 @@ export function CostGraph3D(props: Props) {
                   <span className="font-bold text-blue-400">
                     {selecionado.profundidade === 0 ? 'Lote Raiz (100%)' : `${selecionado.proporcaoPaiPct}% do Custo Pai`}
                   </span>
-                  <span className="text-[10px] text-gray-400">Nível {selecionado.profundidade}</span>
+                  <span className="text-xs opacity-90 text-gray-400">Nível {selecionado.profundidade}</span>
                 </div>
                 <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden border border-gray-700">
                   <div
@@ -168,7 +168,7 @@ export function CostGraph3D(props: Props) {
             <div>
               <dt>{tDynamic('Ordem de Grandeza')}</dt>
               <dd className="font-bold text-purple-300">
-                10<sup>{selecionado.ordemGrandeza}</sup> R$/un <span className="text-[10px] font-normal text-gray-400">({selecionado.ordemGrandeza >= 0 ? `~R$ 10^${selecionado.ordemGrandeza}` : `~R$ 10^(${selecionado.ordemGrandeza})`})</span>
+                10<sup>{selecionado.ordemGrandeza}</sup> R$/un <span className="text-xs opacity-90 font-normal text-gray-400">({selecionado.ordemGrandeza >= 0 ? `~R$ 10^${selecionado.ordemGrandeza}` : `~R$ 10^(${selecionado.ordemGrandeza})`})</span>
               </dd>
             </div>
             <div>

@@ -117,13 +117,13 @@ export default function ModalInventario({ insumos, onFechar, onSucesso }: Props)
                     Sistema diz: <b>{saldo.toLocaleString('pt-BR')} {i.unidade_medida}</b>
                   </p>
                   {dif != null && Math.abs(dif) > 1e-6 && (
-                    <p className={`mt-1 flex items-center gap-1 text-[11px] font-bold ${dif > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                    <p className={`mt-1 flex items-center gap-1 text-xs opacity-95 font-bold ${dif > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                       {dif > 0 ? '+' : ''}{dif.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} {i.unidade_medida}
                       {custoUnit > 0 && <span className="font-medium text-gray-400">({fmt(Math.abs(dif) * custoUnit)} {dif > 0 ? 'a mais' : 'de perda'})</span>}
                     </p>
                   )}
                   {dif != null && Math.abs(dif) <= 1e-6 && (
-                    <p className="mt-1 flex items-center gap-1 text-[11px] font-bold text-gray-400">
+                    <p className="mt-1 flex items-center gap-1 text-xs opacity-95 font-bold text-gray-400">
                       <CheckCircle2 size={11} /> bate com o sistema
                     </p>
                   )}

@@ -124,7 +124,7 @@ export function ModalDivisaoProdutoCaixa({
                     <div className="font-semibold text-slate-200 flex items-center gap-2">
                       <span>{item.nome_produto}</span>
                       {item.origem_balanca && (
-                        <span className="rounded bg-emerald-500/10 text-emerald-400 text-[10px] px-1.5 py-0.5 font-mono border border-emerald-500/30">
+                        <span className="rounded bg-emerald-500/10 text-emerald-400 text-xs opacity-90 px-1.5 py-0.5 font-mono border border-emerald-500/30">
                           BALANÇA
                         </span>
                       )}
@@ -136,7 +136,7 @@ export function ModalDivisaoProdutoCaixa({
 
                   {/* Seletor de assentos participantes */}
                   <div className="flex-1">
-                    <div className="text-[11px] text-slate-400 mb-1 font-mono">
+                    <div className="text-xs opacity-95 text-slate-400 mb-1 font-mono">
                       Divisão ({participantes.length} pessoas = {fmt(valorPessoa)} cada):
                     </div>
                     <div className="flex flex-wrap gap-1.5">
@@ -186,7 +186,7 @@ export function ModalDivisaoProdutoCaixa({
 
                   <div className="space-y-1 max-h-32 overflow-y-auto pr-1 text-xs text-slate-400">
                     {dados.itens.map(({ item, fracao, valor }, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-[11px]">
+                      <div key={idx} className="flex justify-between items-center text-xs opacity-95">
                         <span className="truncate max-w-[120px]">
                           {item.nome_produto} {fracao < 1 ? `(${fracao.toFixed(2)}x)` : ''}
                         </span>

@@ -125,7 +125,7 @@ export default function SeletorItemUniversal({
               <p className="truncate text-sm font-black text-gray-900 dark:text-gray-100">
                 {generoEscolhido.nome}
               </p>
-              <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
+              <p className="text-xs opacity-95 text-emerald-700 dark:text-emerald-400">
                 {generoEscolhido.categoria} · compra-se em <b>{generoEscolhido.unidade}</b>
               </p>
             </div>
@@ -166,12 +166,12 @@ export default function SeletorItemUniversal({
                     <span className="block truncate text-sm font-bold text-gray-900 dark:text-gray-100">
                       {item.nome}
                     </span>
-                    <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                    <span className="text-xs opacity-95 text-gray-500 dark:text-gray-400">
                       {item.categoria}
                       {item.variedades?.length ? ` · ${item.variedades.length} variedades` : ''}
                     </span>
                   </span>
-                  <span className="shrink-0 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-bold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                  <span className="shrink-0 rounded-md bg-gray-100 px-2 py-0.5 text-xs opacity-95 font-bold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
                     {item.unidade}
                   </span>
                 </button>
@@ -184,7 +184,7 @@ export default function SeletorItemUniversal({
                 <button
                   type="button"
                   onClick={() => { onChange({ slug: null }); setAberto(false); }}
-                  className="w-full px-3 py-2 text-left text-[11px] font-bold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-800"
+                  className="w-full px-3 py-2 text-left text-xs opacity-95 font-bold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-800"
                 >
                   {tDynamic('Usar como item novo, fora do catálogo')}: “{valor.base.trim()}”
                 </button>
@@ -197,7 +197,7 @@ export default function SeletorItemUniversal({
       {/* ── 2. Variedade e marca ──────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400">
+          <span className="flex items-center gap-1.5 text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">
             <Layers size={12} /> {tDynamic('Variedade / tipo')}
             <span className="font-normal text-gray-400">{tDynamic('(opcional)')}</span>
           </span>
@@ -218,7 +218,7 @@ export default function SeletorItemUniversal({
                     key={v}
                     type="button"
                     onClick={() => onChange({ variedade: ativa ? '' : v })}
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold transition-colors ${
+                    className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-bold transition-colors ${
                       ativa
                         ? 'bg-[var(--cor-primaria)] text-white'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -233,7 +233,7 @@ export default function SeletorItemUniversal({
         </label>
 
         <label className="block">
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400">
+          <span className="flex items-center gap-1.5 text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">
             <Factory size={12} /> {tDynamic('Marca / fabricante')}
             <span className="font-normal text-gray-400">(opcional)</span>
           </span>
@@ -243,7 +243,7 @@ export default function SeletorItemUniversal({
             placeholder={tDynamic('ex: Tio João, Sadia, Ypê')}
             className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100 focus:border-[var(--cor-primaria)] focus:outline-none"
           />
-          <span className="mt-1 block text-[10px] text-gray-400 dark:text-gray-500">
+          <span className="mt-1 block text-xs opacity-90 text-gray-400 dark:text-gray-500">
             {tDynamic('Preencha quando a marca muda o preço ou o rendimento.')}
           </span>
         </label>
@@ -253,10 +253,10 @@ export default function SeletorItemUniversal({
       {nomeFinal && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-900/60">
           <Tag size={13} className="text-gray-400" />
-          <span className="text-[11px] text-gray-500 dark:text-gray-400">{tDynamic('Vai ser salvo como')}</span>
+          <span className="text-xs opacity-95 text-gray-500 dark:text-gray-400">{tDynamic('Vai ser salvo como')}</span>
           <span className="text-sm font-black text-gray-900 dark:text-gray-100">{nomeFinal}</span>
           {valor.slug && (
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs opacity-90 font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
               agrupa em {valor.slug}
             </span>
           )}
@@ -264,7 +264,7 @@ export default function SeletorItemUniversal({
       )}
 
       {duplicado && (
-        <p className="flex items-start gap-1.5 rounded-lg bg-red-50 px-3 py-2 text-[11px] font-bold text-red-600 dark:bg-red-900/20 dark:text-red-400">
+        <p className="flex items-start gap-1.5 rounded-lg bg-red-50 px-3 py-2 text-xs opacity-95 font-bold text-red-600 dark:bg-red-900/20 dark:text-red-400">
           <AlertTriangle size={13} className="mt-px shrink-0" />
             {tDynamic('Você já tem este item no estoque. Mude a variedade ou a marca para diferenciar.')}{' '}
             <span className="font-black">“{duplicado.nome}”</span>
@@ -273,16 +273,16 @@ export default function SeletorItemUniversal({
 
       {!duplicado && irmaos.length > 0 && (
         <div className="rounded-lg border border-blue-100 bg-blue-50/60 px-3 py-2 dark:border-blue-900/40 dark:bg-blue-900/10">
-          <p className="text-[11px] font-bold text-blue-700 dark:text-blue-400">
+          <p className="text-xs opacity-95 font-bold text-blue-700 dark:text-blue-400">
             Você já controla {irmaos.length}{' '}
             {irmaos.length === 1 ? 'item deste gênero' : 'itens deste gênero'}:
           </p>
-          <p className="mt-0.5 text-[11px] text-blue-600/80 dark:text-blue-300/70">
+          <p className="mt-0.5 text-xs opacity-95 text-blue-600/80 dark:text-blue-300/70">
             {irmaos
               .map((i) => `${i.nome} (${Number(i.quantidade_atual ?? 0).toLocaleString('pt-BR')} ${i.unidade_medida})`)
               .join(' · ')}
           </p>
-          <p className="mt-1 text-[10px] text-blue-600/70 dark:text-blue-300/60">
+          <p className="mt-1 text-xs opacity-90 text-blue-600/70 dark:text-blue-300/60">
             {tDynamic('Todos somam no mesmo relatório de custo. Cadastre outro só se comprar separado de verdade.')}
           </p>
         </div>

@@ -24,7 +24,7 @@ export default function CadastreSuaLoja() {
 
         <div className="mb-8 flex flex-col items-center justify-center text-center relative z-10">
           <MiseOnLogo size={150} className="mb-4" />
-          <span className="mb-3 inline-flex rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-emerald-400">
+          <span className="mb-3 inline-flex rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs opacity-95 font-black uppercase tracking-widest text-emerald-400">
             ✨ {tDynamic('30 Dias Grátis · Sem Cartão')}
           </span>
           <h1 className="text-xl font-bold dark:text-white" style={{ fontFamily: "'Sora', sans-serif" }}>{tDynamic('Cadastre sua loja na MiseOn')}</h1>

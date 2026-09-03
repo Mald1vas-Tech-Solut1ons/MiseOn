@@ -692,7 +692,7 @@ export default function Loja() {
           <p className="text-xs font-bold text-gray-700 dark:text-gray-200">
             {tDynamic('Chamar na TV os pedidos de')}
           </p>
-          <p className="mb-2 text-[11px] text-gray-500 dark:text-gray-400">
+          <p className="mb-2 text-xs opacity-95 text-gray-500 dark:text-gray-400">
             {tDynamic('A senha zera todo dia e vai de 1 a 999. Delivery não é chamado: o cliente não está no balcão.')}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -736,23 +736,23 @@ export default function Loja() {
               senao ele copia a URL "limpa" da barra do navegador e a TV para
               de mostrar senhas sem explicacao. */}
           <div data-tour="tour-loja-tv-credencial" className="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
-            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+            <p className="text-xs opacity-95 text-gray-500 dark:text-gray-400">
               {tDynamic('Os links acima levam uma credencial no final. Ela é o que impede qualquer pessoa de abrir o painel da sua loja — copie o link por aqui, não da barra do navegador da TV.')}
             </p>
             <button
               type="button"
               onClick={regenerarTokenTv}
               disabled={regenerandoTv}
-              className="mt-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-[11px] font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+              className="mt-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs opacity-95 font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
             >
               {regenerandoTv ? tDynamic('Gerando...') : tDynamic('Gerar credencial nova')}
             </button>
-            <span className="ml-2 text-[11px] text-gray-400">
+            <span className="ml-2 text-xs opacity-95 text-gray-400">
               {tDynamic('Use se o link vazou. As TVs atuais vão precisar do link novo.')}
             </span>
           </div>
         </div>
-        {copiado && <p className="text-[11px] font-medium text-green-600">Link copiado!</p>}
+        {copiado && <p className="text-xs opacity-95 font-medium text-green-600">Link copiado!</p>}
       </div>
 
       {/* Preview ao vivo da identidade — reflete cada escolha na hora */}
@@ -779,7 +779,7 @@ export default function Loja() {
           <div className="min-w-0">
             <p className="truncate font-bold" style={{ color: tokensPreview.texto }}>{form.nome || 'Nome da loja'}</p>
             <p className="truncate text-xs" style={{ color: tokensPreview.textoSuave }}>{form.descricao || 'Descrição da loja'}</p>
-            <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: form.cor_primaria, color: isLightColor(form.cor_primaria) ? '#000000' : '#ffffff' }}>
+            <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs opacity-90 font-semibold" style={{ background: form.cor_primaria, color: isLightColor(form.cor_primaria) ? '#000000' : '#ffffff' }}>
               Aberto agora
             </span>
           </div>
@@ -857,7 +857,7 @@ export default function Loja() {
                       <p className="text-xs text-gray-500 dark:text-gray-400">{info.descricao}</p>
                     </div>
 
-                    <div className="mt-3 text-[10px] font-semibold text-[var(--cor-primaria)]">
+                    <div className="mt-3 text-xs opacity-90 font-semibold text-[var(--cor-primaria)]">
                       {selecionado ? '✓ Preset Aplicado' : 'Clique para selecionar'}
                     </div>
                   </button>
@@ -874,7 +874,7 @@ export default function Loja() {
                   <Layers size={18} className="text-orange-500" />
                   <span>{tDynamic('Módulos Operacionais Híbridos (TUDO CONFIGURÁVEL)')}</span>
                 </div>
-                <span className="rounded-full bg-orange-500/10 px-2.5 py-0.5 text-[11px] font-bold text-orange-400 border border-orange-500/20">
+                <span className="rounded-full bg-orange-500/10 px-2.5 py-0.5 text-xs opacity-95 font-bold text-orange-400 border border-orange-500/20">
                   Inteligente
                 </span>
               </div>
@@ -907,7 +907,7 @@ export default function Loja() {
                       </div>
                       <div>
                         <div className="font-semibold text-xs dark:text-gray-100">{rotulo}</div>
-                        <div className="text-[11px] text-gray-500 dark:text-gray-400">{desc}</div>
+                        <div className="text-xs opacity-95 text-gray-500 dark:text-gray-400">{desc}</div>
                       </div>
                     </div>
 
@@ -984,7 +984,7 @@ export default function Loja() {
                         />
                         <span className="min-w-0">
                           <span className="block text-xs font-bold dark:text-gray-100">{tDynamic(titulo)}</span>
-                          <span className="block text-[11px] text-gray-500 dark:text-gray-400">{tDynamic(ajuda)}</span>
+                          <span className="block text-xs opacity-95 text-gray-500 dark:text-gray-400">{tDynamic(ajuda)}</span>
                         </span>
                       </label>
                     ))}
@@ -1000,7 +1000,7 @@ export default function Loja() {
                   />
                   <span className="min-w-0">
                     <span className="block">{tDynamic('Mostrar selos como "alto em proteína" e "fonte de fibras"')}</span>
-                    <span className="block text-[11px] text-gray-500 dark:text-gray-400">
+                    <span className="block text-xs opacity-95 text-gray-500 dark:text-gray-400">
                       {tDynamic('Calculados pelos limites da RDC 54/2012 e exibidos com o critério ao lado. Aparecem apenas em pratos completos.')}
                     </span>
                   </span>
@@ -1054,7 +1054,7 @@ export default function Loja() {
                   style={{ objectPosition: `50% ${form.banner_pos_y}%` }}
                   alt="Prévia do enquadramento do banner"
                 />
-                <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
+                <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-xs opacity-95 font-semibold text-white backdrop-blur-sm">
                   {tDynamic('Prévia — é assim que o cliente vê')}
                 </span>
               </div>
@@ -1093,7 +1093,7 @@ export default function Loja() {
                   <p className="mt-1 text-sm font-semibold dark:text-gray-100">
                     {form.tema_cardapio === 'escuro' ? 'Escuro' : 'Claro'}
                   </p>
-                  <p className="mt-1 text-[11px] text-gray-500">
+                  <p className="mt-1 text-xs opacity-95 text-gray-500">
                     {tDynamic('Define o tema inicial para quem entrar pela primeira vez. Depois disso, o cliente final pode alternar o tema na vitrine pública.')}
                   </p>
                 </div>
@@ -1124,7 +1124,7 @@ export default function Loja() {
                 </div>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-3 text-[11px]">
+              <div className="mt-3 grid grid-cols-2 gap-3 text-xs opacity-95">
                 <div className={`rounded-xl border p-3 ${form.tema_cardapio === 'claro' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5' : 'border-gray-200 dark:border-gray-700'}`}>
                   <p className="mb-1 flex items-center gap-1 font-semibold dark:text-gray-100"><Sun size={13} /> Claro</p>
                   <p className="text-gray-500 dark:text-gray-400">Visual leve, limpo e luminoso.</p>
@@ -1161,24 +1161,24 @@ export default function Loja() {
                   </button>
                 </div>
               </div>
-              <p className="text-[11px] text-gray-500">
+              <p className="text-xs opacity-95 text-gray-500">
                 {tDynamic('O cliente final pode escolher entre claro e escuro na vitrine pública. Aqui você garante que os dois modos fiquem bonitos e legíveis.')}
               </p>
             </div>
             
             <div className="mb-4">
               <ColorSwatchPicker label="Cor Primária" value={form.cor_primaria} onChange={(c) => setValor('cor_primaria', c)} />
-              <p className="mt-1 text-[11px] text-gray-500">{tDynamic('Principal cor de ação. Usada nos botões grandes (ex: Finalizar Pedido) e menus principais.')}</p>
+              <p className="mt-1 text-xs opacity-95 text-gray-500">{tDynamic('Principal cor de ação. Usada nos botões grandes (ex: Finalizar Pedido) e menus principais.')}</p>
             </div>
 
             <div className="mb-4">
               <ColorSwatchPicker label="Cor base da identidade" value={form.cor_texto} onChange={(c) => setValor('cor_texto', c)} />
-              <p className="mt-1 text-[11px] text-gray-500">{tDynamic('Essa cor é a origem dos dois temas. O claro vira uma leitura suave dessa cor e o escuro vira uma leitura profunda da mesma família cromática.')}</p>
+              <p className="mt-1 text-xs opacity-95 text-gray-500">{tDynamic('Essa cor é a origem dos dois temas. O claro vira uma leitura suave dessa cor e o escuro vira uma leitura profunda da mesma família cromática.')}</p>
             </div>
             
             <div className="mb-4">
               <ColorSwatchPicker label="Cor Secundária" value={form.cor_secundaria} onChange={(c) => setValor('cor_secundaria', c)} />
-              <p className="mt-1 text-[11px] text-gray-500">{tDynamic('Cor de apoio. Usada apenas em selos menores (ex: "Promoção", "Destaque") para não conflitar com os botões.')}</p>
+              <p className="mt-1 text-xs opacity-95 text-gray-500">{tDynamic('Cor de apoio. Usada apenas em selos menores (ex: "Promoção", "Destaque") para não conflitar com os botões.')}</p>
             </div>
             
             <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
@@ -1186,7 +1186,7 @@ export default function Loja() {
               <p className="mt-1 text-sm font-semibold dark:text-gray-100">
                 {tDynamic('A cor primária da loja gera os dois temas com a mesma identidade visual')}
               </p>
-              <p className="mt-1 text-[11px] text-gray-500">
+              <p className="mt-1 text-xs opacity-95 text-gray-500">
                 Exemplo: azul vira azul claro no tema claro e azul profundo no tema escuro. Vermelho vira vermelho claro e vermelho profundo. O sistema recalcula contraste, superfícies e bordas sem deixar texto sumir.
               </p>
 
@@ -1209,7 +1209,7 @@ export default function Loja() {
                             {tema === 'claro' ? 'Variação clara da marca' : 'Variação escura da marca'}
                           </p>
                         </div>
-                        <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: tokensTema.destaque, color: tokensTema.texto }}>
+                        <span className="rounded-full px-2.5 py-1 text-xs opacity-95 font-semibold" style={{ background: tokensTema.destaque, color: tokensTema.texto }}>
                           {tema === 'claro' ? 'Claro' : 'Escuro'}
                         </span>
                       </div>
@@ -1220,10 +1220,10 @@ export default function Loja() {
                           {tDynamic('A paleta se adapta automaticamente a partir da cor primária.')}
                         </p>
                         <div className="mt-3 flex gap-2">
-                          <span className="rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: form.cor_primaria, color: isLightColor(form.cor_primaria) ? '#111827' : '#FFFFFF' }}>
+                          <span className="rounded-full px-3 py-1 text-xs opacity-95 font-semibold" style={{ background: form.cor_primaria, color: isLightColor(form.cor_primaria) ? '#111827' : '#FFFFFF' }}>
                             Primária
                           </span>
-                          <span className="rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: form.cor_secundaria, color: isLightColor(form.cor_secundaria) ? '#111827' : '#FFFFFF' }}>
+                          <span className="rounded-full px-3 py-1 text-xs opacity-95 font-semibold" style={{ background: form.cor_secundaria, color: isLightColor(form.cor_secundaria) ? '#111827' : '#FFFFFF' }}>
                             Secundária
                           </span>
                         </div>
@@ -1258,7 +1258,7 @@ export default function Loja() {
               {renderCampo('Razão social / Nome', 'razao_social', 'Lanche do Paulista Ltda')}
               {renderCampo('CPF / CNPJ', 'cnpj', '000.000.000-00 ou 00.000.000/0001-00')}
             </div>
-            <p className="mt-2 text-[11px] text-gray-400">{tDynamic('Aparecem no cabeçalho da Nota do Cliente. Deixe em branco se não quiser exibir.')}</p>
+            <p className="mt-2 text-xs opacity-95 text-gray-400">{tDynamic('Aparecem no cabeçalho da Nota do Cliente. Deixe em branco se não quiser exibir.')}</p>
           </div>
           {renderCampo('Pedido mínimo (R$)', 'pedido_minimo', '15')}
         </div>
@@ -1294,7 +1294,7 @@ export default function Loja() {
                   placeholder="5.00"
                   className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
                 />
-                <p className="mt-1 text-[11px] text-gray-400">{tDynamic('Valor fixo cobrado em qualquer entrega.')}</p>
+                <p className="mt-1 text-xs opacity-95 text-gray-400">{tDynamic('Valor fixo cobrado em qualquer entrega.')}</p>
               </label>
 
               <label className="block">
@@ -1307,7 +1307,7 @@ export default function Loja() {
                   placeholder="2.00"
                   className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
                 />
-                <p className="mt-1 text-[11px] text-gray-400">{tDynamic('Adicional multiplicado pela distância em km.')}</p>
+                <p className="mt-1 text-xs opacity-95 text-gray-400">{tDynamic('Adicional multiplicado pela distância em km.')}</p>
               </label>
 
               <label className="block">
@@ -1320,7 +1320,7 @@ export default function Loja() {
                   placeholder="8.0"
                   className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
                 />
-                <p className="mt-1 text-[11px] text-gray-400">{tDynamic('Bloqueia pedidos com distância superior a este raio.')}</p>
+                <p className="mt-1 text-xs opacity-95 text-gray-400">{tDynamic('Bloqueia pedidos com distância superior a este raio.')}</p>
               </label>
 
               <label className="block">
@@ -1333,7 +1333,7 @@ export default function Loja() {
                   placeholder="0.00 (desativado)"
                   className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500"
                 />
-                <p className="mt-1 text-[11px] text-gray-400">{tDynamic('Isenta a taxa se o subtotal atingir este valor (0 = sem frete grátis).')}</p>
+                <p className="mt-1 text-xs opacity-95 text-gray-400">{tDynamic('Isenta a taxa se o subtotal atingir este valor (0 = sem frete grátis).')}</p>
               </label>
             </div>
 
@@ -1569,7 +1569,7 @@ export default function Loja() {
                 <input type="number" min="0" value={form.agendamento_antecedencia_min}
                   onChange={(e) => setForm((f) => ({ ...f, agendamento_antecedencia_min: e.target.value }))}
                   className="mt-1 w-32 rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100" />
-                <span className="mt-1 block text-[10px] text-gray-400">{tDynamic('Quanto tempo você precisa entre "agora" e o horário agendado mais próximo, pra dar tempo de preparar.')}</span>
+                <span className="mt-1 block text-xs opacity-90 text-gray-400">{tDynamic('Quanto tempo você precisa entre "agora" e o horário agendado mais próximo, pra dar tempo de preparar.')}</span>
               </label>
             )}
           </div>
@@ -1599,7 +1599,7 @@ export default function Loja() {
                     <div className="h-2 w-16 bg-gray-600 rounded"></div>
                     <div className="flex items-center gap-2 bg-gray-700/50 p-1.5 rounded">
                       <div className="h-3 w-3 rounded-sm border border-gray-500"></div>
-                      <span className="text-[10px] font-mono text-gray-200">API</span>
+                      <span className="text-xs opacity-90 font-mono text-gray-200">API</span>
                     </div>
                   </div>
                 </div>
@@ -1611,7 +1611,7 @@ export default function Loja() {
                   <div className="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-[var(--cor-primaria)] text-white flex items-center justify-center font-bold text-xs">2</div>
                   <p className="text-xs text-gray-300 mb-3">{tDynamic('Lá em cima, no canto superior direito, clique em')} <b className="text-white">{tDynamic('Identificador de conta')}</b>.</p>
                   <div className="rounded border border-gray-700 bg-[#1e1e1e] p-2 flex justify-end opacity-80">
-                    <div className="flex items-center gap-1 text-[10px] text-cyan-400 font-mono">
+                    <div className="flex items-center gap-1 text-xs opacity-90 text-cyan-400 font-mono">
                       <Shield size={12} /> {tDynamic('Identificador de conta')}
                     </div>
                   </div>
@@ -1624,11 +1624,11 @@ export default function Loja() {
                   <div className="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-[var(--cor-primaria)] text-white flex items-center justify-center font-bold text-xs">3</div>
                   <p className="text-xs text-gray-300 mb-3">{tDynamic('Copie o código')}<b className="text-white">payee_code</b> e cole aqui em cima!</p>
                   <div className="rounded border border-gray-600 bg-[#252525] p-3 shadow-lg">
-                    <p className="text-[10px] font-bold text-white mb-2">{tDynamic('Identificador de conta')}</p>
+                    <p className="text-xs opacity-90 font-bold text-white mb-2">{tDynamic('Identificador de conta')}</p>
                     <div className="flex items-center justify-between border-b border-gray-600 pb-1">
-                      <span className="text-[9px] text-gray-400">payee_code</span>
+                      <span className="text-xs opacity-80 text-gray-400">payee_code</span>
                       <div className="flex items-center gap-1">
-                        <span className="text-[9px] text-white">f03566adf9b0...</span>
+                        <span className="text-xs opacity-80 text-white">f03566adf9b0...</span>
                         <Copy size={10} className="text-cyan-400" />
                       </div>
                     </div>
@@ -1660,7 +1660,7 @@ export default function Loja() {
             {(validandoRepasse || repasse) && (
               <div
                 className={
-                  'mt-3 flex items-start gap-2 rounded-xl p-3 text-[11px] ' +
+                  'mt-3 flex items-start gap-2 rounded-xl p-3 text-xs opacity-95 ' +
                   (validandoRepasse
                     ? 'bg-gray-500/10 text-gray-600 dark:text-gray-300'
                     : repasse?.status === 'aceito'
@@ -1686,7 +1686,7 @@ export default function Loja() {
 
             <div className="mt-3 flex items-start gap-2 rounded-xl bg-emerald-500/10 p-3">
               <Check size={14} className="mt-0.5 shrink-0 text-emerald-600" />
-              <p className="text-[11px] text-gray-600 dark:text-gray-300">
+              <p className="text-xs opacity-95 text-gray-600 dark:text-gray-300">
                 {tDynamic('Preenchendo os dois campos,')} <b>cada venda no Pix é repassada 100% para a sua conta na hora</b>.
                 Se ficarem em branco, o valor entra na conta da plataforma e o repasse é feito manualmente.
               </p>
@@ -1700,11 +1700,11 @@ export default function Loja() {
             </h3>
             <div className="space-y-2 text-xs text-gray-600 dark:text-gray-300">
               <div className="flex items-start gap-2">
-                <span className="mt-0.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">PIX</span>
+                <span className="mt-0.5 rounded-full bg-emerald-100 px-2 py-0.5 text-xs opacity-90 font-black text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">PIX</span>
                 <p><b>Na hora.</b> {tDynamic('O repasse é imediato assim que o cliente paga. Tarifa Efí:')} <b>{EFI_TARIFAS.pix}</b> por venda recebida.</p>
               </div>
               <div className="flex items-start gap-2">
-                <span className="mt-0.5 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">CRÉDITO</span>
+                <span className="mt-0.5 rounded-full bg-blue-100 px-2 py-0.5 text-xs opacity-90 font-black text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">CRÉDITO</span>
                 <p>
                   <b>{tDynamic('Prazo padrão de ~31 dias por parcela.')}</b> {tDynamic('À vista a tarifa Efí é')} <b>{EFI_TARIFAS.creditoAVista}</b>;
                   no parcelado, a tarifa e o prazo variam conforme a tabela.
@@ -1724,20 +1724,20 @@ export default function Loja() {
                     <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
                       Antecipação Requer Contratação na Efí Bank
                     </p>
-                    <p className="mt-1 text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+                    <p className="mt-1 text-xs opacity-95 leading-relaxed text-amber-800 dark:text-amber-300">
                       A antecipação de cartão (receber o valor total em ~2 dias úteis, mesmo em vendas parceladas) é um <b>produto de prateleira</b> que você deve contratar diretamente no painel da sua conta Efí Empresas.
                     </p>
-                    <p className="mt-2 text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+                    <p className="mt-2 text-xs opacity-95 leading-relaxed text-amber-800 dark:text-amber-300">
                       Nenhuma alteração de código ou configuração na plataforma habilitará isso se o contrato não estiver firmado e as chaves "Antecipadas" não forem geradas pelo banco. 
                     </p>
-                    <a href="https://sejaefi.com.br" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 hover:underline dark:text-amber-400">
+                    <a href="https://sejaefi.com.br" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1 text-xs opacity-95 font-bold text-amber-700 hover:underline dark:text-amber-400">
                       Acessar minha conta Efí <ArrowRight size={12} />
                     </a>
                   </div>
                 </div>
               </div>
               
-              <p className="mt-2 text-[10px] text-gray-400">
+              <p className="mt-2 text-xs opacity-90 text-gray-400">
                 O repasse padrão das vendas no cartão continua funcionando perfeitamente (~31 dias).
                 {' '}Tarifas da tabela pública da Efí ({EFI_TARIFAS.referencia}), negociáveis por volume — confira em{' '}
                 <a href={EFI_LINKS.tarifas} target="_blank" rel="noreferrer" className="font-semibold underline">sejaefi.com.br/tarifas</a>.

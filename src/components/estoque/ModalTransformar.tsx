@@ -194,7 +194,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
                 onChange={v => atualizar(lado, l.key, { valor: v })} />
               {lado === 'd' && (
                 <label className="block sm:w-28">
-                  <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">Peso do custo</span>
+                  <span className="text-xs opacity-90 font-semibold text-gray-500 dark:text-gray-400">Peso do custo</span>
                   <input type="number" min="0" step="any" placeholder="auto"
                     className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                     value={l.peso} onChange={e => atualizar(lado, l.key, { peso: e.target.value })} />
@@ -203,14 +203,14 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
             </div>
 
             {lado === 'o' && (
-              <p className={`mt-1.5 text-[10px] ${semSaldo ? 'font-bold text-red-500' : 'text-gray-400'}`}>
+              <p className={`mt-1.5 text-xs opacity-90 ${semSaldo ? 'font-bold text-red-500' : 'text-gray-400'}`}>
                 {semSaldo
                   ? `Só tem ${saldo.toLocaleString('pt-BR')} ${alvo.unidade_medida} em estoque`
                   : `Estoque: ${saldo.toLocaleString('pt-BR')} ${alvo.unidade_medida} · consome ${fmt(base * (custos[l.insumoId] ?? 0))}`}
               </p>
             )}
             {lado === 'd' && base > 0 && custoEstimado > 0 && (
-              <p className="mt-1.5 text-[10px] text-gray-400">
+              <p className="mt-1.5 text-xs opacity-90 text-gray-400">
                 Fica com <b className="text-emerald-600 dark:text-emerald-400">{fmt(custoEstimado * fatia)}</b>
                 {' '}({(fatia * 100).toFixed(0)}%) · {fmt((custoEstimado * fatia) / base)} por {alvo.unidade_medida}
               </p>
@@ -220,7 +220,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
       })}
 
       <button onClick={() => (lado === 'o' ? setOrigens : setDestinos)(ls => [...ls, novaLinha(insumos[0]?.id ?? '')])}
-        className="flex items-center gap-1 text-[11px] font-bold text-blue-600 transition-colors hover:underline dark:text-blue-400">
+        className="flex items-center gap-1 text-xs opacity-95 font-bold text-blue-600 transition-colors hover:underline dark:text-blue-400">
         <Plus size={12} /> Adicionar {lado === 'o' ? 'origem' : 'destino'}
       </button>
     </div>
@@ -260,7 +260,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
 
         <div className="flex-1 space-y-5 overflow-y-auto p-6 hide-scrollbar">
           <div>
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+            <p className="mb-2 text-xs opacity-95 font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
               Sai do estoque
             </p>
             {renderLado('o', origens)}
@@ -273,11 +273,11 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
           </div>
 
           <div>
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+            <p className="mb-2 text-xs opacity-95 font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               {tDynamic('Entra no estoque')}
             </p>
             {renderLado('d', destinos)}
-            <p className="mt-2 text-[10px] text-gray-400">
+            <p className="mt-2 text-xs opacity-90 text-gray-400">
               O <b>peso do custo</b> distribui o valor entre as partes. Deixe em branco para ratear pela
               quantidade — use quando as partes valem o mesmo por unidade.
             </p>
@@ -291,12 +291,12 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
                   <p className="text-xs font-bold text-red-700 dark:text-red-400 flex items-center gap-1.5">
                     <Trash2 size={14} /> {tDynamic('Perda / Quebra de Processamento (Refugo)')}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-red-600/80 dark:text-red-400/80">
+                  <p className="mt-0.5 text-xs opacity-95 text-red-600/80 dark:text-red-400/80">
                     Gordura, pelancas e ossos jogados fora. <b>{tDynamic('Não precisa cadastrar insumo de lixo!')}</b> {tDynamic('O custo desta perda é absorvido automaticamente pelos cortes nobres obtidos.')}
                   </p>
                 </div>
                 <div className="w-full sm:w-32 shrink-0">
-                  <span className="text-[10px] font-bold text-red-700 dark:text-red-400 uppercase">Qtd Perda</span>
+                  <span className="text-xs opacity-90 font-bold text-red-700 dark:text-red-400 uppercase">Qtd Perda</span>
                   <input type="number" min="0" step="any" placeholder="0"
                     className="mt-1 w-full rounded-lg border border-red-300 p-2 text-sm font-bold text-center dark:border-red-800 dark:bg-gray-950 dark:text-gray-100 focus:outline-none"
                     value={perdaKg} onChange={e => setPerdaKg(e.target.value)} />
@@ -306,7 +306,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
           )}
 
           <label className="block">
-            <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Observação</span>
+            <span className="text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Observação</span>
             <input placeholder="Ex: desossa da manhã"
               className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
               value={obs} onChange={e => setObs(e.target.value)} />
@@ -322,9 +322,9 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
         <div className="shrink-0 border-t border-gray-100 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{tDynamic('Custo que muda de lugar')}</p>
+              <p className="text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400">{tDynamic('Custo que muda de lugar')}</p>
               <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{fmt(custoEstimado)}</p>
-              <p className="text-[10px] text-gray-400">estimado — o valor final vem do PEPS dos lotes</p>
+              <p className="text-xs opacity-90 text-gray-400">estimado — o valor final vem do PEPS dos lotes</p>
             </div>
             <button onClick={confirmar} disabled={salvando}
               className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">

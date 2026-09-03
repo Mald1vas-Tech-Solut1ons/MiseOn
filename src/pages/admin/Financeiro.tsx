@@ -233,7 +233,7 @@ export default function Financeiro() {
     <div data-tour="tour-financeiro-header" className="p-4 max-w-3xl mx-auto">
       <div className="mb-3 flex items-center gap-2">
         <h2 className="font-bold text-xl dark:text-gray-100">{tDynamic('Financeiro')}</h2>
-        <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+        <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs opacity-90 font-black uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" /> {tDynamic('Ao vivo')}
         </span>
       </div>
@@ -265,23 +265,23 @@ export default function Financeiro() {
           {/* ── KPIs ── */}
           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><DollarSign size={11} /> {tDynamic('Faturamento')}</p>
+              <p className="flex items-center gap-1 text-xs opacity-90 font-semibold text-gray-400"><DollarSign size={11} /> {tDynamic('Faturamento')}</p>
               <p className="mt-1 text-lg font-bold dark:text-gray-100">{fmt(resumo.faturamento)}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><Bike size={11} /> {tDynamic('Taxas Entrega')}</p>
+              <p className="flex items-center gap-1 text-xs opacity-90 font-semibold text-gray-400"><Bike size={11} /> {tDynamic('Taxas Entrega')}</p>
               <p className="mt-1 text-lg font-bold text-blue-500">{fmt(resumo.totalTaxasEntrega)}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><TrendingUp size={11} /> {tDynamic('Lucro estimado')}</p>
+              <p className="flex items-center gap-1 text-xs opacity-90 font-semibold text-gray-400"><TrendingUp size={11} /> {tDynamic('Lucro estimado')}</p>
               <p className={`mt-1 text-lg font-bold ${resumo.lucro < 0 ? 'text-red-500' : 'text-green-600'}`}>{fmt(resumo.lucro)}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><ShoppingBag size={11} /> {tDynamic('Pedidos')}</p>
+              <p className="flex items-center gap-1 text-xs opacity-90 font-semibold text-gray-400"><ShoppingBag size={11} /> {tDynamic('Pedidos')}</p>
               <p className="mt-1 text-lg font-bold dark:text-gray-100">{resumo.qtdPedidos}</p>
             </div>
             <div className="rounded-2xl bg-white p-3 shadow-sm dark:border dark:border-gray-800 dark:bg-gray-900 col-span-2 sm:col-span-1">
-              <p className="flex items-center gap-1 text-[10px] font-semibold text-gray-400"><Ticket size={11} /> {tDynamic('Ticket médio')}</p>
+              <p className="flex items-center gap-1 text-xs opacity-90 font-semibold text-gray-400"><Ticket size={11} /> {tDynamic('Ticket médio')}</p>
               <p className="mt-1 text-lg font-bold dark:text-gray-100">{fmt(resumo.ticketMedio)}</p>
             </div>
           </div>
@@ -326,7 +326,7 @@ export default function Financeiro() {
                     <div key={metodo}>
                       <div className="flex items-center justify-between text-xs">
                         <span className="flex items-center gap-1.5 font-semibold text-gray-600 dark:text-gray-300"><Icone size={13} /> {conf.label} <span className="text-gray-400">({info.qtd})</span></span>
-                        <span className="font-bold dark:text-gray-100">{fmt(info.total)} <span className="text-[10px] font-semibold text-gray-400">{pct.toFixed(0)}%</span></span>
+                        <span className="font-bold dark:text-gray-100">{fmt(info.total)} <span className="text-xs opacity-90 font-semibold text-gray-400">{pct.toFixed(0)}%</span></span>
                       </div>
                       <div className="mt-1 h-1.5 rounded-full bg-gray-100 dark:bg-gray-800">
                         <div className="h-1.5 rounded-full bg-[var(--cor-primaria)]" style={{ width: `${pct}%` }} />
@@ -356,7 +356,7 @@ export default function Financeiro() {
                         ? <Bike size={12} className="shrink-0 text-blue-400" />
                         : <Store size={12} className="shrink-0 text-emerald-500" />}
                     </div>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-gray-400">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs opacity-95 text-gray-400">
                       <span>{dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} {dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                       {metodo && <span>· {METODO_INFO[metodo]?.label ?? metodo}</span>}
                       <span>· {(p.itens_pedido ?? []).reduce((s, i) => s + i.quantidade, 0)} item(ns)</span>
@@ -364,7 +364,7 @@ export default function Financeiro() {
                   </div>
                   <div className="shrink-0 text-right">
                     <p className={`text-sm font-bold ${cancelado ? 'text-gray-400 line-through' : 'dark:text-gray-100'}`}>{fmt(Number(p.valor_total))}</p>
-                    <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${STATUS_BADGE[p.status] ?? ''}`}>{STATUS_LABEL[p.status] ?? p.status}</span>
+                    <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs opacity-90 font-bold ${STATUS_BADGE[p.status] ?? ''}`}>{STATUS_LABEL[p.status] ?? p.status}</span>
                   </div>
                 </div>
               );
@@ -390,19 +390,19 @@ export default function Financeiro() {
                   </div>
                   <div className="grid grid-cols-4 gap-2 text-center text-xs">
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
-                      <p className="text-[9px] uppercase tracking-wide text-gray-400 mb-1">Venda</p>
+                      <p className="text-xs opacity-80 uppercase tracking-wide text-gray-400 mb-1">Venda</p>
                       <p className="font-semibold dark:text-gray-200">{fmt(Number(p.preco_venda))}</p>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
-                      <p className="text-[9px] uppercase tracking-wide text-gray-400 mb-1">Insumos (CMV)</p>
+                      <p className="text-xs opacity-80 uppercase tracking-wide text-gray-400 mb-1">Insumos (CMV)</p>
                       <p className="font-semibold text-orange-600 dark:text-orange-400">-{fmt(Number(p.custo_insumos))}</p>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
-                      <p className="text-[9px] uppercase tracking-wide text-gray-400 mb-1">Custos Fixos</p>
+                      <p className="text-xs opacity-80 uppercase tracking-wide text-gray-400 mb-1">Custos Fixos</p>
                       <p className="font-semibold text-orange-600 dark:text-orange-400">-{fmt(Number(p.taxa_rateio))}</p>
                     </div>
                     <div className={`${prejuizo ? 'bg-red-50 dark:bg-red-900/10' : 'bg-green-50 dark:bg-green-900/10'} rounded-lg p-2`}>
-                      <p className="text-[9px] uppercase tracking-wide text-gray-400 mb-1">Líq. Real</p>
+                      <p className="text-xs opacity-80 uppercase tracking-wide text-gray-400 mb-1">Líq. Real</p>
                       <p className={`font-bold ${prejuizo ? 'text-red-600 dark:text-red-400' : 'text-green-700 dark:text-green-400'}`}>{fmt(Number(p.lucro_liquido))}</p>
                     </div>
                   </div>
@@ -468,14 +468,14 @@ export default function Financeiro() {
                     <span className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-1 block">{tDynamic('Expectativa de Vendas / Mês (Qtd)')}</span>
                     <input type="number" className="w-full rounded-xl border-2 border-[var(--cor-primaria)] bg-green-50 dark:bg-green-900/10 p-3 text-lg font-bold text-[var(--cor-primaria)] focus:outline-none"
                       value={configCusto.expectativa_vendas_mes} onChange={e => setConfigCusto({...configCusto, expectativa_vendas_mes: e.target.valueAsNumber || 0})} />
-                    <p className="text-[10px] text-gray-500 mt-1">{tDynamic('Quantos itens principais você estima vender por mês?')}</p>
+                    <p className="text-xs opacity-90 text-gray-500 mt-1">{tDynamic('Quantos itens principais você estima vender por mês?')}</p>
                    </label>
                  </div>
 
                  <div className="w-full sm:w-1/2 rounded-xl bg-gray-900 text-white p-4 text-center">
-                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Total Despesas</p>
+                   <p className="text-xs opacity-90 font-bold uppercase tracking-widest text-gray-400">Total Despesas</p>
                    <p className="text-lg font-bold mb-2">{fmt(totalFixoMensal)}</p>
-                   <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic('Rateio por Produto')}</p>
+                   <p className="text-xs opacity-90 font-bold uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic('Rateio por Produto')}</p>
                    <p className="text-2xl font-black">{fmt(rateioSimulado)}</p>
                  </div>
                </div>
@@ -523,7 +523,7 @@ export default function Financeiro() {
                        value={configCusto.entregador_taxa_km_excedente ?? 1.2}
                        onChange={e => setConfigCusto({ ...configCusto, entregador_taxa_km_excedente: e.target.valueAsNumber || 0 })} />
                    </label>
-                   <p className="col-span-full text-[10px] text-gray-500">
+                   <p className="col-span-full text-xs opacity-90 text-gray-500">
                      {tDynamic('Ex: entrega de 8km com os valores acima = R$5 + (8 − 5) × R$1,20 = R$8,60. Sem endereço geolocalizado, cai na taxa mínima.')}
                    </p>
                  </div>

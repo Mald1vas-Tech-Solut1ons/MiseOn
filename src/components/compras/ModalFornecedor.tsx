@@ -52,7 +52,7 @@ export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo 
   };
 
   const campo = 'mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100';
-  const rotulo = 'text-[11px] font-semibold text-gray-600 dark:text-gray-400';
+  const rotulo = 'text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onFechar}>
@@ -105,7 +105,7 @@ export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo 
           </div>
 
           <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-900/10">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+            <p className="mb-3 text-xs opacity-95 font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
               {tDynamic('Logística — alimenta a sugestão de compra')}
             </p>
             <div className="grid grid-cols-2 gap-3">
@@ -127,7 +127,7 @@ export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo 
                   const ativo = (f.dias_entrega ?? []).includes(i);
                   return (
                     <button key={d} onClick={() => toggleDia(i)}
-                      className={`rounded-lg px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
+                      className={`rounded-lg px-2.5 py-1.5 text-xs opacity-95 font-bold transition-colors ${
                         ativo ? 'bg-[var(--cor-primaria)] text-white shadow-sm'
                               : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400'}`}>
                       {d}

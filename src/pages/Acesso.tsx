@@ -91,7 +91,7 @@ export default function Acesso() {
                 style={{ background: `${p.cor}1A`, color: p.cor }}>
                 {p.icon}
               </div>
-              <p style={{ color: p.cor, fontFamily: "'JetBrains Mono', monospace" }} className="text-[11px] font-bold uppercase tracking-widest">{p.sub}</p>
+              <p style={{ color: p.cor, fontFamily: "'JetBrains Mono', monospace" }} className="text-xs opacity-95 font-bold uppercase tracking-widest">{p.sub}</p>
               <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="mt-1 text-xl font-extrabold">{p.titulo}</h2>
               <p style={{ color: 'rgba(234,241,251,0.6)' }} className="mt-2 text-sm leading-relaxed flex-1">{p.desc}</p>
               <a href={p.href}

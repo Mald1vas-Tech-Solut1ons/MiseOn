@@ -235,7 +235,7 @@ export function ModalReposicaoBuffet({
                        <div key={cuba.id} className="bg-slate-950 border border-slate-800 p-3 rounded-xl flex justify-between items-center">
                          <div>
                            <p className="text-sm font-bold text-slate-200">{cuba.preparo?.nome}</p>
-                           <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5"><Clock size={10} /> Enviado às {new Date(cuba.criado_em).toLocaleTimeString('pt-BR')} · {cuba.peso_reposto_kg} {cuba.preparo?.unidade_medida}</p>
+                           <p className="text-xs opacity-90 text-slate-400 flex items-center gap-1 mt-0.5"><Clock size={10} /> Enviado às {new Date(cuba.criado_em).toLocaleTimeString('pt-BR')} · {cuba.peso_reposto_kg} {cuba.preparo?.unidade_medida}</p>
                          </div>
                          <button onClick={() => setCubaSendoFechada(cuba)} className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
                            Recolher
@@ -264,7 +264,7 @@ export function ModalReposicaoBuffet({
                      <input type="checkbox" checked={reaproveitarSobra} onChange={(e) => setReaproveitarSobra(e.target.checked)} className="rounded bg-slate-800 border-slate-700 text-blue-500 focus:ring-0 focus:ring-offset-0" />
                      <div>
                        <p className="text-xs font-bold text-slate-200">{tDynamic('Reaproveitar no Estoque')}</p>
-                       <p className="text-[10px] text-slate-500">{tDynamic('Se marcado, o peso da sobra voltará para o estoque da cozinha. Senão, será descartado.')}</p>
+                       <p className="text-xs opacity-90 text-slate-500">{tDynamic('Se marcado, o peso da sobra voltará para o estoque da cozinha. Senão, será descartado.')}</p>
                      </div>
                    </label>
                  </div>

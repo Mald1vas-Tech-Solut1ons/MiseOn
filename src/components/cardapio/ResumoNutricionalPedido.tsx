@@ -96,17 +96,17 @@ export default function ResumoNutricionalPedido({
         className="flex w-full items-center justify-between gap-2 text-left"
       >
         <span className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] font-bold" style={{ color: 'var(--cor-texto)' }}>
+          <span className="text-xs opacity-95 font-bold" style={{ color: 'var(--cor-texto)' }}>
             Neste pedido
           </span>
           {Number.isFinite(kcal) && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-black text-white dark:bg-gray-100 dark:text-gray-900">
+            <span className="inline-flex items-center gap-1 rounded-full bg-gray-900 px-2 py-0.5 text-xs opacity-90 font-black text-white dark:bg-gray-100 dark:text-gray-900">
               <Flame size={10} strokeWidth={3} />
               {formatarValor(kcal, 'kcal')} kcal
             </span>
           )}
           {resumo.alergenos.contem.length > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900 dark:bg-amber-950/50 dark:text-amber-300">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs opacity-90 font-bold text-amber-900 dark:bg-amber-950/50 dark:text-amber-300">
               <AlertTriangle size={10} strokeWidth={3} />
               {resumo.alergenos.contem.length} alergênicos
             </span>
@@ -122,7 +122,7 @@ export default function ResumoNutricionalPedido({
       {aberto && (
         <div className="mt-2 space-y-2">
           {principais.length > 0 && (
-            <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs opacity-95">
               {principais.map((n) => {
                 const vd = percentualVD(resumo.total[n.codigo], n.vdr);
                 return (
@@ -143,13 +143,13 @@ export default function ResumoNutricionalPedido({
           )}
 
           {resumo.alergenos.contem.length > 0 && (
-            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--cor-texto-suave)' }}>
+            <p className="text-xs opacity-95 leading-relaxed" style={{ color: 'var(--cor-texto-suave)' }}>
               <strong className="font-bold">Contém:</strong> {resumo.alergenos.contem.join(', ')}.
               {resumo.alergenos.pode.length > 0 && ` Pode conter: ${resumo.alergenos.pode.join(', ')}.`}
             </p>
           )}
 
-          <p className="text-[10px] leading-relaxed" style={{ color: 'var(--cor-texto-fraco)' }}>
+          <p className="text-xs opacity-90 leading-relaxed" style={{ color: 'var(--cor-texto-fraco)' }}>
             {resumo.semDado > 0
               ? `${resumo.semDado} ${resumo.semDado === 1 ? 'item ainda não tem' : 'itens ainda não têm'} valores calculados e ${resumo.semDado === 1 ? 'ficou' : 'ficaram'} de fora desta soma. `
               : ''}

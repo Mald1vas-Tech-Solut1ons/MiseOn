@@ -144,7 +144,7 @@ export default function Ajuda() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-orange-400">
+                    <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2.5 py-0.5 text-xs opacity-90 font-extrabold uppercase tracking-wider text-orange-400">
                       Novo Recurso Interativo
                     </span>
                   </div>
@@ -441,13 +441,13 @@ export default function Ajuda() {
               <div key={linha.forma} className={`flex items-center justify-between gap-3 bg-white px-4 py-3.5 dark:bg-gray-900 ${i > 0 ? 'border-t border-gray-100 dark:border-gray-800' : ''}`}>
                 <div>
                   <p className="text-sm font-semibold dark:text-gray-100">{linha.forma}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">{linha.detalhe}</p>
+                  <p className="text-xs opacity-95 text-gray-400 mt-0.5">{linha.detalhe}</p>
                 </div>
                 <span className="shrink-0 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-black text-gray-700 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">{linha.taxa}</span>
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-gray-400 mb-8">
+          <p className="text-xs opacity-95 text-gray-400 mb-8">
             Taxas públicas do Efí Bank (base {EFI_TARIFAS.referencia}). Sujeito a alteração. <a href={EFI_LINKS.tarifas} target="_blank" rel="noreferrer" className="underline">{tDynamic('Confira no site oficial')}</a>.
           </p>
 
@@ -575,7 +575,7 @@ export default function Ajuda() {
         </div>
       )}
 
-      <div className="mt-8 flex items-center justify-center gap-2 text-[11px] text-gray-400 opacity-60">
+      <div className="mt-8 flex items-center justify-center gap-2 text-xs opacity-95 text-gray-400 opacity-60">
         <Check size={12} className="text-emerald-500" /> {tDynamic('Base de conhecimento atualizada')}
       </div>
     </div>

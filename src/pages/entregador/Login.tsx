@@ -109,7 +109,7 @@ export default function EntregadorLogin() {
           </button>
         </form>
 
-        <p className="mt-8 text-center text-[11px] font-medium text-gray-600">
+        <p className="mt-8 text-center text-xs opacity-95 font-medium text-gray-600">
           {tDynamic('Você precisa ser convidado por um restaurante Parceiro MiseOn para ter acesso ao app.')}
         </p>
       </div>

@@ -358,14 +358,14 @@ export default function ScannerQRCodeModal({
                   <div id={containerFallbackId} className={usandoNativo ? 'hidden' : 'min-h-[280px]'} />
                 </div>
                 <div className="mt-3 flex items-start justify-between gap-2">
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                  <p className="text-xs opacity-95 text-gray-500 dark:text-gray-400">
                     Encoste no QR Code do cupom, a uns 10 cm, com o papel esticado.
                     {usandoNativo && <span className="block text-emerald-600 dark:text-emerald-400">{tDynamic('Leitor do próprio aparelho ativo.')}</span>}
                   </p>
                   {temLanterna && (
                     <button
                       onClick={alternarLanterna}
-                      className="flex shrink-0 items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1.5 text-[11px] font-bold text-gray-700 dark:text-gray-300"
+                      className="flex shrink-0 items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1.5 text-xs opacity-95 font-bold text-gray-700 dark:text-gray-300"
                     >
                       {lanternaLigada ? <ZapOff size={13} /> : <Zap size={13} />}
                       {lanternaLigada ? 'Apagar' : 'Lanterna'}
@@ -383,12 +383,12 @@ export default function ScannerQRCodeModal({
                 <ImageIcon size={22} className="mt-0.5 shrink-0 text-orange-500" />
                 <div>
                   <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Como fotografar</p>
-                  <ol className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-gray-600 dark:text-gray-400">
+                  <ol className="mt-1.5 space-y-1 text-xs opacity-95 leading-relaxed text-gray-600 dark:text-gray-400">
                     <li><strong>1.</strong> {tDynamic('Deixe o cupom esticado sobre uma mesa, sem dobra no QR.')}</li>
                     <li><strong>2.</strong> {tDynamic('Fotografe de cima, a uns 15 cm, com o QR no meio do quadro.')}</li>
                     <li><strong>3.</strong> {tDynamic('Evite sombra da própria mão e reflexo em cima do código.')}</li>
                   </ol>
-                  <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-500">
+                  <p className="mt-2 text-xs opacity-95 text-gray-500 dark:text-gray-500">
                     {tDynamic('Serve foto da galeria, inclusive uma que você já tirou antes.')}
                   </p>
                 </div>
@@ -413,13 +413,13 @@ export default function ScannerQRCodeModal({
                 {lendoFoto ? 'Lendo...' : 'Escolher foto do cupom'}
               </button>
               {lendoFoto && etapa && (
-                <p className="mt-2 text-center text-[11px] text-gray-500 dark:text-gray-400">{TEXTO_ETAPA[etapa]}</p>
+                <p className="mt-2 text-center text-xs opacity-95 text-gray-500 dark:text-gray-400">{TEXTO_ETAPA[etapa]}</p>
               )}
             </div>
             {erroFoto && (
               <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-900/40">
                 <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
-                <p className="text-[11px] text-amber-800 dark:text-amber-300">{erroFoto}</p>
+                <p className="text-xs opacity-95 text-amber-800 dark:text-amber-300">{erroFoto}</p>
               </div>
             )}
           </div>
@@ -435,11 +435,11 @@ export default function ScannerQRCodeModal({
               <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/40 dark:bg-amber-900/20">
                 <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
                 <div>
-                  <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300">
+                  <p className="text-xs opacity-95 font-bold text-amber-800 dark:text-amber-300">
                     {tDynamic('A consulta pelo QR Code não deu certo desta vez')}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-400/90">{motivoFallback}</p>
-                  <p className="mt-1 text-[11px] font-bold text-amber-800 dark:text-amber-300">
+                  <p className="mt-0.5 text-xs opacity-95 text-amber-700 dark:text-amber-400/90">{motivoFallback}</p>
+                  <p className="mt-1 text-xs opacity-95 font-bold text-amber-800 dark:text-amber-300">
                     {tDynamic('Sem problema: fotografe o cupom que eu leio os itens para você.')}
                   </p>
                 </div>
@@ -453,12 +453,12 @@ export default function ScannerQRCodeModal({
                   <p className="text-xs font-bold text-gray-900 dark:text-gray-100">
                     {tDynamic('Leitura do cupom por inteligência artificial')}
                   </p>
-                  <ol className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-gray-600 dark:text-gray-400">
+                  <ol className="mt-1.5 space-y-1 text-xs opacity-95 leading-relaxed text-gray-600 dark:text-gray-400">
                     <li><strong>1.</strong> {tDynamic('Estique o cupom numa superfície plana, sem dobra.')}</li>
                     <li><strong>2.</strong> {tDynamic('Fotografe a LISTA DE PRODUTOS de perto, de cima.')}</li>
                     <li><strong>3.</strong> {tDynamic('Cupom longo? Fotografe em partes, de cima para baixo.')}</li>
                   </ol>
-                  <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-500">
+                  <p className="mt-2 text-xs opacity-95 text-gray-500 dark:text-gray-500">
                     {tDynamic('Não precisa do QR Code. Funciona com cupom de qualquer estado.')}
                   </p>
                 </div>
@@ -483,7 +483,7 @@ export default function ScannerQRCodeModal({
                   {fotosCupom.map((f, i) => (
                     <li key={`${f.name}-${i}`} className="flex items-center gap-2 rounded-lg bg-gray-50 px-2.5 py-1.5 dark:bg-gray-800">
                       <ImageIcon size={13} className="shrink-0 text-gray-400" />
-                      <span className="min-w-0 flex-1 truncate text-[11px] text-gray-600 dark:text-gray-300">
+                      <span className="min-w-0 flex-1 truncate text-xs opacity-95 text-gray-600 dark:text-gray-300">
                         {tDynamic('Parte')} {i + 1} · {(f.size / 1024).toFixed(0)} KB
                       </span>
                       <button
@@ -527,7 +527,7 @@ export default function ScannerQRCodeModal({
             {erroCupom && (
               <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/40 dark:bg-amber-900/20">
                 <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
-                <p className="text-[11px] text-amber-800 dark:text-amber-300">{erroCupom}</p>
+                <p className="text-xs opacity-95 text-amber-800 dark:text-amber-300">{erroCupom}</p>
               </div>
             )}
           </div>
@@ -554,7 +554,7 @@ export default function ScannerQRCodeModal({
                     ? <CheckCircle2 size={15} className="mt-px shrink-0 text-emerald-600 dark:text-emerald-400" />
                     : <AlertCircle size={15} className="mt-px shrink-0 text-amber-600 dark:text-amber-400" />}
                   <div className="min-w-0">
-                    <p className={`text-[11px] font-bold ${
+                    <p className={`text-xs opacity-95 font-bold ${
                       leituraManual.podeConsultar
                         ? 'text-emerald-800 dark:text-emerald-300'
                         : 'text-amber-800 dark:text-amber-300'
@@ -562,14 +562,14 @@ export default function ScannerQRCodeModal({
                       {leituraManual.descricao}
                     </p>
                     {leituraManual.chave && (
-                      <p className="mt-0.5 break-all font-mono text-[10px] text-gray-500 dark:text-gray-400">
+                      <p className="mt-0.5 break-all font-mono text-xs opacity-90 text-gray-500 dark:text-gray-400">
                         {leituraManual.chave.replace(/(\d{4})/g, '$1 ').trim()}
                       </p>
                     )}
                   </div>
                 </div>
               ) : (
-                <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                <p className="mt-2 text-xs opacity-95 text-gray-500 dark:text-gray-400">
                   Cole o endereço que o QR Code abre, ou digite a chave de 44 dígitos impressa no
                   cupom — eu entendo os dois, com ou sem espaços.
                 </p>

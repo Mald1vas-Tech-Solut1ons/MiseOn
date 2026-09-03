@@ -94,7 +94,7 @@ export default function EntregadorLayout() {
           <LanguageToggle variant="minimal" />
           <div className="text-right hidden sm:block">
             <p className="text-xs font-bold text-gray-300">{ctx.nome}</p>
-            <p className="text-[10px] text-green-400">Online e operando</p>
+            <p className="text-xs opacity-90 text-green-400">Online e operando</p>
           </div>
           <NavLink to="/entregador/documentos" className={({isActive}) => `relative rounded-full p-2 transition-colors ${isActive ? 'bg-[var(--cor-primaria)] text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700 bg-gray-800'}`}>
             <FileText size={16} />

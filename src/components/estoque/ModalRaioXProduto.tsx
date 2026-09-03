@@ -159,7 +159,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                            <div key={lote.id} className="flex items-center justify-between text-xs bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg">
                              <div className="font-semibold text-gray-700 dark:text-gray-300">
                                {Number(lote.quantidade_restante).toLocaleString('pt-BR')} {insumo.unidade_medida}
-                               {lote.lote_fornecedor && <span className="ml-2 px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[9px] uppercase">Ref: {lote.lote_fornecedor}</span>}
+                               {lote.lote_fornecedor && <span className="ml-2 px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs opacity-80 uppercase">Ref: {lote.lote_fornecedor}</span>}
                              </div>
                              {validade ? (
                                <div className={`font-bold flex items-center gap-1 ${vencido ? 'text-red-500' : venceEmBreve ? 'text-amber-500' : 'text-gray-500'}`}>
@@ -167,7 +167,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                                  {validade.toLocaleDateString('pt-BR')}
                                </div>
                              ) : (
-                               <span className="text-gray-400 text-[10px] uppercase">S/ Validade</span>
+                               <span className="text-gray-400 text-xs opacity-90 uppercase">S/ Validade</span>
                              )}
                            </div>
                          );
@@ -197,18 +197,18 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                             <p className="flex items-center gap-1.5 text-sm font-bold text-gray-800 dark:text-gray-200">
                               {idx === 0 && origens.length > 1 && <Award size={13} className="shrink-0 text-emerald-500" />}
                               {o.fornecedor}
-                              {o.marca && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gray-600 dark:bg-gray-700 dark:text-gray-300">{o.marca}</span>}
+                              {o.marca && <span className="rounded bg-gray-200 px-1.5 py-0.5 text-xs opacity-80 font-bold uppercase text-gray-600 dark:bg-gray-700 dark:text-gray-300">{o.marca}</span>}
                             </p>
-                            <p className="mt-0.5 text-[10px] text-gray-400">
+                            <p className="mt-0.5 text-xs opacity-90 text-gray-400">
                               {o.compras} {o.compras === 1 ? 'compra' : 'compras'} · última em{' '}
                               {new Date(o.ultimaData).toLocaleDateString('pt-BR')} a {fmt(o.ultimo)}
                             </p>
                           </div>
                           <div className="shrink-0 text-right">
                             <p className="text-sm font-black text-gray-900 dark:text-gray-100">{fmt(o.custoMedio)}</p>
-                            <p className="text-[10px] text-gray-400">média / {insumo.unidade_medida}</p>
+                            <p className="text-xs opacity-90 text-gray-400">média / {insumo.unidade_medida}</p>
                             {idx === 0 && economia > 1 && (
-                              <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                              <p className="text-xs opacity-90 font-bold text-emerald-600 dark:text-emerald-400">
                                 −{economia.toFixed(0)}% vs o mais caro
                               </p>
                             )}
@@ -230,7 +230,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
                         <Info size={24} className="mb-2 opacity-50" />
                         <p className="text-xs font-medium">{tDynamic('Dados insuficientes para gerar o gráfico.')}</p>
-                        <p className="text-[10px]">{tDynamic('Registre mais de uma compra com custo para ver a inflação.')}</p>
+                        <p className="text-xs opacity-90">{tDynamic('Registre mais de uma compra com custo para ver a inflação.')}</p>
                      </div>
                    ) : (
                      <ResponsiveContainer width="100%" height="100%">
@@ -285,10 +285,10 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                          return (
                           <tr key={mov.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors">
                             <td className="py-3 px-5 text-gray-500 dark:text-gray-400">
-                              {new Date(mov.criado_em).toLocaleDateString('pt-BR')} <span className="text-[10px] opacity-70">{new Date(mov.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                              {new Date(mov.criado_em).toLocaleDateString('pt-BR')} <span className="text-xs opacity-90 opacity-70">{new Date(mov.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                             </td>
                             <td className="py-3 px-5">
-                               <span className={`px-2 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold ${
+                               <span className={`px-2 py-0.5 rounded text-xs opacity-80 uppercase tracking-wider font-bold ${
                                   isEntrada ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 
                                   isSaida ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 
                                   isPerda ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 
@@ -302,12 +302,12 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
                             </td>
                             <td className="py-3 px-5 font-medium text-gray-600 dark:text-gray-400">
                               {isEntrada ? (
-                                unit > 0 ? fmt(unit) : <span className="text-[10px] italic text-gray-400 font-normal">Sem custo reg.</span>
+                                unit > 0 ? fmt(unit) : <span className="text-xs opacity-90 italic text-gray-400 font-normal">Sem custo reg.</span>
                               ) : '-'}
                             </td>
                             <td className="py-3 px-5 text-gray-500 dark:text-gray-400">
                               <span className="block truncate max-w-[150px]">{mov.motivo || '-'}</span>
-                              {mov.lote_fornecedor && <span className="text-[10px] bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded mt-1 inline-block">L: {mov.lote_fornecedor}</span>}
+                              {mov.lote_fornecedor && <span className="text-xs opacity-90 bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded mt-1 inline-block">L: {mov.lote_fornecedor}</span>}
                             </td>
                           </tr>
                          );

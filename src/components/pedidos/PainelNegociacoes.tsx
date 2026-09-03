@@ -104,7 +104,7 @@ export function PainelNegociacoes({ lojaId }: { lojaId: string }) {
                 {d.mensagem && (
                   <p className="mt-0.5 truncate text-xs italic text-gray-600 dark:text-gray-300">"{d.mensagem}"</p>
                 )}
-                <p className="mt-0.5 text-[11px] font-semibold text-red-600 dark:text-red-400">
+                <p className="mt-0.5 text-xs opacity-95 font-semibold text-red-600 dark:text-red-400">
                   {tDynamic(consequenciaDoSilencio(d.acao_no_prazo))}
                 </p>
               </div>
@@ -221,7 +221,7 @@ function ModalNegociacao({
         <>
           {/* O que o cliente disse, com as palavras dele. */}
           <div className="mb-4 rounded-2xl border border-[var(--cor-borda)] bg-[var(--cor-surface)] p-3.5">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--cor-texto-fraco)]">
+            <p className="text-xs opacity-95 font-semibold uppercase tracking-wider text-[var(--cor-texto-fraco)]">
               {tDynamic('O que o cliente relatou')}
             </p>
             <p className="mt-1 text-sm italic text-[var(--cor-texto)] dark:text-[var(--cor-texto-claro)]">
@@ -256,7 +256,7 @@ function ModalNegociacao({
               <span className="text-sm font-bold text-[var(--cor-texto)] dark:text-[var(--cor-texto-claro)]">
                 {tDynamic('Rejeitar')}
               </span>
-              <span className="text-[10px] text-[var(--cor-texto-fraco)]">{tDynamic('mantenho o valor')}</span>
+              <span className="text-xs opacity-90 text-[var(--cor-texto-fraco)]">{tDynamic('mantenho o valor')}</span>
             </button>
 
             <button
@@ -271,7 +271,7 @@ function ModalNegociacao({
               <span className="text-sm font-bold text-[var(--cor-texto)] dark:text-[var(--cor-texto-claro)]">
                 {tDynamic('Aceitar')}
               </span>
-              <span className="text-[10px] text-[var(--cor-texto-fraco)]">{tDynamic('abro mão do valor')}</span>
+              <span className="text-xs opacity-90 text-[var(--cor-texto-fraco)]">{tDynamic('abro mão do valor')}</span>
             </button>
           </div>
 
@@ -306,7 +306,7 @@ function ModalNegociacao({
 
               {decisao === 'aceitar' && lista.length > 0 && (
                 <label className="mt-3 block">
-                  <span className="text-[11px] font-semibold text-[var(--cor-texto-fraco)]">
+                  <span className="text-xs opacity-95 font-semibold text-[var(--cor-texto-fraco)]">
                     {tDynamic('Detalhe (opcional) — vai junto para o iFood')}
                   </span>
                   <textarea

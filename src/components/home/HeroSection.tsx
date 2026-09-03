@@ -67,7 +67,7 @@ export default function HeroSection() {
               </div>
               <div className="flex flex-1 justify-center">
                 <div className="flex h-6 items-center rounded-md bg-black/40 px-3 border border-white/10 shadow-inner">
-                  <span className="text-[10px] font-medium text-gray-400 font-mono tracking-wide">app.miseon.com.br/dashboard</span>
+                  <span className="text-xs opacity-90 font-medium text-gray-400 font-mono tracking-wide">app.miseon.com.br/dashboard</span>
                 </div>
               </div>
               <div className="w-16" /> {/* Spacer */}

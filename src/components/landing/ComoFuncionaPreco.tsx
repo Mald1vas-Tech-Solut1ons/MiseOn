@@ -86,7 +86,7 @@ export function ComoFuncionaPreco() {
                 style={{ fontFamily: "'Sora', sans-serif" }}
                 className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-xs sm:text-sm font-bold transition ${anual ? 'bg-[#0A5CC4] text-white shadow-[0_0_20px_rgba(10,92,196,0.5)]' : 'text-gray-400 hover:text-white'}`}
               >
-                {tDynamic('Anual (R$ 99,90/mês)')} <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-23% OFF</span>
+                {tDynamic('Anual (R$ 99,90/mês)')} <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-23% OFF</span>
               </button>
             </div>
           </div>
@@ -160,7 +160,7 @@ export function ComoFuncionaPreco() {
                   </div>
                 ))}
               </div>
-              <p style={{ color: 'rgba(234,241,251,0.4)' }} className="mt-4 text-[11px] leading-relaxed">
+              <p style={{ color: 'rgba(234,241,251,0.4)' }} className="mt-4 text-xs opacity-95 leading-relaxed">
                 Tarifas públicas do Efí Bank ({EFI_TARIFAS.referencia}, negociáveis por volume). Confira em{' '}
                 <a href={EFI_LINKS.tarifas} target="_blank" rel="noreferrer" className="underline transition hover:text-white">
                   sejaefi.com.br/tarifas

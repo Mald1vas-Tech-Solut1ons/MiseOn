@@ -482,22 +482,22 @@ export default function Mesas() {
                   <div className="flex items-start justify-between">
                     <span className="font-['Sora'] text-2xl font-black dark:text-gray-100">{m.numero}</span>
                     {ocupada
-                      ? <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-black text-white">OCUPADA</span>
-                      : <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">LIVRE</span>}
+                      ? <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs opacity-90 font-black text-white">OCUPADA</span>
+                      : <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs opacity-90 font-black text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">LIVRE</span>}
                   </div>
-                  {m.nome && <p className="mt-0.5 truncate text-[11px] text-gray-400">{m.nome}</p>}
-                  {m.capacidade && <p className="mt-1 flex items-center gap-1 text-[11px] text-gray-400"><Users size={11} /> {m.capacidade} lugares</p>}
+                  {m.nome && <p className="mt-0.5 truncate text-xs opacity-95 text-gray-400">{m.nome}</p>}
+                  {m.capacidade && <p className="mt-1 flex items-center gap-1 text-xs opacity-95 text-gray-400"><Users size={11} /> {m.capacidade} lugares</p>}
                   {ocupada ? (
                     <div className="mt-3 border-t border-orange-200 pt-2 dark:border-orange-900/40">
                       <p className="text-lg font-black text-orange-600 dark:text-orange-400">{fmt(m.totalParcial - m.totalPago)}</p>
-                      <p className="flex items-center gap-1 text-[11px] text-gray-500"><Clock size={10} /> {min}min · {m.qtdItens} item(ns){m.temItemEmPreparo ? ' · prep.' : ''}{m.totalPago > 0 ? ' · (Pago par.)' : ''}</p>
+                      <p className="flex items-center gap-1 text-xs opacity-95 text-gray-500"><Clock size={10} /> {min}min · {m.qtdItens} item(ns){m.temItemEmPreparo ? ' · prep.' : ''}{m.totalPago > 0 ? ' · (Pago par.)' : ''}</p>
                     </div>
                   ) : (
-                    <p className="mt-3 text-[11px] text-gray-400">{tDynamic('Toque para abrir a conta')}</p>
+                    <p className="mt-3 text-xs opacity-95 text-gray-400">{tDynamic('Toque para abrir a conta')}</p>
                   )}
                 </button>
                 <div className="mt-2 flex gap-1.5 border-t border-gray-100 pt-2 dark:border-gray-800">
-                  <button onClick={() => abrirQr(m)} className="flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"><QrCode size={12} /> QR Code</button>
+                  <button onClick={() => abrirQr(m)} className="flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 text-xs opacity-95 font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"><QrCode size={12} /> QR Code</button>
                   {!ocupada && (
                     <button onClick={() => excluirMesa(m)} className="rounded-lg px-2 py-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"><Trash2 size={12} /></button>
                   )}
@@ -519,7 +519,7 @@ export default function Mesas() {
             
             <label className="text-xs font-bold text-gray-600 dark:text-gray-300">{tDynamic('Número da mesa *')}</label>
             <input {...register('numero')} placeholder="ex: 5" inputMode="numeric" autoFocus className={`${inputCls} mt-1 text-center text-xl font-black ${errors.numero ? 'border-red-500 focus:border-red-500' : ''}`} />
-            {errors.numero && <p className="mt-1 text-[10px] text-red-500">{errors.numero.message}</p>}
+            {errors.numero && <p className="mt-1 text-xs opacity-90 text-red-500">{errors.numero.message}</p>}
 
             <label className="mt-3 block text-xs font-bold text-gray-600 dark:text-gray-300">Nome (opcional)</label>
             <input {...register('nome')} placeholder="ex: Varanda" className={`${inputCls} mt-1`} />
@@ -608,7 +608,7 @@ export default function Mesas() {
                       <div key={p.id} className="rounded-xl border border-gray-100 p-3 dark:border-gray-800">
                         <div className="mb-1.5 flex items-center justify-between">
                           <span className="font-mono text-xs font-bold text-gray-400">Pedido #{p.numero}</span>
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${STATUS_EM_PREPARO.includes(p.status) ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>{p.status}</span>
+                          <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-bold ${STATUS_EM_PREPARO.includes(p.status) ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>{p.status}</span>
                         </div>
                         {p.itens_pedido?.map((i) => (
                           <div key={i.id} className="flex justify-between text-[13px]">
@@ -721,7 +721,7 @@ export default function Mesas() {
                           ) : (
                             <p className="text-xs text-amber-600">{tDynamic('Cadastre a chave Pix da loja em Configurações → Pagamentos para mostrar aqui.')}</p>
                           )}
-                          <p className="mt-2 text-[11px] text-gray-400">{tDynamic('Confirme abaixo assim que o Pix cair.')}</p>
+                          <p className="mt-2 text-xs opacity-95 text-gray-400">{tDynamic('Confirme abaixo assim que o Pix cair.')}</p>
                         </div>
                       )}
                       {(fechando === 'CREDITO' || fechando === 'DEBITO') && (

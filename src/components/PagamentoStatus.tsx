@@ -185,7 +185,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
                 </div>
                 <div>
                   <p className="text-sm font-black text-gray-900 dark:text-white">Pague com Pix</p>
-                  <p className="text-[11px] font-medium text-gray-400">Pedido #{numero}</p>
+                  <p className="text-xs opacity-95 font-medium text-gray-400">Pedido #{numero}</p>
                 </div>
               </div>
               <button onClick={onFechar} className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"><X size={18} /></button>
@@ -204,7 +204,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
                   </span>
                 </div>
                 <ProgressBar valor={restante} max={janelaSeg} tom="#0d9488" altura="h-1.5" className="mt-2.5" animado={false} />
-                <p className="mt-1.5 text-[10px] font-semibold text-teal-600/80 dark:text-teal-400/80">
+                <p className="mt-1.5 text-xs opacity-90 font-semibold text-teal-600/80 dark:text-teal-400/80">
                   O código expira em {mmss} — depois disso você pode gerar um novo.
                 </p>
               </div>
@@ -221,7 +221,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
               </div>
 
               {/* Copia e cola */}
-              <p className="mb-1.5 ml-1 mt-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Pix copia e cola</p>
+              <p className="mb-1.5 ml-1 mt-4 text-xs opacity-90 font-bold uppercase tracking-widest text-gray-400">Pix copia e cola</p>
               <div className="flex items-center gap-2">
                 <input readOnly value={pix.copia_e_cola}
                   className="w-full truncate rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-xs text-gray-600 focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400" />
@@ -241,7 +241,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
                 <button onClick={onFechar} className="font-semibold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">Fechar</button>
               </div>
 
-              <p className="mt-4 flex items-center justify-center gap-1 text-[10px] font-semibold text-gray-400">
+              <p className="mt-4 flex items-center justify-center gap-1 text-xs opacity-90 font-semibold text-gray-400">
                 <ShieldCheck size={12} /> {tDynamic('A confirmação é automática assim que o banco liquidar o Pix.')}
               </p>
             </div>

@@ -81,29 +81,29 @@ export default function CrmClientes() {
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-4">
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">{tDynamic('LTV Médio por Cliente')}</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">{tDynamic('LTV Médio por Cliente')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-gray-900 dark:text-white">R$ {ltvMedio}</p>
-          <span className="text-[10px] text-emerald-500 font-semibold flex items-center gap-0.5 mt-1">
+          <span className="text-xs opacity-90 text-emerald-500 font-semibold flex items-center gap-0.5 mt-1">
             <TrendingUpIcon size={12} /> +14.2% este mês
           </span>
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">Clientes VIPs</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">Clientes VIPs</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-[#FC5B24]">{totalVips}</p>
-          <span className="text-[10px] text-slate-400 mt-1 block">{tDynamic('Frequência e ticket alto')}</span>
+          <span className="text-xs opacity-90 text-slate-400 mt-1 block">{tDynamic('Frequência e ticket alto')}</span>
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Clientes em Risco')}</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">{tDynamic('Clientes em Risco')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-amber-500">{totalEmRisco}</p>
-          <span className="text-[10px] text-amber-400 font-semibold mt-1 block">{tDynamic('Inativos há +15 dias')}</span>
+          <span className="text-xs opacity-90 text-amber-400 font-semibold mt-1 block">{tDynamic('Inativos há +15 dias')}</span>
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
-          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Programa de Cashback')}</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">{tDynamic('Programa de Cashback')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-emerald-500">{taxaCashback}%</p>
-          <span className="text-[10px] text-slate-400 mt-1 block">{tDynamic('Devolvido no cardápio')}</span>
+          <span className="text-xs opacity-90 text-slate-400 mt-1 block">{tDynamic('Devolvido no cardápio')}</span>
         </div>
       </div>
 
@@ -161,7 +161,7 @@ export default function CrmClientes() {
               <button
                 key={cat}
                 onClick={() => setFiltroCategoria(cat)}
-                className={`rounded-full px-3 py-1 text-[11px] font-bold transition ${
+                className={`rounded-full px-3 py-1 text-xs opacity-95 font-bold transition ${
                   filtroCategoria === cat
                     ? 'bg-[#FC5B24] text-white shadow-sm'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-slate-300'
@@ -176,7 +176,7 @@ export default function CrmClientes() {
         {/* Tabela */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-gray-200 text-[11px] uppercase tracking-wider text-slate-400 dark:border-white/10">
+            <thead className="border-b border-gray-200 text-xs opacity-95 uppercase tracking-wider text-slate-400 dark:border-white/10">
               <tr>
                 <th className="py-3 px-4">Cliente</th>
                 <th className="py-3 px-4">Categoria RFM</th>
@@ -192,10 +192,10 @@ export default function CrmClientes() {
                 <tr key={cliente.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5">
                   <td className="py-3 px-4">
                     <p className="font-bold text-gray-900 dark:text-white">{cliente.nome}</p>
-                    <p className="text-[11px] text-slate-400">{cliente.telefone}</p>
+                    <p className="text-xs opacity-95 text-slate-400">{cliente.telefone}</p>
                   </td>
                   <td className="py-3 px-4">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase ${
+                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs opacity-90 font-black uppercase ${
                       cliente.categoria === 'VIP' ? 'bg-orange-500/10 text-[#FC5B24]' :
                       cliente.categoria === 'Frequente' ? 'bg-blue-500/10 text-blue-500' :
                       cliente.categoria === 'Em Risco' ? 'bg-amber-500/10 text-amber-500' :
@@ -220,14 +220,14 @@ export default function CrmClientes() {
                       {cliente.categoria === 'Em Risco' || cliente.categoria === 'Inativo' ? (
                         <button
                           onClick={() => dispararCampanhaWhatsApp(cliente, 'retorno')}
-                          className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-500 hover:bg-amber-500/20"
+                          className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs opacity-95 font-bold text-amber-500 hover:bg-amber-500/20"
                         >
                           <SendIcon size={12} /> Resgatar
                         </button>
                       ) : (
                         <button
                           onClick={() => dispararCampanhaWhatsApp(cliente, 'vip')}
-                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-500 hover:bg-emerald-500/20"
+                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs opacity-95 font-bold text-emerald-500 hover:bg-emerald-500/20"
                         >
                           <MessageSquareIcon size={12} /> WhatsApp
                         </button>

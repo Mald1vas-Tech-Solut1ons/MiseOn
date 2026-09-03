@@ -45,7 +45,7 @@ export default function Pricing() {
             style={{ fontFamily: "'Sora', sans-serif" }}
             className={`flex items-center gap-2 rounded-full px-8 py-3 text-sm font-bold transition ${anual ? 'bg-[#0A5CC4] text-white shadow-[0_0_20px_rgba(10,92,196,0.5)]' : 'text-gray-400 hover:text-white'}`}
           >
-            Anual <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-23% OFF</span>
+            Anual <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-black ${anual ? 'bg-white text-[#0A5CC4]' : 'bg-blue-900/40 text-blue-400'}`}>-23% OFF</span>
           </button>
         </div>
 

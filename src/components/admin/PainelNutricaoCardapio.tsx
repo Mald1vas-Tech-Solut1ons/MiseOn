@@ -68,7 +68,7 @@ export default function PainelNutricaoCardapio({ cobertura }: { cobertura: Cober
           <p className="flex items-center gap-1.5 text-sm font-bold dark:text-gray-100">
             <Apple size={15} className="text-emerald-600" />
             {tDynamic('Nutrição do cardápio')}
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
+            <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-black ${
               tudoPronto
                 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
                 : 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300'
@@ -76,7 +76,7 @@ export default function PainelNutricaoCardapio({ cobertura }: { cobertura: Cober
               {publicando.length}/{ativos.length} publicando
             </span>
           </p>
-          <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+          <p className="mt-0.5 text-xs opacity-95 text-gray-500 dark:text-gray-400">
             {tudoPronto
               ? 'Todos os pratos disponíveis exibem tabela nutricional no cardápio.'
               : `${pendentes.length} ${pendentes.length === 1 ? 'prato ainda não exibe' : 'pratos ainda não exibem'} tabela${comAlerta.length ? ` · ${comAlerta.length} com valor suspeito` : ''}.`}
@@ -101,12 +101,12 @@ export default function PainelNutricaoCardapio({ cobertura }: { cobertura: Cober
         <div className="mt-3 space-y-3 border-t border-gray-100 pt-3 dark:border-gray-800">
           {ranking.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <p className="text-xs opacity-95 font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 {tDynamic('Resolva primeiro — ordenado pelo que destrava mais')}
               </p>
               <ul className="mt-1.5 space-y-1">
                 {ranking.slice(0, 6).map((r) => (
-                  <li key={r.nome} className="flex items-start justify-between gap-2 rounded-lg bg-amber-50 px-2 py-1.5 text-[11px] dark:bg-amber-950/20">
+                  <li key={r.nome} className="flex items-start justify-between gap-2 rounded-lg bg-amber-50 px-2 py-1.5 text-xs opacity-95 dark:bg-amber-950/20">
                     <span className="min-w-0 text-amber-900 dark:text-amber-200">
                       <strong className="font-bold">{r.nome}</strong> — {r.motivo}
                     </span>
@@ -116,7 +116,7 @@ export default function PainelNutricaoCardapio({ cobertura }: { cobertura: Cober
                   </li>
                 ))}
               </ul>
-              <p className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-xs opacity-90 text-gray-500 dark:text-gray-400">
                 {tDynamic('Cadastre a nutrição em Estoque → botão da maçã no insumo. Código de barras ou foto do rótulo resolvem em segundos.')}
               </p>
             </div>
@@ -124,12 +124,12 @@ export default function PainelNutricaoCardapio({ cobertura }: { cobertura: Cober
 
           {comAlerta.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wide text-red-600 dark:text-red-400">
+              <p className="text-xs opacity-95 font-bold uppercase tracking-wide text-red-600 dark:text-red-400">
                 {tDynamic('Valores que precisam de conferência')}
               </p>
               <ul className="mt-1.5 space-y-1">
                 {comAlerta.map((c) => (
-                  <li key={c.produto_id} className="flex items-start gap-1.5 text-[11px] text-red-700 dark:text-red-300">
+                  <li key={c.produto_id} className="flex items-start gap-1.5 text-xs opacity-95 text-red-700 dark:text-red-300">
                     <AlertTriangle size={11} className="mt-0.5 shrink-0" />
                     <span><strong className="font-bold">{c.produto}</strong> — {c.alertas[0].detalhe}</span>
                   </li>
@@ -139,12 +139,12 @@ export default function PainelNutricaoCardapio({ cobertura }: { cobertura: Cober
           )}
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <p className="text-xs opacity-95 font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               {tDynamic('Prato a prato')}
             </p>
             <ul className="mt-1.5 divide-y divide-gray-100 dark:divide-gray-800">
               {ativos.map((c) => (
-                <li key={c.produto_id} className="flex items-center justify-between gap-2 py-1.5 text-[11px]">
+                <li key={c.produto_id} className="flex items-center justify-between gap-2 py-1.5 text-xs opacity-95">
                   <span className="flex min-w-0 items-center gap-1.5">
                     {c.publicavel ? (
                       <CircleCheck size={13} className="shrink-0 text-emerald-600" />

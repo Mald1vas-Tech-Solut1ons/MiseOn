@@ -120,7 +120,7 @@ export default function Historico() {
             <div key={p.id} className="rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="font-bold">#{p.numero}</span>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_COR[p.status]}`}>{STATUS_LABEL[p.status]}</span>
+                <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-semibold ${STATUS_COR[p.status]}`}>{STATUS_LABEL[p.status]}</span>
               </div>
               <p className="text-sm">{p.identificador_cliente} · {p.telefone_contato}</p>
               <div className="mt-1 flex items-center justify-between text-xs text-gray-400">

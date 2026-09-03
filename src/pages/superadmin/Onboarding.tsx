@@ -77,7 +77,7 @@ export default function Onboarding() {
               <div key={l.id} className="rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-3 shadow-sm">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-bold">{l.nome_loja}</p>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_COR[l.status]}`}>{l.status}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-semibold ${STATUS_COR[l.status]}`}>{l.status}</span>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {l.nome_responsavel} - {l.whatsapp}{l.email ? ` - ${l.email}` : ''}

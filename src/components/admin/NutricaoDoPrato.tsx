@@ -164,7 +164,7 @@ export default function NutricaoDoPrato({
             {res.insumos_faltantes?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {res.insumos_faltantes.slice(0, 6).map((f) => (
-                  <li key={f.insumo_id} className="flex items-start gap-1 text-[11px] text-amber-900 dark:text-amber-200">
+                  <li key={f.insumo_id} className="flex items-start gap-1 text-xs opacity-95 text-amber-900 dark:text-amber-200">
                     <ChevronRight size={11} className="mt-0.5 shrink-0" />
                     <span>
                       <strong className="font-semibold">{f.nome}</strong> — {f.motivo}
@@ -172,18 +172,18 @@ export default function NutricaoDoPrato({
                   </li>
                 ))}
                 {res.insumos_faltantes.length > 6 && (
-                  <li className="text-[11px] text-amber-800 dark:text-amber-300">
+                  <li className="text-xs opacity-95 text-amber-800 dark:text-amber-300">
                     e mais {res.insumos_faltantes.length - 6}…
                   </li>
                 )}
-                <li className="pt-0.5 text-[11px] text-gray-600 dark:text-gray-400">
+                <li className="pt-0.5 text-xs opacity-95 text-gray-600 dark:text-gray-400">
                   {tDynamic('Resolva em Estoque → botão da maçã em cada insumo (código de barras, foto do rótulo ou IA).')}
                 </li>
               </ul>
             )}
 
             {res.alertas?.map((a) => (
-              <p key={a.codigo} className="mt-1.5 flex items-start gap-1 text-[11px] font-semibold text-red-700 dark:text-red-300">
+              <p key={a.codigo} className="mt-1.5 flex items-start gap-1 text-xs opacity-95 font-semibold text-red-700 dark:text-red-300">
                 <AlertTriangle size={11} className="mt-0.5 shrink-0" /> {a.detalhe}
               </p>
             ))}
@@ -193,12 +193,12 @@ export default function NutricaoDoPrato({
             <div className="mt-2 flex flex-wrap gap-1">
               {atributos.map((a) => (
                 <span key={a} title={ATRIBUTOS[a]?.criterio}
-                  className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                  className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs opacity-90 font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                   {ATRIBUTOS[a]?.rotulo ?? a}
                 </span>
               ))}
               {res.alergenos_contem?.map((a) => (
-                <span key={a} className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
+                <span key={a} className="rounded-full bg-amber-100 px-2 py-0.5 text-xs opacity-90 font-bold text-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
                   contém {a.toLowerCase()}
                 </span>
               ))}
@@ -211,7 +211,7 @@ export default function NutricaoDoPrato({
       <button
         type="button"
         onClick={() => setAberto((v) => !v)}
-        className="mt-2.5 text-[11px] font-semibold text-[var(--cor-primaria)] underline underline-offset-2"
+        className="mt-2.5 text-xs opacity-95 font-semibold text-[var(--cor-primaria)] underline underline-offset-2"
       >
         {tDynamic(aberto ? 'Ocultar ajustes' : 'Ajustar porção, cocção e exibição')}
       </button>
@@ -228,7 +228,7 @@ export default function NutricaoDoPrato({
           </label>
 
           <div className="grid grid-cols-2 gap-2">
-            <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+            <label className="text-xs opacity-95 font-medium text-gray-500 dark:text-gray-400">
               {tDynamic('Rende quantas porções')}
               <input
                 type="number" min={1} step={1} value={config.porcoes}
@@ -236,7 +236,7 @@ export default function NutricaoDoPrato({
                 className="mt-0.5 w-full rounded-lg border p-1.5 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
               />
             </label>
-            <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+            <label className="text-xs opacity-95 font-medium text-gray-500 dark:text-gray-400">
               {tDynamic('Peso da porção (g)')}
               <input
                 type="number" min={0} step={1}
@@ -249,7 +249,7 @@ export default function NutricaoDoPrato({
           </div>
 
           <div>
-            <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400">{tDynamic('Como é preparado')}</p>
+            <p className="text-xs opacity-95 font-medium text-gray-500 dark:text-gray-400">{tDynamic('Como é preparado')}</p>
             <div className="mt-1 flex flex-wrap gap-1">
               {METODOS.map((m) => (
                 <button
@@ -257,7 +257,7 @@ export default function NutricaoDoPrato({
                   type="button"
                   title={m.ajuda}
                   onClick={() => onConfigChange({ ...config, metodo_coccao: m.valor, fator_coccao: m.fator })}
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                  className={`rounded-full px-2.5 py-1 text-xs opacity-95 font-semibold transition ${
                     config.metodo_coccao === m.valor
                       ? 'bg-[var(--cor-primaria)] text-white'
                       : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
@@ -267,7 +267,7 @@ export default function NutricaoDoPrato({
                 </button>
               ))}
             </div>
-            <p className="mt-1 flex items-start gap-1 text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">
+            <p className="mt-1 flex items-start gap-1 text-xs opacity-90 leading-relaxed text-gray-500 dark:text-gray-400">
               <Info size={10} className="mt-0.5 shrink-0" />
               O fator ({config.fator_coccao.toFixed(2).replace('.', ',')}×) ajusta apenas o <strong>peso</strong> do
               que chega ao prato. Os nutrientes não mudam — água que evapora não leva proteína embora.
@@ -276,7 +276,7 @@ export default function NutricaoDoPrato({
 
           {revenda && (
             <div>
-              <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-xs opacity-95 font-medium text-gray-500 dark:text-gray-400">
                 {tDynamic('Revenda: este produto é um item pronto')}
               </p>
               <div className="mt-1 flex gap-1.5">
@@ -302,7 +302,7 @@ export default function NutricaoDoPrato({
                   />
                 )}
               </div>
-              <p className="mt-1 text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-xs opacity-90 leading-relaxed text-gray-500 dark:text-gray-400">
                 Uma lata de refrigerante não tem receita — tem rótulo. Apontando o insumo, a tabela sai do
                 rótulo dele sem precisar de ficha técnica de mentira.
               </p>

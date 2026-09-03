@@ -104,7 +104,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
         </div>
         
         {!isOpen && hasUnread && (
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 border-2 border-white text-[10px] font-bold text-white shadow-sm animate-bounce">
+          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 border-2 border-white text-xs opacity-90 font-bold text-white shadow-sm animate-bounce">
             1
           </span>
         )}
@@ -157,7 +157,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
         >
           {/* Default Welcome Message */}
           <div className="flex justify-center mb-6">
-            <span className="bg-[#FEEFCA] dark:bg-[#1E2A30] text-[#54656F] dark:text-[#8696A0] text-[11px] font-medium px-4 py-1.5 rounded-xl shadow-sm text-center max-w-[85%]">
+            <span className="bg-[#FEEFCA] dark:bg-[#1E2A30] text-[#54656F] dark:text-[#8696A0] text-xs opacity-95 font-medium px-4 py-1.5 rounded-xl shadow-sm text-center max-w-[85%]">
               {tDynamic('As mensagens são protegidas com criptografia de ponta a ponta. Ninguém fora desta conversa pode lê-las.')}
             </span>
           </div>
@@ -182,7 +182,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
                     style={isMine ? { background: loja.cor_primaria || '#005C4B' } : undefined}
                   >
                     {isSystem && (
-                      <div className="flex items-center gap-1.5 font-bold mb-1 text-[11px] text-[var(--cor-primaria)] dark:text-blue-400 opacity-90">
+                      <div className="flex items-center gap-1.5 font-bold mb-1 text-xs opacity-95 text-[var(--cor-primaria)] dark:text-blue-400 opacity-90">
                         <Sparkles size={11} /> Assistente Inteligente
                       </div>
                     )}
@@ -193,7 +193,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
                       </span>
                       
                       <div className={`flex items-center justify-end gap-1 mt-1 -mb-1 ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
-                        <span className="text-[10px] font-medium leading-none">
+                        <span className="text-xs opacity-90 font-medium leading-none">
                           {new Date(msg.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                         {isMine && (

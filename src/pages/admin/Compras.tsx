@@ -361,13 +361,13 @@ export default function Compras() {
                               <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900 dark:text-gray-100">
                                 {s.insumo.nome}
                                 {s.urgencia === 'ZERADO' && (
-                                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">acabou</span>
+                                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs opacity-80 font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">acabou</span>
                                 )}
                                 {s.urgencia === 'CRITICO' && (
-                                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">crítico</span>
+                                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs opacity-80 font-black uppercase tracking-wider text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">crítico</span>
                                 )}
                                 {s.rupturaAntesDaEntrega && (
-                                  <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                                  <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs opacity-80 font-black uppercase tracking-wider text-red-700 dark:bg-red-900/30 dark:text-red-400">
                                     <AlertTriangle size={9} /> acaba antes de chegar
                                   </span>
                                 )}
@@ -378,7 +378,7 @@ export default function Compras() {
                                   <> · sai <b>{s.giro.consumo_diario.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} {s.insumo.unidade_medida}/dia</b></>
                                 )}
                               </p>
-                              <p className="mt-1 flex flex-wrap items-center gap-3 text-[10px] font-medium text-gray-400">
+                              <p className="mt-1 flex flex-wrap items-center gap-3 text-xs opacity-90 font-medium text-gray-400">
                                 {s.diasCobertura != null ? (
                                   <span className={`flex items-center gap-1 ${s.diasCobertura <= 2 ? 'text-red-500' : s.diasCobertura <= 5 ? 'text-amber-500' : ''}`}>
                                     <Clock size={10} /> dura {s.diasCobertura.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} dias
@@ -423,7 +423,7 @@ export default function Compras() {
                                     setSelecao(v => ({ ...v, [s.insumo.id]: Math.max(1, Math.ceil((v[s.insumo.id] || 0) * fatorConv)) }));
                                   }
                                 }}
-                                className="mt-1.5 bg-transparent text-[10px] font-bold uppercase tracking-wider text-gray-400 focus:outline-none cursor-pointer hover:text-gray-600 dark:hover:text-gray-200 text-center"
+                                className="mt-1.5 bg-transparent text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400 focus:outline-none cursor-pointer hover:text-gray-600 dark:hover:text-gray-200 text-center"
                               >
                                 {s.opcoesCompra.map(o => (
                                   <option key={o.codigo} value={o.codigo}>{o.codigo}</option>
@@ -432,7 +432,7 @@ export default function Compras() {
                             </div>
                             <div className="min-w-[80px] text-right">
                               <p className="text-sm font-black text-gray-900 dark:text-gray-100">{fmt(qtd * precoCalc)}</p>
-                              <p className="mt-1 text-[10px] text-gray-400">{fmt(precoCalc)}/{unid.codigo}</p>
+                              <p className="mt-1 text-xs opacity-90 text-gray-400">{fmt(precoCalc)}/{unid.codigo}</p>
                             </div>
                           </div>
                         </div>
@@ -518,13 +518,13 @@ export default function Compras() {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${COR_STATUS[c.status]}`}>
+                        <span className={`rounded-full px-2 py-0.5 text-xs opacity-80 font-black uppercase tracking-wider ${COR_STATUS[c.status]}`}>
                           {ROTULO_STATUS[c.status]}
                         </span>
                         <p className="font-bold text-gray-900 dark:text-gray-100">
                           {c.fornecedor_nome ?? 'Sem fornecedor'}
                         </p>
-                        {c.numero_nota && <span className="text-[11px] text-gray-400">NF {c.numero_nota}</span>}
+                        {c.numero_nota && <span className="text-xs opacity-95 text-gray-400">NF {c.numero_nota}</span>}
                       </div>
                       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         Pedido em {new Date(c.data_pedido + 'T12:00:00').toLocaleDateString('pt-BR')}
@@ -537,7 +537,7 @@ export default function Compras() {
                         <p className="font-black text-gray-900 dark:text-gray-100">
                           {fmt(Number(c.total_pago) > 0 ? Number(c.total_pago) : Number(c.total_previsto))}
                         </p>
-                        <p className="text-[10px] text-gray-400">
+                        <p className="text-xs opacity-90 text-gray-400">
                           {Number(c.total_pago) > 0 ? 'pago' : 'previsto'}
                         </p>
                       </div>
@@ -589,17 +589,17 @@ export default function Compras() {
                       {f.telefone && <p className="mt-1 text-xs text-gray-400">{f.telefone}</p>}
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {f.prazo_entrega_dias != null && (
-                          <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                          <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs opacity-80 font-bold text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
                             entrega em {f.prazo_entrega_dias}d
                           </span>
                         )}
                         {f.pedido_minimo != null && f.pedido_minimo > 0 && (
-                          <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                          <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs opacity-80 font-bold text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                             mín. {fmt(Number(f.pedido_minimo))}
                           </span>
                         )}
                         {f.condicao_pagamento && (
-                          <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                          <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs opacity-80 font-bold text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                             {f.condicao_pagamento}
                           </span>
                         )}

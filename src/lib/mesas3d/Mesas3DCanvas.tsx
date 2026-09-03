@@ -112,7 +112,7 @@ export function Mesas3DCanvas({
         >
           <div className="flex items-center justify-between gap-3 border-b border-gray-800 pb-1.5 font-bold text-gray-100">
             <span>Mesa {hover.mesa3d.mesa.numero} {hover.mesa3d.mesa.nome ? `(${hover.mesa3d.mesa.nome})` : ''}</span>
-            <span className="rounded-full bg-orange-500/20 px-2 py-0.5 text-[10px] font-black text-orange-400 uppercase">
+            <span className="rounded-full bg-orange-500/20 px-2 py-0.5 text-xs opacity-90 font-black text-orange-400 uppercase">
               {hover.mesa3d.status3D}
             </span>
           </div>
@@ -127,7 +127,7 @@ export function Mesas3DCanvas({
                 <p>Lugares: <strong className="text-gray-100">{hover.mesa3d.capacidade} assentos</strong></p>
                 <p>Consumo total: <strong className="text-emerald-400">{brl(hover.mesa3d.totalParcial)}</strong></p>
                 {hover.mesa3d.tempoMinutos > 0 && (
-                  <p className="text-[11px] text-gray-400">Permanência: {hover.mesa3d.tempoMinutos} minutos</p>
+                  <p className="text-xs opacity-95 text-gray-400">Permanência: {hover.mesa3d.tempoMinutos} minutos</p>
                 )}
               </>
             )}
@@ -136,7 +136,7 @@ export function Mesas3DCanvas({
       )}
 
       {/* Legenda de Status Visual */}
-      <div className="absolute bottom-4 left-4 z-20 flex flex-wrap gap-2 rounded-2xl border border-gray-800 bg-gray-950/80 px-3 py-2 text-[11px] backdrop-blur-md">
+      <div className="absolute bottom-4 left-4 z-20 flex flex-wrap gap-2 rounded-2xl border border-gray-800 bg-gray-950/80 px-3 py-2 text-xs opacity-95 backdrop-blur-md">
         <span className="flex items-center gap-1.5 text-emerald-400 font-semibold"><i className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" /> Livre</span>
         <span className="flex items-center gap-1.5 text-orange-400 font-semibold"><i className="h-2.5 w-2.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]" /> Ocupada</span>
         <span className="flex items-center gap-1.5 text-blue-400 font-semibold"><i className="h-2.5 w-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse" /> Em Preparo</span>

@@ -123,7 +123,7 @@ export function PedidoActions({
         </button>
         {menu && (
           <div className="absolute bottom-12 right-0 z-20 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0B1120]">
-            <p className="px-3 pt-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">Imprimir via</p>
+            <p className="px-3 pt-2.5 pb-1 text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400">Imprimir via</p>
             <button onClick={() => { setMenu(false); onImprimir('cozinha'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
               <ChefHat size={16} className="text-orange-500" /> {tDynamic('Comanda da Cozinha')}
             </button>

@@ -72,7 +72,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
     <div className={`inline-flex items-center rounded-full border border-gray-200/80 bg-gray-100/80 p-0.5 backdrop-blur-md dark:border-white/15 dark:bg-white/5 ${className}`}>
       <button
         onClick={() => setIdioma('pt-BR')}
-        className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold transition ${
+        className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs opacity-95 font-bold transition ${
           idioma === 'pt-BR'
             ? 'bg-[#FC5B24] text-white shadow-md'
             : 'text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white'
@@ -82,7 +82,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
       </button>
       <button
         onClick={() => setIdioma('en-US')}
-        className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold transition ${
+        className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs opacity-95 font-bold transition ${
           idioma === 'en-US'
             ? 'bg-[#FC5B24] text-white shadow-md'
             : 'text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white'

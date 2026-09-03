@@ -12,7 +12,7 @@ export default function FontPicker({ value, onChange }: { value: string; onChang
         >
           <p style={{ fontFamily: f.familia }} className="text-xl font-bold leading-none">Aa</p>
           <p className="mt-1.5 text-xs font-semibold">{f.nome}</p>
-          <p className={`text-[10px] ${value === f.nome ? 'text-gray-500 dark:text-gray-300' : 'text-gray-400'}`}>{f.estilo}</p>
+          <p className={`text-xs opacity-90 ${value === f.nome ? 'text-gray-500 dark:text-gray-300' : 'text-gray-400'}`}>{f.estilo}</p>
         </button>
       ))}
     </div>

@@ -71,7 +71,7 @@ export function Comparativo() {
           ))}
         </div>
 
-        <p style={{ color: 'rgba(234,241,251,0.35)' }} className="mt-4 text-center text-[11px] leading-relaxed">
+        <p style={{ color: 'rgba(234,241,251,0.35)' }} className="mt-4 text-center text-xs opacity-95 leading-relaxed">
           {tDynamic('Levantamento baseado nas funcionalidades públicas do anota-ai em julho/2026. Se algo mudou por lá, nos avise que corrigimos aqui.')}
         </p>
       </div>

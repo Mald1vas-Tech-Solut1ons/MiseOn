@@ -179,7 +179,7 @@ export function FiscalOnboarding({
                 className="w-full rounded-xl border p-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" />
             </label>
           </div>
-          <p className="mt-3 flex items-center gap-1.5 text-[11px] text-gray-400">
+          <p className="mt-3 flex items-center gap-1.5 text-xs opacity-95 text-gray-400">
             <Info size={14} /> {tDynamic('O CSC é emitido pelo site da SEFAZ do seu estado e é obrigatório para emissão de NFC-e.')}
           </p>
         </div>
@@ -203,7 +203,7 @@ export function FiscalOnboarding({
             </label>
           </div>
           {nfeHabilitado && (
-            <p className="mt-3 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+            <p className="mt-3 text-xs opacity-95 text-emerald-600 dark:text-emerald-400 font-semibold">
               {tDynamic('Seu certificado já foi enviado anteriormente. Só preencha acima se precisar renovar/atualizar.')}
             </p>
           )}

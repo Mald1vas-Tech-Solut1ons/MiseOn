@@ -219,7 +219,7 @@ export default function Assinatura() {
           <div className={`rounded-3xl border p-6 shadow-sm transition-colors ${emDia ? 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800' : 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800/50'}`}>
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Status da Loja</p>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-black text-emerald-600 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs opacity-90 font-black text-emerald-600 dark:text-emerald-400">
                 <Sparkles size={11} /> 30 Dias Grátis
               </span>
             </div>
@@ -262,7 +262,7 @@ export default function Assinatura() {
                       : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                   }`}
                 >
-                  Plano Anual <span className="text-[10px] opacity-90">(R$ 149,90/mês)</span>
+                  Plano Anual <span className="text-xs opacity-90 opacity-90">(R$ 149,90/mês)</span>
                 </button>
                 <button
                   type="button"
@@ -273,7 +273,7 @@ export default function Assinatura() {
                       : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                   }`}
                 >
-                  Plano Mensal <span className="text-[10px] opacity-90">(R$ 169,90/mês)</span>
+                  Plano Mensal <span className="text-xs opacity-90 opacity-90">(R$ 169,90/mês)</span>
                 </button>
               </div>
             </div>
@@ -282,7 +282,7 @@ export default function Assinatura() {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-sm font-bold text-gray-900 dark:text-gray-100 block">MiseOn SaaS Pro</span>
-                  <span className="text-[11px] text-gray-400">
+                  <span className="text-xs opacity-95 text-gray-400">
                     {ciclo === 'anual' ? 'R$ 1.798,80 no ano (em até 12x no cartão)' : 'Sem fidelidade contratual'}
                   </span>
                 </div>
@@ -291,7 +291,7 @@ export default function Assinatura() {
                     R$ {ciclo === 'anual' ? '149,90' : '169,90'} <span className="text-xs text-gray-400 font-medium">/mês</span>
                   </span>
                   {ciclo === 'anual' && (
-                    <span className="text-[10px] font-bold text-emerald-500">{tDynamic('Economia de R$ 240,00/ano')}</span>
+                    <span className="text-xs opacity-90 font-bold text-emerald-500">{tDynamic('Economia de R$ 240,00/ano')}</span>
                   )}
                 </div>
               </div>
@@ -456,7 +456,7 @@ export default function Assinatura() {
                              {copiado ? <CheckCircle size={18} /> : <Copy size={18} />}
                            </button>
                         </div>
-                        <p className="text-[10px] text-teal-600 dark:text-teal-400 font-semibold mt-4 flex items-center gap-1">
+                        <p className="text-xs opacity-90 text-teal-600 dark:text-teal-400 font-semibold mt-4 flex items-center gap-1">
                            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span> {tDynamic('Aguardando confirmação do banco...')}
                         </p>
                      </div>

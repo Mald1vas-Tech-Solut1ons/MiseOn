@@ -440,11 +440,11 @@ export default function PainelTV() {
             <h1 className="font-['Sora'] text-2xl font-black tracking-tight text-white flex items-center gap-2">
               {loja.nome}
               {offline ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-red-500/20 px-2.5 py-0.5 text-[11px] font-bold text-red-300 border border-red-500/40">
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-500/20 px-2.5 py-0.5 text-xs opacity-95 font-bold text-red-300 border border-red-500/40">
                   <span className="w-2 h-2 rounded-full bg-red-400" /> {tDynamic('SEM CONEXÃO — senhas podem estar desatualizadas')}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/30">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs opacity-95 font-bold text-emerald-400 border border-emerald-500/30">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> {tDynamic('AO VIVO')}
                 </span>
               )}
@@ -477,7 +477,7 @@ export default function PainelTV() {
             >
               {tDynamic('Automático')}
               {modo === 'AUTO' && (
-                <span className="ml-1.5 text-[10px] font-extrabold text-white/70">
+                <span className="ml-1.5 text-xs opacity-90 font-extrabold text-white/70">
                   {modoEfetivo === 'SENHAS' ? tDynamic('· senhas') : tDynamic('· cardápio')}
                 </span>
               )}
@@ -510,7 +510,7 @@ export default function PainelTV() {
               mentindo: sem voz, a chamada e visual e o lojista precisa saber
               disso ANTES do cliente reclamar que nao foi chamado. */}
           {vozDisponivel === false && (
-            <span className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-[11px] font-bold text-amber-300">
+            <span className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-xs opacity-95 font-bold text-amber-300">
               {tDynamic('Chamada apenas visual neste aparelho')}
             </span>
           )}
@@ -614,7 +614,7 @@ export default function PainelTV() {
                           {produto.nome}
                         </h3>
                         {produto.destaque && (
-                          <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-extrabold text-amber-300 border border-amber-500/30">
+                          <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs opacity-90 font-extrabold text-amber-300 border border-amber-500/30">
                             ★ POPULAR
                           </span>
                         )}
@@ -628,7 +628,7 @@ export default function PainelTV() {
                     </div>
 
                     <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">A partir de</span>
+                      <span className="text-xs opacity-95 font-bold text-slate-400 uppercase tracking-wider">A partir de</span>
                       <span className="font-['Sora'] text-xl font-black text-[#FC5B24]">
                         {fmt(Number(produto.preco))}
                       </span>
@@ -652,7 +652,7 @@ export default function PainelTV() {
                 <img src={qrCodeUrl} alt="QR Code do Cardápio" className="w-40 h-40" />
               </div>
 
-              <p className="text-[11px] font-mono text-slate-400 truncate">
+              <p className="text-xs opacity-95 font-mono text-slate-400 truncate">
                 {urlCardapio.replace('https://', '')}
               </p>
             </div>
@@ -708,7 +708,7 @@ export default function PainelTV() {
                   <span className="font-['Sora'] text-3xl font-black text-amber-400">#{p.numero}</span>
                   <p className="text-xs text-slate-300 font-bold truncate">{p.primeiro_nome || 'Cliente'}</p>
                   {ehEntrega(p) && (
-                    <span className="inline-block rounded-full bg-sky-500/20 px-2 py-0.5 text-[10px] font-extrabold text-sky-300 border border-sky-500/30">
+                    <span className="inline-block rounded-full bg-sky-500/20 px-2 py-0.5 text-xs opacity-90 font-extrabold text-sky-300 border border-sky-500/30">
                       🛵 {tDynamic('ENTREGA')}
                     </span>
                   )}
@@ -742,7 +742,7 @@ export default function PainelTV() {
                   <span className="font-['Sora'] text-4xl font-black text-white">#{p.numero}</span>
                   <p className="text-xs text-emerald-100 font-extrabold truncate">{p.primeiro_nome || 'Cliente'}</p>
                   {ehEntrega(p) && (
-                    <span className="inline-block rounded-full bg-sky-500/30 px-2 py-0.5 text-[10px] font-extrabold text-sky-100 border border-sky-300/40">
+                    <span className="inline-block rounded-full bg-sky-500/30 px-2 py-0.5 text-xs opacity-90 font-extrabold text-sky-100 border border-sky-300/40">
                       🛵 {tDynamic('COLETA')}
                     </span>
                   )}
@@ -759,7 +759,7 @@ export default function PainelTV() {
           <span className="h-2 w-2 rounded-full bg-[#FC5B24]" />
           <span>MiseOn Smart TV Engine v2.4</span>
         </div>
-        <p className="text-[11px] text-slate-500">{tDynamic('Pressione F11 na Smart TV para alternar para modo Tela Cheia sem bordas.')}</p>
+        <p className="text-xs opacity-95 text-slate-500">{tDynamic('Pressione F11 na Smart TV para alternar para modo Tela Cheia sem bordas.')}</p>
       </footer>
     </div>
   );

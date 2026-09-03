@@ -492,7 +492,7 @@ export default function WhatsApp() {
                       {new Date(conexao.conectado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   )}
-                  <p className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-500 dark:bg-white/5 dark:text-gray-400">
+                  <p className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs opacity-95 leading-relaxed text-gray-500 dark:bg-white/5 dark:text-gray-400">
                     <b>Desconectar</b> para o atendimento automático na hora, mas o número segue
                     reservado ao WhatsApp Business API. Para o dono voltar a usá-lo no
                     <b> WhatsApp comum</b>, use <b>{tDynamic('Devolver número')}</b>.
@@ -580,7 +580,7 @@ export default function WhatsApp() {
                 {finalizando ? <Loader2 size={17} className="animate-spin" /> : <QrCode size={17} />}
                 {finalizando ? 'Finalizando conexão…' : 'Usar o número que já está no celular'}
               </button>
-              <span className="max-w-md text-[11px] leading-relaxed text-emerald-200/80">
+              <span className="max-w-md text-xs opacity-95 leading-relaxed text-emerald-200/80">
                 Você lê um <b className="text-emerald-100">QR Code</b> no WhatsApp Business do
                 aparelho. O número <b className="text-emerald-100">continua funcionando no celular</b>{' '}
                 e passa a receber também aqui. Não precisa de chip novo nem apagar conversa.
@@ -596,7 +596,7 @@ export default function WhatsApp() {
                 <MessageCircle size={16} />
                 {tDynamic('Usar um chip dedicado só para o atendimento')}
               </button>
-              <span className="max-w-md text-[11px] leading-relaxed text-emerald-200/70">
+              <span className="max-w-md text-xs opacity-95 leading-relaxed text-emerald-200/70">
                 Registro novo na Meta, confirmado por SMS. O número{' '}
                 <b className="text-emerald-100">não pode estar ativo no WhatsApp</b> e deixa de
                 funcionar no celular — passa a ser só do atendimento automático.
@@ -639,7 +639,7 @@ export default function WhatsApp() {
             >
               <div>
                 <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{tDynamic('Atendimento automático com IA')}</p>
-                <p className="text-[11px] text-gray-400">{tDynamic('A IA responde os clientes no WhatsApp usando seu cardápio.')}</p>
+                <p className="text-xs opacity-95 text-gray-400">{tDynamic('A IA responde os clientes no WhatsApp usando seu cardápio.')}</p>
               </div>
               <span className={`relative h-6 w-11 shrink-0 rounded-full transition ${iaAtivo ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
                 <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${iaAtivo ? 'left-[22px]' : 'left-0.5'}`} />
@@ -653,7 +653,7 @@ export default function WhatsApp() {
             >
               <div>
                 <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{tDynamic('Mensagens fora da janela (templates)')}</p>
-                <p className="text-[11px] leading-snug text-gray-400">
+                <p className="text-xs opacity-95 leading-snug text-gray-400">
                   Permite avisar o cliente depois de 24h sem resposta.{' '}
                   <b className="text-amber-600 dark:text-amber-400">{tDynamic('Mensagens fora da janela de 24h são cobradas pela Meta')}</b>{' '}
                   — desligado por padrão.
@@ -674,7 +674,7 @@ export default function WhatsApp() {
                 placeholder="Ex: Olá! Bem-vindo à Pizzaria do Zé 🍕 Posso te ajudar com o cardápio ou com seu pedido?"
                 className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-emerald-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
               />
-              <span className="mt-1 block text-[11px] text-gray-400">
+              <span className="mt-1 block text-xs opacity-95 text-gray-400">
                 {tDynamic('Primeira mensagem que o cliente recebe ao falar com sua loja.')}
               </span>
             </div>
@@ -713,14 +713,14 @@ export default function WhatsApp() {
                   <div key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gray-50 px-3.5 py-2.5 dark:bg-white/5">
                     <div className="flex min-w-0 items-center gap-2.5">
                       <Mail size={14} className="shrink-0 text-gray-400" />
-                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${cor}`}>{rotulo}</span>
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs opacity-90 font-black uppercase tracking-wide ${cor}`}>{rotulo}</span>
                       {ev.erro && (
-                        <span className="truncate text-[11px] text-red-500 dark:text-red-400" title={ev.erro}>
+                        <span className="truncate text-xs opacity-95 text-red-500 dark:text-red-400" title={ev.erro}>
                           {ev.erro}
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] text-gray-400">
+                    <span className="text-xs opacity-95 text-gray-400">
                       {new Date(ev.criado_em).toLocaleDateString('pt-BR')} {new Date(ev.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>

@@ -54,14 +54,14 @@ export function DepoimentosSection() {
                 </div>
                 <p className="text-sm font-bold text-white">{d.nome}</p>
                 <p className="text-xs text-gray-500">{d.negocio}</p>
-                <span style={{ background: 'rgba(252,91,36,0.1)', border: '1px solid rgba(252,91,36,0.3)', color: '#FC5B24' }} className="mt-2.5 inline-block rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide">
+                <span style={{ background: 'rgba(252,91,36,0.1)', border: '1px solid rgba(252,91,36,0.3)', color: '#FC5B24' }} className="mt-2.5 inline-block rounded-full px-2.5 py-1 text-xs opacity-90 font-bold uppercase tracking-wide">
                   {d.destaque}
                 </span>
               </figcaption>
             </figure>
           ))}
         </div>
-        <p className="mt-6 text-center text-[11px] text-gray-600">
+        <p className="mt-6 text-center text-xs opacity-95 text-gray-600">
           {tDynamic('Depoimentos ilustrativos baseados em relatos reais de lojistas do segmento.')}
         </p>
       </div>

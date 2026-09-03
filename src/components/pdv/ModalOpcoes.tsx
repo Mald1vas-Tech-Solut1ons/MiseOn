@@ -51,7 +51,7 @@ export function ModalOpcoes({ produto, nutricao, onConfirmar, onFechar }: {
             precisa da resposta na tela, não no cardápio do cliente. */}
         {((nutricao?.alergenos_contem?.length ?? 0) > 0 || (nutricao?.alergenos_pode_conter?.length ?? 0) > 0) && (
           <div className="mx-5 mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-800/60 dark:bg-amber-950/30">
-            <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-amber-900 dark:text-amber-200">
+            <p className="flex items-start gap-1.5 text-xs opacity-95 leading-relaxed text-amber-900 dark:text-amber-200">
               <AlertTriangle size={13} className="mt-0.5 shrink-0" />
               <span>
                 {(nutricao?.alergenos_contem?.length ?? 0) > 0 && (

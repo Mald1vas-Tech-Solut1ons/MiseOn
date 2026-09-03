@@ -60,7 +60,7 @@ export function PagamentosSection() {
                 </div>
               ))}
             </div>
-            <p style={{ color: 'rgba(234,241,251,0.4)' }} className="mt-4 text-[11px] leading-relaxed">
+            <p style={{ color: 'rgba(234,241,251,0.4)' }} className="mt-4 text-xs opacity-95 leading-relaxed">
               Taxas cobradas pelo Efí Bank (tabela pública de {EFI_TARIFAS.referencia}, negociável por volume) — o MiseOn
               não fica com nada das suas vendas. Confira em{' '}
               <a href={EFI_LINKS.tarifas} target="_blank" rel="noreferrer" className="underline transition hover:text-white">sejaefi.com.br/tarifas</a>.

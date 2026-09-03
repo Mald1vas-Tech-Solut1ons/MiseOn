@@ -163,7 +163,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
 
         {/* BADGE VERMELHO Destaque 99+ */}
         {naoLidas > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-['Sora'] text-[10px] font-black tracking-tight shadow-lg border-2 border-white dark:border-[#070C18] animate-in zoom-in-50 duration-300">
+          <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-['Sora'] text-xs opacity-90 font-black tracking-tight shadow-lg border-2 border-white dark:border-[#070C18] animate-in zoom-in-50 duration-300">
             {badgeFormatado}
           </span>
         )}
@@ -183,7 +183,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                 <h3 className="font-['Sora'] text-sm font-extrabold text-gray-900 dark:text-white">
                   {tDynamic('Central de Notificações')}
                 </h3>
-                <p className="text-[10px] text-gray-400">
+                <p className="text-xs opacity-90 text-gray-400">
                   {naoLidas > 0 ? `${naoLidas} não lida(s) • As notificações permanecem salvas até você decidir resolver` : 'Todas visualizadas • Clique na lixeira para excluir o alerta'}
                 </p>
               </div>
@@ -223,7 +223,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
               <button
                 key={cat}
                 onClick={() => setCatAtiva(cat)}
-                className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold transition ${
+                className={`shrink-0 rounded-full px-3 py-1 text-xs opacity-95 font-bold transition ${
                   catAtiva === cat
                     ? 'bg-orange-500 text-white shadow-md'
                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-white/10'
@@ -250,7 +250,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                 <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
                   {tDynamic('Nenhuma notificação nesta categoria')}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-xs opacity-90 text-gray-400 mt-1">
                   {tDynamic('Alertas de estoque crítico, novos pedidos e atendimento aparecem aqui.')}
                 </p>
               </div>
@@ -275,7 +275,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                         <h4 className="text-xs font-extrabold text-gray-900 dark:text-white truncate">
                           {n.titulo}
                         </h4>
-                        <span className="shrink-0 flex items-center gap-1 text-[10px] font-medium text-gray-400">
+                        <span className="shrink-0 flex items-center gap-1 text-xs opacity-90 font-medium text-gray-400">
                           <Clock size={10} /> {tempoRelativo(n.criadaEm)}
                         </span>
                       </div>
@@ -289,7 +289,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                         {n.acaoUrl && (
                           <button
                             onClick={() => handleAcao(n)}
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white transition-all shadow-sm"
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs opacity-95 font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white transition-all shadow-sm"
                           >
                             <span>{n.acaoRotulo || 'Visualizar'}</span>
                             <ExternalLink size={12} />
@@ -301,13 +301,13 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                             <button
                               onClick={() => marcarComoLida(n.id)}
                               title="Marcar como lida (manter salva)"
-                              className="flex items-center gap-1 rounded-lg border border-gray-200 dark:border-white/10 px-2 py-1 text-[10px] font-semibold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition"
+                              className="flex items-center gap-1 rounded-lg border border-gray-200 dark:border-white/10 px-2 py-1 text-xs opacity-90 font-semibold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition"
                             >
                               <Check size={11} />
                               <span>Manter</span>
                             </button>
                           ) : (
-                            <span className="text-[10px] font-semibold text-gray-400 flex items-center gap-0.5">
+                            <span className="text-xs opacity-90 font-semibold text-gray-400 flex items-center gap-0.5">
                               <CheckCheck size={12} className="text-emerald-500" /> Mantida
                             </span>
                           )}
@@ -316,7 +316,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                           <button
                             onClick={() => excluirNotificacao(n.id)}
                             title="Excluir notificação (já resolvi)"
-                            className="flex items-center gap-1 rounded-lg border border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-950/20 px-2 py-1 text-[10px] font-bold text-red-500 hover:bg-red-500 hover:text-white transition"
+                            className="flex items-center gap-1 rounded-lg border border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-950/20 px-2 py-1 text-xs opacity-90 font-bold text-red-500 hover:bg-red-500 hover:text-white transition"
                           >
                             <Trash2 size={11} />
                             <span>Excluir</span>
@@ -338,7 +338,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
           {/* Rodapé do Painel */}
           {notificacoes.length > 0 && (
             <div className="p-3 border-t border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] text-center">
-              <span className="text-[10px] font-semibold text-gray-400">
+              <span className="text-xs opacity-90 font-semibold text-gray-400">
                 {tDynamic('Notificações salvas permanentemente • Clique em "Excluir" quando resolver o problema')}
               </span>
             </div>

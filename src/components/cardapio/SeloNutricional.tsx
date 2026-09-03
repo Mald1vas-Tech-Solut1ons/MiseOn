@@ -21,7 +21,7 @@ export default function SeloNutricional({ dados, compacto = false }: { dados?: N
   return (
     <div className="mt-1.5 flex flex-wrap items-center gap-1">
       {Number.isFinite(kcal) && (
-        <span className="inline-flex items-center gap-0.5 rounded-full bg-gray-900/90 px-1.5 py-0.5 text-[9px] font-black text-white dark:bg-gray-100 dark:text-gray-900">
+        <span className="inline-flex items-center gap-0.5 rounded-full bg-gray-900/90 px-1.5 py-0.5 text-xs opacity-80 font-black text-white dark:bg-gray-100 dark:text-gray-900">
           <Flame size={9} strokeWidth={3} />
           {formatarValor(kcal as number, 'kcal')} kcal
         </span>
@@ -30,7 +30,7 @@ export default function SeloNutricional({ dados, compacto = false }: { dados?: N
       {atributo && (
         <span
           title={ATRIBUTOS[atributo].criterio}
-          className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+          className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs opacity-80 font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
         >
           <ShieldCheck size={9} strokeWidth={3} />
           {ATRIBUTOS[atributo].rotulo}
@@ -38,7 +38,7 @@ export default function SeloNutricional({ dados, compacto = false }: { dados?: N
       )}
 
       {contem.length > 0 && !compacto && (
-        <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-900 dark:bg-amber-950/50 dark:text-amber-300">
+        <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs opacity-80 font-bold text-amber-900 dark:bg-amber-950/50 dark:text-amber-300">
           <AlertTriangle size={9} strokeWidth={3} />
           {contem.length === 1 ? `Contém ${contem[0].toLowerCase()}` : `${contem.length} alergênicos`}
         </span>

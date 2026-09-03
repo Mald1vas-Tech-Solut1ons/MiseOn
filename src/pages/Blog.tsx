@@ -139,7 +139,7 @@ export default function Blog() {
             <div className="group overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
               <div className="grid gap-8 lg:grid-cols-3">
                 <div className="lg:col-span-2">
-                  <span className="inline-block rounded-full bg-orange-500/10 px-3 py-1 text-[11px] font-bold text-[#FC5B24]">
+                  <span className="inline-block rounded-full bg-orange-500/10 px-3 py-1 text-xs opacity-95 font-bold text-[#FC5B24]">
                     {tDynamic(destaque.category)}
                   </span>
                   <h2 className="mt-3 font-['Sora'] text-2xl font-extrabold text-gray-900 group-hover:text-[#FC5B24] sm:text-3xl dark:text-white transition-colors">
@@ -156,7 +156,7 @@ export default function Blog() {
 
                 <div className="flex flex-col justify-between rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0B1120] to-[#111a33] p-6 text-white">
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-orange-400">{t('blog.visaoPratica')}</span>
+                    <span className="text-xs opacity-90 font-black uppercase tracking-wider text-orange-400">{t('blog.visaoPratica')}</span>
                     <p className="mt-2 text-xs leading-relaxed text-slate-300">
                       {tDynamic(destaque.description)}
                     </p>
@@ -209,14 +209,14 @@ export default function Blog() {
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-                    <span className="absolute bottom-3 left-3 rounded-full bg-[#FC5B24] px-3 py-0.5 text-[10px] font-bold text-white shadow-md">
+                    <span className="absolute bottom-3 left-3 rounded-full bg-[#FC5B24] px-3 py-0.5 text-xs opacity-90 font-bold text-white shadow-md">
                       {tDynamic(post.category)}
                     </span>
                   </div>
 
                   <div className="p-6 flex flex-col flex-1 justify-between">
                     <div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 mb-2">
+                      <div className="flex items-center justify-between text-xs opacity-95 text-slate-400 mb-2">
                         <span className="flex items-center gap-1"><Clock size={12} /> {tDynamic(post.readTime)}</span>
                         <span>{post.publishedAt}</span>
                       </div>
@@ -231,7 +231,7 @@ export default function Blog() {
                     </div>
 
                     <div className="mt-6 pt-4 border-t border-gray-100 dark:border-white/10 flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-slate-400">{post.author.name}</span>
+                      <span className="text-xs opacity-95 font-semibold text-slate-400">{post.author.name}</span>
                       <Link to={`/blog/${post.slug}`} className="flex items-center gap-1 text-xs font-bold text-[#FC5B24] group-hover:translate-x-1 transition-transform">
                         {t('blog.lerArtigo')} <ArrowRight size={13} />
                       </Link>

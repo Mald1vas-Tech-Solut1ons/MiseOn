@@ -51,7 +51,7 @@ export default function FlipCard({
               <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ${corTexto} shadow-inner`}>
                 <Icon size={26} />
               </div>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white/90 border border-white/10">
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs opacity-90 font-black uppercase tracking-wider text-white/90 border border-white/10">
                 {tDynamic(badge)}
               </span>
             </div>
@@ -66,7 +66,7 @@ export default function FlipCard({
           </div>
 
           <div className="flex items-center justify-between border-t border-white/10 pt-3">
-            <span className="text-[11px] font-bold text-orange-400 flex items-center gap-1">
+            <span className="text-xs opacity-95 font-bold text-orange-400 flex items-center gap-1">
               <RotateCw size={12} className="animate-spin" /> {tDynamic('Virar card para detalhes')}
             </span>
             <span className="font-['Sora'] text-xs font-black text-white">{tDynamic(metrica)}</span>
@@ -79,10 +79,10 @@ export default function FlipCard({
         >
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-orange-400 flex items-center gap-1">
+              <span className="text-xs opacity-90 font-extrabold uppercase tracking-widest text-orange-400 flex items-center gap-1">
                 <Icon size={14} /> {tDynamic('REGRAS DE NEGÓCIO')}
               </span>
-              <span className="text-[11px] font-mono font-bold text-emerald-400">{tDynamic(metrica)}</span>
+              <span className="text-xs opacity-95 font-mono font-bold text-emerald-400">{tDynamic(metrica)}</span>
             </div>
 
             <h4 className="font-['Sora'] text-sm font-bold text-white">

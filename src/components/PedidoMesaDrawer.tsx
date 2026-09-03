@@ -99,7 +99,7 @@ export default function PedidoMesaDrawer({ loja, mesa, carrinho, setCarrinho, on
             style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)', color: 'var(--cor-texto)' }} />
         </label>
 
-        <p className="mt-3 text-[11px]" style={{ color: 'var(--cor-texto-fraco)' }}>
+        <p className="mt-3 text-xs opacity-95" style={{ color: 'var(--cor-texto-fraco)' }}>
           {tDynamic('A conta é fechada pelo garçom no final — não é preciso pagar agora.')}
         </p>
 

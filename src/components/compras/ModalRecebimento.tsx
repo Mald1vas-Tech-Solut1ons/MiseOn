@@ -203,22 +203,22 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
 
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <label className="block">
-              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Nota fiscal</span>
+              <span className="text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Nota fiscal</span>
               <input className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                 placeholder="Ex: 12345" value={nota} onChange={e => setNota(e.target.value)} />
             </label>
             <label className="block">
-              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Data da entrega')}</span>
+              <span className="text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">{tDynamic('Data da entrega')}</span>
               <input type="date" className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                 value={dataReceb} onChange={e => setDataReceb(e.target.value)} />
             </label>
             <label className="block">
-              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Frete R$</span>
+              <span className="text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Frete R$</span>
               <input type="number" step="any" className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                 placeholder="0,00" value={frete} onChange={e => setFrete(e.target.value)} />
             </label>
             <label className="block">
-              <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">Desconto R$</span>
+              <span className="text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Desconto R$</span>
               <input type="number" step="any" className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                 placeholder="0,00" value={desconto} onChange={e => setDesconto(e.target.value)} />
             </label>
@@ -251,14 +251,14 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{insumo?.nome ?? 'Insumo'}</p>
-                    <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                    <p className="mt-0.5 text-xs opacity-95 text-gray-500 dark:text-gray-400">
                       Pedido: <b>{Number(it.qtd_pedida).toLocaleString('pt-BR')} {it.unidade_pedida}</b>
                       {it.preco_unitario_previsto ? ` · previsto ${fmt(precoPrevisto)}` : ''}
                     </p>
                   </div>
                   <button
                     onClick={() => atualizar(it.id, { naoVeio: !c.naoVeio })}
-                    className={`flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
+                    className={`flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs opacity-95 font-bold transition-colors ${
                       c.naoVeio
                         ? 'border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400'
                         : 'border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-900/20'}`}>
@@ -270,19 +270,19 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                   <>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
-                        <span className="mb-1 block text-[11px] font-semibold text-gray-600 dark:text-gray-400">Chegou</span>
+                        <span className="mb-1 block text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Chegou</span>
                         <SeletorQuantidade
                           alvo={alvo} valor={c.valor}
                           onChange={v => atualizar(it.id, { valor: v })}
                         />
                       </div>
                       <label className="block">
-                        <span className="mb-1 block text-[11px] font-semibold text-gray-600 dark:text-gray-400">Total pago R$</span>
+                        <span className="mb-1 block text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Total pago R$</span>
                         <input type="number" step="any" placeholder="0,00"
                           className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                           value={c.preco} onChange={e => atualizar(it.id, { preco: e.target.value })} />
                         {Number(c.preco) > 0 && base > 0 && (
-                          <span className="mt-1 block text-[10px] text-gray-500 dark:text-gray-400">
+                          <span className="mt-1 block text-xs opacity-90 text-gray-500 dark:text-gray-400">
                             {fmt(Number(c.preco) / base)} por {alvo.unidade_medida}
                           </span>
                         )}
@@ -291,25 +291,25 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
 
                     <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                       <label className="block">
-                        <span className="mb-1 block text-[11px] font-semibold text-gray-600 dark:text-gray-400">Marca</span>
+                        <span className="mb-1 block text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Marca</span>
                         <input placeholder="Ex: Sadia"
                           className="w-full rounded-lg border border-gray-300 p-2 text-xs focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                           value={c.marca} onChange={e => atualizar(it.id, { marca: e.target.value })} />
                       </label>
                       <label className="block">
-                        <span className="mb-1 block text-[11px] font-semibold text-gray-600 dark:text-gray-400">Lote</span>
+                        <span className="mb-1 block text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Lote</span>
                         <input placeholder="Opcional"
                           className="w-full rounded-lg border border-gray-300 p-2 text-xs focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                           value={c.lote} onChange={e => atualizar(it.id, { lote: e.target.value })} />
                       </label>
                       <label className="block">
-                        <span className="mb-1 block text-[11px] font-semibold text-gray-600 dark:text-gray-400">Validade</span>
+                        <span className="mb-1 block text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Validade</span>
                         <input type="date"
                           className="w-full rounded-lg border border-gray-300 p-2 text-xs focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                           value={c.vence} onChange={e => atualizar(it.id, { vence: e.target.value })} />
                       </label>
                       <label className="block">
-                        <span className="mb-1 block text-[11px] font-semibold text-gray-600 dark:text-gray-400">Veio outro item?</span>
+                        <span className="mb-1 block text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">Veio outro item?</span>
                         <select
                           className="w-full rounded-lg border border-gray-300 p-2 text-xs focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                           value={c.substituto}
@@ -333,7 +333,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
 
                     <div className="mt-3">
                       <label className="block max-w-xs">
-                        <span className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-gray-600 dark:text-gray-400">
+                        <span className="mb-1 flex items-center gap-1 text-xs opacity-95 font-semibold text-gray-600 dark:text-gray-400">
                           <Barcode size={12} /> {tDynamic('Código de barras (opcional)')}
                         </span>
                         <input placeholder="Escaneie ou digite o EAN"
@@ -345,32 +345,32 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                         />
                       </label>
                       {statusNutricao[it.id] === 'buscando' && (
-                        <p className="mt-1 text-[10px] text-gray-400">{tDynamic('Buscando informação nutricional…')}</p>
+                        <p className="mt-1 text-xs opacity-90 text-gray-400">{tDynamic('Buscando informação nutricional…')}</p>
                       )}
                       {statusNutricao[it.id] === 'encontrado' && (
-                        <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                        <p className="mt-1 flex items-center gap-1 text-xs opacity-90 font-semibold text-emerald-600 dark:text-emerald-400">
                           <Sparkles size={11} /> {tDynamic('Nutrição encontrada — revise em Estoque › Nutrição')}
                         </p>
                       )}
                       {statusNutricao[it.id] === 'nao_encontrado' && (
-                        <p className="mt-1 text-[10px] text-gray-400">{tDynamic('Sem nutrição na base para este código — dá para fotografar o rótulo depois.')}</p>
+                        <p className="mt-1 text-xs opacity-90 text-gray-400">{tDynamic('Sem nutrição na base para este código — dá para fotografar o rótulo depois.')}</p>
                       )}
                     </div>
 
                     {(falta || sobra || caro) && (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {falta && (
-                          <span className="flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                          <span className="flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-xs opacity-90 font-bold text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
                             <AlertTriangle size={11} /> Veio {(100 - (base / basePedida) * 100).toFixed(0)}% menos que o pedido
                           </span>
                         )}
                         {sobra && (
-                          <span className="flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+                          <span className="flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-xs opacity-90 font-bold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
                             <Info size={11} /> {tDynamic('Veio acima do pedido')}
                           </span>
                         )}
                         {caro && (
-                          <span className="flex items-center gap-1 rounded-lg bg-red-50 px-2 py-1 text-[10px] font-bold text-red-700 dark:bg-red-900/20 dark:text-red-400">
+                          <span className="flex items-center gap-1 rounded-lg bg-red-50 px-2 py-1 text-xs opacity-90 font-bold text-red-700 dark:bg-red-900/20 dark:text-red-400">
                             <AlertTriangle size={11} /> {((Number(c.preco) / precoPrevisto - 1) * 100).toFixed(0)}% mais caro que o previsto
                           </span>
                         )}
@@ -392,16 +392,16 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
           <div className="flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex gap-6">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Previsto</p>
+                <p className="text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400">Previsto</p>
                 <p className="text-sm font-bold text-gray-500 dark:text-gray-400">{fmt(totalPrevisto)}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Pago</p>
+                <p className="text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400">Pago</p>
                 <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{fmt(totalPago)}</p>
               </div>
               {Math.abs(diferenca) > 0.01 && totalPrevisto > 0 && (
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Diferença</p>
+                  <p className="text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400">Diferença</p>
                   <p className={`text-sm font-bold ${diferenca > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
                     {diferenca > 0 ? '+' : ''}{fmt(diferenca)}
                   </p>

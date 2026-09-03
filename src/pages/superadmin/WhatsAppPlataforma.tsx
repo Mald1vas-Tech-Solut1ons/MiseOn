@@ -167,12 +167,12 @@ export default function WhatsAppPlataforma() {
             { r: 'Config ID (Embedded Signup)', v: APP_MISEON.config_id },
           ].map((c) => (
             <div key={c.r}>
-              <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-400">{c.r}</span>
+              <span className="mb-1 block text-xs opacity-95 font-bold uppercase tracking-wide text-gray-400">{c.r}</span>
               <p className="rounded-lg bg-black/30 px-3 py-2 font-mono text-xs text-gray-200">{c.v}</p>
             </div>
           ))}
         </div>
-        <p className="mt-3 text-[11px] text-gray-500">
+        <p className="mt-3 text-xs opacity-95 text-gray-500">
           O <b>App Secret</b> fica em Supabase → Edge Functions → Secrets (<code>META_APP_SECRET</code>) e
           nunca é exposto ao navegador.
         </p>
@@ -293,7 +293,7 @@ export default function WhatsAppPlataforma() {
                     autoComplete="off"
                     className={campoCls}
                   />
-                  <span className="mt-1 block text-[11px] text-gray-500">{f.ajuda}</span>
+                  <span className="mt-1 block text-xs opacity-95 text-gray-500">{f.ajuda}</span>
                 </label>
               ))}
             </div>

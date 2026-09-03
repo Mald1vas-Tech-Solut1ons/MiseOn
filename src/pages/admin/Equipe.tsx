@@ -227,14 +227,14 @@ export default function Equipe() {
                     <div>
                       <p className="text-sm font-bold dark:text-gray-100">
                         {m.nome || m.email}
-                        {m.sou_eu && <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-400">você</span>}
+                        {m.sou_eu && <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs opacity-90 font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-400">você</span>}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{m.email}{m.telefone ? ` · ${m.telefone}` : ''}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${papel.classe}`}><Icone size={11} /> {papel.label}</span>
-                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">{CONTRATO_LABEL[m.tipo_contrato] ?? m.tipo_contrato}</span>
-                        <span className="text-[11px] text-gray-400">Desde {dataBr(m.criado_em)}</span>
-                        <span className="text-[11px] text-gray-400">· Último acesso: {m.ultimo_acesso ? dataBr(m.ultimo_acesso) : 'nunca entrou'}</span>
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs opacity-95 font-bold ${papel.classe}`}><Icone size={11} /> {papel.label}</span>
+                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs opacity-95 font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">{CONTRATO_LABEL[m.tipo_contrato] ?? m.tipo_contrato}</span>
+                        <span className="text-xs opacity-95 text-gray-400">Desde {dataBr(m.criado_em)}</span>
+                        <span className="text-xs opacity-95 text-gray-400">· Último acesso: {m.ultimo_acesso ? dataBr(m.ultimo_acesso) : 'nunca entrou'}</span>
                       </div>
                     </div>
                   </div>
@@ -255,7 +255,7 @@ export default function Equipe() {
       {/* ── Convite por e-mail (opcional) ── */}
       <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold dark:text-gray-200"><Mail size={15} /> {tDynamic('Convidar por e-mail (opcional)')}</p>
-        <p className="mb-3 text-[11px] text-gray-400">{tDynamic('A pessoa recebe um link para definir a própria senha. Se o e-mail não chegar, use o botão')} <b>Criar acesso</b> acima — funciona na hora, sem depender de e-mail.</p>
+        <p className="mb-3 text-xs opacity-95 text-gray-400">{tDynamic('A pessoa recebe um link para definir a própria senha. Se o e-mail não chegar, use o botão')} <b>Criar acesso</b> acima — funciona na hora, sem depender de e-mail.</p>
         <div className="flex gap-2">
           <input value={conviteEmail} onChange={(e) => setConviteEmail(e.target.value)} placeholder="email@exemplo.com"
             className="flex-1 rounded-xl border border-gray-300 p-2.5 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" />
@@ -290,7 +290,7 @@ export default function Equipe() {
                   <p className="font-mono text-sm dark:text-gray-100"><b>Senha:</b> {credenciais.senha}</p>
                   <p className="mt-1 font-mono text-xs text-gray-500">Login em: {window.location.origin}{form.papel === 'entregador' ? '/entregador' : '/admin'}</p>
                 </div>
-                <p className="mt-2 text-[11px] text-gray-400">{tDynamic('A senha não fica visível depois — copie agora. Se perder, é só redefinir na edição do membro.')}</p>
+                <p className="mt-2 text-xs opacity-95 text-gray-400">{tDynamic('A senha não fica visível depois — copie agora. Se perder, é só redefinir na edição do membro.')}</p>
                 <div className="mt-4 flex gap-2">
                   <button onClick={copiarCredenciais} className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 py-2.5 text-sm font-bold text-gray-700 dark:border-gray-700 dark:text-gray-200">
                     {copiado ? <Check size={15} className="text-green-500" /> : <Copy size={15} />} {copiado ? 'Copiado!' : 'Copiar credenciais'}
@@ -347,7 +347,7 @@ export default function Equipe() {
                   </label>
                 </div>
                 {form.papel === 'entregador' && (
-                  <p className="rounded-xl bg-emerald-50 p-3 text-[11px] font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                  <p className="rounded-xl bg-emerald-50 p-3 text-xs opacity-95 font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
                     🛵 O cadastro do entregador é criado junto — ele já consegue entrar no app de entregas com este login.
                   </p>
                 )}
@@ -413,7 +413,7 @@ export default function Equipe() {
                 {salvando ? 'Salvando…' : 'Salvar alterações'}
               </button>
               {formEdit.nova_senha && (
-                <p className="text-[11px] text-gray-400">⚠ Ao salvar, a senha vira <b className="font-mono">{formEdit.nova_senha}</b> — repasse para o funcionário.</p>
+                <p className="text-xs opacity-95 text-gray-400">⚠ Ao salvar, a senha vira <b className="font-mono">{formEdit.nova_senha}</b> — repasse para o funcionário.</p>
               )}
             </div>
           </div>

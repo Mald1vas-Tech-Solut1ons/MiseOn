@@ -106,29 +106,29 @@ export default function CrmLeads() {
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-4">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-          <span className="text-[11px] font-bold text-gray-400">{tDynamic('MRR Potencial no Funil')}</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">{tDynamic('MRR Potencial no Funil')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-emerald-400">
             R$ {mrrTotalEstimado.toFixed(2)}/mês
           </p>
-          <span className="text-[10px] text-gray-400 block mt-1">Assinaturas estimadas</span>
+          <span className="text-xs opacity-90 text-gray-400 block mt-1">Assinaturas estimadas</span>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-          <span className="text-[11px] font-bold text-gray-400">Assinantes Ativos</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">Assinantes Ativos</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-indigo-400">{totalAssinantes}</p>
-          <span className="text-[10px] text-emerald-400 font-semibold block mt-1">{tDynamic('Lojas em produção')}</span>
+          <span className="text-xs opacity-90 text-emerald-400 font-semibold block mt-1">{tDynamic('Lojas em produção')}</span>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Degustação / Trial 30D')}</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">{tDynamic('Degustação / Trial 30D')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-orange-400">{totalTrials}</p>
-          <span className="text-[10px] text-orange-300 block mt-1">{tDynamic('Em período de teste')}</span>
+          <span className="text-xs opacity-90 text-orange-300 block mt-1">{tDynamic('Em período de teste')}</span>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-          <span className="text-[11px] font-bold text-gray-400">{tDynamic('Total de Leads no Funil')}</span>
+          <span className="text-xs opacity-95 font-bold text-gray-400">{tDynamic('Total de Leads no Funil')}</span>
           <p className="mt-1 font-['Sora'] text-xl font-bold text-white">{leads.length}</p>
-          <span className="text-[10px] text-gray-400 block mt-1">Origem multicanal</span>
+          <span className="text-xs opacity-90 text-gray-400 block mt-1">Origem multicanal</span>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default function CrmLeads() {
               <button
                 key={etapa}
                 onClick={() => setEtapaFiltro(etapa)}
-                className={`rounded-full px-3 py-1 text-[11px] font-bold transition ${
+                className={`rounded-full px-3 py-1 text-xs opacity-95 font-bold transition ${
                   etapaFiltro === etapa
                     ? 'bg-indigo-600 text-white shadow-md'
                     : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
@@ -166,7 +166,7 @@ export default function CrmLeads() {
         {/* Tabela de Leads */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-gray-300">
-            <thead className="border-b border-white/10 text-[11px] uppercase tracking-wider text-gray-400">
+            <thead className="border-b border-white/10 text-xs opacity-95 uppercase tracking-wider text-gray-400">
               <tr>
                 <th className="py-3 px-4">Restaurante / Lead</th>
                 <th className="py-3 px-4">Segmento</th>
@@ -181,10 +181,10 @@ export default function CrmLeads() {
                 <tr key={lead.id} className="hover:bg-white/5 transition-colors">
                   <td className="py-3 px-4">
                     <p className="font-bold text-white">{lead.nomeLoja}</p>
-                    <p className="text-[11px] text-gray-400">{lead.nomeContato} · {lead.telefone}</p>
+                    <p className="text-xs opacity-95 text-gray-400">{lead.nomeContato} · {lead.telefone}</p>
                   </td>
                   <td className="py-3 px-4">
-                    <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-gray-300">
+                    <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs opacity-90 font-bold text-gray-300">
                       {lead.segmento}
                     </span>
                   </td>
@@ -192,7 +192,7 @@ export default function CrmLeads() {
                     <select
                       value={lead.etapa}
                       onChange={(e) => moverEtapa(lead.id, e.target.value as LeadB2B['etapa'])}
-                      className={`rounded-lg border px-2.5 py-1 text-[11px] font-bold outline-none bg-black/60 ${
+                      className={`rounded-lg border px-2.5 py-1 text-xs opacity-95 font-bold outline-none bg-black/60 ${
                         lead.etapa === 'ASSINANTE' ? 'border-emerald-500/50 text-emerald-400' :
                         lead.etapa === 'DEMO_TRIAL' ? 'border-orange-500/50 text-orange-400' :
                         lead.etapa === 'FECHAMENTO' ? 'border-indigo-500/50 text-indigo-400' :
@@ -212,7 +212,7 @@ export default function CrmLeads() {
                   <td className="py-3 px-4 font-mono font-bold text-emerald-400">
                     R$ {lead.mrrEstimado.toFixed(2)}/mês
                   </td>
-                  <td className="py-3 px-4 text-gray-400 text-[11px]">
+                  <td className="py-3 px-4 text-gray-400 text-xs opacity-95">
                     {lead.origem}
                   </td>
                   <td className="py-3 px-4 text-right">

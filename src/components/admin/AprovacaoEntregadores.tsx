@@ -90,7 +90,7 @@ export default function AprovacaoEntregadores({ lojaId }: { lojaId: string }) {
                 </p>
               </div>
               {e.status_documentos === 'rejeitado' && (
-                <span className="rounded-full bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-[10px] font-bold text-red-600 dark:text-red-400">Reenviado</span>
+                <span className="rounded-full bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-xs opacity-90 font-bold text-red-600 dark:text-red-400">Reenviado</span>
               )}
             </div>
             <div className="mt-2 flex flex-wrap gap-2">

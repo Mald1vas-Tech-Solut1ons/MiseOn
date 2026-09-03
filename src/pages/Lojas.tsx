@@ -267,11 +267,11 @@ export default function Lojas() {
                 <div className="relative z-10 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p style={{ fontFamily: "'Sora', sans-serif" }} className="truncate text-base font-bold text-white">{l.nome}</p>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs opacity-90 font-bold uppercase tracking-wider text-emerald-400">
                       <Sparkles size={10} /> Operante
                     </span>
                     {l.distanciaKm != null && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/70">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-xs opacity-90 font-bold uppercase tracking-wider text-white/70">
                         <MapPin size={10} /> {l.distanciaKm} km
                       </span>
                     )}
@@ -279,7 +279,7 @@ export default function Lojas() {
                   {l.descricao && <p className="truncate text-xs" style={{ color: 'rgba(234,241,251,0.6)' }}>{l.descricao}</p>}
                   {l.endereco && <p className="mt-1 flex items-center gap-1 truncate text-xs" style={{ color: 'rgba(234,241,251,0.45)' }}><MapPin size={11} /> {l.endereco}</p>}
                   {(l.faixaNome || l.taxaEntrega != null) && (
-                    <p className="mt-1 text-[11px] font-semibold" style={{ color: 'rgba(234,241,251,0.62)' }}>
+                    <p className="mt-1 text-xs opacity-95 font-semibold" style={{ color: 'rgba(234,241,251,0.62)' }}>
                       {l.faixaNome ? `${l.faixaNome} · ` : ''}{l.taxaEntrega != null ? `Entrega a partir de R$ ${Number(l.taxaEntrega).toFixed(2).replace('.', ',')}` : ''}
                     </p>
                   )}

@@ -757,7 +757,7 @@ export default function Fiscal() {
               <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Lock size={20} className="text-emerald-500" /> {tDynamic('Certificado Digital A1 (.pfx ou .p12)')}
               </h2>
-              <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg">
+              <span className="text-xs opacity-95 font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg">
                 🔒 Criptografia Servidor AES-256
               </span>
             </div>
@@ -778,7 +778,7 @@ export default function Fiscal() {
                 <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
                   {certificadoFile ? certificadoFile.name : (formConfig.certificado_nome ? `Substituir ${formConfig.certificado_nome}` : 'Clique para selecionar arquivo .pfx/.p12')}
                 </span>
-                <span className="text-[10px] text-gray-400 mt-1">{tDynamic('Tamanho máximo: 5MB')}</span>
+                <span className="text-xs opacity-90 text-gray-400 mt-1">{tDynamic('Tamanho máximo: 5MB')}</span>
               </div>
 
               <div>
@@ -799,7 +799,7 @@ export default function Fiscal() {
                     {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1.5">
+                <p className="text-xs opacity-90 text-gray-400 mt-1.5">
                   {tDynamic('Conforme a LGPD, esta senha é encriptada e nunca armazenada em texto puro.')}
                 </p>
               </div>
@@ -953,7 +953,7 @@ export default function Fiscal() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm border-collapse">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-bold text-gray-400 uppercase">
+                  <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 text-xs opacity-95 font-bold text-gray-400 uppercase">
                     <th className="p-4">Data</th>
                     <th className="p-4">Tipo</th>
                     <th className="p-4">Número / Ref</th>
@@ -977,7 +977,7 @@ export default function Fiscal() {
                         </td>
 
                         <td className="p-4 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${
+                          <span className={`px-2 py-0.5 rounded-md text-xs opacity-90 font-black ${
                             nota.tipo === 'NFCE' 
                               ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' 
                               : nota.tipo === 'NFE'
@@ -992,7 +992,7 @@ export default function Fiscal() {
                           <div className="flex flex-col">
                             <span className="font-bold text-gray-900 dark:text-white">#{nota.numero || nota.ref?.substring(0, 12)}</span>
                             {nota.chave_nfe && (
-                              <span className="text-[10px] font-mono text-gray-400 truncate max-w-[160px]">{nota.chave_nfe}</span>
+                              <span className="text-xs opacity-90 font-mono text-gray-400 truncate max-w-[160px]">{nota.chave_nfe}</span>
                             )}
                           </div>
                         </td>
@@ -1189,7 +1189,7 @@ export default function Fiscal() {
                 placeholder="Motivo legal do cancelamento..."
                 className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-sm font-semibold outline-none focus:border-red-500"
               />
-              <span className="text-[10px] text-gray-400">{justificativaCancelamento.length}/15 caracteres mínimos</span>
+              <span className="text-xs opacity-90 text-gray-400">{justificativaCancelamento.length}/15 caracteres mínimos</span>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">

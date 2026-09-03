@@ -21,7 +21,7 @@ export function Metricas() {
             </div>
           ))}
         </div>
-        <p style={{ color: 'rgba(234,241,251,0.3)' }} className="mt-6 text-center text-[11px]">
+        <p style={{ color: 'rgba(234,241,251,0.3)' }} className="mt-6 text-center text-xs opacity-95">
           * Tempos de setup e de atualização de tela são valores de referência, medidos em condições normais de uso.
         </p>
       </div>

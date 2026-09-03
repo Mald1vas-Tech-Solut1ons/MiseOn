@@ -52,7 +52,7 @@ export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva
                 {p.nome.toUpperCase()}
               </span>
               {p.tipo_venda === 'POR_PESO' && (
-                <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[9px] font-black text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
+                <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-xs opacity-80 font-black text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
                   R$/KG
                 </span>
               )}

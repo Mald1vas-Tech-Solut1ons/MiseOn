@@ -269,7 +269,7 @@ function OSCard({
             </button>
             <div className="text-center w-14">
               <span className="text-2xl font-black text-orange-600 dark:text-orange-500 leading-none">{qtdLotes}</span>
-              <span className="block text-[9px] uppercase font-bold text-gray-400">lotes</span>
+              <span className="block text-xs opacity-80 uppercase font-bold text-gray-400">lotes</span>
             </div>
             <button onClick={() => setQtdLotes(qtdLotes + 1)}
               className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
@@ -280,7 +280,7 @@ function OSCard({
 
         {/* Checklist de insumos */}
         <div className="mt-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 p-3 border border-gray-100 dark:border-gray-800">
-          <p className="text-[10px] uppercase font-black text-gray-400 mb-2">{tDynamic('Checklist de Manufatura')}</p>
+          <p className="text-xs opacity-90 uppercase font-black text-gray-400 mb-2">{tDynamic('Checklist de Manufatura')}</p>
           {semFicha ? (
             <p className="text-xs text-gray-400 py-1">{tDynamic('Sem ficha técnica cadastrada.')}</p>
           ) : (
@@ -351,7 +351,7 @@ function OSCard({
             </p>
             
             <div className="bg-red-50 dark:bg-red-900/10 rounded-xl p-3 mb-5 border border-red-100 dark:border-red-900/30">
-              <p className="text-[10px] font-black uppercase text-red-800 dark:text-red-400 mb-2 tracking-wider">{tDynamic('Insumos que ficarão negativos:')}</p>
+              <p className="text-xs opacity-90 font-black uppercase text-red-800 dark:text-red-400 mb-2 tracking-wider">{tDynamic('Insumos que ficarão negativos:')}</p>
               <div className="space-y-2">
                 {itens.filter(i => !i.ok).map(i => {
                   const saldoApos = Number(i.ins?.quantidade_atual) - i.necessario;

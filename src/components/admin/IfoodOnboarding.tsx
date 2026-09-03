@@ -127,7 +127,7 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess, onSalvarTax
         </div>
 
         {diagnostico && (
-          <div className="mt-3 space-y-1.5 text-[11px]">
+          <div className="mt-3 space-y-1.5 text-xs opacity-95">
             <p className={diagnostico.credenciaisConfiguradas ? 'text-emerald-600 dark:text-emerald-400' : 'font-bold text-red-600 dark:text-red-400'}>
               {diagnostico.credenciaisConfiguradas ? '✓' : '✕'} {tDynamic('Credenciais do aplicativo no servidor')}
             </p>
@@ -143,7 +143,7 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess, onSalvarTax
               </p>
             )}
             {diagnostico.detalhe && (
-              <p className="rounded-lg bg-red-50 px-2.5 py-2 font-mono text-[10px] leading-relaxed text-red-700 dark:bg-red-900/20 dark:text-red-300">
+              <p className="rounded-lg bg-red-50 px-2.5 py-2 font-mono text-xs opacity-90 leading-relaxed text-red-700 dark:bg-red-900/20 dark:text-red-300">
                 {diagnostico.detalhe}
               </p>
             )}
@@ -176,7 +176,7 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess, onSalvarTax
               <p className="flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-500 mb-1">
                 <AlertCircle size={14} /> {tDynamic('Importante: Markup de Cardápio')}
               </p>
-              <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+              <p className="text-xs opacity-95 text-amber-700 dark:text-amber-400 leading-relaxed">
                 Ao configurar a sua taxa de contrato abaixo, o MiseOn aplicará automaticamente este Markup aos itens do cardápio vinculados ao iFood. Assim, garantimos sua margem real, evitando prejuízos por divergência de preços no app.
               </p>
             </div>
@@ -228,7 +228,7 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess, onSalvarTax
                 {salvandoTaxas ? tDynamic('Salvando…') : tDynamic('Salvar taxas')}
               </button>
             ) : (
-              <p className="mt-4 text-center text-[10px] text-gray-400">
+              <p className="mt-4 text-center text-xs opacity-90 text-gray-400">
                 {tDynamic('Lembre-se de clicar em')} <b>"Salvar alterações"</b> no final da tela para aplicar estas taxas.
               </p>
             )}

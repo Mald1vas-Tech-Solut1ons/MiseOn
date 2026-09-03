@@ -134,13 +134,13 @@ export function ModalCodigoEntrega({
                 <>
                   <button
                     onClick={() => setVerTecnico((v) => !v)}
-                    className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-[var(--cor-texto-fraco)] hover:underline"
+                    className="mt-2 flex items-center gap-1 text-xs opacity-95 font-semibold text-[var(--cor-texto-fraco)] hover:underline"
                   >
                     <ChevronDown size={12} className={verTecnico ? 'rotate-180 transition' : 'transition'} />
                     {tDynamic('Detalhe técnico (para o suporte)')}
                   </button>
                   {verTecnico && (
-                    <pre className="mt-1.5 max-h-32 overflow-auto whitespace-pre-wrap rounded-lg bg-black/30 p-2 font-['JetBrains_Mono'] text-[10px] text-[var(--cor-texto-fraco)]">
+                    <pre className="mt-1.5 max-h-32 overflow-auto whitespace-pre-wrap rounded-lg bg-black/30 p-2 font-['JetBrains_Mono'] text-xs opacity-90 text-[var(--cor-texto-fraco)]">
                       {fase.tecnico}
                     </pre>
                   )}
@@ -180,7 +180,7 @@ export function ModalCodigoEntrega({
           </div>
 
           <label className="block">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--cor-texto-fraco)]">
+            <span className="text-xs opacity-95 font-semibold uppercase tracking-wider text-[var(--cor-texto-fraco)]">
               {coleta ? tDynamic('Código de coleta') : tDynamic('Código de entrega')}
             </span>
             <div className="relative mt-1.5">
@@ -217,12 +217,12 @@ export function ModalCodigoEntrega({
 
           <button
             onClick={() => setVerAjuda((v) => !v)}
-            className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-[var(--cor-texto-fraco)] hover:underline"
+            className="mt-3 flex items-center gap-1.5 text-xs opacity-95 font-semibold text-[var(--cor-texto-fraco)] hover:underline"
           >
             <HelpCircle size={13} /> {tDynamic('E se o cliente não tiver o código?')}
           </button>
           {verAjuda && (
-            <p className="mt-1.5 rounded-xl border border-[var(--cor-borda)] bg-[var(--cor-surface)] p-3 text-[11px] leading-relaxed text-[var(--cor-texto-suave)]">
+            <p className="mt-1.5 rounded-xl border border-[var(--cor-borda)] bg-[var(--cor-surface)] p-3 text-xs opacity-95 leading-relaxed text-[var(--cor-texto-suave)]">
               {coleta
                 ? tDynamic('O código aparece no app do entregador, na tela da coleta. Se ele não conseguir mostrar, não libere a sacola: acione o suporte do iFood pelo Portal do Parceiro.')
                 : tDynamic('O código fica no acompanhamento do pedido, no app do iFood. Sem ele, não confirme por aqui — o iFood conclui o pedido sozinho depois do prazo de entrega, e forçar a baixa aqui faria os dois sistemas discordarem.')}

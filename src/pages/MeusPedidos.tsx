@@ -315,7 +315,7 @@ export default function MeusPedidos() {
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="text-lg font-black" style={{ color: 'var(--cor-texto)' }}>#{pedido.numero}</span>
-                            <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${STATUS_TOM[pedido.status]}`}>{STATUS_LABEL[pedido.status]}</span>
+                            <span className={`rounded-full px-2.5 py-1 text-xs opacity-95 font-bold ${STATUS_TOM[pedido.status]}`}>{STATUS_LABEL[pedido.status]}</span>
                           </div>
                           <p className="mt-2 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>{descricaoStatus(pedido)}</p>
                           <div className="mt-3 flex flex-wrap items-center gap-3 text-xs" style={{ color: 'var(--cor-texto-fraco)' }}>
@@ -325,7 +325,7 @@ export default function MeusPedidos() {
                         </div>
                         <div className="text-right">
                           <p className="font-black" style={{ color: 'var(--cor-primaria-texto)' }}>{fmt(Number(pedido.valor_total))}</p>
-                          <span className="mt-3 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-texto)' }}>
+                          <span className="mt-3 inline-flex rounded-full px-3 py-1 text-xs opacity-95 font-semibold" style={{ background: 'var(--cor-destaque)', color: 'var(--cor-texto)' }}>
                             {pedido.status === 'EM_ROTA' ? 'Acompanhar ao vivo' : 'Ver detalhes'}
                           </span>
                         </div>
@@ -353,7 +353,7 @@ export default function MeusPedidos() {
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="font-black" style={{ color: 'var(--cor-texto)' }}>#{pedido.numero}</span>
-                            <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${STATUS_TOM[pedido.status]}`}>{STATUS_LABEL[pedido.status]}</span>
+                            <span className={`rounded-full px-2.5 py-1 text-xs opacity-95 font-bold ${STATUS_TOM[pedido.status]}`}>{STATUS_LABEL[pedido.status]}</span>
                           </div>
                           <p className="mt-1 text-xs" style={{ color: 'var(--cor-texto-fraco)' }}>{new Date(pedido.criado_em).toLocaleString('pt-BR')}</p>
                         </div>

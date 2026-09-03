@@ -152,7 +152,7 @@ export default function IfoodConectar({
             </p>
           </div>
         </div>
-        <p className="mt-3 break-all font-mono text-[11px] text-emerald-700/70 dark:text-emerald-500/70">
+        <p className="mt-3 break-all font-mono text-xs opacity-95 text-emerald-700/70 dark:text-emerald-500/70">
           {merchantConectado}
         </p>
       </div>
@@ -193,7 +193,7 @@ export default function IfoodConectar({
               {tDynamic('Entre no Portal do Parceiro e vá em')} <b>{tDynamic('Minha Loja → Loja')}</b>.{' '}
               {tDynamic('Logo abaixo do nome da sua loja aparece o ID — um código como este:')}
             </p>
-            <p className="mt-1 font-mono text-[11px] text-gray-400">ffbff387-e005-4829-9cfe-496a386491c3</p>
+            <p className="mt-1 font-mono text-xs opacity-95 text-gray-400">ffbff387-e005-4829-9cfe-496a386491c3</p>
 
             <a
               href="https://portal.ifood.com.br"
@@ -303,7 +303,7 @@ export default function IfoodConectar({
                     <Store size={18} className="mt-0.5 shrink-0 text-emerald-600" />
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-black text-gray-900 dark:text-gray-100">{m.nome}</span>
-                      <span className="block truncate font-mono text-[10px] text-gray-400">{m.id}</span>
+                      <span className="block truncate font-mono text-xs opacity-90 text-gray-400">{m.id}</span>
                     </span>
                   </button>
                 ))}

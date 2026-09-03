@@ -167,7 +167,7 @@ export default function EntregadorDashboard() {
               <p className="text-xs font-bold uppercase">Corridas</p>
             </div>
             <p className="text-2xl font-black text-white">{metricas.corridasHoje}</p>
-            <p className="text-[10px] text-gray-500 font-medium">{metricas.pedidosEntregues} pedidos entregues</p>
+            <p className="text-xs opacity-90 text-gray-500 font-medium">{metricas.pedidosEntregues} pedidos entregues</p>
           </div>
           
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-4">
@@ -176,7 +176,7 @@ export default function EntregadorDashboard() {
               <p className="text-xs font-bold uppercase">Distância</p>
             </div>
             <p className="text-2xl font-black text-white">{metricas.kmHoje} <span className="text-sm text-gray-500 font-bold">km</span></p>
-            <p className="text-[10px] text-gray-500 font-medium">Percorridos hoje</p>
+            <p className="text-xs opacity-90 text-gray-500 font-medium">Percorridos hoje</p>
           </div>
           
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-4">
@@ -185,14 +185,14 @@ export default function EntregadorDashboard() {
               <p className="text-xs font-bold uppercase">Tempo Méd.</p>
             </div>
             <p className="text-2xl font-black text-white">{metricas.tempoMedio} <span className="text-sm text-gray-500 font-bold">min</span></p>
-            <p className="text-[10px] text-gray-500 font-medium">{tDynamic('Por corrida concluída')}</p>
+            <p className="text-xs opacity-90 text-gray-500 font-medium">{tDynamic('Por corrida concluída')}</p>
           </div>
           
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-4 flex flex-col items-center justify-center text-center">
              <button onClick={carregar} disabled={loading} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-full text-gray-400 transition-colors">
                <RefreshCw size={24} className={loading ? 'animate-spin text-orange-500' : ''} />
              </button>
-             <p className="text-[10px] font-bold text-gray-500 uppercase mt-2">Atualizar App</p>
+             <p className="text-xs opacity-90 font-bold text-gray-500 uppercase mt-2">Atualizar App</p>
           </div>
         </div>
       </div>

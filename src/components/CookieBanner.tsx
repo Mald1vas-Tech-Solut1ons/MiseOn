@@ -100,7 +100,7 @@ export function CookieBanner() {
                   <h3 className="font-['Sora'] text-base font-bold text-gray-900 dark:text-white">
                     {tDynamic('Sua Privacidade Importa (LGPD)')}
                   </h3>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs opacity-95 font-semibold text-emerald-600 dark:text-emerald-400">
                     <ShieldCheck size={12} /> LGPD OK
                   </span>
                 </div>
@@ -181,11 +181,11 @@ export function CookieBanner() {
                   <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">
                     <Lock size={14} /> {tDynamic('Essenciais')}
                   </span>
-                  <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                  <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 text-xs opacity-90 font-extrabold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
                     {tDynamic('Obrigatório')}
                   </span>
                 </div>
-                <p className="mt-2 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
+                <p className="mt-2 text-xs opacity-95 leading-relaxed text-gray-600 dark:text-gray-300">
                   {tDynamic('Necessários para navegação, login, sessão ativa e funcionamento do carrinho. Não podem ser desativados.')}
                 </p>
               </div>
@@ -206,7 +206,7 @@ export function CookieBanner() {
                     <div className="peer h-6 w-11 rounded-full bg-gray-200 transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[var(--cor-primaria)] peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:bg-gray-700" />
                   </label>
                 </div>
-                <p className="mt-2 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
+                <p className="mt-2 text-xs opacity-95 leading-relaxed text-gray-600 dark:text-gray-300">
                   {tDynamic('Ajudam a entender quais produtos são mais acessados para melhorar o desempenho do cardápio.')}
                 </p>
               </div>
@@ -227,7 +227,7 @@ export function CookieBanner() {
                     <div className="peer h-6 w-11 rounded-full bg-gray-200 transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[var(--cor-primaria)] peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:bg-gray-700" />
                   </label>
                 </div>
-                <p className="mt-2 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
+                <p className="mt-2 text-xs opacity-95 leading-relaxed text-gray-600 dark:text-gray-300">
                   {tDynamic('Permitem mensurar o retorno de anúncios do Instagram/Facebook e exibir ofertas relevantes.')}
                 </p>
               </div>

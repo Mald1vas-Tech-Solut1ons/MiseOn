@@ -394,7 +394,7 @@ export default function KDS() {
               {p.senha != null ? p.senha : `#${p.numero}`}
             </span>
             {p.senha != null && (
-              <span className="font-['JetBrains_Mono'] text-[11px] font-bold text-slate-500">#{p.numero}</span>
+              <span className="font-['JetBrains_Mono'] text-xs opacity-95 font-bold text-slate-500">#{p.numero}</span>
             )}
           </span>
 
@@ -403,14 +403,14 @@ export default function KDS() {
               {minTotal >= 0 ? `${Math.floor(minTotal)}min` : `em ${Math.ceil(-minTotal)}min`}
             </span>
             {minNaEtapa > 0 && !finalizadoCozinha && (
-              <span className="text-[10px] text-slate-400 flex items-center justify-end gap-1 font-mono">
+              <span className="text-xs opacity-90 text-slate-400 flex items-center justify-end gap-1 font-mono">
                 <Clock size={10} /> {tDynamic('na etapa:')} {Math.floor(minNaEtapa)}m
               </span>
             )}
           </div>
         </div>
 
-        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-[#6C7A96]">
+        <div className="mt-1 flex items-center gap-1.5 text-xs opacity-95 font-semibold text-[#6C7A96]">
           {p.tipo_pedido === 'SALAO'
             ? <UtensilsCrossed size={12} />
             : p.origem === 'balcao' ? <Store size={12} /> : p.tipo_pedido === 'DELIVERY' ? <Bike size={12} /> : <Package size={12} />}
@@ -434,7 +434,7 @@ export default function KDS() {
               {/* 1. ITENS PARA PREPARAR NA COZINHA */}
               {cozinha.length > 0 && (
                 <div className="space-y-2">
-                  <span className="font-['JetBrains_Mono'] text-[10px] font-extrabold uppercase tracking-wider text-orange-400">
+                  <span className="font-['JetBrains_Mono'] text-xs opacity-90 font-extrabold uppercase tracking-wider text-orange-400">
                     🍳 {tDynamic('Preparo Cozinha')} ({cozinha.length}):
                   </span>
                   {cozinha.map((i) => (
@@ -456,7 +456,7 @@ export default function KDS() {
               {/* 2. ITENS DE REVENDA DIRETA / BALCÃO */}
               {direto.length > 0 && (
                 <div className="mt-2 rounded-xl border border-slate-700/60 bg-slate-800/40 p-2.5 space-y-1.5">
-                  <span className="font-['JetBrains_Mono'] text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <span className="font-['JetBrains_Mono'] text-xs opacity-90 font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                     <Store size={12} className="text-blue-400" /> {tDynamic('Revenda / Balcão')} ({direto.length}):
                   </span>
                   {direto.map((i) => (
@@ -464,7 +464,7 @@ export default function KDS() {
                       <span>
                         <strong className="text-blue-400">{i.quantidade}×</strong> {i.nome_produto}
                       </span>
-                      <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      <span className="text-xs opacity-80 uppercase font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
                         {tDynamic('DIRETO')}
                       </span>
                     </div>
@@ -549,7 +549,7 @@ export default function KDS() {
           <ChefHat size={22} className="text-orange-500" />
           <h2 className="font-['Sora'] text-xl font-black text-white">{tDynamic('KDS Kanban Cozinha')}</h2>
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]" />
-          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs opacity-90 font-bold uppercase tracking-wider text-slate-400">
             {etapas.length} {tDynamic('Colunas Trello')}
           </span>
         </div>
@@ -593,7 +593,7 @@ export default function KDS() {
       {/* ── Seletor de operador ── */}
       {operadores.length > 0 && (
         <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1">
-          <span className="shrink-0 font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-[0.2em] text-[#6C7A96]">Na cozinha:</span>
+          <span className="shrink-0 font-['JetBrains_Mono'] text-xs opacity-90 font-bold uppercase tracking-[0.2em] text-[#6C7A96]">Na cozinha:</span>
           {operadores.map((op, idx) => (
             <button key={op.user_id} onClick={() => escolherOperador(op.user_id)}
               className={`shrink-0 rounded-full border px-3 py-1 text-xs font-bold transition ${
@@ -611,7 +611,7 @@ export default function KDS() {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         {agregado.length > 0 && (
           <div className="flex items-center gap-2 overflow-x-auto rounded-2xl border border-white/8 bg-white/[0.04] px-3 py-2 flex-1">
-            <span className="shrink-0 font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400">Em produção:</span>
+            <span className="shrink-0 font-['JetBrains_Mono'] text-xs opacity-90 font-bold uppercase tracking-[0.2em] text-orange-400">Em produção:</span>
             {agregado.map(([nome, qtd]) => (
               <span key={nome} className="shrink-0 rounded-full bg-white/5 px-3 py-1 text-[12px] font-bold text-[#EAF1FB]">
                 <span className="text-orange-400">{qtd}×</span> {nome}
@@ -646,7 +646,7 @@ export default function KDS() {
                 </div>
                 <div className="flex items-center gap-2">
                   {tempoMedioEtapa > 0 && (
-                    <span className="text-[10px] font-mono text-slate-400 bg-white/10 px-2 py-0.5 rounded-full">
+                    <span className="text-xs opacity-90 font-mono text-slate-400 bg-white/10 px-2 py-0.5 rounded-full">
                       ~{tempoMedioEtapa}m
                     </span>
                   )}
@@ -701,7 +701,7 @@ export default function KDS() {
                         <span className="h-3 w-3 rounded-full" style={{ background: e.cor }} />
                         <span className="font-['Sora'] text-sm font-bold text-white">{e.nome}</span>
                         {ehGargalo && (
-                          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase text-amber-300">
+                          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs opacity-90 font-black uppercase text-amber-300">
                             Maior Gargalo
                           </span>
                         )}

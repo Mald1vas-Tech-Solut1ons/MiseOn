@@ -63,7 +63,7 @@ export function Hero() {
           ].map((m) => (
             <div key={m.label} style={{ border: '1px solid rgba(255,255,255,.09)', background: 'rgba(255,255,255,.02)' }} className="rounded-2xl px-4 py-4">
               <p style={{ fontFamily: "'Sora', sans-serif" }} className="text-2xl font-extrabold text-white">{m.valor}</p>
-              <p className="mt-1 text-[11px] font-medium text-gray-500">{m.label}</p>
+              <p className="mt-1 text-xs opacity-95 font-medium text-gray-500">{m.label}</p>
             </div>
           ))}
         </div>

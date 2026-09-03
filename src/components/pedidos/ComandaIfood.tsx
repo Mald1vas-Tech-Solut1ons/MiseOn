@@ -97,7 +97,7 @@ export function ComandaIfood({ pedido: p }: { pedido: Pedido }) {
         <Linha key={i} icone={<Ticket size={13} className="text-violet-500" />}>
           {tDynamic('Cupom')} {fmt(Number(b.value ?? 0))}
           {b.campaign?.name ? ` · ${b.campaign.name}` : ''}
-          <span className="block text-[11px] text-[var(--cor-texto-fraco)]">{quemBanca(b)}</span>
+          <span className="block text-xs opacity-95 text-[var(--cor-texto-fraco)]">{quemBanca(b)}</span>
         </Linha>
       ))}
 

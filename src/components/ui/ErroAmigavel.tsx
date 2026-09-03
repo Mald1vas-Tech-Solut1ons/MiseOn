@@ -40,7 +40,7 @@ export function ErroAmigavel({ erro, onFechar }: { erro: ErroTraduzido; onFechar
           </p>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-xl bg-white/70 px-3 py-2.5 dark:bg-white/5">
-            <span className="text-[11px] font-black uppercase tracking-wide text-red-500 dark:text-red-400">
+            <span className="text-xs opacity-95 font-black uppercase tracking-wide text-red-500 dark:text-red-400">
               O que fazer
             </span>
             <p className="w-full text-[13px] font-semibold leading-relaxed text-gray-700 dark:text-gray-200">
@@ -58,14 +58,14 @@ export function ErroAmigavel({ erro, onFechar }: { erro: ErroTraduzido; onFechar
 
           <button
             onClick={() => setTecnicoAberto((v) => !v)}
-            className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-red-400 transition hover:text-red-600 dark:hover:text-red-300"
+            className="mt-2 flex items-center gap-1 text-xs opacity-95 font-semibold text-red-400 transition hover:text-red-600 dark:hover:text-red-300"
           >
             <LifeBuoy size={12} />
             {tDynamic('Detalhe técnico para o suporte')}
             <ChevronDown size={12} className={`transition-transform ${tecnicoAberto ? 'rotate-180' : ''}`} />
           </button>
           {tecnicoAberto && (
-            <p className="mt-1.5 select-all break-all rounded-lg bg-white/70 px-2.5 py-2 font-['JetBrains_Mono'] text-[11px] text-gray-500 dark:bg-white/5 dark:text-gray-400">
+            <p className="mt-1.5 select-all break-all rounded-lg bg-white/70 px-2.5 py-2 font-['JetBrains_Mono'] text-xs opacity-95 text-gray-500 dark:bg-white/5 dark:text-gray-400">
               {erro.tecnico}
             </p>
           )}

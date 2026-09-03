@@ -130,7 +130,7 @@ function LiveTrackingAdmin({ lojaId }: { lojaId: string }) {
             return (
               <div key={id} className="flex items-center gap-1">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ background: corPorEntregador[id] }} />
-                <span className="text-[10px] font-medium text-gray-300">{pos?.entregador_nome}</span>
+                <span className="text-xs opacity-90 font-medium text-gray-300">{pos?.entregador_nome}</span>
               </div>
             );
           })}
@@ -157,7 +157,7 @@ function LiveTrackingAdmin({ lojaId }: { lojaId: string }) {
                 <div className="text-sm font-medium">
                   <p className="font-bold">{pos.entregador_nome}</p>
                   <p className="text-gray-500">Pedido #{pos.pedido_numero}</p>
-                  <p className="text-[11px] text-gray-400 mt-1">
+                  <p className="text-xs opacity-95 text-gray-400 mt-1">
                     Atualizado {new Date(pos.atualizado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
@@ -503,47 +503,47 @@ function PainelRendimentoEntregas({ lojaId }: { lojaId: string }) {
             {tDynamic('Indicadores financeiros reais arrecadados através do cálculo por distância.')}
           </p>
         </div>
-        <span className="self-start sm:self-auto rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+        <span className="self-start sm:self-auto rounded-full bg-emerald-500/10 px-3 py-1 text-xs opacity-95 font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
           {tDynamic('Cálculo Ativo por Km')}
         </span>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="rounded-2xl bg-emerald-500/5 border border-emerald-500/20 p-3.5">
-          <span className="text-[11px] font-semibold text-gray-400 block">Total em Taxas</span>
+          <span className="text-xs opacity-95 font-semibold text-gray-400 block">Total em Taxas</span>
           <p className="font-['Sora'] text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
             {fmt(metricas.totalTaxas)}
           </p>
-          <span className="text-[10px] text-gray-400 mt-0.5 block">{metricas.qtdEntregas} entregas no período</span>
+          <span className="text-xs opacity-90 text-gray-400 mt-0.5 block">{metricas.qtdEntregas} entregas no período</span>
         </div>
 
         <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 p-3.5">
-          <span className="text-[11px] font-semibold text-gray-400 block">{tDynamic('Taxa Média por Pedido')}</span>
+          <span className="text-xs opacity-95 font-semibold text-gray-400 block">{tDynamic('Taxa Média por Pedido')}</span>
           <p className="font-['Sora'] text-lg font-black text-gray-900 dark:text-white mt-0.5">
             {fmt(metricas.taxaMedia)}
           </p>
-          <span className="text-[10px] text-emerald-500 font-bold mt-0.5 flex items-center gap-0.5">
+          <span className="text-xs opacity-90 text-emerald-500 font-bold mt-0.5 flex items-center gap-0.5">
             <TrendingUp size={12} /> R$/entrega cobrado
           </span>
         </div>
 
         <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 p-3.5">
-          <span className="text-[11px] font-semibold text-gray-400 block">{tDynamic('Distância Média')}</span>
+          <span className="text-xs opacity-95 font-semibold text-gray-400 block">{tDynamic('Distância Média')}</span>
           <p className="font-['Sora'] text-lg font-black text-blue-500 mt-0.5">
             {metricas.distanciaMediaKm.toFixed(1)} km
           </p>
-          <span className="text-[10px] text-blue-400 font-medium mt-0.5 flex items-center gap-0.5">
+          <span className="text-xs opacity-90 text-blue-400 font-medium mt-0.5 flex items-center gap-0.5">
             <Compass size={12} /> {tDynamic('Raio médio de rota')}
           </span>
         </div>
 
         <div className="rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 p-3.5">
-          <span className="text-[11px] font-semibold text-gray-400 block">{tDynamic('Distribuição por Raio')}</span>
-          <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-gray-700 dark:text-gray-300">
+          <span className="text-xs opacity-95 font-semibold text-gray-400 block">{tDynamic('Distribuição por Raio')}</span>
+          <div className="mt-1 flex items-center gap-1.5 text-xs opacity-95 font-bold text-gray-700 dark:text-gray-300">
             <span className="text-emerald-500">{metricas.curtasCount}c (0-3km)</span> ·
             <span className="text-blue-500">{metricas.mediasCount}m (3-6km)</span>
           </div>
-          <span className="text-[10px] text-gray-400 mt-0.5 block">{metricas.longasCount} entregas acima de 6km</span>
+          <span className="text-xs opacity-90 text-gray-400 mt-0.5 block">{metricas.longasCount} entregas acima de 6km</span>
         </div>
       </div>
     </div>
@@ -931,10 +931,10 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
                   <p className="text-xs text-gray-400">{e.telefone} · {e.veiculo ?? 'Moto'}</p>
                 </div>
                 {!e.user_id && (
-                  <span className="text-[10px] font-bold bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-500/20 whitespace-nowrap">Sem app</span>
+                  <span className="text-xs opacity-90 font-bold bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-500/20 whitespace-nowrap">Sem app</span>
                 )}
                 {e.user_id && (
-                  <span className="text-[10px] font-bold bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded-full border border-green-500/20 whitespace-nowrap">App ativo</span>
+                  <span className="text-xs opacity-90 font-bold bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded-full border border-green-500/20 whitespace-nowrap">App ativo</span>
                 )}
                 <button onClick={() => removerEntregador(e.id)} className="text-gray-300 dark:text-gray-600 hover:text-red-500 transition-colors p-1">
                   <Trash2 size={16} />
@@ -963,7 +963,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
                 const isLoja = m.remetente_tipo === 'LOJA';
                 return (
                   <div key={m.id} className={`flex flex-col ${isLoja ? 'items-end' : 'items-start'}`}>
-                    <span className="text-[10px] text-gray-400 mb-1">{isLoja ? 'Você (Loja)' : m.remetente_tipo === 'ENTREGADOR' ? 'Entregador' : 'Cliente'}</span>
+                    <span className="text-xs opacity-90 text-gray-400 mb-1">{isLoja ? 'Você (Loja)' : m.remetente_tipo === 'ENTREGADOR' ? 'Entregador' : 'Cliente'}</span>
                     <div className={`px-3.5 py-2 rounded-2xl max-w-[85%] text-sm ${isLoja ? 'bg-[var(--cor-primaria)] text-white rounded-tr-none' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none'}`}>
                       {m.mensagem}
                     </div>

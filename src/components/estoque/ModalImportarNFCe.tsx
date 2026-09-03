@@ -511,7 +511,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-black text-xl text-gray-900 dark:text-gray-100">{tDynamic('Conferência de Cupom Fiscal (NFC-e)')}</h3>
-                <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 uppercase tracking-wider">
+                <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs opacity-90 font-bold px-2.5 py-0.5 uppercase tracking-wider">
                   SEFAZ {dadosNota.uf}
                 </span>
               </div>
@@ -560,7 +560,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                       <p className="text-xs font-black text-amber-800 dark:text-amber-300">
                         {tDynamic(recomendacao.titulo)}
                       </p>
-                      <p className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-400/90">
+                      <p className="mt-0.5 text-xs opacity-95 text-amber-700 dark:text-amber-400/90">
                         {recomendacao.explicacao}
                       </p>
                     </div>
@@ -574,7 +574,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                     <button
                       type="button"
                       onClick={() => setModoEntrada('SOMAR')}
-                      className={`rounded-lg px-3 py-1.5 text-[11px] font-bold transition ${
+                      className={`rounded-lg px-3 py-1.5 text-xs opacity-95 font-bold transition ${
                         modoEntrada === 'SOMAR'
                           ? 'bg-emerald-600 text-white shadow'
                           : 'border border-gray-300 text-gray-600 hover:bg-white dark:border-gray-700 dark:text-gray-300'
@@ -585,7 +585,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                     <button
                       type="button"
                       onClick={() => setModoEntrada('HISTORICO')}
-                      className={`rounded-lg px-3 py-1.5 text-[11px] font-bold transition ${
+                      className={`rounded-lg px-3 py-1.5 text-xs opacity-95 font-bold transition ${
                         modoEntrada === 'HISTORICO'
                           ? 'bg-blue-600 text-white shadow'
                           : 'border border-gray-300 text-gray-600 hover:bg-white dark:border-gray-700 dark:text-gray-300'
@@ -599,7 +599,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
 
               {modoEntrada === 'HISTORICO' && (
                 <div className="mb-3 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 dark:border-blue-900/40 dark:bg-blue-900/15">
-                  <p className="text-[11px] font-bold text-blue-800 dark:text-blue-300">
+                  <p className="text-xs opacity-95 font-bold text-blue-800 dark:text-blue-300">
                     {tDynamic('Modo histórico: o saldo do estoque não muda. O sistema guarda o preço desta compra para comparar com as próximas.')}
                   </p>
                 </div>
@@ -615,26 +615,26 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                   <div className="flex flex-wrap gap-1.5">
                     <button
                       onClick={() => marcarTodos(true)}
-                      className="rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1 text-[11px] font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900"
+                      className="rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1 text-xs opacity-95 font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900"
                     >
                       Marcar todos
                     </button>
                     <button
                       onClick={() => marcarTodos(false)}
-                      className="rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1 text-[11px] font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900"
+                      className="rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1 text-xs opacity-95 font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900"
                     >
                       Desmarcar todos
                     </button>
                     <button
                       onClick={marcarSomenteConhecidos}
                       title="Deixa marcados só os itens que já existem no seu estoque"
-                      className="rounded-lg border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                      className="rounded-lg border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 text-xs opacity-95 font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                     >
                       {tDynamic('Só os já cadastrados')}
                     </button>
                   </div>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500 dark:text-gray-400">
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-95 text-gray-500 dark:text-gray-400">
                   <span><b className="text-emerald-600 dark:text-emerald-400">{contagem.alta}</b> reconhecidos automaticamente</span>
                   <span><b className="text-amber-600 dark:text-amber-400">{contagem.media}</b> por sugestão de nome</span>
                   <span><b className="text-blue-600 dark:text-blue-400">{contagem.novos}</b> vão virar insumo novo</span>
@@ -656,7 +656,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                   )}
                 </div>
                 {totalMarcado < dadosNota.valor_total - 0.01 && (
-                  <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                  <p className="mt-2 text-xs opacity-95 text-gray-500 dark:text-gray-400">
                     Desmarcado: {fmt(dadosNota.valor_total - totalMarcado)} — itens que não entram no estoque
                     (compra pessoal, material de limpeza, o que você decidir).
                   </p>
@@ -715,20 +715,20 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                             />
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                                {l.confiancaMatch === 'ALTA' && <span className="rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black px-1.5 py-0.5">AUTO MATCH</span>}
-                                {l.confiancaMatch === 'MEDIA' && <span className="rounded-full bg-amber-100 text-amber-700 text-[9px] font-black px-1.5 py-0.5">SUGESTÃO</span>}
-                                {l.criarNovo && <span className="rounded-full bg-blue-100 text-blue-700 text-[9px] font-black px-1.5 py-0.5">+ NOVO INSUMO</span>}
+                                {l.confiancaMatch === 'ALTA' && <span className="rounded-full bg-emerald-100 text-emerald-700 text-xs opacity-80 font-black px-1.5 py-0.5">AUTO MATCH</span>}
+                                {l.confiancaMatch === 'MEDIA' && <span className="rounded-full bg-amber-100 text-amber-700 text-xs opacity-80 font-black px-1.5 py-0.5">SUGESTÃO</span>}
+                                {l.criarNovo && <span className="rounded-full bg-blue-100 text-blue-700 text-xs opacity-80 font-black px-1.5 py-0.5">+ NOVO INSUMO</span>}
                                 {/* O que o sistema não conseguiu deduzir sozinho vem marcado: o
                                     lojista confere só essas linhas, não as 53. */}
                                 {(l.sugestao as { daIA?: boolean }).daIA && (
-                                  <span className="flex items-center gap-0.5 rounded-full bg-violet-100 px-1.5 py-0.5 text-[9px] font-black text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
+                                  <span className="flex items-center gap-0.5 rounded-full bg-violet-100 px-1.5 py-0.5 text-xs opacity-80 font-black text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
                                     <Sparkles size={9} /> IA
                                   </span>
                                 )}
                                 {l.importar && l.sugestao.confianca === 'baixa' && (
-                                  <span className="rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-[9px] font-black px-1.5 py-0.5">{tDynamic('CONFIRA')}</span>
+                                  <span className="rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-xs opacity-80 font-black px-1.5 py-0.5">{tDynamic('CONFIRA')}</span>
                                 )}
-                                {!l.importar && <span className="rounded-full bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400 text-[9px] font-black px-1.5 py-0.5">{tDynamic('FORA DA IMPORTAÇÃO')}</span>}
+                                {!l.importar && <span className="rounded-full bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400 text-xs opacity-80 font-black px-1.5 py-0.5">{tDynamic('FORA DA IMPORTAÇÃO')}</span>}
                               </div>
                               <p className={`font-bold text-sm ${l.importar ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 line-through dark:text-gray-600'}`}>
                                 {l.itemNota.descricao}
@@ -821,7 +821,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               cozinha, aqui tambem.
                             */
                             <div className="mb-2 flex flex-wrap items-center gap-2">
-                              <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                              <span className="text-xs opacity-95 font-medium text-gray-500 dark:text-gray-400">
                                 {tDynamic('Controlar no estoque em:')}
                               </span>
                               <select
@@ -845,12 +845,12 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                                 ))}
                               </select>
                               {saldoDoInsumo > 0 && unidadeTrocada && (
-                                <span className="text-[10px] text-amber-600 dark:text-amber-400">
+                                <span className="text-xs opacity-90 text-amber-600 dark:text-amber-400">
                                   tem {saldoDoInsumo} {insumoSelecionado?.unidade_medida} em estoque — zere antes de trocar
                                 </span>
                               )}
                               {saldoDoInsumo === 0 && unidadeTrocada && (
-                                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                                <span className="text-xs opacity-90 font-bold text-blue-600 dark:text-blue-400">
                                   o insumo passa a ser controlado em {l.unidadeInsumo}
                                 </span>
                               )}
@@ -871,7 +871,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               faz o lojista confiar no número — e conferir 53
                               linhas com o olho, em vez de digitar 53 vezes.
                             */}
-                            <span className="w-full text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+                            <span className="w-full text-xs opacity-95 leading-snug text-gray-500 dark:text-gray-400">
                               {l.sugestao.explicacao}
                               <span className="ml-1 text-gray-400 dark:text-gray-500">
                                 {tDynamic('Na nota veio como')} <b>{unidadeNota}</b>.
@@ -900,7 +900,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               trocar de fornecedor ou repensar o preço de venda.
                             */}
                             {variacao && variacao.relevante && (
-                              <span className={`flex w-full items-center gap-1 text-[11px] font-bold ${
+                              <span className={`flex w-full items-center gap-1 text-xs opacity-95 font-bold ${
                                 variacao.direcao === 'alta'
                                   ? 'text-red-600 dark:text-red-400'
                                   : 'text-emerald-700 dark:text-emerald-400'
@@ -912,7 +912,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               </span>
                             )}
                             {variacao && !variacao.relevante && (
-                              <span className="w-full text-[11px] text-gray-400 dark:text-gray-500">
+                              <span className="w-full text-xs opacity-95 text-gray-400 dark:text-gray-500">
                                 {variacao.texto}
                               </span>
                             )}
@@ -924,20 +924,20 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                             */}
                             {modoEntrada === 'SOMAR' && (
                               <span className="flex w-full flex-wrap items-center gap-2 border-t border-gray-100 pt-1.5 dark:border-gray-800">
-                                <span className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                <span className="flex items-center gap-1 text-xs opacity-95 text-gray-500 dark:text-gray-400">
                                   <CalendarClock size={12} /> {tDynamic('Vence em')}
                                 </span>
                                 <input
                                   type="date"
                                   value={l.venceEm}
                                   onChange={e => atualizarLinha(i, { venceEm: e.target.value })}
-                                  className={`rounded border p-1 text-[11px] dark:bg-gray-900 dark:text-gray-100 ${
+                                  className={`rounded border p-1 text-xs opacity-95 dark:bg-gray-900 dark:text-gray-100 ${
                                     alertaValidade.critico
                                       ? 'border-amber-400 dark:border-amber-600'
                                       : 'border-gray-300 dark:border-gray-700'
                                   }`}
                                 />
-                                <span className={`text-[11px] ${
+                                <span className={`text-xs opacity-95 ${
                                   alertaValidade.situacao === 'vencido'
                                     ? 'font-bold text-red-600 dark:text-red-400'
                                     : alertaValidade.critico
@@ -969,7 +969,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         {/* Rodapé com Ação */}
         <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 p-4 bg-white dark:bg-gray-900">
           {podeRepetir && (
-            <label className="mb-3 flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-[11px] text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
+            <label className="mb-3 flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs opacity-95 text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
               <input
                 type="checkbox"
                 checked={repetirNota}
@@ -984,12 +984,12 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
           )}
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] uppercase font-bold text-gray-400">
+              <p className="text-xs opacity-90 uppercase font-bold text-gray-400">
                 {marcados.length === linhas.length ? 'Total da nota' : 'Total selecionado'}
               </p>
               <p className="text-xl font-black text-gray-900 dark:text-gray-100">{fmt(totalMarcado)}</p>
               {marcados.length !== linhas.length && (
-                <p className="text-[10px] text-gray-400">nota inteira: {fmt(dadosNota.valor_total)}</p>
+                <p className="text-xs opacity-90 text-gray-400">nota inteira: {fmt(dadosNota.valor_total)}</p>
               )}
               {/*
                 O desconto da nota não é detalhe de exibição: ele muda o custo
@@ -998,7 +998,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                 bater com o que ele pagou.
               */}
               {Number(dadosNota.desconto) > 0 && (
-                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                <p className="text-xs opacity-90 font-bold text-emerald-600 dark:text-emerald-400">
                   {tDynamic('desconto de')} {fmt(Number(dadosNota.desconto))} {tDynamic('já abatido no custo de cada item')}
                 </p>
               )}

@@ -32,7 +32,7 @@ export function Stepper({
                 {concluida ? <Check size={16} strokeWidth={3} /> : i + 1}
               </div>
               <span
-                className={`text-[11px] font-semibold text-center leading-tight ${
+                className={`text-xs opacity-95 font-semibold text-center leading-tight ${
                   corrente
                     ? 'text-[var(--cor-primaria)]'
                     : concluida

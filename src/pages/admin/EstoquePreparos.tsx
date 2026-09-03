@@ -305,23 +305,23 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                        <h3 className="text-lg font-black dark:text-gray-100 flex items-center gap-2">
                          {p.nome}
                          {p.validade_horas != null && Number(p.validade_horas) > 0 && (
-                           <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                           <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs opacity-90 font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
                              <Timer size={10} /> validade {fmtValidadeExtensa(p.validade_horas)}
                            </span>
                          )}
                          {temVencido && (
-                           <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                           <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs opacity-90 font-bold text-red-600 dark:bg-red-900/30 dark:text-red-400">
                              <AlertTriangle size={10} /> lote vencido
                            </span>
                          )}
                        </h3>
                        <div className="flex gap-4 mt-2">
                          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg px-3 py-1.5 border border-gray-100 dark:border-gray-700">
-                           <p className="text-[10px] text-gray-500 uppercase font-bold">Estoque Atual</p>
+                           <p className="text-xs opacity-90 text-gray-500 uppercase font-bold">Estoque Atual</p>
                            <p className="font-black text-gray-900 dark:text-gray-100">{Number(p.quantidade_atual)} {p.unidade_medida}</p>
                          </div>
                          <div className="bg-orange-50 dark:bg-orange-900/10 rounded-lg px-3 py-1.5 border border-orange-100 dark:border-orange-900/30">
-                           <p className="text-[10px] text-orange-600 dark:text-orange-500 uppercase font-bold">Custo P/ {p.unidade_medida}</p>
+                           <p className="text-xs opacity-90 text-orange-600 dark:text-orange-500 uppercase font-bold">Custo P/ {p.unidade_medida}</p>
                            <p className="font-black text-orange-700 dark:text-orange-400">{fmt(custoPorcao)}</p>
                          </div>
                        </div>
@@ -341,7 +341,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                    {/* ── Lotes produzidos (ordens de serviço) ── */}
                    {lotes.length > 0 && (
                      <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">
-                       <p className="mb-2 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-gray-400"><Clock size={11} /> Lotes em uso</p>
+                       <p className="mb-2 flex items-center gap-1.5 text-xs opacity-90 font-black uppercase tracking-wider text-gray-400"><Clock size={11} /> Lotes em uso</p>
                        <div className="space-y-1.5">
                          {lotes.map(l => {
                            const st = statusValidade(l.vence_em);
@@ -353,8 +353,8 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                                </div>
                                <div className="flex shrink-0 items-center gap-1.5">
                                  {st
-                                   ? <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${st.classe}`}>{st.label}</span>
-                                   : <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400">sem validade</span>}
+                                   ? <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-bold ${st.classe}`}>{st.label}</span>
+                                   : <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs opacity-90 font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400">sem validade</span>}
                                  <button onClick={() => descartarLote(l)} title="Descartar lote (baixa como perda)" className="rounded-lg p-1 text-gray-400 hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-900/30">
                                    <Trash2 size={13} />
                                  </button>
@@ -397,11 +397,11 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
 
               <div className={`grid grid-cols-2 ${isBuffet ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-3`}>
                 <div>
-                  <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">1 Lote Rende Qtos?</label>
+                  <label className="text-xs opacity-90 uppercase font-bold text-gray-500 dark:text-gray-400">1 Lote Rende Qtos?</label>
                   <input value={rendimentoPorcoes} onChange={e => setRendimentoPorcoes(e.target.value)} type="number" placeholder="ex: 10" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Unidade</label>
+                  <label className="text-xs opacity-90 uppercase font-bold text-gray-500 dark:text-gray-400">Unidade</label>
                   <select value={unidade} onChange={e => setUnidade(e.target.value)} className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold">
                     <option value="un">Un (Porção)</option>
                     <option value="L">Litros (L)</option>
@@ -412,14 +412,14 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                 </div>
                 {isBuffet && (
                   <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400">Rendimento Kg (Buffet)</label>
+                    <label className="text-xs opacity-90 uppercase font-bold text-gray-500 dark:text-gray-400">Rendimento Kg (Buffet)</label>
                     <input value={rendimentoPadraoKg} onChange={e => setRendimentoPadraoKg(e.target.value)} type="number" step="0.001" placeholder="ex: 2.500" className="mt-1 w-full p-2.5 rounded-xl border border-orange-300 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-900/10 text-orange-900 dark:text-orange-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
                   </div>
                 )}
               </div>
 
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-900/10">
-                <label className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-amber-700 dark:text-amber-500"><Timer size={13} /> {tDynamic('Validade após produção')}</label>
+                <label className="flex items-center gap-1.5 text-xs opacity-90 uppercase font-bold text-amber-700 dark:text-amber-500"><Timer size={13} /> {tDynamic('Validade após produção')}</label>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1">
                     <input value={validadeQtd} onChange={e => setValidadeQtd(e.target.value)} type="number" min="0" placeholder="ex: 3" className="w-24 p-2.5 rounded-xl border border-amber-300 dark:border-amber-900/50 bg-white dark:bg-gray-950 dark:text-gray-100 outline-none focus:border-amber-500 text-center font-bold text-lg" />
@@ -442,7 +442,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                     ))}
                   </div>
                 </div>
-                <p className="mt-2 text-[11px] text-amber-700/80 dark:text-amber-500/80">{tDynamic('Cada produção vira uma ordem de serviço com data de vencimento. Deixe em branco para não controlar validade.')}</p>
+                <p className="mt-2 text-xs opacity-95 text-amber-700/80 dark:text-amber-500/80">{tDynamic('Cada produção vira uma ordem de serviço com data de vencimento. Deixe em branco para não controlar validade.')}</p>
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
@@ -470,11 +470,11 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/40 dark:bg-emerald-900/10">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400">{tDynamic('Custo Estimado do Lote')}</p>
+                      <p className="text-xs opacity-90 font-black uppercase text-emerald-800 dark:text-emerald-400">{tDynamic('Custo Estimado do Lote')}</p>
                       <p className="text-xl font-black text-emerald-900 dark:text-emerald-100">{fmt(custoFichaTotal)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400">Custo Estimado P/ {unidade}</p>
+                      <p className="text-xs opacity-90 font-black uppercase text-emerald-800 dark:text-emerald-400">Custo Estimado P/ {unidade}</p>
                       <p className="text-lg font-black text-emerald-700 dark:text-emerald-300">{fmt(custoPorUnidade)}</p>
                     </div>
                   </div>
@@ -514,7 +514,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                       </p>
 
                       <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-left dark:border-green-900/40 dark:bg-green-900/10">
-                        <p className="text-[10px] font-black uppercase tracking-wider text-green-800 dark:text-green-400">
+                        <p className="text-xs opacity-90 font-black uppercase tracking-wider text-green-800 dark:text-green-400">
                           {tDynamic('Custo apurado desta produção')}
                         </p>
                         <div className="mt-2 flex items-baseline justify-between">
@@ -544,7 +544,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                         )}
                       </div>
 
-                      <p className="mt-3 text-[11px] leading-relaxed text-gray-400">
+                      <p className="mt-3 text-xs opacity-95 leading-relaxed text-gray-400">
                         {tDynamic('Esse custo já entra nas fichas técnicas dos pratos que usam este preparo.')}
                       </p>
                     </>
@@ -569,13 +569,13 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                      <button onClick={() => setMultProducao(m => Math.max(1, m - 1))} className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-black text-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">-</button>
                      <div className="text-center w-24">
                        <span className="text-5xl font-black text-orange-600 dark:text-orange-500">{multProducao}x</span>
-                       <span className="block text-[10px] uppercase font-bold text-gray-400 mt-1">Lotes</span>
+                       <span className="block text-xs opacity-90 uppercase font-bold text-gray-400 mt-1">Lotes</span>
                      </div>
                      <button onClick={() => setMultProducao(m => m + 1)} className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-black text-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">+</button>
                   </div>
 
                   <div className="bg-orange-50 dark:bg-orange-900/10 rounded-2xl p-4 border border-orange-100 dark:border-orange-900/30 mb-6 max-h-32 overflow-y-auto">
-                    <p className="text-[10px] uppercase font-black text-orange-800 dark:text-orange-400 mb-2">{tDynamic('Resumo da Produção:')}</p>
+                    <p className="text-xs opacity-90 uppercase font-black text-orange-800 dark:text-orange-400 mb-2">{tDynamic('Resumo da Produção:')}</p>
                     <ul className="space-y-1.5">
                        {((produzindo as any).fichas_preparos || []).map((f: any, idx: number) => {
                           const i = insumosTotais.find(x => x.id === f.insumo_id);

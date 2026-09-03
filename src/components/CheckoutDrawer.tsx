@@ -407,12 +407,12 @@ export default function CheckoutDrawer({
                     {item.produto.nome}
                   </p>
                   {item.opcoesSelecionadas?.length > 0 && (
-                    <p className="text-[11px] text-gray-400 truncate mt-0.5">
+                    <p className="text-xs opacity-95 text-gray-400 truncate mt-0.5">
                       {item.opcoesSelecionadas.map((o) => o.nome).join(', ')}
                     </p>
                   )}
                   {item.observacao && (
-                    <p className="text-[11px] italic text-gray-400 mt-0.5">"{item.observacao}"</p>
+                    <p className="text-xs opacity-95 italic text-gray-400 mt-0.5">"{item.observacao}"</p>
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -682,7 +682,7 @@ export default function CheckoutDrawer({
                       <Wallet size={16} style={{ color: 'var(--cor-primaria-texto)' }} />
                       <span>
                         <span className="block text-sm font-bold dark:text-gray-100">Usar meu cashback</span>
-                        <span className="block text-[11px] text-gray-400">Você tem {fmt(saldoCashback)} de saldo nesta loja</span>
+                        <span className="block text-xs opacity-95 text-gray-400">Você tem {fmt(saldoCashback)} de saldo nesta loja</span>
                       </span>
                     </span>
                     <span className={`flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors ${usarCashback ? 'bg-[var(--cor-primaria)]' : 'bg-gray-300 dark:bg-gray-600'}`}>
@@ -703,7 +703,7 @@ export default function CheckoutDrawer({
 
                   {metodosOnline.length > 0 && (
                     <div className="mb-3">
-                      <p className="mb-1.5 flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <p className="mb-1.5 flex items-center gap-1 text-xs opacity-95 font-bold text-emerald-600 dark:text-emerald-400">
                         <Lock size={11} /> Pague agora (online)
                       </p>
                       <div className="grid grid-cols-2 gap-2">
@@ -723,7 +723,7 @@ export default function CheckoutDrawer({
 
                   {metodosEntrega.length > 0 && (
                     <div>
-                      <p className="mb-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400">{tDynamic('Pague na entrega')}</p>
+                      <p className="mb-1.5 text-xs opacity-95 font-bold text-gray-500 dark:text-gray-400">{tDynamic('Pague na entrega')}</p>
                       <div className="grid grid-cols-2 gap-2">
                         {metodosEntrega.map((m) => (
                           <button key={m} onClick={() => setMetodo(m)}
@@ -783,7 +783,7 @@ export default function CheckoutDrawer({
                     </span>
                   </div>
                   {(loja.cashback_pct ?? 0) > 0 && totalAntesCashback > 0 && (
-                    <p className="pt-1 text-[11px] text-gray-400">
+                    <p className="pt-1 text-xs opacity-95 text-gray-400">
                       Você ganha {fmt(Math.round(totalAntesCashback * Number(loja.cashback_pct) / 100 * 100) / 100)} de cashback nesta compra.
                     </p>
                   )}
@@ -821,7 +821,7 @@ export default function CheckoutDrawer({
                     ? `Agendar para ${diasDisponiveis.find((d) => d.data === diaAgendado)?.label} ${horaAgendada} - ${fmt(total)}`
                     : `Finalizar Pedido - ${fmt(total)}`}
                 </button>
-                <p className="pb-4 text-center text-[10px] text-gray-400">
+                <p className="pb-4 text-center text-xs opacity-90 text-gray-400">
                   {tDynamic('Ao finalizar você concorda com os termos de uso.')}
                 </p>
               </>

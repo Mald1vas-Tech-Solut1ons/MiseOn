@@ -338,7 +338,7 @@ export default function ModalMinhaConta({
                                   </p>
                                   <p className="text-xs text-gray-500 dark:text-gray-400">{end.bairro} - {end.cidade}/{end.uf}</p>
                                   {end.padrao && (
-                                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--cor-primaria)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--cor-primaria-texto)]">
+                                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--cor-primaria)]/10 px-2 py-0.5 text-xs opacity-90 font-bold text-[var(--cor-primaria-texto)]">
                                       <CheckCircle2 size={10} /> {tDynamic('Endereço Padrão')}
                                     </span>
                                   )}
@@ -401,7 +401,7 @@ export default function ModalMinhaConta({
                       <div key={p.id} className="rounded-xl border p-4 dark:border-gray-800 dark:bg-gray-950">
                         <div className="flex items-center justify-between border-b pb-2 dark:border-gray-800">
                           <span className="font-bold text-gray-900 dark:text-white">{tDynamic('Pedido')} #{p.numero}</span>
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-bold ${
                             p.status === 'FINALIZADO' ? 'bg-green-100 text-green-700' :
                             p.status === 'CANCELADO' ? 'bg-red-100 text-red-700' :
                             'bg-blue-100 text-blue-700'

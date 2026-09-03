@@ -511,7 +511,7 @@ export default function Home() {
 
               {solucoesOpen && (
                 <div className="absolute top-full -left-4 mt-2 w-80 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0B1120]/95 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="mb-2 px-3 pt-1 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                  <div className="mb-2 px-3 pt-1 text-xs opacity-95 font-black uppercase tracking-wider text-slate-400">
                     {tDynamic('Soluções por Nicho')}
                   </div>
                   <div className="space-y-1">
@@ -526,9 +526,9 @@ export default function Home() {
                       <div>
                         <div className="flex items-center gap-1.5 text-xs font-bold text-gray-900 dark:text-white group-hover:text-emerald-400">
                           {tDynamic('Restaurantes por Quilo')}
-                          <span className="rounded-full bg-emerald-500 px-1.5 py-0.2 text-[9px] font-black text-slate-950">{tDynamic('NOVO')}</span>
+                          <span className="rounded-full bg-emerald-500 px-1.5 py-0.2 text-xs opacity-80 font-black text-slate-950">{tDynamic('NOVO')}</span>
                         </div>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic('Peso Inteligente R$/kg e Ficha Técnica')}</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{tDynamic('Peso Inteligente R$/kg e Ficha Técnica')}</p>
                       </div>
                     </Link>
                     <Link
@@ -541,7 +541,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-orange-400">{tDynamic('Hamburguerias')}</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic('Chapa KDS, adicionais e blends')}</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{tDynamic('Chapa KDS, adicionais e blends')}</p>
                       </div>
                     </Link>
                     <Link
@@ -554,7 +554,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-emerald-400">{tDynamic('Pizzarias')}</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic('KDS de forno, delivery e motoboys')}</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{tDynamic('KDS de forno, delivery e motoboys')}</p>
                       </div>
                     </Link>
                     <Link
@@ -567,7 +567,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-blue-400">{tDynamic('Lanchonetes')}</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic('PDV balcão express e caixa por turno')}</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{tDynamic('PDV balcão express e caixa por turno')}</p>
                       </div>
                     </Link>
                     <Link
@@ -580,7 +580,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-amber-400">{tDynamic('Restaurantes & Bares')}</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic('Garçom no celular e mapa de mesas')}</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{tDynamic('Garçom no celular e mapa de mesas')}</p>
                       </div>
                     </Link>
                   </div>
@@ -605,7 +605,7 @@ export default function Home() {
 
               {recursosOpen && (
                 <div className="absolute top-full -left-4 mt-2 w-80 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0B1120]/95 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="mb-2 px-3 pt-1 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                  <div className="mb-2 px-3 pt-1 text-xs opacity-95 font-black uppercase tracking-wider text-slate-400">
                     {tDynamic('Recursos em Destaque')}
                   </div>
                   <div className="space-y-1">
@@ -619,7 +619,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-emerald-400">WhatsApp IA Oficial Meta</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">Atendimento inteligente automatizado</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">Atendimento inteligente automatizado</p>
                       </div>
                     </Link>
                     <Link
@@ -632,7 +632,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-rose-400">{tDynamic("Integração iFood")}</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic("Margem protegida e comanda completa")}</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{tDynamic("Margem protegida e comanda completa")}</p>
                       </div>
                     </Link>
                     <Link
@@ -645,7 +645,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-orange-400">{tDynamic("Cardápio QR Code")}</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic("Autoatendimento direto na mesa sem taxas")}</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{tDynamic("Autoatendimento direto na mesa sem taxas")}</p>
                       </div>
                     </Link>
                     <Link
@@ -658,7 +658,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-blue-400">{tDynamic("Emissão Fiscal NFC-e")}</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">FocusNFe nativo e integrado</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">FocusNFe nativo e integrado</p>
                       </div>
                     </Link>
                     <Link
@@ -671,7 +671,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-purple-400">Estoque 3D & Preparos</p>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400">{tDynamic("Fichas técnicas, lotes e gráfico 3D")}</p>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{tDynamic("Fichas técnicas, lotes e gráfico 3D")}</p>
                       </div>
                     </Link>
                   </div>
@@ -705,7 +705,7 @@ export default function Home() {
 
               {conteudoOpen && (
                 <div className="absolute top-full -left-4 mt-2 w-72 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0B1120]/95 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="mb-2 px-3 pt-1 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                  <div className="mb-2 px-3 pt-1 text-xs opacity-95 font-black uppercase tracking-wider text-slate-400">
                     {t('nav.conteudoTitulo')}
                   </div>
                   <div className="space-y-1">
@@ -727,7 +727,7 @@ export default function Home() {
                           </div>
                           <div>
                             <p className="text-xs font-bold text-gray-900 dark:text-white">{item.titulo}</p>
-                            <p className="text-[11px] text-gray-500 dark:text-slate-400">{item.desc}</p>
+                            <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{item.desc}</p>
                           </div>
                         </a>
                       ) : (
@@ -742,7 +742,7 @@ export default function Home() {
                           </div>
                           <div>
                             <p className="text-xs font-bold text-gray-900 dark:text-white">{item.titulo}</p>
-                            <p className="text-[11px] text-gray-500 dark:text-slate-400">{item.desc}</p>
+                            <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{item.desc}</p>
                           </div>
                         </Link>
                       )
@@ -812,7 +812,7 @@ export default function Home() {
         {menuAberto && (
           <div className="border-t border-gray-200/70 bg-white/95 px-4 pb-5 pt-3 backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#070C18]/95">
             <div className="flex flex-col gap-1">
-              <div className="px-3 py-1 text-[11px] font-black uppercase text-slate-400">{t('nav.solucoes')}</div>
+              <div className="px-3 py-1 text-xs opacity-95 font-black uppercase text-slate-400">{t('nav.solucoes')}</div>
               {[
                 { to: '/sistema-para-restaurante-por-quilo', icone: <Scale size={16} />, rotulo: 'Restaurantes por Quilo', novo: true },
                 { to: '/sistema-para-hamburgueria', icone: <ChefHat size={16} />, rotulo: 'Hamburguerias' },
@@ -829,12 +829,12 @@ export default function Home() {
                   <span className="text-gray-400 dark:text-slate-400">{i.icone}</span>
                   {i.rotulo}
                   {i.novo && (
-                    <span className="rounded-full bg-emerald-500 px-1.5 py-0.5 text-[9px] font-black text-slate-950">NOVO</span>
+                    <span className="rounded-full bg-emerald-500 px-1.5 py-0.5 text-xs opacity-80 font-black text-slate-950">NOVO</span>
                   )}
                 </Link>
               ))}
 
-              <div className="mt-2 px-3 py-1 text-[11px] font-black uppercase text-slate-400">{t('nav.navegacao')}</div>
+              <div className="mt-2 px-3 py-1 text-xs opacity-95 font-black uppercase text-slate-400">{t('nav.navegacao')}</div>
               <a href="#como-funciona" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
                 <span className="text-gray-400 dark:text-slate-400"><Compass size={16} /></span> {t('nav.comoFunciona')}
               </a>
@@ -1101,7 +1101,7 @@ export default function Home() {
                       <h3 className="font-['Sora'] text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
                         {tDynamic('Restaurantes a Quilo & Buffet Self-Service')}
                       </h3>
-                      <span className="rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-black uppercase text-slate-950">
+                      <span className="rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs opacity-90 font-black uppercase text-slate-950">
                         {tDynamic('NOVO MÓDULO')}
                       </span>
                     </div>
@@ -1243,7 +1243,7 @@ export default function Home() {
               <div className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-[#1877F2]/20 bg-[#1877F2]/10 px-3 py-1.5 shadow-[0_0_15px_rgba(24,119,242,0.15)] backdrop-blur-sm">
                 <BadgeCheck size={18} fill="#1877F2" stroke="white" strokeWidth={1.5} />
                 <span className="font-['Sora'] text-[13px] font-extrabold text-white">Meta Verified</span>
-                <span className="text-[11px] font-medium text-emerald-100/60 ml-1">— {tDynamic('Parceiro Oficial')}</span>
+                <span className="text-xs opacity-95 font-medium text-emerald-100/60 ml-1">— {tDynamic('Parceiro Oficial')}</span>
               </div>
               <div className="mt-8">
                 <Link
@@ -1438,7 +1438,7 @@ export default function Home() {
               <div className="rounded-2xl border border-white/10 bg-black/40 p-6 backdrop-blur-md">
                 <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
                   <span className="text-xs font-bold uppercase text-emerald-400">{tDynamic('Simulação de Venda por Peso')}</span>
-                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">PDV Express</span>
+                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs opacity-90 font-bold text-emerald-300">PDV Express</span>
                 </div>
                 <div className="space-y-3 text-xs">
                   <div className="flex justify-between rounded-xl bg-white/5 p-3">
@@ -1497,7 +1497,7 @@ export default function Home() {
                   <div key={p.n} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                     <div className="font-['Sora'] text-2xl font-black text-orange-400">{p.n}</div>
                     <div className="mt-1 text-sm font-bold text-white">{p.t}</div>
-                    <div className="mt-0.5 text-[11px] leading-snug text-orange-100/60">{p.d}</div>
+                    <div className="mt-0.5 text-xs opacity-95 leading-snug text-orange-100/60">{p.d}</div>
                   </div>
                 ))}
               </div>
@@ -1578,7 +1578,7 @@ export default function Home() {
                   <Database size={28} />
                 </div>
                 <div className="mt-5">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-blue-400">Pilar 01</span>
+                  <span className="text-xs opacity-95 font-black uppercase tracking-wider text-blue-400">Pilar 01</span>
                   <h3 className="mt-1 font-['Sora'] text-xl font-bold text-white">
                     Cadastro & Fracionamento Inteligente
                   </h3>
@@ -1595,7 +1595,7 @@ export default function Home() {
                     <span>{tDynamic("Conversão de Uso:")}</span>
                     <span className="font-bold text-emerald-400">Gramas (g) / ML / Fatias</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-amber-300 border-t border-white/10 pt-2">
+                  <div className="flex items-center gap-1.5 text-xs opacity-95 text-amber-300 border-t border-white/10 pt-2">
                     <AlertTriangle size={13} className="shrink-0" />
                     <span>{tDynamic("Alerta automático de estoque crítico/risco.")}</span>
                   </div>
@@ -1610,7 +1610,7 @@ export default function Home() {
                   <FlaskConical size={28} />
                 </div>
                 <div className="mt-5">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-orange-400">Pilar 02</span>
+                  <span className="text-xs opacity-95 font-black uppercase tracking-wider text-orange-400">Pilar 02</span>
                   <h3 className="mt-1 font-['Sora'] text-xl font-bold text-white">
                     {tDynamic('Receitas Base & Validade de Lotes')}
                   </h3>
@@ -1629,7 +1629,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center justify-between text-[#FF4D4D] border-t border-white/10 pt-2 font-bold">
                     <span>{tDynamic("Sinalização de Risco:")}</span>
-                    <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px]">LOTE VENCIDO</span>
+                    <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-xs opacity-90">LOTE VENCIDO</span>
                   </div>
                 </div>
               </div>
@@ -1642,7 +1642,7 @@ export default function Home() {
                   <Eye size={28} />
                 </div>
                 <div className="mt-5">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-purple-400">Pilar 03</span>
+                  <span className="text-xs opacity-95 font-black uppercase tracking-wider text-purple-400">Pilar 03</span>
                   <h3 className="mt-1 font-['Sora'] text-xl font-bold text-white">
                     {tDynamic('Observabilidade 3D de Estoque Físico')}
                   </h3>
@@ -1753,7 +1753,7 @@ export default function Home() {
                     <p className="font-['Sora'] text-sm font-bold text-gray-900 dark:text-white">{d.nome}</p>
                     <p className="text-xs font-medium text-[var(--cor-primaria)]">{d.negocio}</p>
                   </div>
-                  <span className="rounded-full bg-gray-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:bg-white/10 dark:text-gray-400 max-w-[120px] text-right">
+                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs opacity-90 font-bold uppercase tracking-wider text-gray-500 dark:bg-white/10 dark:text-gray-400 max-w-[120px] text-right">
                     {d.perfil}
                   </span>
                 </div>
@@ -1811,11 +1811,11 @@ export default function Home() {
                 
                 <div>
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="inline-flex rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-300">
+                    <span className="inline-flex rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs opacity-90 font-black uppercase tracking-widest text-emerald-300">
                       ✨ 30 Dias Grátis Sem Cartão
                     </span>
                     {planoAnual && (
-                      <span className="inline-flex rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-lg">
+                      <span className="inline-flex rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-3 py-1 text-xs opacity-90 font-black uppercase tracking-widest text-white shadow-lg">
                         {tDynamic('Mais Recomendado')}
                       </span>
                     )}
@@ -1830,7 +1830,7 @@ export default function Home() {
                   {planoAnual ? (
                     <div className="flex items-center gap-3 mb-1">
                       <span className="text-sm font-medium text-slate-500 line-through">{tDynamic("R$ 169,90/mês")}</span>
-                      <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold tracking-wider text-emerald-400 uppercase">Economize R$ 240,00/ano</span>
+                      <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs opacity-90 font-bold tracking-wider text-emerald-400 uppercase">Economize R$ 240,00/ano</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 mb-1">
@@ -1855,7 +1855,7 @@ export default function Home() {
                   >
                     {tDynamic('Testar 30 Dias Grátis')} <ArrowRight size={18} />
                   </Link>
-                  <p className="mt-4 text-center text-[11px] font-medium text-slate-400">
+                  <p className="mt-4 text-center text-xs opacity-95 font-medium text-slate-400">
                     <strong className="text-slate-200">{tDynamic("Sem cartão no cadastro.")}</strong> {tDynamic('Tolerância de 7 dias pós-vencimento.')}
                   </p>
                 </div>
@@ -1958,7 +1958,7 @@ export default function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
               <div>
-                <span className="text-[10px] font-black uppercase text-[#FC5B24]">{tDynamic("Gestão Financeira")}</span>
+                <span className="text-xs opacity-90 font-black uppercase text-[#FC5B24]">{tDynamic("Gestão Financeira")}</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
                   {tDynamic('A Evolução do CMV: Do Caderno ao Custeio PEPS 3D')}
                 </h3>
@@ -1973,7 +1973,7 @@ export default function Home() {
 
             <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
               <div>
-                <span className="text-[10px] font-black uppercase text-blue-400">{tDynamic("Operação & KDS")}</span>
+                <span className="text-xs opacity-90 font-black uppercase text-blue-400">{tDynamic("Operação & KDS")}</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
                   {tDynamic('O Fim do Papel na Cozinha com KDS Kanban')}
                 </h3>
@@ -1988,7 +1988,7 @@ export default function Home() {
 
             <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
               <div>
-                <span className="text-[10px] font-black uppercase text-emerald-400">Tecnologia & IA</span>
+                <span className="text-xs opacity-90 font-black uppercase text-emerald-400">Tecnologia & IA</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
                   {tDynamic('IA no WhatsApp: Conexão Oficial Meta vs Bots Amadores')}
                 </h3>
@@ -2003,7 +2003,7 @@ export default function Home() {
 
             <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
               <div>
-                <span className="text-[10px] font-black uppercase text-amber-400">{tDynamic("Restaurante por Quilo")}</span>
+                <span className="text-xs opacity-90 font-black uppercase text-amber-400">{tDynamic("Restaurante por Quilo")}</span>
                 <h3 className="mt-2 font-['Sora'] text-base font-bold text-white leading-snug">
                   {tDynamic('Perda de Cocção & Peso Inteligente no Buffet')}
                 </h3>
@@ -2021,7 +2021,7 @@ export default function Home() {
           <div className="mt-12 rounded-3xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-blue-500/10 p-8 backdrop-blur-xl">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
-                <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-orange-300">
+                <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs opacity-90 font-black uppercase tracking-wider text-orange-300">
                   🖋️ Escreva para o Blog MiseOn
                 </span>
                 <h3 className="mt-2 font-['Sora'] text-2xl font-bold text-white">

@@ -381,7 +381,7 @@ export default function AcompanharPedido() {
               </div>
               {!cancelado && (
                 <div className="min-w-[120px] rounded-2xl bg-white/10 px-4 py-3 text-center">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/65">{tDynamic('Progresso')}</p>
+                  <p className="text-xs opacity-95 font-semibold uppercase tracking-wider text-white/65">{tDynamic('Progresso')}</p>
                   <p className="mt-1 text-2xl font-black">{progresso}%</p>
                 </div>
               )}
@@ -505,7 +505,7 @@ export default function AcompanharPedido() {
                   <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--cor-texto-fraco)' }}>Live tracking</p>
                   <p className="font-bold" style={{ color: 'var(--cor-texto)' }}>{tDynamic('Seu entregador está em rota')}</p>
                 </div>
-                <span className="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" style={{ background: 'var(--cor-primaria)' }}>Ao vivo</span>
+                <span className="rounded-full px-2.5 py-1 text-xs opacity-95 font-bold text-white" style={{ background: 'var(--cor-primaria)' }}>Ao vivo</span>
               </div>
               <MapContainer center={[posicao.lat, posicao.lng]} zoom={15} style={{ height: 280, width: '100%' }}>
                 <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

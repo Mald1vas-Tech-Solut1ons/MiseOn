@@ -379,7 +379,7 @@ export default function Tenants() {
                     </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3">
-                    <span className={`text-[11px] font-bold uppercase px-2 py-1 rounded-md ${
+                    <span className={`text-xs opacity-95 font-bold uppercase px-2 py-1 rounded-md ${
                       f.nfse_status === 'emitida' ? 'bg-emerald-400/10 text-emerald-400'
                       : f.nfse_status === 'erro' ? 'bg-red-400/10 text-red-400'
                       : 'bg-gray-400/10 text-gray-400'
@@ -464,7 +464,7 @@ export default function Tenants() {
                   return (
                     <div key={i} className={`max-w-[85%] rounded-2xl p-3 text-sm ${isMinha ? 'self-end rounded-tr-none bg-indigo-500/20 border border-indigo-500/30 text-indigo-100' : 'self-start rounded-tl-none bg-white/10 text-gray-200'}`}>
                       <p>{msg.texto}</p>
-                      <span className={`text-[10px] mt-1 block ${isMinha ? 'text-indigo-400/50 text-right' : 'text-gray-500'}`}>
+                      <span className={`text-xs opacity-90 mt-1 block ${isMinha ? 'text-indigo-400/50 text-right' : 'text-gray-500'}`}>
                         {new Date(msg.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>

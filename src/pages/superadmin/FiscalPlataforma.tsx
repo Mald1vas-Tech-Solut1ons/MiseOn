@@ -146,7 +146,7 @@ export default function FiscalPlataforma() {
 
         <div className="rounded-2xl border border-dashed border-white/10 p-4">
           <p className="text-sm font-bold text-white mb-1">{tDynamic('Enquadramento de serviço (CNAE 62.01-5-01)')}</p>
-          <p className="mb-4 flex items-center gap-1.5 text-[11px] text-amber-300/90">
+          <p className="mb-4 flex items-center gap-1.5 text-xs opacity-95 text-amber-300/90">
             <Info size={14} /> Emissora: Maldivas Tech · CNPJ 68.923.239/0001-77 · São Paulo/SP · Simples
             Nacional. Pendente antes de habilitar produção: inscrição municipal (CCM de São Paulo),
             certificado digital A1, e o código de tributação nacional + item LC 116 do serviço de software
@@ -268,7 +268,7 @@ export default function FiscalPlataforma() {
             </label>
           </div>
           {config.certificado_status === 'valido' && (
-            <p className="mt-3 text-[11px] text-emerald-400 font-semibold">
+            <p className="mt-3 text-xs opacity-95 text-emerald-400 font-semibold">
               {tDynamic('Certificado já configurado. Só preencha acima se precisar renovar/atualizar.')}
             </p>
           )}
