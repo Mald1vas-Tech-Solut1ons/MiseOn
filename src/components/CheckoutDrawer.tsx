@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { User } from '@supabase/supabase-js';
 import {
-  ShoppingBag, Plus, Minus, X, MapPin, LogIn, Lock,
+  ShoppingBag, Plus, Minus, X, MapPin, LogIn, Lock, Mail,
   Trash2, ChevronRight, Loader2, CalendarClock, Wallet,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -454,14 +454,27 @@ export default function CheckoutDrawer({
                 <ShoppingBag size={32} className="mx-auto mb-3 text-gray-300" />
                 <p className="text-sm font-bold dark:text-gray-200">{tDynamic('Faça login para finalizar')}</p>
                 <p className="mt-1 text-xs text-gray-400">
-                  {tDynamic('Usamos sua conta Google para salvar seu endereço e histórico de pedidos.')}
+                  {tDynamic('Sua conta guarda seu endereço e o histórico de pedidos.')}
                 </p>
+                {/* Exigir conta Google no checkout custa venda: muito cliente pede
+                    do celular logado noutra conta, ou simplesmente nao tem. O
+                    ModalAuthCliente ja fazia e-mail com senha, cadastro e entrada
+                    sem senha (link no e-mail) — so nao estava oferecido aqui. */}
+                <button
+                  onClick={onAbrirAuth}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white hover:brightness-110 transition-all"
+                >
+                  <Mail size={16} /> {tDynamic('Entrar com e-mail')}
+                </button>
                 <button
                   onClick={() => entrarComGoogle(window.location.href)}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white hover:brightness-110 transition-all"
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
                 >
                   <LogIn size={16} /> {tDynamic('Entrar com Google')}
                 </button>
+                <p className="mt-3 text-xs text-gray-400">
+                  {tDynamic('Não tem conta? Você cria na hora, com e-mail e senha.')}
+                </p>
               </div>
             ) : !perfilCarregado ? (
               <p className="py-4 text-center text-sm text-gray-400">Carregando seus dados...</p>

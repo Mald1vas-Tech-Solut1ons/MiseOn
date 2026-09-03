@@ -271,6 +271,10 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // Login do cliente no checkout
+  'Entrar com e-mail': 'Sign in with e-mail',
+  'Sua conta guarda seu endereço e o histórico de pedidos.': 'Your account keeps your address and order history.',
+  'Não tem conta? Você cria na hora, com e-mail e senha.': 'No account yet? Create one right here with e-mail and password.',
   // Cashback e copia de codigo (tela de Marketing)
   'Copiar': 'Copy',
   'Copiado!': 'Copied!',
