@@ -95,6 +95,16 @@ export default function AdminLayout() {
     prevPathRef.current = loc.pathname;
   }, [loc.pathname]);
 
+  // Auto-scroll inteligente: garante que a funcionalidade ativa esteja visível na sidebar
+  useEffect(() => {
+    setTimeout(() => {
+      const el = document.querySelector('.is-active');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 300);
+  }, [loc.pathname]);
+
   useEffect(() => {
     let minLoadTimer: NodeJS.Timeout;
     if (!isMinLoadingDone) {
@@ -349,22 +359,24 @@ export default function AdminLayout() {
   const innerRouteTitle = mais.find(m => m.to === loc.pathname)?.label;
 
   const renderSidebarLink = (r: RouteDef, onClick?: () => void) => {
+    const isLinkActive = loc.pathname === r.to || loc.pathname.startsWith(r.to + '/');
     return (
       <NavLink
         key={r.to}
         to={r.to}
         onClick={onClick}
+        id={`nav-link-${r.to.replace(/\//g, '-')}`}
         style={{ '--route-color': r.colorHex } as React.CSSProperties}
-        className={({ isActive }) => `
+        className={() => `
           group relative flex items-center gap-3 px-3.5 py-3 mx-3 my-1 rounded-2xl text-sm font-semibold transition-all duration-500 overflow-hidden
-          nav-link-premium ${isActive ? 'is-active' : ''}
+          nav-link-premium ${isLinkActive ? 'is-active' : ''}
         `}
       >
-        {({ isActive }) => (
+        {() => (
           <>
             <div className="nav-link-bg absolute inset-0 opacity-0 transition-all duration-500 pointer-events-none rounded-2xl" />
 
-            <div className={`nav-link-icon relative z-10 flex-shrink-0 transition-transform duration-500 ease-out ${isActive ? 'scale-110 drop-shadow-md' : 'group-hover:scale-110'}`}>
+            <div className={`nav-link-icon relative z-10 flex-shrink-0 transition-transform duration-500 ease-out ${isLinkActive ? 'scale-110 drop-shadow-md' : 'group-hover:scale-110'}`}>
               {r.icon}
             </div>
 
