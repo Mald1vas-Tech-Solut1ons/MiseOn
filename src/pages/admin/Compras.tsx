@@ -12,7 +12,7 @@
  * com a mesma intensidade.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   ShoppingCart, CheckCircle2, Circle, PackageCheck, Loader2, AlertTriangle,
@@ -145,6 +145,16 @@ export default function Compras() {
     });
   }, [sugestoes]);
 
+  // A barra de acao e `fixed`, entao nao ocupa espaco no fluxo: sem reservar a
+  // altura dela, ela deita por cima do ultimo item da lista. Medido em 03/09 num
+  // viewport de 554px de altura: mesmo com o scroll no fim, o campo de quantidade
+  // ficava embaixo da barra e `elementFromPoint` devolvia a barra — o lojista nao
+  // conseguia clicar. Padding fixo nao resolve: a barra quebra em duas linhas em
+  // tela estreita e muda de altura. Entao medimos quanto ela ocupa de fato do
+  // rodape (`innerHeight - topo`), que ja inclui a barra de navegacao embaixo dela.
+  const barraRef = useRef<HTMLDivElement>(null);
+  const [reservaRodape, setReservaRodape] = useState(32);
+
   const rupturas = sugestoes.filter(s => s.rupturaAntesDaEntrega);
   const marcados = sugestoes.filter(s => (selecao[s.insumo.id] ?? 0) > 0);
   const totalEstimado = marcados.reduce((acc, s) => {
@@ -226,12 +236,29 @@ export default function Compras() {
     }
   };
 
+  useLayoutEffect(() => {
+    const medir = () => {
+      const barra = barraRef.current;
+      if (!barra) return setReservaRodape(32);
+      const topo = barra.getBoundingClientRect().top;
+      setReservaRodape(Math.max(32, Math.round(window.innerHeight - topo) + 16));
+    };
+    medir();
+    const ro = barraRef.current ? new ResizeObserver(medir) : null;
+    if (ro && barraRef.current) ro.observe(barraRef.current);
+    window.addEventListener('resize', medir);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', medir);
+    };
+  }, [marcados.length, sugestoes.length]);
+
   if (carregando) {
     return <div className="flex h-64 items-center justify-center"><MiseOnLoader status="Lendo a despensa..." rows={2} /></div>;
   }
 
   return (
-    <div className="mx-auto max-w-5xl p-4 pb-32">
+    <div className="mx-auto max-w-5xl p-4" style={{ paddingBottom: reservaRodape }}>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-[var(--cor-primaria)]/10 p-3 text-[var(--cor-primaria)]">
@@ -445,7 +472,7 @@ export default function Compras() {
           )}
 
           {marcados.length > 0 && (
-            <div className="fixed bottom-16 left-0 z-30 w-full border-t border-gray-200 bg-white p-4 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] dark:border-gray-800 dark:bg-gray-900 lg:bottom-0 lg:pl-[280px]">
+            <div ref={barraRef} className="fixed bottom-16 left-0 z-30 w-full border-t border-gray-200 bg-white p-4 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] dark:border-gray-800 dark:bg-gray-900 lg:bottom-0 lg:pl-[280px]">
               <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-xl font-black text-gray-700 dark:bg-gray-800 dark:text-gray-300">
