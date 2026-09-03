@@ -31,6 +31,17 @@ type SenhaTV = {
  *  mesma coluna sem saber qual senha e de quem. */
 const ehEntrega = (p: SenhaTV) => p.tipo_pedido === 'DELIVERY';
 
+type PromoTV = {
+  tipo_item: 'BANNER' | 'CUPOM' | 'CASHBACK';
+  titulo: string | null;
+  imagem_url: string | null;
+  codigo: string | null;
+  desconto_tipo: string | null;
+  desconto_valor: number | null;
+  pedido_minimo: number | null;
+  validade: string | null;
+};
+
 export default function PainelTV() {
   const { tDynamic, idioma } = useI18n();
   const { slug } = useParams<{ slug: string }>();
@@ -56,6 +67,9 @@ export default function PainelTV() {
   // lojista concluia que o sistema nao chama ninguem — quando o que faltava
   // era o token na URL da TV.
   const [erroSenhas, setErroSenhas] = useState<string | null>(null);
+  // Banner, cupom e cashback cadastrados no Marketing. A TV do balcao e tela de
+  // venda: quem esta na fila precisa saber da promocao da casa.
+  const [promocoes, setPromocoes] = useState<PromoTV[]>([]);
 
   // ── Modo de exibicao: sobrevive a reboot da TV ────────────────────────────
   //
@@ -241,6 +255,14 @@ export default function PainelTV() {
     }
 
     if (peds) setPedidos(peds as SenhaTV[]);
+
+    // Promocoes usam a mesma porta do painel de senhas: `cupons` nao e legivel
+    // por anon (codigo exposto vira abuso), entao vem por RPC com token.
+    const { data: promos } = await supabase.rpc('fn_painel_tv_promocoes', {
+      p_slug: slug,
+      p_token: painelToken,
+    });
+    setPromocoes((promos as PromoTV[]) ?? []);
     setUltimaAtualizacao(Date.now());
     setOffline(false);
     setCarregando(false);
@@ -598,6 +620,46 @@ export default function PainelTV() {
       {/* ══════════ CONTEÚDO PRINCIPAL (MODO MENU BOARD) ══════════ */}
       {modoEfetivo === 'MENU_BOARD' && (
         <main className="my-auto grid grid-cols-12 gap-8 py-4 z-10">
+          {/* Faixa de promocoes da casa. Fica no topo das duas colunas porque a
+              fila do balcao olha a tela inteira, nao so o cardapio. */}
+          {promocoes.length > 0 && (
+            <div className="col-span-12 flex flex-wrap items-center gap-3">
+              {promocoes.map((promo, i) => {
+                if (promo.tipo_item === 'CASHBACK') {
+                  return (
+                    <span key={`p${i}`} className="flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/10 px-5 py-2.5 font-['Sora'] text-xl font-black text-emerald-300">
+                      <Sparkles size={20} className="text-emerald-300" />
+                      {tDynamic('Ganhe')} {Number(promo.desconto_valor ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}% {tDynamic('de volta em cada pedido')}
+                    </span>
+                  );
+                }
+                if (promo.tipo_item === 'CUPOM') {
+                  const vale = promo.desconto_tipo === 'PERCENTUAL'
+                    ? `${Number(promo.desconto_valor ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}% OFF`
+                    : `R$ ${Number(promo.desconto_valor ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} OFF`;
+                  return (
+                    <span key={`p${i}`} className="flex items-center gap-3 rounded-2xl border border-amber-400/40 bg-amber-500/10 px-5 py-2.5">
+                      <span className="font-['Sora'] text-xl font-black text-amber-300">{vale}</span>
+                      <span className="rounded-lg bg-amber-400/20 px-3 py-1 font-mono text-lg font-black tracking-widest text-amber-200">
+                        {promo.codigo}
+                      </span>
+                      {Number(promo.pedido_minimo ?? 0) > 0 && (
+                        <span className="text-xs font-semibold text-amber-200/70">
+                          {tDynamic('acima de')} R$ {Number(promo.pedido_minimo).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      )}
+                    </span>
+                  );
+                }
+                return (
+                  <span key={`p${i}`} className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-2.5 font-['Sora'] text-xl font-bold text-white">
+                    {promo.titulo}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
           {/* Lado Esquerdo: Carrossel do Cardápio */}
           <div className="col-span-9 space-y-6">
             {/* Header da Categoria Ativa */}
