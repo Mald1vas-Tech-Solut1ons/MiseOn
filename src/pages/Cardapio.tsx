@@ -1319,8 +1319,12 @@ const ProdutoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: Nut
           <SeloNutricional dados={nutricao} />
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-3 pt-2">
-          <div>
+        {/* Preco e botao dividem uma coluna estreita, ao lado da foto. Sem
+            `flex-wrap` e `shrink-0`, o botao nao cabia e escorregava para
+            DEBAIXO da foto: na vitrine aparecia "+ Adicio" cortado. Agora ele
+            quebra para a linha de baixo em vez de sumir. */}
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-2">
+          <div className="min-w-0">
             {temDesconto && (
               <p className="line-through text-xs font-bold text-gray-400 dark:text-gray-500">
                 De: {fmt(Number(p.preco_original))}
@@ -1336,7 +1340,7 @@ const ProdutoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: Nut
             </div>
           </div>
 
-          <span className="flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100/80 dark:bg-gray-800/80 px-3.5 py-1.5 text-xs font-bold text-[var(--cor-texto)] group-hover:border-[var(--cor-primaria)] group-hover:bg-[var(--cor-primaria)] group-hover:text-white shadow-sm transition-all">
+          <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100/80 dark:bg-gray-800/80 px-3.5 py-1.5 text-xs font-bold text-[var(--cor-texto)] group-hover:border-[var(--cor-primaria)] group-hover:bg-[var(--cor-primaria)] group-hover:text-white shadow-sm transition-all">
             <Plus size={15} /> Adicionar
           </span>
         </div>

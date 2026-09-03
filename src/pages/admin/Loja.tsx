@@ -206,6 +206,11 @@ export default function Loja() {
     }
     const r = data as { semeado?: boolean; produtos?: number; insumos?: number; motivo?: string } | null;
     if (r?.semeado) {
+      // Regras operacionais do nicho: o que NAO vai para a cozinha (bebida,
+      // borda, complemento) e o que e vendido por peso (buffet). Sem isso o KDS
+      // recebe "1 lata de refrigerante" como comanda de preparo, e um
+      // restaurante por quilo nasce com preco fixo — errado por definicao.
+      await supabase.rpc('fn_ajustar_operacao_nicho', { p_loja: lojaId });
       setTemProduto(true);
       setResultadoSeed(
         `${tDynamic('Pronto: cardápio base aplicado com')} ${r.produtos} ${tDynamic('produtos e')} ${r.insumos} ${tDynamic('insumos. Ajuste preços e estoque no Cardápio e no Estoque.')}`,

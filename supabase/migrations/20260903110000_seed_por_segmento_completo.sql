@@ -237,3 +237,35 @@ grant execute on function public.fn_semear_loja(uuid, text) to authenticated;
 
 comment on function public.fn_semear_loja(uuid, text) is
   'Base inicial do segmento: categorias, insumos, produtos com preco sugerido e ficha tecnica ligada. Estoque e custo de insumo nascem zerados; controla_estoque nasce falso. Nao roda em loja que ja tem produto.';
+
+-- ── Regras operacionais por nicho ─────────────────────────────────────────
+-- Aplicadas logo depois do seed (a tela de Configuracoes chama as duas em
+-- sequencia). Ficam separadas porque valem para qualquer loja, nao so para a
+-- recem-semeada: o lojista pode rodar de novo depois de mexer no cardapio.
+create or replace function public.fn_ajustar_operacao_nicho(p_loja uuid)
+returns jsonb language plpgsql security definer set search_path to 'public','pg_temp'
+as $function$
+declare v_direto int:=0; v_peso int:=0;
+begin
+  -- Refrigerante, borda, complemento e sobremesa pronta nao passam pela
+  -- cozinha. Sem isso o KDS recebe "1 lata de refrigerante" como comanda de
+  -- preparo e a cozinha aprende a ignorar a tela — que e como se perde pedido.
+  update produtos p set estacao_preparo='DIRETO'
+  from categorias c
+  where c.id = p.categoria_id and p.loja_id = p_loja
+    and c.nome in ('Bebidas','Bebidas sem Álcool','Complementos','Bordas',
+                   'Chopes e Cervejas','Drinks','Sobremesas','Açaí');
+  get diagnostics v_direto = row_count;
+
+  -- Buffet e venda POR PESO: preco fixo num restaurante por quilo esta errado
+  -- por definicao, e quebra a balanca.
+  update produtos set tipo_venda='POR_PESO', preco_por_quilo=preco, preco=0
+  where loja_id = p_loja and nome = 'Buffet por Quilo' and tipo_venda <> 'POR_PESO';
+  get diagnostics v_peso = row_count;
+
+  return jsonb_build_object('direto', v_direto, 'por_peso', v_peso);
+end;
+$function$;
+
+revoke all on function public.fn_ajustar_operacao_nicho(uuid) from public;
+grant execute on function public.fn_ajustar_operacao_nicho(uuid) to authenticated;
