@@ -3,7 +3,7 @@ import {
   QrCode, ClipboardList, ChefHat, Bike, Boxes, Wallet, ScanLine, HeartPulse, FileCode,
   MessageCircle, ShieldCheck, ArrowRight, Check, Sparkles,
   Menu as MenuIcon, X, UtensilsCrossed, Megaphone, ShoppingBag,
-  Mail, ChevronDown, Headset, BarChart3, Star, Quote, BadgeCheck, Scale,
+  Mail, ChevronDown, Headset, BarChart3, BadgeCheck, Scale, Quote, CheckCircle2,
   Database, FlaskConical, Eye, AlertTriangle, BookOpen,
   Globe, PlayCircle, Compass, Tv, Mic, ShoppingCart, Store,
 } from 'lucide-react';
@@ -12,6 +12,10 @@ import MiseOnLogo from '../components/MiseOnLogo';
 import SEO from '../components/SEO';
 import FooterSEO from '../components/FooterSEO';
 import FlipCard from '../components/ui/FlipCard';
+import DiagnosticoOperacional from '../components/home/DiagnosticoOperacional';
+import CalculadoraVazamento from '../components/home/CalculadoraVazamento';
+import DemonstracaoFluxo from '../components/home/DemonstracaoFluxo';
+import TabelaComparativaRealidade from '../components/home/TabelaComparativaRealidade';
 import { useI18n } from '../contexts/I18nContext';
 
 const WHATSAPP_CONTATO = '5511919889233';
@@ -282,27 +286,6 @@ const PASSOS = [
     n: 3,
     titulo: 'Compartilhe e receba pedidos',
     texto: 'Divulgue o link e o QR Code. Os pedidos caem no painel em tempo real — no balcão, na cozinha e na entrega.',
-  },
-];
-
-const DEPOIMENTOS = [
-  {
-    nome: 'Carlos M.',
-    negocio: 'Hamburgueria',
-    texto: 'Antes eu pagava 3 sistemas diferentes que não se conversavam e custavam uma fortuna. Com o MiseOn, centralizei PDV, entregas e a IA do WhatsApp. Economizei R$ 400/mês e a operação voa.',
-    perfil: 'Tinha sistema caro e complexo',
-  },
-  {
-    nome: 'Juliana T.',
-    negocio: 'Pizzaria Delivery',
-    texto: 'Eu usava caderninho e WhatsApp manual. Perdia pedido toda sexta-feira. Agora a IA atende e envia o cardápio, os pedidos caem direto na tela. Nunca mais perdi venda.',
-    perfil: 'Não tinha sistema',
-  },
-  {
-    nome: 'Roberto S.',
-    negocio: 'Restaurante e Bar',
-    texto: 'O sistema antigo não tinha tela na cozinha (KDS) nem ficha técnica decente. O MiseOn resolveu isso. Cada venda na mesa já dá baixa no estoque. Controle total, sem gambiarra.',
-    perfil: 'Tinha sistema incompleto',
   },
 ];
 
@@ -896,15 +879,20 @@ export default function Home() {
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              to="/cadastre-se"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105 hover:brightness-110 sm:w-auto"
-            >
-              {t('hero.ctaPrincipal')} <ArrowRight size={18} />
-            </Link>
+            <div className="flex flex-col items-center">
+              <Link
+                to="/cadastre-se"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 transition hover:scale-105 hover:brightness-110 sm:w-auto"
+              >
+                {t('hero.ctaPrincipal')} <ArrowRight size={18} />
+              </Link>
+              <span className="mt-2 text-xs font-semibold text-slate-400">
+                {tDynamic('30 dias. Todas as funcionalidades. Sem cartão e sem fidelidade.')}
+              </span>
+            </div>
             <a
-              href="#como-funciona"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-8 py-4 font-['Sora'] text-base font-bold text-white backdrop-blur-md transition hover:bg-white/15 sm:w-auto"
+              href="#demonstracao-fluxo"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-8 py-4 font-['Sora'] text-base font-bold text-white backdrop-blur-md transition hover:bg-white/15 sm:w-auto self-start sm:self-auto"
             >
               {t('hero.ctaSecundario')}
             </a>
@@ -984,6 +972,18 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ══════════ 3.1 DIAGNÓSTICO DA OPERAÇÃO REAL ══════════ */}
+      <DiagnosticoOperacional />
+
+      {/* ══════════ 3.2 CALCULADORA DE VAZAMENTO DE CAIXA ══════════ */}
+      <CalculadoraVazamento />
+
+      {/* ══════════ 3.3 DEMONSTRAÇÃO VISUAL EM 60 SEGUNDOS ══════════ */}
+      <DemonstracaoFluxo />
+
+      {/* ══════════ 3.4 TABELA COMPARATIVA DE REALIDADE OPERACIONAL ══════════ */}
+      <TabelaComparativaRealidade />
 
       {/* ══════════ 3.5 SEÇÃO VISUAL DE NICHOS E FUNCIONALIDADES ══════════ */}
       <section id="nichos" className="scroll-mt-24 bg-slate-900/40 py-20 backdrop-blur-sm border-b border-white/10">
@@ -1727,47 +1727,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══════════ 8. DEPOIMENTOS ══════════ */}
+      {/* ══════════ 8. TRANSPARÊNCIA E COMPROMISSO REAL ══════════ */}
       <section className="bg-white py-20 sm:py-24 dark:bg-transparent">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic("Histórias reais")}</span>
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="text-xs font-black uppercase tracking-widest text-[var(--cor-primaria)]">{tDynamic("Transparência Total")}</span>
             <h2 className="mt-3 font-['Sora'] text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-              {tDynamic('De quem já tentou de tudo, ou estava apenas começando')}
+              {tDynamic('Construído sem atrito, sem comissões e sem letras miúdas')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-slate-300">
-              Não importa se você usa um sistema caro, um sistema incompleto ou se ainda está no papel.
-              O MiseOn se adapta à sua realidade e transforma sua gestão.
+              {tDynamic('Não inventamos frases de efeito. Convidamos você a testar o MiseOn na rotina real do seu estabelecimento por 30 dias grátis e comprovar o controle absoluto da sua cozinha e do seu caixa.')}
             </p>
           </div>
 
-          <div className="mt-14 grid gap-6 md:grid-cols-3">
-            {DEPOIMENTOS.map((d, i) => (
-              <div key={i} className="relative flex flex-col justify-between rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
-                <Quote className="absolute right-6 top-6 text-gray-100 dark:text-white/5" size={60} />
-                <div className="relative">
-                  <div className="flex items-center gap-1 text-amber-400">
-                    <Star size={16} fill="currentColor" />
-                    <Star size={16} fill="currentColor" />
-                    <Star size={16} fill="currentColor" />
-                    <Star size={16} fill="currentColor" />
-                    <Star size={16} fill="currentColor" />
-                  </div>
-                  <p className="mt-5 text-sm leading-relaxed text-gray-700 dark:text-slate-300 italic">
-                    "{tDynamic(d.texto)}"
-                  </p>
-                </div>
-                <div className="relative mt-8 flex items-center justify-between border-t border-gray-100 pt-5 dark:border-white/10">
-                  <div>
-                    <p className="font-['Sora'] text-sm font-bold text-gray-900 dark:text-white">{d.nome}</p>
-                    <p className="text-xs font-medium text-[var(--cor-primaria)]">{d.negocio}</p>
-                  </div>
-                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs opacity-90 font-bold uppercase tracking-wider text-gray-500 dark:bg-white/10 dark:text-gray-400 max-w-[120px] text-right">
-                    {d.perfil}
-                  </span>
-                </div>
+          <div className="mt-12 grid gap-6 md:grid-cols-3 text-left">
+            <div className="rounded-3xl border border-gray-200 bg-white p-7 shadow-sm dark:border-white/10 dark:bg-white/5 backdrop-blur-md">
+              <div className="flex items-center gap-2 font-['Sora'] text-lg font-bold text-gray-900 dark:text-white">
+                <CheckCircle2 size={22} className="text-emerald-500" />
+                {tDynamic('Zero Cartão no Cadastro')}
               </div>
-            ))}
+              <p className="mt-3 text-xs leading-relaxed text-gray-600 dark:text-slate-300">
+                {tDynamic('Crie sua conta em 3 minutos e use todas as funcionalidades. Não pedimos cartão de crédito nem fazemos cobrança surpresa.')}
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-gray-200 bg-white p-7 shadow-sm dark:border-white/10 dark:bg-white/5 backdrop-blur-md">
+              <div className="flex items-center gap-2 font-['Sora'] text-lg font-bold text-gray-900 dark:text-white">
+                <CheckCircle2 size={22} className="text-emerald-500" />
+                {tDynamic('Sem Fidelidade Forçada')}
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-gray-600 dark:text-slate-300">
+                {tDynamic('O produto se mantém pela eficiência. Você pode cancelar sua assinatura mensal a qualquer momento sem multa ou burocracia.')}
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-gray-200 bg-white p-7 shadow-sm dark:border-white/10 dark:bg-white/5 backdrop-blur-md">
+              <div className="flex items-center gap-2 font-['Sora'] text-lg font-bold text-gray-900 dark:text-white">
+                <CheckCircle2 size={22} className="text-emerald-500" />
+                {tDynamic('Pix Direto na Sua Conta')}
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-gray-600 dark:text-slate-300">
+                {tDynamic('Integrado ao Efí Bank, o dinheiro das vendas em QR Code e WhatsApp cai direto na conta da sua empresa, sem intermediários.')}
+              </p>
+            </div>
           </div>
         </div>
       </section>
