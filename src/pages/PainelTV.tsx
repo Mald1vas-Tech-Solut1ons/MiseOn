@@ -51,6 +51,10 @@ export default function PainelTV() {
    *  pior que painel desligado — desligado, alguem vai conferir no balcao. */
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<number | null>(null);
   const [offline, setOffline] = useState(false);
+  // Motivo pelo qual as senhas nao vem. Sem isso o painel mostrava (0) e o
+  // lojista concluia que o sistema nao chama ninguem — quando o que faltava
+  // era o token na URL da TV.
+  const [erroSenhas, setErroSenhas] = useState<string | null>(null);
 
   // ── Modo de exibicao: sobrevive a reboot da TV ────────────────────────────
   //
@@ -220,8 +224,19 @@ export default function PainelTV() {
       p_token: painelToken,
     });
     if (erroSenhas) {
-      // Token ausente ou errado: a TV mostra o cardapio, mas sem senhas.
+      // Token ausente ou errado: a TV segue mostrando o cardapio, mas isso
+      // precisa APARECER. Antes so ia pro console e a tela exibia "(0)", que
+      // se confunde com "nao ha pedidos" — o lojista liga a TV no balcao,
+      // ve zero senha e acha que o produto nao funciona.
       console.error('Painel de senhas:', erroSenhas.message);
+      setErroSenhas(
+        /token/i.test(erroSenhas.message)
+          ? 'Esta TV precisa do link com token. Copie o endereço em Configurações da Loja › Painel de TV.'
+          : 'Não foi possível carregar as senhas agora.',
+      );
+      setPedidos([]);
+    } else {
+      setErroSenhas(null);
     }
 
     if (peds) setPedidos(peds as SenhaTV[]);
@@ -686,7 +701,16 @@ export default function PainelTV() {
 
       {/* ══════════ MODO EXCLUSIVO DE SENHAS (DUAS COLUNAS GIGANTES) ══════════ */}
       {modoEfetivo === 'SENHAS' && (
-        <main className="my-auto grid grid-cols-2 gap-8 py-4 z-10">
+        <main className="my-auto flex flex-col gap-6 py-4 z-10">
+          {erroSenhas && (
+            <div className="rounded-3xl border-2 border-amber-400/60 bg-amber-500/10 p-6 text-center">
+              <p className="font-['Sora'] text-2xl font-black uppercase tracking-wider text-amber-300">
+                {tDynamic('Painel de senhas indisponível')}
+              </p>
+              <p className="mt-2 text-base text-amber-100/80">{tDynamic(erroSenhas)}</p>
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-8">
           {/* Coluna 1: Em Preparação */}
           <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-8 flex flex-col h-[70vh]">
             <div className="flex items-center gap-3 border-b border-amber-500/20 pb-4 mb-6">
@@ -749,6 +773,7 @@ export default function PainelTV() {
                 </div>
               ))}
             </div>
+          </div>
           </div>
         </main>
       )}

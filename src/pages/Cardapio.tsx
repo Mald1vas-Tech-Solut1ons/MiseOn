@@ -1001,13 +1001,9 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
             <div className="flex w-full snap-x snap-mandatory overflow-x-auto hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {imgs.map((url, i) => (
                 <div key={i} className="min-w-full snap-center bg-black/5 dark:bg-black/40 flex items-center justify-center">
-                  <img
+                  <FotoProduto
                     src={getOptimizedImageUrl(url) || url || fotoPrincipal}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null;
-                      target.src = obterFotoFallback(produto.nome);
-                    }}
+                    fallback={obterFotoFallback(produto.nome)}
                     className="h-64 sm:h-72 w-full object-cover"
                     alt={`${produto.nome} - foto ${i+1}`}
                   />
@@ -1241,6 +1237,47 @@ function obterFotoFallback(nome: string): string {
   return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80';
 }
 
+/**
+ * Foto de produto com prazo para carregar.
+ *
+ * `onError` so dispara quando o servidor RESPONDE com falha. Se a URL externa
+ * simplesmente nao responde — foi o caso medido em 03/09, com 6 produtos
+ * apontando para loremflickr.com, que deu TIMEOUT — nenhum evento acontece: a
+ * imagem fica pendurada para sempre e o cardapio exibe um retangulo preto no
+ * lugar do prato. Numa vitrine, isso e venda perdida.
+ *
+ * Entao alem do onError existe um prazo: se a foto do lojista nao aparecer em
+ * `prazoMs`, entra a foto curada. Vale para qualquer URL externa, nao so para o
+ * placeholder de hoje — foto propria hospedada em servidor lento cai na mesma
+ * armadilha.
+ */
+function FotoProduto({
+  src, fallback, alt, className, prazoMs = 2500,
+}: { src: string; fallback: string; alt: string; className?: string; prazoMs?: number }) {
+  const [atual, setAtual] = useState(src);
+  const carregou = useRef(false);
+
+  useEffect(() => {
+    setAtual(src);
+    carregou.current = false;
+    if (!src || src === fallback) return;
+    const t = window.setTimeout(() => {
+      if (!carregou.current) setAtual(fallback);
+    }, prazoMs);
+    return () => window.clearTimeout(t);
+  }, [src, fallback, prazoMs]);
+
+  return (
+    <img
+      src={atual}
+      alt={alt}
+      className={className}
+      onLoad={() => { carregou.current = true; }}
+      onError={() => { carregou.current = true; setAtual(fallback); }}
+    />
+  );
+}
+
 function obterFotoProduto(p: Produto): string {
   const fotoCurada = obterFotoFallback(p.nome);
   // Se não tem imagem no banco ou se a imagem no banco não é curada em alta definição, usa a foto gastronômica curada
@@ -1266,13 +1303,9 @@ const MaisPedidoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: 
     >
       <div>
         <div className="relative mb-3.5 h-36 sm:h-44 w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800/80 shadow-sm flex items-center justify-center">
-          <img
+          <FotoProduto
             src={foto}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.onerror = null;
-              target.src = obterFotoFallback(p.nome);
-            }}
+            fallback={obterFotoFallback(p.nome)}
             className="vitrine-card-media h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             alt={p.nome}
           />
@@ -1384,13 +1417,9 @@ const ProdutoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: Nut
 
       {/* Coluna da Foto Gastronômica (Direita — Padrão iFood / Enterprise) */}
       <div className="relative h-32 w-32 sm:h-36 sm:w-36 shrink-0 overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800/80 shadow-sm flex items-center justify-center">
-        <img
+        <FotoProduto
           src={foto}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.onerror = null;
-            target.src = obterFotoFallback(p.nome);
-          }}
+          fallback={obterFotoFallback(p.nome)}
           className="vitrine-card-media h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           alt={p.nome}
         />

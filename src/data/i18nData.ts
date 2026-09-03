@@ -271,6 +271,10 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // Painel de senhas na TV do balcao
+  'Painel de senhas indisponível': 'Order-number board unavailable',
+  'Esta TV precisa do link com token. Copie o endereço em Configurações da Loja › Painel de TV.': 'This TV needs the link with a token. Copy the address in Store Settings › TV Board.',
+  'Não foi possível carregar as senhas agora.': 'Could not load the order numbers right now.',
   // Login do cliente no checkout
   'Entrar com e-mail': 'Sign in with e-mail',
   'Sua conta guarda seu endereço e o histórico de pedidos.': 'Your account keeps your address and order history.',
