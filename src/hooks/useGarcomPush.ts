@@ -35,7 +35,7 @@ export function useGarcomPush(lojaId?: string | null) {
 
     carregarChamados();
 
-    // Inscrever em canal Realtime do Supabase (Chamados + Pratos Prontos na Cozinha/Bar)
+    // Inscrever em canal Realtime do Supabase (Chamados + Pratos Prontos)
     const canal = supabase
       .channel(`garcom-chamados-${lojaId}`)
       .on(
@@ -58,7 +58,21 @@ export function useGarcomPush(lojaId?: string | null) {
         (payload) => {
           const ped = payload.new as any;
           if (ped.status === 'PRONTO') {
-            dispararAlertaPratoPronto(ped);
+            if ('vibrate' in navigator) {
+              try {
+                navigator.vibrate([150, 80, 150]);
+              } catch {
+                // Vibração desativada pelo navegador ou dispositivo
+              }
+            }
+            if ('Notification' in window && Notification.permission === 'granted') {
+              const mesa = ped.mesa_numero ? `Mesa #${ped.mesa_numero}` : ped.identificador_cliente || 'Salão';
+              new Notification('🍳 Prato / Drink Pronto!', {
+                body: `Pedido #${ped.numero} (${mesa}) está PRONTO!`,
+                icon: '/icon.png',
+                tag: `pronto-${ped.id}`,
+              });
+            }
           }
         }
       )
@@ -105,26 +119,6 @@ export function useGarcomPush(lojaId?: string | null) {
       osc.stop(ctx.currentTime + 0.3);
     } catch {
       // AudioContext pode ser bloqueado sem gesto prévio do usuário
-    }
-  };
-
-  const dispararAlertaPratoPronto = (pedido: any) => {
-    // Vibração tripla de confirmação no celular do garçom
-    if ('vibrate' in navigator) {
-      try {
-        navigator.vibrate([150, 80, 150, 80, 300]);
-      } catch {
-        // Vibração indisponível no navegador
-      }
-    }
-
-    if ('Notification' in window && Notification.permission === 'granted') {
-      const mesa = pedido.mesa_numero ? `Mesa #${pedido.mesa_numero}` : pedido.identificador_cliente || 'Salão';
-      new Notification('🍳 Prato / Drink Pronto!', {
-        body: `Pedido #${pedido.numero} (${mesa}) está PRONTO para ser servido!`,
-        icon: '/icon.png',
-        tag: `pronto-${pedido.id}`,
-      });
     }
   };
 
