@@ -13,7 +13,7 @@ export default function Login() {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [carregando, setCarregando] = useState(false);
-  const [modo, setModo] = useState<'SENHA' | 'MAGIC_LINK'>('SENHA');
+  const [modo, setModo] = useState<'SENHA' | 'MAGIC_LINK' | 'REDEFINIR'>('SENHA');
 
   const tratarErro = (error: any) => {
     if (error.message.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
@@ -52,6 +52,23 @@ export default function Login() {
       return;
     }
     setSucesso('Te enviamos um link mágico! Verifique sua caixa de entrada e clique nele para entrar sem senha.');
+  };
+
+  const enviarRedefinicaoSenha = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return setErro('Digite seu e-mail para receber o link de redefinição de senha.');
+    
+    setErro(''); setSucesso(''); setCarregando(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/redefinir-senha`,
+    });
+    setCarregando(false);
+
+    if (error) {
+      setErro('Erro ao enviar o e-mail. Verifique se o e-mail está correto.');
+      return;
+    }
+    setSucesso('Enviamos o e-mail de redefinição de senha! Abra sua caixa de entrada e clique no botão para criar sua senha nova.');
   };
 
   const entrarComGoogle = async () => {
@@ -107,7 +124,7 @@ export default function Login() {
             <div className="flex-1 border-t border-gray-200 dark:border-gray-800"></div>
           </div>
 
-          <form onSubmit={modo === 'SENHA' ? entrarComSenha : enviarMagicLink}>
+          <form onSubmit={modo === 'SENHA' ? entrarComSenha : modo === 'MAGIC_LINK' ? enviarMagicLink : enviarRedefinicaoSenha}>
             <div className="space-y-4">
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -143,18 +160,41 @@ export default function Login() {
               {carregando ? (
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
-                modo === 'SENHA' ? 'Entrar no Painel' : 'Enviar Link Mágico'
+                modo === 'SENHA' ? 'Entrar no Painel' : modo === 'MAGIC_LINK' ? 'Enviar Link Mágico' : 'Enviar E-mail de Redefinição'
               )}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <button 
-              onClick={() => { setModo(modo === 'SENHA' ? 'MAGIC_LINK' : 'SENHA'); setErro(''); setSucesso(''); }}
-              className="text-sm font-semibold text-[var(--cor-primaria)] hover:underline"
-            >
-              {modo === 'SENHA' ? 'Esqueceu a senha? Receba um link de acesso' : 'Voltar para login com senha'}
-            </button>
+          <div className="mt-6 flex flex-col items-center gap-2 text-center text-sm font-semibold">
+            {modo !== 'REDEFINIR' && (
+              <button 
+                type="button"
+                onClick={() => { setModo('REDEFINIR'); setErro(''); setSucesso(''); }}
+                className="text-[var(--cor-primaria)] hover:underline"
+              >
+                Esqueceu a senha? Redefinir senha por e-mail
+              </button>
+            )}
+
+            {modo !== 'MAGIC_LINK' && (
+              <button 
+                type="button"
+                onClick={() => { setModo('MAGIC_LINK'); setErro(''); setSucesso(''); }}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:underline text-xs"
+              >
+                Entrar sem senha via Link Mágico
+              </button>
+            )}
+
+            {modo !== 'SENHA' && (
+              <button 
+                type="button"
+                onClick={() => { setModo('SENHA'); setErro(''); setSucesso(''); }}
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 hover:underline pt-2 text-xs"
+              >
+                ← Voltar para login com e-mail e senha
+              </button>
+            )}
           </div>
         </div>
       </div>

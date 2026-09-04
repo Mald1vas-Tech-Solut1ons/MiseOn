@@ -36,6 +36,14 @@ export default function RedefinirSenha() {
   // de senha fica pronta. Sem esse evento em alguns segundos, o link já
   // era — expirado, usado, ou adulterado.
   useEffect(() => {
+    // 1. Detectar erro de token de e-mail expirado ou invalido na URL (hash/search)
+    const hash = window.location.hash;
+    const search = window.location.search;
+    if (hash.includes('error') || search.includes('error') || params.get('erro') === 'expirado') {
+      setEstado('invalido');
+      return;
+    }
+
     const { data: assinatura } = supabase.auth.onAuthStateChange((evento) => {
       if (evento === 'PASSWORD_RECOVERY') setEstado('formulario');
     });
@@ -52,7 +60,7 @@ export default function RedefinirSenha() {
       assinatura.subscription.unsubscribe();
       clearTimeout(espera);
     };
-  }, []);
+  }, [params]);
 
   const redefinir = async (e: React.FormEvent) => {
     e.preventDefault();
