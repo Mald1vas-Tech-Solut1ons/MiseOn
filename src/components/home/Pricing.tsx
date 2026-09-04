@@ -31,10 +31,10 @@ export default function Pricing() {
           {tDynamic('Sem Taxas Escondidas')}
         </div>
         <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-black sm:text-6xl text-white leading-tight">
-          {tDynamic('Uma única assinatura.')}<br />O <span className="text-[#0A5CC4]">ecossistema</span> completo.
+          {tDynamic('Você sabe quanto vai pagar:')}<br />mais lucro <span className="text-[#0A5CC4]">no seu bolso</span>.
         </h2>
         <p style={{ color: 'rgba(234,241,251,0.6)' }} className="mx-auto mt-6 max-w-2xl text-xl font-medium">
-          Diferente do padrão do mercado, não limitamos funcionalidades para realizar vendas de "módulos extras". Você acessa a potência total desde o primeiro dia.
+          {tDynamic('Zero porcentagem sobre sua venda. Todos os recursos liberados para a sua equipe desde o primeiro dia, sem pegadinhas.')}
         </p>
 
         {/* Toggle mensal/anual */}

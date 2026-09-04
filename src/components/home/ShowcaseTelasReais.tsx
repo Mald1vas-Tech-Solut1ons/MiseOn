@@ -148,10 +148,10 @@ export default function ShowcaseTelasReais() {
             <Sparkles size={14} /> {tDynamic('Provação Real do Produto')}
           </span>
           <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {tDynamic('Isto é a tela real do sistema. Não é ilustração.')}
+            {tDynamic('Você sabe exatamente o que está levando: telas reais da sua operação.')}
           </h2>
           <p className="mt-3 text-sm text-slate-300 max-w-2xl mx-auto">
-            {tDynamic('Confira a interface real do MiseOn em operação. Clique nos módulos abaixo para visualizar as capturas das telas em funcionamento:')}
+            {tDynamic('Sem ilustrações falsas. Veja exatamente como a sua cozinha, seu caixa e seu estoque vão funcionar no dia a dia:')}
           </p>
         </div>
 

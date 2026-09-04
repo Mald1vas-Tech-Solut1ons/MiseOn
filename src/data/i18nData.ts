@@ -43,8 +43,8 @@ export const DICIONARIO = {
     // Hero
     'hero.badge': 'SISTEMA DE GESTÃO E OPERAÇÃO PARA RESTAURANTES',
     'hero.title': 'Você sabe quanto seu restaurante faturou ontem.',
-    'hero.titleHighlight': 'Mas sabe quanto realmente sobrou no bolso?',
-    'hero.subtitle': 'O MiseOn conecta venda, operação, estoque, custos e financeiro em uma única operação — para você saber não apenas quanto vendeu, mas quanto realmente ganhou.',
+    'hero.titleHighlight': 'Mas você sabe o quanto realmente sobrou no seu bolso?',
+    'hero.subtitle': 'O MiseOn conecta venda, operação, estoque, custos e financeiro em uma única operação — para você saber não apenas quanto vendeu, mas quanto realmente sobrou no seu bolso e no seu caixa.',
     'hero.ctaPrincipal': 'Quero Descobrir Meu Lucro Real (30 Dias Grátis)',
     'hero.ctaSecundario': 'Veja o Sistema Funcionando (60s)',
 
@@ -176,7 +176,7 @@ export const DICIONARIO = {
     'hero.badge': 'RESTAURANT MANAGEMENT & OPERATING SYSTEM',
     'hero.title': 'You know how much your restaurant billed yesterday.',
     'hero.titleHighlight': 'Do you know how much profit was left in your pocket?',
-    'hero.subtitle': 'MiseOn connects sales, kitchen operations, inventory, costs and finance into a single flow — so you know not just what you sold, but what you actually kept.',
+    'hero.subtitle': 'MiseOn connects sales, kitchen operations, inventory, costs and finance into a single flow — so you know not just what you sold, but what actually stayed in your pocket and cash register.',
     'hero.ctaPrincipal': 'Discover My Real Profit (30 Days Free)',
     'hero.ctaSecundario': 'See System in Action (60s)',
 

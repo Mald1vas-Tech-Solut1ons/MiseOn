@@ -57,11 +57,11 @@ export default function CalculadoraVazamento() {
           </span>
 
           <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {tDynamic('Quanto dinheiro pode estar escapando da sua operação todo mês?')}
+            {tDynamic('Você sabe quanto dinheiro está saindo do seu bolso todo mês?')}
           </h2>
 
           <p className="mt-3 text-sm text-slate-300">
-            {tDynamic('Ajuste os sliders interativos abaixo com a realidade do seu restaurante e veja a simulação em tempo real:')}
+            {tDynamic('Ajuste os controles interativos abaixo com a realidade do seu restaurante e veja o valor que pode ficar no seu bolso:')}
           </p>
         </div>
 
@@ -184,14 +184,14 @@ export default function CalculadoraVazamento() {
                 <TrendingDown size={14} /> {tDynamic('Estimativa de Vazamento')}
               </div>
               
-              <p className="text-xs text-slate-300 uppercase tracking-widest font-bold">{tDynamic('Perda Silenciosa de Caixa')}</p>
+              <p className="text-xs text-slate-300 uppercase tracking-widest font-bold">{tDynamic('Saindo do Seu Bolso e Caixa')}</p>
               
               <div className="mt-2 text-4xl font-extrabold text-red-400 font-['Sora'] animate-pulse">
                 R$ {vazamentoMensalTotal.toLocaleString('pt-BR')}<span className="text-sm text-slate-400 font-normal"> {tDynamic('/ mês')}</span>
               </div>
               
               <p className="mt-1 text-xs text-slate-400">
-                ({tDynamic('Equivalente a')} <strong className="text-red-300">R$ {vazamentoAnualTotal.toLocaleString('pt-BR')}</strong> {tDynamic('por ano')})
+                ({tDynamic('Equivalente a')} <strong className="text-red-300">R$ {vazamentoAnualTotal.toLocaleString('pt-BR')}</strong> {tDynamic('por ano fora do seu bolso')})
               </p>
 
               <div className="mt-6 border-t border-white/10 pt-4 text-xs text-slate-300 leading-relaxed text-left space-y-2">
@@ -199,7 +199,7 @@ export default function CalculadoraVazamento() {
                   💡 {tDynamic('O plano anual do MiseOn custa')} <strong>R$ {precoMensalSaaS.toFixed(2).replace('.', ',')}/mês</strong>.
                 </p>
                 <p className="text-emerald-400 font-bold">
-                  ➔ {tDynamic('O sistema se paga cerca de')} <strong>{multiplicadorRetorno}x {tDynamic('todo mês')}</strong> {tDynamic('ao estancar esses vazamentos.')}
+                  ➔ {tDynamic('Você economiza cerca de')} <strong>{multiplicadorRetorno}x {tDynamic('o valor do plano todo mês')}</strong> {tDynamic('mantendo esse dinheiro no seu bolso.')}
                 </p>
               </div>
 

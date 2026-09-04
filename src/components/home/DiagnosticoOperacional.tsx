@@ -65,9 +65,9 @@ export default function DiagnosticoOperacional() {
         </span>
 
         <h2 className="mt-5 font-['Sora'] text-3xl font-extrabold tracking-tight sm:text-4xl">
-          {tDynamic('Você não precisa de mais um sistema.')}<br />
+          {tDynamic('Você sabe onde está vazando dinheiro na sua loja?')}<br />
           <span className={totalMarcados >= 2 ? 'text-red-400' : 'text-orange-400'}>
-            {tDynamic('Precisa parar de perder dinheiro sem perceber.')}
+            {tDynamic('Você precisa parar de deixar lucro sair do seu bolso.')}
           </span>
         </h2>
         
@@ -130,17 +130,17 @@ export default function DiagnosticoOperacional() {
                 )}
                 <h3 className="font-['Sora'] text-lg font-extrabold text-white">
                   {totalMarcados >= 2
-                    ? tDynamic('ALERTA CRÍTICO: Sua operação possui vazamentos silenciosos de margem.')
+                    ? tDynamic('ALERTA CRÍTICO: Você sabe que esse dinheiro está saindo do seu bolso todo dia.')
                     : totalMarcados === 1
-                    ? tDynamic('ALERTA MODERADO: Sua loja possui 1 gargalo ativo gerando vazamento invisível.')
-                    : tDynamic('OPERAÇÃO SAUDÁVEL: Nenhum gargalo marcado! O MiseOn expande sua eficiência.')}
+                    ? tDynamic('ALERTA MODERADO: Sua loja possui 1 gargalo ativo tirando dinheiro do seu caixa.')
+                    : tDynamic('OPERAÇÃO SAUDÁVEL: Nenhum gargalo marcado! O dinheiro continua no seu bolso.')}
                 </h3>
               </div>
 
               <p className="text-xs leading-relaxed text-slate-300">
                 {totalMarcados >= 2
-                  ? tDynamic('Ao marcar 2 ou mais itens, você está administrando no escuro. Cada dia sem automação é dinheiro deixado na mesa.')
-                  : tDynamic('Mesmo com poucos gargalos, pequenos desvios de fichas técnicas acumulam grandes perdas no final do ano.')}
+                  ? tDynamic('Você sabe que administrando assim, cada dia sem controle é dinheiro saindo direto do seu bolso. O MiseOn estanca esses vazamentos na hora.')
+                  : tDynamic('Mesmo com poucos gargalos, pequenos desvios acumulam grandes valores fora do seu caixa no final do ano.')}
               </p>
             </div>
 

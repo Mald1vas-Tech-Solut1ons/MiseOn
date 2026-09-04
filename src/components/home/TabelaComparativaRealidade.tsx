@@ -41,20 +41,20 @@ export default function TabelaComparativaRealidade() {
             {tDynamic('Comparativo de Realidade Operacional')}
           </span>
           <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {tDynamic('MiseOn não é mais um sistema.')}<br />
-            <span className="text-purple-400">{tDynamic('É a integração total da sua operação.')}</span>
+            {tDynamic('Você sabe o impacto de cada gargalo na sua loja?')}<br />
+            <span className="text-purple-400">{tDynamic('Veja o que acontece no seu bolso e no seu caixa.')}</span>
           </h2>
           <p className="mt-3 text-sm text-slate-300">
-            {tDynamic('Veja a diferença entre administrar com ferramentas soltas e ter uma operação onde tudo se conecta:')}
+            {tDynamic('Veja a diferença entre trabalhar com ferramentas soltas e ter uma operação onde tudo protege o seu dinheiro:')}
           </p>
         </div>
 
         {/* Tabela de Conversão */}
         <div className="mt-12 overflow-hidden rounded-3xl border border-white/15 bg-white/5 shadow-2xl backdrop-blur-xl">
           <div className="grid grid-cols-12 bg-[#0F172A]/90 p-4 sm:p-6 text-xs font-black uppercase tracking-wider text-slate-400 border-b border-white/10">
-            <div className="col-span-4 sm:col-span-3">{tDynamic('Quando você trabalha assim...')}</div>
-            <div className="col-span-4 text-center text-red-400">{tDynamic('O que acontece no seu caixa')}</div>
-            <div className="col-span-4 sm:col-span-5 text-center text-emerald-400 font-extrabold">{tDynamic('Como o MiseOn conecta')}</div>
+            <div className="col-span-4 sm:col-span-3">{tDynamic('Na sua rotina atual...')}</div>
+            <div className="col-span-4 text-center text-red-400">{tDynamic('O que acontece no seu bolso e caixa')}</div>
+            <div className="col-span-4 sm:col-span-5 text-center text-emerald-400 font-extrabold">{tDynamic('Como o MiseOn protege seu lucro')}</div>
           </div>
 
           <div className="divide-y divide-white/10 text-xs sm:text-sm">
