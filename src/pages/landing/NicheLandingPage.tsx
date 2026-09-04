@@ -18,6 +18,7 @@ import MiseOnLogo from '../../components/MiseOnLogo';
 import LanguageToggle from '../../components/LanguageToggle';
 import DiagnosticoOperacional from '../../components/home/DiagnosticoOperacional';
 import CalculadoraVazamento from '../../components/home/CalculadoraVazamento';
+import ShowcaseTelasReais from '../../components/home/ShowcaseTelasReais';
 
 const ICON_MAP: Record<string, any> = {
   ChefHat,
@@ -265,6 +266,9 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
 
       {/* ══════════ 2.6 CALCULADORA DE VAZAMENTO ══════════ */}
       <CalculadoraVazamento />
+
+      {/* ══════════ 2.7 TELAS REAIS DO SISTEMA ══════════ */}
+      <ShowcaseTelasReais />
 
       {/* ══════════ 3. DORES VS SOLUÇÃO ══════════ */}
       <section id="comparativo" className="scroll-mt-24 py-20 bg-white dark:bg-transparent">

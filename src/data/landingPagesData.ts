@@ -151,6 +151,24 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         resposta: 'Não. Ao voltar da compra, escaneie o QR Code do cupom fiscal: o sistema le a nota na SEFAZ e traz os itens com quantidade e custo. Você confere, desmarca o que não entra e da entrada de tudo de uma vez.',
       },
     ],
+    screenshots: [
+      {
+        titulo: 'Comanda por Mesa com Salão 3D',
+        src: '/images/telas-reais/media__1788462048036.png',
+        alt: 'Mapa de mesas 3D no MiseOn para controle de comandas em bar',
+        legenda: 'Acompanhe mesas abertas, consumo por assento e fechamento de conta sem fila no caixa.',
+        largura: 1047,
+        altura: 590,
+      },
+      {
+        titulo: 'DRE Financeiro & Fechamento de Turno',
+        src: '/images/telas-reais/media__1788461951624.png',
+        alt: 'Painel DRE Gerencial no MiseOn',
+        legenda: 'Margem por bebida e fechamento do caixa do turno com conciliação automática.',
+        largura: 1047,
+        altura: 580,
+      },
+    ],
   },
 
   'sistema-para-dark-kitchen': {
@@ -242,6 +260,24 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         pergunta: 'Preciso de equipamento específico?',
         resposta: 'Não. O MiseOn roda no navegador do computador, tablet ou celular que você ja tem. A cozinha usa uma tela comum como KDS e o cardápio digital dispensa impressão.',
+      },
+    ],
+    screenshots: [
+      {
+        titulo: 'iFood e Canal Próprio na Mesma Fila',
+        src: '/images/telas-reais/ifood-conexao.png',
+        alt: 'Painel de conexão iFood no MiseOn',
+        legenda: 'Pedidos do iFood e do site próprio caindo juntos, com cálculo de margem líquida por prato.',
+        largura: 1047,
+        altura: 602,
+      },
+      {
+        titulo: 'KDS de Produção sem Papel',
+        src: '/images/telas-reais/media__1788461951575.png',
+        alt: 'Tela KDS de produção para dark kitchen',
+        legenda: 'Tempo correndo por pedido e divisão automática de produção por estações da cozinha.',
+        largura: 1047,
+        altura: 600,
       },
     ],
   },

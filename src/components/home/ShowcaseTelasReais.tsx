@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Maximize2, X, Sparkles, ShieldCheck, Tv, MessageCircle, ShoppingBag, Boxes, QrCode, HeartPulse, Wallet } from 'lucide-react';
+import {
+  Maximize2, X, Sparkles, Tv, MessageCircle, ShoppingBag, Boxes,
+  QrCode, HeartPulse, Wallet, ChefHat, UtensilsCrossed, BarChart3, Bike, Scale,
+} from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 
 interface TelaReal {
@@ -53,6 +56,42 @@ const TELAS: TelaReal[] = [
     altura: 800,
   },
   {
+    id: 'pdv-balcao',
+    titulo: 'PDV Express de Balcão & Comandas de Balcão',
+    subtitulo: 'Atendimento Rápido sem Fila',
+    categoria: 'PDV Balcão',
+    icone: UtensilsCrossed,
+    src: '/images/telas-reais/media__1788461951550.png',
+    alt: 'Interface do PDV Express Balcão do MiseOn com lançamento por código e atalhos de salgados e bebidas',
+    descricao: 'Lançamento ultrarrápido por toque ou leitor de código de barras. Permite fechar a conta no balcão em 3 segundos ou gerar comanda para consumo.',
+    largura: 1047,
+    altura: 590,
+  },
+  {
+    id: 'kds-cozinha',
+    titulo: 'Painel KDS de Cozinha por Estações Kanban',
+    subtitulo: 'Produção sem Papel & Controle de Tempo',
+    categoria: 'KDS Cozinha',
+    icone: ChefHat,
+    src: '/images/telas-reais/media__1788461951575.png',
+    alt: 'Tela KDS de produção na cozinha com comandas digitais organizadas em colunas de preparo e cronômetro',
+    descricao: 'Substitua impressoras e papéis engordurados por telas de produção. Mostra os itens agrupados por estação (Chapa, Bar, Forno) e alerta atrasos.',
+    largura: 1047,
+    altura: 600,
+  },
+  {
+    id: 'mapa-mesas',
+    titulo: 'Mapa de Mesas 3D & Comandas por Salão',
+    subtitulo: 'Gestão de Mesas, Comandas e Garçons',
+    categoria: 'Salão & Mesas',
+    icone: Scale,
+    src: '/images/telas-reais/media__1788462048036.png',
+    alt: 'Visão do Mapa de Mesas 3D no MiseOn destacando mesas livres, ocupadas, comandas de garçons e divisão de conta',
+    descricao: 'Visualize o salão em tempo real. O garçom lança o pedido pelo celular, abre comandas por assento e fecha a conta com divisão por pessoa.',
+    largura: 1047,
+    altura: 590,
+  },
+  {
     id: 'estoque-nfce',
     titulo: 'Entrada de Estoque por Cupom Fiscal (NFC-e)',
     subtitulo: 'Gestão de Suprimentos & Alerta Crítico',
@@ -63,6 +102,18 @@ const TELAS: TelaReal[] = [
     descricao: 'Escaneie a nota do mercado pelo celular ou importe XML do fornecedor: os itens entram no estoque com quantidade e custo real pelo método PEPS.',
     largura: 1047,
     altura: 485,
+  },
+  {
+    id: 'dre-financeiro',
+    titulo: 'DRE Gerencial de Dupla Entrada & Margem Líquida',
+    subtitulo: 'Financeiro Transparente sem Planilhas',
+    categoria: 'DRE Financeiro',
+    icone: BarChart3,
+    src: '/images/telas-reais/media__1788461951624.png',
+    alt: 'Painel DRE Gerencial do MiseOn exibindo faturamento bruto, deduções de taxas, CMV e margem líquida em gráfico',
+    descricao: 'Veja exatamente quanto sobrou no seu bolso. O DRE cruza vendas, custos fixos, CMV das fichas técnicas e taxas de cartões/iFood automaticamente.',
+    largura: 1047,
+    altura: 580,
   },
   {
     id: 'ifood-conexao',
@@ -89,6 +140,18 @@ const TELAS: TelaReal[] = [
     altura: 477,
   },
   {
+    id: 'entregas-gps',
+    titulo: 'Gestão de Entregas & Rota GPS Motoboy',
+    subtitulo: 'Rastreamento de Entregadores & Taxa por Raio',
+    categoria: 'Delivery & Rotas',
+    icone: Bike,
+    src: '/images/telas-reais/media__1788462335394.png',
+    alt: 'Painel de Gestão de Entregas do MiseOn com mapa de rotas, alocação de motoboys e histórico de taxas de entrega por km',
+    descricao: 'Acompanhe a localização dos entregadores no mapa ao vivo. Calcule a taxa de entrega automaticamente com base na distância real da loja até o cliente.',
+    largura: 1047,
+    altura: 580,
+  },
+  {
     id: 'tv-senhas-config',
     titulo: 'Configuração da TV Automática & Painel 4K',
     subtitulo: 'Menu Board & Chamada de Senhas na TV',
@@ -99,18 +162,6 @@ const TELAS: TelaReal[] = [
     descricao: 'Gere links de acesso sem login para Smart TVs. A TV chama a senha com voz e gongo e vira Menu Board 4K quando o balcão está livre.',
     largura: 1047,
     altura: 489,
-  },
-  {
-    id: 'navegacao-painel',
-    titulo: 'Painel Lateral de Navegação da Loja',
-    subtitulo: 'Multi-Loja & Acesso Rápido Módulos',
-    categoria: 'Sistema Operacional',
-    icone: ShieldCheck,
-    src: '/images/telas-reais/navegacao-painel.png',
-    alt: 'Menu Lateral do MiseOn exibindo as seções de Loja, Integração iFood, WhatsApp, Cardápio, Estoque e Financeiro',
-    descricao: 'Navegação fluida e limpa por todos os módulos da sua loja (PDV, Estoque, Financeiro, iFood, WhatsApp e Histórico).',
-    largura: 288,
-    altura: 588,
   },
 ];
 

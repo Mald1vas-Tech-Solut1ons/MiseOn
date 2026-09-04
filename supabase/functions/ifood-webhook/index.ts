@@ -112,7 +112,7 @@ const ifoodEventSchema = z.array(
 // (c44831bc-9cc2-47c0-ac61-5e73b71645d3). Healthcheck com erro reincidente por
 // 72h DESATIVA o webhook, e webhook desativado e pedido que nao chega na
 // cozinha.
-const aceito = () => new Response('Accepted', { status: 202, headers: corsHeaders });
+const aceito = () => new Response('OK', { status: 200, headers: corsHeaders });
 
 // `EdgeRuntime` existe no runtime do Supabase, nao na tipagem do Deno.
 declare const EdgeRuntime: { waitUntil?: (p: Promise<unknown>) => void } | undefined;
@@ -602,10 +602,10 @@ serve(async (req: Request) => {
   // Responde 202 ANTES de qualquer trabalho: sem rate limit, sem banco, sem
   // rede. E este caminho que decide se a loja aparece online no iFood, e ele
   // nao pode depender de nenhuma dependencia nossa estar de pe.
-  const soKeepalive =
+  const isHealthcheck =
     eventosBrutos.length === 0 ||
-    eventosBrutos.every((e) => (e as { code?: string })?.code === 'KEEPALIVE');
-  if (soKeepalive) return aceito();
+    eventosBrutos.every((e) => !e || typeof e !== 'object' || !(e as { orderId?: string })?.orderId);
+  if (isHealthcheck) return aceito();
 
   // ── Rate limit: so para evento, nunca para healthcheck ─────────────────────
   // 429 e resposta legitima para evento — o iFood reenvia depois. No

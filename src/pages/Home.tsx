@@ -16,6 +16,7 @@ import DiagnosticoOperacional from '../components/home/DiagnosticoOperacional';
 import CalculadoraVazamento from '../components/home/CalculadoraVazamento';
 import DemonstracaoFluxo from '../components/home/DemonstracaoFluxo';
 import TabelaComparativaRealidade from '../components/home/TabelaComparativaRealidade';
+import ShowcaseTelasReais from '../components/home/ShowcaseTelasReais';
 import { useI18n } from '../contexts/I18nContext';
 
 const WHATSAPP_CONTATO = '5511919889233';
@@ -979,10 +980,13 @@ export default function Home() {
       {/* ══════════ 3.2 CALCULADORA DE VAZAMENTO DE CAIXA ══════════ */}
       <CalculadoraVazamento />
 
-      {/* ══════════ 3.3 DEMONSTRAÇÃO VISUAL EM 60 SEGUNDOS ══════════ */}
+      {/* ══════════ 3.3 TELAS REAIS DO SISTEMA EM OPERAÇÃO ══════════ */}
+      <ShowcaseTelasReais />
+
+      {/* ══════════ 3.4 DEMONSTRAÇÃO VISUAL EM 60 SEGUNDOS ══════════ */}
       <DemonstracaoFluxo />
 
-      {/* ══════════ 3.4 TABELA COMPARATIVA DE REALIDADE OPERACIONAL ══════════ */}
+      {/* ══════════ 3.5 TABELA COMPARATIVA DE REALIDADE OPERACIONAL ══════════ */}
       <TabelaComparativaRealidade />
 
       {/* ══════════ 3.5 SEÇÃO VISUAL DE NICHOS E FUNCIONALIDADES ══════════ */}
@@ -1000,17 +1004,22 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Cards de Nicho */}
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Cards de Nicho com Capturas Reais do Sistema */}
+          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             
             {/* 1. Hamburguerias */}
             <Link
               to="/sistema-para-hamburgueria"
-              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-orange-500/50 hover:bg-white/10 hover:shadow-2xl hover:shadow-orange-500/10"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-orange-500/70 hover:bg-white/10 hover:shadow-2xl hover:shadow-orange-500/20"
             >
               <div>
-                <div className="inline-flex rounded-2xl bg-orange-500/20 p-3 text-orange-400">
-                  <ChefHat size={28} />
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex rounded-2xl bg-orange-500/20 p-3 text-orange-400">
+                    <ChefHat size={28} />
+                  </div>
+                  <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-[11px] font-black uppercase text-orange-300">
+                    {tDynamic('Chapa & KDS')}
+                  </span>
                 </div>
                 <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-orange-400 transition-colors">
                   {t('nicho.hamburgueria')}
@@ -1018,7 +1027,23 @@ export default function Home() {
                 <p className="mt-2 text-xs leading-relaxed text-slate-300">
                   {t('nicho.hamburgueriaDesc')}
                 </p>
+                
+                {/* Imagem Real da Tela do Sistema na Hamburgueria */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-orange-500/50 transition">
+                  <img
+                    src="/images/telas-reais/cardapio-digital-os-mais-pedidos.png"
+                    alt="Tela real do MiseOn para Hamburguerias com combos e adicionais"
+                    width={500}
+                    height={280}
+                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
+                    <span>🍔 Cardápio & Adicionais de Blend</span>
+                    <span className="text-orange-400">Ver Tela →</span>
+                  </div>
+                </div>
               </div>
+
               <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-orange-400 group-hover:translate-x-1 transition-transform">
                 {t('nicho.verSolucao')} {t('nicho.hamburgueria')} <ArrowRight size={14} />
               </div>
@@ -1027,11 +1052,16 @@ export default function Home() {
             {/* 2. Lanchonetes */}
             <Link
               to="/sistema-para-lanchonete"
-              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-500/50 hover:bg-white/10 hover:shadow-2xl hover:shadow-blue-500/10"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-blue-500/70 hover:bg-white/10 hover:shadow-2xl hover:shadow-blue-500/20"
             >
               <div>
-                <div className="inline-flex rounded-2xl bg-blue-500/20 p-3 text-blue-400">
-                  <UtensilsCrossed size={28} />
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex rounded-2xl bg-blue-500/20 p-3 text-blue-400">
+                    <UtensilsCrossed size={28} />
+                  </div>
+                  <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-[11px] font-black uppercase text-blue-300">
+                    {tDynamic('PDV Balcão Express')}
+                  </span>
                 </div>
                 <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
                   {t('nicho.lanchonete')}
@@ -1039,7 +1069,23 @@ export default function Home() {
                 <p className="mt-2 text-xs leading-relaxed text-slate-300">
                   {t('nicho.lanchoneteDesc')}
                 </p>
+
+                {/* Imagem Real da Tela do PDV Express */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-blue-500/50 transition">
+                  <img
+                    src="/images/telas-reais/media__1788461951550.png"
+                    alt="Tela real do PDV Express Balcão do MiseOn para Lanchonetes"
+                    width={500}
+                    height={280}
+                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
+                    <span>☕ PDV Balcão & Comandas</span>
+                    <span className="text-blue-400">Ver Tela →</span>
+                  </div>
+                </div>
               </div>
+
               <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
                 {t('nicho.verSolucao')} {t('nicho.lanchonete')} <ArrowRight size={14} />
               </div>
@@ -1048,11 +1094,16 @@ export default function Home() {
             {/* 3. Pizzarias */}
             <Link
               to="/sistema-para-pizzaria"
-              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-emerald-500/50 hover:bg-white/10 hover:shadow-2xl hover:shadow-emerald-500/10"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-emerald-500/70 hover:bg-white/10 hover:shadow-2xl hover:shadow-emerald-500/20"
             >
               <div>
-                <div className="inline-flex rounded-2xl bg-emerald-500/20 p-3 text-emerald-400">
-                  <Boxes size={28} />
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex rounded-2xl bg-emerald-500/20 p-3 text-emerald-400">
+                    <Boxes size={28} />
+                  </div>
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-black uppercase text-emerald-300">
+                    {tDynamic('Forno & Delivery')}
+                  </span>
                 </div>
                 <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
                   {t('nicho.pizzaria')}
@@ -1060,20 +1111,41 @@ export default function Home() {
                 <p className="mt-2 text-xs leading-relaxed text-slate-300">
                   {t('nicho.pizzariaDesc')}
                 </p>
+
+                {/* Imagem Real do KDS de Forno / Entregas */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-emerald-500/50 transition">
+                  <img
+                    src="/images/telas-reais/media__1788462335394.png"
+                    alt="Tela real de Gestão de Entregas por Km do MiseOn para Pizzarias"
+                    width={500}
+                    height={280}
+                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
+                    <span>🍕 Rotas de Entrega & Motoboy</span>
+                    <span className="text-emerald-400">Ver Tela →</span>
+                  </div>
+                </div>
               </div>
+
               <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
                 {t('nicho.verSolucao')} {t('nicho.pizzaria')} <ArrowRight size={14} />
               </div>
             </Link>
 
-            {/* 4. Restaurantes */}
+            {/* 4. Restaurantes & Bares */}
             <Link
               to="/sistema-para-restaurantes"
-              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-500/50 hover:bg-white/10 hover:shadow-2xl hover:shadow-amber-500/10"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-amber-500/70 hover:bg-white/10 hover:shadow-2xl hover:shadow-amber-500/20"
             >
               <div>
-                <div className="inline-flex rounded-2xl bg-amber-500/20 p-3 text-amber-400">
-                  <BarChart3 size={28} />
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex rounded-2xl bg-amber-500/20 p-3 text-amber-400">
+                    <BarChart3 size={28} />
+                  </div>
+                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-black uppercase text-amber-300">
+                    {tDynamic('Salão 3D & Comanda')}
+                  </span>
                 </div>
                 <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
                   {t('nicho.restauranteBar')}
@@ -1081,39 +1153,109 @@ export default function Home() {
                 <p className="mt-2 text-xs leading-relaxed text-slate-300">
                   {t('nicho.restauranteBarDesc')}
                 </p>
+
+                {/* Imagem Real do Mapa de Mesas 3D */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-amber-500/50 transition">
+                  <img
+                    src="/images/telas-reais/media__1788462048036.png"
+                    alt="Tela real de Mapa de Mesas 3D no MiseOn para Restaurantes e Bares"
+                    width={500}
+                    height={280}
+                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
+                    <span>🍷 Mapa de Mesas 3D & Comandas</span>
+                    <span className="text-amber-400">Ver Tela →</span>
+                  </div>
+                </div>
               </div>
+
               <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
                 {t('nicho.verSolucao')} {t('nicho.restauranteBar')} <ArrowRight size={14} />
               </div>
             </Link>
 
-            {/* 5. Restaurantes por Quilo & Self-Service */}
+            {/* 5. Dark Kitchens */}
+            <Link
+              to="/sistema-para-dark-kitchen"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:bg-white/10 hover:shadow-2xl hover:shadow-indigo-500/20"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex rounded-2xl bg-indigo-500/20 p-3 text-indigo-400">
+                    <ShoppingBag size={28} />
+                  </div>
+                  <span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-[11px] font-black uppercase text-indigo-300">
+                    {tDynamic('Multi-Marcas & iFood')}
+                  </span>
+                </div>
+                <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">
+                  {t('nicho.darkKitchen')}
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-slate-300">
+                  {t('nicho.darkKitchenDesc')}
+                </p>
+
+                {/* Imagem Real de Conexão iFood / Dark Kitchen */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-indigo-500/50 transition">
+                  <img
+                    src="/images/telas-reais/ifood-conexao.png"
+                    alt="Tela real de Integração iFood e Dark Kitchens no MiseOn"
+                    width={500}
+                    height={280}
+                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
+                    <span>🛵 iFood & Multi-Marcas</span>
+                    <span className="text-indigo-400">Ver Tela →</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-indigo-400 group-hover:translate-x-1 transition-transform">
+                {t('nicho.verSolucao')} {t('nicho.darkKitchen')} <ArrowRight size={14} />
+              </div>
+            </Link>
+
+            {/* 6. Restaurantes por Quilo & Self-Service */}
             <Link
               to="/sistema-para-restaurante-por-quilo"
-              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-emerald-500/30 bg-emerald-950/20 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-emerald-500 hover:bg-emerald-900/30 hover:shadow-2xl hover:shadow-emerald-500/20 sm:col-span-2 lg:col-span-4"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/40 via-slate-900 to-emerald-950/20 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-emerald-500 hover:bg-emerald-900/30 hover:shadow-2xl hover:shadow-emerald-500/20"
             >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="inline-flex rounded-2xl bg-emerald-500/20 p-3.5 text-emerald-400 shrink-0">
-                    <Scale size={32} />
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex rounded-2xl bg-emerald-500/20 p-3 text-emerald-400">
+                    <Scale size={28} />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-['Sora'] text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
-                        {tDynamic('Restaurantes a Quilo & Buffet Self-Service')}
-                      </h3>
-                      <span className="rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs opacity-90 font-black uppercase text-slate-950">
-                        {tDynamic('NOVO MÓDULO')}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-300 max-w-3xl">
-                      {tDynamic('Módulo de Peso Inteligente (R$/kg) + Integração Nativa com Balanças (Toledo/Filizola/Urano), Divisão Inteligente de Bebidas/Itens na Mesa (Garçom no Lançamento & Caixa por Produto) e PWA Garçom com Vibração Hálptica.')}
-                    </p>
+                  <span className="rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs font-black uppercase text-slate-950">
+                    {tDynamic('MÓDULO R$/KG')}
+                  </span>
+                </div>
+                <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
+                  {tDynamic('Restaurantes por Quilo & Buffet')}
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-slate-300">
+                  {tDynamic('Peso Inteligente R$/kg com balança serial (Toledo/Filizola/Urano) e Ficha Técnica com perda de cocção.')}
+                </p>
+
+                {/* Imagem Real de Balança & Alergênicos */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-emerald-500/50 transition">
+                  <img
+                    src="/images/telas-reais/cardapio-modal-alergenicos.png"
+                    alt="Tela real de Ficha Técnica e Alergênicos do MiseOn"
+                    width={500}
+                    height={280}
+                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
+                    <span>⚖️ Peso R$/kg & Ficha Técnica</span>
+                    <span className="text-emerald-400">Ver Tela →</span>
                   </div>
                 </div>
-                <div className="shrink-0 flex items-center gap-1.5 text-sm font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
-                  Conhecer Peso Inteligente <ArrowRight size={16} />
-                </div>
+              </div>
+
+              <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
+                Conhecer Peso Inteligente <ArrowRight size={14} />
               </div>
             </Link>
 
