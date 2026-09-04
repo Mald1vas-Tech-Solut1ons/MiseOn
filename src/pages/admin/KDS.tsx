@@ -12,6 +12,7 @@ import { traduzirErro, type ErroTraduzido } from '../../lib/erros';
 import { ErroAmigavel } from '../../components/ui/ErroAmigavel';
 import type { CtxLoja } from './AdminLayout';
 import { useI18n } from '../../contexts/I18nContext';
+import { HorizontalScrollContainer } from '../../components/ui';
 
 // Select principal: inclui adicionais (itens_pedido_opcoes) e estação de preparo do produto
 // para separar Cozinha vs Revenda Direta sem depender só de palavras-chave.
@@ -77,6 +78,7 @@ export default function KDS() {
   const [metricas, setMetricas] = useState<Metricas | null>(null);
   const [celebrar, setCelebrar] = useState(false);
   const [erroAcao, setErroAcao] = useState<ErroTraduzido | null>(null);
+  const [filtroEstacao, setFiltroEstacao] = useState<'TODAS' | 'COZINHA' | 'BAR'>('TODAS');
 
   // Etapas de processo configuráveis pelo restaurante
   const [etapas, setEtapas] = useState<EtapaKDS[]>(() => {
@@ -417,22 +419,35 @@ export default function KDS() {
           {p.tipo_pedido === 'SALAO' ? `${tDynamic('MESA')} ${p.mesa_numero ?? '—'}` : p.origem === 'balcao' ? tDynamic('BALCÃO') : p.tipo_pedido === 'DELIVERY' ? tDynamic('DELIVERY') : tDynamic('RETIRADA')} · {p.identificador_cliente}
         </div>
 
-        {/* Separação inteligente: Cozinha vs Revenda Direta */}
+        {/* Separação inteligente: Cozinha vs Bar vs Revenda Direta */}
         {(() => {
-          const palavrasRevenda = ['guaraná', 'guarana', 'coca', 'pepsi', 'fanta', 'sprite', 'suco', 'refrigerante', 'lata', 'cerveja', 'água', 'agua', 'long neck', 'red bull', 'h2oh', 'bebida'];
+          const palavrasBar = ['drink', 'coquetel', 'caipirinha', 'chopp', 'gin', 'vodka', 'whisky', 'vinho', 'mojito', 'margarita', 'caipiroska', 'batida'];
+          const palavrasRevenda = ['guaraná', 'guarana', 'coca', 'pepsi', 'fanta', 'sprite', 'suco', 'refrigerante', 'lata', 'cerveja', 'água', 'agua', 'long neck', 'red bull', 'h2oh'];
+          
+          const isItemBar = (item: any) => {
+            if (item.produtos?.estacao_preparo === 'BAR') return true;
+            const nomeLower = (item.nome_produto || '').toLowerCase();
+            return palavrasBar.some((p) => nomeLower.includes(p));
+          };
+
           const isItemDireto = (item: any) => {
             if (item.produtos?.estacao_preparo === 'DIRETO') return true;
+            if (isItemBar(item)) return false;
             const nomeLower = (item.nome_produto || '').toLowerCase();
             return palavrasRevenda.some((p) => nomeLower.includes(p));
           };
 
-          const cozinha = p.itens_pedido?.filter((i) => !isItemDireto(i)) || [];
+          const bar = p.itens_pedido?.filter((i) => isItemBar(i)) || [];
+          const cozinha = p.itens_pedido?.filter((i) => !isItemBar(i) && !isItemDireto(i)) || [];
           const direto = p.itens_pedido?.filter((i) => isItemDireto(i)) || [];
+
+          if (filtroEstacao === 'COZINHA' && cozinha.length === 0) return null;
+          if (filtroEstacao === 'BAR' && bar.length === 0) return null;
 
           return (
             <div className="mt-3 space-y-3">
               {/* 1. ITENS PARA PREPARAR NA COZINHA */}
-              {cozinha.length > 0 && (
+              {(filtroEstacao === 'TODAS' || filtroEstacao === 'COZINHA') && cozinha.length > 0 && (
                 <div className="space-y-2">
                   <span className="font-['JetBrains_Mono'] text-xs opacity-90 font-extrabold uppercase tracking-wider text-orange-400">
                     🍳 {tDynamic('Preparo Cozinha')} ({cozinha.length}):
@@ -453,8 +468,30 @@ export default function KDS() {
                 </div>
               )}
 
-              {/* 2. ITENS DE REVENDA DIRETA / BALCÃO */}
-              {direto.length > 0 && (
+              {/* 2. ITENS PARA PREPARAR NO BAR */}
+              {(filtroEstacao === 'TODAS' || filtroEstacao === 'BAR') && bar.length > 0 && (
+                <div className="space-y-2 rounded-xl border border-purple-500/30 bg-purple-500/10 p-2.5">
+                  <span className="font-['JetBrains_Mono'] text-xs opacity-90 font-extrabold uppercase tracking-wider text-purple-400 flex items-center gap-1">
+                    🍹 {tDynamic('Bar & Drinks')} ({bar.length}):
+                  </span>
+                  {bar.map((i) => (
+                    <div key={i.id} className="pl-1">
+                      <p className="text-[14px] font-extrabold leading-tight text-purple-200">
+                        <span className="text-purple-400">{i.quantidade}×</span> {i.nome_produto}
+                      </p>
+                      {i.itens_pedido_opcoes?.map((o, x) => (
+                        <p key={x} className="pl-4 text-[11px] text-purple-300">+ {o.nome_opcao}</p>
+                      ))}
+                      {i.observacao && (
+                        <p className="pl-4 text-[11px] font-bold text-amber-300">⚠ {i.observacao.toUpperCase()}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 3. ITENS DE REVENDA DIRETA / BALCÃO */}
+              {filtroEstacao === 'TODAS' && direto.length > 0 && (
                 <div className="mt-2 rounded-xl border border-slate-700/60 bg-slate-800/40 p-2.5 space-y-1.5">
                   <span className="font-['JetBrains_Mono'] text-xs opacity-90 font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                     <Store size={12} className="text-blue-400" /> {tDynamic('Revenda / Balcão')} ({direto.length}):
@@ -555,6 +592,40 @@ export default function KDS() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Seletor de Estação: Todas vs Cozinha vs Bar */}
+          <div className="flex items-center gap-1 rounded-xl bg-slate-900 border border-slate-800 p-1">
+            <button
+              onClick={() => setFiltroEstacao('TODAS')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+                filtroEstacao === 'TODAS'
+                  ? 'bg-orange-500 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Todas
+            </button>
+            <button
+              onClick={() => setFiltroEstacao('COZINHA')}
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold transition ${
+                filtroEstacao === 'COZINHA'
+                  ? 'bg-orange-500 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              🍳 Cozinha
+            </button>
+            <button
+              onClick={() => setFiltroEstacao('BAR')}
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold transition ${
+                filtroEstacao === 'BAR'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              🍹 Bar & Drinks
+            </button>
+          </div>
+
           {metricas && (
             <div className="flex items-center gap-1.5 rounded-xl border border-white/10 px-3 py-1.5 text-xs font-bold" style={{ color: corMeta }}>
               <Flame size={13} />
@@ -592,31 +663,35 @@ export default function KDS() {
 
       {/* ── Seletor de operador ── */}
       {operadores.length > 0 && (
-        <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="mb-3 flex items-center gap-2 overflow-hidden">
           <span className="shrink-0 font-['JetBrains_Mono'] text-xs opacity-90 font-bold uppercase tracking-[0.2em] text-[#6C7A96]">Na cozinha:</span>
-          {operadores.map((op, idx) => (
-            <button key={op.user_id} onClick={() => escolherOperador(op.user_id)}
-              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-bold transition ${
-                operadorAtivo === op.user_id
-                  ? 'border-orange-500 bg-orange-500 text-white'
-                  : 'border-white/10 bg-white/5 text-white/60 hover:text-white'
-              }`}>
-              {op.nome || `Operador ${idx + 1}`}
-            </button>
-          ))}
+          <HorizontalScrollContainer className="flex-1 min-w-0 pb-1" showGradients={false}>
+            {operadores.map((op, idx) => (
+              <button key={op.user_id} onClick={() => escolherOperador(op.user_id)}
+                className={`shrink-0 rounded-full border px-3 py-1 text-xs font-bold transition ${
+                  operadorAtivo === op.user_id
+                    ? 'border-orange-500 bg-orange-500 text-white'
+                    : 'border-white/10 bg-white/5 text-white/60 hover:text-white'
+                }`}>
+                {op.nome || `Operador ${idx + 1}`}
+              </button>
+            ))}
+          </HorizontalScrollContainer>
         </div>
       )}
 
       {/* ── Resumo de Gargalo & Fila ── */}
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         {agregado.length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto rounded-2xl border border-white/8 bg-white/[0.04] px-3 py-2 flex-1">
+          <div className="flex items-center gap-2 rounded-2xl border border-white/8 bg-white/[0.04] px-3 py-2 flex-1 overflow-hidden">
             <span className="shrink-0 font-['JetBrains_Mono'] text-xs opacity-90 font-bold uppercase tracking-[0.2em] text-orange-400">Em produção:</span>
-            {agregado.map(([nome, qtd]) => (
-              <span key={nome} className="shrink-0 rounded-full bg-white/5 px-3 py-1 text-[12px] font-bold text-[#EAF1FB]">
-                <span className="text-orange-400">{qtd}×</span> {nome}
-              </span>
-            ))}
+            <HorizontalScrollContainer className="flex-1 min-w-0" showGradients={false}>
+              {agregado.map(([nome, qtd]) => (
+                <span key={nome} className="shrink-0 rounded-full bg-white/5 px-3 py-1 text-[12px] font-bold text-[#EAF1FB]">
+                  <span className="text-orange-400">{qtd}×</span> {nome}
+                </span>
+              ))}
+            </HorizontalScrollContainer>
           </div>
         )}
 

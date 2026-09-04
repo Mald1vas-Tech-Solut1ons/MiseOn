@@ -17,9 +17,14 @@ export interface CreatePedidoParams {
 }
 
 export async function createPedidoPedido(dados: CreatePedidoParams) {
-  const temCozinha = dados.carrinho.some(
-    (i) => i.produto.estacao_preparo === 'COZINHA' || !i.produto.estacao_preparo
-  );
+  const palavrasRevenda = ['guaraná', 'guarana', 'coca', 'pepsi', 'fanta', 'sprite', 'suco', 'refrigerante', 'lata', 'cerveja', 'água', 'agua', 'long neck', 'red bull', 'h2oh', 'buffet', 'quilo'];
+  
+  const temCozinha = dados.carrinho.some((i) => {
+    if (i.produto.estacao_preparo === 'DIRETO' || i.produto.estacao_preparo === 'BALCAO') return false;
+    if (i.produto.estacao_preparo === 'COZINHA') return true;
+    const nomeLower = (i.produto.nome || '').toLowerCase();
+    return !palavrasRevenda.some((p) => nomeLower.includes(p));
+  });
 
   const baseInsert = {
     loja_id: dados.lojaId,
@@ -36,6 +41,7 @@ export async function createPedidoPedido(dados: CreatePedidoParams) {
     requer_cozinha: temCozinha,
     estacao_atual: temCozinha ? 'COZINHA' : 'BALCAO',
     enviado_cozinha_em: temCozinha ? new Date().toISOString() : null,
+    ...(dados.tipo_pedido === 'SALAO' ? { status: 'ACEITO' } : {}),
   };
 
   const { data: ped, error: e1 } = await supabase.from('pedidos').insert({

@@ -9,7 +9,7 @@ export type StatusRota = 'PENDENTE' | 'EM_ANDAMENTO' | 'FINALIZADA';
 export type EntregaModo = 'BAIRRO' | 'DISTANCIA' | 'HIBRIDO';
 // Fluxo passa-bastão (docs/PLANO-FLUXO-PEDIDOS.md): estação de preparo do
 // produto e o bastão atual do pedido entre balcão e cozinha.
-export type EstacaoPreparo = 'COZINHA' | 'DIRETO';
+export type EstacaoPreparo = 'COZINHA' | 'BAR' | 'BALCAO' | 'DIRETO';
 export type EstacaoAtual = 'BALCAO' | 'COZINHA';
 export type TipoVenda = 'UNITARIO' | 'POR_PESO';
 
