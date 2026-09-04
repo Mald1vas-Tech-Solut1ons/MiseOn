@@ -1,13 +1,10 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { X, Check } from 'lucide-react';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
+import { X, Check, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import {
   fmt, precoItem, type Produto, type Opcao, type ItemCarrinho, type Loja, type Mesa,
   type CaixaTurno, type CaixaMovimentacao, type MetodoPgto, type ClientePDV,
-  // Vem de types.ts, nao de uma copia local: havia uma interface homonima aqui
-  // que sombreava a oficial, entao campo novo (a senha) compilava como erro
-  // mesmo ja existindo no tipo compartilhado com o modal de sucesso.
   type VendaConcluida,
 } from '../../types';
 import { imprimir } from '../../lib/print';
@@ -49,6 +46,7 @@ type ModoPDV = 'BALCAO' | 'MESA';
 export default function PDV() {
   const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
+  const [searchParams] = useSearchParams();
   const toast = useToast();
 
   // catálogo
@@ -62,6 +60,7 @@ export default function PDV() {
   const [modo, setModo] = useState<ModoPDV>('BALCAO');
   const [mesas, setMesas] = useState<Mesa[]>([]);
   const [mesaSelecionada, setMesaSelecionada] = useState<Mesa | null>(null);
+  const [assentoSelecionado, setAssentoSelecionado] = useState<number | null>(null);
   const [enviandoMesa, setEnviandoMesa] = useState(false);
   const [pedidoMesaOk, setPedidoMesaOk] = useState<{ numero: number; mesaNumero: number } | null>(null);
 
@@ -137,6 +136,23 @@ export default function PDV() {
     }, 0);
   }, [lojaId, carregarCatalogo, carregarCaixa]);
 
+  // Auto-seleciona mesa e assento se vierem da URL (ex: /admin/pdv?mesa=10&assento=1)
+  useEffect(() => {
+    const mesaParam = searchParams.get('mesa');
+    const assentoParam = searchParams.get('assento');
+    if (mesaParam && mesas.length > 0) {
+      const num = Number(mesaParam);
+      const mEncontrada = mesas.find((m) => m.numero === num);
+      if (mEncontrada) {
+        setModo('MESA');
+        setMesaSelecionada(mEncontrada);
+      }
+    }
+    if (assentoParam) {
+      setAssentoSelecionado(Number(assentoParam));
+    }
+  }, [searchParams, mesas]);
+
   /* ── derivados ── */
   const produtosVisiveis = useMemo(() => {
     let lista = produtos;
@@ -159,12 +175,29 @@ export default function PDV() {
   const adicionarProduto = (p: Produto, opcoes: Opcao[] = [], quantidade = 1, observacao = '') => {
     toast(`${p.nome} adicionado!`, 'info');
     setCarrinho((c) => {
-      // agrupa itens idênticos (mesmo produto, mesmas opções, mesma obs)
-      const chave = (i: ItemCarrinho) => i.produto.id + '|' + i.opcoesSelecionadas.map((o) => o.id).sort().join(',') + '|' + (i.observacao ?? '');
-      const nova = { produto: p, quantidade, opcoesSelecionadas: opcoes, observacao: observacao || undefined };
+      // agrupa itens idênticos (mesmo produto, mesmas opções, mesma obs, mesmo assento)
+      const chave = (i: ItemCarrinho) =>
+        i.produto.id +
+        '|' +
+        i.opcoesSelecionadas.map((o) => o.id).sort().join(',') +
+        '|' +
+        (i.observacao ?? '') +
+        '|' +
+        (i.assento_numero ?? '');
+
+      const nova: ItemCarrinho = {
+        produto: p,
+        quantidade,
+        opcoesSelecionadas: opcoes,
+        observacao: observacao || undefined,
+        assento_numero: modo === 'MESA' ? assentoSelecionado : null,
+      };
+
       const idx = c.findIndex((i) => chave(i) === chave(nova));
       if (idx >= 0) {
-        const cp = [...c]; cp[idx] = { ...cp[idx], quantidade: cp[idx].quantidade + quantidade }; return cp;
+        const cp = [...c];
+        cp[idx] = { ...cp[idx], quantidade: cp[idx].quantidade + quantidade };
+        return cp;
       }
       return [...c, nova];
     });
@@ -536,18 +569,52 @@ export default function PDV() {
       )}
 
       {modo === 'MESA' && (
-        <div className="border-b border-gray-200 bg-white px-4 py-2.5 dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 py-2.5 dark:border-gray-800 dark:bg-gray-900">
           {mesas.length === 0 ? (
             <p className="text-xs text-gray-400">{tDynamic('Nenhuma mesa cadastrada ainda — crie mesas no Mapa de Mesas.')}</p>
           ) : (
             <div className="flex items-center gap-2 overflow-x-auto">
               <span className="shrink-0 text-xs opacity-95 font-bold uppercase tracking-wide text-gray-400">{tDynamic('Mesa:')}</span>
               {mesas.map((m) => (
-                <button key={m.id} onClick={() => setMesaSelecionada(m)}
+                <button key={m.id} onClick={() => { setMesaSelecionada(m); setAssentoSelecionado(null); }}
                   className={`shrink-0 rounded-full border-2 px-3.5 py-1.5 text-xs font-black transition ${mesaSelecionada?.id === m.id ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)] text-white' : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'}`}>
                   {m.numero}
                 </button>
               ))}
+            </div>
+          )}
+
+          {mesaSelecionada && (
+            <div className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-gray-950 text-xs">
+              <span className="flex items-center gap-1 px-1 font-bold text-gray-500 dark:text-gray-400">
+                <Users size={12} className="text-orange-500" /> {tDynamic('Assento:')}
+              </span>
+              <button
+                onClick={() => setAssentoSelecionado(null)}
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                  assentoSelecionado === null
+                    ? 'bg-orange-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                }`}
+              >
+                Visão Geral
+              </button>
+              {Array.from({ length: mesaSelecionada.capacidade || 4 }).map((_, idx) => {
+                const numAssento = idx + 1;
+                return (
+                  <button
+                    key={numAssento}
+                    onClick={() => setAssentoSelecionado(numAssento)}
+                    className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                      assentoSelecionado === numAssento
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                    }`}
+                  >
+                    #{numAssento}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

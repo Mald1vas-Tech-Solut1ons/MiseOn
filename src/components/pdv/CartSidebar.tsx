@@ -154,6 +154,11 @@ export function CartSidebar({
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-[13px] font-bold leading-tight dark:text-gray-100">{item.produto.nome}</p>
+                  {item.assento_numero && (
+                    <span className="inline-block rounded-md bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-black text-blue-600 dark:text-blue-400 border border-blue-500/20 mt-0.5">
+                      Cadeira #{item.assento_numero}
+                    </span>
+                  )}
                   {item.opcoesSelecionadas.map((o) => (
                     <p key={o.id} className="text-xs opacity-95 text-gray-400">+ {o.nome}</p>
                   ))}

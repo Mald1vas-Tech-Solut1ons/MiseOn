@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -59,6 +59,7 @@ const novaMesaSchema = z.object({
 
 export default function Mesas() {
   const { tDynamic } = useI18n();
+  const navigate = useNavigate();
   const { lojaId, lojaSlug } = useOutletContext<CtxLoja>();
   const [loja, setLoja] = useState<Loja | null>(null);
   const [mesas, setMesas] = useState<MesaComComanda[]>([]);
@@ -752,6 +753,10 @@ export default function Mesas() {
           loja={loja}
           onClose={() => setGarcomDrawerMesa(null)}
           onAtualizar={carregar}
+          onNovoPedidoAssento={(mesaNumero, assentoNum) => {
+            setGarcomDrawerMesa(null);
+            navigate(`/admin/pdv?mesa=${mesaNumero}${assentoNum ? `&assento=${assentoNum}` : ''}`);
+          }}
         />
       )}
 

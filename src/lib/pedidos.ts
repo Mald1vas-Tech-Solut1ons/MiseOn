@@ -55,6 +55,7 @@ export async function createPedidoPedido(dados: CreatePedidoParams) {
       preco_unitario: precoItemFinal,
       quantidade: item.quantidade,
       observacao: item.observacao ?? null,
+      assento_numero: item.assento_numero ?? null,
     }).select('id').single();
     
     if (e2 || !it) throw e2 ?? new Error('Falha ao registrar item');
