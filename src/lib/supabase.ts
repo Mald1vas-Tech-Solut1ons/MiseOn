@@ -16,6 +16,8 @@ if (url.includes('placeholder')) {
   console.warn('Supabase não configurado: defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.');
 }
 
+
+
 /** Sessão do chat anônimo da vitrine.
  *
  *  Vai como cabeçalho em toda requisição porque virou credencial: a RLS de

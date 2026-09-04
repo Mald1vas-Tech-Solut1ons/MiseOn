@@ -99,24 +99,19 @@ function AuthRecoveryRedirect() {
         return;
       }
     } else if (hash.includes('error') || search.includes('error')) {
-      if (location.pathname !== '/redefinir-senha' && location.pathname !== '/admin/login') {
+      if (
+        location.pathname !== '/redefinir-senha' &&
+        location.pathname !== '/admin/login' &&
+        location.pathname !== '/superadmin/login'
+      ) {
         navigate('/redefinir-senha?erro=expirado', { replace: true });
         return;
       }
     }
 
-    // 2. Se abriu https://miseon.vercel.app/# (hash com # vindo do e-mail do Supabase)
-    if ((hash === '#' || hash === '') && location.pathname === '/') {
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session) {
-          navigate('/redefinir-senha', { replace: true });
-        }
-      });
-    }
-
-    // 3. Escutar eventos do Supabase Auth em tempo real
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session && (window.location.hash === '#' || window.location.hash.includes('access_token')))) {
+    // 2. Escutar evento de redefinição de senha do Supabase Auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
         if (location.pathname !== '/redefinir-senha') {
           navigate('/redefinir-senha', { replace: true });
         }
