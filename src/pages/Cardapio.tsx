@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
-import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { FotoProduto } from '../lib/fotoProduto';
 import { obterFotoFallback, obterFotoProduto } from '../lib/fotoProdutoUtils';
@@ -11,7 +11,7 @@ import ModalAuthCliente from '../components/ModalAuthCliente';
 import ModalMinhaConta from '../components/ModalMinhaConta';
 import PedidoMesaDrawer from '../components/PedidoMesaDrawer';
 import VoiceOrderModal from '../components/VoiceOrderModal';
-import { Button, Modal, SuccessCelebration, BandeiraMark, BANDEIRAS_ACEITAS } from '../components/ui';
+import { Button, Modal, SuccessCelebration, BandeiraMark, BANDEIRAS_ACEITAS, HorizontalScrollContainer } from '../components/ui';
 import {
   Loja, Banner, Categoria, Produto, TaxaEntrega, FaixaEntrega, ItemCarrinho,
   HorarioFuncionamento, MetodoPgto, Mesa, fmt, fmtQtd, precoItem, Cupom,
@@ -150,13 +150,7 @@ export default function Cardapio() {
   const [user, setUser] = useState<User | null>(null);
   const [temaCliente, setTemaCliente] = useState<PreferenciaTema>(() => obterTemaPreferido());
   const [modalVozAberto, setModalVozAberto] = useState(false);
-  const catScrollRef = useRef<HTMLDivElement>(null);
 
-  const rolarCategorias = (dir: 'esq' | 'dir') => {
-    if (catScrollRef.current) {
-      catScrollRef.current.scrollBy({ left: dir === 'esq' ? -260 : 260, behavior: 'smooth' });
-    }
-  };
 
   // Recuperação de vendas: quando o checkout abre com item no carrinho, registra
   // o "quase comprei" — se ele fechar sem terminar, o lojista consegue reativar.
@@ -673,26 +667,9 @@ export default function Cardapio() {
             </div>
           </div>
 
-          {/* Filtros de categoria com setas de navegação no desktop e suporte a scroll de mouse */}
-          <div className="relative flex items-center px-4 py-3 lg:px-0">
-            <button
-              type="button"
-              onClick={() => rolarCategorias('esq')}
-              className="hidden sm:flex shrink-0 items-center justify-center h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90 text-gray-700 dark:text-gray-200 shadow-md hover:bg-gray-50 dark:hover:bg-gray-800 mr-2 z-10 transition-all cursor-pointer"
-              title="Rolar categorias para a esquerda"
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            <div
-              ref={catScrollRef}
-              onWheel={(e) => {
-                if (catScrollRef.current && e.deltaY !== 0) {
-                  catScrollRef.current.scrollLeft += e.deltaY;
-                }
-              }}
-              className="flex flex-1 gap-2 overflow-x-auto scroll-smooth hide-scrollbar py-1"
-            >
+          {/* Filtros de categoria */}
+          <div className="px-4 py-3 lg:px-0">
+            <HorizontalScrollContainer className="py-1">
               <button
                 onClick={() => setCatAtiva(null)}
                 className={`vitrine-chip shrink-0 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer ${!catAtiva ? 'is-active' : ''}`}
@@ -708,16 +685,7 @@ export default function Cardapio() {
                   {c.nome}
                 </button>
               ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => rolarCategorias('dir')}
-              className="hidden sm:flex shrink-0 items-center justify-center h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90 text-gray-700 dark:text-gray-200 shadow-md hover:bg-gray-50 dark:hover:bg-gray-800 ml-2 z-10 transition-all cursor-pointer"
-              title="Rolar categorias para a direita"
-            >
-              <ChevronRight size={16} />
-            </button>
+            </HorizontalScrollContainer>
           </div>
 
           {/* Os mais pedidos */}

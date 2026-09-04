@@ -9,6 +9,7 @@ import ImageUpload from '../../components/ImageUpload';
 import type { CtxLoja } from './AdminLayout';
 import { getOptimizedImageUrl } from '../../lib/cdn';
 import { useI18n } from '../../contexts/I18nContext';
+import { HorizontalScrollContainer } from '../../components/ui';
 import NutricaoDoPrato from '../../components/admin/NutricaoDoPrato';
 import { CONFIG_NUTRICAO_PADRAO, type ConfigNutricaoPrato } from '../../lib/nutricao';
 import PainelNutricaoCardapio, { type CoberturaProduto } from '../../components/admin/PainelNutricaoCardapio';
@@ -116,7 +117,7 @@ export default function CardapioAdmin() {
               className="w-full bg-transparent text-sm outline-none" />
           </div>
 
-          <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+          <HorizontalScrollContainer className="mb-3 pb-1">
             <button onClick={() => setCatAtiva(null)}
               className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${!catAtiva ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm dark:bg-gray-900 dark:text-gray-300 dark:border dark:border-gray-800'}`}>
               {tDynamic('Tudo')}
@@ -127,7 +128,7 @@ export default function CardapioAdmin() {
                 {c.nome}
               </button>
             ))}
-          </div>
+          </HorizontalScrollContainer>
 
           <button onClick={() => setEditando('novo')}
             className="mb-3 flex w-full items-center justify-center gap-1 rounded-xl bg-[var(--cor-primaria)] py-2.5 text-sm font-semibold text-white">

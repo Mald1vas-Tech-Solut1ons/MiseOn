@@ -12,6 +12,7 @@ import type { CtxLoja } from './AdminLayout';
 import { getOptimizedImageUrl } from '../../lib/cdn';
 
 import { useI18n } from '../../contexts/I18nContext';
+import { HorizontalScrollContainer } from '../../components/ui';
 type Tab = 'cupons' | 'banners' | 'cashback' | 'recuperacao' | 'anuncios' | 'disparos' | 'emails' | 'crm';
 
 export default function Marketing() {
@@ -34,7 +35,7 @@ export default function Marketing() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+      <HorizontalScrollContainer className="pb-1">
         {[
           { id: 'cupons', label: 'Cupons', icon: Gift },
           { id: 'banners', label: 'Banners de Vitrine', icon: Megaphone },
@@ -58,7 +59,7 @@ export default function Marketing() {
             {label}
           </button>
         ))}
-      </div>
+      </HorizontalScrollContainer>
 
       {/* Tab Contents */}
       {tab === 'cupons' && <CuponsTab lojaId={lojaId} />}

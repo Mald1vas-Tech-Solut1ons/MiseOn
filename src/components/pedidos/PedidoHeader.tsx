@@ -125,6 +125,12 @@ export function PedidoHeader({ pedido: p }: PedidoHeaderProps) {
           <div style={{ fontSize: 12, color: '#AEB9CE', marginTop: 4 }}>{tDynamic('Estoque baixado por ficha técnica ✓')}</div>
         </div>
       )}
+      {p.status === 'ACEITO' && !naCozinha && !p.requer_cozinha && (
+        <div style={{ margin: '12px 16px 0', background: 'rgba(16,185,129,.1)', border: '1px solid rgba(16,185,129,.35)', borderRadius: 12, padding: '10px 14px' }}>
+          <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 14, color: '#10B981' }}>{tDynamic('Lançado na Comanda (Consumo Salão / Buffet)')}</div>
+          <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>{tDynamic('Item de consumo direto — sem necessidade de preparo na cozinha ✓')}</div>
+        </div>
+      )}
     </>
   );
 }

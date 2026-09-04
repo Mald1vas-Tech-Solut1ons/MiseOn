@@ -11,7 +11,7 @@ import { getOptimizedImageUrl } from '../../lib/cdn';
 
 import { useI18n } from '../../contexts/I18nContext';
 export default function Assinatura() {
-  const { tDynamic } = useI18n();
+  const { idioma, tDynamic } = useI18n();
   const { lojaId, lojaNome } = useOutletContext<CtxLoja>();
   const [, setStatus] = useState<string>('trial');
   const [emDia, setEmDia] = useState<boolean>(true);
@@ -68,7 +68,7 @@ export default function Assinatura() {
     const num = numero.replace(/\s/g, '');
     const [mes, ano] = validade.split('/');
     if (num.length < 13 || !nome || cpf.replace(/\D/g, '').length !== 11 || !mes || !ano || cvv.length < 3) {
-      return setErro('Confira os dados do cartão.');
+      return setErro(tDynamic('Confira os dados do cartão.'));
     }
     setProcessando(true);
 
@@ -123,17 +123,17 @@ export default function Assinatura() {
 
       if (error || data?.error) throw new Error(data?.error || error?.message || 'Pagamento recusado pelo banco.');
       
-      setSucesso('Transação Aprovada! Assinatura ativada com sucesso.');
+      setSucesso(tDynamic('Transação Aprovada! Assinatura ativada com sucesso.'));
       setNumero(''); setNome(''); setCpf(''); setValidade(''); setCvv(''); setCelular('');
       carregarDados();
     } catch (e: any) {
-      setErro(e?.message || 'Erro crítico ao processar o pagamento.');
+      setErro(e?.message || tDynamic('Erro crítico ao processar o pagamento.'));
     }
     setProcessando(false);
   };
 
   const valorPixCalculado = ciclo === 'anual' ? SAAS_PRICING.anual.pix : SAAS_PRICING.mensal.pix;
-  const emReais = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const emReais = (v: number) => v.toLocaleString(idioma === 'en-US' ? 'en-US' : 'pt-BR', { style: 'currency', currency: 'BRL' });
   const economiaAnualPix = SAAS_PRICING.mensal.bruto * 12 - SAAS_PRICING.anual.pix;
 
   const gerarPix = async () => {
@@ -152,7 +152,7 @@ export default function Assinatura() {
          setCopiaCola(data.copia_e_cola);
       }
     } catch (e: any) {
-      setErro(e?.message || 'Erro ao comunicar com a Efí Bank.');
+      setErro(e?.message || tDynamic('Erro ao comunicar com a Efí Bank.'));
     }
     setProcessando(false);
   };
@@ -174,11 +174,11 @@ export default function Assinatura() {
       txidPix.current = null;
       setQrCode(null);
       setCopiaCola('');
-      setSucesso('Pix confirmado! Assinatura ativada.');
+      setSucesso(tDynamic('Pix confirmado! Assinatura ativada.'));
       carregarDados();
     }, 10000);
     return () => { vivo = false; clearInterval(timer); };
-  }, [qrCode, lojaId, carregarDados]);
+  }, [qrCode, lojaId, carregarDados, tDynamic]);
 
   const copiarPix = () => {
     navigator.clipboard.writeText(copiaCola);
@@ -188,7 +188,7 @@ export default function Assinatura() {
 
   if (carregando) return (
     <div className="flex h-[50vh] items-center justify-center">
-      <MiseOnLoader status="Autenticando ambiente seguro..." rows={2} />
+      <MiseOnLoader status={tDynamic('Autenticando ambiente seguro...')} rows={2} />
     </div>
   );
 
@@ -208,7 +208,7 @@ export default function Assinatura() {
         </div>
         <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-500 rounded-xl border border-green-200 dark:border-green-800/50">
           <ShieldCheck size={18} />
-          <span className="text-xs font-bold uppercase tracking-wider">Ambiente Blindado</span>
+          <span className="text-xs font-bold uppercase tracking-wider">{tDynamic('Ambiente Blindado')}</span>
         </div>
       </div>
 
@@ -218,9 +218,9 @@ export default function Assinatura() {
         <div className="lg:col-span-5 space-y-6">
           <div className={`rounded-3xl border p-6 shadow-sm transition-colors ${emDia ? 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800' : 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800/50'}`}>
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Status da Loja</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{tDynamic('Status da Loja')}</p>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs opacity-90 font-black text-emerald-600 dark:text-emerald-400">
-                <Sparkles size={11} /> 30 Dias Grátis
+                <Sparkles size={11} /> {tDynamic('30 Dias Grátis')}
               </span>
             </div>
             
@@ -236,7 +236,7 @@ export default function Assinatura() {
               )}
               <div>
                 <p className={`text-xl font-black ${emDia ? 'text-green-600' : 'text-red-600'}`}>
-                  {emDia ? 'Ativa & Liberada' : 'Pendente / Tolerância'}
+                  {tDynamic(emDia ? 'Ativa & Liberada' : 'Pendente / Tolerância')}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-0.5">{lojaNome}</p>
               </div>
@@ -246,7 +246,7 @@ export default function Assinatura() {
             <div className="mb-6 rounded-2xl bg-amber-50 dark:bg-amber-900/20 p-3.5 border border-amber-200 dark:border-amber-800/50 flex items-center gap-3">
               <Clock size={20} className="text-amber-600 shrink-0" />
               <div className="text-xs text-amber-900 dark:text-amber-200">
-                <span className="font-bold">{tDynamic('Regra de Tolerância:')}</span> 7 dias de carência pós-vencimento antes da suspensão automática.
+                <span className="font-bold">{tDynamic('Regra de Tolerância:')}</span> {tDynamic('7 dias de carência pós-vencimento antes da suspensão automática.')}
               </div>
             </div>
 
@@ -262,7 +262,7 @@ export default function Assinatura() {
                       : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                   }`}
                 >
-                  Plano Anual <span className="text-xs opacity-90 opacity-90">(R$ 149,90/mês)</span>
+                  {tDynamic('Plano Anual')} <span className="text-xs opacity-90 font-medium">({tDynamic('R$ 149,90/mês')})</span>
                 </button>
                 <button
                   type="button"
@@ -273,7 +273,7 @@ export default function Assinatura() {
                       : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                   }`}
                 >
-                  Plano Mensal <span className="text-xs opacity-90 opacity-90">(R$ 169,90/mês)</span>
+                  {tDynamic('Plano Mensal')} <span className="text-xs opacity-90 font-medium">({tDynamic('R$ 169,90/mês')})</span>
                 </button>
               </div>
             </div>
@@ -283,12 +283,12 @@ export default function Assinatura() {
                 <div>
                   <span className="text-sm font-bold text-gray-900 dark:text-gray-100 block">MiseOn SaaS Pro</span>
                   <span className="text-xs opacity-95 text-gray-400">
-                    {ciclo === 'anual' ? 'R$ 1.798,80 no ano (em até 12x no cartão)' : 'Sem fidelidade contratual'}
+                    {tDynamic(ciclo === 'anual' ? 'R$ 1.798,80 no ano (em até 12x no cartão)' : 'Sem fidelidade contratual')}
                   </span>
                 </div>
                 <div className="text-right">
                   <span className="font-black text-xl text-gray-900 dark:text-gray-100 block">
-                    R$ {ciclo === 'anual' ? '149,90' : '169,90'} <span className="text-xs text-gray-400 font-medium">/mês</span>
+                    R$ {ciclo === 'anual' ? '149,90' : '169,90'} <span className="text-xs text-gray-400 font-medium">{tDynamic('/mês')}</span>
                   </span>
                   {ciclo === 'anual' && (
                     <span className="text-xs opacity-90 font-bold text-emerald-500">{tDynamic('Economia de R$ 240,00/ano')}</span>
@@ -298,7 +298,7 @@ export default function Assinatura() {
 
               {/* Informação do Desconto Pix */}
               <div className="rounded-xl bg-emerald-500/10 p-3 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center justify-between">
-                <span>Pix à vista (5% OFF):</span>
+                <span>{tDynamic('Pix à vista (5% OFF):')}</span>
                 <span className="font-black">R$ {ciclo === 'anual' ? '1.708,86' : '161,40'}</span>
               </div>
               
@@ -307,7 +307,7 @@ export default function Assinatura() {
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 dark:text-gray-400"><Calendar size={16} /> {tDynamic('Vencimento do Trial')}</span>
                 <span className="font-bold text-xs px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
-                  {vencimento ? `${new Date(vencimento).toLocaleDateString('pt-BR')} (${diasRestantesTrial} dias)` : `${diasRestantesTrial} dias restantes`}
+                  {vencimento ? `${new Date(vencimento).toLocaleDateString(idioma === 'en-US' ? 'en-US' : 'pt-BR')} (${diasRestantesTrial} ${tDynamic('dias')})` : `${diasRestantesTrial} ${tDynamic('dias restantes')}`}
                 </span>
               </div>
             </div>
@@ -350,7 +350,7 @@ export default function Assinatura() {
               {metodo === 'cartao' ? (
                 <div className="space-y-4 animate-in slide-in-from-right-4">
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-2">
-                    {ciclo === 'anual' ? 'Plano Anual: R$ 1.798,80 (equivalente a R$ 149,90/mês). Parcele abaixo em até 3x.' : 'Plano Mensal: R$ 169,90/mês. Cancele quando quiser.'}
+                    {tDynamic(ciclo === 'anual' ? 'Plano Anual: R$ 1.798,80 (equivalente a R$ 149,90/mês). Parcele abaixo em até 3x.' : 'Plano Mensal: R$ 169,90/mês. Cancele quando quiser.')}
                   </p>
                   
                   <label className="block">
@@ -370,7 +370,7 @@ export default function Assinatura() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <label className="block">
-                       <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">Validade</span>
+                       <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">{tDynamic('Validade')}</span>
                        <input value={validade} onChange={(e) => setValidade(e.target.value)} placeholder="MM/AA" 
                          className="mt-1 w-full rounded-xl border border-gray-300 p-3.5 text-sm font-medium focus:border-[var(--cor-primaria)] focus:ring-4 focus:ring-[var(--cor-primaria)]/10 focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 transition-all" />
                     </label>
@@ -383,12 +383,12 @@ export default function Assinatura() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <label className="block">
-                       <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">CPF do Titular</span>
+                       <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">{tDynamic('CPF do Titular')}</span>
                        <input value={cpf} onChange={(e) => setCpf(e.target.value)} inputMode="numeric" placeholder="000.000.000-00" 
                          className="mt-1 w-full rounded-xl border border-gray-300 p-3.5 text-sm font-medium focus:border-[var(--cor-primaria)] focus:ring-4 focus:ring-[var(--cor-primaria)]/10 focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 transition-all" />
                     </label>
                     <label className="block">
-                       <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">Celular</span>
+                       <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 ml-1">{tDynamic('Celular')}</span>
                        <input value={celular} onChange={(e) => setCelular(e.target.value)} inputMode="numeric" placeholder="(11) 90000-0000" 
                          className="mt-1 w-full rounded-xl border border-gray-300 p-3.5 text-sm font-medium focus:border-[var(--cor-primaria)] focus:ring-4 focus:ring-[var(--cor-primaria)]/10 focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 transition-all" />
                     </label>
@@ -402,9 +402,9 @@ export default function Assinatura() {
                          onChange={(e) => setParcelas(Number(e.target.value))}
                          className="mt-1 w-full rounded-xl border border-gray-300 p-3.5 text-sm font-bold focus:border-[var(--cor-primaria)] focus:ring-4 focus:ring-[var(--cor-primaria)]/10 focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 transition-all"
                        >
-                         <option value={3}>3x de R$ 599,60 / mês (Total R$ 1.798,80)</option>
-                         <option value={2}>2x de R$ 899,40 / mês (Total R$ 1.798,80)</option>
-                         <option value={1}>1x de R$ 1.798,80 à vista</option>
+                         <option value={3}>{tDynamic('3x de R$ 599,60 / mês (Total R$ 1.798,80)')}</option>
+                         <option value={2}>{tDynamic('2x de R$ 899,40 / mês (Total R$ 1.798,80)')}</option>
+                         <option value={1}>{tDynamic('1x de R$ 1.798,80 à vista')}</option>
                        </select>
                     </label>
                   )}
@@ -414,7 +414,7 @@ export default function Assinatura() {
                     {processando ? (
                       <><div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-500 border-t-white dark:border-t-gray-900"></div> {tDynamic('Autenticando no Banco...')}</>
                     ) : (
-                      <><Lock size={18} /> Pagar Assinatura ({ciclo === 'anual' ? 'R$ 1.798,80' : 'R$ 169,90'})</>
+                      <><Lock size={18} /> {tDynamic('Pagar Assinatura')} ({ciclo === 'anual' ? 'R$ 1.798,80' : 'R$ 169,90'})</>
                     )}
                   </button>
                 </div>
@@ -422,13 +422,13 @@ export default function Assinatura() {
                 <div className="space-y-6 animate-in slide-in-from-left-4 flex flex-col items-center">
                   <div className="text-center mt-2">
                      <span className="inline-flex rounded-full bg-teal-500/20 px-3 py-1 text-xs font-bold text-teal-600 dark:text-teal-400 mb-2">
-                        Desconto Especial: 5% OFF à Vista
+                        {tDynamic('Desconto Especial: 5% OFF à Vista')}
                      </span>
                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">{tDynamic('Pagamento instantâneo via Pix com aprovação imediata.')}</p>
                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                       {ciclo === 'anual'
+                       {tDynamic(ciclo === 'anual'
                          ? `Plano Anual com 5% OFF: ${emReais(SAAS_PRICING.anual.pix)} (Economia de ${emReais(economiaAnualPix)}/ano)`
-                         : `Plano Mensal com 5% OFF: ${emReais(SAAS_PRICING.mensal.pix)}/mês`}
+                         : `Plano Mensal com 5% OFF: ${emReais(SAAS_PRICING.mensal.pix)}/mês`)}
                      </p>
                   </div>
 
@@ -438,7 +438,7 @@ export default function Assinatura() {
                        {processando ? (
                          <><div className="h-5 w-5 animate-spin rounded-full border-2 border-teal-800 border-t-white"></div> {tDynamic('Gerando código seguro...')}</>
                        ) : (
-                         <><QrCode size={20} /> Gerar Pix com 5% OFF ({emReais(valorPixCalculado)})</>
+                         <><QrCode size={20} /> {tDynamic('Gerar Pix com 5% OFF')} ({emReais(valorPixCalculado)})</>
                        )}
                      </button>
                   ) : (
@@ -447,7 +447,7 @@ export default function Assinatura() {
                            <img src={getOptimizedImageUrl(qrCode)} alt="QR Code Pix" className="w-56 h-56" />
                         </div>
                         
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Pix Copia e Cola</p>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">{tDynamic('Pix Copia e Cola')}</p>
                         <div className="flex w-full items-center gap-2">
                            <input readOnly value={copiaCola} className="w-full rounded-xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-3 text-xs text-gray-600 dark:text-gray-400 font-mono truncate" />
                            <button onClick={copiarPix} className={`shrink-0 flex items-center justify-center p-3 rounded-xl transition-colors ${copiado ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300'}`}>

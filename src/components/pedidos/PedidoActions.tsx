@@ -57,13 +57,17 @@ export function PedidoActions({
         </button>
       )}
 
-      {/* ACEITO com bastão no balcão: enviar pra cozinha OU atalho de revenda */}
+      {/* ACEITO com bastão no balcão: enviar pra cozinha OU consumo salão/comanda OU atalho de revenda */}
       {p.status === 'ACEITO' && !naCozinha && (
         p.requer_cozinha ? (
           <button disabled={processando} onClick={() => executar(onEnviarCozinha)}
             className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-xl py-2.5 font-['Sora'] font-bold text-sm shadow-lg shadow-orange-500/20 hover:brightness-110 transition disabled:opacity-50">
             <Flame size={16} /> {tDynamic('Enviar para a cozinha')}
           </button>
+        ) : (p.tipo_pedido === 'SALAO' || p.origem === 'balanca') ? (
+          <div className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2.5 text-xs font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+            <UtensilsCrossed size={15} /> {tDynamic('Consumo Salão (Comanda Aberta)')}
+          </div>
         ) : (
           <button disabled={processando} onClick={() => executar(() => onAvancar('PRONTO'))}
             className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 text-white rounded-xl py-2.5 font-['Sora'] font-bold text-sm shadow-lg shadow-emerald-500/20 hover:brightness-110 transition disabled:opacity-50">

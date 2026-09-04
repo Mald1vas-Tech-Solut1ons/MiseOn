@@ -512,7 +512,7 @@ export default function AdminLayout() {
 
         {/* Informações da Loja */}
         <div className={`px-4 py-5 flex flex-col gap-1 overflow-hidden transition-all duration-300 shrink-0 ${isCollapsed ? 'items-center opacity-0 h-0 p-0 m-0 border-0' : 'opacity-100'}`}>
-          <span className="text-xs opacity-90 font-bold tracking-wider text-gray-400 uppercase whitespace-nowrap">Loja Atual</span>
+          <span className="text-xs opacity-90 font-bold tracking-wider text-gray-400 uppercase whitespace-nowrap">{tDynamic('Loja Atual')}</span>
           <h2 className="font-bold text-base truncate text-gray-900 dark:text-white whitespace-nowrap">{ctx.lojaNome}</h2>
           {ctx.papel !== 'admin' && (
             <span className="inline-block mt-1 self-start rounded-md bg-[#004198]/10 px-2 py-0.5 text-xs opacity-90 font-bold text-[#004198] dark:text-[#6B9EFF] uppercase">
@@ -528,25 +528,25 @@ export default function AdminLayout() {
             <>
               {[
                 { 
-                  id: 'visao-geral', label: 'Visão Geral', color: 'slate', routes: ['/admin/inicio']
+                  id: 'visao-geral', label: tDynamic('Visão Geral'), color: 'slate', routes: ['/admin/inicio']
                 },
                 { 
-                  id: 'operacao', label: 'Operação', color: 'orange', routes: ['/admin/pdv', '/admin/mesas', '/admin/balanca', '/admin/garcom-mobile', '/admin/pedidos', '/admin/kds', '/admin/producao', '/admin/entregas']
+                  id: 'operacao', label: tDynamic('Operação'), color: 'orange', routes: ['/admin/pdv', '/admin/mesas', '/admin/balanca', '/admin/garcom-mobile', '/admin/pedidos', '/admin/kds', '/admin/producao', '/admin/entregas']
                 },
                 { 
-                  id: 'atendimento', label: 'Atendimento e Canais', color: 'emerald', routes: ['/admin/chat', '/admin/ifood', '/admin/whatsapp']
+                  id: 'atendimento', label: tDynamic('Atendimento e Canais'), color: 'emerald', routes: ['/admin/chat', '/admin/ifood', '/admin/whatsapp']
                 },
                 { 
-                  id: 'catalogo', label: 'Cardápio e Estoque', color: 'blue', routes: ['/admin/cardapio', '/admin/estoque', '/admin/compras']
+                  id: 'catalogo', label: tDynamic('Cardápio e Estoque'), color: 'blue', routes: ['/admin/cardapio', '/admin/estoque', '/admin/compras']
                 },
                 { 
-                  id: 'gestao', label: 'Gestão e Relatórios', color: 'purple', routes: ['/admin/financeiro', '/admin/historico', '/admin/marketing']
+                  id: 'gestao', label: tDynamic('Gestão e Relatórios'), color: 'purple', routes: ['/admin/financeiro', '/admin/historico', '/admin/marketing']
                 },
                 { 
-                  id: 'admin', label: 'Configurações', color: 'indigo', routes: ['/admin/equipe', '/admin/loja', '/admin/fiscal', '/admin/assinatura']
+                  id: 'admin', label: tDynamic('Configurações'), color: 'indigo', routes: ['/admin/equipe', '/admin/loja', '/admin/fiscal', '/admin/assinatura']
                 },
                 { 
-                  id: 'suporte', label: 'Ajuda', color: 'sky', routes: ['/admin/ajuda']
+                  id: 'suporte', label: tDynamic('Ajuda'), color: 'sky', routes: ['/admin/ajuda']
                 }
               ].map((grupo, index) => {
                 const rotasDesteGrupo = [...principal, ...mais].filter(p => grupo.routes.includes(p.to));
@@ -573,7 +573,7 @@ export default function AdminLayout() {
           ) : (
             <div className="space-y-1">
               <p className={`px-5 mb-2 text-xs opacity-90 font-bold tracking-widest text-gray-400 uppercase transition-all duration-300 ${isCollapsed ? 'text-center text-xs opacity-80' : ''}`}>
-                {isCollapsed ? '---' : 'Operação'}
+                {isCollapsed ? '---' : tDynamic('Operação')}
               </p>
               {principal.map(p => renderSidebarLink(p))}
             </div>
@@ -591,8 +591,8 @@ export default function AdminLayout() {
           >
             <div className="nav-link-bg absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none rounded-2xl" />
             <Store size={20} className="nav-link-icon shrink-0 transition-transform duration-300" />
-            <span className={`nav-link-text whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>Ver Loja Online</span>
-            {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900/90 backdrop-blur-sm dark:bg-white/90 text-white dark:text-gray-900 text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">Ver Loja Online</div>}
+            <span className={`nav-link-text whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>{tDynamic('Ver Loja Online')}</span>
+            {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900/90 backdrop-blur-sm dark:bg-white/90 text-white dark:text-gray-900 text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">{tDynamic('Ver Loja Online')}</div>}
           </a>
           <NavLink
             to="/admin/conta"
@@ -601,8 +601,8 @@ export default function AdminLayout() {
           >
             <div className="nav-link-bg absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none rounded-2xl" />
             <UserCircle size={20} className="nav-link-icon shrink-0 transition-transform duration-300" />
-            <span className={`nav-link-text whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>Minha Conta</span>
-            {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900/90 backdrop-blur-sm dark:bg-[#111827]/90 text-white text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">Minha Conta</div>}
+            <span className={`nav-link-text whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>{tDynamic('Minha Conta')}</span>
+            {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900/90 backdrop-blur-sm dark:bg-[#111827]/90 text-white text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">{tDynamic('Minha Conta')}</div>}
           </NavLink>
           <button
             onClick={sair}
@@ -610,7 +610,7 @@ export default function AdminLayout() {
           >
             <LogOut size={20} className="shrink-0 group-hover:scale-110 transition-transform duration-300" />
             <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>{tDynamic('Sair do Sistema')}</span>
-            {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-red-600/90 backdrop-blur-sm text-white text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">Sair</div>}
+            {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-red-600/90 backdrop-blur-sm text-white text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">{tDynamic('Sair do Sistema')}</div>}
           </button>
         </div>
       </aside>

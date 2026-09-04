@@ -20,6 +20,7 @@ import { PainelNegociacoes } from '../../components/pedidos/PainelNegociacoes';
 import { despacharNoIfood, ehPedidoIfood, entregaEhDaLoja } from '../../lib/ifood';
 
 import { useI18n } from '../../contexts/I18nContext';
+import { HorizontalScrollContainer } from '../../components/ui';
 const SELECT = '*, itens_pedido(*, itens_pedido_opcoes(*)), pagamentos(metodo, status, valor_pago)';
 
 /* ── Card de pedido com visual oficial MiseOn ── */
@@ -332,7 +333,7 @@ export default function PainelPedidos() {
         </div>
 
         {/* ── Filtro por status ── */}
-        <div data-tour="tour-pedidos-filtros" className="mt-4 flex gap-2 overflow-x-auto pb-1">
+        <HorizontalScrollContainer className="mt-4 pb-1">
           {filtros.map((f) => {
             const qtd = contagem(f);
             const ativo = filtro === f.id;
@@ -353,7 +354,7 @@ export default function PainelPedidos() {
               </button>
             );
           })}
-        </div>
+        </HorizontalScrollContainer>
       </div>
 
       {carregando && (
@@ -368,7 +369,7 @@ export default function PainelPedidos() {
             <CalendarClock size={16} className="text-purple-500" />
             <h3 className="font-['Sora'] text-sm font-bold text-gray-700 dark:text-gray-200">Agendados ({agendadosFuturos.length})</h3>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2">
+          <HorizontalScrollContainer className="pb-2">
             {agendadosFuturos.map((p) => (
               <div key={p.id} className="w-64 shrink-0 rounded-2xl border border-purple-200 bg-purple-50 p-3 dark:border-purple-900/40 dark:bg-purple-900/10">
                 <div className="flex items-center justify-between">
@@ -381,7 +382,7 @@ export default function PainelPedidos() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">{fmt(Number(p.valor_total))} · {p.tipo_pedido === 'DELIVERY' ? 'Entrega' : p.tipo_pedido === 'SALAO' ? `Mesa ${p.mesa_numero ?? '—'}` : 'Retirada'}</p>
               </div>
             ))}
-          </div>
+          </HorizontalScrollContainer>
         </div>
       )}
 

@@ -26,6 +26,7 @@ import { tocarSom } from '../../lib/som';
 import { traduzirErro } from '../../lib/erros';
 import { createPedidoPedido } from '../../lib/pedidos';
 import { getOptimizedImageUrl } from '../../lib/cdn';
+import { HorizontalScrollContainer } from '../../components/ui';
 
 /* ─────────────────────────────────────────────────────────────
    PDV — Frente de balcão touch-first.
@@ -573,14 +574,16 @@ export default function PDV() {
           {mesas.length === 0 ? (
             <p className="text-xs text-gray-400">{tDynamic('Nenhuma mesa cadastrada ainda — crie mesas no Mapa de Mesas.')}</p>
           ) : (
-            <div className="flex items-center gap-2 overflow-x-auto">
+            <div className="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
               <span className="shrink-0 text-xs opacity-95 font-bold uppercase tracking-wide text-gray-400">{tDynamic('Mesa:')}</span>
-              {mesas.map((m) => (
-                <button key={m.id} onClick={() => { setMesaSelecionada(m); setAssentoSelecionado(null); }}
-                  className={`shrink-0 rounded-full border-2 px-3.5 py-1.5 text-xs font-black transition ${mesaSelecionada?.id === m.id ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)] text-white' : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'}`}>
-                  {m.numero}
-                </button>
-              ))}
+              <HorizontalScrollContainer className="flex-1 min-w-0" showGradients={false}>
+                {mesas.map((m) => (
+                  <button key={m.id} onClick={() => { setMesaSelecionada(m); setAssentoSelecionado(null); }}
+                    className={`shrink-0 rounded-full border-2 px-3.5 py-1.5 text-xs font-black transition ${mesaSelecionada?.id === m.id ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)] text-white' : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'}`}>
+                    {m.numero}
+                  </button>
+                ))}
+              </HorizontalScrollContainer>
             </div>
           )}
 

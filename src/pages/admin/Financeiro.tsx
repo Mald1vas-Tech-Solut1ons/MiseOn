@@ -11,6 +11,7 @@ import DreGerencial from '../../components/admin/DreGerencial';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
 import { useI18n } from '../../contexts/I18nContext';
+import { HorizontalScrollContainer } from '../../components/ui';
 
 const defaultCustos: ConfiguracoesCusto = {
   loja_id: '',
@@ -251,7 +252,7 @@ export default function Financeiro() {
       {aba === 'EXTRATO' && (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
           {/* ── Seletor de período ── */}
-          <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+          <HorizontalScrollContainer className="mb-4 pb-1">
             {PERIODOS.map((p) => (
               <button key={p.id} onClick={() => setPeriodo(p.id)}
                 className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-bold transition ${periodo === p.id
@@ -260,7 +261,7 @@ export default function Financeiro() {
                 {p.label}
               </button>
             ))}
-          </div>
+          </HorizontalScrollContainer>
 
           {/* ── KPIs ── */}
           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">

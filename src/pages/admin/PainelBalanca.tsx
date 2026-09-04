@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Scale, RefreshCw, Check, AlertTriangle, ShieldCheck, Zap, Usb, Hash, ArrowRight, Utensils, Award } from 'lucide-react';
+import { Scale, RefreshCw, Check, AlertTriangle, ShieldCheck, Zap, Usb, Hash, ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmt, type BalancaConfiguracao, type ProtocoloBalanca, type ModoConexaoBalanca, type Produto, type Comanda } from '../../types';
 import { BalancaEngine, type LeituraBalanca } from '../../lib/balanca/balancaEngine';
+
 import { useI18n } from '../../contexts/I18nContext';
-
-type ModoBuffet = 'QUILO' | 'LIVRE';
-
 export function PainelBalanca() {
   const { tDynamic } = useI18n();
   const [lojaId, setLojaId] = useState<string | null>(null);
@@ -14,15 +12,11 @@ export function PainelBalanca() {
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null);
 
-  // Modo Buffet: Por Quilo (R$/kg) vs Buffet Livre (Preço Fixo)
-  const [modoBuffet, setModoBuffet] = useState<ModoBuffet>('QUILO');
-  const [precoBuffetLivre, setPrecoBuffetLivre] = useState<number>(45.00);
-
   // Produtos por quilo
   const [produtosPeso, setProdutosPeso] = useState<Produto[]>([]);
   const [comandasAbertas, setComandasAbertas] = useState<Comanda[]>([]);
   
-  // Operação em Tempo Real
+  // Operação em Tempo Real (Caixa)
   const [produtoAtivo, setProdutoAtivo] = useState<Produto | null>(null);
   const [precoPraticado, setPrecoPraticado] = useState<number>(0);
   const inputComandaRef = useRef<HTMLInputElement>(null);
@@ -37,7 +31,7 @@ export function PainelBalanca() {
     data_bits: 8,
     stop_bits: 1,
     parity: 'none',
-    tara_padrao_g: 450, // Tara padrão de prato de restaurante self-service (450g)
+    tara_padrao_g: 200,
     produto_buffet_id: null,
     ip_dispositivo: '192.168.1.150',
     porta_dispositivo: 9100,
@@ -48,7 +42,7 @@ export function PainelBalanca() {
   const [conectado, setConectado] = useState(false);
   const [leituraAtual, setLeituraAtual] = useState<LeituraBalanca>({
     pesoBrutoKg: 0,
-    taraKg: 0.450,
+    taraKg: 0.200,
     pesoLiquidoKg: 0,
     estavel: true,
     timestamp: new Date(),
@@ -82,6 +76,8 @@ export function PainelBalanca() {
       const { data: userRes } = await supabase.auth.getUser();
       if (!userRes.user) return;
 
+      // A tabela é `usuarios_loja`; `membros_equipe` nunca existiu no banco, o
+      // que deixava o painel da balança sem loja e travado no loading.
       const { data: membro } = await supabase
         .from('usuarios_loja')
         .select('loja_id')
@@ -92,34 +88,35 @@ export function PainelBalanca() {
       if (!lId) return;
       setLojaId(lId);
 
-      // Botões Rápidos de Preço por Quilo
+
+      // 1. Inteligência de Food Service: Botões Rápidos locais (sem depender de Cardápio)
       const botoesSalvos = localStorage.getItem('@miseon/balanca_botoes');
       let botoesIniciais = [];
       if (botoesSalvos) {
         try {
           botoesIniciais = JSON.parse(botoesSalvos);
         } catch {
-          // Fallback se JSON estiver quebrado
+          // Se o JSON estiver quebrado, ignora silenciosamente e usa o padrão
         }
       }
       
       if (botoesIniciais.length === 0) {
         botoesIniciais = [
           { id: '1', nome: 'Buffet Tradicional', preco_por_quilo: 69.90 },
-          { id: '2', nome: 'Buffet com Churrasco', preco_por_quilo: 89.90 },
-          { id: '3', nome: 'Sobremesa', preco_por_quilo: 99.90 }
+          { id: '2', nome: 'Buffet com Churrasco', preco_por_quilo: 89.90 }
         ];
         localStorage.setItem('@miseon/balanca_botoes', JSON.stringify(botoesIniciais));
       }
       
       setProdutosPeso(botoesIniciais as any);
 
+      // Auto-selecionar o primeiro se houver
       if (botoesIniciais.length > 0) {
         setProdutoAtivo(botoesIniciais[0]);
         setPrecoPraticado(botoesIniciais[0].preco_por_quilo || 0);
       }
 
-      // Configuração de Hardware da Balança
+      // 2. Carregar configuração de Balança (ANTES DAS COMANDAS PARA GARANTIR FUNCIONAMENTO)
       let configParaUsar = null;
       const { data: confBalanca } = await supabase
         .from('balanca_configuracoes')
@@ -131,6 +128,7 @@ export function PainelBalanca() {
         setConfig(confBalanca as BalancaConfiguracao);
         configParaUsar = confBalanca;
       } else {
+        // Padrão inicial
         const defaultConfig: BalancaConfiguracao = {
           id: '',
           loja_id: lId,
@@ -140,7 +138,7 @@ export function PainelBalanca() {
           data_bits: 8,
           stop_bits: 1,
           parity: 'none',
-          tara_padrao_g: 450,
+          tara_padrao_g: 200,
           produto_buffet_id: null,
           ip_dispositivo: '192.168.1.150',
           porta_dispositivo: 9100,
@@ -150,9 +148,10 @@ export function PainelBalanca() {
         configParaUsar = defaultConfig;
       }
       
+      // Inicializa o hardware IMEDIATAMENTE para garantir que o emulador funcione
       inicializarEngine(configParaUsar as BalancaConfiguracao);
 
-      // Comandas Abertas
+      // 3. Carregar comandas abertas
       const { data: coms } = await supabase
         .from('comandas')
         .select('*')
@@ -175,25 +174,21 @@ export function PainelBalanca() {
     };
   }, [carregarDados]);
 
+  // Inteligência de Food Service: Sempre mantém um botão ativo para nunca exibir preço em branco
   useEffect(() => {
     if (produtosPeso.length > 0) {
       if (!produtoAtivo || !produtosPeso.find(p => p.id === produtoAtivo.id)) {
         setProdutoAtivo(produtosPeso[0]);
         setPrecoPraticado(produtosPeso[0].preco_por_quilo || 0);
       }
+    } else {
+      setProdutoAtivo(null);
+      setPrecoPraticado(0);
     }
   }, [produtosPeso, produtoAtivo]);
 
-  const aplicarTaraRapida = (taraGramas: number) => {
-    const novaConfig = { ...config, tara_padrao_g: taraGramas };
-    setConfig(novaConfig);
-    const taraKg = taraGramas / 1000;
-    setLeituraAtual((prev) => ({
-      ...prev,
-      taraKg,
-      pesoLiquidoKg: Math.max(0, prev.pesoBrutoKg - taraKg),
-    }));
-  };
+
+
 
   const salvarConfiguracoes = async () => {
     if (!lojaId) return;
@@ -210,7 +205,7 @@ export function PainelBalanca() {
         stop_bits: Number(config.stop_bits),
         parity: config.parity,
         tara_padrao_g: Number(config.tara_padrao_g),
-        produto_buffet_id: null,
+        produto_buffet_id: null, // Descontinuado do hardware, agora é live na tela
         ip_dispositivo: config.ip_dispositivo || null,
         porta_dispositivo: config.porta_dispositivo ? Number(config.porta_dispositivo) : null,
         ativo: config.ativo,
@@ -236,13 +231,12 @@ export function PainelBalanca() {
     }
   };
 
-  /* ── Lançamento Inteligente de Buffet em Comanda ── */
   const lancarPesoNaComanda = async () => {
-    if (modoBuffet === 'QUILO' && leituraAtual.pesoLiquidoKg <= 0) {
+    if (leituraAtual.pesoLiquidoKg <= 0) {
       return setMensagem({ tipo: 'erro', texto: 'Coloque um prato na balança com peso maior que zero.' });
     }
 
-    if (modoBuffet === 'QUILO' && !produtoAtivo) {
+    if (!produtoAtivo) {
       return setMensagem({ tipo: 'erro', texto: 'Selecione ou cadastre um produto por quilo para registrar a pesagem.' });
     }
 
@@ -252,7 +246,7 @@ export function PainelBalanca() {
     try {
       let comandaAlvoId = comandaSelecionadaId;
 
-      // Se informou número de cartão de comanda (bipagem ou digitação)
+      // Se informou número de cartão de comanda individual
       if (numeroCartaoInput.trim() && lojaId) {
         let { data: comExistente } = await supabase
           .from('comandas')
@@ -263,7 +257,7 @@ export function PainelBalanca() {
           .maybeSingle();
 
         if (!comExistente) {
-          // Criar comanda aberta para este cartão de consumo
+          // Criar nova comanda individual automática para este cartão
           const { data: novaCom, error: errCom } = await supabase
             .from('comandas')
             .insert({
@@ -286,10 +280,10 @@ export function PainelBalanca() {
 
       if (!comandaAlvoId) {
         setProcessandoLancamento(false);
-        return setMensagem({ tipo: 'erro', texto: 'Bipe o cartão ou selecione a comanda do cliente.' });
+        return setMensagem({ tipo: 'erro', texto: 'Comanda não selecionada ou não encontrada.' });
       }
 
-      // Buscar ou criar pedido vinculado em status ACEITO (em aberto na comanda, consumido no salão)
+      // Buscar ou criar pedido vinculado à comanda
       let { data: pedExistente } = await supabase
         .from('pedidos')
         .select('*')
@@ -304,10 +298,8 @@ export function PainelBalanca() {
             loja_id: lojaId,
             comanda_id: comandaAlvoId,
             tipo_pedido: 'SALAO',
-            status: 'ACEITO', // Status ACEITO: item lançado na comanda aberta, aguarda pagamento no caixa
-            requer_cozinha: false,
-            estacao_atual: 'BALCAO',
-            identificador_cliente: numeroCartaoInput.trim() ? `Cartão #${numeroCartaoInput.trim()}` : 'Cliente Buffet',
+            status: 'FINALIZADO', // item de buffet pesado é consumido de imediato
+            identificador_cliente: numeroCartaoInput.trim() ? `Comanda ${numeroCartaoInput.trim()}` : 'Cliente Buffet',
             subtotal: 0,
             taxa_entrega: 0,
             desconto: 0,
@@ -321,28 +313,18 @@ export function PainelBalanca() {
         pedExistente = novoPed;
       }
 
-      // Dados do item (Buffet por Quilo vs Buffet Livre)
-      const isQuilo = modoBuffet === 'QUILO';
-      const valorItem = isQuilo
-        ? Number((leituraAtual.pesoLiquidoKg * precoPraticado).toFixed(2))
-        : precoBuffetLivre;
+      // Inserir o item pesado
+      const valorItem = Number((leituraAtual.pesoLiquidoKg * precoPraticado).toFixed(2));
 
-      const nomeItem = isQuilo
-        ? (produtoAtivo ? `${produtoAtivo.nome} (${leituraAtual.pesoLiquidoKg.toFixed(3)}kg)` : `Buffet por Quilo (${leituraAtual.pesoLiquidoKg.toFixed(3)}kg)`)
-        : 'Buffet Livre (Por Pessoa)';
-
-      const precoUnitario = isQuilo ? precoPraticado : precoBuffetLivre;
-      const quantidade = isQuilo ? leituraAtual.pesoLiquidoKg : 1;
-
-      // Inserir item no pedido
+      // Registra o item do peso no banco usando produto_id null ou mockado
       const { error: errItem } = await supabase.from('itens_pedido').insert({
         pedido_id: pedExistente.id,
-        produto_id: isQuilo && produtoAtivo?.id?.length === 36 ? produtoAtivo.id : null,
-        nome_produto: nomeItem,
-        preco_unitario: precoUnitario,
-        quantidade: quantidade,
-        origem_balanca: isQuilo,
-        tara_g: isQuilo ? config.tara_padrao_g : 0,
+        produto_id: produtoAtivo?.id?.length === 36 ? produtoAtivo.id : null, // Evita enviar ID fake do localStorage se a tabela exigir uuid, ou manda nulo.
+        nome_produto: produtoAtivo ? produtoAtivo.nome : 'Buffet Avulso',
+        preco_unitario: precoPraticado,
+        quantidade: leituraAtual.pesoLiquidoKg,
+        origem_balanca: true,
+        tara_g: config.tara_padrao_g,
       });
 
       if (errItem) throw errItem;
@@ -368,18 +350,15 @@ export function PainelBalanca() {
 
       setMensagem({
         tipo: 'sucesso',
-        texto: isQuilo
-          ? `✅ Gravação OK! ${leituraAtual.pesoLiquidoKg.toFixed(3)} kg (${fmt(valorItem)}) lançados no Cartão #${numeroCartaoInput.trim() || 'Comanda'}!`
-          : `✅ Buffet Livre (${fmt(precoBuffetLivre)}) lançado no Cartão #${numeroCartaoInput.trim() || 'Comanda'}!`,
+        texto: `✅ Registrado! ${leituraAtual.pesoLiquidoKg.toFixed(3)} kg (${fmt(valorItem)}) gravados com sucesso!`,
       });
 
-      // Limpar campo de bipagem para o próximo cliente da fila do buffet
       setNumeroCartaoInput('');
       carregarDados();
       setTimeout(() => inputComandaRef.current?.focus(), 100);
     } catch (err: any) {
       console.error('Erro ao lançar peso:', err);
-      setMensagem({ tipo: 'erro', texto: `Falha ao gravar item na comanda: ${err?.message || 'Erro de conexão ou validação.'}` });
+      setMensagem({ tipo: 'erro', texto: 'Falha ao gravar item na comanda.' });
     } finally {
       setProcessandoLancamento(false);
     }
@@ -393,61 +372,46 @@ export function PainelBalanca() {
     );
   }
 
-  const valorEstimadoPrato = modoBuffet === 'QUILO'
+  const valorEstimadoPrato = produtoAtivo
     ? (leituraAtual.pesoLiquidoKg * precoPraticado)
-    : precoBuffetLivre;
+    : 0;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
-      {/* Header com Seletor de Modo Self-Service */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-orange-500/10 p-2.5 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-            <Scale size={28} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100">{tDynamic('Balança & Estação Buffet Self-Service')}</h1>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Pesagem por quilo, buffet livre por pessoa e gravação instantânea em comanda por bipagem.
-            </p>
+    <div className="mx-auto max-w-6xl space-y-8 p-4 sm:p-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 dark:border-slate-800 pb-5">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-orange-500/10 p-2.5 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+              <Scale size={28} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{tDynamic('Balança do Buffet por Quilo')}</h1>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {tDynamic('Integração inteligente de pesagem em tempo real com Toledo, Filizola, Urano e Web Serial.')}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Seletor de Modo: Quilo vs Livre */}
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-800 dark:bg-slate-900">
-            <button
-              onClick={() => setModoBuffet('QUILO')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                modoBuffet === 'QUILO'
-                  ? 'bg-orange-500 text-slate-950 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-              }`}
-            >
-              <Scale size={14} /> Por Quilo (R$/kg)
-            </button>
-            <button
-              onClick={() => setModoBuffet('LIVRE')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                modoBuffet === 'LIVRE'
-                  ? 'bg-orange-500 text-slate-950 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-              }`}
-            >
-              <Utensils size={14} /> Buffet Livre (Fixo)
-            </button>
-          </div>
-
+        <div className="flex items-center gap-3">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border ${
+            className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-semibold border ${
               conectado
                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
                 : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
             }`}
           >
-            <span className={`h-2 w-2 rounded-full ${conectado ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-            {conectado ? `${config.modo_conexao}` : 'Off'}
+            <span className={`h-2 w-2 rounded-full ${conectado ? 'bg-emerald-500 dark:bg-emerald-400 animate-pulse' : 'bg-rose-500 dark:bg-rose-400'}`} />
+            {conectado ? `${tDynamic('Balança Conectada')} (${config.modo_conexao})` : tDynamic('Balança Desconectada')}
           </span>
+
+          <button
+            onClick={() => engineRef.current && engineRef.current.conectar().then((ok) => setConectado(ok))}
+            className="flex items-center gap-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-700"
+          >
+            <RefreshCw size={14} /> {tDynamic('Reconectar')}
+          </button>
         </div>
       </div>
 
@@ -464,267 +428,326 @@ export function PainelBalanca() {
         </div>
       )}
 
-      {/* Grid Operacional */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Lado Esquerdo: Display Digital & Bipagem Contínua */}
+      {/* Grid Principal */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        {/* Painel Esquerdo: Mostrador Digital & Lançamento Rápido */}
         <div className="lg:col-span-7 space-y-6">
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-6 shadow-xl backdrop-blur-md">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-4">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                <Zap size={14} className="text-amber-500" />
-                {modoBuffet === 'QUILO' ? 'Visor Digital de Pesagem' : 'Valor Fixo por Pessoa'}
+                <Zap size={14} className="text-amber-500 dark:text-amber-400" /> {tDynamic('Leitura Digital em Tempo Real')}
               </span>
-
-              {modoBuffet === 'QUILO' && (
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-slate-400 font-bold mr-1">Tara:</span>
-                  {[
-                    { label: 'Prato 450g', g: 450 },
-                    { label: 'Sobremesa 200g', g: 200 },
-                    { label: 'Marmita 30g', g: 30 },
-                    { label: 'Zero', g: 0 },
-                  ].map((t) => (
-                    <button
-                      key={t.g}
-                      onClick={() => aplicarTaraRapida(t.g)}
-                      className={`px-2 py-1 rounded text-[10px] font-bold border transition ${
-                        config.tara_padrao_g === t.g
-                          ? 'bg-orange-500 text-slate-950 border-orange-500'
-                          : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <span className="text-xs text-slate-500 font-mono">
+                {leituraAtual.estavel ? tDynamic('ESTÁVEL') : tDynamic('OSCILANDO...')}
+              </span>
             </div>
 
-            {/* Display HUD */}
-            <div className="my-5 rounded-2xl bg-slate-950 border border-slate-800 p-6 text-center shadow-inner relative overflow-hidden">
-              {modoBuffet === 'QUILO' ? (
-                <>
-                  <div className="absolute top-3 left-4 text-xs font-mono text-emerald-500/70">
-                    TARA APLICADA: {config.tara_padrao_g}g | BRUTO: {leituraAtual.pesoBrutoKg.toFixed(3)}kg
-                  </div>
+            {/* Display de Peso em LED / HUD - Mantido com tema escuro técnico intencional */}
+            <div className="my-6 rounded-2xl bg-slate-950 border border-slate-800 p-6 text-center shadow-inner relative overflow-hidden">
+              <div className="absolute top-3 left-4 text-xs font-mono text-emerald-500/70">
+                PROT: {config.modo_conexao === 'MANUAL' ? tDynamic('DIGITAÇÃO MANUAL') : config.protocolo} | TARA: {config.tara_padrao_g}g
+              </div>
 
-                  {config.modo_conexao === 'MANUAL' ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <input
-                        type="number"
-                        step="0.001"
-                        min="0"
-                        value={leituraAtual.pesoLiquidoKg || ''}
-                        onChange={(e) => {
-                          const pesoLiq = Number(e.target.value);
-                          const taraKg = config.tara_padrao_g / 1000;
-                          setLeituraAtual({
-                            ...leituraAtual,
-                            pesoLiquidoKg: pesoLiq,
-                            pesoBrutoKg: pesoLiq + taraKg,
-                            estavel: true,
-                          });
-                        }}
-                        className="w-48 bg-transparent text-5xl font-black font-mono tracking-tight text-emerald-400 sm:text-6xl text-center focus:outline-none border-b-2 border-emerald-500/40 focus:border-emerald-500"
-                        placeholder="0.000"
-                      />
-                      <span className="text-2xl font-bold text-emerald-500">kg</span>
-                    </div>
-                  ) : (
-                    <div className="text-5xl font-black font-mono tracking-tight text-emerald-400 sm:text-6xl">
-                      {leituraAtual.pesoLiquidoKg.toFixed(3)}{' '}
-                      <span className="text-2xl font-bold text-emerald-500">kg</span>
-                    </div>
-                  )}
-
-                  <div className="mt-2 text-xs text-slate-400 font-mono">
-                    Peso Líquido Calculado (Bruto - {config.tara_padrao_g}g de prato)
-                  </div>
-                </>
+              {config.modo_conexao === 'MANUAL' ? (
+                <div className="flex items-center justify-center gap-2">
+                  <input
+                    type="number"
+                    step="0.001"
+                    min="0"
+                    autoFocus
+                    value={leituraAtual.pesoLiquidoKg || ''}
+                    onChange={(e) => {
+                      const pesoLiq = Number(e.target.value);
+                      const taraKg = config.tara_padrao_g / 1000;
+                      setLeituraAtual({
+                        ...leituraAtual,
+                        pesoLiquidoKg: pesoLiq,
+                        pesoBrutoKg: pesoLiq + taraKg,
+                        estavel: true
+                      });
+                    }}
+                    className="w-48 bg-transparent text-5xl font-black font-mono tracking-tight text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.3)] sm:text-6xl text-center focus:outline-none border-b-2 border-emerald-500/30 focus:border-emerald-500"
+                    placeholder="0.000"
+                  />
+                  <span className="text-2xl font-bold text-emerald-500">kg</span>
+                </div>
               ) : (
-                <div className="space-y-2">
-                  <div className="text-xs font-bold uppercase tracking-wider text-amber-400">
-                    Consumo Livre por Pessoa
-                  </div>
-                  <div className="flex justify-center items-center gap-2">
-                    <span className="text-2xl font-bold text-slate-400">R$</span>
-                    <input
-                      type="number"
-                      step="0.50"
-                      value={precoBuffetLivre}
-                      onChange={(e) => setPrecoBuffetLivre(Number(e.target.value))}
-                      className="w-40 bg-transparent text-5xl font-black font-mono text-emerald-400 text-center border-b-2 border-emerald-500/40 focus:outline-none"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-400">O cliente paga um valor fixo e consome à vontade no buffet.</p>
+                <div className="text-5xl font-black font-mono tracking-tight text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.3)] sm:text-6xl">
+                  {leituraAtual.pesoLiquidoKg.toFixed(3)}{' '}
+                  <span className="text-2xl font-bold text-emerald-500">kg</span>
                 </div>
               )}
+
+              <div className="mt-3 flex items-center justify-center gap-6 text-xs text-slate-400 font-mono">
+                <span>Bruto: {leituraAtual.pesoBrutoKg.toFixed(3)} kg</span>
+                <span>•</span>
+                <span>Tara (Prato): {(config.tara_padrao_g / 1000).toFixed(3)} kg</span>
+              </div>
             </div>
 
-            {/* Seleção de Tabela de Preço por Quilo */}
-            {modoBuffet === 'QUILO' && (
-              <div className="mb-5 rounded-xl bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-200 dark:border-slate-700/50 space-y-3">
-                <div className="text-xs text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">
-                  Selecione a Tabela / Tipo de Buffet:
-                </div>
+            {/* Produto Buffet & Valor Estimado (Override de Preço) */}
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-200 dark:border-slate-700/50">
+              <div className="flex-1 space-y-3">
+                <div className="text-xs text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">{tDynamic('O que estamos pesando?')}</div>
                 <div className="flex flex-wrap gap-2">
-                  {produtosPeso.map((p) => (
+                  {produtosPeso.map(p => (
                     <button
                       key={p.id}
                       onClick={() => {
                         setProdutoAtivo(p);
                         setPrecoPraticado(p.preco_por_quilo || 0);
                       }}
-                      className={`px-3.5 py-2 rounded-lg text-xs font-bold border transition ${
-                        produtoAtivo?.id === p.id
-                          ? 'bg-orange-500 text-slate-950 border-orange-500 shadow-md scale-105'
-                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                      className={`px-4 py-2.5 rounded-lg text-sm font-bold border transition ${
+                        produtoAtivo?.id === p.id 
+                          ? 'bg-orange-500 text-slate-950 border-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.4)] scale-105' 
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
                       }`}
                     >
-                      {p.nome} ({fmt(p.preco_por_quilo || 0)}/kg)
+                      {p.nome}
                     </button>
                   ))}
-                </div>
-
-                <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-700/50 pt-3">
-                  <span className="text-xs text-slate-400">Preço do Quilo Aplicado:</span>
-                  <span className="text-base font-extrabold text-emerald-400 font-mono">
-                    {fmt(precoPraticado)}/kg
-                  </span>
+                  {produtosPeso.length === 0 && (
+                    <span className="text-sm font-bold text-orange-600 dark:text-orange-400">Buffet Avulso</span>
+                  )}
                 </div>
               </div>
-            )}
 
-            {/* Área de Bipagem Contínua de Cartão/Comanda */}
+              <div className="flex items-center gap-6 border-t border-slate-200 dark:border-slate-700/50 pt-4 sm:border-0 sm:pt-0 sm:pl-4 sm:border-l">
+                <div className="flex flex-col">
+                  <label className="text-xs opacity-90 uppercase font-bold text-slate-600 dark:text-slate-400 mb-1">{tDynamic('Preço Praticado/kg')}</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-sm font-bold text-slate-400 dark:text-slate-500">R$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={precoPraticado || 0}
+                      onChange={e => setPrecoPraticado(Number(e.target.value))}
+                      className="w-28 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 pl-8 pr-2 py-2 text-base font-bold text-emerald-600 dark:text-emerald-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs opacity-90 uppercase font-bold text-slate-600 dark:text-slate-400 mb-1">{tDynamic('Total do Prato')}</div>
+                  <div className="text-2xl font-black text-orange-600 dark:text-orange-400 leading-none">{fmt(valorEstimadoPrato)}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Formulário de Lançamento Direto na Comanda */}
             <div className="space-y-4 pt-2 border-t border-slate-200 dark:border-slate-800">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                  Bipar Cartão de Comanda do Cliente
-                </h3>
-                <span className="text-[11px] font-semibold text-emerald-500 flex items-center gap-1">
-                  <Award size={13} /> Pronto para bipagem rápida
-                </span>
-              </div>
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                {tDynamic('Vincular Pesagem à Comanda do Cliente')}
+              </h3>
 
-              <div className="space-y-3">
-                <div className="relative">
-                  <Hash size={18} className="absolute left-3.5 top-3.5 text-orange-500" />
-                  <input
-                    ref={inputComandaRef}
-                    autoFocus
-                    type="text"
-                    placeholder="Bipe o código de barras ou digite o nº do cartão..."
-                    value={numeroCartaoInput}
-                    onChange={(e) => setNumeroCartaoInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        lancarPesoNaComanda();
-                      }
-                    }}
-                    className="w-full rounded-2xl bg-white dark:bg-slate-950 border-2 border-orange-500/60 pl-10 pr-4 py-3 text-base font-bold text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none shadow-md"
-                  />
-                </div>
-
-                {comandasAbertas.length > 0 && (
-                  <div className="pt-1">
-                    <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                      Ou selecione uma comanda aberta:
-                    </label>
-                    <select
-                      value={comandaSelecionadaId}
-                      onChange={(e) => {
-                        setComandaSelecionadaId(e.target.value);
-                        const selected = comandasAbertas.find((c) => c.id === e.target.value);
-                        if (selected?.numero_cartao) {
-                          setNumeroCartaoInput(selected.numero_cartao);
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    {tDynamic('Comanda ou Ficha (Aceita Código de Barras)')}
+                  </label>
+                  <div className="relative">
+                    <Hash size={16} className="absolute left-3 top-3 text-slate-400 dark:text-slate-500" />
+                    <input
+                      ref={inputComandaRef}
+                      autoFocus
+                      type="text"
+                      placeholder="Ex: JOAO, VIP-123 ou Bipar Cartão"
+                      value={numeroCartaoInput}
+                      onChange={(e) => setNumeroCartaoInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          lancarPesoNaComanda();
                         }
                       }}
-                      className="w-full rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
-                    >
-                      <option value="">-- Selecionar Comanda Aberta --</option>
-                      {comandasAbertas.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.numero_cartao ? `Cartão #${c.numero_cartao}` : `Comanda ${c.id.substring(0, 8)}`}
-                        </option>
-                      ))}
-                    </select>
+                      className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 pl-9 pr-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
+                    />
                   </div>
-                )}
+                </div>
 
-                <button
-                  onClick={lancarPesoNaComanda}
-                  disabled={processandoLancamento || (modoBuffet === 'QUILO' && leituraAtual.pesoLiquidoKg <= 0)}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 py-3.5 px-4 font-bold text-slate-950 shadow-lg hover:brightness-110 active:scale-[0.99] disabled:opacity-50 transition text-sm"
-                >
-                  {processandoLancamento ? (
-                    <RefreshCw className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <>
-                      <span>Gravar na Comanda ({fmt(valorEstimadoPrato)})</span>
-                      <ArrowRight size={18} />
-                    </>
-                  )}
-                </button>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    {tDynamic('Ou Escolha uma Comanda de Mesa')}
+                  </label>
+                  <select
+                    value={comandaSelecionadaId}
+                    onChange={(e) => setComandaSelecionadaId(e.target.value)}
+                    className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
+                  >
+                    <option value="">{tDynamic('Selecione a comanda...')}</option>
+                    {comandasAbertas.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.numero_cartao ? `Cartão #${c.numero_cartao}` : `Comanda da Mesa`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
+
+              <button
+                onClick={lancarPesoNaComanda}
+                disabled={processandoLancamento || leituraAtual.pesoLiquidoKg <= 0}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 py-3.5 px-4 font-semibold text-slate-950 shadow-lg hover:brightness-110 active:scale-[0.99] disabled:opacity-50 transition"
+              >
+                {processandoLancamento ? (
+                  <RefreshCw className="h-5 w-5 animate-spin" />
+                ) : (
+                  <>
+                    <span>{tDynamic('Gravar Peso na Comanda')} ({fmt(valorEstimadoPrato)})</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Lado Direito: Parâmetros & Configuração */}
+        {/* Painel Direito: Configuração Avançada da Balança */}
         <div className="lg:col-span-5 space-y-6">
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-6 shadow-xl backdrop-blur-md space-y-5">
-            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 uppercase tracking-wider">
-              <Usb size={16} className="text-orange-500" /> Parâmetros da Balança Física
+            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Usb size={18} className="text-orange-500 dark:text-orange-400" /> {tDynamic('Configuração do Hardware')}
             </h2>
 
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="block font-medium text-slate-400 mb-1">Modo de Conexão Hardware</label>
-                <select
-                  value={config.modo_conexao}
-                  onChange={(e) => setConfig({ ...config, modo_conexao: e.target.value as ModoConexaoBalanca })}
-                  className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 focus:border-orange-500 focus:outline-none"
-                >
-                  <option value="WEB_SERIAL">Web Serial API (Cabo USB / RS-232 Direct)</option>
-                  <option value="NETWORK_WEBHOOK">Rede Local TCP/IP (Ethernet/Wi-Fi)</option>
-                  <option value="MANUAL">Digitação Manual no Teclado</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                {tDynamic('Modo de Conexão com a Balança')}
+              </label>
+              <select
+                value={config.modo_conexao}
+                onChange={(e) => setConfig({ ...config, modo_conexao: e.target.value as ModoConexaoBalanca })}
+                className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
+              >
+                <option value="WEB_SERIAL">Web Serial API (Cabo USB / RS-232 Direct)</option>
+                <option value="NETWORK_WEBHOOK">Rede Local / IP TCP/IP</option>
+                <option value="MANUAL">{tDynamic('Digitação Manual (Sem Comunicação Integrada)')}</option>
+              </select>
+            </div>
 
+            {/* Smart UI: Render fields based on connection mode */}
+            {config.modo_conexao === 'MANUAL' && (
+              <div className="rounded-xl bg-orange-500/10 p-3 border border-orange-500/20 text-xs text-orange-700 dark:text-orange-300 flex items-center gap-2">
+                <ShieldCheck size={16} className="shrink-0" />
+                <span>{tDynamic('Modo de Digitação Manual: O operador deverá olhar o visor da balança não-integrada e digitar o peso do prato diretamente no sistema.')}</span>
+              </div>
+            )}
+
+            {config.modo_conexao === 'NETWORK_WEBHOOK' && (
+              <div className="rounded-xl bg-emerald-500/10 p-3 border border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                <ShieldCheck size={16} className="shrink-0" />
+                <span>{tDynamic('Modo Rede ativado. O sistema escutará as transmissões da balança diretamente via TCP/IP na porta configurada.')}</span>
+              </div>
+            )}
+
+            {(config.modo_conexao === 'WEB_SERIAL' || config.modo_conexao === 'NETWORK_WEBHOOK') && (
               <div>
-                <label className="block font-medium text-slate-400 mb-1">Protocolo / Fabricante</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                  {tDynamic('Protocolo / Fabricante da Balança')}
+                </label>
                 <select
                   value={config.protocolo}
                   onChange={(e) => setConfig({ ...config, protocolo: e.target.value as ProtocoloBalanca })}
-                  className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 focus:border-orange-500 focus:outline-none"
+                  className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
                 >
-                  <option value="TOLEDO_PRIX3">Toledo Prix 3 / Prix 4 / Prix 5</option>
+                  <option value="TOLEDO_PRIX3">Toledo Prix 3 / Prix 4</option>
                   <option value="FILIZOLA_CS15">Filizola CS 15 / Platina</option>
                   <option value="URANO">Urano Pop / Integra</option>
-                  <option value="CUSTOM_SERIAL">Serial Genérica (ASCII Float)</option>
+                  <option value="CUSTOM_SERIAL">{tDynamic('Serial Genérica (ASCII Float)')}</option>
                 </select>
               </div>
+            )}
 
-              <div>
-                <label className="block font-medium text-slate-400 mb-1">Tara Padrão do Prato (g)</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {config.modo_conexao === 'WEB_SERIAL' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      Baud Rate (bps)
+                    </label>
+                    <input
+                      type="number"
+                      value={config.baud_rate}
+                      onChange={(e) => setConfig({ ...config, baud_rate: Number(e.target.value) })}
+                      className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      Data Bits
+                    </label>
+                    <select
+                      value={config.data_bits}
+                      onChange={(e) => setConfig({ ...config, data_bits: Number(e.target.value) })}
+                      className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
+                    >
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      Stop Bits
+                    </label>
+                    <select
+                      value={config.stop_bits}
+                      onChange={(e) => setConfig({ ...config, stop_bits: Number(e.target.value) })}
+                      className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
+                    >
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      Paridade (Parity)
+                    </label>
+                    <select
+                      value={config.parity}
+                      onChange={(e) => setConfig({ ...config, parity: e.target.value as any })}
+                      className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
+                    >
+                      <option value="none">None (Nenhuma)</option>
+                      <option value="even">Even (Par)</option>
+                      <option value="odd">Odd (Ímpar)</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {config.modo_conexao === 'NETWORK_WEBHOOK' && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    {tDynamic('Porta de Escuta (TCP)')}
+                  </label>
+                  <input
+                    type="number"
+                    value={config.porta_dispositivo || 9100}
+                    onChange={(e) => setConfig({ ...config, porta_dispositivo: Number(e.target.value) })}
+                    className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
+                  />
+                </div>
+              )}
+
+              <div className={config.modo_conexao === 'MANUAL' ? 'sm:col-span-2' : ''}>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                  {tDynamic('Tara Padrão do Prato (gramas)')}
+                </label>
                 <input
                   type="number"
                   value={config.tara_padrao_g}
                   onChange={(e) => setConfig({ ...config, tara_padrao_g: Number(e.target.value) })}
-                  className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 focus:border-orange-500 focus:outline-none"
+                  className="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-orange-500 focus:outline-none"
                 />
               </div>
             </div>
 
-            {/* Tabela de Preços Rápidos por Quilo */}
-            <div className="pt-3 border-t border-slate-800 space-y-2">
-              <label className="block text-xs font-bold text-orange-400 uppercase tracking-wider">
-                Tabelas de Preço Rápido (R$/kg)
+            {/* Gerenciamento Rápido de Botões (Substitui Cardápio) */}
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800/50">
+              <label className="block text-xs font-bold text-orange-600 dark:text-orange-400 mb-3 uppercase tracking-wider">
+                {tDynamic('Botões de Preço Rápido (Exclusivo desta balança)')}
               </label>
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <div className="space-y-3">
                 {produtosPeso.map((p, index) => (
-                  <div key={p.id} className="flex items-center gap-2">
+                  <div key={p.id} className="flex items-center gap-3">
                     <input
                       type="text"
                       value={p.nome}
@@ -734,33 +757,58 @@ export function PainelBalanca() {
                         setProdutosPeso(newProds);
                         localStorage.setItem('@miseon/balanca_botoes', JSON.stringify(newProds));
                       }}
-                      className="flex-1 rounded-lg bg-slate-950 border border-slate-800 px-2.5 py-1.5 text-xs text-slate-200"
+                      placeholder="Ex: Tradicional"
+                      className="flex-1 rounded-lg bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-200 focus:border-orange-500 focus:outline-none"
                     />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={p.preco_por_quilo || 0}
-                      onChange={(e) => {
-                        const newProds = [...produtosPeso];
-                        newProds[index].preco_por_quilo = Number(e.target.value);
+                    <div className="relative w-32">
+                      <span className="absolute left-3 top-2 text-xs font-bold text-slate-400 dark:text-slate-500">R$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={p.preco_por_quilo || 0}
+                        onChange={(e) => {
+                          const newProds = [...produtosPeso];
+                          newProds[index].preco_por_quilo = Number(e.target.value);
+                          setProdutosPeso(newProds);
+                          localStorage.setItem('@miseon/balanca_botoes', JSON.stringify(newProds));
+                          if (produtoAtivo?.id === p.id) setPrecoPraticado(Number(e.target.value));
+                        }}
+                        className="w-full rounded-lg bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 pl-8 pr-2 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 focus:border-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      onClick={() => {
+                        const newProds = produtosPeso.filter((_, i) => i !== index);
                         setProdutosPeso(newProds);
                         localStorage.setItem('@miseon/balanca_botoes', JSON.stringify(newProds));
-                        if (produtoAtivo?.id === p.id) setPrecoPraticado(Number(e.target.value));
                       }}
-                      className="w-24 rounded-lg bg-slate-950 border border-slate-800 px-2.5 py-1.5 text-xs font-bold text-emerald-400 font-mono"
-                    />
+                      className="p-2 bg-red-500/10 text-red-600 dark:text-red-500 rounded-lg hover:bg-red-500/20 transition"
+                    >
+                      X
+                    </button>
                   </div>
                 ))}
+                
+                <button
+                  onClick={() => {
+                    const newProds = [...produtosPeso, { id: Date.now().toString(), nome: 'Novo Botão', preco_por_quilo: 0 }];
+                    setProdutosPeso(newProds as any);
+                    localStorage.setItem('@miseon/balanca_botoes', JSON.stringify(newProds));
+                  }}
+                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition"
+                >
+                  + {tDynamic('Adicionar novo botão')}
+                </button>
               </div>
             </div>
 
             <button
               onClick={salvarConfiguracoes}
               disabled={salvando}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-800 py-3 text-xs font-bold text-white hover:bg-slate-700 transition"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-900 dark:bg-slate-800 py-3 text-sm font-semibold text-white border border-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 transition"
             >
               {salvando ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Check size={16} />}
-              <span>Salvar Parâmetros da Balança</span>
+              <span>{tDynamic('Salvar Parâmetros da Balança')}</span>
             </button>
           </div>
         </div>
@@ -768,3 +816,4 @@ export function PainelBalanca() {
     </div>
   );
 }
+

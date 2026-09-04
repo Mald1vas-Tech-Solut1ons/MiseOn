@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import { fmt } from '../../types';
 import type { ProductGridProps } from '../../types';
+import { HorizontalScrollContainer } from '../ui';
 
 export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva, produtosVisiveis, tocarProduto }: ProductGridProps) {
   return (
@@ -12,7 +13,7 @@ export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva
             className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-[var(--cor-primaria)] dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100" />
         </div>
       </div>
-      <div className="flex gap-1.5 overflow-x-auto p-3 pb-2 custom-scrollbar">
+      <HorizontalScrollContainer className="p-3 pb-2">
         <button 
           onClick={() => setCatAtiva('TODAS')} 
           className={`shrink-0 rounded-full px-5 py-2 text-xs font-bold transition-all duration-300 border ${
@@ -36,7 +37,7 @@ export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva
             {c.nome}
           </button>
         ))}
-      </div>
+      </HorizontalScrollContainer>
       <div className="grid flex-1 auto-rows-min grid-cols-2 gap-3 overflow-y-auto p-4 pt-2 sm:grid-cols-3 xl:grid-cols-4 custom-scrollbar">
         {produtosVisiveis.map((p) => (
           <button 

@@ -12,3 +12,4 @@ export { ToastProvider } from './Toast';
 export { useToast } from '../../contexts/ToastContext';
 export { BandeiraMark } from './BandeiraMark';
 export { BANDEIRAS_ACEITAS } from '../../constants/bandeiras';
+export { HorizontalScrollContainer } from './HorizontalScrollContainer';
