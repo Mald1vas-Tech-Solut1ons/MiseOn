@@ -1,24 +1,11 @@
 -- ============================================================
--- MiseOn — Fix P0: pedido de mesa (QR) não era criado por anônimo
+-- MiseOn — Pedidos de Mesa (Salão/QR/Garçom) com Envio Direto ao KDS
 --
--- Bug encontrado na validação E2E do fluxo do QR: PedidoMesaDrawer
--- faz .insert().select('id, numero') em pedidos. O PostgREST vira
--- INSERT ... RETURNING, e o Postgres exige policy de SELECT para o
--- RETURNING. O anônimo não tem SELECT em pedidos desde
--- 20260718140000_seguranca_fase_a (que removeu pub_le_pedido por
--- vazamento) — logo o INSERT em si passa (pub_cria_pedido), mas o
--- RETURNING falha com 42501 e o cliente do QR não consegue enviar
--- pedido desde 18/07. Idem para .insert().select() em itens_pedido.
--- O checkout por link escapa porque exige login (cliente_seus_pedidos).
---
--- Solução (mesmo padrão de fn_acompanhar_pedido e
--- fn_comanda_aberta_mesa): RPC SECURITY DEFINER que executa o fluxo
--- inteiro no servidor e retorna só (pedido_id, numero).
---
--- Endurecimento incluso: os preços são SEMPRE recalculados do banco
--- (produtos.preco + opcoes.preco_adicional) e produto/opção são
--- validados contra a loja — com o insert público antigo, um cliente
--- podia ditar preco_unitario/valor_total arbitrários.
+-- Corrige a RPC fn_pedido_mesa_criar para que novos pedidos de mesa
+-- nasçam com status = 'ACEITO', estacao_atual = 'COZINHA',
+-- requer_cozinha = true e etapa_kds_atual = 'etapa_fila'.
+-- Isso elimina o engessamento de ter que aprovar manualmente
+-- pedidos da mesa no balcão, enviando os pratos direto à cozinha.
 -- ============================================================
 
 create or replace function public.fn_pedido_mesa_criar(
@@ -46,8 +33,10 @@ declare
   v_preco_item  numeric;
   v_subtotal    numeric := 0;
   v_item_id     uuid;
+  v_tem_cozinha boolean := false;
+  v_estacao     text;
+  v_prod_nome   text;
 begin
-  -- Mesa precisa existir, ser da loja e estar ativa (mesma guarda da comanda)
   select m.numero into v_mesa_numero
     from mesas m
    where m.id = p_mesa_id and m.loja_id = p_loja_id and m.ativo;
@@ -59,8 +48,25 @@ begin
     raise exception 'Pedido sem itens';
   end if;
 
-  -- Reusa a comanda ABERTA da mesa ou abre uma nova (função já validada)
-  v_comanda := public.fn_comanda_aberta_mesa(p_loja_id, p_mesa_id);
+  for v_item in select value from jsonb_array_elements(p_itens) loop
+    select pr.estacao_preparo, pr.nome into v_estacao, v_prod_nome
+      from produtos pr
+     where pr.id = (v_item->>'produto_id')::uuid;
+    
+    if (v_estacao is null or v_estacao = 'COZINHA') then
+      if coalesce(v_prod_nome, '') not ilike '%coca%' 
+         and coalesce(v_prod_nome, '') not ilike '%guarana%' 
+         and coalesce(v_prod_nome, '') not ilike '%fanta%' 
+         and coalesce(v_prod_nome, '') not ilike '%sprite%' 
+         and coalesce(v_prod_nome, '') not ilike '%suco%' 
+         and coalesce(v_prod_nome, '') not ilike '%cerveja%' 
+         and coalesce(v_prod_nome, '') not ilike '%agua%' 
+         and coalesce(v_prod_nome, '') not ilike '%buffet%' 
+         and coalesce(v_prod_nome, '') not ilike '%quilo%' then
+        v_tem_cozinha := true;
+      end if;
+    end if;
+  end loop;
 
   insert into pedidos (loja_id, tipo_pedido, origem, comanda_id, mesa_numero,
                        identificador_cliente, subtotal, valor_total, observacao,
@@ -68,11 +74,12 @@ begin
   values (p_loja_id, 'SALAO', 'mesa', v_comanda, v_mesa_numero,
           coalesce(nullif(trim(coalesce(p_identificador, '')), ''), 'Mesa ' || v_mesa_numero), 0, 0,
           nullif(trim(coalesce(p_observacao, '')), ''),
-          true, 'ACEITO', 'COZINHA', 'etapa_fila', now())
+          v_tem_cozinha, 'ACEITO', case when v_tem_cozinha then 'COZINHA' else 'BALCAO' end,
+          case when v_tem_cozinha then 'etapa_fila' else null end,
+          case when v_tem_cozinha then now() else null end)
   returning pedidos.id, pedidos.numero into v_pedido, v_numero;
 
   for v_item in select value from jsonb_array_elements(p_itens) loop
-    -- Produto precisa ser da loja e estar disponível
     select pr.id, pr.nome, pr.preco into v_prod
       from produtos pr
      where pr.id = (v_item->>'produto_id')::uuid
@@ -85,7 +92,6 @@ begin
     v_qtd := greatest(1, coalesce((v_item->>'quantidade')::int, 1));
     v_preco_item := v_prod.preco;
 
-    -- Valida cada opção contra o produto e soma o adicional do BANCO
     for v_opcao in select value from jsonb_array_elements(coalesce(v_item->'opcoes', '[]'::jsonb)) loop
       select o.id, o.nome, o.preco_adicional into v_op
         from opcoes o
@@ -116,8 +122,6 @@ begin
     v_subtotal := v_subtotal + v_preco_item * v_qtd;
   end loop;
 
-  -- Subtotal/valor_total finais calculados no servidor (mesma transação;
-  -- triggers de status/histórico não agem porque status não muda)
   update pedidos set subtotal = v_subtotal, valor_total = v_subtotal where id = v_pedido;
 
   return query select v_pedido, v_numero;
