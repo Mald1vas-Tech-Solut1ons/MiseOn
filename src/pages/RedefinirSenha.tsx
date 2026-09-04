@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { KeyRound, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { KeyRound, AlertCircle, CheckCircle2, ShieldCheck, Mail } from 'lucide-react';
 import MiseOnLogo from '../components/MiseOnLogo';
 import { supabase } from '../lib/supabase';
 import LanguageToggle from '../components/LanguageToggle';
@@ -30,6 +30,12 @@ export default function RedefinirSenha() {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [erro, setErro] = useState('');
   const [salvando, setSalvando] = useState(false);
+
+  // Re-envio direto na tela de link expirado
+  const [emailResend, setEmailResend] = useState('');
+  const [resendEnviando, setResendEnviando] = useState(false);
+  const [resendSucesso, setResendSucesso] = useState('');
+  const [resendErro, setResendErro] = useState('');
 
   // O Supabase processa o token do e-mail (na URL) sozinho ao carregar o
   // cliente e dispara PASSWORD_RECOVERY quando a sessão temporária de troca
@@ -81,6 +87,27 @@ export default function RedefinirSenha() {
     setEstado('sucesso');
   };
 
+  const enviarNovoLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailResend) return setResendErro('Digite seu e-mail para receber o link.');
+
+    setResendErro('');
+    setResendSucesso('');
+    setResendEnviando(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(emailResend, {
+      redirectTo: `${window.location.origin}/redefinir-senha`,
+    });
+    setResendEnviando(false);
+
+    if (error) {
+      setResendErro('Erro ao enviar o e-mail. Verifique se o e-mail está correto.');
+      return;
+    }
+
+    setResendSucesso(`Enviamos um novo link de redefinição para ${emailResend}. Verifique sua caixa de entrada!`);
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 dark:bg-gray-950">
       <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-gray-900">
@@ -110,15 +137,57 @@ export default function RedefinirSenha() {
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {tDynamic('Este link expirou, já foi usado, ou não é válido.')}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {tDynamic('Volte para o login e peça um novo link de redefinição.')}
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {tDynamic('Informe seu e-mail abaixo para receber um novo link de redefinição instantâneo:')}
               </p>
-              <Link
-                to={loginUrl}
-                className="mt-2 rounded-xl bg-[var(--cor-primaria)] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
-              >
-                {tDynamic('Voltar para o login')}
-              </Link>
+
+              {resendErro && (
+                <div className="w-full text-left flex items-start gap-2 rounded-xl bg-red-50 p-3 text-xs font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400">
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                  <p>{resendErro}</p>
+                </div>
+              )}
+
+              {resendSucesso && (
+                <div className="w-full text-left flex items-start gap-2 rounded-xl bg-green-50 p-3 text-xs font-medium text-green-700 dark:bg-green-950/30 dark:text-green-400">
+                  <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
+                  <p>{resendSucesso}</p>
+                </div>
+              )}
+
+              <form onSubmit={enviarNovoLink} className="w-full mt-2 text-left space-y-3">
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="email"
+                    required
+                    value={emailResend}
+                    onChange={(e) => setEmailResend(e.target.value)}
+                    placeholder="seu@email.com"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-4 text-sm outline-none transition-all focus:border-[var(--cor-primaria)] focus:bg-white focus:ring-4 focus:ring-[var(--cor-primaria)]/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:bg-gray-900"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={resendEnviando}
+                  className="flex w-full items-center justify-center rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md shadow-[var(--cor-primaria)]/30 transition-all hover:opacity-90 disabled:opacity-50"
+                >
+                  {resendEnviando ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    tDynamic('Enviar novo link por e-mail')
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-4 pt-2 border-t border-gray-100 dark:border-gray-800 w-full">
+                <Link
+                  to={loginUrl}
+                  className="text-xs font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white hover:underline"
+                >
+                  {tDynamic('← Voltar para o login')}
+                </Link>
+              </div>
             </div>
           )}
 
