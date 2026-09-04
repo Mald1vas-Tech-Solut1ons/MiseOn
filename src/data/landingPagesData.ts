@@ -154,7 +154,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     screenshots: [
       {
         titulo: 'Comanda por Mesa com Salão 3D',
-        src: '/images/telas-reais/media__1788462048036.png',
+        src: '/images/telas-reais/nicho-restaurante-bar.png',
         alt: 'Mapa de mesas 3D no MiseOn para controle de comandas em bar',
         legenda: 'Acompanhe mesas abertas, consumo por assento e fechamento de conta sem fila no caixa.',
         largura: 1047,
@@ -162,7 +162,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         titulo: 'DRE Financeiro & Fechamento de Turno',
-        src: '/images/telas-reais/media__1788461951624.png',
+        src: '/images/telas-reais/dre-financeiro.png',
         alt: 'Painel DRE Gerencial no MiseOn',
         legenda: 'Margem por bebida e fechamento do caixa do turno com conciliação automática.',
         largura: 1047,
@@ -265,7 +265,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     screenshots: [
       {
         titulo: 'iFood e Canal Próprio na Mesma Fila',
-        src: '/images/telas-reais/ifood-conexao.png',
+        src: '/images/telas-reais/nicho-dark-kitchen.png',
         alt: 'Painel de conexão iFood no MiseOn',
         legenda: 'Pedidos do iFood e do site próprio caindo juntos, com cálculo de margem líquida por prato.',
         largura: 1047,
@@ -273,7 +273,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         titulo: 'KDS de Produção sem Papel',
-        src: '/images/telas-reais/media__1788461951575.png',
+        src: '/images/telas-reais/kds-cozinha.png',
         alt: 'Tela KDS de produção para dark kitchen',
         legenda: 'Tempo correndo por pedido e divisão automática de produção por estações da cozinha.',
         largura: 1047,
@@ -399,7 +399,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     screenshots: [
       {
         titulo: 'KDS Kanban de Cozinha & Chapa',
-        src: '/images/telas-reais/media__1788461951575.png',
+        src: '/images/telas-reais/nicho-hamburgueria.png',
         alt: 'Painel KDS de cozinha no MiseOn para hamburgueria',
         legenda: 'Visualização da fila de hambúrgueres por etapa (Chapa, Montagem, Pronto) com alerta de tempo.',
         largura: 1047,
@@ -513,7 +513,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     screenshots: [
       {
         titulo: 'PDV Express de Balcão & Caixa Rápido',
-        src: '/images/telas-reais/media__1788461951550.png',
+        src: '/images/telas-reais/nicho-lanchonete.png',
         alt: 'PDV Express de balcão no MiseOn para lanchonete',
         legenda: 'Lançamento rápido por toque de salgados, bebidas e sucos no balcão.',
         largura: 1047,
@@ -641,17 +641,17 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     ],
     screenshots: [
       {
-        titulo: 'KDS de Montagem & Forno',
-        src: '/images/telas-reais/media__1788461951575.png',
-        alt: 'Tela KDS de produção para pizzaria no MiseOn',
+        titulo: 'Fila de Pizzas & Forno KDS',
+        src: '/images/telas-reais/nicho-pizzaria.png',
+        alt: 'KDS de produção para pizzaria no MiseOn',
         legenda: 'Fila de pedidos dividida por etapas de montagem e forneamento.',
         largura: 1047,
         altura: 600,
       },
       {
-        titulo: 'Gestão de Entregas & GPS de Motoboys',
-        src: '/images/telas-reais/media__1788462335394.png',
-        alt: 'Painel de gestão de entregas no MiseOn',
+        titulo: 'Rotas de Motoboy & Taxa de Entrega',
+        src: '/images/telas-reais/entregas-gps.png',
+        alt: 'Painel de rotas de entrega e motoboys no MiseOn',
         legenda: 'Rastreamento de motoboys e cálculo de taxa por raio de km.',
         largura: 1047,
         altura: 580,
@@ -1472,7 +1472,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     screenshots: [
       {
         titulo: 'Estoque pelo Cupom & Ficha de Peso',
-        src: '/images/telas-reais/estoque-cupom-nfce.png',
+        src: '/images/telas-reais/nicho-por-quilo.png',
         alt: 'Painel de estoque no MiseOn para restaurante a quilo',
         legenda: 'Baixa de insumos proporcional ao peso servido no buffet.',
         largura: 1047,
@@ -1480,7 +1480,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         titulo: 'PDV Balcão & Lançamento por Peso',
-        src: '/images/telas-reais/media__1788461951550.png',
+        src: '/images/telas-reais/estoque-cupom-nfce.png',
         alt: 'PDV Express no MiseOn para entrada de peso',
         legenda: 'Entrada agilizada de peso no caixa de balcão e comandas.',
         largura: 1047,

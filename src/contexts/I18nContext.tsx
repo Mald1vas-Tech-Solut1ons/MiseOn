@@ -61,7 +61,9 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Com useCallback, só mudam quando o idioma muda de verdade.
   const t = useCallback(
     (chave: ChaveDicionario): string =>
-      DICIONARIO[idioma]?.[chave] || DICIONARIO['pt-BR']?.[chave] || chave,
+      (DICIONARIO[idioma] as Record<string, string>)?.[chave] ||
+      (DICIONARIO['pt-BR'] as Record<string, string>)?.[chave] ||
+      chave,
     [idioma],
   );
 
