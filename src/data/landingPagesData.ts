@@ -396,6 +396,24 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         resposta: 'Se o item mais caro do prato é algo que a sua cozinha prepara — blend, molho, cebola caramelizada —, esse custo costuma sumir da conta. Um lanche com blend de R$ 8,10, molho e cebola pode aparecer custando R$ 4,52 quando custa R$ 13,24. A diferença muda o CMV de 14% para 41%: de "excelente" para "no limite". É com esse número que você decide preço e promoção.',
       },
     ],
+    screenshots: [
+      {
+        titulo: 'KDS Kanban de Cozinha & Chapa',
+        src: '/images/telas-reais/media__1788461951575.png',
+        alt: 'Painel KDS de cozinha no MiseOn para hamburgueria',
+        legenda: 'Visualização da fila de hambúrgueres por etapa (Chapa, Montagem, Pronto) com alerta de tempo.',
+        largura: 1047,
+        altura: 600,
+      },
+      {
+        titulo: 'Estoque pelo Cupom Fiscal & Ficha Técnica',
+        src: '/images/telas-reais/estoque-cupom-nfce.png',
+        alt: 'Tela de estoque no MiseOn para controle de insumos de hamburgueria',
+        legenda: 'Baixa automática de pães, blends e bacon a cada hambúrguer vendido.',
+        largura: 1047,
+        altura: 485,
+      },
+    ],
   },
 
   'sistema-para-lanchonete': {
@@ -490,6 +508,24 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         pergunta: 'Como funciona o recebimento via Pix no balcão?',
         resposta: 'Com a integração Efí, o Pix gera o QR Code na tela e a confirmação do pagamento cai instantaneamente no sistema, liberando a venda.',
+      },
+    ],
+    screenshots: [
+      {
+        titulo: 'PDV Express de Balcão & Caixa Rápido',
+        src: '/images/telas-reais/media__1788461951550.png',
+        alt: 'PDV Express de balcão no MiseOn para lanchonete',
+        legenda: 'Lançamento rápido por toque de salgados, bebidas e sucos no balcão.',
+        largura: 1047,
+        altura: 590,
+      },
+      {
+        titulo: 'Cardápio Digital & Autoatendimento',
+        src: '/images/telas-reais/cardapio-digital-os-mais-pedidos.png',
+        alt: 'Cardápio digital no MiseOn para lanchonete',
+        legenda: 'Cardápio no celular do cliente para pedidos diretos sem fila.',
+        largura: 1047,
+        altura: 580,
       },
     ],
   },
@@ -603,6 +639,24 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         resposta: 'Quando o pizzaiolo produz 10 kg de massa ou 5 litros de molho, o MiseOn calcula em tempo real o valor total dos insumos consumidos pelo PEPS e atribui o custo exato por kg ou litro. Assim, ao vender a pizza, o custo da fatia de massa e da concha de molho é abatido com precisão no CMV.',
       },
     ],
+    screenshots: [
+      {
+        titulo: 'KDS de Montagem & Forno',
+        src: '/images/telas-reais/media__1788461951575.png',
+        alt: 'Tela KDS de produção para pizzaria no MiseOn',
+        legenda: 'Fila de pedidos dividida por etapas de montagem e forneamento.',
+        largura: 1047,
+        altura: 600,
+      },
+      {
+        titulo: 'Gestão de Entregas & GPS de Motoboys',
+        src: '/images/telas-reais/media__1788462335394.png',
+        alt: 'Painel de gestão de entregas no MiseOn',
+        legenda: 'Rastreamento de motoboys e cálculo de taxa por raio de km.',
+        largura: 1047,
+        altura: 580,
+      },
+    ],
   },
 
   'sistema-para-restaurantes': {
@@ -697,6 +751,24 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         pergunta: 'O sistema faz a emissão de Nota Fiscal (NFC-e)?',
         resposta: 'Sim. Através da integração nativa com o FocusNFe, o MiseOn autoriza NFC-e diretamente junto à SEFAZ e disponibiliza o cupom fiscal.',
+      },
+    ],
+    screenshots: [
+      {
+        titulo: 'Mapa de Mesas 3D & Comandas por Salão',
+        src: '/images/telas-reais/media__1788462048036.png',
+        alt: 'Visão do Mapa de Mesas 3D no MiseOn para restaurantes',
+        legenda: 'Salão em tempo real: comandas abertas por mesa, assentos e divisão de conta.',
+        largura: 1047,
+        altura: 590,
+      },
+      {
+        titulo: 'DRE Financeiro & Margem Líquida',
+        src: '/images/telas-reais/media__1788461951624.png',
+        alt: 'Painel DRE Gerencial no MiseOn para restaurantes',
+        legenda: 'DRE gerencial automático mostrando CMV, faturamento e margem real.',
+        largura: 1047,
+        altura: 580,
       },
     ],
   },
@@ -932,6 +1004,24 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         resposta: 'O Pix cai direto na conta bancária vinculada à sua conta Efí (Gerencianet), sem retenção de saldo pelo MiseOn.',
       },
     ],
+    screenshots: [
+      {
+        titulo: 'Cardápio Digital & Os Mais Pedidos',
+        src: '/images/telas-reais/cardapio-digital-os-mais-pedidos.png',
+        alt: 'Cardápio digital no MiseOn com produtos e resumo nutricional',
+        legenda: 'Interface rápida e moderna para autoatendimento no celular do cliente.',
+        largura: 1047,
+        altura: 580,
+      },
+      {
+        titulo: 'Checkout Flexível com Pix & Cashback',
+        src: '/images/telas-reais/cardapio-checkout-pix-cashback.png',
+        alt: 'Tela de checkout no MiseOn com Pix e cashback',
+        legenda: 'Aplicação de cupons, desconto de cashback e Pix direto na conta.',
+        largura: 480,
+        altura: 800,
+      },
+    ],
   },
 
   // Painel de senha na TV: o recurso estava no produto e em lugar nenhum do
@@ -1053,6 +1143,16 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         resposta: 'Funciona em qualquer operação de balcão em que o cliente espera e é chamado: lanchonete, hamburgueria, cafeteria, restaurante por quilo, açaí, food truck e praça de alimentação.',
       },
     ],
+    screenshots: [
+      {
+        titulo: 'Configuração do Painel de TV & Links Rápidos',
+        src: '/images/telas-reais/tv-senhas-configuracao.png',
+        alt: 'Painel de configuração da TV automática no MiseOn',
+        legenda: 'Links de acesso sem login para chamada de senhas por voz e menu board 4K.',
+        largura: 1047,
+        altura: 489,
+      },
+    ],
   },
 
   'api-whatsapp-restaurantes': {
@@ -1140,6 +1240,16 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         pergunta: 'Um atendente humano pode intervir na conversa do WhatsApp?',
         resposta: 'Sim! No painel de Chat do MiseOn você pode visualizar todas as conversas e responder o cliente. A IA silencia assim que o atendente assume.',
+      },
+    ],
+    screenshots: [
+      {
+        titulo: 'WhatsApp Business Cloud API Conectado',
+        src: '/images/telas-reais/whatsapp-conectado.png',
+        alt: 'Painel de conexão WhatsApp no MiseOn',
+        legenda: 'Número oficial verificado pela Meta com IA automatizada para respostas.',
+        largura: 1047,
+        altura: 477,
       },
     ],
   },
@@ -1236,6 +1346,16 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         pergunta: 'O sistema atende a SEFAZ do meu estado?',
         resposta: 'Sim. A tecnologia FocusNFe está homologada para emissão de NFC-e e NF-e junto às Secretarias de Fazenda de todos os estados do Brasil.',
+      },
+    ],
+    screenshots: [
+      {
+        titulo: 'Entrada de Estoque por Cupom Fiscal NFC-e',
+        src: '/images/telas-reais/estoque-cupom-nfce.png',
+        alt: 'Módulo de estoque e emissão fiscal no MiseOn',
+        legenda: 'Entrada de mercadorias via QR Code de NFC-e e emissão integrada SEFAZ.',
+        largura: 1047,
+        altura: 485,
       },
     ],
   },
@@ -1347,6 +1467,24 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       {
         pergunta: 'Como o sistema calcula a perda de cocção dos assados e grelhados do buffet?',
         resposta: 'No MiseOn, a ordem de produção permite informar o rendimento padrão em kg após o cozimento. Se você cozinha 10 kg de carne e obtém 7 kg de assado pronto na travessa, o sistema ajusta o custo unitário por kg final servido. Dessa forma, o valor por grama consumido pelo cliente reflete 100% do custo real do ingrediente.',
+      },
+    ],
+    screenshots: [
+      {
+        titulo: 'Estoque pelo Cupom & Ficha de Peso',
+        src: '/images/telas-reais/estoque-cupom-nfce.png',
+        alt: 'Painel de estoque no MiseOn para restaurante a quilo',
+        legenda: 'Baixa de insumos proporcional ao peso servido no buffet.',
+        largura: 1047,
+        altura: 485,
+      },
+      {
+        titulo: 'PDV Balcão & Lançamento por Peso',
+        src: '/images/telas-reais/media__1788461951550.png',
+        alt: 'PDV Express no MiseOn para entrada de peso',
+        legenda: 'Entrada agilizada de peso no caixa de balcão e comandas.',
+        largura: 1047,
+        altura: 590,
       },
     ],
   },

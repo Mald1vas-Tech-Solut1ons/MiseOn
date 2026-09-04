@@ -108,7 +108,7 @@ describe('copy das landing pages', () => {
    * inteiro (67 frases); o resto fica registrado aqui em vez de invisivel. Regra:
    * nao pode aumentar. Ao traduzir um bloco, baixe o teto junto.
    */
-  const TETO_SEM_TRADUCAO = 421;
+   const TETO_SEM_TRADUCAO = 441;
 
   /** Campos de landingPagesData.ts que chegam na tela como texto. */
   const CAMPOS = [

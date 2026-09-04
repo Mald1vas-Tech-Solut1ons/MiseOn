@@ -187,7 +187,7 @@ export default function RedefinirSenha() {
                 ) : (
                   <>
                     <CheckCircle2 size={18} className="mr-2" />
-                    Salvar senha nova
+                    {tDynamic('Salvar senha nova')}
                   </>
                 )}
               </button>
