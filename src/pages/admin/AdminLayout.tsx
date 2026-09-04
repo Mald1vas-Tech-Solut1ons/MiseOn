@@ -61,6 +61,22 @@ export default function AdminLayout() {
     return localStorage.getItem('miseon_sidebar_collapsed') === 'true';
   });
 
+  const [isNativeFs, setIsNativeFs] = useState(false);
+
+  useEffect(() => {
+    const checkFs = () => {
+      const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      setIsNativeFs(isFs);
+    };
+    checkFs();
+    document.addEventListener('fullscreenchange', checkFs);
+    document.addEventListener('webkitfullscreenchange', checkFs);
+    return () => {
+      document.removeEventListener('fullscreenchange', checkFs);
+      document.removeEventListener('webkitfullscreenchange', checkFs);
+    };
+  }, []);
+
   const toggleSidebar = () => {
     const newState = !isCollapsed;
     setIsCollapsed(newState);
@@ -446,6 +462,7 @@ export default function AdminLayout() {
       </NavLink>
     );
   };
+
   return (
     <div className="flex h-screen bg-transparent text-gray-900 dark:text-gray-100 font-sans overflow-hidden selection:bg-[#FC5B24] selection:text-white">
       {/* 
@@ -619,67 +636,69 @@ export default function AdminLayout() {
       <div className="flex-1 flex flex-col min-w-0 h-full relative bg-transparent">
 
         {/* ── TOP HEADER GLOBAL ── */}
-        <header className="h-[88px] flex-shrink-0 bg-transparent flex items-center justify-between px-6 sm:px-10 z-30 print:hidden relative">
+        {!isNativeFs && (
+          <header className="h-[88px] flex-shrink-0 bg-transparent flex items-center justify-between px-6 sm:px-10 z-30 print:hidden relative">
 
-          <div className="flex items-center gap-4">
-            {/* Mobile Menu Toggle */}
-            <button onClick={() => setMenuMobileAberto(true)} className="lg:hidden p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
-              <Menu size={24} />
-            </button>
+            <div className="flex items-center gap-4">
+              {/* Mobile Menu Toggle */}
+              <button onClick={() => setMenuMobileAberto(true)} className="lg:hidden p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <Menu size={24} />
+              </button>
 
-            {/* Mobile Brand / Back Button */}
-            <div className="flex lg:hidden items-center gap-2 min-w-0">
-              {ehSubRota && (
-                <button onClick={() => nav(-1)} aria-label="Voltar" className="flex items-center shrink-0 text-sm font-bold text-[#004198] dark:text-[#6B9EFF]">
-                  <ChevronLeft size={20} />
-                </button>
-              )}
-              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: corTela }} />
-              <span className="font-extrabold text-lg text-gray-900 dark:text-white truncate">{tituloTela}</span>
+              {/* Mobile Brand / Back Button */}
+              <div className="flex lg:hidden items-center gap-2 min-w-0">
+                {ehSubRota && (
+                  <button onClick={() => nav(-1)} aria-label="Voltar" className="flex items-center shrink-0 text-sm font-bold text-[#004198] dark:text-[#6B9EFF]">
+                    <ChevronLeft size={20} />
+                  </button>
+                )}
+                <span className="h-2 w-2 rounded-full shrink-0" style={{ background: corTela }} />
+                <span className="font-extrabold text-lg text-gray-900 dark:text-white truncate">{tituloTela}</span>
+              </div>
+
+              {/* Desktop Page Title (Optional) */}
+              <div className="hidden lg:flex items-center gap-3">
+                {ehSubRota && (
+                  <button onClick={() => nav(-1)} aria-label="Voltar" className="mr-1 p-2 rounded-xl text-gray-400 hover:bg-white/50 dark:hover:bg-white/10 transition-colors shadow-sm">
+                    <ChevronLeft size={20} />
+                  </button>
+                )}
+                <span
+                  className="h-2.5 w-2.5 rounded-full shrink-0"
+                  style={{ background: corTela, boxShadow: `0 0 12px ${corTela}` }}
+                />
+                <h1 className="font-['Sora'] font-bold text-2xl text-gray-900 dark:text-white tracking-tight drop-shadow-sm">
+                  {tituloTela}
+                </h1>
+              </div>
             </div>
 
-            {/* Desktop Page Title (Optional) */}
-            <div className="hidden lg:flex items-center gap-3">
-              {ehSubRota && (
-                <button onClick={() => nav(-1)} aria-label="Voltar" className="mr-1 p-2 rounded-xl text-gray-400 hover:bg-white/50 dark:hover:bg-white/10 transition-colors shadow-sm">
-                  <ChevronLeft size={20} />
-                </button>
-              )}
-              <span
-                className="h-2.5 w-2.5 rounded-full shrink-0"
-                style={{ background: corTela, boxShadow: `0 0 12px ${corTela}` }}
-              />
-              <h1 className="font-['Sora'] font-bold text-2xl text-gray-900 dark:text-white tracking-tight drop-shadow-sm">
-                {tituloTela}
-              </h1>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (location.pathname === '/admin/ajuda') {
+                    tour.iniciarTourCompleto();
+                  } else {
+                    tour.iniciarTourDaPagina(location.pathname);
+                  }
+                }}
+                title={location.pathname === '/admin/ajuda' ? 'Iniciar Tour Completo do Sistema (20 Passos)' : 'Iniciar Tour Guiado desta página'}
+                className="flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/10 px-3.5 py-1.5 text-xs font-extrabold text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition shadow-sm"
+              >
+                <Compass size={15} />
+                <span className="hidden sm:inline">
+                  {location.pathname === '/admin/ajuda' ? 'Tour Completo 🚀' : 'Tour desta Página 📍'}
+                </span>
+              </button>
+              <LanguageToggle variant="pill" />
+              {ctx?.lojaId && <NotificationCenter lojaId={ctx.lojaId} />}
+              <ThemeToggle />
             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                if (location.pathname === '/admin/ajuda') {
-                  tour.iniciarTourCompleto();
-                } else {
-                  tour.iniciarTourDaPagina(location.pathname);
-                }
-              }}
-              title={location.pathname === '/admin/ajuda' ? 'Iniciar Tour Completo do Sistema (20 Passos)' : 'Iniciar Tour Guiado desta página'}
-              className="flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/10 px-3.5 py-1.5 text-xs font-extrabold text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition shadow-sm"
-            >
-              <Compass size={15} />
-              <span className="hidden sm:inline">
-                {location.pathname === '/admin/ajuda' ? 'Tour Completo 🚀' : 'Tour desta Página 📍'}
-              </span>
-            </button>
-            <LanguageToggle variant="pill" />
-            {ctx?.lojaId && <NotificationCenter lojaId={ctx.lojaId} />}
-            <ThemeToggle />
-          </div>
-        </header>
+          </header>
+        )}
 
         {/* ── CONTEÚDO DA PÁGINA (SCROLLÁVEL) ── */}
-        <main className="flex-1 overflow-y-auto pb-28 lg:pb-0 relative custom-scrollbar px-6 sm:px-10 pt-2">
+        <main className={`flex-1 overflow-y-auto relative custom-scrollbar ${isNativeFs ? 'p-0 pb-0' : 'px-6 sm:px-10 pt-2 pb-28 lg:pb-0'}`}>
 
           {/* BANNER PROATIVO: TRIAL AINDA VÁLIDO, MAS ACABANDO EM BREVE */}
           {ctx.diasAtraso === 0 && ctx.status_assinatura === 'trial' && ctx.trialTerminaEm && (() => {
@@ -724,7 +743,7 @@ export default function AdminLayout() {
           )}
 
           {/* Container com transição inteligente (mo-screen ou mo-screen-back) baseada na profundidade */}
-          <div key={loc.pathname} className={`mx-auto max-w-6xl w-full h-full ${transitionClass}`}>
+          <div key={loc.pathname} className={`${isNativeFs ? 'w-full h-full max-w-none p-0 m-0' : 'mx-auto max-w-6xl w-full h-full'} ${transitionClass}`}>
             <Suspense fallback={<BrandLoader title="Carregando módulo..." />}>
               <Outlet context={ctx} />
             </Suspense>

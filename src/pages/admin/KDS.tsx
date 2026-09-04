@@ -84,7 +84,7 @@ export default function KDS() {
 
   const [operadorAtivo, setOperadorAtivo] = useState<string | null>(() => localStorage.getItem(`miseon_kds_operador_${lojaId}`));
   const [filtroOperadorVisualizacao, setFiltroOperadorVisualizacao] = useState<string>('TODOS');
-  
+
   // Atribuições individuais de comanda por operador (pedidoId -> operadorUserId)
   const [atribuicoesPedidos, setAtribuicoesPedidos] = useState<Record<string, string>>(() => {
     const salvo = localStorage.getItem(`miseon_kds_atribuicoes_${lojaId}`);
@@ -232,50 +232,45 @@ export default function KDS() {
       });
   }, [lojaId]);
 
-  // Alternar Fullscreen Imersivo Total + Browser requestFullscreen
+  // Alternar Tela Cheia Nativa do Navegador (remove a barra de endereço, abas e navegação do sistema)
   const toggleFullscreen = useCallback(() => {
-    const proxState = !emFullscreen;
-    setEmFullscreen(proxState);
-
     try {
-      if (proxState) {
+      const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      if (!isFs) {
         const docEl = document.documentElement as any;
         if (docEl.requestFullscreen) {
-          docEl.requestFullscreen().catch(() => {});
+          docEl.requestFullscreen().catch((err: any) => {
+            console.warn('Falha na requisição de fullscreen:', err);
+          });
         } else if (docEl.webkitRequestFullscreen) {
           docEl.webkitRequestFullscreen();
         }
       } else {
         if (document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
+          document.exitFullscreen().catch((err: any) => {
+            console.warn('Falha ao sair de fullscreen:', err);
+          });
         } else if ((document as any).webkitExitFullscreen) {
           (document as any).webkitExitFullscreen();
         }
       }
     } catch (e) {
-      console.warn('Erro ao alternar API fullscreen:', e);
+      console.warn('Erro ao alternar fullscreen nativo:', e);
     }
-  }, [emFullscreen]);
+  }, []);
 
-  // Atalho de Teclado F11 para Tela Cheia Imersiva
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F11') {
-        e.preventDefault();
-        toggleFullscreen();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleFullscreen]);
-
+  // Sincronizar o estado imersivo estritamente com o estado de Tela Cheia Nativa do Navegador (HTML5 Fullscreen API)
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
       setEmFullscreen(isFs);
     };
+
+    handleFullscreenChange();
+
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
@@ -419,11 +414,11 @@ export default function KDS() {
       prev.map((item) =>
         item.id === p.id
           ? {
-              ...item,
-              status: novoStatus,
-              etapa_kds_atual: proximaEtapa.id,
-              timestamps_etapas_kds: timestampsAtualizados,
-            }
+            ...item,
+            status: novoStatus,
+            etapa_kds_atual: proximaEtapa.id,
+            timestamps_etapas_kds: timestampsAtualizados,
+          }
           : item
       )
     );
@@ -621,9 +616,8 @@ export default function KDS() {
       <div
         draggable={!finalizadoCozinha}
         onDragStart={(e) => handleDragStart(e, p)}
-        className={`group relative w-full rounded-2xl bg-[#0F172A]/90 p-3.5 text-left backdrop-blur-md transition-all duration-300 hover:shadow-xl hover:shadow-black/40 ${
-          draggedPedidoId === p.id ? 'opacity-40 scale-95 border-dashed border-orange-500' : ''
-        }`}
+        className={`group relative w-full rounded-2xl bg-[#0F172A]/90 p-3.5 text-left backdrop-blur-md transition-all duration-300 hover:shadow-xl hover:shadow-black/40 ${draggedPedidoId === p.id ? 'opacity-40 scale-95 border-dashed border-orange-500' : ''
+          }`}
         style={{
           border: `2px solid ${finalizadoCozinha ? 'rgba(16,185,129,0.4)' : cor.borda}`,
           animation: cor.pulso && !finalizadoCozinha ? 'pulse 1.6s infinite' : undefined,
@@ -857,12 +851,11 @@ export default function KDS() {
   const nomeGargalo = etapas.find(e => e.id === metricasPorEtapa.gargaloId)?.nome;
 
   return (
-    <div className={`flex flex-col bg-[#070C18] transition-all duration-300 ${
-      emFullscreen
+    <div className={`flex flex-col bg-[#070C18] transition-all duration-300 ${emFullscreen
         ? 'fixed inset-0 z-[9999] h-screen w-screen p-3 lg:p-4 overflow-hidden'
         : 'min-h-screen px-3 pt-3 lg:px-4'
-    }`}>
-      
+      }`}>
+
       {/* ── Cabeçalho KDS Kanban ── */}
       <div data-tour="tour-kds-header" className="mb-3 flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
@@ -930,33 +923,30 @@ export default function KDS() {
             <button
               onClick={() => alterarModoLayout('ORGANICO')}
               title={tDynamic('Layout Orgânico (Auto-collapse e largura flexível)')}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                modoLayout === 'ORGANICO'
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${modoLayout === 'ORGANICO'
                   ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 shadow-md font-extrabold'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               <Sparkles size={13} /> {tDynamic('Orgânico')}
             </button>
             <button
               onClick={() => alterarModoLayout('GRADE')}
               title={tDynamic('Modo Grade (Otimizado para Tablet e Telas Compactas)')}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                modoLayout === 'GRADE'
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${modoLayout === 'GRADE'
                   ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 shadow-md font-extrabold'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               <LayoutGrid size={13} /> {tDynamic('Grade')}
             </button>
             <button
               onClick={() => alterarModoLayout('KANBAN_TRELLO')}
               title={tDynamic('Modo Trello (Colunas Fixas Clássicas)')}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                modoLayout === 'KANBAN_TRELLO'
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${modoLayout === 'KANBAN_TRELLO'
                   ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 shadow-md font-extrabold'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               <Columns size={13} /> {tDynamic('Trello')}
             </button>
@@ -966,25 +956,22 @@ export default function KDS() {
           <div className="hidden sm:flex items-center gap-1 rounded-xl bg-black/40 border border-white/10 p-1">
             <button
               onClick={() => alterarDensidadeCards('COMPACTO')}
-              className={`px-2 py-1 rounded-lg text-xs font-bold transition ${
-                densidadeCards === 'COMPACTO' ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-2 py-1 rounded-lg text-xs font-bold transition ${densidadeCards === 'COMPACTO' ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
+                }`}
             >
               {tDynamic('Compacto')}
             </button>
             <button
               onClick={() => alterarDensidadeCards('PADRAO')}
-              className={`px-2 py-1 rounded-lg text-xs font-bold transition ${
-                densidadeCards === 'PADRAO' ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-2 py-1 rounded-lg text-xs font-bold transition ${densidadeCards === 'PADRAO' ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
+                }`}
             >
               {tDynamic('Padrão')}
             </button>
             <button
               onClick={() => alterarDensidadeCards('DETALHADO')}
-              className={`px-2 py-1 rounded-lg text-xs font-bold transition ${
-                densidadeCards === 'DETALHADO' ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-2 py-1 rounded-lg text-xs font-bold transition ${densidadeCards === 'DETALHADO' ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
+                }`}
             >
               {tDynamic('Detalhado')}
             </button>
@@ -994,25 +981,22 @@ export default function KDS() {
           <div className="flex items-center gap-1 rounded-xl bg-black/40 border border-white/10 p-1">
             <button
               onClick={() => setFiltroEstacao('TODAS')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
-                filtroEstacao === 'TODAS' ? 'bg-orange-500 text-slate-950' : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${filtroEstacao === 'TODAS' ? 'bg-orange-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                }`}
             >
               {tDynamic('Todas')}
             </button>
             <button
               onClick={() => setFiltroEstacao('COZINHA')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
-                filtroEstacao === 'COZINHA' ? 'bg-orange-500 text-slate-950' : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${filtroEstacao === 'COZINHA' ? 'bg-orange-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                }`}
             >
               🍳 {tDynamic('Cozinha')}
             </button>
             <button
               onClick={() => setFiltroEstacao('BAR')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
-                filtroEstacao === 'BAR' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${filtroEstacao === 'BAR' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
             >
               🍹 {tDynamic('Bar')}
             </button>
@@ -1056,11 +1040,10 @@ export default function KDS() {
           <button
             onClick={toggleFullscreen}
             title={tDynamic('Tela cheia imersiva (F11)')}
-            className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-extrabold transition shadow-md ${
-              emFullscreen
+            className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-extrabold transition shadow-md ${emFullscreen
                 ? 'border-orange-500 bg-orange-500 text-slate-950 shadow-orange-500/30 animate-pulse'
                 : 'border-white/10 bg-white/5 text-white/80 hover:text-white hover:bg-white/10'
-            }`}
+              }`}
           >
             {emFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
             <span>{emFullscreen ? tDynamic('Sair da Tela Cheia (F11)') : tDynamic('Tela Cheia (F11)')}</span>
@@ -1080,11 +1063,10 @@ export default function KDS() {
         <HorizontalScrollContainer className="flex-1 min-w-0 pb-1" showGradients={false}>
           {operadores.map((op) => (
             <button key={op.user_id} onClick={() => escolherOperador(op.user_id)}
-              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-bold transition flex items-center gap-1.5 ${
-                operadorAtivo === op.user_id
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-bold transition flex items-center gap-1.5 ${operadorAtivo === op.user_id
                   ? 'border-orange-500 bg-orange-500 text-slate-950 font-black shadow-md'
                   : 'border-white/10 bg-white/5 text-white/60 hover:text-white'
-              }`}>
+                }`}>
               <User size={12} />
               {op.nome}
             </button>
@@ -1131,11 +1113,10 @@ export default function KDS() {
                   onDragOver={(e) => handleDragOver(e, etapa.id)}
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, idx, etapa)}
-                  className={`flex flex-col rounded-2xl border p-3 backdrop-blur-md transition-all duration-300 ${
-                    isDragTarget
+                  className={`flex flex-col rounded-2xl border p-3 backdrop-blur-md transition-all duration-300 ${isDragTarget
                       ? 'border-orange-500 bg-orange-500/10 shadow-[0_0_25px_rgba(252,91,36,0.3)] ring-2 ring-orange-500/40'
                       : 'border-white/10 bg-white/5'
-                  }`}
+                    }`}
                 >
                   <div className="mb-3 flex items-center justify-between border-b border-white/5 pb-2.5 px-1">
                     <div className="flex items-center gap-2 truncate">
@@ -1193,9 +1174,8 @@ export default function KDS() {
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, idx, etapa)}
                     onClick={() => toggleColunaRecolhida(etapa.id)}
-                    className={`flex w-14 shrink-0 cursor-pointer flex-col items-center justify-between rounded-2xl border p-2 text-center backdrop-blur-md transition-all duration-300 hover:bg-white/10 ${
-                      isDragTarget ? 'border-orange-500 bg-orange-500/20 shadow-[0_0_20px_rgba(252,91,36,0.4)]' : 'border-white/10 bg-white/5'
-                    }`}
+                    className={`flex w-14 shrink-0 cursor-pointer flex-col items-center justify-between rounded-2xl border p-2 text-center backdrop-blur-md transition-all duration-300 hover:bg-white/10 ${isDragTarget ? 'border-orange-500 bg-orange-500/20 shadow-[0_0_20px_rgba(252,91,36,0.4)]' : 'border-white/10 bg-white/5'
+                      }`}
                   >
                     <div className="flex flex-col items-center gap-2 pt-2">
                       <span className="h-3 w-3 rounded-full shadow-sm" style={{ background: etapa.cor }} />
@@ -1224,11 +1204,10 @@ export default function KDS() {
                   onDragOver={(e) => handleDragOver(e, etapa.id)}
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, idx, etapa)}
-                  className={`flex flex-col rounded-2xl border p-3 backdrop-blur-md transition-all duration-300 ${
-                    isDragTarget
+                  className={`flex flex-col rounded-2xl border p-3 backdrop-blur-md transition-all duration-300 ${isDragTarget
                       ? 'border-orange-500 bg-orange-500/10 shadow-[0_0_25px_rgba(252,91,36,0.3)] ring-2 ring-orange-500/40'
                       : 'border-white/10 bg-white/5'
-                  }`}
+                    }`}
                 >
                   <div className="mb-3 flex items-center justify-between border-b border-white/5 pb-2.5 px-1">
                     <div className="flex items-center gap-2 truncate">
