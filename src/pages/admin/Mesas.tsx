@@ -370,6 +370,16 @@ export default function Mesas() {
     return prepararLayoutSalao3D(mesasBrutas, comandasCruas, pedidosCruos);
   }, [mesasBrutas, comandasCruas, pedidosCruos]);
 
+  const totalSaldoAberto = useMemo(() => {
+    return ocupadas.reduce((s, m) => s + (m.totalParcial - m.totalPago), 0);
+  }, [ocupadas]);
+
+  const tempoMedioAtualMin = useMemo(() => {
+    if (ocupadas.length === 0) return 0;
+    const somaMin = ocupadas.reduce((acc, m) => acc + (m.comanda ? minutosDesde(m.comanda.aberta_em) : 0), 0);
+    return Math.round(somaMin / ocupadas.length);
+  }, [ocupadas]);
+
   const salvarPosicaoMesa3D = async (mesaId: string, novaPos: { x: number; z: number; rotacao: number }) => {
     await supabase.from('mesas').update({
       pos_x: novaPos.x,
@@ -391,6 +401,55 @@ export default function Mesas() {
 
   return (
     <div data-tour="tour-mesas-header" className="mx-auto max-w-5xl p-4 pb-12">
+      {/* KPI Header Bar: Métricas de Tempo Médio e Saldo Em Aberto */}
+      <div className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-3.5 shadow-sm flex items-center gap-3">
+          <div className="p-2.5 bg-orange-500/10 text-orange-500 rounded-xl shrink-0">
+            <Box size={20} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">{tDynamic('Mesas Ocupadas')}</p>
+            <p className="text-base font-black dark:text-gray-100">{ocupadas.length} / {mesas.length}</p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-3.5 shadow-sm flex items-center gap-3">
+          <div className="p-2.5 bg-red-500/10 text-red-500 rounded-xl shrink-0">
+            <AlertTriangle size={20} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">{tDynamic('Saldo Não Pago')}</p>
+            <p className="text-base font-black text-red-600 dark:text-red-400 truncate">
+              {fmt(totalSaldoAberto)}
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-3.5 shadow-sm flex items-center gap-3">
+          <div className="p-2.5 bg-blue-500/10 text-blue-500 rounded-xl shrink-0">
+            <Clock size={20} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">{tDynamic('Tempo Médio Aberta')}</p>
+            <p className="text-base font-black dark:text-gray-100">
+              {tempoMedioAtualMin > 0 ? `${tempoMedioAtualMin} min` : '--'}
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-3.5 shadow-sm flex items-center gap-3">
+          <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl shrink-0">
+            <Check size={20} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">{tDynamic('Disponíveis')}</p>
+            <p className="text-base font-black text-emerald-600 dark:text-emerald-400 truncate">
+              {livres.length} {tDynamic('mesas libres')}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-black dark:text-gray-100">
