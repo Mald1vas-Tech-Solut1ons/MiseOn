@@ -92,18 +92,31 @@ function AuthRecoveryRedirect() {
     const hash = window.location.hash;
     const search = window.location.search;
 
+    // 1. Redirecionar se a URL contiver tokens de recuperação ou erro no hash/search
     if (hash.includes('type=recovery') || hash.includes('access_token')) {
       if (location.pathname !== '/redefinir-senha') {
         navigate('/redefinir-senha' + hash, { replace: true });
+        return;
       }
     } else if (hash.includes('error') || search.includes('error')) {
       if (location.pathname !== '/redefinir-senha' && location.pathname !== '/admin/login') {
         navigate('/redefinir-senha?erro=expirado', { replace: true });
+        return;
       }
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
+    // 2. Se abriu https://miseon.vercel.app/# (hash com # vindo do e-mail do Supabase)
+    if ((hash === '#' || hash === '') && location.pathname === '/') {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          navigate('/redefinir-senha', { replace: true });
+        }
+      });
+    }
+
+    // 3. Escutar eventos do Supabase Auth em tempo real
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session && (window.location.hash === '#' || window.location.hash.includes('access_token')))) {
         if (location.pathname !== '/redefinir-senha') {
           navigate('/redefinir-senha', { replace: true });
         }

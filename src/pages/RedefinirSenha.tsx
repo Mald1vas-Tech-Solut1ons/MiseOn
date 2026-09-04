@@ -45,11 +45,11 @@ export default function RedefinirSenha() {
     }
 
     const { data: assinatura } = supabase.auth.onAuthStateChange((evento) => {
-      if (evento === 'PASSWORD_RECOVERY') setEstado('formulario');
+      if (evento === 'PASSWORD_RECOVERY' || evento === 'SIGNED_IN') setEstado('formulario');
     });
 
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setEstado((atual) => (atual === 'verificando' ? 'formulario' : atual));
+      if (data.session) setEstado('formulario');
     });
 
     const espera = setTimeout(() => {
