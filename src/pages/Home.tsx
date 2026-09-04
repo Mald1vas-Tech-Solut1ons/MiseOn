@@ -1029,17 +1029,27 @@ export default function Home() {
                 </p>
                 
                 {/* Imagem Real da Tela do Sistema na Hamburgueria */}
-                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-orange-500/50 transition">
-                  <img
-                    src="/images/telas-reais/cardapio-digital-os-mais-pedidos.png"
-                    alt="Tela real do MiseOn para Hamburguerias com combos e adicionais"
-                    width={500}
-                    height={280}
-                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
-                    <span>🍔 Cardápio & Adicionais de Blend</span>
-                    <span className="text-orange-400">Ver Tela →</span>
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/15 bg-slate-950/90 shadow-xl group-hover:border-orange-500/60 transition duration-300">
+                  <div className="flex items-center justify-between border-b border-white/10 bg-slate-900/90 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider">MiseOn • Hamburgueria</span>
+                  </div>
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
+                    <img
+                      src="/images/telas-reais/nicho-hamburgueria.png"
+                      alt="Tela real do MiseOn para Hamburguerias com PDV, burgers e combos"
+                      width={600}
+                      height={375}
+                      className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
+                    <span>🍔 PDV & Combos Artesanais</span>
+                    <span className="text-orange-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
               </div>
@@ -1070,18 +1080,28 @@ export default function Home() {
                   {t('nicho.lanchoneteDesc')}
                 </p>
 
-                {/* Imagem Real da Tela do PDV Express */}
-                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-blue-500/50 transition">
-                  <img
-                    src="/images/telas-reais/media__1788461951550.png"
-                    alt="Tela real do PDV Express Balcão do MiseOn para Lanchonetes"
-                    width={500}
-                    height={280}
-                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
-                    <span>☕ PDV Balcão & Comandas</span>
-                    <span className="text-blue-400">Ver Tela →</span>
+                {/* Imagem Real da Tela do PDV Express / Lanchonetes */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/15 bg-slate-950/90 shadow-xl group-hover:border-blue-500/60 transition duration-300">
+                  <div className="flex items-center justify-between border-b border-white/10 bg-slate-900/90 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider">MiseOn • Lanchonete</span>
+                  </div>
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
+                    <img
+                      src="/images/telas-reais/nicho-lanchonete.png"
+                      alt="Tela real do Painel Balcão e Comandas do MiseOn para Lanchonetes"
+                      width={600}
+                      height={375}
+                      className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
+                    <span>☕ Painel Balcão & Comandas</span>
+                    <span className="text-blue-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
               </div>
@@ -1112,18 +1132,28 @@ export default function Home() {
                   {t('nicho.pizzariaDesc')}
                 </p>
 
-                {/* Imagem Real do KDS de Forno / Entregas */}
-                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-emerald-500/50 transition">
-                  <img
-                    src="/images/telas-reais/media__1788462335394.png"
-                    alt="Tela real de Gestão de Entregas por Km do MiseOn para Pizzarias"
-                    width={500}
-                    height={280}
-                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
-                    <span>🍕 Rotas de Entrega & Motoboy</span>
-                    <span className="text-emerald-400">Ver Tela →</span>
+                {/* Imagem Real do KDS de Forno / Pizzarias */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/15 bg-slate-950/90 shadow-xl group-hover:border-emerald-500/60 transition duration-300">
+                  <div className="flex items-center justify-between border-b border-white/10 bg-slate-900/90 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider">MiseOn • Pizzaria</span>
+                  </div>
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
+                    <img
+                      src="/images/telas-reais/nicho-pizzaria.png"
+                      alt="Tela real de KDS de Produção e Forno do MiseOn para Pizzarias"
+                      width={600}
+                      height={375}
+                      className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
+                    <span>🍕 KDS Cozinha & Forno</span>
+                    <span className="text-emerald-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
               </div>
@@ -1154,18 +1184,28 @@ export default function Home() {
                   {t('nicho.restauranteBarDesc')}
                 </p>
 
-                {/* Imagem Real do Mapa de Mesas 3D */}
-                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-amber-500/50 transition">
-                  <img
-                    src="/images/telas-reais/media__1788462048036.png"
-                    alt="Tela real de Mapa de Mesas 3D no MiseOn para Restaurantes e Bares"
-                    width={500}
-                    height={280}
-                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
-                    <span>🍷 Mapa de Mesas 3D & Comandas</span>
-                    <span className="text-amber-400">Ver Tela →</span>
+                {/* Imagem Real do Modal de Mesas & Conta / Restaurantes & Bares */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/15 bg-slate-950/90 shadow-xl group-hover:border-amber-500/60 transition duration-300">
+                  <div className="flex items-center justify-between border-b border-white/10 bg-slate-900/90 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider">MiseOn • Restaurante & Bar</span>
+                  </div>
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
+                    <img
+                      src="/images/telas-reais/nicho-restaurante-bar.png"
+                      alt="Tela real de Gestão de Mesas e Divisão de Conta por Assento no MiseOn"
+                      width={600}
+                      height={375}
+                      className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
+                    <span>🍷 Modal Mesa & Divisão por Assento</span>
+                    <span className="text-amber-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
               </div>
@@ -1196,18 +1236,28 @@ export default function Home() {
                   {t('nicho.darkKitchenDesc')}
                 </p>
 
-                {/* Imagem Real de Conexão iFood / Dark Kitchen */}
-                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-indigo-500/50 transition">
-                  <img
-                    src="/images/telas-reais/ifood-conexao.png"
-                    alt="Tela real de Integração iFood e Dark Kitchens no MiseOn"
-                    width={500}
-                    height={280}
-                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
-                    <span>🛵 iFood & Multi-Marcas</span>
-                    <span className="text-indigo-400">Ver Tela →</span>
+                {/* Imagem Real de Entregas & GPS / Dark Kitchen */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/15 bg-slate-950/90 shadow-xl group-hover:border-indigo-500/60 transition duration-300">
+                  <div className="flex items-center justify-between border-b border-white/10 bg-slate-900/90 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider">MiseOn • Dark Kitchen</span>
+                  </div>
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
+                    <img
+                      src="/images/telas-reais/nicho-dark-kitchen.png"
+                      alt="Tela real de Gestão de Entregas com Mapa em Tempo Real no MiseOn"
+                      width={600}
+                      height={375}
+                      className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
+                    <span>🛵 Fila de Delivery & GPS Ao Vivo</span>
+                    <span className="text-indigo-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
               </div>
@@ -1238,18 +1288,28 @@ export default function Home() {
                   {tDynamic('Peso Inteligente R$/kg com balança serial (Toledo/Filizola/Urano) e Ficha Técnica com perda de cocção.')}
                 </p>
 
-                {/* Imagem Real de Balança & Alergênicos */}
-                <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-lg group-hover:border-emerald-500/50 transition">
-                  <img
-                    src="/images/telas-reais/cardapio-modal-alergenicos.png"
-                    alt="Tela real de Ficha Técnica e Alergênicos do MiseOn"
-                    width={500}
-                    height={280}
-                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="bg-black/80 px-3 py-1.5 text-[11px] font-bold text-slate-300 border-t border-white/10 flex items-center justify-between">
-                    <span>⚖️ Peso R$/kg & Ficha Técnica</span>
-                    <span className="text-emerald-400">Ver Tela →</span>
+                {/* Imagem Real da Balança por Quilo */}
+                <div className="mt-5 overflow-hidden rounded-2xl border border-white/15 bg-slate-950/90 shadow-xl group-hover:border-emerald-500/60 transition duration-300">
+                  <div className="flex items-center justify-between border-b border-white/10 bg-slate-900/90 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider">MiseOn • Buffet por Quilo</span>
+                  </div>
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
+                    <img
+                      src="/images/telas-reais/nicho-por-quilo.png"
+                      alt="Tela real de Leitura Digital da Balança por Quilo do MiseOn"
+                      width={600}
+                      height={375}
+                      className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
+                    <span>⚖️ Leitura Digital R$/kg & Balança</span>
+                    <span className="text-emerald-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
               </div>
