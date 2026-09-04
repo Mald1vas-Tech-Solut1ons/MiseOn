@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B132B"/>
+      <stop offset="50%" stop-color="#070C18"/>
+      <stop offset="100%" stop-color="#050811"/>
+    </linearGradient>
+    <linearGradient id="card-orange" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FC5B24"/>
+      <stop offset="100%" stop-color="#D9410D"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="680" rx="16" fill="url(#bg-grad)"/>
+
+  <!-- Top Bar / Header -->
+  <rect x="0" y="0" width="1200" height="64" fill="#0F172A" opacity="0.9"/>
+  <line x1="0" y1="64" x2="1200" y2="64" stroke="#1E293B" stroke-width="1"/>
+
+  <!-- Brand logo indicator -->
+  <circle cx="36" cy="32" r="10" fill="#FC5B24"/>
+  <text x="56" y="38" font-family="'Sora', sans-serif" font-weight="800" font-size="18" fill="#FFFFFF">KDS Cozinha</text>
+  <text x="175" y="38" font-family="sans-serif" font-weight="600" font-size="12" fill="#94A3B8">| Estações de Produção Kanban</text>
+
+  <!-- Live Stats in Header -->
+  <rect x="750" y="16" width="130" height="32" rx="16" fill="#1E293B"/>
+  <circle cx="766" cy="32" r="4" fill="#10B981"/>
+  <text x="778" y="37" font-family="sans-serif" font-weight="700" font-size="12" fill="#10B981">6 Em Preparo</text>
+
+  <rect x="890" y="16" width="140" height="32" rx="16" fill="#7F1D1D" opacity="0.6"/>
+  <circle cx="906" cy="32" r="4" fill="#EF4444"/>
+  <text x="918" y="37" font-family="sans-serif" font-weight="700" font-size="12" fill="#F87171">1 Alerta Atraso</text>
+
+  <rect x="1040" y="16" width="130" height="32" rx="16" fill="#FC5B24" opacity="0.2" stroke="#FC5B24" stroke-width="1"/>
+  <text x="1065" y="37" font-family="sans-serif" font-weight="700" font-size="12" fill="#FF8C66">Modo TV 4K</text>
+
+  <!-- COLUMNS -->
+  <!-- COL 1: CHAPA & BURGERS -->
+  <rect x="24" y="88" width="368" height="568" rx="12" fill="#0F172A" stroke="#1E293B" stroke-width="1"/>
+  <rect x="24" y="88" width="368" height="44" rx="12" fill="#1E293B"/>
+  <text x="44" y="115" font-family="'Sora', sans-serif" font-weight="700" font-size="15" fill="#F8FAFC">🔥 Estação CHAPA (3)</text>
+  <rect x="340" y="98" width="36" height="24" rx="12" fill="#FC5B24"/>
+  <text x="354" y="114" font-family="sans-serif" font-weight="800" font-size="12" fill="#FFFFFF">3</text>
+
+  <!-- Ticket 1: Urgent/Delayed -->
+  <rect x="40" y="148" width="336" height="210" rx="10" fill="#1E1B18" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <path d="M40 148 H376 V184 H40 Z" fill="#7F1D1D" rx="10"/>
+  <rect x="40" y="174" width="336" height="10" fill="#7F1D1D"/>
+  <text x="56" y="170" font-family="sans-serif" font-weight="800" font-size="14" fill="#FFFFFF">#1042 • Mesa 04</text>
+  <rect x="280" y="156" width="80" height="22" rx="11" fill="#EF4444"/>
+  <text x="291" y="171" font-family="sans-serif" font-weight="800" font-size="11" fill="#FFFFFF">⏱️ 14 min</text>
+  
+  <text x="56" y="210" font-family="sans-serif" font-weight="700" font-size="14" fill="#F8FAFC">2x X-Bacon Artesanal</text>
+  <text x="72" y="228" font-family="sans-serif" font-size="12" fill="#CBD5E1">• Ponto: Ao Ponto pra Mal</text>
+  <text x="72" y="244" font-family="sans-serif" font-size="12" fill="#CBD5E1">• Sem Cebola Caramelizada</text>
+  <text x="72" y="260" font-family="sans-serif" font-weight="700" font-size="12" fill="#F59E0B">• Add: Picles Extra</text>
+
+  <text x="56" y="290" font-family="sans-serif" font-weight="700" font-size="14" fill="#F8FAFC">1x Smash Duplo Bacon</text>
+  <text x="72" y="308" font-family="sans-serif" font-size="12" fill="#CBD5E1">• Ponto: Bem Passado</text>
+
+  <rect x="56" y="324" width="304" height="24" rx="6" fill="#EF4444" opacity="0.9"/>
+  <text x="145" y="340" font-family="sans-serif" font-weight="700" font-size="12" fill="#FFFFFF">MARCAR PRONTO</text>
+
+  <!-- Ticket 2: Normal -->
+  <rect x="40" y="374" width="336" height="190" rx="10" fill="#182232" stroke="#334155" stroke-width="1" filter="url(#shadow)"/>
+  <rect x="40" y="374" width="336" height="36" rx="10" fill="#1E293B"/>
+  <rect x="40" y="400" width="336" height="10" fill="#1E293B"/>
+  <text x="56" y="397" font-family="sans-serif" font-weight="800" font-size="14" fill="#FFFFFF">#1045 • Delivery iFood</text>
+  <rect x="290" y="382" width="70" height="20" rx="10" fill="#10B981" opacity="0.2"/>
+  <text x="303" y="396" font-family="sans-serif" font-weight="700" font-size="11" fill="#34D399">⏱️ 4 min</text>
+
+  <text x="56" y="435" font-family="sans-serif" font-weight="700" font-size="14" fill="#F8FAFC">1x Combo Master Cheeseburger</text>
+  <text x="72" y="453" font-family="sans-serif" font-size="12" fill="#94A3B8">• Maionese Verde à Parte</text>
+  <text x="56" y="480" font-family="sans-serif" font-weight="700" font-size="14" fill="#F8FAFC">1x Porção Batata Rustica (G)</text>
+
+  <rect x="56" y="522" width="304" height="28" rx="6" fill="#FC5B24"/>
+  <text x="145" y="541" font-family="sans-serif" font-weight="700" font-size="12" fill="#FFFFFF">AVANÇAR PRÓXIMO</text>
+
+
+  <!-- COL 2: FRITURAS & ACOMPANHAMENTOS -->
+  <rect x="416" y="88" width="368" height="568" rx="12" fill="#0F172A" stroke="#1E293B" stroke-width="1"/>
+  <rect x="416" y="88" width="368" height="44" rx="12" fill="#1E293B"/>
+  <text x="436" y="115" font-family="'Sora', sans-serif" font-weight="700" font-size="15" fill="#F8FAFC">🍟 Estação FRITADEIRA (2)</text>
+  <rect x="732" y="98" width="36" height="24" rx="12" fill="#3B82F6"/>
+  <text x="746" y="114" font-family="sans-serif" font-weight="800" font-size="12" fill="#FFFFFF">2</text>
+
+  <!-- Ticket Fritura 1 -->
+  <rect x="432" y="148" width="336" height="180" rx="10" fill="#182232" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="432" y="148" width="336" height="36" rx="10" fill="#1E3A8A" opacity="0.6"/>
+  <rect x="432" y="174" width="336" height="10" fill="#1E3A8A" opacity="0.6"/>
+  <text x="448" y="171" font-family="sans-serif" font-weight="800" font-size="14" fill="#FFFFFF">#1043 • Balcão 02</text>
+  <rect x="682" y="156" width="70" height="20" rx="10" fill="#3B82F6" opacity="0.3"/>
+  <text x="695" y="170" font-family="sans-serif" font-weight="700" font-size="11" fill="#60A5FA">⏱️ 7 min</text>
+
+  <text x="448" y="210" font-family="sans-serif" font-weight="700" font-size="14" fill="#F8FAFC">2x Batata Frita com Cheddar & Bacon</text>
+  <text x="464" y="228" font-family="sans-serif" font-size="12" fill="#94A3B8">• Servir em Cuba Individual</text>
+  <text x="448" y="255" font-family="sans-serif" font-weight="700" font-size="14" fill="#F8FAFC">1x Coxinha de Costela (6un)</text>
+
+  <rect x="448" y="284" width="304" height="28" rx="6" fill="#3B82F6"/>
+  <text x="537" y="303" font-family="sans-serif" font-weight="700" font-size="12" fill="#FFFFFF">MARCAR PRONTO</text>
+
+
+  <!-- COL 3: BAR & BEBIDAS -->
+  <rect x="808" y="88" width="368" height="568" rx="12" fill="#0F172A" stroke="#1E293B" stroke-width="1"/>
+  <rect x="808" y="88" width="368" height="44" rx="12" fill="#1E293B"/>
+  <text x="828" y="115" font-family="'Sora', sans-serif" font-weight="700" font-size="15" fill="#F8FAFC">🥤 Estação BAR / BEBIDAS (1)</text>
+  <rect x="1124" y="98" width="36" height="24" rx="12" fill="#10B981"/>
+  <text x="1138" y="114" font-family="sans-serif" font-weight="800" font-size="12" fill="#FFFFFF">1</text>
+
+  <!-- Ticket Bar 1 -->
+  <rect x="824" y="148" width="336" height="180" rx="10" fill="#182232" stroke="#10B981" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="824" y="148" width="336" height="36" rx="10" fill="#065F46" opacity="0.6"/>
+  <rect x="824" y="174" width="336" height="10" fill="#065F46" opacity="0.6"/>
+  <text x="840" y="171" font-family="sans-serif" font-weight="800" font-size="14" fill="#FFFFFF">#1046 • Mesa 09</text>
+  <rect x="1074" y="156" width="70" height="20" rx="10" fill="#10B981" opacity="0.3"/>
+  <text x="1087" y="170" font-family="sans-serif" font-weight="700" font-size="11" fill="#34D399">⏱️ 2 min</text>
+
+  <text x="840" y="210" font-family="sans-serif" font-weight="700" font-size="14" fill="#F8FAFC">2x Chopp Artesanal IPA 500ml</text>
+  <text x="856" y="228" font-family="sans-serif" font-size="12" fill="#94A3B8">• Colarinho Duplo</text>
+  <text x="840" y="255" font-family="sans-serif" font-weight="700" font-size="14" fill="#F8FAFC">1x Soda Italiana Maçã Verde</text>
+
+  <rect x="840" y="284" width="304" height="28" rx="6" fill="#10B981"/>
+  <text x="929" y="303" font-family="sans-serif" font-weight="700" font-size="12" fill="#FFFFFF">DESPACHAR BEBIDAS</text>
+
+</svg>

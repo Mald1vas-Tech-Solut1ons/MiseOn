@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-  Maximize2, X, Sparkles, Tv, MessageCircle, ShoppingBag, Boxes,
+  Maximize2, X, Sparkles, MessageCircle, ShoppingBag, Boxes,
   QrCode, HeartPulse, Wallet, ChefHat, UtensilsCrossed, BarChart3, Bike, Scale,
+  ShoppingCart, Megaphone,
 } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 
@@ -25,23 +26,23 @@ const TELAS: TelaReal[] = [
     subtitulo: 'Os Mais Pedidos & Autoatendimento sem Taxas',
     categoria: 'Cardápio Digital',
     icone: QrCode,
-    src: '/images/telas-reais/cardapio-digital-os-mais-pedidos.png',
-    alt: 'Cardápio digital do MiseOn com destaques de X-Bacon, combos, valor de calorias e carrinho de compras integrado',
-    descricao: 'Design moderno e rápido para celular ou computador. Exibe destaques, promoções (ex: 22% OFF), calorias agregadas e carrinho em tempo real.',
-    largura: 1047,
-    altura: 580,
+    src: '/images/telas-reais/media__1788462048036.png',
+    alt: 'Cardápio digital do MiseOn com os pratos mais pedidos, calorias por item e carrinho em tempo real',
+    descricao: 'Design moderno e ultra-rápido para celular ou computador. Exibe os mais pedidos, calorias por item, promoções e carrinho em tempo real.',
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'cardapio-alergenicos',
     titulo: 'Ficha do Prato: Calorias, Proteína & Alergênicos',
-    subtitulo: 'Informação Nutricional Transparente',
+    subtitulo: 'Informação Nutricional Transparente (Anvisa)',
     categoria: 'Tabela Nutricional',
     icone: HeartPulse,
-    src: '/images/telas-reais/cardapio-modal-alergenicos.png',
-    alt: 'Modal de produto X-Bacon no MiseOn destacando calorias, alto teor proteico e aviso oficial de alergênicos',
-    descricao: 'Segurança total para o cliente: indicação clara de alergênicos (Glúten, Leite, Ovo, Soja), calorias e tabela nutricional gerada pela Ficha Técnica.',
-    largura: 560,
-    altura: 600,
+    src: '/images/telas-reais/cardapio-checkout-pix-cashback.png',
+    alt: 'Modal de produto X-Bacon no MiseOn destacando calorias, proteína e aviso legal de alergênicos',
+    descricao: 'Segurança total para o seu cliente: indicação clara de alergênicos (Glúten, Leite, Ovo, Soja), calorias agregadas e selos nutricionais.',
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'cardapio-checkout',
@@ -49,23 +50,23 @@ const TELAS: TelaReal[] = [
     subtitulo: 'Finalização de Pedido Sem Atrito',
     categoria: 'Checkout & Cashback',
     icone: Wallet,
-    src: '/images/telas-reais/cardapio-checkout-pix-cashback.png',
-    alt: 'Tela de finalização de pedido do MiseOn com aplicação de cupom, desconto de cashback, opções Pix/Crédito e cálculo de entrega',
-    descricao: 'Cliente aplica cupons, escolhe pagamento online (Pix/Crédito) ou na entrega, usa saldo de cashback e visualiza a taxa de entrega por raio.',
-    largura: 480,
-    altura: 800,
+    src: '/images/telas-reais/media__1788462128250.png',
+    alt: 'Tela de checkout do MiseOn com aplicação de cupom, desconto de cashback e pagamento Pix/Crédito',
+    descricao: 'Seu cliente aplica cupons, acumula cashback automático na sua loja e paga via Pix ou cartão sem pagar comissão de marketplace.',
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'pdv-balcao',
-    titulo: 'PDV Express de Balcão & Comandas de Balcão',
+    titulo: 'PDV Express de Balcão & Comandas Rápidas',
     subtitulo: 'Atendimento Rápido sem Fila',
     categoria: 'PDV Balcão',
     icone: UtensilsCrossed,
-    src: '/images/telas-reais/media__1788461951550.png',
-    alt: 'Interface do PDV Express Balcão do MiseOn com lançamento por código e atalhos de salgados e bebidas',
-    descricao: 'Lançamento ultrarrápido por toque ou leitor de código de barras. Permite fechar a conta no balcão em 3 segundos ou gerar comanda para consumo.',
-    largura: 1047,
-    altura: 590,
+    src: '/images/telas-reais/pdv-balcao.png',
+    alt: 'Interface do PDV Express Balcão do MiseOn com atalhos de salgados, busca rápida e emissão de comanda/NFC-e em 3s',
+    descricao: 'Lançamento ultrarrápido por toque ou leitor de código de barras. Permite fechar a conta no balcão em 3 segundos e emitir NFC-e automática.',
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'kds-cozinha',
@@ -73,11 +74,11 @@ const TELAS: TelaReal[] = [
     subtitulo: 'Produção sem Papel & Controle de Tempo',
     categoria: 'KDS Cozinha',
     icone: ChefHat,
-    src: '/images/telas-reais/media__1788461951575.png',
-    alt: 'Tela KDS de produção na cozinha com comandas digitais organizadas em colunas de preparo e cronômetro',
-    descricao: 'Substitua impressoras e papéis engordurados por telas de produção. Mostra os itens agrupados por estação (Chapa, Bar, Forno) e alerta atrasos.',
-    largura: 1047,
-    altura: 600,
+    src: '/images/telas-reais/kds-cozinha.png',
+    alt: 'Tela KDS de produção na cozinha com comandas digitais organizadas por estação Chapa, Fritadeira e Bar',
+    descricao: 'Substitua impressoras e papéis engordurados por telas de produção. Mostra os itens agrupados por estação (Chapa, Fritadeira, Bar) com alertas de atraso em tempo real.',
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'mapa-mesas',
@@ -85,23 +86,47 @@ const TELAS: TelaReal[] = [
     subtitulo: 'Gestão de Mesas, Comandas e Garçons',
     categoria: 'Salão & Mesas',
     icone: Scale,
-    src: '/images/telas-reais/media__1788462048036.png',
-    alt: 'Visão do Mapa de Mesas 3D no MiseOn destacando mesas livres, ocupadas, comandas de garçons e divisão de conta',
-    descricao: 'Visualize o salão em tempo real. O garçom lança o pedido pelo celular, abre comandas por assento e fecha a conta com divisão por pessoa.',
-    largura: 1047,
-    altura: 590,
+    src: '/images/telas-reais/mapa-mesas.png',
+    alt: 'Visão do Mapa de Mesas 3D no MiseOn destacando mesas livres, ocupadas e comandas ativas',
+    descricao: 'Visualize o salão em tempo real. O garçom lança o pedido pelo celular, abre comandas por assento e fecha a conta com divisão automática por pessoa.',
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'estoque-nfce',
     titulo: 'Entrada de Estoque por Cupom Fiscal (NFC-e)',
     subtitulo: 'Gestão de Suprimentos & Alerta Crítico',
-    categoria: 'Estoque & CMV',
+    categoria: 'Estoque & NFC-e',
     icone: Boxes,
+    src: '/images/telas-reais/cardapio-digital-os-mais-pedidos.png',
+    alt: 'Tela de Estoque Geral do MiseOn mostrando alerta de estoque crítico e escaneamento de cupom fiscal NFC-e',
+    descricao: 'Escaneie o QR Code da nota do mercado ou importe o XML do fornecedor: o estoque baixa/alimenta automaticamente por custo PEPS.',
+    largura: 1200,
+    altura: 680,
+  },
+  {
+    id: 'central-compras',
+    titulo: 'Central de Compras & Cotação com Fornecedores',
+    subtitulo: 'Gestão Inteligente de Pedidos de Insumos',
+    categoria: 'Central de Compras',
+    icone: ShoppingCart,
+    src: '/images/telas-reais/central-compras.png',
+    alt: 'Painel da Central de Compras do MiseOn com sugestões automáticas de reposição baseadas no estoque crítico',
+    descricao: 'Gerencie pedidos de compras com fornecedores, compare preços de insumos e receba sugestões automáticas de reposição antes do estoque acabar.',
+    largura: 1200,
+    altura: 680,
+  },
+  {
+    id: 'fichas-tecnicas',
+    titulo: 'Fichas Técnicas & Validade de Preparos Base',
+    subtitulo: 'Preparo de Insumos Brutos & Molhos',
+    categoria: 'Fichas Técnicas',
+    icone: Sparkles,
     src: '/images/telas-reais/estoque-cupom-nfce.png',
-    alt: 'Tela de Estoque Geral do MiseOn mostrando alerta de estoque crítico e botão de escanear cupom fiscal NFC-e',
-    descricao: 'Escaneie a nota do mercado pelo celular ou importe XML do fornecedor: os itens entram no estoque com quantidade e custo real pelo método PEPS.',
-    largura: 1047,
-    altura: 485,
+    alt: 'Tela de Fichas Técnicas de Preparos Base e controle de receitas do MiseOn',
+    descricao: 'Transforme insumos brutos em receitas base. Cada produção gera uma ordem de serviço com controle de lote e validade pós-preparo.',
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'dre-financeiro',
@@ -109,11 +134,23 @@ const TELAS: TelaReal[] = [
     subtitulo: 'Financeiro Transparente sem Planilhas',
     categoria: 'DRE Financeiro',
     icone: BarChart3,
-    src: '/images/telas-reais/media__1788461951624.png',
-    alt: 'Painel DRE Gerencial do MiseOn exibindo faturamento bruto, deduções de taxas, CMV e margem líquida em gráfico',
+    src: '/images/telas-reais/dre-financeiro.png',
+    alt: 'Painel DRE Gerencial do MiseOn exibindo faturamento bruto, deduções de taxas, CMV real e margem líquida',
     descricao: 'Veja exatamente quanto sobrou no seu bolso. O DRE cruza vendas, custos fixos, CMV das fichas técnicas e taxas de cartões/iFood automaticamente.',
-    largura: 1047,
-    altura: 580,
+    largura: 1200,
+    altura: 680,
+  },
+  {
+    id: 'marketing',
+    titulo: 'Marketing, Cupons & Disparo Automatizado',
+    subtitulo: 'Fidelização & Recuperação de Clientes Inativos',
+    categoria: 'Marketing & Cupons',
+    icone: Megaphone,
+    src: '/images/telas-reais/marketing.png',
+    alt: 'Painel de Marketing e Automação de Cupons no MiseOn para atrair e fidelizar clientes',
+    descricao: 'Crie campanhas de cashback, cupons promocionais com regras avançadas e automatize disparos de recuperação de clientes inativos.',
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'ifood-conexao',
@@ -121,11 +158,11 @@ const TELAS: TelaReal[] = [
     subtitulo: 'Conexão, Taxas & De-Para de Produtos',
     categoria: 'Integração iFood',
     icone: ShoppingBag,
-    src: '/images/telas-reais/ifood-conexao.png',
+    src: '/images/telas-reais/media__1788461951505.png',
     alt: 'Painel de Integração iFood no MiseOn exibindo a aba de Conexão e Taxas do contrato',
     descricao: 'Insira o ID da sua loja no iFood e configure a taxa do contrato. O MiseOn calcula a margem líquida por pedido e traz os pedidos direto para o PDV.',
-    largura: 1047,
-    altura: 602,
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'whatsapp-conectado',
@@ -133,11 +170,11 @@ const TELAS: TelaReal[] = [
     subtitulo: 'Atendimento com IA & Status Conectado',
     categoria: 'WhatsApp IA',
     icone: MessageCircle,
-    src: '/images/telas-reais/whatsapp-conectado.png',
+    src: '/images/telas-reais/media__1788461951550.png',
     alt: 'Painel do WhatsApp no MiseOn exibindo o número conectado oficialmente na API Cloud da Meta',
     descricao: 'Número verificado sem risco de banimento. A IA responde dúvidas do cardápio com dados reais e silencia no instante em que o atendente assume.',
-    largura: 1047,
-    altura: 477,
+    largura: 1200,
+    altura: 680,
   },
   {
     id: 'entregas-gps',
@@ -145,23 +182,11 @@ const TELAS: TelaReal[] = [
     subtitulo: 'Rastreamento de Entregadores & Taxa por Raio',
     categoria: 'Delivery & Rotas',
     icone: Bike,
-    src: '/images/telas-reais/media__1788462335394.png',
-    alt: 'Painel de Gestão de Entregas do MiseOn com mapa de rotas, alocação de motoboys e histórico de taxas de entrega por km',
+    src: '/images/telas-reais/entregas-gps.png',
+    alt: 'Painel de Gestão de Entregas do MiseOn com mapa de rotas, alocação de motoboys e taxa de entrega por raio km',
     descricao: 'Acompanhe a localização dos entregadores no mapa ao vivo. Calcule a taxa de entrega automaticamente com base na distância real da loja até o cliente.',
-    largura: 1047,
-    altura: 580,
-  },
-  {
-    id: 'tv-senhas-config',
-    titulo: 'Configuração da TV Automática & Painel 4K',
-    subtitulo: 'Menu Board & Chamada de Senhas na TV',
-    categoria: 'Painel de TV',
-    icone: Tv,
-    src: '/images/telas-reais/tv-senhas-configuracao.png',
-    alt: 'Painel de Configurações da Loja no MiseOn exibindo links de acesso rápido para TV Automática, Cardápio 4K e Painel de Senhas',
-    descricao: 'Gere links de acesso sem login para Smart TVs. A TV chama a senha com voz e gongo e vira Menu Board 4K quando o balcão está livre.',
-    largura: 1047,
-    altura: 489,
+    largura: 1200,
+    altura: 680,
   },
 ];
 
@@ -217,7 +242,7 @@ export default function ShowcaseTelasReais() {
                 onClick={() => setTelaAtiva(t.id)}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all border ${
                   selecionado
-                    ? 'border-[#FC5B24] bg-[#FC5B24]/20 text-white shadow-lg shadow-[#FC5B24]/10'
+                    ? 'border-[#FC5B24] bg-[#FC5B24]/20 text-white shadow-lg shadow-[#FC5B24]/20 scale-105'
                     : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10'
                 }`}
               >
@@ -234,7 +259,7 @@ export default function ShowcaseTelasReais() {
             
             {/* Informações da Tela (Esquerda) */}
             <div className="lg:col-span-5 space-y-4 text-left">
-              <span className="inline-flex rounded-full bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs font-extrabold text-orange-300 uppercase tracking-wider">
+              <span className="inline-flex rounded-full bg-orange-500/20 border border-orange-500/30 px-3.5 py-1 text-xs font-extrabold text-orange-300 uppercase tracking-wider">
                 {tDynamic(ativa.subtitulo)}
               </span>
 
@@ -257,24 +282,41 @@ export default function ShowcaseTelasReais() {
               </div>
             </div>
 
-            {/* Imagem Real da Tela (Direita) */}
+            {/* Imagem Real da Tela em Moldura SaaS Premium (Direita) */}
             <div className="lg:col-span-7">
               <div
                 onClick={() => setAmpliada(ativa)}
-                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/15 bg-black/80 shadow-2xl transition hover:border-[#FC5B24]"
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/20 bg-[#0F172A] shadow-2xl transition-all duration-300 hover:border-[#FC5B24] hover:shadow-[#FC5B24]/20 hover:shadow-2xl"
               >
-                <img
-                  src={ativa.src}
-                  alt={ativa.alt}
-                  width={ativa.largura}
-                  height={ativa.altura}
-                  className="w-full h-auto object-cover transition duration-300 group-hover:scale-[1.01]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-4">
-                  <span className="flex items-center gap-2 rounded-full bg-black/80 px-4 py-2 text-xs font-bold text-white backdrop-blur-md">
-                    <Maximize2 size={14} /> {tDynamic('Clique para ampliar em tela cheia')}
-                  </span>
+                {/* Moldura de Navegador (Browser Header Frame) */}
+                <div className="flex items-center justify-between border-b border-white/10 bg-[#1E293B]/80 px-4 py-2.5 backdrop-blur-md">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-red-500/80" />
+                    <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
+                    <div className="h-3 w-3 rounded-full bg-green-500/80" />
+                  </div>
+                  <div className="flex items-center rounded-md bg-black/40 px-3 py-1 text-[11px] font-mono text-slate-400 border border-white/5 w-64 truncate justify-center">
+                    https://app.miseon.com.br/{ativa.id}
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-mono font-bold uppercase tracking-wider">MiseOn App</div>
                 </div>
+
+                {/* Imagem da Tela */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-black/60 flex items-center justify-center p-1">
+                  <img
+                    src={ativa.src}
+                    alt={ativa.alt}
+                    width={ativa.largura}
+                    height={ativa.altura}
+                    className="w-full h-full object-contain transition duration-300 group-hover:scale-[1.01]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-4">
+                    <span className="flex items-center gap-2 rounded-full bg-black/90 px-4 py-2 text-xs font-bold text-white border border-white/20 backdrop-blur-md">
+                      <Maximize2 size={14} /> {tDynamic('Clique para ampliar em tela cheia')}
+                    </span>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -306,7 +348,7 @@ export default function ShowcaseTelasReais() {
             <img
               src={ampliada.src}
               alt={ampliada.alt}
-              className="h-auto max-h-[85vh] w-auto max-w-full rounded-xl shadow-2xl mx-auto"
+              className="h-auto max-h-[85vh] w-auto max-w-full rounded-xl stroke-none shadow-2xl mx-auto border border-white/20"
             />
             <p className="mt-3 font-['Sora'] text-sm font-bold text-white">
               {tDynamic(ampliada.titulo)}
@@ -320,3 +362,4 @@ export default function ShowcaseTelasReais() {
     </section>
   );
 }
+
