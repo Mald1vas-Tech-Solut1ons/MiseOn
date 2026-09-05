@@ -28,15 +28,15 @@ function credsPlataforma() {
   };
 }
 
-async function efiFetch(certPem: string, path: string, init: RequestInit, token?: string) {
+function efiFetch(certPem: string, path: string, init: RequestInit, token?: string) {
   const client = Deno.createHttpClient({
-    // @ts-ignore
+    // @ts-ignore — API de mTLS do Deno
     cert: certPem,
     key: certPem,
   });
   return fetch(`${EFI_URL}${path}`, {
     ...init,
-    // @ts-ignore
+    // @ts-ignore — opção 'client' é específica do Deno (fetch com HttpClient)
     client,
     headers: {
       'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ async function validarHmacSha256(message: string, signature: string, secret: str
     );
     const signatureBytes = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
     return await crypto.subtle.verify("HMAC", key, signatureBytes, new TextEncoder().encode(message));
-  } catch (e) {
+  } catch {
     return false;
   }
 }

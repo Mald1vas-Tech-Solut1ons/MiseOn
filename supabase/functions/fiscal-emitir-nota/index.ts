@@ -24,7 +24,6 @@ serve(async (req) => {
       return json({ error: 'pedido_id é obrigatório para emissão' }, { status: 400 });
     }
 
-    const authHeader = req.headers.get('Authorization');
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -131,7 +130,7 @@ serve(async (req) => {
     }
 
     // Registra como PROCESSANDO na tabela notas_fiscais e no pedido
-    const { data: notaCriada, error: errNota } = await supabaseAdmin
+    const { data: notaCriada } = await supabaseAdmin
       .from('notas_fiscais')
       .insert({
         loja_id: lojaId,

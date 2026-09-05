@@ -24,6 +24,11 @@ const REGRAS = [
   { forte: true,  nome: 'Token do GitHub',        re: /\bgh[pousr]_[A-Za-z0-9]{36,}\b/ },
   { forte: true,  nome: 'Chave AWS',              re: /\bAKIA[0-9A-Z]{16}\b/ },
   { forte: true,  nome: 'Senha de app do Gmail',  re: /['"][a-z]{4}\s[a-z]{4}\s[a-z]{4}\s[a-z]{4}['"]/ },
+  // Credenciais Efí: o formato é inconfundível (prefixo + 40 hex). Estas
+  // estavam hardcoded em scripts locais que, por sorte, o .gitignore pegou
+  // antes do primeiro commit — a barreira precisa pegar na próxima.
+  { forte: true,  nome: 'Client secret Efí',      re: /\bClient_Secret_[0-9a-f]{40}\b/ },
+  { forte: true,  nome: 'Client ID Efí',          re: /\bClient_Id_[0-9a-f]{40}\b/ },
   { forte: false, nome: 'JWT',                    re: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/ },
   { forte: false, nome: 'Senha literal em atribuição', re: /(password|senha|passwd|pwd)\s*[:=]\s*['"][^'"\s]{8,}['"]/i },
 ];

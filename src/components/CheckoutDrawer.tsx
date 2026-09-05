@@ -483,7 +483,7 @@ export default function CheckoutDrawer({
                 {/* Tipo de pedido */}
                 <div>
                   <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
-                    Tipo de pedido
+                    {tDynamic('Tipo de pedido')}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     {(['DELIVERY', 'RETIRADA_BALCAO'] as const).map((t) => (

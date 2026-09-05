@@ -144,7 +144,7 @@ import { TEMPLATES } from './templates/index.ts';
 
 const cache = new Map<string, HandlebarsTemplateDelegate>();
 
-async function compilar(nome: string) {
+function compilar(nome: string) {
   const emCache = cache.get(nome);
   if (emCache) return emCache;
   const fonte = TEMPLATES[nome];

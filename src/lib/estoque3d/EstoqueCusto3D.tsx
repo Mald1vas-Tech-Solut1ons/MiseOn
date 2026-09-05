@@ -284,7 +284,7 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
 
         <div className="bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
           <p className="text-xs opacity-90 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
-            <Package size={12} className="text-amber-500" /> Maior Alocação
+            <Package size={12} className="text-amber-500" /> {tDynamic('Maior Alocação')}
           </p>
           <p className="text-sm font-black text-amber-600 dark:text-amber-400 mt-1 truncate" title={kpis.maiorConcentracaoItem?.rotulo}>
             {kpis.maiorConcentracaoItem?.rotulo.split('(')[0] ?? 'N/A'}

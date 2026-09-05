@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ShoppingBag, Bike, Boxes, QrCode, ChevronRight, Activity, TrendingUp, Store, Bot } from 'lucide-react';
+import { useI18n } from '../../contexts/I18nContext';
 
 const RECURSOS = [
   {
@@ -158,16 +159,17 @@ const RECURSOS = [
 
 export function RecursosShowcase() {
   const [activeTab, setActiveTab] = useState(RECURSOS[0].id);
+  const { tDynamic } = useI18n();
 
   return (
     <section id="recursos" style={{ borderTop: '1px solid rgba(10,92,196,0.15)', background: 'rgba(10,92,196,0.03)' }} className="py-28">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-16 text-center">
           <h2 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
-            Um sistema só. Do pedido ao dinheiro na conta.
+            {tDynamic('Um sistema só. Do pedido ao dinheiro na conta.')}
           </h2>
           <p style={{ color: 'rgba(234,241,251,0.5)' }} className="mt-4 text-lg">
-            Você não precisa de 5 aplicativos para tocar sua loja. Precisa de um que faça tudo direito.
+            {tDynamic('Você não precisa de 5 aplicativos para tocar sua loja. Precisa de um que faça tudo direito.')}
           </p>
         </div>
 

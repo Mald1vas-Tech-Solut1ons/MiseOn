@@ -111,6 +111,11 @@ export const PUBLIC_ROUTES = [
   { path: '/painel-de-senhas-tv', changefreq: 'weekly', priority: 0.9 },
   { path: '/gestao-fiscal-nfe', changefreq: 'weekly', priority: 0.9 },
   { path: '/gestao-de-estoque-3d', changefreq: 'weekly', priority: 0.8 },
+  // Vertical MiseOn Kiosk (commit de lançamento editou o sitemap.xml à mão
+  // sem cadastrar aqui — o próximo build as apagava. /totem é redirect para
+  // /autoatendimento, então não entra).
+  { path: '/autoatendimento', changefreq: 'weekly', priority: 1.0 },
+  { path: '/demo-kiosk', changefreq: 'weekly', priority: 0.9 },
   { path: '/blog', changefreq: 'daily', priority: 0.9 },
   // Os posts entram automaticamente logo abaixo — ver ROTAS_DO_BLOG.
   ...rotasDoBlog(),

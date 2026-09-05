@@ -54,7 +54,7 @@ function credsPlataforma(): EfiCreds {
 }
 
 // mTLS: Deno.createHttpClient com o certificado (cert+key em PEM) da conta usada.
-async function efiFetch(creds: EfiCreds, path: string, init: RequestInit, token?: string) {
+function efiFetch(creds: EfiCreds, path: string, init: RequestInit, token?: string) {
   const client = Deno.createHttpClient({
     // @ts-ignore — API de mTLS do Deno
     cert: creds.certPem,
@@ -62,7 +62,7 @@ async function efiFetch(creds: EfiCreds, path: string, init: RequestInit, token?
   });
   return fetch(`${EFI_URL}${path}`, {
     ...init,
-    // @ts-ignore
+    // @ts-ignore — opção 'client' é específica do Deno (fetch com HttpClient)
     client,
     headers: {
       'Content-Type': 'application/json',

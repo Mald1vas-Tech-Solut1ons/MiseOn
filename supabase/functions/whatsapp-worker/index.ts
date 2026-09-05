@@ -155,7 +155,6 @@ serve(async (req) => {
   for (const evento of eventos) {
     try {
       const msg = evento.payload?.message;
-      const contato = evento.payload?.contacts?.[0];
       const telefone: string | undefined = msg?.from;
       if (!telefone) throw new Error("evento sem remetente");
 

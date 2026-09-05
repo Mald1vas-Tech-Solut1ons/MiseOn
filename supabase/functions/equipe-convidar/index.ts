@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
       // reaproveita a conta se o e-mail já existe no Auth
       const { data: existentes } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 }).catch(() => ({ data: null }));
       let userId = existentes?.users.find((u) => u.email?.toLowerCase() === String(email).toLowerCase())?.id;
-      let contaExistia = !!userId;
+      const contaExistia = !!userId;
 
       if (!userId) {
         const { data: criado, error: eCriar } = await admin.auth.admin.createUser({

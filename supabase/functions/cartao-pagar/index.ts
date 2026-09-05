@@ -66,7 +66,7 @@ const cartaoPagarSchema = z.object({
   })
 });
 
-const handler = async (req: Request, ctx: { user: any, supabase: any }, body: z.infer<typeof cartaoPagarSchema>) => {
+const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z.infer<typeof cartaoPagarSchema>) => {
   const reqLogger = logger.withContext({ req_id: crypto.randomUUID(), tenant_id: ctx.user?.id });
   try {
     const { pedido_id, payment_token, installments, customer } = body;

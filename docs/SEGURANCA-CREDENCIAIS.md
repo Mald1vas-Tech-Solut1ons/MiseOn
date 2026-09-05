@@ -99,6 +99,21 @@ local (por exemplo, um `commit --no-verify`).
 
 ## 4. Decisão pendente: reescrever o histórico?
 
+> **REGISTRO DE DECISÃO (05/09/2026) — pendência encerrada.**
+> Decisão do dono: **não rotacionar** e **não reescrever o histórico**.
+> Forense exata (508 commits no repo): C1 presente em **22 revisões**
+> (introduzida `dda7efa` 21/07, removida `b8b965b` 22/07); C2 em **144 revisões**
+> (`b8a475d` 14/07 → removida `8e376fd` 22/07); C3 em **104 revisões**
+> (`cc662de` 14/07 → removida `8e376fd` 22/07). Nenhum outro segredo no
+> histórico (verificado: tokens `sbp_`, chaves Efí, service role key e
+> certificados nunca foram commitados — `.gitignore` os capturou desde o início).
+> **Risco residual assumido e formalmente registrado**: os 3 valores são
+> públicos e devem ser considerados comprometidos para sempre; o painel
+> superadmin da época compartilhava lógica de autenticação com a senha exposta
+> (removida da árvore, mas o valor permanece utilizável até rotação). A
+> recomendação de rotação (R1–R3) permanece de pé e é pré-requisito
+> recomendado antes do primeiro cliente pagante.
+
 Depois de rotacionar, as credenciais antigas viram inúteis e o histórico deixa
 de ser um risco ativo. Reescrever é opcional e tem custo.
 

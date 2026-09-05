@@ -261,7 +261,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
         <div className="flex-1 space-y-5 overflow-y-auto p-6 hide-scrollbar">
           <div>
             <p className="mb-2 text-xs opacity-95 font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-              Sai do estoque
+              {tDynamic('Sai do estoque')}
             </p>
             {renderLado('o', origens)}
           </div>

@@ -114,14 +114,19 @@ describe.runIf(isConfigured)('Motor de cálculo nutricional — NUT-05/06/07', (
       await criarNutricao(azeite, { base_unidade: 'ml', nutrientes: { ENERGIA_KCAL: 884, GORDURAS_TOTAIS: 100 } });
 
       // Nível 3 (mais fundo): preparo "Massa" consome só farinha, 1:1.
+      // rendimento_padrao_kg está em KG desde o motor v2 (20260901120000
+      // §2.8, correção do erro de 1000x): 1 kg = 1000 g de rendimento.
+      // A versão original passava 1000 "pensando em gramas" — expectativa
+      // da era do motor v1, que tratava o número cru como grama.
       const massa = await criarInsumo({
-        nome: 'Massa', unidade_medida: 'g', is_preparo: true, rendimento_padrao_kg: 1000,
+        nome: 'Massa', unidade_medida: 'g', is_preparo: true, rendimento_padrao_kg: 1,
       });
       await criarFichaPreparo(massa, farinha, 1000);
 
       // Nível 2: preparo "Molho" consome tomate + azeite + a Massa (preparo dentro de preparo).
+      // 2 kg = 2000 g de rendimento (ver comentário da Massa acima).
       const molho = await criarInsumo({
-        nome: 'Molho', unidade_medida: 'g', is_preparo: true, rendimento_padrao_kg: 2000,
+        nome: 'Molho', unidade_medida: 'g', is_preparo: true, rendimento_padrao_kg: 2,
       });
       await criarFichaPreparo(molho, tomate, 1500);
       await criarFichaPreparo(molho, azeite, 100);

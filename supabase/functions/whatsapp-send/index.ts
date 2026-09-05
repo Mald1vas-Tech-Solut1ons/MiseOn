@@ -162,7 +162,7 @@ serve(async (req) => {
     // 4. Prepara o payload para a Graph API (garante apenas dígitos no telefone)
     const telLimpo = String(telefone).replace(/\D/g, "");
 
-    let metaPayload: any = {
+    const metaPayload: any = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
       to: telLimpo,

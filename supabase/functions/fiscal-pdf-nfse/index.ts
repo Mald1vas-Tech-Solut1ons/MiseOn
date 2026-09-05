@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([595.28, 841.89]); // A4
-    const { width, height } = page.getSize();
+    const { width } = page.getSize();
 
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);

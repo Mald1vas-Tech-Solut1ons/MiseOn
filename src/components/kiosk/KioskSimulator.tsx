@@ -13,6 +13,7 @@ import {
   Check,
 } from 'lucide-react';
 import { KioskLeadModal } from '../landing/KioskLeadModal';
+import { useI18n } from '../../contexts/I18nContext';
 
 interface ItemMenu {
   id: string;
@@ -59,6 +60,7 @@ const MENU_MOCK: ItemMenu[] = [
 ];
 
 export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean }) {
+  const { tDynamic } = useI18n();
   const [etapa, setEtapa] = useState<'inicio' | 'cardapio' | 'carrinho' | 'pagamento' | 'sucesso'>('inicio');
   const [carrinho, setCarrinho] = useState<{ item: ItemMenu; qtd: number; obs: string }[]>([]);
   const [baconExtra, setBaconExtra] = useState(false);
@@ -124,10 +126,10 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
             <Touchpad size={16} /> SIMULADOR INTERATIVO MISEON KIOSK
           </div>
           <h2 className="font-['Sora'] text-2xl sm:text-4xl font-bold text-white">
-            Experimente o autoatendimento na prática
+            {tDynamic('Experimente o autoatendimento na prática')}
           </h2>
           <p className="mt-2 text-sm text-gray-300">
-            Faça um pedido no totem virtual à esquerda e veja a comanda cair instantaneamente no KDS da cozinha à direita.
+            {tDynamic('Faça um pedido no totem virtual à esquerda e veja a comanda cair instantaneamente no KDS da cozinha à direita.')}
           </p>
         </div>
       )}
@@ -158,9 +160,9 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                   <div className="w-20 h-20 rounded-full bg-[#FC5B24]/20 flex items-center justify-center text-[#FC5B24] mb-4 animate-bounce">
                     <Utensils size={36} />
                   </div>
-                  <h3 className="font-['Sora'] text-2xl font-black text-white">Toque para pedir</h3>
+                  <h3 className="font-['Sora'] text-2xl font-black text-white">{tDynamic('Toque para pedir')}</h3>
                   <p className="mt-2 text-xs text-gray-400 px-6">
-                    Faça seu pedido com rapidez, personalize seus adicionais e pague na hora.
+                    {tDynamic('Faça seu pedido com rapidez, personalize seus adicionais e pague na hora.')}
                   </p>
 
                   <button
@@ -247,7 +249,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                   {/* Barra Inferior com Total e Botão */}
                   <div className="pt-3 border-t border-gray-800 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] text-gray-400 block">Total do Pedido</span>
+                      <span className="text-[10px] text-gray-400 block">{tDynamic('Total do Pedido')}</span>
                       <span className="text-base font-extrabold text-white">
                         R$ {totalCarrinho.toFixed(2).replace('.', ',')}
                       </span>
@@ -257,7 +259,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                       disabled={carrinho.length === 0}
                       className="rounded-full bg-[#FC5B24] px-5 py-2.5 font-['Sora'] text-xs font-bold text-white shadow-lg shadow-[#FC5B24]/30 hover:brightness-110 disabled:opacity-50"
                     >
-                      Avançar para Pagamento →
+                      {tDynamic('Avançar para Pagamento →')}
                     </button>
                   </div>
                 </div>
@@ -281,7 +283,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                         }`}
                       >
                         <QrCode size={20} />
-                        <span className="text-xs font-bold">Pix Instantâneo</span>
+                        <span className="text-xs font-bold">{tDynamic('Pix Instantâneo')}</span>
                       </button>
                       <button
                         onClick={() => setMetodoPagamento('cartao')}
@@ -304,13 +306,13 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                             <QrCode size={96} className="text-slate-950" />
                           </div>
                           <span className="text-[11px] text-gray-300 font-semibold">
-                            Aponte a câmera do seu banco
+                            {tDynamic('Aponte a câmera do seu banco')}
                           </span>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center py-4">
                           <CreditCard size={40} className="text-blue-400 mb-2 animate-pulse" />
-                          <span className="text-xs text-white font-bold">Insira ou aproxime o cartão</span>
+                          <span className="text-xs text-white font-bold">{tDynamic('Insira ou aproxime o cartão')}</span>
                           <span className="text-[10px] text-gray-400 mt-1">Leitor POS lateral homologado</span>
                         </div>
                       )}
@@ -340,16 +342,16 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                     Pedido #{numeroPedido} enviado!
                   </h3>
                   <p className="mt-1 text-[11px] text-gray-300 px-4">
-                    Sua senha foi impressa na impressora de 80mm do totem e enviada direto para o KDS da cozinha.
+                    {tDynamic('Sua senha foi impressa na impressora de 80mm do totem e enviada direto para o KDS da cozinha.')}
                   </p>
 
                   <div className="mt-4 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-left w-full">
                     <div className="text-[10px] text-emerald-400 font-bold uppercase mb-1">
-                      Status da Operação:
+                      {tDynamic('Status da Operação:')}
                     </div>
                     <div className="text-xs text-white font-bold flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                      Recebido no KDS Kanban da Cozinha!
+                      {tDynamic('Recebido no KDS Kanban da Cozinha!')}
                     </div>
                   </div>
 
@@ -381,8 +383,8 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                   <ChefHat size={20} />
                 </div>
                 <div>
-                  <h4 className="font-['Sora'] text-sm font-bold text-white">MiseOn KDS — Cozinha em Tempo Real</h4>
-                  <span className="text-[11px] text-gray-400">Visão da equipe de produção (Sem papel)</span>
+                  <h4 className="font-['Sora'] text-sm font-bold text-white">{tDynamic('MiseOn KDS — Cozinha em Tempo Real')}</h4>
+                  <span className="text-[11px] text-gray-400">{tDynamic('Visão da equipe de produção (Sem papel)')}</span>
                 </div>
               </div>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
@@ -473,17 +475,17 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
           <div className="mt-6 pt-4 border-t border-gray-800">
             <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FC5B24]/20 to-[#E34A1B]/10 border border-[#FC5B24]/30">
               <h5 className="font-['Sora'] text-sm font-bold text-white">
-                Agora imagine isso acontecendo automaticamente no seu restaurante.
+                {tDynamic('Agora imagine isso acontecendo automaticamente no seu restaurante.')}
               </h5>
               <p className="mt-1 text-xs text-gray-300">
-                Sem filas no balcão, sem erro de anotação e com baixa automática de estoque no KDS.
+                {tDynamic('Sem filas no balcão, sem erro de anotação e com baixa automática de estoque no KDS.')}
               </p>
 
               <button
                 onClick={() => setModalOpen(true)}
                 className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#FC5B24] px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#FC5B24]/30 hover:brightness-110 transition"
               >
-                <span>Quero implementar no meu negócio</span>
+                <span>{tDynamic('Quero implementar no meu negócio')}</span>
                 <ArrowRight size={14} />
               </button>
             </div>

@@ -3,8 +3,10 @@ import { ArrowLeft, Sparkles } from 'lucide-react';
 import SEO from '../../components/SEO';
 import { KioskSimulator } from '../../components/kiosk/KioskSimulator';
 import FooterSEO from '../../components/FooterSEO';
+import { useI18n } from '../../contexts/I18nContext';
 
 export default function DemoKioskPage() {
+  const { tDynamic } = useI18n();
   return (
     <div className="min-h-screen bg-[#070C18] text-white selection:bg-[#FC5B24] selection:text-white font-sans pt-20 pb-12">
       <SEO
@@ -20,10 +22,10 @@ export default function DemoKioskPage() {
             to="/autoatendimento"
             className="inline-flex items-center gap-2 text-xs font-bold text-gray-300 hover:text-white transition"
           >
-            <ArrowLeft size={16} /> Voltar para a Landing Page do Kiosk
+            <ArrowLeft size={16} /> {tDynamic('Voltar para a Landing Page do Kiosk')}
           </Link>
           <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#FC5B24]">
-            <Sparkles size={14} /> DEMONSTRAÇÃO INTERATIVA AO VIVO
+            <Sparkles size={14} /> {tDynamic('DEMONSTRAÇÃO INTERATIVA AO VIVO')}
           </span>
         </div>
       </div>

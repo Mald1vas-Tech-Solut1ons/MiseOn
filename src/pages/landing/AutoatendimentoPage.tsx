@@ -21,8 +21,10 @@ import FooterSEO from '../../components/FooterSEO';
 import { KioskLeadModal } from '../../components/landing/KioskLeadModal';
 import { RoiCalculator } from '../../components/kiosk/RoiCalculator';
 import { KioskSimulator } from '../../components/kiosk/KioskSimulator';
+import { useI18n } from '../../contexts/I18nContext';
 
 export default function AutoatendimentoPage() {
+  const { tDynamic } = useI18n();
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [faqAberto, setFaqAberto] = useState<number | null>(null);
 
@@ -117,7 +119,7 @@ export default function AutoatendimentoPage() {
             onClick={() => setLeadModalOpen(true)}
             className="rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-5 py-2 text-xs font-bold text-white shadow-lg shadow-[#FC5B24]/20 hover:brightness-110 transition flex items-center gap-1.5"
           >
-            <span>Fale com a MiseOn</span>
+            <span>{tDynamic('Fale com a MiseOn')}</span>
             <ArrowRight size={14} />
           </button>
         </div>
@@ -135,16 +137,16 @@ export default function AutoatendimentoPage() {
           </div>
 
           <h1 className="font-['Sora'] text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] max-w-4xl mx-auto text-white">
-            Seu cliente pede sozinho. <br />
+            {tDynamic('Seu cliente pede sozinho.')} <br />
             <span className="bg-gradient-to-r from-[#FF8A5C] via-[#FC5B24] to-[#3B82F6] bg-clip-text text-transparent">
-              Sua cozinha recebe.
+              {tDynamic('Sua cozinha recebe.')}
             </span>{' '}
-            Sua operação controla tudo.
+            {tDynamic('Sua operação controla tudo.')}
           </h1>
 
           <p className="mt-5 text-base sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Autoatendimento profissional para restaurantes, hamburguerias e lanchonetes.{' '}
-            <strong className="text-amber-300 font-bold block sm:inline mt-1 sm:mt-0">É mais acessível do que parece!</strong>
+            {tDynamic('Autoatendimento profissional para restaurantes, hamburguerias e lanchonetes.')}{' '}
+            <strong className="text-amber-300 font-bold block sm:inline mt-1 sm:mt-0">{tDynamic('É mais acessível do que parece!')}</strong>
           </p>
 
           {/* Botões de Ação Hero */}
@@ -153,7 +155,7 @@ export default function AutoatendimentoPage() {
               onClick={() => setLeadModalOpen(true)}
               className="w-full sm:w-auto rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 hover:scale-105 transition flex items-center justify-center gap-2"
             >
-              <span>Não perca tempo — Fale com a MiseOn</span>
+              <span>{tDynamic('Não perca tempo — Fale com a MiseOn')}</span>
               <ArrowRight size={18} />
             </button>
 
@@ -161,13 +163,13 @@ export default function AutoatendimentoPage() {
               href="#demo"
               className="w-full sm:w-auto rounded-full border border-gray-700 bg-white/5 px-7 py-4 font-['Sora'] text-base font-bold text-white hover:bg-white/10 transition flex items-center justify-center gap-2"
             >
-              <span>Testar demonstração ao vivo</span>
+              <span>{tDynamic('Testar demonstração ao vivo')}</span>
               <Touchpad size={18} className="text-[#FC5B24]" />
             </a>
           </div>
 
           <p className="mt-4 text-xs font-semibold text-slate-400">
-            Hardware Bravus Core 21" ("Tecnologia é o nosso core") • Operação MiseOn OS
+            {tDynamic('Hardware Bravus Core 21" ("Tecnologia é o nosso core") • Operação MiseOn OS')}
           </p>
 
           {/* Hero Visual Mockup */}
@@ -181,20 +183,20 @@ export default function AutoatendimentoPage() {
             {/* Benefícios Rápidos em Chips */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-left">
               <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs">
-                <span className="text-[#FC5B24] font-bold block mb-0.5">Pedidos & Pagamentos</span>
-                <span className="text-gray-400 text-[11px]">Pix e Cartão na tela</span>
+                <span className="text-[#FC5B24] font-bold block mb-0.5">{tDynamic('Pedidos & Pagamentos')}</span>
+                <span className="text-gray-400 text-[11px]">{tDynamic('Pix e Cartão na tela')}</span>
               </div>
               <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs">
-                <span className="text-emerald-400 font-bold block mb-0.5">Conectado ao KDS</span>
-                <span className="text-gray-400 text-[11px]">Cozinha sem papel</span>
+                <span className="text-emerald-400 font-bold block mb-0.5">{tDynamic('Conectado ao KDS')}</span>
+                <span className="text-gray-400 text-[11px]">{tDynamic('Cozinha sem papel')}</span>
               </div>
               <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs">
-                <span className="text-blue-400 font-bold block mb-0.5">Estoque & Ficha Técnica</span>
-                <span className="text-gray-400 text-[11px]">Baixa por lote PEPS</span>
+                <span className="text-blue-400 font-bold block mb-0.5">{tDynamic('Estoque & Ficha Técnica')}</span>
+                <span className="text-gray-400 text-[11px]">{tDynamic('Baixa por lote PEPS')}</span>
               </div>
               <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs">
-                <span className="text-purple-400 font-bold block mb-0.5">DRE & Relatórios</span>
-                <span className="text-gray-400 text-[11px]">Gestão em tempo real</span>
+                <span className="text-purple-400 font-bold block mb-0.5">{tDynamic('DRE & Relatórios')}</span>
+                <span className="text-gray-400 text-[11px]">{tDynamic('Gestão em tempo real')}</span>
               </div>
             </div>
           </div>
@@ -205,12 +207,12 @@ export default function AutoatendimentoPage() {
       <section id="acessivel" className="py-20 border-b border-gray-800 bg-gradient-to-b from-[#090E1A] to-[#070C18]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto mb-14">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Quebrando Mitos do Mercado</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">{tDynamic('Quebrando Mitos do Mercado')}</span>
             <h2 className="font-['Sora'] text-3xl sm:text-4xl font-bold text-white mt-2">
               "Achei que totem de autoatendimento custasse R$ 50 mil..."
             </h2>
             <p className="mt-3 text-sm sm:text-base text-gray-300">
-              Esqueça os orçamentos abusivos e as burocracias de empresas tradicionais de hardware. O MiseOn Kiosk foi desenhado para o restaurante real.
+              {tDynamic('Esqueça os orçamentos abusivos e as burocracias de empresas tradicionais de hardware. O MiseOn Kiosk foi desenhado para o restaurante real.')}
             </p>
           </div>
 
@@ -229,7 +231,7 @@ export default function AutoatendimentoPage() {
               <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
                 <TrendingUp size={22} />
               </div>
-              <h3 className="font-['Sora'] text-lg font-bold text-white">O próprio Kiosk se paga</h3>
+              <h3 className="font-['Sora'] text-lg font-bold text-white">{tDynamic('O próprio Kiosk se paga')}</h3>
               <p className="text-xs text-gray-300 leading-relaxed">
                 O totem não esquece de oferecer adicionais (bacon, queijo duplo, bebida grande). Com um aumento médio de 15% no ticket por pedido, o faturamento extra cobre a operação.
               </p>
@@ -239,7 +241,7 @@ export default function AutoatendimentoPage() {
               <div className="w-10 h-10 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
                 <Zap size={22} />
               </div>
-              <h3 className="font-['Sora'] text-lg font-bold text-white">Sem taxas por pedido</h3>
+              <h3 className="font-['Sora'] text-lg font-bold text-white">{tDynamic('Sem taxas por pedido')}</h3>
               <p className="text-xs text-gray-300 leading-relaxed">
                 Ao contrário de agregadores e intermediários que cobram porcentagens sobre cada venda, o MiseOn Kiosk é seu canal direto de atendimento sem comissões por pedido.
               </p>
@@ -252,9 +254,9 @@ export default function AutoatendimentoPage() {
       <section className="py-20 border-b border-gray-800 bg-[#070C18]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto mb-14">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#FC5B24]">Comparativo de Mercado</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#FC5B24]">{tDynamic('Comparativo de Mercado')}</span>
             <h2 className="font-['Sora'] text-3xl sm:text-4xl font-bold text-white mt-2">
-              Por que os totens tradicionais falham no restaurante?
+              {tDynamic('Por que os totens tradicionais falham no restaurante?')}
             </h2>
           </div>
 
@@ -262,25 +264,25 @@ export default function AutoatendimentoPage() {
             {/* Outros Totens */}
             <div className="p-7 rounded-3xl border border-red-500/20 bg-red-500/5">
               <div className="flex items-center gap-2 text-red-400 font-bold text-sm uppercase mb-4">
-                <AlertTriangle size={18} /> Totens Tradicionais do Mercado
+                <AlertTriangle size={18} /> {tDynamic('Totens Tradicionais do Mercado')}
               </div>
 
               <ul className="space-y-3 text-xs text-gray-300">
                 <li className="flex items-start gap-2">
                   <span className="text-red-400 font-bold">✕</span>
-                  <span>São apenas "telas isoladas" que não conversam com a cozinha.</span>
+                  <span>{tDynamic('São apenas "telas isoladas" que não conversam com a cozinha.')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-red-400 font-bold">✕</span>
-                  <span>Exigem redigitação manual do pedido no sistema do caixa.</span>
+                  <span>{tDynamic('Exigem redigitação manual do pedido no sistema do caixa.')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-red-400 font-bold">✕</span>
-                  <span>Não baixam o estoque por lote PEPS nem calculam o CMV.</span>
+                  <span>{tDynamic('Não baixam o estoque por lote PEPS nem calculam o CMV.')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-red-400 font-bold">✕</span>
-                  <span>Contratos pesados e burocráticos direcionados só para grandes redes.</span>
+                  <span>{tDynamic('Contratos pesados e burocráticos direcionados só para grandes redes.')}</span>
                 </li>
               </ul>
             </div>
@@ -292,25 +294,25 @@ export default function AutoatendimentoPage() {
               </span>
 
               <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase mb-4">
-                <ShieldCheck size={18} /> MiseOn Kiosk (Hardware Bravus Core + Software OS)
+                <ShieldCheck size={18} /> {tDynamic('MiseOn Kiosk (Hardware Bravus Core + Software OS)')}
               </div>
 
               <ul className="space-y-3 text-xs text-gray-300">
                 <li className="flex items-start gap-2">
                   <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
-                  <span><strong>Conectado ao KDS Kanban:</strong> O pedido cai direto na tela da cozinha por estação.</span>
+                  <span><strong>{tDynamic('Conectado ao KDS Kanban:')}</strong> {tDynamic('O pedido cai direto na tela da cozinha por estação.')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
-                  <span><strong>Baixa Automática de Estoque:</strong> Cada venda abate a ficha técnica exata.</span>
+                  <span><strong>{tDynamic('Baixa Automática de Estoque:')}</strong> {tDynamic('Cada venda abate a ficha técnica exata.')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
-                  <span><strong>Integração com DRE & Financeiro:</strong> Conciliação instantânea de Pix e Cartão.</span>
+                  <span><strong>{tDynamic('Integração com DRE & Financeiro:')}</strong> {tDynamic('Conciliação instantânea de Pix e Cartão.')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
-                  <span><strong>Mais acessível do que parece:</strong> Estrutura comercial sob medida.</span>
+                  <span><strong>{tDynamic('Mais acessível do que parece:')}</strong> {tDynamic('Estrutura comercial sob medida.')}</span>
                 </li>
               </ul>
             </div>
@@ -326,12 +328,12 @@ export default function AutoatendimentoPage() {
             {/* Lado Esquerdo: Mensagem Parceria */}
             <div className="lg:col-span-6 space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3.5 py-1 text-xs font-bold text-blue-400">
-                <Cpu size={14} /> PARCERIA DE HARDWARE • BRAVUS CORE
+                <Cpu size={14} /> {tDynamic('PARCERIA DE HARDWARE • BRAVUS CORE')}
               </div>
 
               <h2 className="font-['Sora'] text-3xl sm:text-4xl font-bold text-white">
-                Hardware Bravus Core. <br />
-                <span className="text-[#FC5B24]">Software MiseOn OS.</span>
+                {tDynamic('Hardware Bravus Core.')} <br />
+                <span className="text-[#FC5B24]">{tDynamic('Software MiseOn OS.')}</span>
               </h2>
 
               <p className="text-xs font-bold text-blue-300 uppercase tracking-widest">
@@ -339,7 +341,7 @@ export default function AutoatendimentoPage() {
               </p>
 
               <p className="text-sm text-gray-300 leading-relaxed">
-                Em parceria com a <strong>Bravus Core</strong>, referência em engenharia de hardware e totens de autoatendimento no Brasil, conectamos equipamentos de durabilidade industrial a uma plataforma completa de gestão de food service.
+                {tDynamic('Em parceria com a')} <strong>Bravus Core</strong>{tDynamic(', referência em engenharia de hardware e totens de autoatendimento no Brasil, conectamos equipamentos de durabilidade industrial a uma plataforma completa de gestão de food service.')}
               </p>
 
               <div className="p-4 rounded-2xl bg-white/5 border border-white/10 font-mono text-xs text-gray-300">
@@ -359,29 +361,29 @@ export default function AutoatendimentoPage() {
                 />
 
                 <h3 className="font-['Sora'] text-sm font-bold text-white uppercase mb-3">
-                  Ficha Técnica do Totem Bravus Core 21":
+                  {tDynamic('Ficha Técnica do Totem Bravus Core 21":')}
                 </h3>
 
                 <ul className="space-y-2 text-xs text-gray-300">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                    <span><strong>Display 21.5" Touchscreen Capacitivo</strong> Full HD de alta sensibilidade</span>
+                    <span><strong>{tDynamic('Display 21.5" Touchscreen Capacitivo')}</strong> {tDynamic('Full HD de alta sensibilidade')}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                    <span><strong>Impressora Térmica 80mm</strong> com cortador/guilhotina automática</span>
+                    <span><strong>{tDynamic('Impressora Térmica 80mm')}</strong> {tDynamic('com cortador/guilhotina automática')}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                    <span><strong>Scanner 1D/2D QR Code</strong> para vouchers, cupons e leitura rápida</span>
+                    <span><strong>{tDynamic('Scanner 1D/2D QR Code')}</strong> {tDynamic('para vouchers, cupons e leitura rápida')}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                    <span><strong>Gabinete em Aço Carbono</strong> com pintura eletrostática ultra-resistente</span>
+                    <span><strong>{tDynamic('Gabinete em Aço Carbono')}</strong> {tDynamic('com pintura eletrostática ultra-resistente')}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                    <span><strong>Suporte a Pinpad / POS Lateral</strong> homologado para pagamentos</span>
+                    <span><strong>{tDynamic('Suporte a Pinpad / POS Lateral')}</strong> {tDynamic('homologado para pagamentos')}</span>
                   </li>
                 </ul>
               </div>
@@ -408,16 +410,16 @@ export default function AutoatendimentoPage() {
       <section className="py-16 border-b border-gray-800 bg-[#070C18]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 text-center">
           <span className="text-xs font-bold uppercase tracking-wider text-blue-400 block mb-2">
-            PRESENÇA NACIONAL & HOMOLOGAÇÃO
+            {tDynamic('PRESENÇA NACIONAL & HOMOLOGAÇÃO')}
           </span>
           <h3 className="font-['Sora'] text-xl font-bold text-white mb-6">
-            Atendimento comercial e suporte técnico para todo o Brasil
+            {tDynamic('Atendimento comercial e suporte técnico para todo o Brasil')}
           </h3>
 
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-300 max-w-4xl mx-auto">
             <span className="flex items-center gap-1 font-bold text-white"><MapPin size={14} className="text-[#FC5B24]" /> São Paulo (SP)</span>
             <span>•</span>
-            <span className="font-bold text-white">Rio de Janeiro (RJ)</span>
+            <span className="font-bold text-white">{tDynamic('Rio de Janeiro (RJ)')}</span>
             <span>•</span>
             <span className="font-bold text-white">Belo Horizonte (MG)</span>
             <span>•</span>
@@ -443,7 +445,7 @@ export default function AutoatendimentoPage() {
             <ShieldCheck size={28} className="text-amber-400 shrink-0 mt-1" />
             <div>
               <h4 className="font-['Sora'] text-base font-bold text-amber-300">
-                Política Comercial Transparente — MiseOn Kiosk
+                {tDynamic('Política Comercial Transparente — MiseOn Kiosk')}
               </h4>
               <p className="mt-1 text-xs text-amber-200/90 leading-relaxed">
                 O <strong>MiseOn Kiosk</strong> é uma vertical comercial e produto B2B independente (Hardware Bravus Core 21" + Licença Operacional Kiosk). Trata-se de um produto a parte contratado sob proposta comercial sob medida para a estrutura da sua loja, não fazendo parte dos planos de assinatura de software de balcão e delivery padrão (R$ 149,90 / R$ 169,90).
@@ -457,9 +459,9 @@ export default function AutoatendimentoPage() {
       <section id="faq" className="py-20 border-b border-gray-800 bg-[#090E1A]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="text-center mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-purple-400">Esclarecimentos Rápidos</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-purple-400">{tDynamic('Esclarecimentos Rápidos')}</span>
             <h2 className="font-['Sora'] text-3xl font-bold text-white mt-2">
-              Perguntas Frequentes sobre o MiseOn Kiosk
+              {tDynamic('Perguntas Frequentes sobre o MiseOn Kiosk')}
             </h2>
           </div>
 
@@ -493,15 +495,15 @@ export default function AutoatendimentoPage() {
       <section className="py-24 bg-gradient-to-b from-[#0B1120] to-[#070C18]">
         <div className="mx-auto max-w-4xl px-4 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#FC5B24]/40 bg-[#FC5B24]/10 px-4 py-1.5 text-xs font-bold text-[#FC5B24] mb-4">
-            <Sparkles size={14} /> NÃO PERCA TEMPO COM FILAS NO BALCÃO
+            <Sparkles size={14} /> {tDynamic('NÃO PERCA TEMPO COM FILAS NO BALCÃO')}
           </div>
 
           <h2 className="font-['Sora'] text-3xl sm:text-5xl font-extrabold text-white">
-            Pronto para levar o autoatendimento profissional para a sua loja?
+            {tDynamic('Pronto para levar o autoatendimento profissional para a sua loja?')}
           </h2>
 
           <p className="mt-4 text-base text-gray-300 max-w-2xl mx-auto">
-            É mais acessível do que parece. Fale com um de nossos especialistas e receba um projeto sob medida.
+            {tDynamic('É mais acessível do que parece. Fale com um de nossos especialistas e receba um projeto sob medida.')}
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -509,7 +511,7 @@ export default function AutoatendimentoPage() {
               onClick={() => setLeadModalOpen(true)}
               className="w-full sm:w-auto rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-9 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 hover:scale-105 transition flex items-center justify-center gap-2"
             >
-              <span>Não perca tempo — Fale com a MiseOn</span>
+              <span>{tDynamic('Não perca tempo — Fale com a MiseOn')}</span>
               <ArrowRight size={18} />
             </button>
 
@@ -519,12 +521,12 @@ export default function AutoatendimentoPage() {
               rel="noreferrer"
               className="w-full sm:w-auto rounded-full border border-emerald-500/40 bg-emerald-500/10 px-8 py-4 font-['Sora'] text-base font-bold text-emerald-400 hover:bg-emerald-500/20 transition flex items-center justify-center gap-2"
             >
-              <MessageCircle size={18} /> Falar no WhatsApp Comercial
+              <MessageCircle size={18} /> {tDynamic('Falar no WhatsApp Comercial')}
             </a>
           </div>
 
           <p className="mt-6 text-xs text-gray-400">
-            Hardware Bravus Core ("Tecnologia é o nosso core") • Operação MiseOn OS
+            {tDynamic('Hardware Bravus Core ("Tecnologia é o nosso core") • Operação MiseOn OS')}
           </p>
         </div>
       </section>

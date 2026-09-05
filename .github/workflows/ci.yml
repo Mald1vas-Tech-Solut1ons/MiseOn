@@ -15,10 +15,20 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-fund
-      - name: Security Scan (npm audit)
-        run: npm audit --audit-level=critical || true
+      # Portão, não alarme: dependência com vulnerabilidade CRÍTICA bloqueia.
+      # Se precisar de exceção documentada, use `npm audit` com allowlist
+      # (npm overrides) — nunca volte o `|| true`.
+      - name: Auditoria de dependências (npm audit)
+        run: npm audit --audit-level=critical
       - name: Linting
         run: npm run lint
+      # Edge Functions são Deno, fora do ESLint do front. `deno lint` não
+      # precisa de rede — as 41 funções nunca foram lintadas por nada.
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Lint das Edge Functions (Deno)
+        run: deno lint supabase/functions
       - name: Unit Tests
         run: npx vitest run
       - name: Typecheck + build
@@ -29,13 +39,49 @@ jobs:
       # Nao ha passo de deploy aqui, de proposito.
       #
       # Quem publica e a integracao Git da Vercel, que observa os pushes na
-      # main direto. O passo antigo disparava um deploy hook por curl, com o
-      # token em texto claro neste arquivo — enquanto o repositorio foi
-      # publico, qualquer pessoa podia disparar deploys da producao. O hook
-      # foi revogado em 01/09/2026 e o curl passaria a falhar, pintando o CI
-      # de vermelho sem nada de errado no codigo.
-      #
-      # ATENCAO ao que isso significa: a Vercel publica no INSTANTE do push,
-      # sem esperar os passos acima. Este workflow deixou de ser um portao e
-      # virou um alarme — ele avisa que quebrou, mas depois de ja estar no ar.
-      # Push na main vai para o cliente; valide antes de empurrar.
+      # main direto. O deploy via Actions (vercel CLI + token em secret) entra
+      # no Sprint 6 do plano CTO, quando este workflow ja estiver verde em
+      # tudo — ate la, o CI e o fiscal: "push na main vai para o cliente;
+      # valide antes de empurrar".
+
+  # Suíte de integração contra Supabase LOCAL (Docker no runner) — gratuito.
+  # Antes desta job os testes de __tests__/integration eram pulados no CI
+  # (describe.runIf(Boolean(SERVICE_KEY))): RLS, triggers e RPCs nunca foram
+  # exercidos fora da maquina de quem tivesse uma service key a mao.
+  # Colateral desejado: db reset aplica as migrations em banco limpo a cada
+  # PR — o repo volta a reconstruir o banco (ou o CI mostra exatamente onde
+  # para de reconstruir).
+  integration:
+    name: Integração (Supabase local)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: npm ci --no-fund
+      - name: Subir banco local (migrations + seed)
+        run: |
+          supabase start
+          supabase db reset
+          # `status -o env` emite cada VALOR entre aspas duplas e nomes SEM
+          # prefixo (API_URL, SERVICE_ROLE_KEY). Jogar a saída crua no
+          # $GITHUB_ENV colaria as aspas dentro do valor, e mapear
+          # SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY apontaria para variáveis
+          # que nunca existem — a suíte seria pulada em silêncio e o CI
+          # ficaria verde sem testar nada. eval resolve as aspas; os nomes
+          # são repassados com os que os testes realmente leem.
+          eval "$(supabase status -o env)"
+          {
+            echo "SB_API_URL=$API_URL"
+            echo "SB_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+      - name: Testes de integração
+        run: npx vitest run __tests__/integration
+        env:
+          VITE_SUPABASE_URL: ${{ env.SB_API_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SB_SERVICE_ROLE_KEY }}

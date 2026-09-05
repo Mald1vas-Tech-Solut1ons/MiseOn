@@ -1,0 +1,16 @@
+{
+  // Config do Deno usada pelo CI (`deno lint supabase/functions`) e pelo pre-commit.
+  // REGRAS EXCLUÍDAS — cada exclusão é dívida registrada, não aprovação:
+  // - no-explicit-any (107 ocorrências): tipagem gradual nas edge functions.
+  //   Corrigir tudo de uma vez seria churn cosmético em código de pagamento;
+  //   entra no backlog para diluir por sprint, não no portão do CI.
+  // - no-import-prefix (73) e no-unversioned-import (11): imports via URL esm.sh
+  //   são o padrão estabelecido deste runtime (Supabase Edge Functions);
+  //   trocar por `npm:`/versões fixas é migração de build, não correção de defeito.
+  // TODAS as demais regras continuam ativas e são portão do CI.
+  "lint": {
+    "rules": {
+      "exclude": ["no-explicit-any", "no-import-prefix", "no-unversioned-import"]
+    }
+  }
+}

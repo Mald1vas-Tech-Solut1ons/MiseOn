@@ -679,7 +679,7 @@ export default function KDS() {
                 onChange={(evt) => atribuirPedidoAOperador(p.id, evt.target.value || null)}
                 className="bg-white/5 text-xs font-bold text-slate-200 rounded-lg px-2 py-0.5 border border-white/10 focus:outline-none focus:border-orange-500"
               >
-                <option value="" className="bg-[#0F172A] text-slate-400">Sem operador atribuído</option>
+                <option value="" className="bg-[#0F172A] text-slate-400">{tDynamic('Sem operador atribuído')}</option>
                 {operadores.map(op => (
                   <option key={op.user_id} value={op.user_id} className="bg-[#0F172A] text-white">
                     {op.nome}
@@ -883,7 +883,7 @@ export default function KDS() {
               onChange={(e) => setFiltroOperadorVisualizacao(e.target.value)}
               className="bg-white/10 text-xs font-bold text-white rounded-lg px-2 py-1 border border-white/10 focus:outline-none focus:border-orange-500"
             >
-              <option value="TODOS" className="bg-[#0F172A]">Todos os Operadores</option>
+              <option value="TODOS" className="bg-[#0F172A]">{tDynamic('Todos os Operadores')}</option>
               {operadorAtivo && <option value="MEUS" className="bg-[#0F172A] text-orange-400">Apenas Meus Pedidos</option>}
               {operadores.map(o => (
                 <option key={o.user_id} value={o.user_id} className="bg-[#0F172A]">

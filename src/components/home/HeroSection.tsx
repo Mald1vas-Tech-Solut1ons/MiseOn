@@ -47,7 +47,7 @@ export default function HeroSection() {
             style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', fontFamily: "'Sora', sans-serif" }}
             className="group flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-lg font-bold text-white transition-all hover:bg-white/10 sm:w-auto"
           >
-            <Play size={20} className="text-gray-400 group-hover:text-white transition-colors" /> Ver na Prática
+            <Play size={20} className="text-gray-400 group-hover:text-white transition-colors" /> {tDynamic('Ver na Prática')}
           </a>
         </div>
 

@@ -609,7 +609,7 @@ function ImportarCardapioModal({ lojaId }: { lojaId: string }) {
                     <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/15">
                       <Sparkles size={15} className="mt-0.5 shrink-0 text-blue-500" />
                       <p className="text-xs leading-relaxed text-blue-700 dark:text-blue-300">
-                        Os produtos novos já chegam com o <b>Código PDV preenchido</b> — sua tabela De-Para fica pronta automaticamente.
+                        {tDynamic('Os produtos novos já chegam com o')} <b>{tDynamic('Código PDV preenchido')}</b> {tDynamic('— sua tabela De-Para fica pronta automaticamente.')}
                       </p>
                     </div>
                   )}

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { TrendingUp, Clock, ArrowRight, Info, Sparkles } from 'lucide-react';
 import { KioskLeadModal } from '../landing/KioskLeadModal';
+import { useI18n } from '../../contexts/I18nContext';
 
 export function RoiCalculator() {
+  const { tDynamic } = useI18n();
   const [pedidosDia, setPedidosDia] = useState<number>(300);
   const [ticketMedio, setTicketMedio] = useState<number>(35);
   const [pedidosPico, setPedidosPico] = useState<number>(80);
@@ -39,13 +41,13 @@ export function RoiCalculator() {
     <div className="rounded-3xl border border-gray-800 bg-gradient-to-b from-[#0B1120] to-[#070C18] p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
       <div className="mb-8 text-center md:text-left">
         <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-3.5 py-1 text-xs font-bold text-orange-400 mb-3">
-          <Sparkles size={14} /> DIAGNÓSTICO E ROI OPERACIONAL
+          <Sparkles size={14} /> {tDynamic('DIAGNÓSTICO E ROI OPERACIONAL')}
         </div>
         <h3 className="font-['Sora'] text-2xl sm:text-3xl font-bold text-white leading-tight">
           Quanto o autoatendimento pode <span className="text-[#FC5B24]">impactar sua operação?</span>
         </h3>
         <p className="mt-2 text-sm text-gray-400 max-w-2xl">
-          Simule o potencial de crescimento de vendas, redução de filas e aumento de ticket médio com o MiseOn Kiosk.
+          {tDynamic('Simule o potencial de crescimento de vendas, redução de filas e aumento de ticket médio com o MiseOn Kiosk.')}
         </p>
       </div>
 
@@ -56,7 +58,7 @@ export function RoiCalculator() {
           {/* Input 1: Pedidos por dia */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="text-xs font-bold text-gray-200">Pedidos por dia (total)</label>
+              <label className="text-xs font-bold text-gray-200">{tDynamic('Pedidos por dia (total)')}</label>
               <span className="text-sm font-extrabold text-[#FC5B24]">{pedidosDia} pedidos</span>
             </div>
             <input
@@ -78,7 +80,7 @@ export function RoiCalculator() {
           {/* Input 2: Ticket médio R$ */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="text-xs font-bold text-gray-200">Ticket médio atual (R$)</label>
+              <label className="text-xs font-bold text-gray-200">{tDynamic('Ticket médio atual (R$)')}</label>
               <span className="text-sm font-extrabold text-emerald-400">R$ {ticketMedio},00</span>
             </div>
             <input
@@ -100,7 +102,7 @@ export function RoiCalculator() {
           {/* Input 3: Pedidos no horário de pico por hora */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="text-xs font-bold text-gray-200">Pedidos no horário de pico (por hora)</label>
+              <label className="text-xs font-bold text-gray-200">{tDynamic('Pedidos no horário de pico (por hora)')}</label>
               <span className="text-sm font-extrabold text-blue-400">{pedidosPico} pedidos/h</span>
             </div>
             <input
@@ -117,7 +119,7 @@ export function RoiCalculator() {
           {/* Grid 2 colunas para Caixas e Totens */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div>
-              <label className="block text-xs font-bold text-gray-300 mb-1.5">Caixas no balcão</label>
+              <label className="block text-xs font-bold text-gray-300 mb-1.5">{tDynamic('Caixas no balcão')}</label>
               <select
                 value={caixasBalcao}
                 onChange={(e) => setCaixasBalcao(Number(e.target.value))}
@@ -160,7 +162,7 @@ export function RoiCalculator() {
 
             {/* Métrica 1: Pedidos adicionais */}
             <div className="mb-5">
-              <div className="text-xs text-gray-400 mb-1">Pedidos adicionais capturados/mês</div>
+              <div className="text-xs text-gray-400 mb-1">{tDynamic('Pedidos adicionais capturados/mês')}</div>
               <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight flex items-baseline gap-2">
                 <span className="text-emerald-400">+ {pedidosAdicionaisMes.toLocaleString('pt-BR')}</span>
                 <span className="text-xs text-gray-400 font-normal">pedidos/mês</span>
@@ -177,7 +179,7 @@ export function RoiCalculator() {
                 <span className="text-xs text-gray-400 font-normal ml-2">/mês estimativa</span>
               </div>
               <p className="mt-1 text-[11px] text-gray-300">
-                Calculado com base na conversão de adicionais + absorção de fluxo no pico.
+                {tDynamic('Calculado com base na conversão de adicionais + absorção de fluxo no pico.')}
               </p>
             </div>
 
@@ -191,7 +193,7 @@ export function RoiCalculator() {
                   - {reducaoFilaPico}% no tempo de espera da fila no pico
                 </div>
                 <div className="text-xs text-gray-400">
-                  Desafoga o caixa físico e reduz desistências no balcão.
+                  {tDynamic('Desafoga o caixa físico e reduz desistências no balcão.')}
                 </div>
               </div>
             </div>
@@ -202,7 +204,7 @@ export function RoiCalculator() {
               onClick={() => setModalOpen(true)}
               className="w-full rounded-2xl bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] py-4 px-6 font-['Sora'] text-sm font-bold text-white shadow-xl shadow-[#FC5B24]/25 transition hover:scale-[1.02] hover:brightness-110 flex items-center justify-center gap-2"
             >
-              <span>Quero analisar minha operação</span>
+              <span>{tDynamic('Quero analisar minha operação')}</span>
               <ArrowRight size={18} />
             </button>
             <p className="mt-2 text-center text-[10px] text-gray-500 flex items-center justify-center gap-1">

@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { ArrowRight, Sparkles, CheckCircle2, ChevronRight, Layers, Cpu, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { KioskLeadModal } from '../landing/KioskLeadModal';
+import { useI18n } from '../../contexts/I18nContext';
 
 export function KioskHomeSection() {
   const [modalOpen, setModalOpen] = useState(false);
+  const { tDynamic } = useI18n();
 
   return (
     <section className="relative overflow-hidden py-16 sm:py-24 bg-[#070C18] border-y border-gray-800/80">
@@ -20,22 +22,22 @@ export function KioskHomeSection() {
             <Sparkles size={14} /> NOVA VERTICAL COMERCIAL • MISEON KIOSK
           </div>
           <h2 className="font-['Sora'] text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-4xl">
-            Seu cliente pede sozinho. <br className="hidden sm:block" />
-            <span className="text-[#FC5B24]">Sua cozinha recebe.</span> Seu negócio controla tudo.
+            {tDynamic('Seu cliente pede sozinho.')} <br className="hidden sm:block" />
+            <span className="text-[#FC5B24]">{tDynamic('Sua cozinha recebe.')}</span> {tDynamic('Seu negócio controla tudo.')}
           </h2>
           <p className="mt-3 font-['Sora'] text-base sm:text-xl font-bold text-amber-300">
-            Autoatendimento profissional ao seu alcance. É mais acessível do que parece!
+            {tDynamic('Autoatendimento profissional ao seu alcance. É mais acessível do que parece!')}
           </p>
           <p className="mt-2 text-sm text-gray-300 max-w-2xl">
-            Estrutura profissional para restaurantes, lanchonetes e hamburguerias de alto fluxo.
+            {tDynamic('Estrutura profissional para restaurantes, lanchonetes e hamburguerias de alto fluxo.')}
           </p>
           <div className="mt-3 flex items-center justify-center gap-3 text-xs font-bold text-gray-400">
             <span className="flex items-center gap-1.5 text-blue-400">
-              <Cpu size={15} /> Hardware Bravus Core 21" ("Tecnologia é o nosso core")
+              <Cpu size={15} /> {tDynamic('Hardware Bravus Core 21" ("Tecnologia é o nosso core")')}
             </span>
             <span>+</span>
             <span className="flex items-center gap-1.5 text-orange-400">
-              <Layers size={15} /> Operação MiseOn OS
+              <Layers size={15} /> {tDynamic('Operação MiseOn OS')}
             </span>
           </div>
         </div>
@@ -46,12 +48,12 @@ export function KioskHomeSection() {
           {/* Lado Esquerdo: Mensagem e Recursos Conectados */}
           <div className="lg:col-span-6 space-y-5">
             <div className="inline-flex items-center gap-2 rounded-lg bg-white/5 border border-white/10 px-3 py-1 text-xs font-bold text-gray-300">
-              SOLUÇÃO ENTERPRISE BRAVUS CORE + MISEON OS
+              {tDynamic('SOLUÇÃO ENTERPRISE BRAVUS CORE + MISEON OS')}
             </div>
 
             <h3 className="font-['Sora'] text-2xl sm:text-3xl font-bold text-white leading-snug">
-              Não é apenas um totem. <br />
-              <span className="text-gray-400 font-normal">É uma nova estação de vendas para sua operação.</span>
+              {tDynamic('Não é apenas um totem.')} <br />
+              <span className="text-gray-400 font-normal">{tDynamic('É uma nova estação de vendas para sua operação.')}</span>
             </h3>
 
             <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
@@ -62,23 +64,23 @@ export function KioskHomeSection() {
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 flex items-start gap-2">
               <ShieldCheck size={16} className="text-amber-400 shrink-0 mt-0.5" />
               <span>
-                <strong>Produto B2B Independente:</strong> Solução sob proposta comercial personalizada (Hardware Bravus Core + Licença Kiosk), não inclusa nos planos padrão de balcão.
+                <strong>{tDynamic('Produto B2B Independente:')}</strong> {tDynamic('Solução sob proposta comercial personalizada (Hardware Bravus Core + Licença Kiosk), não inclusa nos planos padrão de balcão.')}
               </span>
             </div>
 
             {/* Checklist da Estação Conectada */}
             <div className="grid grid-cols-2 gap-3 pt-1">
               <div className="flex items-center gap-2 text-xs font-bold text-gray-200">
-                <CheckCircle2 size={16} className="text-[#FC5B24]" /> Pedidos & Pagamentos
+                <CheckCircle2 size={16} className="text-[#FC5B24]" /> {tDynamic('Pedidos & Pagamentos')}
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-gray-200">
-                <CheckCircle2 size={16} className="text-[#FC5B24]" /> Conectado ao KDS
+                <CheckCircle2 size={16} className="text-[#FC5B24]" /> {tDynamic('Conectado ao KDS')}
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-gray-200">
-                <CheckCircle2 size={16} className="text-[#FC5B24]" /> Baixa de Estoque PEPS
+                <CheckCircle2 size={16} className="text-[#FC5B24]" /> {tDynamic('Baixa de Estoque PEPS')}
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-gray-200">
-                <CheckCircle2 size={16} className="text-[#FC5B24]" /> DRE e Financeiro Real
+                <CheckCircle2 size={16} className="text-[#FC5B24]" /> {tDynamic('DRE e Financeiro Real')}
               </div>
             </div>
 
@@ -88,7 +90,7 @@ export function KioskHomeSection() {
                 onClick={() => setModalOpen(true)}
                 className="rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-7 py-3.5 font-['Sora'] text-sm font-bold text-white shadow-xl shadow-[#FC5B24]/25 hover:brightness-110 hover:scale-105 transition flex items-center justify-center gap-2"
               >
-                <span>Não perca tempo — Fale com a MiseOn</span>
+                <span>{tDynamic('Não perca tempo — Fale com a MiseOn')}</span>
                 <ArrowRight size={18} />
               </button>
 
@@ -96,7 +98,7 @@ export function KioskHomeSection() {
                 to="/autoatendimento"
                 className="rounded-full border border-gray-700 bg-white/5 px-6 py-3.5 font-['Sora'] text-sm font-bold text-white hover:bg-white/10 transition flex items-center justify-center gap-2"
               >
-                <span>Ver como funciona</span>
+                <span>{tDynamic('Ver como funciona')}</span>
                 <ChevronRight size={18} />
               </Link>
             </div>

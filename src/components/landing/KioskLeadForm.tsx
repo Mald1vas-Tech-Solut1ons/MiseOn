@@ -121,7 +121,7 @@ export function KioskLeadForm({
           >
             <MessageCircle size={18} /> {tDynamic('Falar direto com Especialista no WhatsApp')}
           </a>
-          <p className="text-xs text-gray-400">Atendimento prioritário para operações de alimentação.</p>
+          <p className="text-xs text-gray-400">{tDynamic('Atendimento prioritário para operações de alimentação.')}</p>
         </div>
       </SuccessCelebration>
     );
@@ -141,7 +141,7 @@ export function KioskLeadForm({
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold text-gray-300">WhatsApp (com DDD)*</label>
+        <label className="mb-1 block text-xs font-semibold text-gray-300">{tDynamic('WhatsApp (com DDD)*')}</label>
         <input
           value={whatsapp}
           onChange={(e) => setWhatsapp(e.target.value)}
@@ -152,7 +152,7 @@ export function KioskLeadForm({
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold text-gray-300">Nome do seu Estabelecimento</label>
+        <label className="mb-1 block text-xs font-semibold text-gray-300">{tDynamic('Nome do seu Estabelecimento')}</label>
         <input
           value={empresa}
           onChange={(e) => setEmpresa(e.target.value)}
@@ -172,7 +172,7 @@ export function KioskLeadForm({
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold text-gray-300">Tipo de Negócio*</label>
+        <label className="mb-1 block text-xs font-semibold text-gray-300">{tDynamic('Tipo de Negócio*')}</label>
         <select
           value={segmento}
           onChange={(e) => setSegmento(e.target.value)}
@@ -189,7 +189,7 @@ export function KioskLeadForm({
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold text-gray-300">Quantidade de Unidades</label>
+        <label className="mb-1 block text-xs font-semibold text-gray-300">{tDynamic('Quantidade de Unidades')}</label>
         <select
           value={unidades}
           onChange={(e) => setUnidades(e.target.value)}
@@ -204,7 +204,7 @@ export function KioskLeadForm({
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold text-gray-300">Média de Pedidos/Dia (Aproximado)</label>
+        <label className="mb-1 block text-xs font-semibold text-gray-300">{tDynamic('Média de Pedidos/Dia (Aproximado)')}</label>
         <input
           value={pedidosDia}
           onChange={(e) => setPedidosDia(e.target.value)}
@@ -260,7 +260,7 @@ export function KioskLeadForm({
             <ShieldCheck size={14} className="text-emerald-400" /> Atendimento direto B2B
           </span>
           <span className="flex items-center gap-1">
-            <CheckCircle2 size={14} className="text-emerald-400" /> Sem compromisso
+            <CheckCircle2 size={14} className="text-emerald-400" /> {tDynamic('Sem compromisso')}
           </span>
         </div>
       </div>

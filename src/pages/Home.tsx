@@ -1317,7 +1317,7 @@ export default function Home() {
                       <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
                       <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
                     </div>
-                    <span className="text-[10px] font-mono text-slate-400 tracking-wider">MiseOn • Buffet por Quilo</span>
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider">{tDynamic('MiseOn • Buffet por Quilo')}</span>
                   </div>
                   <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
                     <img

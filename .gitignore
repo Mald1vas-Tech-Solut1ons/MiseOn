@@ -22,6 +22,7 @@ Thumbs.db
 
 # Supabase local
 supabase/.temp/
+supabase/.branches/
 
 # Scripts temporarios e lixo
 scratch/

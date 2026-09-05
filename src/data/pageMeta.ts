@@ -151,4 +151,21 @@ export const PAGE_META: Record<string, PageMeta> = {
     canonicalUrl: `${BASE}/gestao-de-estoque-3d`,
     h1: 'Gestão de Estoque Físico, Fichas Técnicas e Observabilidade 3D em Tempo Real',
   },
+
+  // Vertical MiseOn Kiosk — registradas em scripts/public-routes.mjs no
+  // Sprint 0; sem isto o prerender do build quebrava (rota pública sem metadados).
+  '/autoatendimento': {
+    title: 'Totem de Autoatendimento para Restaurantes | MiseOn Kiosk',
+    description:
+      'Totem de autoatendimento com pedido por QR Code, cardápio digital e pagamento no balcão: menos fila, mais giro e comanda certa para lanchonetes, hamburguerias e food service.',
+    canonicalUrl: `${BASE}/autoatendimento`,
+    h1: 'Autoatendimento que Acelera o Balcão e a Mesa',
+  },
+  '/demo-kiosk': {
+    title: 'Simulador do Totem MiseOn Kiosk | Veja o Pedido em Ação',
+    description:
+      'Experimente o totem de autoatendimento do MiseOn no navegador: monte o pedido como o cliente monta, com cardápio, adicionais e checkout — sem cadastro.',
+    canonicalUrl: `${BASE}/demo-kiosk`,
+    h1: 'Simulador do MiseOn Kiosk',
+  },
 };
