@@ -10,6 +10,7 @@ export function FooterSEO() {
   const { t, tDynamic } = useI18n();
 
   const nichos = [
+    { title: tDynamic('Totem de Autoatendimento (MiseOn Kiosk)'), href: '/autoatendimento' },
     { title: tDynamic('Restaurantes por Quilo (R$/kg)'), href: '/sistema-para-restaurante-por-quilo' },
     { title: tDynamic('Sistema para Hamburgueria'), href: '/sistema-para-hamburgueria' },
     { title: tDynamic('Sistema para Lanchonete'), href: '/sistema-para-lanchonete' },
@@ -18,6 +19,8 @@ export function FooterSEO() {
   ];
 
   const funcionalidades = [
+    { title: tDynamic('Totem de Autoatendimento (Bravus Core)'), href: '/autoatendimento' },
+    { title: tDynamic('Demonstração Interativa do Kiosk'), href: '/demo-kiosk' },
     { title: tDynamic('Integração iFood Nativa'), href: '/integracao-ifood' },
     { title: tDynamic('Cardápio Digital QR Code'), href: '/cardapio-qr-code' },
     { title: tDynamic('Atendimento WhatsApp com IA'), href: '/api-whatsapp-restaurantes' },

@@ -5,7 +5,7 @@ import {
   Menu as MenuIcon, X, UtensilsCrossed, Megaphone, ShoppingBag,
   Mail, ChevronDown, Headset, BarChart3, BadgeCheck, Scale, Quote, CheckCircle2,
   Database, FlaskConical, Eye, AlertTriangle, BookOpen,
-  Globe, PlayCircle, Compass, Tv, Mic, ShoppingCart, Store,
+  Globe, PlayCircle, Compass, Tv, Mic, ShoppingCart, Store, Touchpad,
 } from 'lucide-react';
 import { useState } from 'react';
 import MiseOnLogo from '../components/MiseOnLogo';
@@ -17,6 +17,7 @@ import CalculadoraVazamento from '../components/home/CalculadoraVazamento';
 import DemonstracaoFluxo from '../components/home/DemonstracaoFluxo';
 import TabelaComparativaRealidade from '../components/home/TabelaComparativaRealidade';
 import ShowcaseTelasReais from '../components/home/ShowcaseTelasReais';
+import { KioskHomeSection } from '../components/home/KioskHomeSection';
 import { useI18n } from '../contexts/I18nContext';
 
 const WHATSAPP_CONTATO = '5511919889233';
@@ -501,6 +502,22 @@ export default function Home() {
                   </div>
                   <div className="space-y-1">
                     <Link
+                      to="/autoatendimento"
+                      onClick={() => setSolucoesOpen(false)}
+                      className="flex items-center gap-3 rounded-xl p-2.5 transition hover:bg-orange-500/10 dark:hover:bg-white/10 group"
+                    >
+                      <div className="rounded-lg bg-orange-500/20 p-2 text-orange-400 shrink-0">
+                        <Touchpad size={18} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-900 dark:text-white group-hover:text-orange-400">
+                          {tDynamic('Totem de Autoatendimento')}
+                          <span className="rounded-full bg-[#FC5B24] px-1.5 py-0.5 text-[10px] font-black text-white">NOVO</span>
+                        </div>
+                        <p className="text-xs opacity-95 text-gray-500 dark:text-slate-400">{tDynamic('Hardware Bravus Core + Operação MiseOn')}</p>
+                      </div>
+                    </Link>
+                    <Link
                       to="/sistema-para-restaurante-por-quilo"
                       onClick={() => setSolucoesOpen(false)}
                       className="flex items-center gap-3 rounded-xl p-2.5 transition hover:bg-emerald-500/10 dark:hover:bg-white/10 group"
@@ -799,6 +816,7 @@ export default function Home() {
             <div className="flex flex-col gap-1">
               <div className="px-3 py-1 text-xs opacity-95 font-black uppercase text-slate-400">{t('nav.solucoes')}</div>
               {[
+                { to: '/autoatendimento', icone: <Touchpad size={16} />, rotulo: 'Totem de Autoatendimento (Kiosk)', novo: true },
                 { to: '/sistema-para-restaurante-por-quilo', icone: <Scale size={16} />, rotulo: 'Restaurantes por Quilo', novo: true },
                 { to: '/sistema-para-hamburgueria', icone: <ChefHat size={16} />, rotulo: 'Hamburguerias' },
                 { to: '/sistema-para-pizzaria', icone: <Boxes size={16} />, rotulo: 'Pizzarias' },
@@ -953,6 +971,9 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* ══════════ MISEON KIOSK (NOVA VERTICAL COMERCIAL • HARDWARE BRAVUS) ══════════ */}
+      <KioskHomeSection />
 
       {/* ══════════ 3. FAIXA DE CREDIBILIDADE ══════════ */}
       <section className="border-y border-white/10 bg-[#0B1120] py-8 relative overflow-hidden">

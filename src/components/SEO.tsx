@@ -11,6 +11,9 @@ export interface SEOProps {
   schemaJson?: Record<string, any> | Record<string, any>[];
   metaPixelId?: string | null;
   ga4MeasurementId?: string | null;
+  geoRegion?: string;
+  geoPlacename?: string;
+  geoPosition?: string;
 }
 
 export function SEO({
@@ -23,6 +26,9 @@ export function SEO({
   schemaJson,
   metaPixelId,
   ga4MeasurementId,
+  geoRegion,
+  geoPlacename,
+  geoPosition,
 }: SEOProps) {
   const [consentState, setConsentState] = useState(() => ({
     analiticos: temPermissao('analiticos'),
@@ -56,10 +62,20 @@ export function SEO({
       element.setAttribute('content', content);
     };
 
-    // 2. Meta Tags Padrão
+    // 2. Meta Tags Padrão & Geo-SEO
     setMetaTag('name', 'description', description);
     if (keywords) {
       setMetaTag('name', 'keywords', keywords);
+    }
+    if (geoRegion) {
+      setMetaTag('name', 'geo.region', geoRegion);
+    }
+    if (geoPlacename) {
+      setMetaTag('name', 'geo.placename', geoPlacename);
+    }
+    if (geoPosition) {
+      setMetaTag('name', 'geo.position', geoPosition);
+      setMetaTag('name', 'ICBM', geoPosition.replace(';', ', '));
     }
 
     // 3. OpenGraph / Redes Sociais / WhatsApp Previews
@@ -136,7 +152,7 @@ export function SEO({
         document.head.appendChild(ga4ConfigScript);
       }
     }
-  }, [title, description, keywords, canonicalUrl, ogType, ogImage, schemaJson, metaPixelId, ga4MeasurementId, consentState]);
+  }, [title, description, keywords, canonicalUrl, ogType, ogImage, schemaJson, metaPixelId, ga4MeasurementId, consentState, geoRegion, geoPlacename, geoPosition]);
 
   return null;
 }

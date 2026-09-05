@@ -31,6 +31,8 @@ const Blog             = lazy(() => import('./pages/Blog'));
 const BlogPost         = lazy(() => import('./pages/BlogPost'));
 const PainelTV         = lazy(() => import('./pages/PainelTV'));
 const MarketingStrategyPage = lazy(() => import('./pages/landing/MarketingStrategyPage'));
+const AutoatendimentoPage = lazy(() => import('./pages/landing/AutoatendimentoPage'));
+const DemoKioskPage       = lazy(() => import('./pages/landing/DemoKioskPage'));
 
 // ── Lazy: ADMIN_LAYOUT (único layout compartilhado — carrega rápido) ─────────
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -207,6 +209,11 @@ export default function App() {
                 <Route path="/demonstracao"  element={<Videos />} />
                 <Route path="/pedido/:id"    element={<AcompanharPedido />} />
                 
+                {/* ── Páginas do MiseOn Kiosk (Autoatendimento & Demo) ── */}
+                <Route path="/autoatendimento"           element={<AutoatendimentoPage />} />
+                <Route path="/totem"                     element={<Navigate to="/autoatendimento" replace />} />
+                <Route path="/demo-kiosk"                element={<DemoKioskPage />} />
+
                 {/* ── Páginas de Nicho & Funcionalidade (SEO Programático) ── */}
                 <Route path="/sistema-para-hamburgueria" element={<NicheLandingPage forcedSlug="sistema-para-hamburgueria" />} />
                 <Route path="/sistema-para-lanchonete"   element={<NicheLandingPage forcedSlug="sistema-para-lanchonete" />} />
