@@ -24,6 +24,10 @@
  *     pela ENTRADA do destino.
  *  6. vw_divergencia_saldo_lotes: saldo físico incompatível com saldo de
  *     lotes é DETECTÁVEL — critério de aceitação do sprint.
+ *  7. O GATILHO do ledger (trg_lancar_custo_estoque) dispara em TODO consumo
+ *     definitivo (S1-D): PERDA sem pedido vira CMV — antes o WHEN filtrava
+ *     só BAIXA_VENDA com pedido_id e o descarte por validade sumia do DRE.
+ *     O caminho clássico da venda (BAIXA_VENDA com pedido) continua gerando.
  *
  * Como os demais arquivos desta suíte: roda só com SUPABASE_SERVICE_ROLE_KEY
  * (CI sobe o Supabase local). A transformação precisa de usuário logado
@@ -47,6 +51,8 @@ let lojaId: string;
 let usuarioId: string;
 
 const SUFIXO = Date.now().toString(36);
+/** Descartável e única por execução — só serve para o signIn do usuário de teste. */
+const SENHA_TESTE = `s1c-${SUFIXO}`;
 const insumoIds: string[] = [];
 const pedidosCriados: string[] = [];
 
@@ -164,7 +170,7 @@ beforeAll(async () => {
   const email = `s1c-${SUFIXO}@miseon.teste`;
   const { data: user, error: errUser } = await db.auth.admin.createUser({
     email,
-    password: 's1c-teste-senha',
+    password: SENHA_TESTE,
     email_confirm: true,
   });
   if (errUser || !user.user) throw new Error(`createUser falhou: ${errUser?.message}`);
@@ -176,7 +182,7 @@ beforeAll(async () => {
   if (errVinculo) throw new Error(`usuarios_loja falhou: ${errVinculo.message}`);
 
   dbUsuario = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
-  const { error: errSignIn } = await dbUsuario.auth.signInWithPassword({ email, password: 's1c-teste-senha' });
+  const { error: errSignIn } = await dbUsuario.auth.signInWithPassword({ email, password: SENHA_TESTE });
   if (errSignIn) throw new Error(`signIn falhou: ${errSignIn.message}`);
 });
 
@@ -405,6 +411,13 @@ describe.runIf(isConfigured)('Estorno devolve o lote, não só o saldo (Sprint 1
       pedido_id: pedido.id,
     });
     expect(await saldoDe(g.id)).toBe(2);
+
+    // O caminho clássico da venda continua passando pelo gatilho novo (S1-D):
+    // a baixa custeada de 8,00 gerou o CMV dela no ledger, referenciando o pedido.
+    const cmvDaBaixa = (await lancamentosCmvDaLoja()).find(
+      (l: any) => l.referencia_id === pedido.id && Number(l.valor) === 8,
+    );
+    expect(cmvDaBaixa).toBeTruthy();
 
     const cmvAntes = await lancamentosCmvDaLoja();
     const { error: errCancel } = await db
