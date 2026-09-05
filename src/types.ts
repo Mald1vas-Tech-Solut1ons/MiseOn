@@ -9,16 +9,26 @@ export type StatusRota = 'PENDENTE' | 'EM_ANDAMENTO' | 'FINALIZADA';
 export type EntregaModo = 'BAIRRO' | 'DISTANCIA' | 'HIBRIDO';
 // Fluxo passa-bastão (docs/PLANO-FLUXO-PEDIDOS.md): estação de preparo do
 // produto e o bastão atual do pedido entre balcão e cozinha.
-export type EstacaoPreparo = 'COZINHA' | 'BAR' | 'BALCAO' | 'DIRETO';
+// O CHECK do banco (20260720100000) admite só COZINHA | DIRETO — o tipo não
+// pode prometer mais que o banco devolve.
+export type EstacaoPreparo = 'COZINHA' | 'DIRETO';
 export type EstacaoAtual = 'BALCAO' | 'COZINHA';
 export type TipoVenda = 'UNITARIO' | 'POR_PESO';
+
+/**
+ * Estação de uma etapa do KDS (lojas.kds_etapas). null/ausente = GLOBAL
+ * (aparece em toda visão do KDS); 'COZINHA'/'BAR' = coluna exclusiva dessa
+ * visão. O pipeline do pedido continua único — a estação só filtra quais
+ * colunas cada visão mostra (20260905150000).
+ */
+export type EstacaoEtapaKDS = 'COZINHA' | 'BAR';
 
 export interface EtapaKDS {
   id: string;
   nome: string;
   cor: string;
   ordem: number;
-  estacaoPreparo?: string;
+  estacao?: EstacaoEtapaKDS | null;
 }
 
 export interface LeadCadastro {
