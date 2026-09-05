@@ -105,14 +105,16 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
     if (!confirm(`Descartar o lote de ${preparo.nome} produzido em ${dataHoraBr(lote.produzido_em)}?\n\nSerão baixados ${qtdDescartar} ${preparo.unidade_medida} do estoque como perda.`)) return;
     try {
       if (qtdDescartar > 0) {
-        await supabase.from('movimentacoes_estoque').insert({
-          loja_id: lojaId,
-          insumo_id: lote.preparo_id,
-          tipo: 'PERDA',
-          quantidade: -qtdDescartar,
-          motivo: `Descarte por validade — lote de ${dataHoraBr(lote.produzido_em)}`,
+        // Uma chamada transacional: a RPC grava a PERDA (custeada pelo PEPS
+        // dos lotes, sinal negativo) e o saldo juntos (Sprint 1 — eram 2
+        // chamadas soltas).
+        const { error: movError } = await supabase.rpc('fn_movimentar_estoque', {
+          p_insumo_id: lote.preparo_id,
+          p_tipo: 'PERDA',
+          p_quantidade: -qtdDescartar,
+          p_motivo: `Descarte por validade — lote de ${dataHoraBr(lote.produzido_em)}`,
         });
-        await supabase.from('insumos').update({ quantidade_atual: Number(preparo.quantidade_atual) - qtdDescartar }).eq('id', lote.preparo_id);
+        if (movError) throw movError;
       }
       await supabase.from('producoes_preparo').update({
         status: 'DESCARTADO',
