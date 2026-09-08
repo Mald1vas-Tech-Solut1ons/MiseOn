@@ -36,7 +36,8 @@
  * afterAll.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { it, expect, beforeAll, afterAll } from 'vitest';
+import { gated } from './gate';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -207,7 +208,7 @@ afterAll(async () => {
   await db.auth.admin.deleteUser(usuarioId);
 });
 
-describe.runIf(isConfigured)('Estoque — RPC transacional (Sprint 1)', () => {
+gated(isConfigured, 'Estoque — RPC transacional (Sprint 1)', () => {
   it('entrada cria movimentação, lote PEPS e saldo coerentes, na data da compra', async () => {
     const a = await criarInsumo('Entrada A');
 
@@ -280,7 +281,7 @@ describe.runIf(isConfigured)('Estoque — RPC transacional (Sprint 1)', () => {
   });
 });
 
-describe.runIf(isConfigured)('CMV é consumo — nunca entrada (Sprint 1)', () => {
+gated(isConfigured, 'CMV é consumo — nunca entrada (Sprint 1)', () => {
   it('entrada com custo NÃO gera lançamento de CMV (regressão do blocker da compra)', async () => {
     const antes = await lancamentosCmvDaLoja();
     const d = await criarInsumo('Compra D');
@@ -330,7 +331,7 @@ describe.runIf(isConfigured)('CMV é consumo — nunca entrada (Sprint 1)', () =
   });
 });
 
-describe.runIf(isConfigured)('Transformação conserva valor (Sprint 1)', () => {
+gated(isConfigured, 'Transformação conserva valor (Sprint 1)', () => {
   it('custo consumido da origem = custo distribuído entre os destinos', async () => {
     const origem = await criarInsumo('Desmonte Origem');
     const carne = await criarInsumo('Desmonte Carne');
@@ -373,7 +374,7 @@ describe.runIf(isConfigured)('Transformação conserva valor (Sprint 1)', () => 
   });
 });
 
-describe.runIf(isConfigured)('Estorno devolve o lote, não só o saldo (Sprint 1)', () => {
+gated(isConfigured, 'Estorno devolve o lote, não só o saldo (Sprint 1)', () => {
   it('cancelamento recria o lote com o custo original e sem CMV novo', async () => {
     const g = await criarInsumo('Estorno G');
     await entrada(g.id, 6, 12, '2026-01-15T12:00:00.000Z'); // 2,00/un
@@ -447,7 +448,7 @@ describe.runIf(isConfigured)('Estorno devolve o lote, não só o saldo (Sprint 1
   });
 });
 
-describe.runIf(isConfigured)('Divergência saldo × lotes é DETECTÁVEL (critério S1-C)', () => {
+gated(isConfigured, 'Divergência saldo × lotes é DETECTÁVEL (critério S1-C)', () => {
   it('cache de saldo sujo aparece na view e some quando volta a bater', async () => {
     const h = await criarInsumo('Divergencia H');
     await entrada(h.id, 10, 25, '2026-01-15T12:00:00.000Z');

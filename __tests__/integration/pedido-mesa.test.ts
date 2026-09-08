@@ -19,7 +19,8 @@
  * limpa tudo que criou no afterAll.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { it, expect, beforeAll, afterAll } from 'vitest';
+import { gated } from './gate';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -87,7 +88,7 @@ afterAll(async () => {
   await db.from('produtos').delete().eq('id', produtoId);
 });
 
-describe.runIf(isConfigured)('Pedido de mesa via QR → comanda (Sprint 1)', () => {
+gated(isConfigured, 'Pedido de mesa via QR → comanda (Sprint 1)', () => {
   it('pedido da RPC nasce vinculado à comanda ABERTA da mesa', async () => {
     const { pedido_id } = await chamarRpcMesa([{ produto_id: produtoId, quantidade: 2 }]);
 

@@ -20,6 +20,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { gated } from './gate';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // ─── Setup do cliente de testes (usa service-role para bypass de RLS) ─────────
@@ -104,7 +105,7 @@ afterAll(async () => {
 
 // ─── Testes ──────────────────────────────────────────────────────────────────
 
-describe.runIf(isConfigured)('Ledger Financeiro — Dupla Entrada', () => {
+gated(isConfigured, 'Ledger Financeiro — Dupla Entrada', () => {
 
   describe('Receita de pedido próprio (não-iFood)', () => {
     it('deve gerar 1 lançamento de RECEITA ao finalizar pedido', async () => {
@@ -300,7 +301,7 @@ describe.runIf(isConfigured)('Ledger Financeiro — Dupla Entrada', () => {
   });
 });
 
-describe.runIf(isConfigured)('Sequência de Pedidos — Anti Race Condition', () => {
+gated(isConfigured, 'Sequência de Pedidos — Anti Race Condition', () => {
   it('deve gerar 10 números únicos para pedidos simultâneos', async () => {
     const N = 10;
     const inserts = Array.from({ length: N }, () =>
@@ -315,7 +316,7 @@ describe.runIf(isConfigured)('Sequência de Pedidos — Anti Race Condition', ()
   });
 });
 
-describe.runIf(isConfigured)('Integridade do Plano de Contas', () => {
+gated(isConfigured, 'Integridade do Plano de Contas', () => {
   it('deve existir pelo menos 8 contas padrão para cada loja', async () => {
     const { data, error } = await db
       .from('contas')

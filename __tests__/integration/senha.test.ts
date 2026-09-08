@@ -15,7 +15,8 @@
  * afterAll. Pulado quando falta SUPABASE_SERVICE_ROLE_KEY.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { it, expect, beforeAll, afterAll } from 'vitest';
+import { gated } from './gate';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -77,7 +78,7 @@ afterAll(async () => {
   }
 });
 
-describe.runIf(isConfigured)('Senha de balcão × número do pedido', () => {
+gated(isConfigured, 'Senha de balcão × número do pedido', () => {
   it('dá senha para balcão e mesa, e NÃO dá para delivery', async () => {
     const balcao = await criarPedido('RETIRADA_BALCAO');
     const mesa = await criarPedido('SALAO');
