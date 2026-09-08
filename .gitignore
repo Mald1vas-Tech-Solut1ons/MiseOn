@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 dist/
 dev-dist/
 
@@ -60,3 +60,6 @@ scripts/*.cjs
 scripts/*.ps1
 scripts/_*.mjs
 scripts/emitir-nfse-*.mjs
+.smoke-golive-s1/
+*.diff
+.claude/
