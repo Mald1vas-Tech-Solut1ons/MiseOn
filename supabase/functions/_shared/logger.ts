@@ -25,15 +25,30 @@ export class EdgeLogger {
 
   private log(level: LogLevel, payload: EdgeLogPayload) {
     const timestamp = new Date().toISOString();
-    
+
+    // Qualquer chave fora do contrato entra no contexto em vez de sumir.
+    //
+    // POR QUE ISTO EXISTE: quase todo chamador escreve
+    // `log.error('...', undefined, { response: charge })` — `response` não é
+    // `context`, então o spread jogava a chave fora e o log saía com
+    // `context: {}`. Foi assim que a recusa de cartão da Efí (08/09) ficou
+    // registrada como "Efí recusou o cartão" e MAIS NADA: a resposta do
+    // provedor, única coisa capaz de explicar a recusa, era descartada na
+    // hora de gravar. O mesmo valia para Pix, iFood e assinatura — todos os
+    // caminhos de dinheiro logando cego.
+    //
+    // O typecheck não pegava porque `npm run typecheck` cobre src/, e as
+    // edge functions rodam em Deno, fora dele.
+    const { message, tenant_id, req_id, context, error, ...resto } = payload as EdgeLogPayload & Record<string, unknown>;
+
     const logEntry = {
       timestamp,
       level,
-      message: payload.message,
-      tenant_id: payload.tenant_id ?? this.baseContext.tenant_id,
-      req_id: payload.req_id ?? this.baseContext.req_id,
-      context: { ...this.baseContext.context, ...payload.context },
-      error: payload.error ? this.formatError(payload.error) : undefined,
+      message,
+      tenant_id: tenant_id ?? this.baseContext.tenant_id,
+      req_id: req_id ?? this.baseContext.req_id,
+      context: { ...this.baseContext.context, ...context, ...resto },
+      error: error ? this.formatError(error) : undefined,
     };
 
     // Imprimir o objeto como string JSON puro garante que o Supabase/Logflare extraia os campos corretamente

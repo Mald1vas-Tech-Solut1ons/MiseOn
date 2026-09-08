@@ -13,9 +13,28 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-const EFI_COB_URL = Deno.env.get('EFI_SANDBOX') === 'true'
-  ? 'https://cobrancas-h.api.efipay.com.br'
-  : 'https://cobrancas.api.efipay.com.br';
+const EFI_COB_HOMOLOG = 'https://cobrancas-h.api.efipay.com.br';
+const EFI_COB_PRODUCAO = 'https://cobrancas.api.efipay.com.br';
+
+/**
+ * Host da API de Cobrancas (cartao).
+ *
+ * O BANCO manda. Antes isto era uma const de modulo lida so de
+ * `EFI_SANDBOX`: bastava a secret ficar 'true' para TODA cobranca de cartao
+ * sair para a homologacao — onde a conta tem limite operacional simbolico e
+ * o banco real nunca ve a transacao. O sintoma e exatamente
+ * "o valor da emissao e superior ao limite operacional da conta" numa
+ * cobranca de poucos reais, com o Pix (que nao usa esta variavel) recebendo
+ * normalmente na mesma conta.
+ *
+ * `configuracoes_fiscais_plataforma.efi_sandbox` ja e a fonte de verdade do
+ * ambiente desde 20260902220212; a env vira fallback para quando a linha de
+ * configuracao ainda nao existe.
+ */
+function urlCobrancas(sandboxDoBanco: boolean | null | undefined): string {
+  const sandbox = sandboxDoBanco ?? (Deno.env.get('EFI_SANDBOX') === 'true');
+  return sandbox ? EFI_COB_HOMOLOG : EFI_COB_PRODUCAO;
+}
 
 // CORS: sem isto o navegador bloqueia a chamada do checkout antes de chegar na Efí.
 const cors = {
@@ -37,9 +56,9 @@ function envFirst(...names: string[]): string {
   throw new Error(`Secret ausente: informe um destes nomes -> ${names.join(', ')}`);
 }
 
-async function getToken(clientId: string, clientSecret: string): Promise<string> {
+async function getToken(baseUrl: string, clientId: string, clientSecret: string): Promise<string> {
   const auth = btoa(`${clientId}:${clientSecret}`);
-  const res = await fetch(`${EFI_COB_URL}/v1/authorize`, {
+  const res = await fetch(`${baseUrl}/v1/authorize`, {
     method: 'POST',
     headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ grant_type: 'client_credentials' }),
@@ -117,9 +136,11 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
     // sem redeploy e sem depender de variavel de build da Vercel.
     const { data: cfgPlataforma } = await supabaseAdmin
       .from('configuracoes_fiscais_plataforma')
-      .select('efi_payee_code, efi_payee_code_antecipado')
+      .select('efi_payee_code, efi_payee_code_antecipado, efi_sandbox')
       .eq('id', true)
       .maybeSingle();
+
+    const efiCobUrl = urlCobrancas((cfgPlataforma as any)?.efi_sandbox);
 
     const payeeAntecipadoCfg = (Deno.env.get('EFI_ANTECIPADO_PAYEE_CODE')
       ?? (cfgPlataforma as any)?.efi_payee_code_antecipado ?? '')?.trim();
@@ -141,17 +162,59 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
     if (avisoModalidade) reqLogger.warn(avisoModalidade, { pedido_id });
 
     const token = usarAntecipado
-      ? await getToken(Deno.env.get('EFI_ANTECIPADO_CLIENT_ID')!.trim(), Deno.env.get('EFI_ANTECIPADO_CLIENT_SECRET')!.trim())
+      ? await getToken(efiCobUrl, Deno.env.get('EFI_ANTECIPADO_CLIENT_ID')!.trim(), Deno.env.get('EFI_ANTECIPADO_CLIENT_SECRET')!.trim())
       : await getToken(
+          efiCobUrl,
           envFirst('EFI_COBRANCAS_CLIENT_ID', 'EFI_CLIENT_ID'),
           envFirst('EFI_COBRANCAS_CLIENT_SECRET', 'EFI_CLIENT_SECRET'),
         );
 
     const payeeCode = (pedido as any).lojas?.efi_payee_code?.trim();
-    const payeePlataforma = (usarAntecipado
-      ? payeeAntecipadoCfg
-      : (Deno.env.get('EFI_PLATFORM_PAYEE_CODE') ?? (cfgPlataforma as any)?.efi_payee_code ?? ''))?.trim();
-    const usarSplit = !!payeeCode && payeeCode.length > 5 && payeeCode !== payeePlataforma;
+
+    // NUNCA repassar para a propria conta que processa.
+    //
+    // O split so faz sentido quando o recebedor e OUTRA conta. Se a loja
+    // estiver cadastrada com o mesmo payee_code da plataforma (que e o caso
+    // quando o dono da plataforma tambem e o lojista), mandar
+    // `marketplace.repasses` de 100% faz a Efi validar o limite operacional
+    // do "recebedor" — e recusar a cobranca ANTES de falar com o banco. Foi
+    // o que aconteceu em 08/09: cartao recusado com "valor da emissao
+    // superior ao limite operacional da conta" numa cobranca de R$ 4,75,
+    // enquanto o Pix na mesma conta funcionava.
+    //
+    // Antes a comparacao era contra UMA origem so (env, com o banco de
+    // fallback). Env desatualizada vencia o banco e reabria a auto-transferencia.
+    // Agora qualquer payee conhecido da plataforma — env ou banco, padrao ou
+    // antecipado — desliga o split.
+    const payeesDaPlataforma = new Set(
+      [
+        Deno.env.get('EFI_PLATFORM_PAYEE_CODE'),
+        (cfgPlataforma as any)?.efi_payee_code,
+        Deno.env.get('EFI_ANTECIPADO_PAYEE_CODE'),
+        (cfgPlataforma as any)?.efi_payee_code_antecipado,
+      ]
+        .map((v) => String(v ?? '').trim().toLowerCase())
+        .filter((v) => v.length > 0),
+    );
+
+    const usarSplit = !!payeeCode
+      && payeeCode.length > 5
+      && !payeesDaPlataforma.has(payeeCode.toLowerCase());
+
+    reqLogger.info('Cobranca de cartao montada', {
+      context: {
+        pedido_id,
+        valor_centavos: valorCobrancaCentavos,
+        usar_split: usarSplit,
+        payee_loja_definido: !!payeeCode,
+        payee_e_da_plataforma: !!payeeCode && payeesDaPlataforma.has(payeeCode.toLowerCase()),
+        modalidade: usarAntecipado ? 'antecipado' : 'padrao',
+        // Sem isto nao da para saber se a cobranca foi para producao ou
+        // homologacao — foi o que escondeu a causa da recusa de 08/09.
+        host_efi: efiCobUrl,
+        ambiente: (cfgPlataforma as any)?.efi_sandbox === true ? 'homologacao' : 'producao',
+      },
+    });
     const marketplace = usarSplit
       ? { marketplace: { repasses: [{ payee_code: payeeCode, percentage: 10000 }] } }
       : {};
@@ -190,7 +253,7 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       },
     };
 
-    const res = await fetch(`${EFI_COB_URL}/v1/charge/one-step`, {
+    const res = await fetch(`${efiCobUrl}/v1/charge/one-step`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(bodyToSend),
@@ -198,13 +261,34 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
     const charge = await res.json();
     const data = charge?.data;
     if (!data?.charge_id) {
-      reqLogger.error('Efí recusou o cartão', undefined, { response: charge });
+      // A resposta do provedor É o diagnóstico. Vai em `context` (o logger
+      // descartava chave fora do contrato — ver _shared/logger.ts).
+      reqLogger.error('Efí recusou o cartão', undefined, {
+        context: { pedido_id, http_status: res.status, efi: charge },
+      });
       const ed = charge?.error_description;
       let motivo = typeof ed === 'string'
         ? ed
         : (ed?.message ?? charge?.message ?? (Array.isArray(charge?.errors) ? charge.errors[0]?.message : null) ?? 'Cobrança não autorizada');
       if (ed && typeof ed === 'object' && ed.property) motivo = `${motivo} (${ed.property})`;
-      return json({ aprovado: false, error: String(motivo), detail: charge }, { status: 200 });
+
+      // Erro de CONTA do recebedor nao e problema do comprador: ele nao tem
+      // como resolver "limite operacional da conta" nem falar com o suporte
+      // do adquirente, e mostrar isso a ele expoe um problema interno do
+      // lojista no meio do checkout. Para o comprador vale a saida pratica;
+      // o texto do provedor continua no motivo_tecnico e no log, que e onde
+      // o lojista (e eu) precisa dele.
+      const ehProblemaDaConta = /limite operacional|recebedor|payee|marketplace|conta do/i.test(String(motivo));
+      const mensagemCliente = ehProblemaDaConta
+        ? 'Não conseguimos processar o cartão agora. Você pode pagar com Pix ou escolher outra forma de pagamento.'
+        : String(motivo);
+
+      return json({
+        aprovado: false,
+        error: mensagemCliente,
+        motivo_tecnico: String(motivo),
+        detail: charge,
+      }, { status: 200 });
     }
 
     const aprovado = ['approved', 'paid'].includes(String(data.status));
