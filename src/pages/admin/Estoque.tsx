@@ -374,9 +374,13 @@ export default function Estoque() {
        const { data, error } = await supabase.from('insumos').insert(payload).select('id').single();
        if (error) return avisarErroInsumo(error, nomeLimpo);
        if (data && estoqueFinal > 0) {
-         await supabase.from('movimentacoes_estoque').insert({
-           loja_id: lojaId, insumo_id: data.id, tipo: 'ENTRADA', quantidade: estoqueFinal, motivo: 'Saldo inicial',
+         // Uma chamada transacional: a RPC grava a movimentação e o saldo
+         // juntos (Sprint 1 — antes eram 2 inserts soltos e a falha de um
+         // deixava o outro divergir).
+         const { error: errSaldo } = await supabase.rpc('fn_movimentar_estoque', {
+           p_insumo_id: data.id, p_tipo: 'ENTRADA', p_quantidade: estoqueFinal, p_motivo: 'Saldo inicial',
          });
+         if (errSaldo) alert(`Insumo criado, mas o saldo inicial falhou: ${errSaldo.message}`);
        }
     }
 
@@ -442,33 +446,34 @@ export default function Estoque() {
     if (!(qtd > 0)) return;
     const base = entrada.insumo.unidade_medida;
 
-    const patch: Record<string, unknown> = {
-      quantidade_atual: Number(entrada.insumo.quantidade_atual) + qtd,
-    };
     // Atalho aprendido: da próxima vez "cabeça" já aparece na lista do insumo.
     if (unidadeAvulsa && entrada.lembrarConversao) {
       const atual = entrada.insumo.detalhes_rendimento;
-      patch.detalhes_rendimento = {
-        regras: atual?.regras ?? [],
-        equivalencias: [
-          ...(atual?.equivalencias ?? []).filter(e => e.unidade !== entrada.unidade),
-          { unidade: entrada.unidade, rende_qtd: fatorEntrada, rende_unidade: base },
-        ],
-      };
+      await supabase.from('insumos').update({
+        detalhes_rendimento: {
+          regras: atual?.regras ?? [],
+          equivalencias: [
+            ...(atual?.equivalencias ?? []).filter(e => e.unidade !== entrada.unidade),
+            { unidade: entrada.unidade, rende_qtd: fatorEntrada, rende_unidade: base },
+          ],
+        },
+      }).eq('id', entrada.insumo.id);
     }
-    await supabase.from('insumos').update(patch).eq('id', entrada.insumo.id);
-    await supabase.from('movimentacoes_estoque').insert({
-      loja_id: lojaId,
-      insumo_id: entrada.insumo.id,
-      tipo: 'ENTRADA',
-      quantidade: qtd,
-      custo_total: Number(entrada.custo || 0),
+    // Uma chamada transacional: a RPC grava a movimentação (que abre o lote
+    // PEPS) e o saldo juntos — antes eram 2 chamadas soltas e a falha de uma
+    // deixava a outra divergir (Sprint 1).
+    const { error } = await supabase.rpc('fn_movimentar_estoque', {
+      p_insumo_id: entrada.insumo.id,
+      p_tipo: 'ENTRADA',
+      p_quantidade: qtd,
+      p_custo_total: entrada.custo ? Number(entrada.custo) : null,
       // Guarda o que foi digitado: sem isso, "45 un" no histórico esconde que
       // a compra foi de 5 kg e o erro de conversão fica invisível na auditoria.
-      motivo: entrada.unidade === base ? 'Compra' : `Compra (${entrada.qtd} ${entrada.unidade})`,
-      lote_fornecedor: entrada.lote || null,
-      vence_em: entrada.validade || null
+      p_motivo: entrada.unidade === base ? 'Compra' : `Compra (${entrada.qtd} ${entrada.unidade})`,
+      p_lote_fornecedor: entrada.lote || null,
+      p_vence_em: entrada.validade || null,
     });
+    if (error) { alert(`Não foi possível registrar a entrada: ${error.message}`); return; }
     setEntrada(null);
     carregar();
   };

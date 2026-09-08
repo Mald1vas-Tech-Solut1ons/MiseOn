@@ -20,7 +20,9 @@ export async function createPedidoPedido(dados: CreatePedidoParams) {
   const palavrasRevenda = ['guaraná', 'guarana', 'coca', 'pepsi', 'fanta', 'sprite', 'suco', 'refrigerante', 'lata', 'cerveja', 'água', 'agua', 'long neck', 'red bull', 'h2oh', 'buffet', 'quilo'];
   
   const temCozinha = dados.carrinho.some((i) => {
-    if (i.produto.estacao_preparo === 'DIRETO' || i.produto.estacao_preparo === 'BALCAO') return false;
+    // estacao_preparo no banco admite só COZINHA | DIRETO (CHECK
+    // 20260720100000) — o antigo `=== 'BALCAO'` aqui era um ramo morto.
+    if (i.produto.estacao_preparo === 'DIRETO') return false;
     if (i.produto.estacao_preparo === 'COZINHA') return true;
     const nomeLower = (i.produto.nome || '').toLowerCase();
     return !palavrasRevenda.some((p) => nomeLower.includes(p));

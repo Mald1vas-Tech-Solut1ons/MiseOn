@@ -73,35 +73,22 @@ export async function confirmarPagamentoPedido(
     .maybeSingle();
   if (!pagoRow?.pedido_id) return { pago: true, pedido_id: pgto.pedido_id, motivo: 'ja_processado' };
 
-  const lojaId = (pgto.pedidos as any)?.loja_id;
-  const numero = (pgto.pedidos as any)?.numero;
+  // NOTA LEDGER (2026-09-05, Sprint 1 — receita única):
+  // A confirmação do Pix NÃO lança mais receita no ledger. A ÚNICA origem de
+  // lançamento de receita de pedido é fn_lancar_receita_pedido, no FINALIZADO
+  // (trigger fn_trg_status_pedido) — a mesma regra para Pix, cartão e dinheiro.
+  // Lançar aqui também fazia o DRE contar pedido Pix em dobro (crédito em
+  // conta RECEITA no pagamento + de novo na finalização) e o estorno nunca
+  // revertia esta entrada. Aqui ficam só os fatos operacionais: pagamento PAGO
+  // e pedido ACEITO.
 
-  // Lançamento contábil (ledger de dupla entrada) — mesma regra que já estava
-  // no webhook: entra em caixa Efí (1.1.02) contra receita de vendas (3.1.01).
-  if (lojaId) {
-    const { data: contasInfo } = await supabase.from('contas').select('id, codigo').eq('loja_id', lojaId);
-    const contaEfi = contasInfo?.find((c: any) => c.codigo === '1.1.02')?.id;
-    const contaReceita = contasInfo?.find((c: any) => c.codigo === '3.1.01')?.id;
-    if (contaEfi && contaReceita) {
-      await supabase.from('lancamentos_financeiros').insert({
-        loja_id: lojaId,
-        historico: `Recebimento Pix pedido #${numero}`,
-        valor: pago,
-        conta_debitada: contaEfi,
-        conta_creditada: contaReceita,
-        referencia_tipo: 'PAGAMENTO',
-        referencia_id: pagoRow.pedido_id,
-      });
-    }
-  }
-
-  // Só depois de confirmado e lançado o pedido entra na operação.
+  // Só depois de confirmado o pedido entra na operação.
   await supabase
     .from('pedidos')
     .update({ status: 'ACEITO' })
     .eq('id', pagoRow.pedido_id)
     .eq('status', 'NOVO');
 
-  log.info('Pagamento Pix confirmado e ledger atualizado', { txid, pedido_id: pagoRow.pedido_id });
+  log.info('Pagamento Pix confirmado (receita lança no FINALIZADO)', { txid, pedido_id: pagoRow.pedido_id });
   return { pago: true, pedido_id: pagoRow.pedido_id };
 }

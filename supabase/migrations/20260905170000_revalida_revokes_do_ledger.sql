@@ -1,0 +1,22 @@
+-- ============================================================================
+-- HOTFIX DO GO-LIVE — revalida as revogações de EXECUTE que a 100000 derrubou
+--
+-- O hardening de 20260729000340 revogou EXECUTE de PUBLIC/anon/authenticated
+-- nas funções internas do ledger ("forjar lançamento financeiro" era a ameaça
+-- nominal). A migration 20260905100000 recriou fn_lancar_receita_pedido e
+-- fn_lancar_estorno_pedido com DROP + CREATE — e DROP zera os privilégios,
+-- restaurando o grant default de PUBLIC. Verificado na produção em 05/09
+-- (go-live do Sprint 1): as duas voltaram a ser chamáveis pela chave anon
+-- que vai no bundle do site. As funções de gatilho recriadas pela 120000 não
+-- regrediram — CREATE OR REPLACE preserva os grants; foi o DROP da 100000.
+--
+-- Regra daqui pra frente: migration que recria função interna usa
+-- CREATE OR REPLACE, ou re-revoga no mesmo arquivo (como a 120000 fez com
+-- fn_movimentar_estoque e como este arquivo faz agora).
+--
+-- Impacto: nenhum caminho do produto chama essas RPCs pelo cliente — a única
+-- origem de lançamento é o gatilho fn_trg_status_pedido (executa como dono,
+-- postgres, que não depende de grants).
+-- ============================================================================
+REVOKE EXECUTE ON FUNCTION public.fn_lancar_receita_pedido(uuid) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.fn_lancar_estorno_pedido(uuid) FROM PUBLIC, anon, authenticated;

@@ -15,6 +15,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { gated } from './gate';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? '';
@@ -99,7 +100,7 @@ async function calcular(linhas: Array<{ insumo_id: string; quantidade: number }>
   };
 }
 
-describe.runIf(isConfigured)('Motor de cálculo nutricional — NUT-05/06/07', () => {
+gated(isConfigured, 'Motor de cálculo nutricional — NUT-05/06/07', () => {
   describe('Preparo aninhado em 3 níveis', () => {
     it('normaliza cada nível pelo próprio rendimento (produto → molho → massa → farinha)', async () => {
       // Muitos inserts sequenciais de setup (rede real, não banco local) —

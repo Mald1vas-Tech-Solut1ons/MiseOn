@@ -442,27 +442,31 @@ export default function KDSProducao() {
     }));
 
     try {
-      // 1. Saída dos insumos brutos
-      const saidas = itens.map(it => ({
-        loja_id: lojaId, insumo_id: it.ins!.id, tipo: 'SAIDA', quantidade: it.necessario,
-        motivo: `OS Manufatura — ${p.nome} (${qtdLotes} lotes)`,
-      }));
-      if (saidas.length > 0) await supabase.from('movimentacoes_estoque').insert(saidas);
-      
+      // 1. Saída dos insumos brutos — NEGATIVA: a convenção do banco é
+      // "positivo entra, negativo sai", e só o sinal negativo é custeado pelo
+      // PEPS e consome os lotes reais (Sprint 1: era positiva, custava zero e
+      // não tocava nos lotes).
+      let custoProducao = 0;
       for (const it of itens) {
-        await supabase.from('insumos')
-          .update({ quantidade_atual: Number(it.ins!.quantidade_atual) - it.necessario })
-          .eq('id', it.ins!.id);
+        const { data: mov, error } = await supabase.rpc('fn_movimentar_estoque', {
+          p_insumo_id: it.ins!.id,
+          p_tipo: 'SAIDA',
+          p_quantidade: -it.necessario,
+          p_motivo: `OS Manufatura — ${p.nome} (${qtdLotes} lotes)`,
+        });
+        if (error) throw error;
+        custoProducao += Number(mov?.custo_total ?? 0);
       }
-      
-      // 2. Entrada do preparo
-      await supabase.from('movimentacoes_estoque').insert({
-        loja_id: lojaId, insumo_id: p.id, tipo: 'ENTRADA', quantidade: rendimento,
-        motivo: `OS Manufatura Concluída — ${qtdLotes} lotes`,
+
+      // 2. Entrada do preparo carregando o custo real dos insumos consumidos:
+      // o preparo vale o que custou produzir, e o valor se conserva até a
+      // venda — antes o lote do preparo era custeado pelo preço de catálogo.
+      const { error: errEntrada } = await supabase.rpc('fn_movimentar_estoque', {
+        p_insumo_id: p.id, p_tipo: 'ENTRADA', p_quantidade: rendimento,
+        p_custo_total: custoProducao > 0 ? custoProducao : null,
+        p_motivo: `OS Manufatura Concluída — ${qtdLotes} lotes`,
       });
-      await supabase.from('insumos')
-        .update({ quantidade_atual: Number(p.quantidade_atual) + rendimento })
-        .eq('id', p.id);
+      if (errEntrada) throw errEntrada;
 
       await carregar();
     } catch (e) {

@@ -7,7 +7,11 @@
  *
  * O que está travado aqui:
  *   • só confirma com cobrança CONCLUIDA e valor >= total do pedido;
- *   • confirmar duas vezes NÃO duplica lançamento no ledger;
+ *   • a confirmação NÃO lança receita no ledger — receita tem uma origem só
+ *     (fn_lancar_receita_pedido, no FINALIZADO; Sprint 1: antes disso o DRE
+ *     contava pedido Pix em dobro);
+ *   • confirmar duas vezes não reprocessa (idempotente pela virada
+ *     condicional PENDENTE→PAGO);
  *   • pedido que já saiu de NOVO não volta para ACEITO por cima.
  */
 import { describe, it, expect } from 'vitest';
@@ -73,7 +77,7 @@ function bancoBase(over: { pagamento?: Row; pedido?: Row } = {}): Banco {
 }
 
 describe('confirmarPagamentoPedido', () => {
-  it('confirma, lança no ledger e move o pedido para ACEITO', async () => {
+  it('confirma o pagamento e move o pedido para ACEITO — sem tocar no ledger', async () => {
     const banco = bancoBase();
 
     const r = await confirmarPagamentoPedido(fakeSupabase(banco), TXID, cobConcluida('46.00'));
@@ -81,13 +85,13 @@ describe('confirmarPagamentoPedido', () => {
     expect(r.pago).toBe(true);
     expect(banco.pagamentos[0].status).toBe('PAGO');
     expect(banco.pedidos[0].status).toBe('ACEITO');
-    expect(banco.lancamentos_financeiros).toHaveLength(1);
-    expect(banco.lancamentos_financeiros[0]).toMatchObject({
-      valor: 46, conta_debitada: 'conta-efi', conta_creditada: 'conta-receita', referencia_id: PEDIDO,
-    });
+    // Sprint 1 (receita única): a confirmação do Pix NÃO lança receita — a
+    // única origem é fn_lancar_receita_pedido, no FINALIZADO. Lançar aqui
+    // também fazia o DRE contar pedido Pix em dobro.
+    expect(banco.lancamentos_financeiros).toHaveLength(0);
   });
 
-  it('webhook repetido não duplica lançamento no ledger', async () => {
+  it('webhook repetido não reprocessa nem lança nada', async () => {
     const banco = bancoBase();
     const sb = fakeSupabase(banco);
 
@@ -95,7 +99,7 @@ describe('confirmarPagamentoPedido', () => {
     const r2 = await confirmarPagamentoPedido(sb, TXID, cobConcluida('46.00'));
 
     expect(r2).toEqual({ pago: true, pedido_id: PEDIDO, motivo: 'ja_processado' });
-    expect(banco.lancamentos_financeiros).toHaveLength(1);
+    expect(banco.lancamentos_financeiros).toHaveLength(0);
   });
 
   it('pagamento parcial não confirma o pedido', async () => {

@@ -83,17 +83,16 @@ export function ModalReposicaoBuffet({
         .single();
       if (repError) throw repError;
 
-      await supabase.from('movimentacoes_estoque').insert({
-        loja_id: lojaId,
-        insumo_id: preparoId,
-        tipo: 'SAIDA',
-        quantidade: -pesoKg,
-        motivo: `Enviado para a Pista (${nomeCuba})`,
+      // Uma chamada transacional: a RPC grava a movimentação (custeada pelo
+      // PEPS, sinal negativo) e o saldo juntos (Sprint 1 — eram 2 chamadas
+      // soltas, e a falha de uma deixava a outra divergir).
+      const { error: movError } = await supabase.rpc('fn_movimentar_estoque', {
+        p_insumo_id: preparoId,
+        p_tipo: 'SAIDA',
+        p_quantidade: -pesoKg,
+        p_motivo: `Enviado para a Pista (${nomeCuba})`,
       });
-
-      await supabase.from('insumos')
-        .update({ quantidade_atual: Number(preparoSelecionado.quantidade_atual) - pesoKg })
-        .eq('id', preparoId);
+      if (movError) throw movError;
 
       onSucesso();
     } catch (err: any) {
@@ -125,19 +124,13 @@ export function ModalReposicaoBuffet({
       // Porém, podemos registrar uma PERDA contábil para o relatório. (Isso é opcional, pois a saída já cobriu o CMV).
       
       if (reaproveitarSobra && sobra > 0) {
-        await supabase.from('movimentacoes_estoque').insert({
-          loja_id: lojaId,
-          insumo_id: cubaSendoFechada.preparo_id,
-          tipo: 'ENTRADA',
-          quantidade: sobra,
-          motivo: `Retorno de Pista (Reaproveitamento de Sobra Limpa)`,
+        const { error: retError } = await supabase.rpc('fn_movimentar_estoque', {
+          p_insumo_id: cubaSendoFechada.preparo_id,
+          p_tipo: 'ENTRADA',
+          p_quantidade: sobra,
+          p_motivo: `Retorno de Pista (Reaproveitamento de Sobra Limpa)`,
         });
-        const prepAtual = preparosAtivos.find(p => p.id === cubaSendoFechada.preparo_id);
-        if (prepAtual) {
-           await supabase.from('insumos')
-             .update({ quantidade_atual: Number(prepAtual.quantidade_atual) + sobra })
-             .eq('id', prepAtual.id);
-        }
+        if (retError) throw retError;
       }
 
       setCubaSendoFechada(null);

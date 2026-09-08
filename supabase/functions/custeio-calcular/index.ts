@@ -82,11 +82,10 @@ async function carregarItem(
       .single(),
     supabase
       .from('lotes_estoque')
-      .select('id, quantidade_restante, custo_unitario, criado_em')
+      .select('id, quantidade_restante, custo_unitario, criado_em, ocorrido_em')
       .eq('insumo_id', insumoId)
       .eq('loja_id', lojaId)
-      .gt('quantidade_restante', 0)
-      .order('criado_em', { ascending: true }),
+      .gt('quantidade_restante', 0),
     supabase
       .from('fatores_conversao')
       .select('unidade_origem, unidade_destino, multiplicador')
@@ -100,13 +99,17 @@ async function carregarItem(
   const insumo = insumoRes.data as { id: string; nome: string; unidade_medida: string };
 
   const lotes: Lote[] = (lotesRes.data ?? []).map((l: {
-    id: string; quantidade_restante: number; custo_unitario: number; criado_em: string;
+    id: string; quantidade_restante: number; custo_unitario: number;
+    criado_em: string; ocorrido_em: string | null;
   }) => ({
     id: l.id,
-    data: l.criado_em,
+    // A fila do PEPS anda pela data da COMPRA (ocorrido_em) — a mesma ordem
+    // de fn_consumir_lotes_peps no banco. criado_em é só fallback (Sprint 1:
+    // o preview ordenava pela data do registro e podia mentir o custo).
+    data: l.ocorrido_em ?? l.criado_em,
     quantidade: Number(l.quantidade_restante),
     custoTotal: Number(l.quantidade_restante) * Number(l.custo_unitario),
-  }));
+  })).sort((a, b) => a.data.localeCompare(b.data) || a.id.localeCompare(b.id));
 
   const fatores: FatorItem[] = (fatoresRes.data ?? []).map((f: {
     unidade_origem: string; unidade_destino: string; multiplicador: number;

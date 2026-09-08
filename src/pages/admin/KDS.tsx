@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { type Pedido, type EtapaKDS, type StatusPedido } from '../../types';
+import { etapasVisiveisDaEstacao, statusAoAvancar } from '../../lib/kdsEtapas';
 import { tocarSom } from '../../lib/som';
 import { traduzirErro, type ErroTraduzido } from '../../lib/erros';
 import { ErroAmigavel } from '../../components/ui/ErroAmigavel';
@@ -360,8 +361,11 @@ export default function KDS() {
     const proximaEtapa = etapas[alvoIndex];
     if (!proximaEtapa) return;
 
-    const ehUltimaEtapa = alvoIndex >= etapas.length - 1;
-    const novoStatus: StatusPedido = ehUltimaEtapa ? 'PRONTO' : 'PREPARANDO';
+    // Regra extraída 1:1 para src/lib/kdsEtapas.ts (testada): só a última
+    // etapa REAL do pipeline conclui — a última coluna de uma visão
+    // filtrada por estação não muda o fluxo de status.
+    const novoStatus: StatusPedido = statusAoAvancar(etapas, alvoIndex);
+    const ehUltimaEtapa = novoStatus === 'PRONTO';
 
     const tsAtuais = p.timestamps_etapas_kds || {};
     const timestampsAtualizados = {
@@ -586,6 +590,14 @@ export default function KDS() {
     });
   };
 
+  // Colunas que a visão atual mostra (globais + da estação do filtro), cada
+  // uma carregando o ÍNDICE REAL no pipeline completo — é ele que alimenta
+  // getPedidosPorEtapa, avançar, drop e status. A visão não é o pipeline.
+  const etapasVisiveis = useMemo(
+    () => etapasVisiveisDaEstacao(etapas, filtroEstacao),
+    [etapas, filtroEstacao],
+  );
+
   const pedidosArquivadosList = useMemo(() => {
     return pedidos.filter(p => pedidosArquivadosIds.has(p.id) || (p.status === 'PRONTO' && !pedidosArquivadosIds.has(p.id)));
   }, [pedidos, pedidosArquivadosIds]);
@@ -715,7 +727,9 @@ export default function KDS() {
           const palavrasRevenda = ['guaraná', 'guarana', 'coca', 'pepsi', 'fanta', 'sprite', 'suco', 'refrigerante', 'lata', 'cerveja', 'água', 'agua', 'long neck', 'red bull', 'h2oh'];
 
           const isItemBar = (item: any) => {
-            if (item.produtos?.estacao_preparo === 'BAR') return true;
+            // produtos.estacao_preparo no banco admite só COZINHA | DIRETO
+            // (CHECK 20260720100000) — drink é detectado pela heurística de
+            // nome abaixo, como sempre foi. (O ramo `=== 'BAR'` era morto.)
             const nomeLower = (item.nome_produto || '').toLowerCase();
             return palavrasBar.some((p) => nomeLower.includes(p));
           };
@@ -1101,7 +1115,7 @@ export default function KDS() {
       <div className="flex-1 min-h-0 overflow-hidden" style={{ zoom: `${nivelZoom}%` }}>
         {modoLayout === 'GRADE' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-y-auto h-full pb-4">
-            {etapas.map((etapa, idx) => {
+            {etapasVisiveis.map(({ etapa, indiceReal: idx }) => {
               const listaPedidos = getPedidosPorEtapa(idx, etapa);
               const proximaEtapaNome = etapas[idx + 1]?.nome || tDynamic('Concluir');
               const tempoMedioEtapa = metricasPorEtapa.medias[etapa.id] || 0;
@@ -1124,6 +1138,11 @@ export default function KDS() {
                       <span className="font-['Sora'] text-sm font-extrabold uppercase tracking-wide text-white truncate">
                         {etapa.nome}
                       </span>
+                      {etapa.estacao && (
+                        <span className="shrink-0 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-300">
+                          {etapa.estacao === 'COZINHA' ? tDynamic('Cozinha') : tDynamic('Bar')}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5">
                       {tempoMedioEtapa > 0 && (
@@ -1155,7 +1174,7 @@ export default function KDS() {
           </div>
         ) : (
           <HorizontalScrollContainer className="h-full pb-4" contentClassName="items-stretch h-full gap-3.5">
-            {etapas.map((etapa, idx) => {
+            {etapasVisiveis.map(({ etapa, indiceReal: idx }) => {
               const listaPedidos = getPedidosPorEtapa(idx, etapa);
               const proximaEtapaNome = etapas[idx + 1]?.nome || tDynamic('Concluir');
               const tempoMedioEtapa = metricasPorEtapa.medias[etapa.id] || 0;
@@ -1215,6 +1234,11 @@ export default function KDS() {
                       <span className="font-['Sora'] text-sm font-extrabold uppercase tracking-wide text-white truncate">
                         {etapa.nome}
                       </span>
+                      {etapa.estacao && (
+                        <span className="shrink-0 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-300">
+                          {etapa.estacao === 'COZINHA' ? tDynamic('Cozinha') : tDynamic('Bar')}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5">
@@ -1491,6 +1515,20 @@ export default function KDS() {
                         }}
                         className="flex-1 rounded-xl border border-white/10 bg-white/10 px-3 py-1.5 text-sm font-bold text-white focus:outline-none focus:border-orange-500"
                       />
+                      <select
+                        value={e.estacao ?? ''}
+                        onChange={(evt) => {
+                          const clone = [...etapas];
+                          clone[index].estacao = (evt.target.value || null) as EtapaKDS['estacao'];
+                          salvarEtapas(clone);
+                        }}
+                        title={tDynamic('Em qual visão do KDS esta coluna aparece (Global = todas)')}
+                        className="shrink-0 rounded-xl border border-white/10 bg-white/10 px-2 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-orange-500"
+                      >
+                        <option value="" className="bg-[#0F172A]">{tDynamic('Global')}</option>
+                        <option value="COZINHA" className="bg-[#0F172A]">🍳 {tDynamic('Cozinha')}</option>
+                        <option value="BAR" className="bg-[#0F172A]">🍹 {tDynamic('Bar')}</option>
+                      </select>
                     </div>
 
                     <div className="flex items-center gap-1">

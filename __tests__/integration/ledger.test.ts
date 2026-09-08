@@ -20,6 +20,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { gated } from './gate';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // ─── Setup do cliente de testes (usa service-role para bypass de RLS) ─────────
@@ -104,7 +105,7 @@ afterAll(async () => {
 
 // ─── Testes ──────────────────────────────────────────────────────────────────
 
-describe.runIf(isConfigured)('Ledger Financeiro — Dupla Entrada', () => {
+gated(isConfigured, 'Ledger Financeiro — Dupla Entrada', () => {
 
   describe('Receita de pedido próprio (não-iFood)', () => {
     it('deve gerar 1 lançamento de RECEITA ao finalizar pedido', async () => {
@@ -192,9 +193,115 @@ describe.runIf(isConfigured)('Ledger Financeiro — Dupla Entrada', () => {
       expect(Number(estornos[0].valor)).toBe(60.00);
     });
   });
+
+  // ─── Sprint 1: RECEITA ÚNICA — regressão da dupla contagem Pix ────────────
+  // Antes: pedido Pix pago gerava DOIS créditos em conta RECEITA (um na
+  // confirmação do pagamento, outro no FINALIZADO). vw_dre_mensal soma todo
+  // crédito RECEITA → faturamento Pix em dobro, divergindo de cartão/dinheiro.
+  // Depois: a única origem é fn_lancar_receita_pedido no FINALIZADO.
+  describe('Receita única — pedido Pix (regressão Sprint 1)', () => {
+    /** Plano de contas da loja de teste: id por código. */
+    async function contasDaLoja(): Promise<Record<string, string>> {
+      const { data, error } = await db
+        .from('contas')
+        .select('id, codigo')
+        .eq('loja_id', lojaId)
+        .in('codigo', ['1.1.01', '1.1.02', '3.1.01']);
+      if (error) throw new Error(error.message);
+      return Object.fromEntries((data ?? []).map((c: any) => [c.codigo, c.id]));
+    }
+
+    async function criarPagamento(pedido_id: string, metodo: string, valor: number) {
+      const { data, error } = await db
+        .from('pagamentos')
+        .insert({ pedido_id, metodo, status: 'PAGO', valor_pago: valor, data_pagamento: new Date().toISOString() })
+        .select('id')
+        .single();
+      if (error) throw new Error(`Erro ao criar pagamento: ${error.message}`);
+      return data;
+    }
+
+    it('pedido Pix pago e finalizado gera EXATAMENTE 1 crédito em conta RECEITA', async () => {
+      const contas = await contasDaLoja();
+      const pedido = await criarPedidoTeste({ valor_total: 46.00, requer_cozinha: false });
+      await criarPagamento(pedido.id, 'PIX', 46.00);
+
+      await avancarStatus(pedido.id, 'ACEITO');
+      await avancarStatus(pedido.id, 'PRONTO');
+      await avancarStatus(pedido.id, 'FINALIZADO');
+
+      const lancamentos = await lancamentosDosPedido(pedido.id);
+      // A invariante do Sprint 1: nenhum lançamento 'PAGAMENTO' pode existir.
+      expect(lancamentos.filter(l => l.referencia_tipo === 'PAGAMENTO')).toHaveLength(0);
+      // E a receita entra UMA vez, debitando o Banco Efí (onde o Pix cai).
+      const receita = lancamentos.filter(l => l.referencia_tipo === 'PEDIDO');
+      expect(receita).toHaveLength(1);
+      expect(receita[0].conta_creditada).toBe(contas['3.1.01']);
+      expect(receita[0].conta_debitada).toBe(contas['1.1.02']);
+      expect(Number(receita[0].valor)).toBe(46.00);
+    });
+
+    it('pedido em dinheiro finalizado debita o CAIXA, não o banco (controle)', async () => {
+      const contas = await contasDaLoja();
+      const pedido = await criarPedidoTeste({ valor_total: 30.00, requer_cozinha: false });
+      await criarPagamento(pedido.id, 'DINHEIRO', 30.00);
+
+      await avancarStatus(pedido.id, 'ACEITO');
+      await avancarStatus(pedido.id, 'PRONTO');
+      await avancarStatus(pedido.id, 'FINALIZADO');
+
+      const receita = (await lancamentosDosPedido(pedido.id)).filter(l => l.referencia_tipo === 'PEDIDO');
+      expect(receita).toHaveLength(1);
+      expect(receita[0].conta_debitada).toBe(contas['1.1.01']);
+    });
+
+    it('pedido Pix pago e CANCELADO antes de finalizar não deixa receita no DRE', async () => {
+      // Antes do Sprint 1 o lançamento 'PAGAMENTO' nascia na confirmação do
+      // Pix e nunca era revertido — pedido pago e cancelado antes da
+      // finalização mantinha receita permanente. Agora nada nasce na
+      // confirmação, então não há o que ficar órfão.
+      const pedido = await criarPedidoTeste({ valor_total: 25.00, requer_cozinha: false });
+      await criarPagamento(pedido.id, 'PIX', 25.00);
+
+      await avancarStatus(pedido.id, 'ACEITO');
+      await avancarStatus(pedido.id, 'CANCELADO');
+
+      const lancamentos = await lancamentosDosPedido(pedido.id);
+      expect(lancamentos.filter(l => l.referencia_tipo === 'PAGAMENTO')).toHaveLength(0);
+      expect(lancamentos.filter(l => l.referencia_tipo === 'PEDIDO')).toHaveLength(0);
+    });
+
+    it('fn_lancar_estorno_pedido reverte o Pix para o BANCO (reversa simétrica)', async () => {
+      // FINALIZADO→CANCELADO é bloqueado pela máquina de estados (ver teste
+      // .skip acima), então o contrato da função é testado direto por RPC —
+      // é o caminho que valerá quando o estorno de encerrado abrir.
+      const contas = await contasDaLoja();
+      const pedido = await criarPedidoTeste({ valor_total: 46.00, requer_cozinha: false });
+      await criarPagamento(pedido.id, 'PIX', 46.00);
+
+      await avancarStatus(pedido.id, 'ACEITO');
+      await avancarStatus(pedido.id, 'PRONTO');
+      await avancarStatus(pedido.id, 'FINALIZADO');
+      // A função exige receita_lancada=true (a finalização já marcou).
+      const { data: pedidoAtual } = await db.from('pedidos').select('receita_lancada').eq('id', pedido.id).single();
+      expect(pedidoAtual?.receita_lancada).toBe(true);
+
+      const { data: estornou, error } = await db.rpc('fn_lancar_estorno_pedido', { p_pedido_id: pedido.id });
+      if (error) throw new Error(error.message);
+
+      expect(estornou).toBe(true);
+      const estornos = (await lancamentosDosPedido(pedido.id)).filter(l => l.referencia_tipo === 'ESTORNO');
+      expect(estornos).toHaveLength(1);
+      // Débito na receita (reverte o crédito), crédito no BANCO — a conta de
+      // onde o dinheiro Pix tinha entrado. Reversa 1:1, sem resíduo.
+      expect(estornos[0].conta_debitada).toBe(contas['3.1.01']);
+      expect(estornos[0].conta_creditada).toBe(contas['1.1.02']);
+      expect(Number(estornos[0].valor)).toBe(46.00);
+    });
+  });
 });
 
-describe.runIf(isConfigured)('Sequência de Pedidos — Anti Race Condition', () => {
+gated(isConfigured, 'Sequência de Pedidos — Anti Race Condition', () => {
   it('deve gerar 10 números únicos para pedidos simultâneos', async () => {
     const N = 10;
     const inserts = Array.from({ length: N }, () =>
@@ -209,7 +316,7 @@ describe.runIf(isConfigured)('Sequência de Pedidos — Anti Race Condition', ()
   });
 });
 
-describe.runIf(isConfigured)('Integridade do Plano de Contas', () => {
+gated(isConfigured, 'Integridade do Plano de Contas', () => {
   it('deve existir pelo menos 8 contas padrão para cada loja', async () => {
     const { data, error } = await db
       .from('contas')
