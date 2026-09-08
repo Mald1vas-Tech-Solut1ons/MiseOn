@@ -107,9 +107,25 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 - Rewrite completo ou migração prematura para microsserviços.
 - Refatorações puramente estéticas em módulos maduros.
 
+## 20-B. Sprint 7 — Estoque tem uma autoridade só (08/09)
+**Medido antes de mexer:** 54 de 92 insumos da loja de provas com saldo divergente dos lotes. Natureba (cliente real) está com 0 insumos ativos, então **nenhum cliente estava contaminado** — mas a fábrica estava ligada e ia junto na primeira carga de NF-e.
+
+**Duas causas, ambas reproduzidas no banco:**
+1. **Dupla contagem ao criar insumo** — o cadastro gravava `quantidade_atual` no INSERT e logo depois chamava `fn_movimentar_estoque` ENTRADA com a mesma quantidade, que soma de novo. Criar insumo com saldo 10 gravava **saldo 20 / lote 10**. Todo insumo nascido com saldo inicial nasceu torto.
+2. **Ledger gravável por fora** — `anon` e `authenticated` tinham INSERT/UPDATE/DELETE diretos em `movimentacoes_estoque`, `lotes_estoque` e no saldo. Como nenhum gatilho dessas tabelas mantém saldo nem consome lote, escrita direta produz estado impossível.
+
+**Fechado:** insumo nasce zerado (saldo entra pela RPC); revogada a escrita direta no ledger e nos lotes; em `insumos` o revoke é **por coluna** — e a primeira tentativa **não pegou**, porque `REVOKE UPDATE (coluna)` não vale contra `GRANT UPDATE` de tabela: foi preciso revogar a tabela e reconceder coluna a coluna, com verificação que aborta a migration se a porta continuar aberta.
+
+**Ferramenta que faltava:** `fn_reconciliar_estoque(insumo, contado, obs)` acerta **saldo E lotes** contra a contagem física, com movimentação de rastro. `fn_ajustar_inventario` não servia: compara com o cache, então em item já divergente responde "bate com o sistema" e não conserta nada. Editar o saldo pela tela agora passa por essa RPC — virou contagem, com rastro.
+
+**Guarda de regressão:** `fn_privilegios_de_escrita_estoque()` devolve as permissões de escrita que não deveriam existir; a suíte trava em zero linhas, para um `GRANT` distraído no futuro não reabrir isso em silêncio.
+
+**Deliberadamente NÃO feito:** derivar o saldo do ledger por gatilho (o conserto definitivo) exige reescrever as 8 funções que hoje atualizam o saldo à mão — refatorar o caminho do dinheiro na véspera de entregar a cliente é risco que não se corre. Fica como próximo sprint, com o caminho já mapeado.
+
 ## 19. Sprint Atual
 - **SPRINT 5: KDS Multiestação — CONCLUÍDO (08/09)**. Ver seção 7.
 - **SPRINT 6: "O servidor decide" — CONCLUÍDO (08/09)**. Ver seção 20-A.
+- **SPRINT 7: "Estoque tem uma autoridade só" — CONCLUÍDO (08/09)**. Ver seção 20-B. CI verde nos dois workflows.
 - **Próximo candidato**: reconciliar PEPS (SQL vs TS) e a divergência saldo×lotes com o mesmo rigor — o diagnóstico de 05/09 apontava motor duplicado, mas o S1-C já mexeu nisso e a informação precisa ser reconfirmada contra o código antes de virar sprint. Alternativa: Sprint 5.4 (modificadores estruturados do KDS, ex. "ponto da carne").
 
 ## 20-A. Sprint 6 — O servidor decide: preço, taxa e porta (08/09)
