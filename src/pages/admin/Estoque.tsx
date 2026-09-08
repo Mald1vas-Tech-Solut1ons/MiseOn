@@ -369,7 +369,10 @@ export default function Estoque() {
       setor: setor || null
     };
 
+    let insumoSalvoId: string | null = null;
+
     if (editando) {
+       insumoSalvoId = editando.id;
        const { error } = await supabase.from('insumos').update(payload).eq('id', editando.id);
        if (error) return avisarErroInsumo(error, nomeLimpo);
 
@@ -394,12 +397,26 @@ export default function Estoque() {
        const { data, error } = await supabase
          .from('insumos').insert({ ...payload, quantidade_atual: 0 }).select('id').single();
        if (error) return avisarErroInsumo(error, nomeLimpo);
+       insumoSalvoId = data?.id ?? null;
        if (data && estoqueFinal > 0) {
          const { error: errSaldo } = await supabase.rpc('fn_movimentar_estoque', {
            p_insumo_id: data.id, p_tipo: 'ENTRADA', p_quantidade: estoqueFinal, p_motivo: 'Saldo inicial',
          });
          if (errSaldo) alert(`Insumo criado, mas o saldo inicial falhou: ${errSaldo.message}`);
        }
+    }
+
+    // O que a pessoa escolheu na tela vira DECISÃO, não palpite: a RPC grava a
+    // categoria como ela escreveu (categoria própria é preservada), deriva o
+    // tipo quando a categoria é conhecida — água sanitária fora da ficha
+    // técnica, frango dentro — e marca origem USUARIO. A partir daqui nenhuma
+    // importação de nota reescreve isso por cima.
+    if (insumoSalvoId && categoriaFinal) {
+      const { error: errClass } = await supabase.rpc('fn_definir_classificacao_insumo', {
+        p_insumo_id: insumoSalvoId,
+        p_categoria: categoriaFinal,
+      });
+      if (errClass) console.error('classificação não gravada:', errClass.message);
     }
 
     cancelarEdicao();

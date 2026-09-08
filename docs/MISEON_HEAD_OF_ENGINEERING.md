@@ -122,10 +122,30 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 
 **Deliberadamente NÃO feito:** derivar o saldo do ledger por gatilho (o conserto definitivo) exige reescrever as 8 funções que hoje atualizam o saldo à mão — refatorar o caminho do dinheiro na véspera de entregar a cliente é risco que não se corre. Fica como próximo sprint, com o caminho já mapeado.
 
+## 20-C. Sprint 8 — A nota vira dado com origem, e tudo continua corrigível (08/09)
+**Gatilho:** o lojista importou duas notas (QR real e foto/IA) e a categorização veio errada. Pedido dele: *"tudo precisa ser editável, não podemos hardcoded no banco tudo que for lido"*.
+
+**Causa raiz (medida, não suposta):** a classificação era calculada e **descartada no salvamento**. O modal resolvia gênero/categoria (catálogo + IA), mas o payload enviado a `fn_importar_nfce` levava só nome/unidade/quantidade/custo — a RPC nunca gravou `categoria_insumo` nem `tipo_item`. Todo insumo importado nascia sem categoria e a tela mostrava "Ingrediente". Contagem no banco: **4 itens de Descartáveis e 1 de Limpeza gravados como INGREDIENTE**, entrando em ficha técnica e nutrição como comida — exatamente o caso da água sanitária (Regra 10).
+
+**O que passou a existir:**
+- `classificacao_categorias` — a regra "categoria → natureza / entra em ficha / entra em nutrição" virou **tabela**, não lista de 49 KB no bundle do front.
+- `fn_classificar_insumo(categoria, nome, ncm)` — **NCM primeiro** (capítulo fiscal é fato: 34 limpeza, 02 carnes, 22 bebidas), categoria depois, `Outros`/baixa confiança como piso — e o piso fica **fora** da ficha técnica, porque incluir errado contamina CMV em silêncio.
+- `insumos.classificacao_origem / _confianca / _revisada` — Regra 9: dá para saber o que é fato (XML/NCM) e o que é palpite (IA), e o que já foi revisado por gente.
+- `parseNFeXml` passou a **ler o NCM**, que ele vinha jogando fora — sem isso o classificador determinístico não tinha o sinal mais forte da nota.
+- `fn_definir_classificacao_insumo` — o que o lojista escolhe na tela vira `origem = USUARIO`, e **nenhuma importação futura sobrescreve**. Categoria própria ("Molhos Especiais da Casa") é preservada como escrita; só categoria conhecida deriva o tipo.
+- `vw_insumos_a_revisar` — fila do que é palpite ou está vazio.
+
+**Provado no banco, ponta a ponta:** `20 KG × 18,90 = 378,00` → quantidade **20**, unitário **18,90** (378 nunca virou quantidade); água sanitária com IA dizendo "Mercearia" → **NCM 34 venceu**, virou Limpeza fora da ficha; `10 CX × fator 12` → **120 UN**; e reimportar a nota **não** desfez a correção do lojista.
+
+**Testes:** `__tests__/parseNFeXml.test.ts` — 7 fixtures de NFe modelo 55 (KG, CX, fracionado, NCM, desconto rateado, XML inválido). É a rota que o lojista não consegue testar (não tem XML) e que era a única sem prova nenhuma.
+
+**Backlog que fica:** o catálogo de 179 gêneros continua no bundle (só a regra de categoria virou tabela); a rota SEFAZ/QR não traz NCM, então lá a classificação continua por categoria; `nfe-ocr-cupom` não devolve NCM.
+
 ## 19. Sprint Atual
 - **SPRINT 5: KDS Multiestação — CONCLUÍDO (08/09)**. Ver seção 7.
 - **SPRINT 6: "O servidor decide" — CONCLUÍDO (08/09)**. Ver seção 20-A.
 - **SPRINT 7: "Estoque tem uma autoridade só" — CONCLUÍDO (08/09)**. Ver seção 20-B. CI verde nos dois workflows.
+- **SPRINT 8: "A nota vira dado com origem" — CONCLUÍDO (08/09)**. Ver seção 20-C.
 - **Próximo candidato**: reconciliar PEPS (SQL vs TS) e a divergência saldo×lotes com o mesmo rigor — o diagnóstico de 05/09 apontava motor duplicado, mas o S1-C já mexeu nisso e a informação precisa ser reconfirmada contra o código antes de virar sprint. Alternativa: Sprint 5.4 (modificadores estruturados do KDS, ex. "ponto da carne").
 
 ## 20-A. Sprint 6 — O servidor decide: preço, taxa e porta (08/09)

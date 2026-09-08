@@ -24,6 +24,7 @@ interface ItemLidoNFCe {
   num_item: number;
   descricao: string;
   gtin?: string | null;
+  ncm?: string | null;
   codigo_fornecedor?: string | null;
   qtd: number;
   unidade: string;
@@ -430,6 +431,16 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
             chave_depara: chaveDoItem(l.itemNota, dadosNota.emitente?.cnpj),
             descricao_nota: l.itemNota.descricao,
             gtin: l.itemNota.gtin || null,
+            // O que o sistema entendeu que o item É. Até 20260908 isto era
+            // calculado (catálogo + IA) e DESCARTADO no salvamento: a RPC não
+            // gravava categoria nem tipo, então todo insumo importado nascia
+            // como "Ingrediente" — inclusive material de limpeza, que assim
+            // entrava em ficha técnica e nutrição.
+            categoria: l.sugestao.categoria || null,
+            // NCM manda na classificação (fn_classificar_insumo): é fato da
+            // nota, não palpite. Hoje só o XML traz.
+            ncm: l.itemNota.ncm || null,
+            confianca_classificacao: l.sugestao.confianca,
             // Validade sustenta o alerta de vencimento e o PVPS: entre lotes
             // do mesmo dia, sai primeiro o que vence antes.
             vence_em: l.venceEm || null,

@@ -42,10 +42,18 @@ export function parseNFeXml(xmlText: string): NotaLida {
     const cEAN = prod.querySelector('cEAN')?.textContent || '';
     const gtin = /^\d{8,14}$/.test(cEAN) ? cEAN : null;
 
+    // NCM é o classificador determinístico que a nota já carrega e que este
+    // parser vinha jogando fora. Capítulo fiscal não é opinião: 34 é
+    // sabão/limpeza, 02 é carne. É o que impede água sanitária de entrar no
+    // sistema como ingrediente (fn_classificar_insumo usa isto primeiro).
+    const ncmBruto = (prod.querySelector('NCM')?.textContent || '').replace(/\D/g, '');
+    const ncm = ncmBruto.length >= 2 ? ncmBruto : null;
+
     itens.push({
       num_item: idx + 1,
       descricao,
       gtin,
+      ncm,
       codigo_fornecedor: codigo || null,
       qtd,
       unidade,

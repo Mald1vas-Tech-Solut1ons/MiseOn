@@ -8,6 +8,8 @@ export interface ItemLidoNota {
   num_item: number;
   descricao: string;
   gtin?: string | null;
+  /** Classificador fiscal determinístico (só o XML traz hoje). */
+  ncm?: string | null;
   codigo_fornecedor?: string | null;
   qtd: number;
   unidade: string;
