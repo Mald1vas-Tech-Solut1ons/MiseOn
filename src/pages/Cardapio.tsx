@@ -324,7 +324,8 @@ export default function Cardapio() {
   const cancelarPedidoPendente = async (pedidoId: string) => {
     await Promise.all([
       supabase.from('pagamentos').update({ status: 'CANCELADO' }).eq('pedido_id', pedidoId).eq('status', 'PENDENTE'),
-      supabase.from('pedidos').update({ status: 'CANCELADO' }).eq('id', pedidoId).eq('status', 'NOVO'),
+      supabase.from('pedidos').update({ status: 'CANCELADO' }).eq('id', pedidoId)
+        .in('status', ['NOVO', 'AGUARDANDO_PAGAMENTO']),
     ]);
   };
 

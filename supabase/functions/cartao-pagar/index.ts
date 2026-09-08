@@ -222,7 +222,10 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       .eq('metodo', 'CREDITO');
 
     if (aprovado) {
-      await supabaseAdmin.from('pedidos').update({ status: 'ACEITO' }).eq('id', pedido_id).eq('status', 'NOVO');
+      // Só aqui, com a cobrança aprovada, o pedido deixa de ser carrinho e
+      // aparece para o lojista (ver AGUARDANDO_PAGAMENTO, 20260908).
+      await supabaseAdmin.from('pedidos').update({ status: 'ACEITO' })
+        .eq('id', pedido_id).in('status', ['NOVO', 'AGUARDANDO_PAGAMENTO']);
     }
 
     reqLogger.info('Pagamento com cartão processado com sucesso', { charge_id: data.charge_id, aprovado });

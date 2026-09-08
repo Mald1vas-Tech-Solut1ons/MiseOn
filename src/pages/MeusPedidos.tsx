@@ -11,6 +11,7 @@ import MiseOnLoader from '../components/MiseOnLoader';
 import { useI18n } from '../contexts/I18nContext';
 
 const STATUS_LABEL: Record<StatusPedido, string> = {
+  AGUARDANDO_PAGAMENTO: 'Aguardando pagamento',
   NOVO: 'Recebido',
   ACEITO: 'Aceito',
   PREPARANDO: 'Em preparo',
@@ -21,6 +22,7 @@ const STATUS_LABEL: Record<StatusPedido, string> = {
 };
 
 const STATUS_TOM: Record<StatusPedido, string> = {
+  AGUARDANDO_PAGAMENTO: 'bg-gray-100 text-gray-600 dark:bg-gray-500/10 dark:text-gray-400',
   NOVO: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
   ACEITO: 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400',
   PREPARANDO: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400',
@@ -31,6 +33,8 @@ const STATUS_TOM: Record<StatusPedido, string> = {
 };
 
 const STATUS_PESO: Record<StatusPedido, number> = {
+  // Antes de existir pagamento o pedido nem entrou na fila da loja.
+  AGUARDANDO_PAGAMENTO: 0,
   NOVO: 1,
   ACEITO: 2,
   PREPARANDO: 3,

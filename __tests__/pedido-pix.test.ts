@@ -26,13 +26,17 @@ function fakeSupabase(banco: Banco) {
   class Builder {
     private op: 'select' | 'update' | 'insert' = 'select';
     private patch: Row = {};
-    private filtros: [string, any][] = [];
+    private filtros: ((r: Row) => boolean)[] = [];
     constructor(private tabela: string) {}
 
     select() { return this; }
     update(patch: Row) { this.op = 'update'; this.patch = patch; return this; }
     insert(linha: Row) { this.op = 'insert'; this.patch = linha; return this; }
-    eq(coluna: string, valor: any) { this.filtros.push([coluna, valor]); return this; }
+    eq(coluna: string, valor: any) { this.filtros.push((r) => r[coluna] === valor); return this; }
+    /** `.in()` existe no cliente real e a confirmação de pagamento usa: o
+     *  pedido online sai de AGUARDANDO_PAGAMENTO, o antigo saía de NOVO. Sem
+     *  isto aqui o fake mentia sobre o que o código consegue fazer. */
+    in(coluna: string, valores: any[]) { this.filtros.push((r) => valores.includes(r[coluna])); return this; }
 
     private executar() {
       banco[this.tabela] ??= [];
@@ -41,7 +45,7 @@ function fakeSupabase(banco: Banco) {
         return { data: [this.patch], error: null };
       }
       // Filtro ANTES do patch: é o que faz o update condicional virar trava.
-      const alvo = banco[this.tabela].filter((r) => this.filtros.every(([c, v]) => r[c] === v));
+      const alvo = banco[this.tabela].filter((r) => this.filtros.every((f) => f(r)));
       if (this.op === 'update') alvo.forEach((r) => Object.assign(r, this.patch));
       return { data: alvo, error: null };
     }

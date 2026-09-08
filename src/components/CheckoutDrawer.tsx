@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import type { User } from '@supabase/supabase-js';
 import {
   ShoppingBag, Plus, Minus, X, MapPin, LogIn, Lock, Mail,
-  Trash2, ChevronRight, Loader2, CalendarClock, Wallet,
+  Trash2, ChevronRight, Loader2, CalendarClock, Wallet, AlertCircle,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import EnderecoMixin, { EnderecoFormData } from './EnderecoMixin';
@@ -56,6 +56,11 @@ export default function CheckoutDrawer({
   const [trocoPara, setTrocoPara] = useState('');
   const [codCupom, setCodCupom] = useState('');
   const [cupom, setCupom] = useState<Cupom | null>(null);
+  /** Erro DO CUPOM, exibido junto do campo. Antes ia para o `erro` geral,
+   *  lá embaixo perto do botão de finalizar: a pessoa clicava em Aplicar e,
+   *  da onde ela estava olhando, nada acontecia. */
+  const [cupomErro, setCupomErro] = useState('');
+  const [aplicandoCupom, setAplicandoCupom] = useState(false);
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [perfilCarregado, setPerfilCarregado] = useState(false);
@@ -244,19 +249,59 @@ export default function CheckoutDrawer({
   // que são gerados para uma pessoa específica). Agora manda-se o código e o
   // servidor responde válido/inválido, aplicando limite de uso, primeira
   // compra e método exigido — regras que antes só existiam no browser.
-  const aplicarCupom = async () => {
-    setErro('');
+  const validarCupom = async (codigo: string, metodoAtual: string | null) => {
     const { data, error } = await supabase.rpc('fn_validar_cupom', {
       p_loja_id: loja.id,
-      p_codigo: codCupom.trim().toUpperCase(),
+      p_codigo: codigo.trim().toUpperCase(),
       p_subtotal: subtotal,
-      p_metodo: metodo,
+      p_metodo: metodoAtual,
     });
-    const valido = (data as Cupom[] | null)?.[0];
+    return { valido: (data as Cupom[] | null)?.[0] ?? null, error };
+  };
+
+  const aplicarCupom = async () => {
+    const codigo = codCupom.trim();
+    if (!codigo) return;
+
+    setCupomErro('');
+    setAplicandoCupom(true);
+    const { valido, error } = await validarCupom(codigo, metodo);
+    setAplicandoCupom(false);
+
     if (error || !valido) {
-      return setErro(mensagemErroSupabase('Cupom inválido ou expirado.', error ?? undefined));
+      // A mensagem do servidor é específica ("venceu em 26/07/2026", "vale a
+      // partir de R$ 30,00", "vale só no pagamento por Pix"). Prefixá-la com
+      // um "Cupom inválido ou expirado." genérico só atrapalha quem lê.
+      setCupom(null);
+      return setCupomErro(error?.message || 'Não foi possível aplicar este cupom.');
     }
     setCupom(valido);
+  };
+
+  // Cupom preso a forma de pagamento (metodo_exigido) deixa de valer se a
+  // pessoa troca de Pix para cartão depois de aplicar. O servidor derruba o
+  // desconto no fn_recalcular_pedido de qualquer jeito — sem isto, a tela
+  // seguiria exibindo um abatimento que não vai existir na cobrança.
+  useEffect(() => {
+    if (!cupom) return;
+    let cancelado = false;
+    (async () => {
+      const { valido, error } = await validarCupom(cupom.codigo, metodo);
+      if (cancelado) return;
+      if (error || !valido) {
+        setCupom(null);
+        setCodCupom('');
+        setCupomErro(error?.message || 'O cupom não vale para esta forma de pagamento.');
+      }
+    })();
+    return () => { cancelado = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metodo]);
+
+  const removerCupom = () => {
+    setCupom(null);
+    setCupomErro('');
+    setCodCupom('');
   };
 
   const enviar = async () => {
@@ -660,24 +705,48 @@ export default function CheckoutDrawer({
                   <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
                     {tDynamic('Cupom de desconto')}
                   </p>
-                  <div className="flex gap-2">
-                    <input
-                      value={codCupom}
-                      onChange={(e) => setCodCupom(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && aplicarCupom()}
-                      placeholder="Código do cupom"
-                      className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm uppercase outline-none focus:border-[var(--cor-primaria)] focus:bg-white dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-                    />
-                    <button
-                      onClick={aplicarCupom}
-                      className="rounded-xl border border-gray-200 px-4 text-sm font-bold dark:border-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                    >
-                      Aplicar
-                    </button>
-                  </div>
-                  {cupom && (
-                    <p className="mt-1.5 text-xs font-bold text-green-600">
-                      Cupom {cupom.codigo} aplicado — desconto de {fmt(desconto)}
+                  {cupom ? (
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-green-300 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-900/20">
+                      <span className="min-w-0 text-sm font-bold text-green-700 dark:text-green-400">
+                        {cupom.codigo} — {tDynamic('desconto de')} {fmt(desconto)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={removerCupom}
+                        className="shrink-0 rounded-lg px-2 py-1 text-xs font-bold text-green-700 underline transition-colors hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/40"
+                      >
+                        {tDynamic('Remover')}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        value={codCupom}
+                        onChange={(e) => { setCodCupom(e.target.value); if (cupomErro) setCupomErro(''); }}
+                        onKeyDown={(e) => e.key === 'Enter' && aplicarCupom()}
+                        placeholder="Código do cupom"
+                        aria-invalid={!!cupomErro}
+                        className={`flex-1 rounded-xl border bg-gray-50 px-4 py-3 text-sm uppercase outline-none transition-colors focus:bg-white dark:bg-gray-900 dark:text-gray-100 ${
+                          cupomErro
+                            ? 'border-red-400 focus:border-red-500 dark:border-red-800'
+                            : 'border-gray-200 focus:border-[var(--cor-primaria)] dark:border-gray-700'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={aplicarCupom}
+                        disabled={aplicandoCupom || !codCupom.trim()}
+                        className="flex min-w-[104px] items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 text-sm font-bold transition-all hover:bg-gray-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        {aplicandoCupom
+                          ? <><Loader2 size={15} className="animate-spin" /> {tDynamic('Aplicando')}</>
+                          : tDynamic('Aplicar')}
+                      </button>
+                    </div>
+                  )}
+                  {cupomErro && (
+                    <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-xs font-semibold text-red-600 dark:text-red-400">
+                      <AlertCircle size={14} className="mt-px shrink-0" /> {cupomErro}
                     </p>
                   )}
                 </div>

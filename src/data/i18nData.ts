@@ -3370,6 +3370,8 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   // KDS por estação e expeditor (Sprint 5) — telas de tablet da cozinha/bar
   'Abrir Expeditor': 'Open Expeditor',
   'Aguardando': 'Waiting',
+  'Aplicando': 'Applying',
+  'Aplicar': 'Apply',
   'Avançar para': 'Advance to',
   'Entregar': 'Hand over',
   'Esta loja tem estações configuradas — cozinha e bar podem trabalhar com tickets independentes.':

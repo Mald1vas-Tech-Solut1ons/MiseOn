@@ -174,3 +174,13 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 
 ## 21. Architectural Decision Records (ADRs)
 *(Este espaço receberá documentação e contexto sobre decisões estruturais (ex: escolha do formato de modelagem das capacidades, contratos do Payment Core) conforme o andamento das Sprints).*
+
+## 20-D. Sprint 9 — Cupom volta a existir, e pedido online espera o pagamento (08/09)
+
+**Cupom (item "a" do relato):** `fn_validar_cupom` declarava `RETURNS TABLE(id, codigo, ...)` e o corpo filtrava por `codigo` sem qualificar a tabela. Esses nomes viram variáveis dentro da função → `42702 column reference "codigo" is ambiguous` em **toda** chamada. **Nenhum cupom jamais foi aplicado neste sistema**; o cliente via "Cupom inválido ou expirado" para cupom válido. Corrigido com alias, e cada recusa passou a ter motivo próprio (não existe / inativo / vencido / limite de usos / forma de pagamento / mínimo / primeira compra) — antes tudo colapsava numa frase só. Na tela: erro junto do campo (ia para o `erro` geral lá embaixo), botão com estado de carregando/desabilitado, cupom aplicado com opção de remover, e revalidação quando muda a forma de pagamento (cupom de Pix usado no cartão perdia o desconto no servidor, em silêncio).
+
+**Pedido antes do pagamento (item "c", o mais grave):** `fn_criar_pedido_completo` criava o pedido como `NOVO` **antes** de gerar a cobrança. No instante em que o cliente abria a tela do cartão, o lojista recebia alerta sonoro e o pedido entrava em "Abertos" — ele aceitava pedido que ninguém pagou, e desistência virava comida perdida. Agora existe `AGUARDANDO_PAGAMENTO` no enum: PIX e CREDITO (os dois com confirmação de gateway) nascem nesse estado; DINHEIRO continua `NOVO` porque paga na entrega. O estado é invisível nos filtros do painel (lista branca `NOVO`/`ACEITO`) e o alerta de realtime o ignora.
+
+**Efeito colateral que quase passou:** a baixa de estoque acontecia em `NEW.status='ACEITO' AND OLD.status='NOVO'`. Com o pedido online saindo de `AGUARDANDO_PAGAMENTO`, o estoque **não baixaria** — saldo alto e CMV baixo, em silêncio. `fn_trg_status_pedido` passou a aceitar as duas origens. Provado no banco: `estoque_baixado = t` após a confirmação.
+
+**Ainda aberto do relato:** (b) taxa por bairro em vez de raio/distância — a loja de teste está em modo BAIRRO e sem lat/lng, o motor de distância do Sprint 6 já existe; (d) recusa do cartão pela Efí ("valor da emissão superior ao limite operacional") é resposta do provedor sobre a conta, não código; (e) ficha técnica de drinks no KDS; (f) sidebar com footer fixo ocupando espaço dos módulos; (g) ciclo de vida da comanda no buffet.

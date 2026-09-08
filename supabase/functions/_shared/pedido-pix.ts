@@ -83,11 +83,14 @@ export async function confirmarPagamentoPedido(
   // e pedido ACEITO.
 
   // Só depois de confirmado o pedido entra na operação.
+  // AGUARDANDO_PAGAMENTO e a origem do pedido online desde 20260908: ele nasce
+  // invisivel para o lojista e so entra na operacao aqui, com o Pix confirmado.
+  // NOVO continua aceito para nao quebrar pedido criado antes dessa mudanca.
   await supabase
     .from('pedidos')
     .update({ status: 'ACEITO' })
     .eq('id', pagoRow.pedido_id)
-    .eq('status', 'NOVO');
+    .in('status', ['NOVO', 'AGUARDANDO_PAGAMENTO']);
 
   log.info('Pagamento Pix confirmado (receita lança no FINALIZADO)', { txid, pedido_id: pagoRow.pedido_id });
   return { pago: true, pedido_id: pagoRow.pedido_id };

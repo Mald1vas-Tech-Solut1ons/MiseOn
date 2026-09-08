@@ -33,6 +33,7 @@ const ETAPAS_RETIRADA: { status: StatusPedido; label: string; icon: ReactNode }[
 ];
 
 const STATUS_LABEL: Record<StatusPedido, string> = {
+  AGUARDANDO_PAGAMENTO: 'Aguardando pagamento',
   NOVO: 'Recebido',
   ACEITO: 'Aceito',
   PREPARANDO: 'Em preparo',

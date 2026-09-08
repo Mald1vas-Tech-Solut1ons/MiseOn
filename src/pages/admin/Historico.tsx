@@ -9,10 +9,12 @@ import MiseOnLoader from '../../components/MiseOnLoader';
 
 import { useI18n } from '../../contexts/I18nContext';
 const STATUS_LABEL: Record<StatusPedido, string> = {
+  AGUARDANDO_PAGAMENTO: 'Aguardando pagamento',
   NOVO: 'Recebido', ACEITO: 'Aceito', PREPARANDO: 'Preparando',
   PRONTO: 'Pronto', EM_ROTA: 'Em rota', FINALIZADO: 'Entregue', CANCELADO: 'Cancelado',
 };
 const STATUS_COR: Record<StatusPedido, string> = {
+  AGUARDANDO_PAGAMENTO: 'bg-gray-100 text-gray-600',
   NOVO: 'bg-amber-100 text-amber-700', ACEITO: 'bg-blue-100 text-blue-700', PREPARANDO: 'bg-indigo-100 text-indigo-700',
   PRONTO: 'bg-purple-100 text-purple-700', EM_ROTA: 'bg-cyan-100 text-cyan-700',
   FINALIZADO: 'bg-green-100 text-green-700', CANCELADO: 'bg-red-100 text-red-600',

@@ -1,7 +1,10 @@
 // ── Tipos espelhando o schema Supabase ──────────────────────
 
 export type TipoPedido = 'DELIVERY' | 'SALAO' | 'RETIRADA_BALCAO';
-export type StatusPedido = 'NOVO' | 'ACEITO' | 'PREPARANDO' | 'PRONTO' | 'EM_ROTA' | 'FINALIZADO' | 'CANCELADO';
+// AGUARDANDO_PAGAMENTO: carrinho em pagamento online (Pix/cartão). Não é
+// operação — não aparece no painel do lojista nem alerta ninguém; vira NOVO/
+// ACEITO quando o gateway confirma (20260908).
+export type StatusPedido = 'AGUARDANDO_PAGAMENTO' | 'NOVO' | 'ACEITO' | 'PREPARANDO' | 'PRONTO' | 'EM_ROTA' | 'FINALIZADO' | 'CANCELADO';
 export type MetodoPgto = 'PIX' | 'CREDITO' | 'DEBITO' | 'DINHEIRO' | 'IFOOD';
 export type TipoRemetente = 'CLIENTE' | 'LOJA' | 'ENTREGADOR';
 export type TipoRemuneracao = 'FIXO' | 'POR_ENTREGA' | 'POR_KM' | 'DESLIGADO';

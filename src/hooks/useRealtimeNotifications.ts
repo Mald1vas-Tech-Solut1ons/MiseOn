@@ -43,6 +43,9 @@ export function useRealtimeNotifications({ lojaId, pedidoId, contexto, entregado
       const canalLoja = supabase.channel(`realtime-loja-${lojaId}-${contexto}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${lojaId}` }, (payload) => {
           const p = payload.new as Pedido;
+          // Carrinho em pagamento não é pedido: alertar aqui fazia o lojista
+          // ser avisado no instante em que o cliente abria a tela do cartão.
+          if (p.status === 'AGUARDANDO_PAGAMENTO') return;
           if (contexto === 'PDV' && modoPdv === 'MESA' && p.origem !== 'balcao' && p.origem !== 'garcom') {
             // Novo pedido de mesa via QR ou delivery (não feito pelo próprio PDV)
             toast(`Novo pedido #${p.numero}!`, 'info');
