@@ -56,6 +56,7 @@ const SUFIXO = Date.now().toString(36);
 const SENHA_TESTE = `s1c-${SUFIXO}`;
 const insumoIds: string[] = [];
 const pedidosCriados: string[] = [];
+const produtosCriados: string[] = [];
 
 /** Marca de teste nos nomes: o afterAll limpa lançamentos CMV por aqui. */
 const nomeInsumo = (apelido: string) => `S1C ${SUFIXO} ${apelido}`;
@@ -192,19 +193,20 @@ afterAll(async () => {
   // Lançamentos de CMV/estorno gerados pelos triggers: sem FK para as linhas
   // de teste, limpar por referência (pedido) e por histórico (nome S1C).
   if (pedidosCriados.length) {
-    await db.from('lancamentos_financeiros').in('referencia_id', pedidosCriados).delete();
+    await db.from('lancamentos_financeiros').delete().in('referencia_id', pedidosCriados);
   }
-  await db.from('lancamentos_financeiros').ilike('historico', `CMV — S1C ${SUFIXO}%`).delete();
+  await db.from('lancamentos_financeiros').delete().ilike('historico', `CMV — S1C ${SUFIXO}%`);
   // Transformações (a itens de transformação é CASCADE da cabeça).
-  await db.from('transformacoes_estoque').ilike('observacao', `S1C ${SUFIXO}%`).delete();
+  await db.from('transformacoes_estoque').delete().ilike('observacao', `S1C ${SUFIXO}%`);
   // Movimentações e lotes antes dos insumos (FK).
   if (insumoIds.length) {
-    await db.from('movimentacoes_estoque').in('insumo_id', insumoIds).delete();
-    await db.from('lotes_estoque').in('insumo_id', insumoIds).delete();
+    await db.from('movimentacoes_estoque').delete().in('insumo_id', insumoIds);
+    await db.from('lotes_estoque').delete().in('insumo_id', insumoIds);
   }
-  if (pedidosCriados.length) await db.from('pedidos').in('id', pedidosCriados).delete();
-  if (insumoIds.length) await db.from('insumos').in('id', insumoIds).delete();
-  await db.from('usuarios_loja').eq('user_id', usuarioId).eq('loja_id', lojaId).delete();
+  if (pedidosCriados.length) await db.from('pedidos').delete().in('id', pedidosCriados);
+  if (produtosCriados.length) await db.from('produtos').delete().in('id', produtosCriados);
+  if (insumoIds.length) await db.from('insumos').delete().in('id', insumoIds);
+  await db.from('usuarios_loja').delete().eq('user_id', usuarioId).eq('loja_id', lojaId);
   await db.auth.admin.deleteUser(usuarioId);
 });
 
@@ -379,16 +381,47 @@ gated(isConfigured, 'Estorno devolve o lote, não só o saldo (Sprint 1)', () =>
     const g = await criarInsumo('Estorno G');
     await entrada(g.id, 6, 12, '2026-01-15T12:00:00.000Z'); // 2,00/un
 
-    // Pedido com baixa já feita (estoque_baixado): a baixa de 4 un consumiu
-    // 8,00 de lote. A baixa é inserida aqui diretamente — o que está em
-    // teste é o ESTORNO do gatilho de cancelamento, não o caminho de venda.
+    // A baixa tem que vir do CAMINHO REAL da venda (NOVO -> ACEITO dispara
+    // fn_baixar_estoque), não de um INSERT em movimentacoes_estoque.
+    //
+    // Por quê: nenhum gatilho de movimentacoes_estoque mexe em
+    // insumos.quantidade_atual NEM consome lote — quem faz as três escritas
+    // juntas (movimento + saldo + PEPS) são as RPCs. Com o INSERT direto o
+    // cenário nascia impossível: saldo parado em 6 e lote intacto, e o
+    // estorno depois criava um lote a mais (10 un para 6 de saldo).
+    // Medido no banco: com o ciclo real dá 2/2 após ACEITO e 6/6 após o
+    // cancelamento, que é exatamente o que este teste afirma.
+    const { data: categoria } = await db
+      .from('categorias').select('id').eq('loja_id', lojaId).limit(1).maybeSingle();
+
+    const { data: produto, error: errProd } = await db
+      .from('produtos')
+      .insert({
+        loja_id: lojaId,
+        categoria_id: categoria?.id ?? null,
+        nome: `Produto Estorno S1C ${SUFIXO}`,
+        preco: 8,
+        disponivel: true,
+        controla_estoque: true,
+        estacao_preparo: 'DIRETO',
+      })
+      .select('id')
+      .single();
+    if (errProd) throw new Error(`produto falhou: ${errProd.message}`);
+    produtosCriados.push(produto.id);
+
+    // 1 produto vendido = 4 un do insumo: é a ficha que define a baixa.
+    const { error: errFicha } = await db
+      .from('fichas_tecnicas')
+      .insert({ produto_id: produto.id, insumo_id: g.id, quantidade_consumida: 4 });
+    if (errFicha) throw new Error(`ficha falhou: ${errFicha.message}`);
+
     const { data: pedido, error: errPedido } = await db
       .from('pedidos')
       .insert({
         loja_id: lojaId,
         tipo_pedido: 'RETIRADA_BALCAO',
         status: 'NOVO',
-        estoque_baixado: true,
         identificador_cliente: 'Teste S1C',
         subtotal: 8,
         taxa_entrega: 0,
@@ -402,15 +435,19 @@ gated(isConfigured, 'Estorno devolve o lote, não só o saldo (Sprint 1)', () =>
     if (errPedido) throw new Error(errPedido.message);
     pedidosCriados.push(pedido.id);
 
-    await db.from('movimentacoes_estoque').insert({
-      loja_id: lojaId,
-      insumo_id: g.id,
-      tipo: 'BAIXA_VENDA',
-      quantidade: -4,
-      custo_total: 8,
-      motivo: 'Baixa automática por pedido',
+    const { error: errItem } = await db.from('itens_pedido').insert({
       pedido_id: pedido.id,
+      produto_id: produto.id,
+      nome_produto: `Produto Estorno S1C ${SUFIXO}`,
+      preco_unitario: 8,
+      quantidade: 1,
     });
+    if (errItem) throw new Error(`item falhou: ${errItem.message}`);
+
+    // NOVO -> ACEITO: o gatilho baixa 4 un, consome o lote e custeia pelo PEPS.
+    const { error: errAceite } = await db
+      .from('pedidos').update({ status: 'ACEITO' }).eq('id', pedido.id);
+    if (errAceite) throw new Error(`aceite falhou: ${errAceite.message}`);
     expect(await saldoDe(g.id)).toBe(2);
 
     // O caminho clássico da venda continua passando pelo gatilho novo (S1-D):

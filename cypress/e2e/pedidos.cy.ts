@@ -15,8 +15,13 @@ describe('Fluxo de Pedidos', () => {
     // Clica no produto
     cy.contains('X-Burger').filter(':visible').first().click();
 
-    // Confirma modal de produto
-    cy.contains('button', 'Adicionar').filter(':visible').first().click();
+    // Confirma modal de produto.
+    // Ancora estavel: o CARD do produto tambem e um <button> e tambem contem a
+    // palavra "Adicionar" (ProdutoCard, Cardapio.tsx). Com
+    // cy.contains('button','Adicionar').first() o Cypress pegava o CARD, que
+    // esta ATRAS do modal aberto — e o clique morria em "element is being
+    // covered by another element" nas 3 tentativas.
+    cy.get('[data-cy=produto-adicionar]').should('be.visible').click();
 
     // Carrinho deve conter o item X-Burger na tela
     cy.contains('X-Burger').should('be.visible');
@@ -56,7 +61,7 @@ describe('Fluxo de Pedidos', () => {
     cy.dismissCookieBanner();
 
     cy.contains('X-Burger').filter(':visible').first().click();
-    cy.contains('button', 'Adicionar').filter(':visible').first().click();
+    cy.get('[data-cy=produto-adicionar]').should('be.visible').click();
     cy.get('.vitrine-floating-cart:visible').click();
 
     // Aguarda o cliente e saldo de cashback serem carregados

@@ -1126,6 +1126,7 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
                   <button type="button" onClick={() => setQtd((q) => q + 1)}><Plus size={16} /></button>
                 </div>
                 <button
+                  data-cy="produto-adicionar"
                   disabled={!valido}
                   onClick={() => onAdd({ produto, quantidade: qtd, observacao: obs || undefined, opcoesSelecionadas })}
                   className="flex-1 rounded-xl bg-[var(--cor-primaria)] py-3 font-semibold text-white disabled:opacity-40"
@@ -1137,6 +1138,7 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
 
             {isPeso && (
               <button
+                data-cy="produto-adicionar"
                 disabled={!valido}
                 onClick={() => onAdd({ produto, quantidade: qtd, observacao: obs || undefined, opcoesSelecionadas })}
                 className="mt-3 flex w-full items-center justify-center rounded-xl bg-[var(--cor-primaria)] py-3 font-semibold text-white disabled:opacity-40"
