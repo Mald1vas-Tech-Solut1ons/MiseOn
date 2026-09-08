@@ -84,6 +84,8 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 - Estruturar Display Device / Session para controle de telas/TVs via pareamento.
 - Desacoplar etapas de KDS de modificadores de produto (roteamento inteligente). — **KDS por estação entregue no Sprint 5; falta o modificador estruturado (Sprint 5.4).**
 - Fixtures de teste para a entrada fiscal (KG/UN/CX/PC/LT, desconto rateado, conversão) — a separação qtd/valor está correta hoje mas sem teste que a proteja de regressão.
+- Geocodificação no servidor: hoje o lat/lng do endereço vem do cliente e a taxa é derivada dele (Sprint 6). Subdeclarar a coordenada ainda pode baixar a faixa de frete.
+- `taxas_entrega.ativo` é ignorado tanto pelo cardápio quanto por `fn_taxa_entrega_calculada` (espelhamento deliberado, para não mudar preço no deploy do Sprint 6). Decidir se a coluna vale e aplicar nos dois lados.
 
 ## 18. Roadmap
 **NOW**
@@ -106,8 +108,29 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 - Refatorações puramente estéticas em módulos maduros.
 
 ## 19. Sprint Atual
-- **SPRINT 5: KDS Multiestação — CONCLUÍDO (08/09)**. Ver seção 7. `typecheck`/`lint` limpos, testado ponta a ponta em produção (tenant de provas), commit feito.
-- **Próximo candidato**: Sprint 3 (Estoque Inteligente/NF/XML/Classificação) tem menos risco vivo do que o diagnóstico antigo sugeria (ver seção 5) — antes de abrir sprint novo, vale reconciliar PEPS/divergência com o mesmo rigor. Alternativa: Sprint 5.4 (modificadores estruturados do KDS, ex. "ponto da carne").
+- **SPRINT 5: KDS Multiestação — CONCLUÍDO (08/09)**. Ver seção 7.
+- **SPRINT 6: "O servidor decide" — CONCLUÍDO (08/09)**. Ver seção 20-A.
+- **Próximo candidato**: reconciliar PEPS (SQL vs TS) e a divergência saldo×lotes com o mesmo rigor — o diagnóstico de 05/09 apontava motor duplicado, mas o S1-C já mexeu nisso e a informação precisa ser reconfirmada contra o código antes de virar sprint. Alternativa: Sprint 5.4 (modificadores estruturados do KDS, ex. "ponto da carne").
+
+## 20-A. Sprint 6 — O servidor decide: preço, taxa e porta (08/09)
+**Problema:** a blindagem de 20260819042904 tirou do cliente a autoridade sobre preço de item e cupom, mas três autoridades continuavam no navegador, e as três mexem em dinheiro:
+
+| # | Defeito | Impacto |
+|---|---------|---------|
+| D1 | `fn_criar_pedido_completo` gravava `taxa_entrega` do payload como veio | POST com `"taxa_entrega": 0` = entrega grátis, invisível no fechamento |
+| D2 | `preco_original` ("De: R$ X") fixado por NOME de produto no bundle do cardápio | Preço de uma loja aparecia em qualquer loja com produto de nome parecido; a coluna nem existia no banco |
+| D3 | "Loja aberta" decidido com `new Date()` do navegador | Relógio errado ou POST direto derruba pedido na cozinha com a loja fechada |
+
+**O que foi feito:**
+- `fn_taxa_entrega_calculada(loja, lat, lng, bairro, subtotal)` — espelha `src/lib/geo.ts` (distância→faixa→bairro→padrão, frete grátis, raio). A distância é recalculada por haversine a partir do lat/lng: mentir nela é mentir no endereço de entrega.
+- `fn_loja_aberta(loja)` — horário no fuso da operação (America/Sao_Paulo), cobrindo turno que cruza a meia-noite; `aberto_manual` vence o horário.
+- `fn_criar_pedido_completo` reescrita **sobre a definição de produção**: taxa nasce 0 e é derivada após o subtotal do servidor; fora de área e loja fechada recusam o pedido — mas pedido **agendado** continua passando com a loja fechada, igual à regra da tela.
+- `produtos.preco_original` criada com backfill que reproduz exatamente o que o bundle fazia (nenhuma vitrine muda de aparência), e o campo entrou no formulário do Cardápio — a promoção virou dado do lojista, não deploy.
+- `fn_agora_sao_paulo_hhmm()` — relógio da operação observável (havia bug histórico de painel apagando às 21h por fuso).
+
+**Provado em produção (tenant de provas), não só em teste:** payload com `taxa_entrega: 0` e `distancia_km: 0.1` → gravado **R$ 7,00** e **2.00 km**; fora do raio recusado; loja fechada recusada; agendado com loja fechada aceito; frete grátis legítimo continua zerando.
+
+**Trade-off assumido:** a geocodificação continua no cliente. O servidor deriva a taxa das suas próprias tabelas, mas confia no lat/lng informado — subdeclarar distância ainda encolhe a faixa. O vazamento é limitado pela tabela de faixas (não é mais arbitrário), e fechar isso exige geocodificação no servidor. **Registrado no backlog.**
 
 ## 20. Decisões do Dono
 - Focar sempre na redução da carga cognitiva e esforço operacional do restaurante. O sistema deve aprender a operação, não o inverso.

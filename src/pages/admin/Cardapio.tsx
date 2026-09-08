@@ -291,6 +291,9 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
   const [descricao, setDescricao] = useState(produto?.descricao ?? '');
   const [tipoVenda, setTipoVenda] = useState<TipoVenda>(produto?.tipo_venda ?? 'UNITARIO');
   const [preco, setPreco] = useState(String(produto?.preco ?? ''));
+  const [precoOriginal, setPrecoOriginal] = useState(
+    produto?.preco_original != null ? String(produto.preco_original) : '',
+  );
   const [precoPorQuilo, setPrecoPorQuilo] = useState(String(produto?.preco_por_quilo ?? ''));
   const [galeria, setGaleria] = useState<string[]>(produto?.galeria ?? (produto?.imagem_url ? [produto.imagem_url] : []));
   const [categoriaId, setCategoriaId] = useState(produto?.categoria_id ?? categorias[0]?.id ?? '');
@@ -415,6 +418,8 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
         tipo_venda: tipoVenda,
         preco_por_quilo: tipoVenda === 'POR_PESO' ? Number(precoPorQuilo || 0) : 0,
         estacao_preparo: estacaoPreparo,
+        // Vazio = sem promoção (NULL); o CHECK do banco recusa zero/negativo.
+        preco_original: precoOriginal.trim() === '' ? null : Number(precoOriginal),
         pdv_code: pdvCode.trim() || null,
         estacao_kds_id: estacaoKdsId || null,
         workflow_kds_id: estacaoKdsId ? (workflowsKds.find((w) => w.estacao_id === estacaoKdsId)?.id ?? null) : null,
@@ -544,6 +549,24 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
               <option value="">Sem categoria</option>
               {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
             </select>
+          </div>
+          {/* Promoção "De/Por": o preço riscado da vitrine. Até 20260908 os
+              únicos valores possíveis estavam fixados por nome no bundle do
+              cardápio público — agora é campo da loja. */}
+          <div className="pt-1">
+            <input
+              value={precoOriginal}
+              onChange={(e) => setPrecoOriginal(e.target.value)}
+              type="number"
+              step="0.01"
+              placeholder='Preço "De:" para promoção riscada (opcional)'
+              className="w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+            />
+            {precoOriginal !== '' && Number(precoOriginal) <= Number(preco || 0) && (
+              <p className="mt-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                {tDynamic('O preço "De" precisa ser maior que o preço de venda para a vitrine riscar.')}
+              </p>
+            )}
           </div>
           <div className="pt-1">
             <input value={pdvCode} onChange={(e) => setPdvCode(e.target.value)} placeholder="Código PDV / iFood (opcional)" className="w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />

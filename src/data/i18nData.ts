@@ -1713,6 +1713,8 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Chama no WhatsApp': 'Message on WhatsApp',
   'Chamar no WhatsApp': 'Message on WhatsApp',
   'Chamar no WhatsApp agora': 'Message on WhatsApp now',
+  'Carregando estação...': 'Loading station...',
+  'Carregando expeditor...': 'Loading expeditor...',
   'Checklist de Manufatura': 'Production Checklist',
   'Clientes em Risco': 'Customers at Risk',
   'Cobranças e notas fiscais da assinatura de': 'Charges and invoices for the subscription of',
@@ -3364,6 +3366,33 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   '— assunto de saúde nunca é automatizado;': '— health matters are never automated;',
   '— está incluído no seu plano MiseOn;': '— it\'s included in your MiseOn plan;',
   '— sua tabela De-Para fica pronta automaticamente.': '— your De-Para mapping table is ready automatically.',
+
+  // KDS por estação e expeditor (Sprint 5) — telas de tablet da cozinha/bar
+  'Abrir Expeditor': 'Open Expeditor',
+  'Aguardando': 'Waiting',
+  'Avançar para': 'Advance to',
+  'Entregar': 'Hand over',
+  'Esta loja tem estações configuradas — cozinha e bar podem trabalhar com tickets independentes.':
+    'This store has stations set up — kitchen and bar can work on independent tickets.',
+  'Estação não encontrada.': 'Station not found.',
+  'Etapa': 'Step',
+  'Expeditor': 'Expeditor',
+  'Marcar Pronto': 'Mark as Ready',
+  'Nenhum pedido em produção.': 'No orders in production.',
+  'Nenhum ticket pendente nesta estação.': 'No pending tickets at this station.',
+  'Padrão da loja (Cozinha)': 'Store default (Kitchen)',
+  'Preparando': 'Preparing',
+  'Quando o pedido for aceito, este item vira um ticket independente na tela dessa estação.':
+    'Once the order is accepted, this item becomes an independent ticket on that station screen.',
+  'Tela do KDS que produz este item': 'KDS screen that produces this item',
+  'Voltar para o KDS': 'Back to the KDS',
+  'ticket(s) na fila': 'ticket(s) in queue',
+  'Acompanha a sincronização de todas as estações por pedido':
+    'Tracks how every station is syncing on each order',
+
+  // Promoção "De/Por" no cadastro de produto (Sprint 6)
+  'O preço "De" precisa ser maior que o preço de venda para a vitrine riscar.':
+    'The "was" price must be higher than the selling price for the storefront to strike it through.',
 };
 
 function escaparRegex(str: string) {

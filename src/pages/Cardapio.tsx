@@ -209,18 +209,17 @@ export default function Cardapio() {
       // disponivel = o lojista quer vender; tem_estoque = os insumos da ficha técnica
       // ainda alcançam pra fazer o produto — os dois juntos decidem se aparece pra compra
       const mapaEstoque = new Map<string, boolean>((est.data ?? []).map((e: any) => [e.produto_id, e.tem_estoque]));
-      const prodsComPromo = (p.data ?? []).map((prod: Produto) => {
-        const nomeU = (prod.nome || '').toUpperCase();
-        let preco_original: number | undefined = prod.preco_original;
-        if (nomeU.includes('COMBO X-BACON')) preco_original = 54.00;
-        if (nomeU.includes('SMASH FIT DE PATINHO')) preco_original = 39.90;
-        return {
-          ...prod,
-          preco_original,
-          tem_estoque: mapaEstoque.get(prod.id) ?? true,
-        };
-      });
-      setProdutos(prodsComPromo);
+      // preco_original ("De: R$ X") vem do cadastro do produto desta loja.
+      // Até 20260908 duas promoções ficavam fixadas AQUI, por nome, dentro do
+      // bundle servido a todas as lojas — qualquer cliente com um produto
+      // chamado "COMBO X-BACON" herdava o preço-de de outro, e o dono da
+      // promoção real dependia de deploy para mudá-la. Agora é coluna
+      // (20260908050000) e o lojista edita na tela do Cardápio.
+      const prodsComEstoque = (p.data ?? []).map((prod: Produto) => ({
+        ...prod,
+        tem_estoque: mapaEstoque.get(prod.id) ?? true,
+      }));
+      setProdutos(prodsComEstoque);
       setNutricao(new Map(((nut.data as NutricaoProduto[]) ?? []).map((n) => [n.produto_id, n])));
       setCatalogoNutrientes((cat.data as NutrienteCatalogo[]) ?? []);
       setNutricaoOpcoes(new Map(((nutOpc.data as NutricaoOpcao[]) ?? []).map((o) => [o.opcao_id, o])));
