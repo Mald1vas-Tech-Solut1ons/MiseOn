@@ -517,7 +517,10 @@ gated(isConfigured, 'Estoque tem UMA autoridade (Sprint 7)', () => {
     await db.from('insumos').update({ quantidade_atual: 25 }).eq('id', i.id);
     expect(await divergenciaDe(i.id)).toHaveLength(1);
 
-    const { error } = await db.rpc('fn_reconciliar_estoque', {
+    // dbUsuario, não db: a RPC exige papel na loja (fn_tem_papel) e o
+    // service-role roda com auth.uid() nulo — mesmo motivo pelo qual
+    // fn_transformar_estoque já é testada com o usuário logado.
+    const { error } = await dbUsuario.rpc('fn_reconciliar_estoque', {
       p_insumo_id: i.id,
       p_qtd_contada: 15,
       p_observacao: `Contagem S1C ${SUFIXO}`,
