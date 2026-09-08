@@ -505,3 +505,40 @@ gated(isConfigured, 'Divergência saldo × lotes é DETECTÁVEL (critério S1-C)
     expect(await divergenciaDe(h.id)).toHaveLength(0);
   });
 });
+
+gated(isConfigured, 'Estoque tem UMA autoridade (Sprint 7)', () => {
+  it('reconciliação acerta saldo E lotes contra a contagem, e zera a divergência', async () => {
+    const i = await criarInsumo('Reconciliar I');
+    await entrada(i.id, 10, 200, '2026-01-15T12:00:00.000Z'); // 20,00/un
+
+    // Fabrica a divergência do jeito que o cadastro antigo fabricava: saldo
+    // escrito por fora, lote intacto. (Aqui via service-role, que ignora os
+    // grants — é o cenário legado que precisamos saber consertar.)
+    await db.from('insumos').update({ quantidade_atual: 25 }).eq('id', i.id);
+    expect(await divergenciaDe(i.id)).toHaveLength(1);
+
+    const { error } = await db.rpc('fn_reconciliar_estoque', {
+      p_insumo_id: i.id,
+      p_qtd_contada: 15,
+      p_observacao: `Contagem S1C ${SUFIXO}`,
+    });
+    if (error) throw new Error(`fn_reconciliar_estoque falhou: ${error.message}`);
+
+    expect(await saldoDe(i.id)).toBe(15);
+    const lotes = await lotesDo(i.id);
+    expect(lotes.reduce((s, l) => s + l.restante, 0)).toBe(15);
+    // O que importa: os dois lados fecham no mesmo número.
+    expect(await divergenciaDe(i.id)).toHaveLength(0);
+  });
+
+  it('o ledger e o saldo NÃO são graváveis por fora das RPCs', async () => {
+    // Guarda contra regressão de PERMISSÃO, não de código: se alguém
+    // reconceder UPDATE/INSERT nessas tabelas, a fábrica de divergência
+    // reabre e nada no app acusa. Consultar o catálogo é o único jeito de
+    // travar isso — o service-role dos testes ignora grant, então testar
+    // "tentando escrever" daria falso verde aqui.
+    const { data, error } = await db.rpc('fn_privilegios_de_escrita_estoque');
+    if (error) throw new Error(`checagem de privilégios falhou: ${error.message}`);
+    expect(data).toEqual([]);
+  });
+});

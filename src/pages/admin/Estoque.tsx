@@ -358,7 +358,9 @@ export default function Estoque() {
       variedade: identidade.variedade.trim() || null,
       marca: identidade.marca.trim() || null,
       unidade_medida: unidadeUso,
-      quantidade_atual: estoqueFinal,
+      // quantidade_atual NÃO entra aqui: saldo só se move por RPC
+      // (movimentação + saldo + lote juntos). O UPDATE desta coluna é
+      // revogado no banco desde 20260908 — mandá-la daria permission denied.
       estoque_minimo: Number(estoqueMinimo || 0),
       preco_embalagem: precoEmb,
       qtd_embalagem: rendEmb,
@@ -370,13 +372,29 @@ export default function Estoque() {
     if (editando) {
        const { error } = await supabase.from('insumos').update(payload).eq('id', editando.id);
        if (error) return avisarErroInsumo(error, nomeLimpo);
+
+       // Mudar o saldo pela tela de cadastro é, na prática, uma CONTAGEM.
+       // Antes isso era gravado direto em quantidade_atual e o lote ficava
+       // para trás — o item passava a mentir em silêncio e toda venda dele
+       // custeava por estimativa em vez de PEPS. Agora vai pela RPC, que
+       // acerta saldo E lotes e deixa a movimentação de rastro.
+       const saldoAnterior = Number(editando.quantidade_atual ?? 0);
+       if (Math.abs(estoqueFinal - saldoAnterior) > 1e-6) {
+         const { error: errSaldo } = await supabase.rpc('fn_reconciliar_estoque', {
+           p_insumo_id: editando.id,
+           p_qtd_contada: estoqueFinal,
+           p_observacao: 'Contagem informada no cadastro do insumo',
+         });
+         if (errSaldo) alert(`Insumo salvo, mas o saldo não pôde ser ajustado: ${errSaldo.message}`);
+       }
     } else {
-       const { data, error } = await supabase.from('insumos').insert(payload).select('id').single();
+       // Nasce ZERADO. O saldo inicial entra logo abaixo, pela RPC — antes o
+       // INSERT já gravava o saldo E a RPC somava de novo: criar insumo com
+       // 10 gravava 20 e lote 10. Era a fábrica de divergência do sistema.
+       const { data, error } = await supabase
+         .from('insumos').insert({ ...payload, quantidade_atual: 0 }).select('id').single();
        if (error) return avisarErroInsumo(error, nomeLimpo);
        if (data && estoqueFinal > 0) {
-         // Uma chamada transacional: a RPC grava a movimentação e o saldo
-         // juntos (Sprint 1 — antes eram 2 inserts soltos e a falha de um
-         // deixava o outro divergir).
          const { error: errSaldo } = await supabase.rpc('fn_movimentar_estoque', {
            p_insumo_id: data.id, p_tipo: 'ENTRADA', p_quantidade: estoqueFinal, p_motivo: 'Saldo inicial',
          });
