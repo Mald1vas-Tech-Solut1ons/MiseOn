@@ -26,15 +26,17 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 ## 5. Estado do Estoque
 - **Visão Estratégica**: NF/XML → interpretação → classificação → fornecedor → unidade → conversão → lote → validade → custo → estoque → disponibilidade → ficha técnica → CMV → sugestão de compra.
 - **Regras**: Determinístico (regras invariantes de negócio), IA (interpreta/classifica/sugere), Humano (confirma decisões críticas). IA nunca dita saldo, preço ou transação.
-- **Diagnóstico Atual**: Oportunidades claras de automação e correção de divergências e PEPS duplicado.
+- **Reconciliação 08/09** — risco "IA confunde quantidade com valor total" (qCom/vUnCom/vProd): rastreei as 3 rotas de entrada (`parseNFeXml.ts` p/ XML, `nfe-ocr-cupom` p/ foto via Gemini com schema tipado, SEFAZ QR) até `fn_importar_nfce`. As três já separam `qtd`/`unidade`/`valor_unitario`/`valor_total` corretamente, e `ModalImportarNFCe.tsx` usa `qtd_nota` (não `valor_total`) pra montar o payload. `custoComDesconto()` rateia o desconto proporcionalmente entre os itens — sem isso o CMV subiria ~3% de forma invisível. **Não é bug vivo hoje**; risco arquitetural real é a falta de testes de fixture (Regra 23) travando essa separação contra regressão futura — registrado no backlog.
+- **Diagnóstico Atual**: Oportunidades de automação seguem válidas; investigar divergências e PEPS duplicado citadas em diagnósticos anteriores exige reconciliação própria antes de agir (não foi o foco desta rodada).
 
 ## 6. Estado de Pedidos
 - **Diagnóstico Atual**: Múltiplos caminhos de criação de pedido espalhados pela base, o que gera inconsistências, regras duplicadas e brechas.
 - **Visão**: Unificar a criação e manipulação em um pipeline previsível de intenção, validação e consolidação.
 
 ## 7. Estado do KDS
-- **Diagnóstico Atual**: Módulo maduro que será mantido, porém com deficiência conceitual em modelagem de estações e modificadores.
-- **Modelo Futuro (Incremental)**: Estação → Workflow → Etapas; Item → Roteamento → Estação; Item → Modificadores/Requisitos de Preparo (ex: "ponto da carne" deve ser modificador, não etapa de workflow).
+- **Sprint 5 entregue (08/09)**: `kds_estacoes` → `kds_workflows` → `kds_tickets` implementado em paralelo ao pipeline legado (`pedidos.etapa_kds_atual`), sem rewrite. Um ticket por pedido por estação, ponteiro de etapa independente — testado de ponta a ponta (pedido misto cozinha+bar, avanço independente, conclusão só quando todos os tickets ficam PRONTO, isolamento entre lojas). Telas novas: `KDSEstacao.tsx` (por estação) e `KDSExpeditor.tsx` (sincronização por pedido). `KDS.tsx` legado intocado, só ganhou um link condicional pro modelo novo.
+- **Achado corrigido nesta entrega**: a integração com a máquina de estados existente (`fn_valida_transicao_pedido`/`fn_valida_estacao_pedido`, o passa-bastão balcão↔cozinha) não estava feita — a conclusão automática de um pedido com item de cozinha ia estourar exceção. `fn_trg_despachar_kds_ao_aceitar` agora adianta as mesmas transições que o clique manual faria.
+- **Ainda não feito (backlog, não bloqueador)**: seletor de estação/workflow por produto está na tela do Cardápio; falta "Modificadores estruturados" (ex: "ponto da carne") como Sprint 5.4 — hoje seria texto livre em `observacao`.
 
 ## 8. Estado Financeiro
 - **Diagnóstico Atual**: Problemas de CMV, riscos financeiros diagnosticados, dados que dificultam conciliação.
@@ -80,7 +82,8 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 - Remover autoridade do frontend sobre dados/segurança sensíveis.
 - Refatorar acoplamento Efí para um Payment Core abstrato.
 - Estruturar Display Device / Session para controle de telas/TVs via pareamento.
-- Desacoplar etapas de KDS de modificadores de produto (roteamento inteligente).
+- Desacoplar etapas de KDS de modificadores de produto (roteamento inteligente). — **KDS por estação entregue no Sprint 5; falta o modificador estruturado (Sprint 5.4).**
+- Fixtures de teste para a entrada fiscal (KG/UN/CX/PC/LT, desconto rateado, conversão) — a separação qtd/valor está correta hoje mas sem teste que a proteja de regressão.
 
 ## 18. Roadmap
 **NOW**
@@ -103,7 +106,8 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 - Refatorações puramente estéticas em módulos maduros.
 
 ## 19. Sprint Atual
-- **SPRINT 0: Go-Live e Integridade do Sprint Anterior** (Veja definição abaixo).
+- **SPRINT 5: KDS Multiestação — CONCLUÍDO (08/09)**. Ver seção 7. `typecheck`/`lint` limpos, testado ponta a ponta em produção (tenant de provas), commit feito.
+- **Próximo candidato**: Sprint 3 (Estoque Inteligente/NF/XML/Classificação) tem menos risco vivo do que o diagnóstico antigo sugeria (ver seção 5) — antes de abrir sprint novo, vale reconciliar PEPS/divergência com o mesmo rigor. Alternativa: Sprint 5.4 (modificadores estruturados do KDS, ex. "ponto da carne").
 
 ## 20. Decisões do Dono
 - Focar sempre na redução da carga cognitiva e esforço operacional do restaurante. O sistema deve aprender a operação, não o inverso.

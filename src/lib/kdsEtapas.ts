@@ -16,7 +16,7 @@
  * visível — filtrar a visão não pode mudar o fluxo de status.
  */
 
-import type { EtapaKDS } from '../types';
+import type { EtapaKDS, EtapaKdsWorkflow, KdsTicket, KdsWorkflow } from '../types';
 
 export type FiltroEstacaoKDS = 'TODAS' | 'COZINHA' | 'BAR';
 
@@ -53,4 +53,23 @@ export function statusAoAvancar(
   alvoIndex: number,
 ): 'PRONTO' | 'PREPARANDO' {
   return alvoIndex >= etapas.length - 1 ? 'PRONTO' : 'PREPARANDO';
+}
+
+// ── Sprint 5: KDS Enterprise — tickets por estação (20260908) ────────────
+// Aqui não existe "etapa global" nem visão filtrada: o ticket já nasce
+// escopado a UMA estação, e etapa_atual_idx anda sozinho no workflow dela.
+
+export interface EtapaAtualDoTicket {
+  /** Etapa em que o ticket está agora (undefined se o workflow está vazio). */
+  atual?: EtapaKdsWorkflow;
+  /** Próxima etapa, ou null se já é a última (avançar marca PRONTO). */
+  proxima: EtapaKdsWorkflow | null;
+  totalEtapas: number;
+}
+
+export function etapaAtualDoTicket(ticket: KdsTicket, workflow: KdsWorkflow): EtapaAtualDoTicket {
+  const etapas = [...workflow.etapas].sort((a, b) => a.ordem - b.ordem);
+  const atual = etapas[ticket.etapa_atual_idx];
+  const proxima = ticket.etapa_atual_idx + 1 < etapas.length ? etapas[ticket.etapa_atual_idx + 1] : null;
+  return { atual, proxima, totalEtapas: etapas.length };
 }

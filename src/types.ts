@@ -31,6 +31,61 @@ export interface EtapaKDS {
   estacao?: EstacaoEtapaKDS | null;
 }
 
+// ── Sprint 5: KDS Enterprise — estações, workflows e tickets ─────────────
+// Modelo novo, em paralelo ao pipeline único acima: cada estação física
+// (Cozinha, Bar...) tem seu próprio workflow e cada pedido pode gerar um
+// kds_ticket por estação, com ponteiro de etapa independente (20260908).
+
+export type StatusKdsTicket = 'AGUARDANDO' | 'PREPARANDO' | 'PRONTO';
+
+export interface KdsEstacao {
+  id: string;
+  loja_id: string;
+  nome: string;
+  cor: string;
+  ativo: boolean;
+  ordem: number;
+  criado_em: string;
+}
+
+export interface EtapaKdsWorkflow {
+  id: string;
+  nome: string;
+  ordem: number;
+}
+
+export interface KdsWorkflow {
+  id: string;
+  loja_id: string;
+  estacao_id: string;
+  nome: string;
+  etapas: EtapaKdsWorkflow[];
+  criado_em: string;
+}
+
+export interface ItemKdsTicket {
+  item_pedido_id: string;
+  produto_id: string | null;
+  nome: string;
+  quantidade: number;
+  observacao: string | null;
+  opcoes: string[];
+}
+
+export interface KdsTicket {
+  id: string;
+  pedido_id: string;
+  loja_id: string;
+  estacao_id: string;
+  workflow_id: string;
+  itens: ItemKdsTicket[];
+  etapa_atual_idx: number;
+  status: StatusKdsTicket;
+  iniciado_em: string | null;
+  concluido_em: string | null;
+  criado_em: string;
+}
+
 export interface LeadCadastro {
   id: string;
   nome_responsavel: string;
@@ -272,6 +327,11 @@ export interface Produto {
   tem_estoque?: boolean; // calculado no client via fn_produtos_com_estoque — não existe como coluna
   estacao_preparo?: EstacaoPreparo; // COZINHA (default) = entra no KDS. DIRETO = revenda, balcão entrega sem passar pela cozinha.
   pdv_code?: string; // para mapeamento com iFood
+  // Sprint 5 — roteamento por kds_estacoes/kds_workflows, em paralelo ao
+  // estacao_preparo acima: null = fn_despachar_kds_tickets manda pra
+  // estação Cozinha padrão da loja.
+  estacao_kds_id?: string | null;
+  workflow_kds_id?: string | null;
 }
 
 export interface Cupom {

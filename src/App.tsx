@@ -43,6 +43,8 @@ const Dashboard     = lazy(() => import('./pages/admin/Dashboard'));
 const PainelPedidos = lazy(() => import('./pages/admin/PainelPedidos'));
 const PDV           = lazy(() => import('./pages/admin/PDV'));
 const KDS           = lazy(() => import('./pages/admin/KDS'));
+const KDSEstacao    = lazy(() => import('./pages/admin/KDSEstacao'));
+const KDSExpeditor  = lazy(() => import('./pages/admin/KDSExpeditor'));
 const KDSProducao   = lazy(() => import('./pages/admin/KDSProducao'));
 const Mesas         = lazy(() => import('./pages/admin/Mesas'));
 const Entregas      = lazy(() => import('./pages/admin/Entregas'));
@@ -146,6 +148,8 @@ export default function App() {
                   <Route path="inicio"    element={<Dashboard />} />
                   <Route path="pdv"       element={<PDV />} />
                   <Route path="kds"       element={<KDS />} />
+                  <Route path="kds/expeditor" element={<KDSExpeditor />} />
+                  <Route path="kds/estacao/:estacaoId" element={<KDSEstacao />} />
                   <Route path="mesas"     element={<Mesas />} />
                   <Route path="balanca"   element={<PainelBalanca />} />
                   <Route path="garcom-mobile" element={<PainelGarcomMobile />} />

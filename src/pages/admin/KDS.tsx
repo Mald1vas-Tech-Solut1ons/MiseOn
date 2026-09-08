@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import {
   ChefHat, Bike, Store, Maximize, Minimize, Check, Package, UtensilsCrossed, Trophy, Flame,
   SlidersHorizontal, Settings, Plus, Trash2, ArrowLeft, ArrowRight, RotateCcw, X,
@@ -7,7 +7,7 @@ import {
   Columns, Archive, Sparkles, MoveRight, ZoomIn, ZoomOut, User, Users
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { type Pedido, type EtapaKDS, type StatusPedido } from '../../types';
+import { type Pedido, type EtapaKDS, type StatusPedido, type KdsEstacao } from '../../types';
 import { etapasVisiveisDaEstacao, statusAoAvancar } from '../../lib/kdsEtapas';
 import { tocarSom } from '../../lib/som';
 import { traduzirErro, type ErroTraduzido } from '../../lib/erros';
@@ -95,6 +95,9 @@ export default function KDS() {
   const [metricas, setMetricas] = useState<Metricas | null>(null);
   const [celebrar, setCelebrar] = useState(false);
   const [erroAcao, setErroAcao] = useState<ErroTraduzido | null>(null);
+  // Sprint 5: se a loja configurou estações (kds_estacoes), oferece o link
+  // pro modelo novo de tickets por estação — sem forçar migração de ninguém.
+  const [estacoesKds, setEstacoesKds] = useState<KdsEstacao[]>([]);
   const [filtroEstacao, setFiltroEstacao] = useState<'TODAS' | 'COZINHA' | 'BAR'>('TODAS');
   const [emFullscreen, setEmFullscreen] = useState(false);
 
@@ -331,6 +334,11 @@ export default function KDS() {
   useEffect(() => {
     carregar();
   }, [lojaId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    supabase.from('kds_estacoes').select('*').eq('loja_id', lojaId).eq('ativo', true).order('ordem')
+      .then(({ data }) => setEstacoesKds((data as KdsEstacao[]) ?? []));
+  }, [lojaId]);
 
   useEffect(() => {
     const canal = supabase
@@ -869,6 +877,25 @@ export default function KDS() {
         ? 'fixed inset-0 z-[9999] h-screen w-screen p-3 lg:p-4 overflow-hidden'
         : 'min-h-screen px-3 pt-3 lg:px-4'
       }`}>
+
+      {/* ── Sprint 5: aviso do modelo novo (só aparece se a loja tem estações configuradas) ── */}
+      {estacoesKds.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-orange-500/30 bg-orange-500/10 px-4 py-2.5 shrink-0">
+          <p className="text-xs font-bold text-orange-300">
+            {tDynamic('Esta loja tem estações configuradas — cozinha e bar podem trabalhar com tickets independentes.')}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/admin/kds/expeditor" className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-black text-white hover:bg-orange-600 transition-colors">
+              {tDynamic('Abrir Expeditor')}
+            </Link>
+            {estacoesKds.map((e) => (
+              <Link key={e.id} to={`/admin/kds/estacao/${e.id}`} className="rounded-lg px-3 py-1.5 text-xs font-black text-white transition-colors hover:opacity-90" style={{ backgroundColor: e.cor }}>
+                {e.nome}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Cabeçalho KDS Kanban ── */}
       <div data-tour="tour-kds-header" className="mb-3 flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-md shrink-0">

@@ -4,7 +4,7 @@ import {
   Plus, Pencil, Trash2, X, Star, EyeOff, Eye, Search, ChevronUp, ChevronDown, Save, Sparkles, ChefHat, Store,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Categoria, Produto, Insumo, EstacaoPreparo, TipoVenda, fmt } from '../../types';
+import { Categoria, Produto, Insumo, EstacaoPreparo, TipoVenda, KdsEstacao, KdsWorkflow, fmt } from '../../types';
 import ImageUpload from '../../components/ImageUpload';
 import type { CtxLoja } from './AdminLayout';
 import { getOptimizedImageUrl } from '../../lib/cdn';
@@ -299,6 +299,16 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
   const [controlaEstoque, setControlaEstoque] = useState(produto?.controla_estoque ?? true);
   const [pdvCode, setPdvCode] = useState(produto?.pdv_code ?? '');
   const [estacaoPreparo, setEstacaoPreparo] = useState<EstacaoPreparo>(produto?.estacao_preparo ?? 'COZINHA');
+  const [estacaoKdsId, setEstacaoKdsId] = useState<string>(produto?.estacao_kds_id ?? '');
+  const [estacoesKds, setEstacoesKds] = useState<KdsEstacao[]>([]);
+  const [workflowsKds, setWorkflowsKds] = useState<KdsWorkflow[]>([]);
+
+  useEffect(() => {
+    supabase.from('kds_estacoes').select('*').eq('loja_id', lojaId).eq('ativo', true).order('ordem')
+      .then(({ data }) => setEstacoesKds((data as KdsEstacao[]) ?? []));
+    supabase.from('kds_workflows').select('*').eq('loja_id', lojaId)
+      .then(({ data }) => setWorkflowsKds((data as KdsWorkflow[]) ?? []));
+  }, [lojaId]);
   const [grupos, setGrupos] = useState<GrupoForm[]>(
     (produto?.grupos_opcoes ?? []).map((g) => ({
       ...g, _key: g.id,
@@ -406,6 +416,8 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
         preco_por_quilo: tipoVenda === 'POR_PESO' ? Number(precoPorQuilo || 0) : 0,
         estacao_preparo: estacaoPreparo,
         pdv_code: pdvCode.trim() || null,
+        estacao_kds_id: estacaoKdsId || null,
+        workflow_kds_id: estacaoKdsId ? (workflowsKds.find((w) => w.estacao_id === estacaoKdsId)?.id ?? null) : null,
       };
 
       let produtoId = produto?.id;
@@ -605,6 +617,28 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                 : 'Entra na fila da cozinha (KDS). Use para itens que precisam de preparo.'}
             </p>
           </div>
+
+          {/* Sprint 5: roteamento pro KDS por tickets — só aparece se a loja
+              configurou estações (kds_estacoes). Produto sem seleção cai na
+              estação Cozinha padrão (fn_despachar_kds_tickets). */}
+          {estacoesKds.length > 0 && (
+            <div className="rounded-2xl border p-3 dark:border-gray-800">
+              <p className="mb-2 text-sm font-semibold dark:text-gray-200">{tDynamic('Tela do KDS que produz este item')}</p>
+              <select
+                value={estacaoKdsId}
+                onChange={(e) => setEstacaoKdsId(e.target.value)}
+                className="w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+              >
+                <option value="">{tDynamic('Padrão da loja (Cozinha)')}</option>
+                {estacoesKds.map((e) => (
+                  <option key={e.id} value={e.id}>{e.nome}</option>
+                ))}
+              </select>
+              <p className="mt-1.5 text-xs opacity-95 text-gray-400">
+                {tDynamic('Quando o pedido for aceito, este item vira um ticket independente na tela dessa estação.')}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Ficha técnica */}
