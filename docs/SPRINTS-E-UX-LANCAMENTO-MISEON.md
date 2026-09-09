@@ -153,6 +153,8 @@ Não converter DELIVERY em RETIRADA para fazê-lo aparecer no painel. As migrati
 
 **Saída e Review:** dossiê privado com transação, fatura, acesso, autorização, consulta oficial e e-mail recebido. Uma transação legítima de produção comprova o fluxo liberado; cenários de falha/renovação usam ambiente apropriado. **Fora do escopo:** fiscal de venda do restaurante e importação de compra. **Recuperação:** preservar cobrança confirmada, suspender novas tentativas ambíguas e reconciliar antes de reprocessar.
 
+**Checkpoint 09/09 (15A — PRONTO PARA REVISÃO):** o PDF (`fiscal-pdf-nfse`) exigia só `?id=<fatura>`, sem autenticação — corrigido com token individual por fatura (hash no banco, gerado na emissão) ou JWT de admin da loja/superadmin; nota emitida antes disso cai para o cadastro atual mas o PDF avisa que não há snapshot da época. Snapshot do prestador passa a ser gravado em `fiscal-emitir-nfse` no momento da emissão. Migration `20260909170000` aplicada, funções publicadas, smoke test real em produção confirmou 403/401 para acesso sem token/token errado. Detalhe completo e pendências em `docs/MISEON_HEAD_OF_ENGINEERING.md` (seção "Execução de 09/09 (parte 2)"). **Falta:** 15B/C inteiras (idempotência de RPS, ciclo de vida da assinatura, entrega fiscal), revisão independente, push da branch.
+
 [[PAGE]]
 
 # Sprint 16 Pagamento e pedidos do iFood

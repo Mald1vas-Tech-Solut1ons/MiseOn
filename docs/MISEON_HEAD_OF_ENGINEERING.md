@@ -297,3 +297,36 @@ A tela da estação exibe badge de drink, ABV, ml, kcal e ingredientes. As RPCs 
 **Gates fiscais ainda abertos:** autorização consultável e recebimento real no assinante; cobrança/renovação/recusa/cancelamento e conciliação; snapshot histórico do prestador; controle de acesso do link legado (público por UUID, comportamento preservado); emissão com RPS sequencial seguro e idempotência. Não reprocessar fatura ambígua só para obter demonstração: produção tem registros em erro/processamento a reconciliar.
 
 **Natureba:** os bloqueios de montagem/rodadas KDS, teste real de iFood, carga do catálogo, UX operacional, ensaio e migração seguem no plano. Não declarar cliente pronto nem POS/Cast/Kiosk homologados a partir destas correções.
+
+## Execução de 09/09 (parte 2) — Sprint 15A: acesso ao PDF fiscal da assinatura
+
+**Sprint / incremento / ID:** Sprint 15 (S01) / 15A / handoff `docs/HANDOFF-SONNET-EXECUCAO-SPRINTS.md`.
+
+**Objetivo e critério de aceite:** fechar o acesso público ao PDF da NFS-e da assinatura e parar de reescrever o cadastro do prestador em notas antigas. Critérios do §5 do handoff (UUID sozinho não basta; token inválido/expirado tem estado próprio; snapshot não é substituído pelo cadastro atual).
+
+**Status:** PRONTO PARA REVISÃO (implementado, testado e publicado por mim; falta revisão independente de arquitetura/dados, conforme §8.4 do handoff — não marcar ACEITO sem ela).
+
+**Branch e commit:** `codex/natureba-fiscal-e-confirmacao`, commit `841f866` (em cima do `4f2380c` recebido). Ainda não empurrado para o remoto.
+
+**Arquivos e objetos alterados:**
+- `supabase/functions/fiscal-pdf-nfse/index.ts`, `dados.ts`, `handler_test.ts`
+- `supabase/functions/fiscal-emitir-nfse/index.ts`
+- `supabase/functions/_shared/nfse-acesso.ts` (novo)
+- `supabase/migrations/20260909170000_nfse_assinatura_acesso_e_snapshot.sql`
+- `src/pages/admin/Assinatura.tsx`
+
+**Estado antes e causa reproduzida:** `fiscal-pdf-nfse` aceitava `GET ?id=<fatura_id>` sem nenhuma autenticação — reproduzido em produção (curl direto devolvia o PDF completo com apenas o UUID). O PDF sempre lia `configuracoes_fiscais_plataforma` (cadastro atual), não havia snapshot do prestador na emissão.
+
+**Estado depois e invariantes preservadas:** endpoint exige token individual (query `token=`, hash SHA-256 comparado ao salvo, com expiração) OU JWT de admin da loja dona/superadmin. `fiscal-emitir-nfse` gera o token e grava snapshot do prestador (`emissor_*`) só quando a nota é de fato emitida (`nfse_status='emitida'` real, não `testada_ok`). Nota sem snapshot (emitida antes deste incremento) cai para o cadastro atual, mas o PDF exibe aviso explícito em vez de apresentar como dado da época. RLS de `faturas_assinatura`/`plataforma_admins`/`usuarios_loja` não foi alterada — a Edge Function consulta essas tabelas com service role e replica a mesma regra manualmente (padrão já usado em `fiscal-emitir-nfse` para a checagem de superadmin).
+
+**Testes:** TypeScript PASS · ESLint dos arquivos alterados PASS · Vitest 377 PASS / 14 SKIPPED (igual ao baseline, sem regressão) · `deno lint` PASS nas três functions tocadas · `deno test` do handler reescrito (9 cenários: anônimo sem token, token errado, token expirado, admin de outra loja, token válido, admin dono via JWT, superadmin via JWT, nota sem snapshot, estados não emitidos, método inválido) — PASS. Smoke test real contra produção (sem usar o token verdadeiro, para não expô-lo): `?id=<fatura real>` sem token → 403; com token de 64 zeros → 401; `id` inexistente → 404. **Não testado:** caminho de sucesso do token real em produção (exigiria capturar/expor o segredo, ou logar como o Rafael, que não tenho credencial) e o download autenticado pelo painel do lojista em navegador real — cobertos apenas pelo teste automatizado com mocks.
+
+**Publicado:** `fiscal-pdf-nfse` e `fiscal-emitir-nfse` publicadas via Supabase CLI (`SUPABASE_ACCESS_TOKEN` do `.env.local`) em 09/09. Migration `20260909170000_nfse_assinatura_acesso_e_snapshot` aplicada via Management API, com backfill de token só para a única fatura já emitida em produção (confirmado por contagem antes de escrever a migration: 1 de 13 faturas emitidas). Frontend (`Assinatura.tsx`) commitado, aguardando o próximo deploy do Vercel (push para o remoto ainda não foi feito — ver [[miseon-deploy-via-ci]]).
+
+**Não publicado:** push da branch para o remoto (o commit está só local, igual ao `4f2380c` recebido).
+
+**Pendências:** Rafael — decidir quando empurrar a branch (aciona deploy imediato no Vercel, ver risco em §8.5 do handoff); revisão independente do incremento (§8.4); confirmar em navegador real que o botão "Baixar PDF" do painel do lojista funciona ponta a ponta (não testei em browser, só typecheck/lint/unit).
+
+**Recuperação e limitações conhecidas:** o link de e-mail enviado antes deste incremento (sem `&token=`) para a única nota já emitida deixou de funcionar sozinho — o backfill gerou um token novo e atualizou `nfse_pdf_url` no banco, mas não há como reenviar automaticamente o e-mail antigo com o link novo; se o Rafael/cliente precisar do PDF dessa nota específica, o caminho é o painel (`Assinatura.tsx`, autenticado) ou o superadmin (`Tenants.tsx`, que já lia `nfse_pdf_url`). Registros fiscais em erro/processamento mencionados no risco anterior não foram tocados nesta sessão.
+
+**Próximo passo executável:** Sprint 15B — autenticação/elegibilidade da fatura, numeração de RPS e idempotência (ver §6 do handoff). Arquivo de entrada: `supabase/functions/fiscal-emitir-nfse/index.ts` (a numeração por `count(*)` na linha ~154 não tem proteção de concorrência — provar retry/concorrência antes de reescrever).
