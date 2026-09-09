@@ -111,6 +111,47 @@ Regras rígidas:
 
 Responda apenas o JSON do schema.`;
 
+/**
+ * Trava determinística contra o erro típico da leitura por IA: trocar
+ * quantidade por valor.
+ *
+ * A nota é aritmética — `qtd × unitário = total`. Quando a conta não fecha, a
+ * leitura está errada em ALGUM dos três campos, e não há como saber em qual
+ * sem olhar o papel. Por isso o item NÃO é corrigido automaticamente: inventar
+ * um valor fiscal plausível é pior do que admitir que não deu para ler, porque
+ * o erro entra silencioso no estoque e contamina custo, PEPS, CMV e margem.
+ * O item volta marcado, e quem decide é o lojista na tela de conferência.
+ *
+ * A tolerância acompanha o arredondamento real do cupom: item por peso
+ * (1,022 kg × 6,99 = 7,1437) é impresso como 7,14.
+ */
+function conferirAritmetica(qtd: number, unitario: number, total: number): {
+  coerente: boolean;
+  motivo?: string;
+  total_esperado?: number;
+} {
+  if (!(qtd > 0) || !(unitario > 0) || !(total > 0)) {
+    return {
+      coerente: false,
+      motivo: 'A leitura não trouxe quantidade, valor unitário ou valor total.',
+      total_esperado: Number((qtd * unitario).toFixed(2)),
+    };
+  }
+
+  const esperado = Number((qtd * unitario).toFixed(2));
+  const tolerancia = Math.max(0.02, total * 0.005);
+
+  if (Math.abs(esperado - total) > tolerancia) {
+    return {
+      coerente: false,
+      motivo: `Quantidade × valor unitário dá ${esperado.toFixed(2)}, mas a linha diz ${total.toFixed(2)}. Confira qual dos três números foi lido errado.`,
+      total_esperado: esperado,
+    };
+  }
+
+  return { coerente: true };
+}
+
 interface ItemOcr {
   num_item: number;
   descricao: string;
@@ -209,19 +250,29 @@ Deno.serve(async (req) => {
 
     const itens = (leitura.itens ?? [])
       .filter((i) => i?.descricao?.trim() && Number.isFinite(i.qtd))
-      .map((i, idx) => ({
-        num_item: i.num_item ?? idx + 1,
-        descricao: i.descricao.trim(),
-        // Cupom não imprime EAN, só o código interno do mercado — que sozinho
-        // não identifica produto entre CNPJs diferentes. Ver chaveDoItem no
-        // ModalImportarNFCe: o De-Para escopa esse código pelo CNPJ.
-        gtin: null,
-        codigo_fornecedor: i.codigo_fornecedor?.toString().trim() || null,
-        qtd: Number(i.qtd) || 0,
-        unidade: (i.unidade || 'un').toLowerCase(),
-        valor_unitario: Number(i.valor_unitario) || 0,
-        valor_total: Number(i.valor_total) || (Number(i.qtd) || 0) * (Number(i.valor_unitario) || 0),
-      }));
+      .map((i, idx) => {
+        const qtd = Number(i.qtd) || 0;
+        const valorUnitario = Number(i.valor_unitario) || 0;
+        // Total ausente é derivado (aritmética, não adivinhação). Total presente
+        // é mantido como lido — corrigir valor fiscal por conta própria seria
+        // inventar dado, que é o erro que esta função existe para não cometer.
+        const valorTotal = Number(i.valor_total) || Number((qtd * valorUnitario).toFixed(2));
+
+        return {
+          num_item: i.num_item ?? idx + 1,
+          descricao: i.descricao.trim(),
+          // Cupom não imprime EAN, só o código interno do mercado — que sozinho
+          // não identifica produto entre CNPJs diferentes. Ver chaveDoItem no
+          // ModalImportarNFCe: o De-Para escopa esse código pelo CNPJ.
+          gtin: null,
+          codigo_fornecedor: i.codigo_fornecedor?.toString().trim() || null,
+          qtd,
+          unidade: (i.unidade || 'un').toLowerCase(),
+          valor_unitario: valorUnitario,
+          valor_total: valorTotal,
+          conferencia: conferirAritmetica(qtd, valorUnitario, valorTotal),
+        };
+      });
 
     if (itens.length === 0) {
       // Zero itens com rodapé legível tem causa conhecida: a foto pegou a parte
