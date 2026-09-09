@@ -175,9 +175,25 @@ export default function KDSEstacao() {
                   <ul className="space-y-2 mb-4">
                     {ticket.itens.map((item, idx) => (
                       <li key={idx} className="text-sm">
-                        <span className="font-bold dark:text-gray-100">{item.quantidade}x {item.nome}</span>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="font-bold dark:text-gray-100">{item.quantidade}x {item.nome}</span>
+                          {item.perfil_preparo === 'DRINK' && <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-black text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">DRINK</span>}
+                          {item.teor_alcoolico_pct != null && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">{item.teor_alcoolico_pct}% ABV</span>}
+                          {item.volume_porcao_ml != null && <span className="text-[10px] font-semibold text-gray-400">{item.volume_porcao_ml} ml</span>}
+                          {item.calorias_porcao != null && <span className="text-[10px] font-semibold text-gray-400">{Math.round(item.calorias_porcao)} kcal</span>}
+                        </div>
                         {item.opcoes.length > 0 && (
                           <span className="block text-xs text-gray-500 dark:text-gray-400 pl-4">{item.opcoes.join(', ')}</span>
+                        )}
+                        {!!item.ingredientes?.length && (
+                          <ol className="mt-1.5 space-y-1 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:bg-white/5 dark:text-gray-300">
+                            {item.ingredientes.map((ingrediente, ingredienteIdx) => (
+                              <li key={`${ingrediente.nome}-${ingredienteIdx}`} className="flex justify-between gap-3">
+                                <span>{ingredienteIdx + 1}. {ingrediente.nome}</span>
+                                <strong className="whitespace-nowrap">{ingrediente.quantidade} {ingrediente.unidade}</strong>
+                              </li>
+                            ))}
+                          </ol>
                         )}
                         {item.observacao && (
                           <span className="block text-xs text-amber-600 dark:text-amber-400 pl-4 font-medium">{item.observacao}</span>

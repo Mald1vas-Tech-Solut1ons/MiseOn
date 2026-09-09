@@ -305,6 +305,9 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
   const [estacaoKdsId, setEstacaoKdsId] = useState<string>(produto?.estacao_kds_id ?? '');
   const [estacoesKds, setEstacoesKds] = useState<KdsEstacao[]>([]);
   const [workflowsKds, setWorkflowsKds] = useState<KdsWorkflow[]>([]);
+  const [perfilPreparo, setPerfilPreparo] = useState<'ALIMENTO' | 'DRINK' | 'BEBIDA_PRONTA'>(produto?.perfil_preparo ?? 'ALIMENTO');
+  const [teorAlcoolico, setTeorAlcoolico] = useState(produto?.teor_alcoolico_pct != null ? String(produto.teor_alcoolico_pct) : '');
+  const [volumePorcaoMl, setVolumePorcaoMl] = useState(produto?.volume_porcao_ml != null ? String(produto.volume_porcao_ml) : '');
 
   useEffect(() => {
     supabase.from('kds_estacoes').select('*').eq('loja_id', lojaId).eq('ativo', true).order('ordem')
@@ -423,6 +426,9 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
         pdv_code: pdvCode.trim() || null,
         estacao_kds_id: estacaoKdsId || null,
         workflow_kds_id: estacaoKdsId ? (workflowsKds.find((w) => w.estacao_id === estacaoKdsId)?.id ?? null) : null,
+        perfil_preparo: perfilPreparo,
+        teor_alcoolico_pct: perfilPreparo === 'DRINK' && teorAlcoolico ? Number(teorAlcoolico) : null,
+        volume_porcao_ml: perfilPreparo === 'DRINK' && volumePorcaoMl ? Number(volumePorcaoMl) : null,
       };
 
       let produtoId = produto?.id;
@@ -662,6 +668,51 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
               </p>
             </div>
           )}
+
+          <div className="rounded-2xl border p-3 dark:border-gray-800">
+            <p className="mb-2 text-sm font-semibold dark:text-gray-200">{tDynamic('Perfil operacional do produto')}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                ['ALIMENTO', '🍳 Alimento'],
+                ['DRINK', '🍹 Drink'],
+                ['BEBIDA_PRONTA', '🥤 Pronta'],
+              ] as const).map(([valorPerfil, rotulo]) => (
+                <button
+                  key={valorPerfil}
+                  type="button"
+                  onClick={() => {
+                    setPerfilPreparo(valorPerfil);
+                    if (valorPerfil === 'DRINK') {
+                      setEstacaoPreparo('COZINHA');
+                      const bar = estacoesKds.find((estacao) => estacao.nome.toLocaleLowerCase('pt-BR').includes('bar'));
+                      if (bar) setEstacaoKdsId(bar.id);
+                    }
+                    if (valorPerfil === 'BEBIDA_PRONTA') setEstacaoPreparo('DIRETO');
+                  }}
+                  className={`rounded-xl border px-2 py-2 text-xs font-bold transition ${perfilPreparo === valorPerfil ? 'border-purple-400 bg-purple-500/10 text-purple-700 dark:text-purple-300' : 'border-gray-200 text-gray-400 dark:border-gray-700'}`}
+                >
+                  {rotulo}
+                </button>
+              ))}
+            </div>
+            {perfilPreparo === 'DRINK' && (
+              <div className="mt-3 rounded-xl border border-purple-200 bg-purple-50/50 p-3 dark:border-purple-900/50 dark:bg-purple-950/20">
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="text-xs font-semibold text-purple-800 dark:text-purple-300">
+                    {tDynamic('Teor alcoólico final (% ABV)')}
+                    <input value={teorAlcoolico} onChange={(event) => setTeorAlcoolico(event.target.value)} type="number" min="0" max="100" step="0.1" placeholder="Ex.: 18" className="mt-1 w-full rounded-lg border border-purple-200 bg-white p-2 text-sm dark:border-purple-900 dark:bg-gray-900" />
+                  </label>
+                  <label className="text-xs font-semibold text-purple-800 dark:text-purple-300">
+                    {tDynamic('Volume servido (ml)')}
+                    <input value={volumePorcaoMl} onChange={(event) => setVolumePorcaoMl(event.target.value)} type="number" min="1" step="1" placeholder="Ex.: 300" className="mt-1 w-full rounded-lg border border-purple-200 bg-white p-2 text-sm dark:border-purple-900 dark:bg-gray-900" />
+                  </label>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-purple-700 dark:text-purple-300">
+                  {tDynamic('A ficha técnica abaixo vira a receita visível no KDS do bar. As calorias são calculadas pelo motor nutricional a partir dos ingredientes cadastrados.')}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Ficha técnica */}
