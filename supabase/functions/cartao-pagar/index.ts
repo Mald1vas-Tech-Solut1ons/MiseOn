@@ -5,10 +5,13 @@
 // O cartão é tokenizado NO NAVEGADOR pela lib oficial `payment-token-efi`
 // (PCI: o número do cartão nunca chega aqui — só o payment_token).
 //
-// Secrets:
-//   EFI_COBRANCAS_CLIENT_ID/EFI_COBRANCAS_CLIENT_SECRET
-//   ou EFI_CLIENT_ID/EFI_CLIENT_SECRET
-//   + EFI_SANDBOX
+// Secrets exclusivos do CARTÃO do checkout (nunca Pix e nunca SaaS):
+//   EFI_CARTAO_PROD_CLIENT_ID / EFI_CARTAO_PROD_CLIENT_SECRET
+//   EFI_CARTAO_HOMOLOG_CLIENT_ID / EFI_CARTAO_HOMOLOG_CLIENT_SECRET
+//
+// A conta e o ambiente que geram o token no navegador são os mesmos usados
+// aqui para cobrar. A seleção de ambiente vem da configuração da plataforma,
+// não de uma secret reaproveitada por Pix ou assinatura.
 // (API de Cobranças usa OAuth Basic — não exige certificado mTLS como o Pix)
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -19,8 +22,8 @@ const EFI_COB_PRODUCAO = 'https://cobrancas.api.efipay.com.br';
 /**
  * Host da API de Cobrancas (cartao).
  *
- * O BANCO manda. Antes isto era uma const de modulo lida so de
- * `EFI_SANDBOX`: bastava a secret ficar 'true' para TODA cobranca de cartao
+ * O BANCO manda. Antes isto era uma const de modulo lida so de uma secret
+ * compartilhada de ambiente: bastava ela ficar 'true' para TODA cobranca de cartao
  * sair para a homologacao — onde a conta tem limite operacional simbolico e
  * o banco real nunca ve a transacao. O sintoma e exatamente
  * "o valor da emissao e superior ao limite operacional da conta" numa
@@ -31,8 +34,11 @@ const EFI_COB_PRODUCAO = 'https://cobrancas.api.efipay.com.br';
  * ambiente desde 20260902220212; a env vira fallback para quando a linha de
  * configuracao ainda nao existe.
  */
-function urlCobrancas(sandboxDoBanco: boolean | null | undefined): string {
-  const sandbox = sandboxDoBanco ?? (Deno.env.get('EFI_SANDBOX') === 'true');
+function ambienteCartao(sandboxDoBanco: boolean | null | undefined): boolean {
+  return sandboxDoBanco ?? (Deno.env.get('EFI_CARTAO_SANDBOX') === 'true');
+}
+
+function urlCobrancas(sandbox: boolean): string {
   return sandbox ? EFI_COB_HOMOLOG : EFI_COB_PRODUCAO;
 }
 
@@ -56,6 +62,16 @@ function envFirst(...names: string[]): string {
   throw new Error(`Secret ausente: informe um destes nomes -> ${names.join(', ')}`);
 }
 
+function credenciaisCartao(sandbox: boolean | null | undefined) {
+  const homologacao = ambienteCartao(sandbox);
+  const ambiente = homologacao ? 'HOMOLOG' : 'PROD';
+  return {
+    ambiente: homologacao ? 'homologacao' : 'producao',
+    clientId: envFirst(`EFI_CARTAO_${ambiente}_CLIENT_ID`),
+    clientSecret: envFirst(`EFI_CARTAO_${ambiente}_CLIENT_SECRET`),
+  };
+}
+
 async function getToken(baseUrl: string, clientId: string, clientSecret: string): Promise<string> {
   const auth = btoa(`${clientId}:${clientSecret}`);
   const res = await fetch(`${baseUrl}/v1/authorize`, {
@@ -63,8 +79,13 @@ async function getToken(baseUrl: string, clientId: string, clientSecret: string)
     headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ grant_type: 'client_credentials' }),
   });
-  const data = await res.json();
-  if (!data.access_token) throw new Error(`Efí OAuth (cobranças) falhou: ${JSON.stringify(data)}`);
+  const raw = await res.text();
+  let data: { access_token?: string; error_description?: string; message?: string } | null = null;
+  try { data = JSON.parse(raw); } catch { /* A Efí pode devolver texto simples em 401. */ }
+  if (!res.ok || !data?.access_token) {
+    const detalhe = data?.error_description ?? data?.message ?? raw.slice(0, 300) ?? 'sem detalhe';
+    throw new Error(`Efí OAuth (cartão) falhou [HTTP ${res.status}]: ${detalhe}`);
+  }
   return data.access_token;
 }
 
@@ -140,7 +161,9 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       .eq('id', true)
       .maybeSingle();
 
-    const efiCobUrl = urlCobrancas((cfgPlataforma as any)?.efi_sandbox);
+    const sandboxCartao = ambienteCartao((cfgPlataforma as any)?.efi_sandbox);
+    const efiCobUrl = urlCobrancas(sandboxCartao);
+    const credenciaisPadrao = credenciaisCartao(sandboxCartao);
 
     const payeeAntecipadoCfg = (Deno.env.get('EFI_ANTECIPADO_PAYEE_CODE')
       ?? (cfgPlataforma as any)?.efi_payee_code_antecipado ?? '')?.trim();
@@ -165,8 +188,8 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       ? await getToken(efiCobUrl, Deno.env.get('EFI_ANTECIPADO_CLIENT_ID')!.trim(), Deno.env.get('EFI_ANTECIPADO_CLIENT_SECRET')!.trim())
       : await getToken(
           efiCobUrl,
-          envFirst('EFI_COBRANCAS_CLIENT_ID', 'EFI_CLIENT_ID'),
-          envFirst('EFI_COBRANCAS_CLIENT_SECRET', 'EFI_CLIENT_SECRET'),
+          credenciaisPadrao.clientId,
+          credenciaisPadrao.clientSecret,
         );
 
     const payeeCode = (pedido as any).lojas?.efi_payee_code?.trim();
@@ -186,15 +209,22 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
     // fallback). Env desatualizada vencia o banco e reabria a auto-transferencia.
     // Agora qualquer payee conhecido da plataforma — env ou banco, padrao ou
     // antecipado — desliga o split.
+    // O BANCO manda; a env so entra quando o banco esta vazio.
+    //
+    // Se a env entrasse SEMPRE, uma secret desatualizada com o payee do
+    // LOJISTA faria o sistema achar que aquela conta e da plataforma e
+    // desligar o repasse: a cobranca passaria e o dinheiro do lojista ficaria
+    // na conta da plataforma, em silencio. Precedencia errada aqui nao
+    // quebra pagamento — desvia dinheiro.
+    const payeePadraoPlataforma = String(
+      (cfgPlataforma as any)?.efi_payee_code ?? Deno.env.get('EFI_PLATFORM_PAYEE_CODE') ?? '',
+    ).trim().toLowerCase();
+    const payeeAntecipadoPlataforma = String(
+      (cfgPlataforma as any)?.efi_payee_code_antecipado ?? Deno.env.get('EFI_ANTECIPADO_PAYEE_CODE') ?? '',
+    ).trim().toLowerCase();
+
     const payeesDaPlataforma = new Set(
-      [
-        Deno.env.get('EFI_PLATFORM_PAYEE_CODE'),
-        (cfgPlataforma as any)?.efi_payee_code,
-        Deno.env.get('EFI_ANTECIPADO_PAYEE_CODE'),
-        (cfgPlataforma as any)?.efi_payee_code_antecipado,
-      ]
-        .map((v) => String(v ?? '').trim().toLowerCase())
-        .filter((v) => v.length > 0),
+      [payeePadraoPlataforma, payeeAntecipadoPlataforma].filter((v) => v.length > 0),
     );
 
     const usarSplit = !!payeeCode
@@ -212,7 +242,7 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
         // Sem isto nao da para saber se a cobranca foi para producao ou
         // homologacao — foi o que escondeu a causa da recusa de 08/09.
         host_efi: efiCobUrl,
-        ambiente: (cfgPlataforma as any)?.efi_sandbox === true ? 'homologacao' : 'producao',
+        ambiente: credenciaisPadrao.ambiente,
       },
     });
     const marketplace = usarSplit
@@ -278,7 +308,23 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       // lojista no meio do checkout. Para o comprador vale a saida pratica;
       // o texto do provedor continua no motivo_tecnico e no log, que e onde
       // o lojista (e eu) precisa dele.
-      const ehProblemaDaConta = /limite operacional|recebedor|payee|marketplace|conta do/i.test(String(motivo));
+      // Recusa por CONTA (limite operacional, conta nao habilitada) nao e
+      // "cartao do cliente recusado": e a loja que nao consegue cobrar. Isso
+      // se repete em 100% das tentativas, entao deixar o cartao no ar so
+      // produz carrinho abandonado. Marca o bloqueio; a vitrine para de
+      // oferecer cartao na hora (lojas_publicas.efi_configurado) e o lojista
+      // ve o motivo no painel, com o texto que ele leva para o provedor.
+      const ehProblemaDaConta = /limite operacional|recebedor|payee|marketplace|conta do|nao habilitad|não habilitad/i.test(String(motivo));
+      if (ehProblemaDaConta) {
+        await supabaseAdmin.rpc('fn_bloquear_cartao_online', {
+          p_loja_id: pedido.loja_id,
+          p_motivo: String(motivo),
+        });
+        reqLogger.warn('Cartao online bloqueado para a loja: o provedor recusou por motivo de conta', {
+          context: { loja_id: pedido.loja_id, motivo: String(motivo) },
+        });
+      }
+
       const mensagemCliente = ehProblemaDaConta
         ? 'Não conseguimos processar o cartão agora. Você pode pagar com Pix ou escolher outra forma de pagamento.'
         : String(motivo);

@@ -146,7 +146,13 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 - **SPRINT 6: "O servidor decide" — CONCLUÍDO (08/09)**. Ver seção 20-A.
 - **SPRINT 7: "Estoque tem uma autoridade só" — CONCLUÍDO (08/09)**. Ver seção 20-B. CI verde nos dois workflows.
 - **SPRINT 8: "A nota vira dado com origem" — CONCLUÍDO (08/09)**. Ver seção 20-C.
-- **Próximo candidato**: reconciliar PEPS (SQL vs TS) e a divergência saldo×lotes com o mesmo rigor — o diagnóstico de 05/09 apontava motor duplicado, mas o S1-C já mexeu nisso e a informação precisa ser reconfirmada contra o código antes de virar sprint. Alternativa: Sprint 5.4 (modificadores estruturados do KDS, ex. "ponto da carne").
+- **SPRINT 9: "Cupom volta a existir, pedido online espera pagamento" — CONCLUÍDO (08/09)**. Ver seção 20-D.
+- **SPRINT 10: "Entrega nasce da localização" — CONCLUÍDO (08/09)**. Ver seção 20-E.
+- **SPRINT 11: "Carrinho não toca campainha" — CONCLUÍDO LOCALMENTE (08/09)**. Ver seção 20-F.
+- **SPRINT 12: "Bar não é cozinha com outro nome" — CONCLUÍDO LOCALMENTE (08/09)**. Ver seção 20-G.
+- **SPRINT 13: "Comanda viva, cupom distribuível e operação acessível" — CONCLUÍDO LOCALMENTE (08/09)**. Ver seção 20-H.
+- **SPRINT 14: "Migrations 9–13 publicadas + comanda buffet acessível ao garçom" — CONCLUÍDO (09/09)**. Ver seção 20-J.
+- **Próximo passo obrigatório**: reverter a conta de cartão de PF para PJ assim que a Efí liberar o limite operacional da Maldivas Tech (ver 20-J); revisar e publicar o código novo da Edge Function `cartao-pagar` (separação de secrets por ambiente) que ainda está só no working tree.
 
 ## 20-A. Sprint 6 — O servidor decide: preço, taxa e porta (08/09)
 **Problema:** a blindagem de 20260819042904 tirou do cliente a autoridade sobre preço de item e cupom, mas três autoridades continuavam no navegador, e as três mexem em dinheiro:
@@ -183,4 +189,81 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 
 **Efeito colateral que quase passou:** a baixa de estoque acontecia em `NEW.status='ACEITO' AND OLD.status='NOVO'`. Com o pedido online saindo de `AGUARDANDO_PAGAMENTO`, o estoque **não baixaria** — saldo alto e CMV baixo, em silêncio. `fn_trg_status_pedido` passou a aceitar as duas origens. Provado no banco: `estoque_baixado = t` após a confirmação.
 
-**Ainda aberto do relato:** (b) taxa por bairro em vez de raio/distância — a loja de teste está em modo BAIRRO e sem lat/lng, o motor de distância do Sprint 6 já existe; (d) recusa do cartão pela Efí ("valor da emissão superior ao limite operacional") é resposta do provedor sobre a conta, não código; (e) ficha técnica de drinks no KDS; (f) sidebar com footer fixo ocupando espaço dos módulos; (g) ciclo de vida da comanda no buffet.
+**Continuação:** os itens (d)–(g) foram tratados nos Sprints 11–13 abaixo. A recusa Efí permanece uma pendência comercial da conta quando o provedor realmente devolve o código 4600037, mas o produto agora deixa de oferecer cartão até a conta ser regularizada e não expõe o texto técnico ao cliente.
+
+## 20-E. Sprint 10 — Entrega nasce da localização (08/09)
+
+**Objetivo:** impedir que uma falha de localização seja convertida silenciosamente em uma taxa por bairro e garantir que o frete continue tendo uma única autoridade.
+
+**Causa:** o checkout e `fn_taxa_entrega_calculada` aplicavam uma cascata `distância → bairro → taxa padrão`. Quando a loja não tinha coordenadas ou o endereço não era geocodificado, o cliente escolhia um bairro pré-definido e recebia uma taxa que não representa a distância real. O servidor repetia a mesma aproximação, então o POST continuava aceito.
+
+**Entregue:**
+- checkout só calcula e exibe frete depois de localizar o endereço completo; a tabela de bairros não é carregada nem exibida;
+- raio, faixas comerciais e frete grátis por valor mínimo seguem como políticas aplicadas sobre a distância real;
+- `fn_taxa_entrega_calculada` exige coordenadas da loja e do destino; não existe mais fallback de bairro/taxa padrão no checkout. Isso também protege POST direto;
+- loja legada em modo `BAIRRO` é apresentada como `DISTANCIA` ao ser reconfigurada, exigindo georreferência antes de salvar;
+- testes unitários cobrem distância + frete grátis e proíbem regressão para taxa de bairro; a integração passou a exigir rejeição para endereço sem coordenadas.
+
+**Critérios de aceitação:** cliente não escolhe bairro para definir preço; endereço fora do raio é barrado; falha de geocodificação explica o que corrigir; frete grátis legítimo continua possível; o banco não aceita uma cobrança sem localização.
+
+**Validação:** `tsc --noEmit` passou; `src/lib/geo.test.ts` e `__tests__/pedido-pix.test.ts` passaram (9 testes). A integração com Supabase exige as credenciais de ambiente e deve ser executada após aplicar a migration.
+
+**Backlog registrado:**
+- **P0 — go-live:** aplicar no banco as migrations 20260908130000–20260908180000 e publicar as functions de pagamento antes de validar o cardápio público; o código local sozinho não altera a vitrine em produção.
+- **P1 — entrega:** mover a geocodificação para o servidor; hoje o frete não cai mais para bairro, mas ainda recebe do cliente a coordenada usada no cálculo.
+- **P1 — KDS:** modelar modificadores estruturados (incluindo ponto da carne) e versões de ficha técnica para preservar o preparo histórico quando a receita mudar.
+
+## 20-F. Sprint 11 — Carrinho não toca campainha (08/09)
+
+**Separação de identidade operacional:** `AGUARDANDO_PAGAMENTO` é intenção de compra, não pedido aceito. Painel, dashboard, KDS e central de notificações agora usam a mesma regra: só entram na operação no INSERT de um pedido já operacional ou na transição de aguardando pagamento para aceito. Isso elimina o alerta ao abrir o formulário do cartão e também corrige métricas de venda/primeira venda contaminadas por carrinhos.
+
+**Rótulo incorreto de buffet:** a mensagem “Lançado na Comanda (Consumo Salão / Buffet)” era aplicada a qualquer pedido sem cozinha. O rótulo agora deriva de `tipo_pedido` e `origem`: só salão/balança fala em comanda; delivery e retirada falam em pagamento confirmado e separação/expedição.
+
+**Cartão:** a configuração de sandbox/produção e as credenciais Efí foram separadas; o split não cria repasse para o próprio recebedor. Recusa de conta (como limite operacional) bloqueia temporariamente o cartão da loja e apresenta Pix/outro meio ao cliente, enquanto o admin vê o motivo técnico e pode reativar depois da regularização. A confirmação do gateway continua sendo a única transição que coloca cartão/Pix na operação.
+
+## 20-G. Sprint 12 — Bar não é cozinha com outro nome (08/09)
+
+Produto passa a declarar `ALIMENTO`, `DRINK` ou `BEBIDA_PRONTA`; drink pode registrar ABV e volume da porção. O despacho KDS usa estação/workflow explícitos e tira da ficha técnica o snapshot de ingredientes, calorias, volume e teor alcoólico. O workflow padrão do bar virou “Separar ingredientes → Misturar/montar → Finalizar e servir”, preservando fluxos já personalizados.
+
+A tela da estação exibe badge de drink, ABV, ml, kcal e ingredientes. As RPCs de despacho e avanço de ticket foram endurecidas com autorização por tenant/papel e `search_path` vazio; auxiliares e triggers deixaram de ser executáveis por `anon`/usuário autenticado.
+
+## 20-H. Sprint 13 — Comanda viva, cupom distribuível e operação acessível (08/09)
+
+**Comanda buffet:** a pesagem virou uma RPC transacional. A primeira leitura de cartão abre/reutiliza uma comanda individual; cada pesagem acumula numa conta ativa; o painel mostra somente comandas vivas com saldo e meio de pagamento. Receber grava o pagamento antes da finalização (preservando o ledger), fecha a comanda e a remove dos seletores operacionais, sem apagar o histórico rastreável. Código de barras/cartão e seleção manual usam o mesmo ciclo.
+
+**Cupons:** cupom pode liberar frete grátis sem substituir a taxa por distância antes da validação; pode ser vinculado a um cliente; e a recuperação gera um `VOLTA####` individual, de uso único e 48 horas. WhatsApp abre com a mensagem pronta e o e-mail entra na fila central, respeitando consentimento, janela e deduplicação. A interface explica sucesso/erro e o botão tem carregamento, estado desabilitado e feedback visual.
+
+**Sidebar:** módulos ganharam busca e grupos sanfonados com preferência persistida. O footer deixou de ocupar três linhas fixas e virou uma barra compacta para Loja Online, Conta e Sair, mantendo rótulos e tooltips quando a coluna está expandida ou recolhida.
+
+## 20-I. Validação e estado de publicação (08/09)
+
+- `tsc --noEmit`: passou.
+- ESLint direcionado aos arquivos alterados: passou sem warnings.
+- Vitest direcionado: 13 testes passaram; 2 integrações foram puladas porque `SUPABASE_SERVICE_ROLE_KEY` não está disponível nesta sessão.
+- Bundle Vite de produção: gerado com sucesso (há somente o warning já conhecido de chunks acima de 600 kB).
+- `git diff --check`: passou.
+- **Não publicado nesta rodada:** migrations 20260908180000–20260908210000 e o código local da Edge Function precisam de deploy controlado. Portanto "concluído localmente" não significa que a vitrine de produção já mudou.
+
+## 20-J. Sprint 14 — Publicação real das migrations 9–13, garçom acessa a comanda do buffet, cartão de crédito diagnosticado (09/09)
+
+**Migrations aplicadas em produção nesta sessão** (todas as do Sprint 9–13 que só existiam localmente): `20260908170000_cartao_bloqueia_quando_conta_recusa`, `20260908180000_entrega_exige_localizacao`, `20260908190000_comanda_buffet_ciclo_de_vida`, `20260908200000_kds_drinks_ficha_e_perfil`, `20260908210000_cupom_frete_gratis`. Confirmado por consulta direta ao catálogo (colunas/funções) antes e depois de cada apply — não presumido pelo nome do arquivo.
+
+**Comanda do buffet ganhou ciclo de vida completo e o garçom deixou de ficar de fora:**
+- Nova migration `20260909000000_garcom_acessa_comanda_buffet.sql`: RPC `fn_lancar_item_avulso_comanda` (papel garçom incluso) lança bebida/sobremesa/repique em qualquer comanda ABERTA (mesa ou individual) sem depender de mesa_id; `fn_registrar_pesagem_comanda` passa a abrir um chamado de atendimento automático na 1ª pesagem, configurável por loja via `lojas.modulos_ativos.buffet_aciona_garcom` (ausente = ligado).
+- Corrigido bug bloqueante: o papel `garcom` não tinha rota nem item de menu para `/admin/garcom-mobile` (`src/lib/permissoes.ts`, `AdminLayout.tsx`) — nenhum garçom conseguia abrir a tela.
+- `PainelGarcomMobile.tsx` ganhou a seção "Comandas do Buffet Abertas" com modal de lançamento de item.
+- `PainelBalanca.tsx`: o modal de recebimento tinha sido escrito só como lógica (estados + função), sem o JSX de renderização — corrigido; agora mostra lista de itens consumidos, tempo em aberto e seleção de forma de pagamento.
+- `PedidoActions.tsx`: o menu "Imprimir via" ficava cortado pelo `overflow-hidden` do card do pedido (dropdown `position:absolute` dentro de um container com cantos arredondados). Corrigido com `createPortal` direto no `body`, posição calculada a partir do botão real.
+- Completado um "prometido e não implementado": o Dashboard já avisava "reative o cartão em Configurações da Loja" quando o cartão online é bloqueado por recusa de conta, mas não existia botão nenhum. Adicionado botão "Já resolvi — reativar cartão" direto no banner do Dashboard, chamando `fn_liberar_cartao_online`.
+
+**Cartão de crédito do checkout online — diagnosticado e contornado, não "consertado por código":**
+- A recusa (Efí, código `4600037`: "o valor da emissão é superior ao limite operacional da conta") não é bug de integração. Confirmado por: (1) autenticação OAuth bem-sucedida com as credenciais certas — logo não é credencial inválida; (2) o mesmo `payee_code` já configurado no banco bate com a conta citada no erro; (3) o Pix funciona normalmente na mesma conta, isolando o problema ao produto "Cobranças/Cartão"; (4) o histórico de `pagamentos` mostra uma cobrança de R$5,00 **aprovada de verdade em 15/07/2026** (`gateway_txid 1037783079`) — só que naquela época com as credenciais da conta **pessoal**, não da PJ.
+- **Decisão temporária do Rafael:** processar cartão pela conta Efí **pessoal** dele até a Efí liberar o limite operacional da conta **PJ** ("Maldivas Tech"). Trocado: `configuracoes_fiscais_plataforma.efi_payee_code` e `lojas.efi_payee_code` (das lojas que apontavam para o payee da PJ) para o identificador da conta pessoal; secrets `EFI_COBRANCAS_CLIENT_ID/SECRET` (as que a Edge Function publicada usa) trocadas para as credenciais da conta pessoal. Os identificadores e credenciais reais das duas contas (PF e PJ) ficam só em `C:\Users\rafae\Dev\Doc_EfiBank\` (fora do repositório) e no banco (secrets do Supabase) — nunca em texto plano neste arquivo.
+- **RISCO REGISTRADO — reverter depois:** enquanto essa configuração estiver no ar, o dinheiro do cartão cai no CPF do Rafael, não no CNPJ da Maldivas Tech. Isso é aceitável como medida de curtíssimo prazo para não perder venda, mas precisa ser revertido (voltar `efi_payee_code` e as secrets para os valores da PJ, documentados em `Doc_EfiBank/conta_pj/Credenciais_EfiBank.txt`) assim que o suporte da Efí liberar o produto de Cobranças da PJ. Quem herdar este código deve checar isso ANTES de assumir que "cartão funciona" significa "cartão funciona na conta certa".
+- Código-fonte da Edge Function (`supabase/functions/cartao-pagar/index.ts`) não foi alterado nesta sessão — a correção foi só de configuração (secrets + payee_code no banco). O diff já existente no working tree (separação `EFI_CARTAO_PROD/HOMOLOG_CLIENT_ID/SECRET`, escrito antes desta sessão) continua pendente de revisão e deploy; as secrets desse esquema novo já foram populadas com os valores da PJ como preparação, e precisam ser atualizadas para a pessoal também caso esse código seja publicado antes da reversão acima.
+
+**Validação desta sessão:** `tsc --noEmit` limpo após cada leva de edições de frontend. Migrations verificadas por introspecção direta do catálogo antes/depois do apply. Autenticação OAuth testada em produção para ambas as contas Efí (PF e PJ) — sem nenhuma chamada de cobrança real de teste (não insiro dados de cartão). `vitest run` completo: 363 passaram, 14 puladas (sem `SUPABASE_SERVICE_ROLE_KEY`). Todo o trabalho desta sessão foi commitado em módulos separados (ver `git log`).
+
+**Achado ao vivo, corrigido na mesma sessão:** durante o teste do Rafael pelo app do garçom, um pedido de Coca-Cola (revenda direta, `estacao_preparo='DIRETO'`) virou ticket na fila da cozinha, na etapa "Ponto da carne" — `fn_despachar_kds_tickets` nunca filtrou por `estacao_preparo`, bug presente desde o Sprint 5 (08/09) e herdado sem revisão suficiente na reescrita do Sprint 12. Corrigido em duas migrations (20260909010000, 20260909020000): a regra final é DIRETO só fica fora do KDS quando o produto não tem NENHUMA `estacao_kds_id` configurada — com estação explícita (ex.: bebida "pronta" que o Bar ainda serve com copo/gelo), o item passa por ela normalmente. Ver `[[miseon-backlog-kds-operador-e-cartao]]` (memória) para o backlog decorrente: fluxo do KDS personalizável por operador logado (pedido pelo Rafael, não implementado — mudança de escopo, precisa de sprint própria).
+
+- **Publicado nesta rodada:** todas as migrations do Sprint 9–14 aplicadas em produção (verificado por introspecção, não presumido); todo o código de frontend commitado em módulos. **Não publicado:** o código novo da Edge Function `cartao-pagar` (separação `EFI_CARTAO_PROD/HOMOLOG_CLIENT_ID/SECRET`) segue só commitado, não deployado — a correção de cartão desta sessão foi por configuração (secrets + payee_code), não por código novo. Nenhum `git push` foi feito ainda nesta sessão.
