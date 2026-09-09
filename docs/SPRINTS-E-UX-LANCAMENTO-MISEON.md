@@ -157,7 +157,83 @@ Não converter DELIVERY em RETIRADA para fazê-lo aparecer no painel. As migrati
 
 **Checkpoint 09/09 (15B parcial — emissão real confirmada, PRONTO PARA REVISÃO):** a única fatura "emitida" em produção era falsa (consulta oficial da Prefeitura devolvia "não conferem" — nota de teste antigo, nunca corrigida). Investigado e corrigido: (1) conectividade — a Prefeitura bloqueia mTLS de origem datacenter/nuvem; Supabase Edge Functions não têm IP fixo; criado `api/fiscal-proxy-nfse.ts` (Vercel, região gru1/São Paulo) para fazer a última perna da chamada a partir de lá; (2) três bugs de estrutura do XML do lote RPS (Id não declarado, namespace herdado incorretamente pelos elementos locais, parsing de `<NumeroNFe>` procurando `<Numero>`), cada um confirmado por um erro real e distinto do webservice. **Prova:** fatura de teste de R$1,00 emitida com NF-e número 1, código `3ZARYZG9`, validada na consulta pública oficial da Prefeitura (abre a nota real, com download). Detalhe completo, pendências e riscos em `docs/MISEON_HEAD_OF_ENGINEERING.md` (seção "Execução de 09/09 (parte 3)"). **Falta:** idempotência/concorrência da numeração de RPS (crítico agora que a emissão real funciona), testar o caminho automático real (Pix→webhook→emissão, não só chamada manual), 15C inteira (ciclo de vida da assinatura, entrega fiscal), revisão independente. **Pedido novo do Rafael, ainda não iniciado:** valor da mensalidade configurável pelo superadmin (preço de lançamento até 10 assinantes; valor diferente para o canal totem/Kiosk) — hoje é hardcoded em `src/lib/efiInfo.ts`.
 
-**Checkpoint 09/09 (15B continuação — idempotência/concorrência do RPS corrigida e o caminho automático destravado, PRONTO PARA REVISÃO):** reproduzido em produção (não hipótese): `count(nfse_status='emitida')+1` sem trava — no estado real da tabela naquele momento, qualquer chamada próxima no tempo calcularia o mesmo `numeroRps`. Corrigido com contador dedicado (`fiscal_rps_sequencia` + `fn_fiscal_reservar_numero_rps`, `UPDATE...RETURNING` atômico, mesmo padrão de `fn_numero_pedido`) — número reservado persiste na fatura (`nfse_numero_rps`) e é reaproveitado em qualquer retentativa, nunca queimando um número novo sobre um RPS que não foi de fato aceito. Adicionada trava de reivindicação atômica por fatura (impede reprocessar uma fatura já `emitida`/`processando`) e guarda de idempotência (fatura já emitida retorna o resultado existente). **Achado não previsto, corrigido no mesmo commit:** a detecção de chamada service-role fazia parsing de JWT (`role===service_role`) — formato que este projeto não usa mais (API key nova da Supabase, `sb_secret_...`, sem ponto); isso fazia o caminho automático (Pix confirmado → `assinatura-pix.ts`/`efi-assinatura-webhook` → esta função) retornar 403 sempre, silenciosamente ("não bloqueia o pagamento" engole o erro) — só a chamada manual com JWT de superadmin real disfarçava o problema. Corrigido comparando a bearer key direto com `SUPABASE_SERVICE_ROLE_KEY`. **Mesmo bug (parsing de JWT para achar service-role) existe em `fiscal-onboarding-plataforma`, `ifood-catalog-import` e `ifood-catalog-sync` — não corrigido nesta sessão, fora do escopo do fiscal da assinatura.** **Prova real:** duas chamadas concorrentes de verdade para a mesma fatura de teste (R$1, Lanche do Paulista) — uma bloqueada (`concorrencia:true`, nunca tocou o webservice), a outra emitiu a NF-e real número 2 (RPS número 3), validada na consulta pública oficial; retentativa na fatura já emitida devolveu `ja_emitida:true` sem gerar nova nota. Migration `20260909180000` e a function publicadas via MCP do Supabase. **Falta:** commit local feito, mas `git push` foi bloqueado pelo classificador do modo automático do Claude Code — Rafael precisa empurrar manualmente ou autorizar; caminho automático fica coberto pela correção do bug de auth, mas não foi disparado por um Pix real de ponta a ponta (exigiria movimentar dinheiro de verdade); 15C inteira; revisão independente; pedido de preço configurável ainda não iniciado (ver Sprint 22 e handoff).
+**Checkpoint 09/09 (15B continuação), formato §9 do handoff:**
+
+```text
+Sprint / incremento / ID: Sprint 15B (continuação) — idempotência e
+  concorrência da numeração de RPS (item 3.2 de
+  docs/HANDOFF-SPRINT15B-CONTINUACAO.md).
+Objetivo e critério de aceite: nenhuma colisão de número de RPS sob
+  concorrência; fatura já emitida nunca é reemitida; caminho automático
+  (Pix->NFS-e) não falha por bug de autenticação.
+Status: PRONTO PARA REVISÃO.
+Branch e commit: main, commits 1167078 (fix) e db8a2c7 (docs) —
+  publicados em origin/main nesta sessão.
+Arquivos e objetos alterados:
+  - supabase/migrations/20260909180000_fiscal_rps_idempotencia_e_concorrencia.sql
+    (tabela fiscal_rps_sequencia; função fn_fiscal_reservar_numero_rps).
+  - supabase/functions/fiscal-emitir-nfse/index.ts (guarda de fatura já
+    emitida; reivindicação atômica por fatura; numeração via RPC em vez
+    de count(*); correção da detecção de service-role; catch externo
+    reverte 'processando' travado).
+Estado antes e causa reproduzida: numeroRps = count(nfse_status=
+  'emitida')+1, sem trava. Medido em produção: no momento da
+  investigação, qualquer chamada próxima no tempo calcularia
+  numeroRps=3 (SELECT count(*) direto, sem escrita entre leituras).
+  isServiceRole fazia parsing de JWT (role==='service_role'); medido que
+  SUPABASE_SERVICE_ROLE_KEY deste projeto tem 41 caracteres e nenhum
+  ponto — não é JWT (formato novo de API key da Supabase) — então toda
+  chamada function-to-function real caía em 403 "Não autorizado".
+Estado depois e invariantes preservadas: número reservado por contador
+  dedicado (UPDATE...RETURNING atômico, mesmo padrão de
+  fn_numero_pedido) e persistido em faturas_assinatura.nfse_numero_rps;
+  retentativa da mesma fatura reaproveita o número já reservado.
+  Reivindicação atômica (UPDATE...WHERE nfse_status NOT IN
+  ('processando','emitida')) garante que só uma chamada concorrente
+  para a mesma fatura toca o webservice. isServiceRole agora compara a
+  bearer key direto com a env var.
+Testes:
+  - Concorrência cross-fatura, DB direto (faturas descartáveis): PASS —
+    números únicos e sequenciais.
+  - Idempotência mesma fatura, DB direto (3 chamadas repetidas): PASS —
+    mesmo número, contador não avança.
+  - Concorrência real contra o webservice de produção (fatura R$1,
+    Lanche do Paulista, 2 chamadas simultâneas via curl): PASS — uma
+    respondeu concorrencia:true (nunca tocou o webservice), a outra
+    emitiu NF-e real número 2 / RPS número 3 / código DPDKQ7JJ.
+  - Validação na consulta pública oficial da Prefeitura (CNPJ
+    68923239000177 / nota 2 / código DPDKQ7JJ): PASS — PDF oficial
+    abre, dados do prestador/tomador conferem.
+  - Retentativa na fatura já emitida: PASS — ja_emitida:true, sem nova
+    nota.
+  - Caminho automático real de ponta a ponta (Pix de verdade via Efí):
+    NOT RUN — exigiria movimentar dinheiro real, fora do escopo de um
+    teste de engenharia. O bug de autenticação que o bloqueava foi
+    corrigido e testado pelo mesmo mecanismo de chamada function-to-
+    function (service role key auto-injetada).
+Publicado: migration 20260909180000 e fiscal-emitir-nfse v44,
+  publicados via MCP do Supabase (apply_migration / deploy_edge_function)
+  em 09/09/2026. git push para origin/main confirmado (commit db8a2c7).
+Não publicado: nada pendente de publicação para este incremento.
+Pendências: mesmo bug de detecção de service-role (parsing de JWT)
+  confirmado por grep em fiscal-onboarding-plataforma,
+  ifood-catalog-import e ifood-catalog-sync — não corrigido aqui,
+  spawnado como tarefa separada (task_b74808f5), já iniciada pelo
+  Rafael em sessão própria. Pedido de preço configurável pelo
+  superadmin: sem assinante ativo hoje, Rafael decidiu não priorizar
+  até a validação de 1 mês da Natureba avançar — ver
+  docs/HANDOFF-SPRINT15B-CONTINUACAO.md item 4 para o levantamento já
+  feito (três lugares hardcoded: src/lib/efiInfo.ts, saas-assinar,
+  saas-pix).
+Recuperação e limitações conhecidas: se a reivindicação ou a reserva de
+  número falharem no meio de uma emissão real, o catch externo só
+  reverte nfse_status para 'erro' se ainda estava 'processando' por
+  esta mesma chamada — nunca sobrescreve um 'emitida' já gravado antes
+  da exceção (ex.: falha no e-mail pós-sucesso).
+Próximo passo executável: 15C (renovação, recusa, cancelamento,
+  reconciliação de webhook duplicado/fora de ordem) ainda não iniciada
+  — é o próximo item de Sprint 15 em aberto.
+```
 
 [[PAGE]]
 
