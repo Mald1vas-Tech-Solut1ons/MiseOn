@@ -132,7 +132,7 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
                 )}
               </div>
               <span className="text-lg font-black text-[var(--cor-primaria)]">
-                {c.tipo === 'FIXO' ? fmt(Number(c.valor)) : `${c.valor}% OFF`}
+                {c.frete_gratis ? 'Frete grátis' : c.tipo === 'FIXO' ? fmt(Number(c.valor)) : `${c.valor}% OFF`}
               </span>
             </div>
 
@@ -201,6 +201,7 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
   const [metodo, setMetodo] = useState<MetodoPgto | ''>(cupom?.metodo_exigido ?? '');
   const [validade, setValidade] = useState(cupom?.validade ?? '');
   const [limiteUsos, setLimiteUsos] = useState(cupom?.limite_usos != null ? String(cupom.limite_usos) : '');
+  const [freteGratis, setFreteGratis] = useState(cupom?.frete_gratis ?? false);
   const [erro, setErro] = useState('');
 
   const salvar = async () => {
@@ -215,6 +216,7 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
       metodo_exigido: metodo || null,
       validade: validade || null,
       limite_usos: limiteUsos ? Number(limiteUsos) : null,
+      frete_gratis: freteGratis,
     };
     const { error } = cupom
       ? await supabase.from('cupons').update(payload).eq('id', cupom.id)
@@ -279,6 +281,13 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
           <label className="flex items-center gap-2 pt-1 text-xs font-semibold text-gray-700 dark:text-gray-300">
             <input type="checkbox" checked={primeiraCompra} onChange={(e) => setPrimeiraCompra(e.target.checked)} className="h-4 w-4 rounded accent-[var(--cor-primaria)]" />
             {tDynamic('Válido exclusivamente no 1º pedido do cliente')}
+          </label>
+          <label className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 text-xs font-semibold text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-300">
+            <input type="checkbox" checked={freteGratis} onChange={(e) => setFreteGratis(e.target.checked)} className="mt-0.5 h-4 w-4 rounded accent-emerald-600" />
+            <span>
+              {tDynamic('Liberar entrega grátis com este cupom')}
+              <small className="mt-0.5 block font-normal opacity-80">{tDynamic('Continua respeitando pedido mínimo, validade, limite de usos, primeira compra e forma de pagamento.')}</small>
+            </span>
           </label>
         </div>
 
@@ -485,9 +494,10 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
   const { tDynamic } = useI18n();
   const [subtab, setSubtab] = useState<'pix' | 'carrinhos'>('pix');
   const [pixPendentes, setPixPendentes] = useState<PixPendente[]>([]);
-  const [carrinhos, setCarrinhos] = useState<(CarrinhoAbandonado & { nome?: string | null; telefone?: string })[]>([]);
+  const [carrinhos, setCarrinhos] = useState<(CarrinhoAbandonado & { clienteId?: string; nome?: string | null; telefone?: string; email?: string | null })[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [gerandoCupom, setGerandoCupom] = useState<string | null>(null);
+  const [feedbackRecuperacao, setFeedbackRecuperacao] = useState('');
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -508,10 +518,10 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
     setPixPendentes((pix as unknown as PixPendente[]) ?? []);
 
     const userIds = [...new Set((abandonados ?? []).map((c) => c.user_id))];
-    let mapa = new Map<string, { nome?: string | null; telefone: string }>();
+    let mapa = new Map<string, { clienteId: string; nome?: string | null; telefone: string; email?: string | null }>();
     if (userIds.length > 0) {
-      const { data: clientesData } = await supabase.from('clientes').select('user_id, nome, telefone').eq('loja_id', lojaId).in('user_id', userIds);
-      mapa = new Map((clientesData ?? []).map((c) => [c.user_id, c]));
+      const { data: clientesData } = await supabase.from('clientes').select('id, user_id, nome, telefone, email').eq('loja_id', lojaId).in('user_id', userIds);
+      mapa = new Map((clientesData ?? []).map((c) => [c.user_id, { ...c, clienteId: c.id }]));
     }
     setCarrinhos((abandonados as CarrinhoAbandonado[] ?? []).map((c) => ({ ...c, ...mapa.get(c.user_id) })));
     setCarregando(false);
@@ -527,7 +537,7 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
     window.open(`https://wa.me/${p.telefone_contato.replace(/\D/g, '')}?text=${encodeURIComponent(texto)}`, '_blank');
   };
 
-  const enviarCarrinho = (c: CarrinhoAbandonado & { nome?: string | null; telefone?: string }, comCupom?: string) => {
+  const enviarCarrinho = (c: CarrinhoAbandonado & { nome?: string | null; telefone?: string; email?: string | null }, comCupom?: string) => {
     if (!c.telefone) return;
     const saudacao = c.nome ? `Oi ${c.nome}!` : 'Oi!';
     const textoBase = `${saudacao} Vi que você montou o pedido (${c.itens_resumo}), mas não finalizou. Quer que eu te ajude a concluir? 😉`;
@@ -535,17 +545,36 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
     window.open(`https://wa.me/${c.telefone.replace(/\D/g, '')}?text=${encodeURIComponent(textoBase + textoCupom + `\n${linkCardapio}`)}`, '_blank');
   };
 
-  const gerarCupomEEnviar = async (c: CarrinhoAbandonado & { nome?: string | null; telefone?: string }) => {
+  const gerarCupomEEnviar = async (c: CarrinhoAbandonado & { clienteId?: string; nome?: string | null; telefone?: string; email?: string | null }) => {
     setGerandoCupom(c.id);
-    const codigo = `VOLTA${Math.floor(1000 + Math.random() * 9000)}`;
-    const { error } = await supabase.from('cupons').insert({
+    setFeedbackRecuperacao('');
+    const codigo = `VOLTA${crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase()}`;
+    const { data: cupomCriado, error } = await supabase.from('cupons').insert({
       loja_id: lojaId, codigo, descricao: 'Recuperação de venda — cupom automático',
       tipo: 'PERCENTUAL', valor: 10, limite_usos: 1,
+      cliente_id: c.clienteId ?? null,
       validade: new Date(Date.now() + 48 * 3600e3).toISOString().slice(0, 10),
-    });
+    }).select('id').single();
+    if (error) { setGerandoCupom(null); return setFeedbackRecuperacao('Erro ao gerar cupom: ' + error.message); }
+    let emailEnfileirado = false;
+    if (cupomCriado?.id && c.clienteId && c.email) {
+      const { data: distribuicao, error: erroEmail } = await supabase.rpc('fn_distribuir_cupom_cliente', {
+        p_cupom_id: cupomCriado.id,
+        p_cliente_id: c.clienteId,
+        p_enviar_email: true,
+      });
+      if (erroEmail) console.error('Cupom criado, mas o e-mail não pôde ser enfileirado:', erroEmail);
+      emailEnfileirado = !!(distribuicao as any)?.email_enfileirado;
+    }
+    if (c.telefone) enviarCarrinho(c, codigo);
+    setFeedbackRecuperacao(
+      emailEnfileirado
+        ? `Cupom ${codigo} criado para este cliente e enfileirado por e-mail${c.telefone ? ' e WhatsApp' : ''}.`
+        : c.telefone
+        ? `Cupom ${codigo} criado para este cliente e aberto no WhatsApp.`
+        : `Cupom ${codigo} criado, mas o e-mail não foi enfileirado (consentimento ou configuração).`,
+    );
     setGerandoCupom(null);
-    if (error) return alert('Erro ao gerar cupom: ' + error.message);
-    enviarCarrinho(c, codigo);
   };
 
   if (carregando) return <p className="py-10 text-center text-xs text-gray-400">{tDynamic('Buscando oportunidades de recuperação…')}</p>;
@@ -570,6 +599,12 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
           <ShoppingCart size={14} /> Carrinhos Abandonados ({carrinhos.length})
         </button>
       </div>
+
+      {feedbackRecuperacao && (
+        <p role="status" className={`rounded-xl border px-3 py-2 text-xs font-semibold ${feedbackRecuperacao.startsWith('Erro') ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
+          {feedbackRecuperacao}
+        </p>
+      )}
 
       {subtab === 'pix' && (
         <div className="space-y-3">
@@ -603,8 +638,14 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
                 <button onClick={() => enviarCarrinho(c)} disabled={!c.telefone} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50">
                   <MessageCircle size={14} /> {tDynamic('Falar no WhatsApp')}
                 </button>
-                <button onClick={() => gerarCupomEEnviar(c)} disabled={!c.telefone || gerandoCupom === c.id} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] py-2 text-xs font-bold text-white shadow-sm hover:brightness-110">
-                  <Gift size={14} /> {gerandoCupom === c.id ? 'Gerando…' : 'Enviar com 10% OFF'}
+                <button onClick={() => gerarCupomEEnviar(c)} disabled={(!c.telefone && !c.email) || gerandoCupom === c.id} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] py-2 text-xs font-bold text-white shadow-sm hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45">
+                  <Gift size={14} /> {gerandoCupom === c.id
+                    ? 'Gerando…'
+                    : c.email && c.telefone
+                    ? 'WhatsApp + e-mail (10% OFF)'
+                    : c.email
+                    ? 'E-mail com 10% OFF'
+                    : 'WhatsApp com 10% OFF'}
                 </button>
               </div>
             </div>
