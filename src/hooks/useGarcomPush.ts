@@ -18,7 +18,7 @@ export function useGarcomPush(lojaId?: string | null) {
     const carregarChamados = async () => {
       const { data } = await supabase
         .from('chamados_garcom')
-        .select('*, mesas(numero)')
+        .select('*, mesas(numero), comandas(numero_cartao)')
         .eq('loja_id', lojaId)
         .eq('status', 'PENDENTE')
         .order('criado_em', { ascending: false });
@@ -28,6 +28,7 @@ export function useGarcomPush(lojaId?: string | null) {
           data.map((c: any) => ({
             ...c,
             mesa_numero: c.mesas?.numero,
+            comanda_numero_cartao: c.comandas?.numero_cartao,
           }))
         );
       }
@@ -97,7 +98,12 @@ export function useGarcomPush(lojaId?: string | null) {
     // 2. Notificação Visual Browser / Push Notification
     if ('Notification' in window && Notification.permission === 'granted') {
       const titulo = chamado.tipo === 'FECHAMENTO' ? '💳 Solicitação de Fechamento!' : '🔔 Chamado de Atendimento!';
-      const msg = `Mesa #${chamado.mesa_numero || 'Salão'} solicita ${chamado.tipo === 'FECHAMENTO' ? 'a conta / fechamento' : 'garçom na mesa'}.`;
+      const local = chamado.mesa_numero
+        ? `Mesa #${chamado.mesa_numero}`
+        : chamado.comanda_numero_cartao
+          ? `Comanda #${chamado.comanda_numero_cartao} (balcão)`
+          : 'Salão';
+      const msg = `${local} solicita ${chamado.tipo === 'FECHAMENTO' ? 'a conta / fechamento' : 'garçom'}.`;
       new Notification(titulo, {
         body: msg,
         icon: '/icon.png',

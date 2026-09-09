@@ -6,7 +6,7 @@ export type Papel = 'admin' | 'operador' | 'garcom' | 'entregador';
 
 const ROTAS_POR_PAPEL: Record<Exclude<Papel, 'admin'>, string[]> = {
   operador: ['pdv', 'kds', 'mesas', 'pedidos', 'entregas', 'estoque', 'producao', 'compras', 'cardapio', 'historico', 'chat', 'ajuda', 'conta'],
-  garcom: ['mesas', 'pdv', 'pedidos', 'ajuda', 'conta'],
+  garcom: ['mesas', 'pdv', 'pedidos', 'garcom-mobile', 'ajuda', 'conta'],
   entregador: ['entregas', 'ajuda', 'conta'],
 };
 

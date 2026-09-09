@@ -1,10 +1,26 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Scale, RefreshCw, Check, AlertTriangle, ShieldCheck, Zap, Usb, Hash, ArrowRight } from 'lucide-react';
+import { Scale, RefreshCw, Check, AlertTriangle, ShieldCheck, Zap, Usb, Hash, ArrowRight, CreditCard, Banknote, Clock, X, Wallet, QrCode, Receipt } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { fmt, type BalancaConfiguracao, type ProtocoloBalanca, type ModoConexaoBalanca, type Produto, type Comanda } from '../../types';
+import { fmt, type BalancaConfiguracao, type ProtocoloBalanca, type ModoConexaoBalanca, type Produto, type Comanda, type MetodoPgto, type ItemPedido } from '../../types';
 import { BalancaEngine, type LeituraBalanca } from '../../lib/balanca/balancaEngine';
 
 import { useI18n } from '../../contexts/I18nContext';
+
+const METODOS_RECEBIMENTO: { valor: MetodoPgto; rotulo: string; icone: typeof Wallet }[] = [
+  { valor: 'DINHEIRO', rotulo: 'Dinheiro', icone: Wallet },
+  { valor: 'PIX', rotulo: 'Pix', icone: QrCode },
+  { valor: 'CREDITO', rotulo: 'Crédito', icone: CreditCard },
+  { valor: 'DEBITO', rotulo: 'Débito', icone: CreditCard },
+];
+
+function tempoDecorrido(desde: string): string {
+  const minutos = Math.max(0, Math.floor((Date.now() - new Date(desde).getTime()) / 60000));
+  if (minutos < 1) return 'agora há pouco';
+  if (minutos < 60) return `há ${minutos} min`;
+  const horas = Math.floor(minutos / 60);
+  const resto = minutos % 60;
+  return `há ${horas}h${resto > 0 ? ` ${resto}min` : ''}`;
+}
 export function PainelBalanca() {
   const { tDynamic } = useI18n();
   const [lojaId, setLojaId] = useState<string | null>(null);
@@ -15,6 +31,12 @@ export function PainelBalanca() {
   // Produtos por quilo
   const [produtosPeso, setProdutosPeso] = useState<Produto[]>([]);
   const [comandasAbertas, setComandasAbertas] = useState<Comanda[]>([]);
+  const [saldosComanda, setSaldosComanda] = useState<Record<string, number>>({});
+  const [comandaParaReceber, setComandaParaReceber] = useState<Comanda | null>(null);
+  const [itensComandaModal, setItensComandaModal] = useState<ItemPedido[]>([]);
+  const [carregandoItensModal, setCarregandoItensModal] = useState(false);
+  const [metodoModal, setMetodoModal] = useState<MetodoPgto>('DINHEIRO');
+  const [fechandoComandaId, setFechandoComandaId] = useState<string | null>(null);
   
   // Operação em Tempo Real (Caixa)
   const [produtoAtivo, setProdutoAtivo] = useState<Produto | null>(null);
@@ -159,6 +181,21 @@ export function PainelBalanca() {
         .eq('status', 'ABERTA');
 
       setComandasAbertas(coms as Comanda[] || []);
+      const comandaIds = (coms ?? []).map((comanda) => comanda.id);
+      if (comandaIds.length > 0) {
+        const { data: pedidosComanda } = await supabase
+          .from('pedidos')
+          .select('comanda_id, valor_total, status')
+          .in('comanda_id', comandaIds)
+          .neq('status', 'CANCELADO');
+        const totais = (pedidosComanda ?? []).reduce<Record<string, number>>((acc, pedido) => {
+          if (pedido.comanda_id) acc[pedido.comanda_id] = (acc[pedido.comanda_id] ?? 0) + Number(pedido.valor_total);
+          return acc;
+        }, {});
+        setSaldosComanda(totais);
+      } else {
+        setSaldosComanda({});
+      }
 
     } catch (err: any) {
       console.error('Erro ao carregar configurações de balança:', err);
@@ -244,109 +281,23 @@ export function PainelBalanca() {
     setMensagem(null);
 
     try {
-      let comandaAlvoId = comandaSelecionadaId;
-
-      // Se informou número de cartão de comanda individual
-      if (numeroCartaoInput.trim() && lojaId) {
-        let { data: comExistente } = await supabase
-          .from('comandas')
-          .select('*')
-          .eq('loja_id', lojaId)
-          .eq('numero_cartao', numeroCartaoInput.trim())
-          .eq('status', 'ABERTA')
-          .maybeSingle();
-
-        if (!comExistente) {
-          // Criar nova comanda individual automática para este cartão
-          const { data: novaCom, error: errCom } = await supabase
-            .from('comandas')
-            .insert({
-              loja_id: lojaId,
-              status: 'ABERTA',
-              tipo_comanda: 'INDIVIDUAL',
-              numero_cartao: numeroCartaoInput.trim(),
-              taxa_servico_pct: 10,
-              valor_servico: 0,
-            })
-            .select()
-            .single();
-
-          if (errCom) throw errCom;
-          comExistente = novaCom;
-        }
-
-        comandaAlvoId = comExistente.id;
-      }
-
-      if (!comandaAlvoId) {
+      if (!comandaSelecionadaId && !numeroCartaoInput.trim()) {
         setProcessandoLancamento(false);
         return setMensagem({ tipo: 'erro', texto: 'Comanda não selecionada ou não encontrada.' });
       }
 
-      // Buscar ou criar pedido vinculado à comanda
-      let { data: pedExistente } = await supabase
-        .from('pedidos')
-        .select('*')
-        .eq('comanda_id', comandaAlvoId)
-        .neq('status', 'CANCELADO')
-        .maybeSingle();
-
-      if (!pedExistente) {
-        const { data: novoPed, error: errPed } = await supabase
-          .from('pedidos')
-          .insert({
-            loja_id: lojaId,
-            comanda_id: comandaAlvoId,
-            tipo_pedido: 'SALAO',
-            status: 'FINALIZADO', // item de buffet pesado é consumido de imediato
-            identificador_cliente: numeroCartaoInput.trim() ? `Comanda ${numeroCartaoInput.trim()}` : 'Cliente Buffet',
-            subtotal: 0,
-            taxa_entrega: 0,
-            desconto: 0,
-            valor_total: 0,
-            origem: 'balanca',
-          })
-          .select()
-          .single();
-
-        if (errPed) throw errPed;
-        pedExistente = novoPed;
-      }
-
-      // Inserir o item pesado
       const valorItem = Number((leituraAtual.pesoLiquidoKg * precoPraticado).toFixed(2));
-
-      // Registra o item do peso no banco usando produto_id null ou mockado
-      const { error: errItem } = await supabase.from('itens_pedido').insert({
-        pedido_id: pedExistente.id,
-        produto_id: produtoAtivo?.id?.length === 36 ? produtoAtivo.id : null, // Evita enviar ID fake do localStorage se a tabela exigir uuid, ou manda nulo.
-        nome_produto: produtoAtivo ? produtoAtivo.nome : 'Buffet Avulso',
-        preco_unitario: precoPraticado,
-        quantidade: leituraAtual.pesoLiquidoKg,
-        origem_balanca: true,
-        tara_g: config.tara_padrao_g,
+      const { error } = await supabase.rpc('fn_registrar_pesagem_comanda', {
+        p_loja_id: lojaId,
+        p_comanda_id: comandaSelecionadaId || null,
+        p_numero_cartao: numeroCartaoInput.trim() || null,
+        p_produto_id: produtoAtivo?.id?.length === 36 ? produtoAtivo.id : null,
+        p_nome_produto: produtoAtivo?.nome || 'Buffet por quilo',
+        p_preco_quilo: precoPraticado,
+        p_peso_liquido_kg: leituraAtual.pesoLiquidoKg,
+        p_tara_g: config.tara_padrao_g,
       });
-
-      if (errItem) throw errItem;
-
-      // Recalcular subtotal do pedido
-      const { data: todosItens } = await supabase
-        .from('itens_pedido')
-        .select('preco_unitario, quantidade')
-        .eq('pedido_id', pedExistente.id);
-
-      const novoSubtotal = (todosItens || []).reduce(
-        (acc, item) => acc + Number(item.preco_unitario) * Number(item.quantidade),
-        0
-      );
-
-      await supabase
-        .from('pedidos')
-        .update({
-          subtotal: novoSubtotal,
-          valor_total: novoSubtotal,
-        })
-        .eq('id', pedExistente.id);
+      if (error) throw error;
 
       setMensagem({
         tipo: 'sucesso',
@@ -362,6 +313,55 @@ export function PainelBalanca() {
     } finally {
       setProcessandoLancamento(false);
     }
+  };
+
+  const abrirModalReceber = async (comanda: Comanda) => {
+    setComandaParaReceber(comanda);
+    setMetodoModal('DINHEIRO');
+    setItensComandaModal([]);
+    setCarregandoItensModal(true);
+    try {
+      const { data: pedidosComanda } = await supabase
+        .from('pedidos')
+        .select('id')
+        .eq('comanda_id', comanda.id)
+        .neq('status', 'CANCELADO');
+      const pedidoIds = (pedidosComanda ?? []).map((p) => p.id);
+      if (pedidoIds.length > 0) {
+        const { data: itens } = await supabase
+          .from('itens_pedido')
+          .select('id, nome_produto, preco_unitario, quantidade, origem_balanca')
+          .in('pedido_id', pedidoIds);
+        setItensComandaModal((itens as ItemPedido[]) || []);
+      }
+    } finally {
+      setCarregandoItensModal(false);
+    }
+  };
+
+  const fecharModalReceber = () => {
+    setComandaParaReceber(null);
+    setItensComandaModal([]);
+  };
+
+  const confirmarRecebimento = async () => {
+    if (!comandaParaReceber) return;
+    const comanda = comandaParaReceber;
+    setFechandoComandaId(comanda.id);
+    setMensagem(null);
+    const { error } = await supabase.rpc('fn_fechar_comanda_buffet', {
+      p_comanda_id: comanda.id,
+      p_metodo_pagamento: metodoModal,
+    });
+    if (error) {
+      setMensagem({ tipo: 'erro', texto: error.message || 'Não foi possível encerrar a comanda.' });
+    } else {
+      setMensagem({ tipo: 'sucesso', texto: `Comanda ${comanda.numero_cartao ?? ''} paga e encerrada. O registro foi enviado ao histórico.` });
+      if (comandaSelecionadaId === comanda.id) setComandaSelecionadaId('');
+      fecharModalReceber();
+      await carregarDados();
+    }
+    setFechandoComandaId(null);
   };
 
   if (loading) {
@@ -427,6 +427,65 @@ export function PainelBalanca() {
           <span>{mensagem.texto}</span>
         </div>
       )}
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/90">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="font-bold text-slate-900 dark:text-slate-100">{tDynamic('Comandas vivas do buffet')}</h2>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {tDynamic('Nascem na primeira pesagem, acumulam consumo e encerram o ciclo só depois do pagamento — o histórico continua auditável.')}
+            </p>
+          </div>
+          <span className="rounded-full bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-600 dark:text-orange-400">
+            {comandasAbertas.filter((c) => c.tipo_comanda === 'INDIVIDUAL').length} {tDynamic('abertas')}
+          </span>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {comandasAbertas.filter((c) => c.tipo_comanda === 'INDIVIDUAL').map((comanda) => (
+            <article
+              key={comanda.id}
+              className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-orange-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-orange-500/40"
+            >
+              <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 opacity-80" />
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{tDynamic('Cartão / comanda')}</p>
+                  <p className="mt-1 text-lg font-black text-slate-900 dark:text-white">#{comanda.numero_cartao ?? 'sem número'}</p>
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> {tDynamic('Viva')}
+                </span>
+              </div>
+              <div className="my-3 flex items-end justify-between border-y border-slate-100 py-3 dark:border-slate-800">
+                <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                  <Clock size={13} className="text-slate-400" /> {tempoDecorrido(comanda.aberta_em)}
+                </span>
+                <strong className="text-xl text-orange-600 dark:text-orange-400">{fmt(saldosComanda[comanda.id] ?? 0)}</strong>
+              </div>
+              <button
+                type="button"
+                onClick={() => abrirModalReceber(comanda)}
+                disabled={(saldosComanda[comanda.id] ?? 0) <= 0}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                <Banknote size={15} />
+                {tDynamic('Receber e encerrar comanda')}
+              </button>
+            </article>
+          ))}
+          {comandasAbertas.filter((c) => c.tipo_comanda === 'INDIVIDUAL').length === 0 && (
+            <div className="md:col-span-2 xl:col-span-3 rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center dark:border-slate-700">
+              <Receipt size={28} className="mx-auto mb-2 text-slate-300 dark:text-slate-600" />
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                {tDynamic('Nenhuma comanda individual aberta.')}
+              </p>
+              <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+                {tDynamic('Leia um cartão na primeira pesagem para iniciar o ciclo.')}
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Grid Principal */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
@@ -813,6 +872,112 @@ export function PainelBalanca() {
           </div>
         </div>
       </div>
+
+      {/* Modal de recebimento: resumo dos itens pesados/lançados na comanda
+          antes de encerrar o ciclo — sem isso o operador confirma às cegas. */}
+      {comandaParaReceber && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+          onClick={fecharModalReceber}
+        >
+          <div
+            className="w-full max-w-md rounded-t-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:rounded-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 p-5 dark:border-slate-800">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{tDynamic('Receber e encerrar comanda')}</h3>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                  #{comandaParaReceber.numero_cartao ?? 'sem número'} · {tempoDecorrido(comandaParaReceber.aberta_em)}
+                </p>
+              </div>
+              <button
+                onClick={fecharModalReceber}
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="max-h-64 space-y-2 overflow-y-auto p-5">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{tDynamic('Itens consumidos')}</p>
+              {carregandoItensModal ? (
+                <div className="flex justify-center py-6">
+                  <RefreshCw size={20} className="animate-spin text-slate-400" />
+                </div>
+              ) : itensComandaModal.length === 0 ? (
+                <p className="py-4 text-center text-xs text-slate-400">{tDynamic('Nenhum item registrado nesta comanda.')}</p>
+              ) : (
+                itensComandaModal.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800/60">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-800 dark:text-slate-100">{item.nome_produto}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {item.origem_balanca
+                          ? `${Number(item.quantidade).toFixed(3)} kg × ${fmt(item.preco_unitario)}/kg`
+                          : `${item.quantidade}x ${fmt(item.preco_unitario)}`}
+                      </p>
+                    </div>
+                    <strong className="shrink-0 text-slate-900 dark:text-slate-100">
+                      {fmt(Number(item.preco_unitario) * Number(item.quantidade))}
+                    </strong>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex items-center justify-between border-y border-slate-100 px-5 py-3 dark:border-slate-800">
+              <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{tDynamic('Total a receber')}</span>
+              <strong className="text-2xl text-orange-600 dark:text-orange-400">
+                {fmt(saldosComanda[comandaParaReceber.id] ?? 0)}
+              </strong>
+            </div>
+
+            <div className="p-5">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">{tDynamic('Forma de pagamento')}</p>
+              <div className="mb-4 grid grid-cols-2 gap-2">
+                {METODOS_RECEBIMENTO.map(({ valor, rotulo, icone: Icone }) => (
+                  <button
+                    key={valor}
+                    type="button"
+                    onClick={() => setMetodoModal(valor)}
+                    className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-bold transition ${
+                      metodoModal === valor
+                        ? 'border-orange-500 bg-orange-500/10 text-orange-600 dark:text-orange-400'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    <Icone size={15} /> {rotulo}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={fecharModalReceber}
+                  className="flex-1 rounded-xl bg-slate-100 py-3 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                  {tDynamic('Cancelar')}
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmarRecebimento}
+                  disabled={fechandoComandaId === comandaParaReceber.id}
+                  className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {fechandoComandaId === comandaParaReceber.id ? (
+                    <RefreshCw size={15} className="animate-spin" />
+                  ) : (
+                    <Banknote size={15} />
+                  )}
+                  {tDynamic('Confirmar recebimento')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

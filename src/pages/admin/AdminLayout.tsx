@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState, useRef, Suspense } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { ClipboardList, Boxes, Bike, Store, LogOut, UtensilsCrossed, MoreHorizontal, X, TrendingUp, Megaphone, Users, History, CreditCard, ShoppingCart, Flame, ChevronLeft, Menu, UserCircle, LifeBuoy, LayoutDashboard, Calculator, ChefHat, LayoutGrid, MessageSquare, MessageCircle, Plug, FileText, Compass, Scale, Smartphone } from 'lucide-react';
+import { ClipboardList, Boxes, Bike, Store, LogOut, UtensilsCrossed, MoreHorizontal, X, TrendingUp, Megaphone, Users, History, CreditCard, ShoppingCart, Flame, ChevronLeft, ChevronDown, Menu, UserCircle, LifeBuoy, LayoutDashboard, Calculator, ChefHat, LayoutGrid, MessageSquare, MessageCircle, Plug, FileText, Compass, Scale, Smartphone, Search } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { avaliarAssinatura } from '../../lib/assinatura';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -46,6 +46,14 @@ export default function AdminLayout() {
   const [emailUsuario, setEmailUsuario] = useState('');
   const [erroConexao, setErroConexao] = useState(false);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
+  const [buscaModulo, setBuscaModulo] = useState('');
+  const [gruposFechados, setGruposFechados] = useState<Record<string, boolean>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('miseon_sidebar_grupos_fechados') ?? '{}');
+    } catch {
+      return {};
+    }
+  });
 
   // Intelligent transition state
   const prevPathRef = useRef(loc.pathname);
@@ -81,6 +89,14 @@ export default function AdminLayout() {
     const newState = !isCollapsed;
     setIsCollapsed(newState);
     localStorage.setItem('miseon_sidebar_collapsed', String(newState));
+  };
+
+  const toggleGrupo = (id: string) => {
+    setGruposFechados((atual) => {
+      const proximo = { ...atual, [id]: !atual[id] };
+      localStorage.setItem('miseon_sidebar_grupos_fechados', JSON.stringify(proximo));
+      return proximo;
+    });
   };
 
   // Monitoramento financeiro em tempo real — alertas de estorno suspeito,
@@ -319,6 +335,7 @@ export default function AdminLayout() {
     : ctx.papel === 'garcom'
       ? [
         { to: '/admin/mesas', icon: <LayoutGrid size={20} />, label: tDynamic('Mapa de Mesas'), colorHex: C.amber },
+        { to: '/admin/garcom-mobile', icon: <Smartphone size={20} />, label: tDynamic('Garçom Mobile PWA'), colorHex: C.orange },
         { to: '/admin/pdv', icon: <Calculator size={20} />, label: tDynamic('Lançar Pedido'), colorHex: C.orange },
       ]
       : ctx.papel === 'operador'
@@ -539,7 +556,22 @@ export default function AdminLayout() {
         </div>
 
         {/* Navegação Scrollável */}
-        <div ref={sidebarRef} className="flex-1 overflow-y-auto py-2 space-y-6 custom-scrollbar overflow-x-hidden">
+        <div ref={sidebarRef} className="flex-1 overflow-y-auto py-2 custom-scrollbar overflow-x-hidden">
+
+          {ctx.papel === 'admin' && !isCollapsed && (
+            <div className="sticky top-0 z-20 bg-white/85 px-4 pb-2 pt-1 backdrop-blur-xl dark:bg-[#070C18]/85">
+              <label className="relative block">
+                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  value={buscaModulo}
+                  onChange={(event) => setBuscaModulo(event.target.value)}
+                  placeholder={tDynamic('Buscar módulo')}
+                  aria-label={tDynamic('Buscar módulo no menu')}
+                  className="w-full rounded-xl border border-gray-200 bg-white/70 py-2 pl-9 pr-3 text-xs font-semibold outline-none transition focus:border-[#0A5CC4] focus:ring-2 focus:ring-[#0A5CC4]/15 dark:border-white/10 dark:bg-white/5"
+                />
+              </label>
+            </div>
+          )}
 
           {ctx.papel === 'admin' ? (
             <>
@@ -566,23 +598,33 @@ export default function AdminLayout() {
                   id: 'suporte', label: tDynamic('Ajuda'), color: 'sky', routes: ['/admin/ajuda']
                 }
               ].map((grupo, index) => {
-                const rotasDesteGrupo = [...principal, ...mais].filter(p => grupo.routes.includes(p.to));
+                const termo = buscaModulo.trim().toLocaleLowerCase('pt-BR');
+                const rotasDesteGrupo = [...principal, ...mais].filter((p) =>
+                  grupo.routes.includes(p.to) && (!termo || p.label.toLocaleLowerCase('pt-BR').includes(termo)),
+                );
 
                 if (rotasDesteGrupo.length === 0) return null;
 
                 // O grupo que contem a rota atual fica aceso. Da orientacao mesmo
                 // quando o item ativo esta fora da area visivel da lista.
                 const grupoAtivo = !!rotaAtual && grupo.routes.includes(rotaAtual.to);
+                const grupoFechado = !isCollapsed && !termo && !grupoAtivo && !!gruposFechados[grupo.id];
 
                 return (
                   <div key={grupo.id} className="space-y-1">
-                    <div className={`px-5 mb-2 ${index > 0 ? 'mt-4' : ''} flex items-center gap-2 transition-all duration-300 ${isCollapsed ? 'justify-center' : ''}`}>
+                    <button
+                      type="button"
+                      onClick={() => !isCollapsed && toggleGrupo(grupo.id)}
+                      aria-expanded={!grupoFechado}
+                      className={`w-full px-5 mb-1 ${index > 0 ? 'mt-2' : ''} flex items-center gap-2 py-1.5 transition-all duration-300 ${isCollapsed ? 'justify-center cursor-default' : 'hover:bg-black/[.035] dark:hover:bg-white/[.04]'}`}
+                    >
                       {!isCollapsed && <div className={`w-1.5 h-1.5 rounded-full bg-${grupo.color}-500 shrink-0 transition-transform duration-300 ${grupoAtivo ? 'scale-150' : ''}`} />}
-                      <p className={`text-[10px] font-black tracking-[0.2em] uppercase text-${grupo.color}-600/90 dark:text-${grupo.color}-400/80 transition-opacity duration-300 ${grupoAtivo ? 'opacity-100' : 'opacity-55'} ${isCollapsed ? 'text-center' : ''}`}>
+                      <span className={`flex-1 text-left text-[10px] font-black tracking-[0.2em] uppercase text-${grupo.color}-600/90 dark:text-${grupo.color}-400/80 transition-opacity duration-300 ${grupoAtivo ? 'opacity-100' : 'opacity-55'} ${isCollapsed ? 'text-center' : ''}`}>
                         {isCollapsed ? '---' : grupo.label}
-                      </p>
-                    </div>
-                    {rotasDesteGrupo.map(p => renderSidebarLink(p))}
+                      </span>
+                      {!isCollapsed && <ChevronDown size={14} className={`opacity-50 transition-transform ${grupoFechado ? '-rotate-90' : ''}`} />}
+                    </button>
+                    {!grupoFechado && rotasDesteGrupo.map(p => renderSidebarLink(p))}
                   </div>
                 );
               })}
@@ -598,37 +640,39 @@ export default function AdminLayout() {
         </div>
 
         {/* Footer da Sidebar (Usuário) */}
-        <div className={`p-4 border-t border-gray-200/30 dark:border-white/10 space-y-2 shrink-0 transition-all duration-300 overflow-hidden bg-white/20 dark:bg-black/10 backdrop-blur-md rounded-b-[2rem]`}>
+        <div className={`border-t border-gray-200/30 p-2 dark:border-white/10 shrink-0 transition-all duration-300 overflow-hidden bg-white/20 dark:bg-black/10 backdrop-blur-md rounded-b-[2rem]`}>
+          <div className="grid grid-cols-3 gap-1">
           <a
             href={`/${ctx.lojaSlug}`}
             target="_blank"
             rel="noreferrer"
             style={{ '--route-color': '#0A5CC4' } as React.CSSProperties}
-            className={`nav-link-premium relative flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-colors group ${isCollapsed ? 'justify-center' : ''}`}
+            className="nav-link-premium group relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition-colors"
+            title={tDynamic('Ver Loja Online')}
           >
             <div className="nav-link-bg absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none rounded-2xl" />
-            <Store size={20} className="nav-link-icon shrink-0 transition-transform duration-300" />
-            <span className={`nav-link-text whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>{tDynamic('Ver Loja Online')}</span>
-            {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900/90 backdrop-blur-sm dark:bg-white/90 text-white dark:text-gray-900 text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">{tDynamic('Ver Loja Online')}</div>}
+            <Store size={18} className="nav-link-icon shrink-0 transition-transform duration-300" />
+            {!isCollapsed && <span className="w-full truncate text-center">{tDynamic('Loja online')}</span>}
           </a>
           <NavLink
             to="/admin/conta"
             style={{ '--route-color': '#FC5B24' } as React.CSSProperties}
-            className={({ isActive }) => `nav-link-premium relative flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-colors group ${isActive ? 'is-active' : ''} ${isCollapsed ? 'justify-center' : ''}`}
+            className={({ isActive }) => `nav-link-premium group relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition-colors ${isActive ? 'is-active' : ''}`}
+            title={tDynamic('Minha Conta')}
           >
             <div className="nav-link-bg absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none rounded-2xl" />
-            <UserCircle size={20} className="nav-link-icon shrink-0 transition-transform duration-300" />
-            <span className={`nav-link-text whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>{tDynamic('Minha Conta')}</span>
-            {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900/90 backdrop-blur-sm dark:bg-[#111827]/90 text-white text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">{tDynamic('Minha Conta')}</div>}
+            <UserCircle size={18} className="nav-link-icon shrink-0 transition-transform duration-300" />
+            {!isCollapsed && <span className="w-full truncate text-center">{tDynamic('Minha conta')}</span>}
           </NavLink>
           <button
             onClick={sair}
-            className={`relative flex items-center gap-3 w-full px-3.5 py-3 rounded-2xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-red-500/15 hover:text-red-500 dark:hover:bg-red-500/20 dark:hover:text-red-400 transition-colors group ${isCollapsed ? 'justify-center' : ''}`}
+            title={tDynamic('Sair do Sistema')}
+            className="group relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-gray-500 transition-colors hover:bg-red-500/15 hover:text-red-500 dark:text-gray-400 dark:hover:bg-red-500/20 dark:hover:text-red-400"
           >
-            <LogOut size={20} className="shrink-0 group-hover:scale-110 transition-transform duration-300" />
-            <span className={`whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>{tDynamic('Sair do Sistema')}</span>
-            {isCollapsed && <div className="absolute left-full ml-4 px-3 py-2 bg-red-600/90 backdrop-blur-sm text-white text-sm font-bold rounded-xl opacity-0 -translate-x-2 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl z-50 whitespace-nowrap">{tDynamic('Sair do Sistema')}</div>}
+            <LogOut size={18} className="shrink-0 transition-transform duration-300 group-hover:scale-110" />
+            {!isCollapsed && <span className="w-full truncate text-center">{tDynamic('Sair')}</span>}
           </button>
+          </div>
         </div>
       </aside>
 

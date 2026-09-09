@@ -18,3 +18,31 @@ export async function obterOuCriarComandaAberta(lojaId: string, mesaId: string):
   if (error || !data) throw error ?? new Error('Falha ao abrir a comanda da mesa');
   return data as string;
 }
+
+/**
+ * Lança um item avulso (bebida, sobremesa, repique de prato) numa comanda já
+ * ABERTA — de mesa ou individual do buffet — sem exigir mesa_id. Usado pelo
+ * garçom para atender uma comanda que nasceu na balança (ver migration
+ * 20260909000000_garcom_acessa_comanda_buffet.sql).
+ */
+export async function lancarItemAvulsoComanda(params: {
+  lojaId: string;
+  comandaId: string;
+  produtoId?: string | null;
+  nomeProduto?: string | null;
+  precoUnitario: number;
+  quantidade: number;
+  observacao?: string | null;
+}): Promise<{ comanda_id: string; pedido_id: string; valor_total: number }> {
+  const { data, error } = await supabase.rpc('fn_lancar_item_avulso_comanda', {
+    p_loja_id: params.lojaId,
+    p_comanda_id: params.comandaId,
+    p_produto_id: params.produtoId || null,
+    p_nome_produto: params.nomeProduto || null,
+    p_preco_unitario: params.precoUnitario,
+    p_quantidade: params.quantidade,
+    p_observacao: params.observacao || null,
+  });
+  if (error) throw error;
+  return data as { comanda_id: string; pedido_id: string; valor_total: number };
+}

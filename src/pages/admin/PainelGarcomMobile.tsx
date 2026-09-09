@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bell, Smartphone, CheckCircle, Volume2, Divide, ChevronRight, Zap } from 'lucide-react';
+import { Bell, Smartphone, CheckCircle, Volume2, Divide, ChevronRight, Zap, Receipt, Clock, Plus, X, Minus } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useGarcomPush } from '../../hooks/useGarcomPush';
+import { lancarItemAvulsoComanda } from '../../lib/comandas';
 import type { CtxLoja } from './AdminLayout';
-import type { Mesa, Produto } from '../../types';
+import type { Mesa, Produto, Comanda } from '../../types';
 import { ModalDivisaoItemGarcom } from '../../components/mesas/ModalDivisaoItemGarcom';
 
 import { useI18n } from '../../contexts/I18nContext';
+
+function tempoDecorrido(desde: string): string {
+  const minutos = Math.max(0, Math.floor((Date.now() - new Date(desde).getTime()) / 60000));
+  if (minutos < 1) return 'agora há pouco';
+  if (minutos < 60) return `há ${minutos} min`;
+  const horas = Math.floor(minutos / 60);
+  const resto = minutos % 60;
+  return `há ${horas}h${resto > 0 ? ` ${resto}min` : ''}`;
+}
+
 export function PainelGarcomMobile() {
   const { tDynamic } = useI18n();
   const { lojaId } = useOutletContext<CtxLoja>();
@@ -21,23 +32,52 @@ export function PainelGarcomMobile() {
 
   const [mesas, setMesas] = useState<Mesa[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [comandasBuffet, setComandasBuffet] = useState<Comanda[]>([]);
   const [mesaSelecionada, setMesaSelecionada] = useState<Mesa | null>(null);
   const [produtoParaFracionar, setProdutoParaFracionar] = useState<Produto | null>(null);
+  const [comandaParaLancar, setComandaParaLancar] = useState<Comanda | null>(null);
 
   const carregarMesasEProdutos = useCallback(async () => {
     if (!lojaId) return;
-    const [{ data: ms }, { data: ps }] = await Promise.all([
+    const [{ data: ms }, { data: ps }, { data: cs }] = await Promise.all([
       supabase.from('mesas').select('*').eq('loja_id', lojaId).eq('ativo', true).order('numero'),
       supabase.from('produtos').select('*').eq('loja_id', lojaId).eq('disponivel', true),
+      supabase
+        .from('comandas')
+        .select('*')
+        .eq('loja_id', lojaId)
+        .eq('status', 'ABERTA')
+        .eq('tipo_comanda', 'INDIVIDUAL')
+        .order('aberta_em', { ascending: false }),
     ]);
 
     setMesas((ms as Mesa[]) || []);
     setProdutos((ps as Produto[]) || []);
+    setComandasBuffet((cs as Comanda[]) || []);
   }, [lojaId]);
 
   useEffect(() => {
     carregarMesasEProdutos();
   }, [carregarMesasEProdutos]);
+
+  const lancarItemNaComandaBuffet = async (produto: Produto, quantidade: number) => {
+    if (!comandaParaLancar || !lojaId) return;
+    try {
+      await lancarItemAvulsoComanda({
+        lojaId,
+        comandaId: comandaParaLancar.id,
+        produtoId: produto.id,
+        nomeProduto: produto.nome,
+        precoUnitario: produto.preco,
+        quantidade,
+      });
+      setComandaParaLancar(null);
+      await carregarMesasEProdutos();
+    } catch (err: any) {
+      console.error('Erro ao lançar item na comanda do buffet:', err);
+      alert(err?.message || 'Falha ao lançar item na comanda.');
+    }
+  };
 
   const lancarItemFracionado = async (produto: Produto, assentos: number[]) => {
     if (!mesaSelecionada || !lojaId) return;
@@ -197,7 +237,11 @@ export function PainelGarcomMobile() {
                 <div className="flex items-center justify-between">
                   <span className="font-extrabold text-base flex items-center gap-1.5">
                     <Zap size={16} className="text-amber-400" />
-                    Mesa #{chamado.mesa_numero || 'Geral'}
+                    {chamado.mesa_numero
+                      ? `Mesa #${chamado.mesa_numero}`
+                      : chamado.comanda_numero_cartao
+                        ? `Comanda #${chamado.comanda_numero_cartao}`
+                        : 'Geral'}
                   </span>
                   <span className="text-xs font-mono font-semibold rounded-full bg-slate-950/60 px-2.5 py-0.5 border border-slate-800">
                     {chamado.tipo}
@@ -205,9 +249,10 @@ export function PainelGarcomMobile() {
                 </div>
 
                 <p className="text-xs opacity-90">
-                  {chamado.tipo === 'FECHAMENTO'
-                    ? 'Cliente solicitou o fechamento da conta!'
-                    : 'Cliente solicita garçom para atendimento.'}
+                  {chamado.mensagem ||
+                    (chamado.tipo === 'FECHAMENTO'
+                      ? 'Cliente solicitou o fechamento da conta!'
+                      : 'Cliente solicita garçom para atendimento.')}
                 </p>
 
                 <div className="flex gap-2 pt-1">
@@ -225,6 +270,47 @@ export function PainelGarcomMobile() {
                   </button>
                 </div>
               </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Seção de Comandas do Buffet — nascem sozinhas na balança, o garçom
+          entra em cena para lançar bebida, sobremesa ou repique de prato. */}
+      <div className="space-y-3">
+        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+          <Receipt size={14} className="text-amber-400" />
+          {tDynamic('Comandas do Buffet Abertas')} ({comandasBuffet.length})
+        </h2>
+
+        {comandasBuffet.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 p-5 text-center text-xs text-slate-500">
+            {tDynamic('Nenhuma comanda de buffet aberta no momento.')}
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {comandasBuffet.map((comanda) => (
+              <button
+                key={comanda.id}
+                type="button"
+                onClick={() => setComandaParaLancar(comanda)}
+                className="w-full flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4 text-left transition hover:border-orange-500/50 active:scale-[0.99]"
+              >
+                <div>
+                  <div className="flex items-center gap-2 font-bold text-slate-100 text-sm">
+                    #{comanda.numero_cartao ?? 'sem número'}
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> {tDynamic('Viva')}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+                    <Clock size={12} /> {tempoDecorrido(comanda.aberta_em)}
+                  </div>
+                </div>
+                <span className="flex items-center gap-1 text-xs font-bold text-orange-400">
+                  <Plus size={14} /> {tDynamic('Lançar item')}
+                </span>
+              </button>
             ))}
           </div>
         )}
@@ -298,6 +384,122 @@ export function PainelGarcomMobile() {
           onConfirmar={(assentos) => lancarItemFracionado(produtoParaFracionar, assentos)}
         />
       )}
+
+      {/* Modal: Lançar item avulso (bebida, sobremesa, repique) na comanda do buffet */}
+      {comandaParaLancar && (
+        <ModalLancarItemComanda
+          comanda={comandaParaLancar}
+          produtos={produtos}
+          onCancelar={() => setComandaParaLancar(null)}
+          onConfirmar={lancarItemNaComandaBuffet}
+        />
+      )}
+    </div>
+  );
+}
+
+function ModalLancarItemComanda({
+  comanda,
+  produtos,
+  onCancelar,
+  onConfirmar,
+}: {
+  comanda: Comanda;
+  produtos: Produto[];
+  onCancelar: () => void;
+  onConfirmar: (produto: Produto, quantidade: number) => Promise<void>;
+}) {
+  const [produtoEscolhido, setProdutoEscolhido] = useState<Produto | null>(null);
+  const [quantidade, setQuantidade] = useState(1);
+  const [enviando, setEnviando] = useState(false);
+
+  const confirmar = async () => {
+    if (!produtoEscolhido) return;
+    setEnviando(true);
+    try {
+      await onConfirmar(produtoEscolhido, quantidade);
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center" onClick={onCancelar}>
+      <div
+        className="w-full max-w-md rounded-t-3xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-slate-100">Lançar item na comanda</h3>
+            <p className="text-xs text-slate-500">#{comanda.numero_cartao ?? 'sem número'}</p>
+          </div>
+          <button onClick={onCancelar} className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+            <X size={18} />
+          </button>
+        </div>
+
+        {!produtoEscolhido ? (
+          <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+            {produtos.map((prod) => (
+              <button
+                key={prod.id}
+                onClick={() => setProdutoEscolhido(prod)}
+                className="w-full flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950 p-3 text-left transition hover:border-orange-500/50"
+              >
+                <span className="text-xs font-semibold text-slate-200">{prod.nome}</span>
+                <span className="text-xs font-mono text-emerald-400">R$ {Number(prod.preco).toFixed(2)}</span>
+              </button>
+            ))}
+            {produtos.length === 0 && (
+              <p className="py-6 text-center text-xs text-slate-500">Nenhum produto disponível para lançamento.</p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-orange-500/30 bg-orange-500/5 p-3">
+              <p className="text-sm font-bold text-slate-100">{produtoEscolhido.nome}</p>
+              <p className="text-xs font-mono text-orange-400">R$ {Number(produtoEscolhido.preco).toFixed(2)} / un</p>
+            </div>
+
+            <div className="flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => setQuantidade((q) => Math.max(1, q - 1))}
+                className="rounded-full bg-slate-800 p-2.5 text-slate-200 hover:bg-slate-700"
+              >
+                <Minus size={16} />
+              </button>
+              <span className="w-10 text-center text-xl font-black text-slate-100">{quantidade}</span>
+              <button
+                type="button"
+                onClick={() => setQuantidade((q) => q + 1)}
+                className="rounded-full bg-slate-800 p-2.5 text-slate-200 hover:bg-slate-700"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setProdutoEscolhido(null)}
+                className="flex-1 rounded-xl bg-slate-800 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-700"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                onClick={confirmar}
+                disabled={enviando}
+                className="flex-[2] rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {enviando ? 'Lançando…' : `Lançar na comanda (R$ ${(produtoEscolhido.preco * quantidade).toFixed(2)})`}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

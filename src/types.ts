@@ -73,6 +73,11 @@ export interface ItemKdsTicket {
   quantidade: number;
   observacao: string | null;
   opcoes: string[];
+  perfil_preparo?: 'ALIMENTO' | 'DRINK' | 'BEBIDA_PRONTA';
+  teor_alcoolico_pct?: number | null;
+  volume_porcao_ml?: number | null;
+  calorias_porcao?: number | null;
+  ingredientes?: { nome: string; quantidade: number; unidade: string }[];
 }
 
 export interface KdsTicket {
@@ -206,6 +211,10 @@ export interface ModulosAtivos {
   entregas?: boolean;
   ifood?: boolean;
   fiscal?: boolean;
+  /** Ao nascer a comanda individual do buffet (1ª pesagem), dispara chamado
+   * automático de atendimento para o garçom. Ausente = ligado (ver coalesce
+   * em fn_registrar_pesagem_comanda). */
+  buffet_aciona_garcom?: boolean;
 }
 
 export interface ReposicaoBuffet {
@@ -335,6 +344,9 @@ export interface Produto {
   // estação Cozinha padrão da loja.
   estacao_kds_id?: string | null;
   workflow_kds_id?: string | null;
+  perfil_preparo?: 'ALIMENTO' | 'DRINK' | 'BEBIDA_PRONTA';
+  teor_alcoolico_pct?: number | null;
+  volume_porcao_ml?: number | null;
 }
 
 export interface Cupom {
@@ -350,6 +362,8 @@ export interface Cupom {
   limite_usos?: number | null;
   usos?: number;
   ativo?: boolean;
+  frete_gratis?: boolean;
+  cliente_id?: string | null;
 }
 
 export interface TaxaEntrega {
@@ -847,6 +861,7 @@ export interface ChamadoGarcom {
   criado_em: string;
   atendido_em?: string | null;
   mesa_numero?: number;
+  comanda_numero_cartao?: string | null;
 }
 
 
