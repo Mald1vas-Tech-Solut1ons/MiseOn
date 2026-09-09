@@ -56,26 +56,23 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) return json({ error: 'Cabeçalho de autorização ausente' }, { status: 401 });
 
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      serviceRoleKey
     );
 
     // Chamada function-to-function (ex.: script de bootstrap operado pelo
-    // próprio dono da plataforma) usa a service role key e passa direto,
-    // mesmo padrão já usado em fiscal-emitir-nfse. Chamada com JWT de
-    // usuário real precisa ser superadmin.
-    const jwtPayload = authHeader.replace(/^Bearer\s+/i, '').split('.')[1];
-    // base64url → base64 com padding correto antes de atob
-    const isServiceRole = (() => {
-      if (!jwtPayload) return false;
-      try {
-        const b64 = jwtPayload.replace(/-/g, '+').replace(/_/g, '/').padEnd(
-          Math.ceil(jwtPayload.length / 4) * 4, '='
-        );
-        return JSON.parse(atob(b64))?.role === 'service_role';
-      } catch { return false; }
-    })();
+    // próprio dono da plataforma) usa a service role key e passa direto.
+    // Chamada com JWT de usuário real precisa ser superadmin.
+    //
+    // Comparação direta com a service role key, não parsing de JWT: este
+    // projeto usa o formato novo de API key da Supabase (`sb_secret_...`,
+    // string opaca sem ponto), não o JWT antigo com claim `role` — mesmo
+    // padrão de fiscal-emitir-nfse (a detecção antiga por JWT sempre
+    // falhava aqui, pois SUPABASE_SERVICE_ROLE_KEY não tem ".").
+    const bearer = authHeader.replace(/^Bearer\s+/i, '');
+    const isServiceRole = bearer !== '' && bearer === serviceRoleKey;
     if (!isServiceRole) {
       const supabaseUser = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',

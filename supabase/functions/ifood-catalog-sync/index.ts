@@ -77,18 +77,11 @@ Deno.serve(async (req) => {
   const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
   if (!bearer) return json({ error: 'Não autorizado' }, 401);
 
-  // Comparar a chave por string quebra quando existe mais de uma service key
-  // válida (rotação, chave legada x nova). O que importa é a claim `role` do
-  // JWT — mesmo critério que fiscal-emitir-nfse já usa.
-  const ehServiceRole = (() => {
-    if (bearer === serviceKey) return true;
-    try {
-      const payload = bearer.split('.')[1];
-      if (!payload) return false;
-      const claims = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-      return claims?.role === 'service_role';
-    } catch { return false; }
-  })();
+  // Comparação direta com a service role key, não parsing de JWT: este
+  // projeto usa o formato novo de API key da Supabase (`sb_secret_...`,
+  // string opaca sem ponto), não o JWT antigo com claim `role` — mesmo
+  // padrão de fiscal-emitir-nfse.
+  const ehServiceRole = bearer === serviceKey;
 
   if (!ehServiceRole) {
     const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
