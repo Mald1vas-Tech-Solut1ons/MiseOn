@@ -1,5 +1,6 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { enderecoPrestador, nfseDisponivel } from './dados.ts';
+import { enderecoPrestador, nfseDisponivel, prestadorParaExibir } from './dados.ts';
+import { hashToken, tokenAutoriza } from '../_shared/nfse-acesso.ts';
 import { PDFDocument, PDFString, rgb, StandardFonts } from 'npm:pdf-lib@1.17.1';
 
 const cors = {
@@ -15,9 +16,10 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const faturaId = url.searchParams.get('id');
+    const tokenBruto = url.searchParams.get('token');
 
     if (!faturaId) {
-      return new Response('Fatura ID não fornecido', { status: 400 });
+      return new Response('Fatura ID não fornecido', { status: 400, headers: cors });
     }
 
     const supabase = createClient(
@@ -32,18 +34,55 @@ Deno.serve(async (req) => {
       .single();
 
     if (error || !fatura) {
-      return new Response('Fatura não encontrada', { status: 404 });
+      return new Response('Fatura não encontrada', { status: 404, headers: cors });
+    }
+
+    // Contrato de acesso: o link entregue por e-mail carrega um token
+    // individual (o UUID da fatura sozinho nunca basta). Quem está logado
+    // como admin da própria loja ou como superadmin também acessa, sem
+    // depender do token — cobre o painel e o caso de token perdido/expirado.
+    let autorizado = false;
+    if (tokenBruto && fatura.nfse_acesso_token_hash) {
+      autorizado = tokenAutoriza(fatura, await hashToken(tokenBruto));
+    }
+    if (!autorizado) {
+      const authHeader = req.headers.get('Authorization') ?? '';
+      if (authHeader) {
+        const supabaseUser = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_ANON_KEY')!,
+          { global: { headers: { Authorization: authHeader } } },
+        );
+        const { data: { user } } = await supabaseUser.auth.getUser();
+        if (user) {
+          const { data: souSuperadmin } = await supabase
+            .from('plataforma_admins').select('user_id').eq('user_id', user.id).maybeSingle();
+          if (souSuperadmin) {
+            autorizado = true;
+          } else {
+            const { data: souAdminLoja } = await supabase
+              .from('usuarios_loja').select('user_id')
+              .eq('user_id', user.id).eq('loja_id', fatura.loja_id).eq('papel', 'admin').maybeSingle();
+            autorizado = !!souAdminLoja;
+          }
+        }
+      }
+    }
+    if (!autorizado) {
+      const motivo = tokenBruto ? 'Token de acesso inválido ou expirado' : 'Acesso não autorizado a este documento';
+      return new Response(motivo, { status: tokenBruto ? 401 : 403, headers: cors });
     }
 
     if (!nfseDisponivel(fatura)) {
-      return new Response('NFS-e ainda não foi emitida para esta fatura', { status: 400 });
+      return new Response('NFS-e ainda não foi emitida para esta fatura', { status: 400, headers: cors });
     }
 
-    const { data: prestador, error: erroPrestador } = await supabase
+    const { data: cadastroAtual, error: erroPrestador } = await supabase
       .from('configuracoes_fiscais_plataforma')
       .select('razao_social,cnpj,inscricao_municipal,logradouro,numero,complemento,bairro,cidade,uf,cep')
       .eq('id', true).single();
-    if (erroPrestador || !prestador) throw new Error('Cadastro fiscal indisponível');
+    if (erroPrestador || !cadastroAtual) throw new Error('Cadastro fiscal indisponível');
+    const { prestador, snapshotHistorico } = prestadorParaExibir(fatura, cadastroAtual);
     const enderecoEmissor = enderecoPrestador(prestador);
 
     const pdfDoc = await PDFDocument.create();
@@ -105,21 +144,28 @@ Deno.serve(async (req) => {
 
     // 2. PRESTADOR
     let currentY = marginY - headerH - 5;
-    drawBox(marginX, currentY, contentW, 60, 'PRESTADOR DE SERVIÇOS - CADASTRO ATUAL');
+    const prestadorBoxH = snapshotHistorico ? 60 : 72;
+    drawBox(marginX, currentY, contentW, prestadorBoxH,
+      snapshotHistorico ? 'PRESTADOR DE SERVIÇOS - DADOS NA DATA DE EMISSÃO' : 'PRESTADOR DE SERVIÇOS - CADASTRO ATUAL');
     drawText('Nome/Razão Social:', marginX + 5, currentY - 25, helveticaBold, 8);
     drawText(prestador.razao_social, marginX + 90, currentY - 25, helveticaBold, 9);
-    
+
     drawText('CPF/CNPJ:', marginX + 5, currentY - 38, helveticaBold, 8);
     drawText(prestador.cnpj, marginX + 50, currentY - 38, helvetica, 9);
-    
+
     drawText('Inscrição Municipal:', marginX + 180, currentY - 38, helveticaBold, 8);
     drawText(prestador.inscricao_municipal, marginX + 270, currentY - 38, helvetica, 9);
 
     drawText('Endereço:', marginX + 5, currentY - 51, helveticaBold, 8);
     drawText(enderecoEmissor, marginX + 50, currentY - 51, helvetica, 9);
 
+    if (!snapshotHistorico) {
+      drawText('Nota emitida antes do registro de snapshot: dados acima são do cadastro atual, não necessariamente os da data de emissão.',
+        marginX + 5, currentY - 64, helvetica, 6.5);
+    }
+
     // 3. TOMADOR
-    currentY -= 65;
+    currentY -= (prestadorBoxH + 5);
     drawBox(marginX, currentY, contentW, 60, 'TOMADOR DE SERVIÇOS');
     drawText('Nome/Razão Social:', marginX + 5, currentY - 25, helveticaBold, 8);
     drawText(fatura.tomador_razao_social || fatura.lojas?.nome || '', marginX + 90, currentY - 25, helvetica, 9);

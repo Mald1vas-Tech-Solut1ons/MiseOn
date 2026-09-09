@@ -32,6 +32,7 @@ import {
   enviarLoteRps,
   type DadosRps,
 } from '../_shared/sp-nfse-webservice.ts';
+import { gerarTokenAcesso, hashToken } from '../_shared/nfse-acesso.ts';
 
 const SECRET_KEY = Deno.env.get('FISCAL_ENCRYPTION_SECRET') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -204,12 +205,39 @@ Deno.serve(async (req) => {
     // verdade — sucesso aqui só confirma que a mensagem passaria. Só marcamos
     // "emitida" quando veio um número de NF-e real (ambiente de produção).
     const emitida = isProd && !!retorno.numeroNFe;
+
+    // Token individual do documento + snapshot do prestador só nascem quando
+    // a nota é de fato emitida — sem isso o link do e-mail não teria o que
+    // autorizar, e o snapshot ficaria gravado para uma nota que não existe.
+    let tokenAcesso: string | null = null;
+    let nfsePdfUrl: string | null = null;
+    const camposEmitida: Record<string, unknown> = {};
+    if (emitida) {
+      tokenAcesso = gerarTokenAcesso();
+      nfsePdfUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/fiscal-pdf-nfse?id=${fatura_id}&token=${tokenAcesso}`;
+      camposEmitida.nfse_acesso_token_hash = await hashToken(tokenAcesso);
+      camposEmitida.nfse_acesso_token_expira_em = new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000).toISOString();
+      camposEmitida.nfse_pdf_url = nfsePdfUrl;
+      camposEmitida.emissor_snapshot_em = new Date().toISOString();
+      camposEmitida.emissor_razao_social = config.razao_social;
+      camposEmitida.emissor_cnpj = config.cnpj;
+      camposEmitida.emissor_inscricao_municipal = config.inscricao_municipal;
+      camposEmitida.emissor_logradouro = config.logradouro;
+      camposEmitida.emissor_numero = config.numero;
+      camposEmitida.emissor_complemento = config.complemento;
+      camposEmitida.emissor_bairro = config.bairro;
+      camposEmitida.emissor_cidade = config.cidade;
+      camposEmitida.emissor_uf = config.uf;
+      camposEmitida.emissor_cep = config.cep;
+    }
+
     await supabase.from('faturas_assinatura').update({
       nfse_status: emitida ? 'emitida' : (isProd ? 'erro' : 'testada_ok'),
       nfse_numero: retorno.numeroNFe ?? null,
       nfse_codigo_verificacao: retorno.codigoVerificacao ?? null,
       nfse_erro: emitida ? null : (isProd ? 'Emissão em produção não retornou número de NF-e.' : null),
       nfse_emitida_em: emitida ? new Date().toISOString() : null,
+      ...camposEmitida,
     }).eq('id', fatura_id);
 
     if (emitida) {
@@ -222,7 +250,7 @@ Deno.serve(async (req) => {
           nfse_numero: retorno.numeroNFe,
           nfse_codigo_verificacao: retorno.codigoVerificacao,
           nfse_inscricao_prestador: config.inscricao_municipal,
-          nfse_pdf_url: `https://zzuxklwhaoisuuvndtfw.supabase.co/functions/v1/fiscal-pdf-nfse?id=${fatura_id}`,
+          nfse_pdf_url: nfsePdfUrl,
         },
         p_referencia_id: fatura_id,
         p_classe: 'TRANSACIONAL',

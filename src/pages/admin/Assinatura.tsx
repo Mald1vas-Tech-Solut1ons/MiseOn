@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { CreditCard, CheckCircle, AlertCircle, Calendar, Lock, ShieldCheck, QrCode, Copy, Sparkles, Clock } from 'lucide-react';
+import { CreditCard, CheckCircle, AlertCircle, Calendar, Lock, ShieldCheck, QrCode, Copy, Sparkles, Clock, FileText, Download, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { avaliarAssinatura } from '../../lib/assinatura';
 import { SAAS_PRICING } from '../../lib/efiInfo';
@@ -41,9 +41,24 @@ export default function Assinatura() {
   const [copiaCola, setCopiaCola] = useState('');
   const [copiado, setCopiado] = useState(false);
 
+  // Notas fiscais da assinatura: o link do e-mail carrega um token próprio,
+  // mas o lojista logado sempre pode reabrir por aqui — o endpoint aceita o
+  // JWT do admin da loja como alternativa ao token (Sprint 15A).
+  const [faturas, setFaturas] = useState<Array<{
+    id: string; created_at: string; ciclo: string | null; valor_cobrado: number;
+    nfse_status: string; nfse_numero: string | null;
+  }>>([]);
+  const [baixandoId, setBaixandoId] = useState<string | null>(null);
+  const [erroNota, setErroNota] = useState('');
+
   const carregarDados = useCallback(async () => {
     setCarregando(true);
-    const { data } = await supabase.from('lojas').select('status_assinatura, trial_termina_em, criado_em').eq('id', lojaId).single();
+    const [{ data }, { data: dataFaturas }] = await Promise.all([
+      supabase.from('lojas').select('status_assinatura, trial_termina_em, criado_em').eq('id', lojaId).single(),
+      supabase.from('faturas_assinatura')
+        .select('id, created_at, ciclo, valor_cobrado, nfse_status, nfse_numero')
+        .eq('loja_id', lojaId).order('created_at', { ascending: false }).limit(12),
+    ]);
     if (data) {
       const info = avaliarAssinatura(data);
       setStatus(info.status);
@@ -56,12 +71,37 @@ export default function Assinatura() {
         setDiasRestantesTrial(diffDias);
       }
     }
+    setFaturas(dataFaturas ?? []);
     setCarregando(false);
   }, [lojaId]);
 
   useEffect(() => {
     setTimeout(carregarDados, 0);
   }, [lojaId, carregarDados]);
+
+  const baixarNota = async (faturaId: string) => {
+    setErroNota('');
+    setBaixandoId(faturaId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Sessão expirada. Faça login novamente.');
+      const resposta = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fiscal-pdf-nfse?id=${faturaId}`,
+        { headers: { Authorization: `Bearer ${session.access_token}`, apikey: import.meta.env.VITE_SUPABASE_ANON_KEY as string } },
+      );
+      if (!resposta.ok) {
+        const texto = await resposta.text();
+        throw new Error(texto || 'Não foi possível abrir a nota fiscal.');
+      }
+      const blob = await resposta.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank', 'noopener,noreferrer');
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch (e: any) {
+      setErroNota(e?.message || tDynamic('Não foi possível abrir a nota fiscal.'));
+    }
+    setBaixandoId(null);
+  };
 
   const assinarCartao = async () => {
     setErro(''); setSucesso('');
@@ -469,6 +509,62 @@ export default function Assinatura() {
         </div>
 
       </div>
+
+      {faturas.length > 0 && (
+        <div className="mt-8 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText size={18} className="text-gray-400" />
+            <h3 className="text-sm font-black uppercase tracking-wider text-gray-700 dark:text-gray-300">{tDynamic('Notas fiscais da assinatura')}</h3>
+          </div>
+
+          {erroNota && (
+            <div className="mb-4 flex items-center gap-3 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 p-3.5 text-sm font-semibold text-red-700 dark:text-red-400">
+              <AlertCircle size={18} className="shrink-0" /> <p>{erroNota}</p>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {faturas.map((f) => {
+              const rotulo: Record<string, string> = {
+                emitida: tDynamic('Emitida'),
+                erro: tDynamic('Erro na emissão'),
+                processando: tDynamic('Processando'),
+                pendente_configuracao: tDynamic('Pendente'),
+                cancelada: tDynamic('Cancelada'),
+              };
+              const cor = f.nfse_status === 'emitida'
+                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                : f.nfse_status === 'erro'
+                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+              return (
+                <div key={f.id} className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 dark:border-gray-800 p-3.5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                      {new Date(f.created_at).toLocaleDateString(idioma === 'en-US' ? 'en-US' : 'pt-BR')}
+                      {f.nfse_numero ? ` · NF ${f.nfse_numero}` : ''}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{emReais(Number(f.valor_cobrado))} · {f.ciclo === 'anual' ? tDynamic('Plano Anual') : tDynamic('Plano Mensal')}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${cor}`}>{rotulo[f.nfse_status] ?? f.nfse_status}</span>
+                    {f.nfse_status === 'emitida' && (
+                      <button
+                        onClick={() => baixarNota(f.id)}
+                        disabled={baixandoId === f.id}
+                        className="flex items-center gap-1.5 text-xs font-bold text-[var(--cor-primaria)] hover:underline disabled:opacity-50 disabled:pointer-events-none"
+                      >
+                        {baixandoId === f.id ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        {tDynamic('Baixar PDF')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
