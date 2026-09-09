@@ -33,6 +33,9 @@ export async function lancarItemAvulsoComanda(params: {
   precoUnitario: number;
   quantidade: number;
   observacao?: string | null;
+  /** Modificadores escolhidos (ponto da carne, com gelo e limão...). Só o id
+   *  viaja: nome e preço vêm do catálogo, no banco. */
+  opcoes?: { id: string }[];
 }): Promise<{ comanda_id: string; pedido_id: string; valor_total: number }> {
   const { data, error } = await supabase.rpc('fn_lancar_item_avulso_comanda', {
     p_loja_id: params.lojaId,
@@ -42,6 +45,7 @@ export async function lancarItemAvulsoComanda(params: {
     p_preco_unitario: params.precoUnitario,
     p_quantidade: params.quantidade,
     p_observacao: params.observacao || null,
+    p_opcoes: params.opcoes ?? [],
   });
   if (error) throw error;
   return data as { comanda_id: string; pedido_id: string; valor_total: number };

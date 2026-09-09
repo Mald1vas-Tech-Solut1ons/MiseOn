@@ -290,6 +290,8 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Nascem na primeira pesagem, acumulam consumo e encerram o ciclo só depois do pagamento — o histórico continua auditável.': 'They are born on the first weighing, accumulate consumption and only end the cycle after payment — the history remains auditable.',
   'Nenhum item registrado nesta comanda.': 'No item registered on this tab.',
   'Nenhuma comanda de buffet aberta no momento.': 'No buffet tab open right now.',
+  'Observação para a cozinha / bar': 'Note for the kitchen / bar',
+  'Observação para a cozinha (vai junto com o item)': 'Note for the kitchen (travels with the item)',
   'Nenhuma comanda individual aberta.': 'No individual tab open.',
   'O provedor de pagamento recusou as cobranças por um motivo de CONTA — não é o cartão do cliente. Enquanto isso, o cartão não aparece no seu cardápio para ninguém tentar e não conseguir. O Pix continua funcionando normalmente.': 'The payment provider declined charges for an ACCOUNT reason — it is not the customer\'s card. Meanwhile, card payment is hidden from your menu so no one tries and fails. Pix keeps working normally.',
   'O que fazer: fale com o suporte da Efí e peça a liberação do limite operacional de cartão da sua conta. Depois, reative o cartão abaixo.': 'What to do: contact Efí support and ask them to release your account\'s card operational limit. Then reactivate the card below.',

@@ -36,12 +36,17 @@ export function PainelGarcomMobile() {
   const [mesaSelecionada, setMesaSelecionada] = useState<Mesa | null>(null);
   const [produtoParaFracionar, setProdutoParaFracionar] = useState<Produto | null>(null);
   const [comandaParaLancar, setComandaParaLancar] = useState<Comanda | null>(null);
+  const [observacaoMesa, setObservacaoMesa] = useState('');
 
   const carregarMesasEProdutos = useCallback(async () => {
     if (!lojaId) return;
     const [{ data: ms }, { data: ps }, { data: cs }] = await Promise.all([
       supabase.from('mesas').select('*').eq('loja_id', lojaId).eq('ativo', true).order('numero'),
-      supabase.from('produtos').select('*').eq('loja_id', lojaId).eq('disponivel', true),
+      // Com os grupos de opções: é assim que "ponto da carne" e "com gelo e
+      // limão" chegam ao garçom. São modificadores do cardápio (com preço,
+      // disponibilidade e insumo próprio), não texto que ele digita de memória.
+      supabase.from('produtos').select('*, grupos_opcoes(*, opcoes(*))')
+        .eq('loja_id', lojaId).eq('disponivel', true),
       supabase
         .from('comandas')
         .select('*')
@@ -60,7 +65,12 @@ export function PainelGarcomMobile() {
     carregarMesasEProdutos();
   }, [carregarMesasEProdutos]);
 
-  const lancarItemNaComandaBuffet = async (produto: Produto, quantidade: number) => {
+  const lancarItemNaComandaBuffet = async (
+    produto: Produto,
+    quantidade: number,
+    observacao: string,
+    opcoes: { id: string }[],
+  ) => {
     if (!comandaParaLancar || !lojaId) return;
     try {
       await lancarItemAvulsoComanda({
@@ -70,6 +80,8 @@ export function PainelGarcomMobile() {
         nomeProduto: produto.nome,
         precoUnitario: produto.preco,
         quantidade,
+        observacao: observacao.trim() || null,
+        opcoes,
       });
       setComandaParaLancar(null);
       await carregarMesasEProdutos();
@@ -153,6 +165,9 @@ export function PainelGarcomMobile() {
         fracionado: true,
         participantes_assentos: assentos,
         assento_numero: assentoNum,
+        // Ponto da carne, "sem cebola": o que o cliente fala na mesa só chega
+        // em quem prepara se viajar no item. Sem isto, a cozinha adivinha.
+        observacao: observacaoMesa.trim() || null,
       }));
 
       const { error: errItens } = await supabase.from('itens_pedido').insert(inserts);
@@ -175,6 +190,7 @@ export function PainelGarcomMobile() {
         .eq('id', pedido.id);
 
       setProdutoParaFracionar(null);
+      setObservacaoMesa('');
       alert(`✅ ${produto.nome} fracionado com sucesso entre os assentos [${assentos.join(', ')}]!`);
     } catch (err: any) {
       console.error('Erro ao fracionar item no lançamento:', err);
@@ -347,6 +363,20 @@ export function PainelGarcomMobile() {
 
           {mesaSelecionada && (
             <div className="space-y-2">
+              {/* O ponto da carne é dito na mesa, não na chapa. Se não sair
+                  daqui junto com o item, a cozinha adivinha. */}
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-slate-400">
+                  {tDynamic('Observação para a cozinha (vai junto com o item)')}
+                </span>
+                <input
+                  value={observacaoMesa}
+                  onChange={(e) => setObservacaoMesa(e.target.value)}
+                  placeholder="ex: ao ponto, sem cebola, alergia a amendoim…"
+                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-600 focus:border-orange-500 focus:outline-none"
+                />
+              </label>
+
               <label className="block text-xs font-medium text-slate-400">
                 Toque no produto para fracionar entre os assentos da Mesa #{mesaSelecionada.numero}:
               </label>
@@ -407,17 +437,41 @@ function ModalLancarItemComanda({
   comanda: Comanda;
   produtos: Produto[];
   onCancelar: () => void;
-  onConfirmar: (produto: Produto, quantidade: number) => Promise<void>;
+  onConfirmar: (produto: Produto, quantidade: number, observacao: string, opcoes: { id: string }[]) => Promise<void>;
 }) {
+  const { tDynamic } = useI18n();
   const [produtoEscolhido, setProdutoEscolhido] = useState<Produto | null>(null);
   const [quantidade, setQuantidade] = useState(1);
+  const [observacao, setObservacao] = useState('');
+  const [opcoesEscolhidas, setOpcoesEscolhidas] = useState<Record<string, string[]>>({});
   const [enviando, setEnviando] = useState(false);
 
+  const grupos = produtoEscolhido?.grupos_opcoes ?? [];
+  // min_escolhas > 0 é escolha obrigatória: ponto da carne não pode ir em
+  // branco para a chapa. Bloqueia o envio em vez de deixar a cozinha adivinhar.
+  const grupoPendente = grupos.find(
+    (g) => (g.min_escolhas ?? 0) > 0 && (opcoesEscolhidas[g.id]?.length ?? 0) < (g.min_escolhas ?? 0),
+  );
+
+  const alternarOpcao = (grupoId: string, opcaoId: string, maxEscolhas: number) => {
+    setOpcoesEscolhidas((atual) => {
+      const jaEscolhidas = atual[grupoId] ?? [];
+      if (jaEscolhidas.includes(opcaoId)) {
+        return { ...atual, [grupoId]: jaEscolhidas.filter((id) => id !== opcaoId) };
+      }
+      // Grupo de escolha única (max 1) troca a seleção em vez de acumular.
+      const proximas = maxEscolhas === 1 ? [opcaoId] : [...jaEscolhidas, opcaoId];
+      if (maxEscolhas > 0 && proximas.length > maxEscolhas) return atual;
+      return { ...atual, [grupoId]: proximas };
+    });
+  };
+
   const confirmar = async () => {
-    if (!produtoEscolhido) return;
+    if (!produtoEscolhido || grupoPendente) return;
     setEnviando(true);
     try {
-      await onConfirmar(produtoEscolhido, quantidade);
+      const opcoes = Object.values(opcoesEscolhidas).flat().map((id) => ({ id }));
+      await onConfirmar(produtoEscolhido, quantidade, observacao, opcoes);
     } finally {
       setEnviando(false);
     }
@@ -480,6 +534,58 @@ function ModalLancarItemComanda({
               </button>
             </div>
 
+            {/* Modificadores do cardápio: ponto da carne, com gelo e limão.
+                Vêm do produto (com preço, disponibilidade e insumo próprio) —
+                o garçom escolhe, não digita de memória. */}
+            {grupos.map((grupo) => {
+              const escolhidas = opcoesEscolhidas[grupo.id] ?? [];
+              const obrigatorio = (grupo.min_escolhas ?? 0) > 0;
+              return (
+                <div key={grupo.id} className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                  <p className="mb-2 text-xs font-bold text-slate-300">
+                    {grupo.nome}
+                    {obrigatorio && <span className="ml-1.5 text-orange-400">*</span>}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(grupo.opcoes ?? []).filter((o) => o.disponivel !== false).map((opcao) => {
+                      const ativa = escolhidas.includes(opcao.id);
+                      return (
+                        <button
+                          key={opcao.id}
+                          type="button"
+                          onClick={() => alternarOpcao(grupo.id, opcao.id, grupo.max_escolhas ?? 0)}
+                          className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
+                            ativa
+                              ? 'border-orange-500 bg-orange-500/15 text-orange-300'
+                              : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                          }`}
+                        >
+                          {opcao.nome}
+                          {Number(opcao.preco_adicional) > 0 && (
+                            <span className="ml-1 opacity-80">+R$ {Number(opcao.preco_adicional).toFixed(2)}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* O que não cabe num modificador (alergia, pedido específico do
+                cliente) ainda precisa de um lugar — e viaja no mesmo ticket. */}
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold text-slate-400">
+                {tDynamic('Observação para a cozinha / bar')}
+              </span>
+              <input
+                value={observacao}
+                onChange={(e) => setObservacao(e.target.value)}
+                placeholder="ex: ao ponto, sem cebola, gelo à parte…"
+                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-600 focus:border-orange-500 focus:outline-none"
+              />
+            </label>
+
             <div className="flex gap-2 pt-1">
               <button
                 type="button"
@@ -491,10 +597,15 @@ function ModalLancarItemComanda({
               <button
                 type="button"
                 onClick={confirmar}
-                disabled={enviando}
-                className="flex-[2] rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                disabled={enviando || !!grupoPendente}
+                title={grupoPendente ? `Escolha: ${grupoPendente.nome}` : undefined}
+                className="flex-[2] rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-45"
               >
-                {enviando ? 'Lançando…' : `Lançar na comanda (R$ ${(produtoEscolhido.preco * quantidade).toFixed(2)})`}
+                {enviando
+                  ? 'Lançando…'
+                  : grupoPendente
+                    ? `Escolha: ${grupoPendente.nome}`
+                    : `Lançar na comanda (R$ ${(produtoEscolhido.preco * quantidade).toFixed(2)})`}
               </button>
             </div>
           </div>
