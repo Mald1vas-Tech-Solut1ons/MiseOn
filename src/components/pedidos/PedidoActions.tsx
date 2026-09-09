@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Printer, Bike, Check, X as XIcon, Store, ChefHat, Receipt, UtensilsCrossed, Flame, Lock, FileText, Loader2 } from 'lucide-react';
 import type { PedidoActionsProps } from '../../types';
 import { supabase } from '../../lib/supabase';
@@ -12,7 +13,27 @@ export function PedidoActions({
   const { tDynamic } = useI18n();
   const [menu, setMenu] = useState(false);
   const [emitindoNfe, setEmitindoNfe] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [posicaoMenu, setPosicaoMenu] = useState<{ top: number; right: number } | null>(null);
+  const botaoRef = useRef<HTMLButtonElement>(null);
+  const menuPortalRef = useRef<HTMLDivElement>(null);
+
+  // O card do pedido tem overflow-hidden (cantos arredondados) — um dropdown
+  // `position: absolute` dentro dele fica cortado/inacessível. Por isso o menu
+  // sai da árvore via portal, com posição calculada a partir do botão real.
+  useLayoutEffect(() => {
+    if (!menu || !botaoRef.current) { setPosicaoMenu(null); return; }
+    const calcular = () => {
+      const r = botaoRef.current!.getBoundingClientRect();
+      setPosicaoMenu({ top: window.innerHeight - r.top + 8, right: window.innerWidth - r.right });
+    };
+    calcular();
+    window.addEventListener('resize', calcular);
+    window.addEventListener('scroll', calcular, true);
+    return () => {
+      window.removeEventListener('resize', calcular);
+      window.removeEventListener('scroll', calcular, true);
+    };
+  }, [menu]);
 
   const handleEmitirNfe = async () => {
     setMenu(false);
@@ -42,7 +63,12 @@ export function PedidoActions({
 
   useEffect(() => {
     if (!menu) return;
-    const fora = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenu(false); };
+    const fora = (e: MouseEvent) => {
+      const alvo = e.target as Node;
+      if (botaoRef.current?.contains(alvo)) return;
+      if (menuPortalRef.current?.contains(alvo)) return;
+      setMenu(false);
+    };
     document.addEventListener('mousedown', fora);
     return () => document.removeEventListener('mousedown', fora);
   }, [menu]);
@@ -117,16 +143,21 @@ export function PedidoActions({
         </div>
       )}
 
-      <div className="relative" ref={menuRef}>
+      <div className="relative">
         <button
+          ref={botaoRef}
           onClick={() => setMenu((m) => !m)}
           className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 transition"
           title="Imprimir via"
         >
           <Printer size={18} />
         </button>
-        {menu && (
-          <div className="absolute bottom-12 right-0 z-20 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0B1120]">
+        {menu && posicaoMenu && createPortal(
+          <div
+            ref={menuPortalRef}
+            style={{ position: 'fixed', bottom: posicaoMenu.top, right: posicaoMenu.right }}
+            className="z-[100] w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0B1120]"
+          >
             <p className="px-3 pt-2.5 pb-1 text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400">Imprimir via</p>
             <button onClick={() => { setMenu(false); onImprimir('cozinha'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
               <ChefHat size={16} className="text-orange-500" /> {tDynamic('Comanda da Cozinha')}
@@ -140,15 +171,16 @@ export function PedidoActions({
               <Receipt size={16} className="text-emerald-500" /> {tDynamic('Nota do Cliente')}
             </button>
             <div className="my-1 border-t border-gray-100 dark:border-white/5"></div>
-            <button 
-              onClick={handleEmitirNfe} 
+            <button
+              onClick={handleEmitirNfe}
               disabled={emitindoNfe}
               className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5 disabled:opacity-50"
             >
               {emitindoNfe ? <Loader2 size={16} className="text-blue-500 animate-spin" /> : <FileText size={16} className="text-blue-500" />}
               {p.nfe_url ? 'Imprimir DANFE (NFC-e)' : 'Emitir NFC-e'}
             </button>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
 
