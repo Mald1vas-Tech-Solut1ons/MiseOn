@@ -51,6 +51,10 @@ export default function CheckoutDrawer({
   const [telefone, setTelefone] = useState('');
   const [enderecoObj, setEnderecoObj] = useState<EnderecoFormData | null>(null);
   const [bairroManual, setBairroManual] = useState('');
+  // Guardado fora de state: só serve para salvar o endereço padrão depois do
+  // pedido, não precisa re-renderizar nada quando muda.
+  const clienteIdRef = useRef<string | null>(null);
+  const enderecoPadraoAtualRef = useRef<EnderecoFormData | null>(null);
   const [metodo, setMetodo] = useState<MetodoPgto>('PIX');
   const [trocoPara, setTrocoPara] = useState('');
   const [codCupom, setCodCupom] = useState('');
@@ -92,6 +96,7 @@ export default function CheckoutDrawer({
         .eq('loja_id', loja.id).eq('user_id', user.id).maybeSingle();
       const c = data as Cliente | null;
       if (c) {
+        clienteIdRef.current = c.id;
         setNome(c.nome ?? '');
         setTelefone(c.telefone ?? '');
         supabase.from('cashback_saldos').select('saldo').eq('cliente_id', c.id).maybeSingle()
@@ -100,15 +105,18 @@ export default function CheckoutDrawer({
           .eq('cliente_id', c.id).eq('padrao', true).maybeSingle()
           .then(({ data: end }) => {
             if (end) {
-              setEnderecoObj({
+              const carregado: EnderecoFormData = {
                 cep: end.cep, logradouro: end.logradouro,
                 numero: end.numero || '', complemento: end.complemento || '',
                 bairro: end.bairro, cidade: end.cidade, uf: end.uf,
                 ponto_referencia: end.ponto_referencia || '',
                 sem_numero: !end.numero || end.numero === 'SN',
-              });
+              };
+              enderecoPadraoAtualRef.current = carregado;
+              setEnderecoObj(carregado);
               setBairroManual(end.bairro);
             } else {
+              enderecoPadraoAtualRef.current = null;
               setEnderecoObj(null);
               setBairroManual(c.bairro ?? '');
             }
@@ -234,6 +242,39 @@ export default function CheckoutDrawer({
     if (metodosDisponiveis.length && !metodosDisponiveis.includes(metodo)) setMetodo(metodosDisponiveis[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aceitaOnline, aceitaEntrega]);
+
+  // App profissional não faz o cliente digitar o endereço de novo a cada
+  // pedido: se mudou em relação ao padrão salvo (ou nunca houve um), essa
+  // entrega vira o novo padrão. Roda em segundo plano — nunca atrasa nem
+  // derruba a confirmação do pedido, que já aconteceu no servidor.
+  const salvarEnderecoComoPadraoSeMudou = (endereco: EnderecoFormData) => {
+    const clienteId = clienteIdRef.current;
+    if (!clienteId) return;
+    const atual = enderecoPadraoAtualRef.current;
+    const mudou = !atual
+      || atual.cep !== endereco.cep
+      || atual.numero !== endereco.numero
+      || atual.complemento !== endereco.complemento
+      || atual.logradouro !== endereco.logradouro;
+    if (!mudou) return;
+
+    (async () => {
+      await supabase.from('enderecos_cliente').update({ padrao: false }).eq('cliente_id', clienteId);
+      const { error } = await supabase.from('enderecos_cliente').insert({
+        cliente_id: clienteId,
+        cep: endereco.cep,
+        logradouro: endereco.logradouro,
+        numero: endereco.sem_numero ? 'SN' : (endereco.numero || null),
+        complemento: endereco.complemento || null,
+        bairro: endereco.bairro,
+        cidade: endereco.cidade,
+        uf: (endereco.uf || '').toUpperCase(),
+        ponto_referencia: endereco.ponto_referencia || null,
+        padrao: true,
+      });
+      if (!error) enderecoPadraoAtualRef.current = endereco;
+    })().catch((e) => console.error('Falha ao salvar endereço padrão do checkout:', e));
+  };
 
   const cancelarPedidoPendente = async (pedidoId: string) => {
     await Promise.all([
@@ -379,6 +420,8 @@ export default function CheckoutDrawer({
     const pedido = { id: String(criado.pedido_id), numero: Number(criado.numero) };
     // Valor cobrado dali para frente e o do servidor, nao o calculado na tela.
     const totalServidor = Number(criado.valor_total ?? total);
+
+    if (tipo === 'DELIVERY' && enderecoObj) salvarEnderecoComoPadraoSeMudou(enderecoObj);
 
     // Cashback cobriu o pedido inteiro: quita e aceita via RPC (valida o dono).
     if (totalServidor <= 0 && cashbackAplicado > 0) {
@@ -722,7 +765,7 @@ export default function CheckoutDrawer({
                         onKeyDown={(e) => e.key === 'Enter' && aplicarCupom()}
                         placeholder="Código do cupom"
                         aria-invalid={!!cupomErro}
-                        className={`flex-1 rounded-xl border bg-gray-50 px-4 py-3 text-sm uppercase outline-none transition-colors focus:bg-white dark:bg-gray-900 dark:text-gray-100 ${
+                        className={`flex-1 rounded-xl border bg-gray-50 px-4 py-3 text-sm uppercase text-gray-900 outline-none transition-colors focus:bg-white dark:bg-gray-900 dark:text-gray-100 ${
                           cupomErro
                             ? 'border-red-400 focus:border-red-500 dark:border-red-800'
                             : 'border-gray-200 focus:border-[var(--cor-primaria)] dark:border-gray-700'
