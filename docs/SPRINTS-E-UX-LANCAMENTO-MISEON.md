@@ -458,6 +458,37 @@ O lançamento pago exige assinatura/NFS-e, operação Natureba, iFood, notifica�
 
 [[PAGE]]
 
+## Execução de 09/09 (parte 5) — Sprint 15C: ciclo recorrente, reconciliação e cancelamento
+
+**Sprint / incremento / ID:** Sprint 15C / S01 — ciclo de vida da assinatura recorrente.
+
+**Objetivo e critério de aceite:** tratar separadamente eventos de assinatura e de cobrança; impedir que duplicidade, concorrência ou ordem inversa dupliquem fatura, período de acesso ou NFS-e; registrar recusa/cancelamento; permitir retomada após falha; cancelar a recorrência pelo painel sem remover o período já pago.
+
+**Status:** PRONTO PARA REVISÃO. Implementado, publicado e testado sem cobrança real; falta revisão independente e homologação com uma assinatura sandbox/real da Efí antes de marcar ACEITO.
+
+**Branch e commit:** `main`, implementação `2f853bd`; checkpoint documental no commit seguinte.
+
+**Arquivos e objetos alterados:** `efi-assinatura-webhook`, novo `saas-cancelar`, `saas-assinar`, shared `assinatura-recorrencia.ts`, `Assinatura.tsx`, `assinatura.ts`, `supabase/config.toml`, migration `20260909200000_assinatura_recorrencia_atomica.sql`, prova `supabase/tests/assinatura-recorrencia.sql` e testes Vitest. Banco: inbox `assinatura_notificacoes_efi`, campos de estado Efí em `lojas`, chave idempotente em `assinatura_eventos_efi` e RPC `fn_assinatura_processar_evento_efi`.
+
+**Estado antes e causa reproduzida:** o webhook considerava `active` como pagamento, inventava `charge_id` com ID/data do evento, atualizava o vencimento antes do INSERT idempotente e ignorava recusa/cancelamento. Duas entregas concorrentes podiam estender o acesso duas vezes; callback entre aprovação e persistência inicial ficava sem retomada. A tela prometia cancelamento sem ação correspondente. O gateway de `saas-assinar` também permanecia com `verify_jwt=false`.
+
+**Estado depois e invariantes preservadas:** o token é persistido antes do GET da Efí; o histórico oficial (`type`, `identifiers`, `status.current`, `id`) é aplicado item a item. Uma RPC `SECURITY DEFINER`, exclusiva de `service_role`, serializa por assinatura e altera evento/fatura/acesso atomicamente. `active` nunca prova dinheiro; só `paid/settled` com valor igual ao contrato concede um mês e aciona uma NFS-e. Evento negativo não rebaixa cobrança paga; aprovação tardia reaproveita a mesma fatura; evento não reconhecido pode ser retomado quando o vínculo surgir. Cancelamento preserva `trial_termina_em` e a tolerância existente. Plano anual continua cobrança única, sem recorrência a cancelar.
+
+**Testes:** Vitest completo — PASS, 762 testes / 66 arquivos; 28 testes / 12 arquivos SKIPPED por dependências de ambiente. TypeScript — PASS. ESLint dos arquivos frontend/teste — PASS. Build Vite — PASS (somente warning preexistente de chunk grande). Parse/bundle das três Edge Functions com esbuild — PASS. Migration + prova SQL em produção com rollback antes do deploy — PASS. Prova SQL pós-deploy com rollback — PASS para callback antes da fatura, renovação, duplicidade, evento fora de ordem, recusa, aprovação tardia, cancelamento e limpeza. Introspecção — PASS. Smokes HTTP — PASS: ping do webhook; `saas-cancelar` e `saas-assinar` sem JWT retornam 401. Deno lint/test — BLOCKED: executável Deno ausente. Cobrança/renovação reais — NOT RUN para não movimentar dinheiro.
+
+**Publicado:** migration `20260909200000` aplicada cirurgicamente em 09/09/2026 (não foi usado `db push` devido ao drift histórico da tabela de migrations); `efi-assinatura-webhook` v31, `saas-cancelar` v2 e `saas-assinar` v56 ativas. Configuração verificada: webhook `verify_jwt=false`; cancelamento/assinatura `verify_jwt=true`. Frontend segue no push dos commits desta execução.
+
+**Não publicado:** nenhum outro banco/function. Nenhuma cobrança, renovação ou NFS-e real foi criada por estes testes.
+
+**Pendências:** engenharia/revisor — revisar SQL, fronteira service-role e UX. Rafael/operação — homologar uma assinatura recorrente controlada e cancelamento no ambiente autorizado, confirmando payload e recebimento fiscal. Infra — agendar chamada autenticada `{reconciliar:true}` ou incorporar a inbox ao monitor operacional. Repositório — drift histórico de migrations impede `db push` seguro e precisa de reconciliação própria. Segurança — `teste-relay-fiscal-rps` apareceu ACTIVE v5 na listagem, embora o handoff anterior dissesse desativado; confirmar finalidade e remover/desativar com autorização.
+
+**Recuperação e limitações conhecidas:** falha após o GET da Efí permanece na inbox como `erro` e pode ser reprocessada pelo modo autenticado de reconciliação; falha fiscal deixa a fatura paga rastreável e não recobra. Reverter código/functions para a versão anterior não deve apagar eventos/faturas. Rollback de schema requer preservar primeiro a inbox e os estados financeiros. Sem evento real, o contrato está pronto para revisão, não aceito.
+
+**Próximo passo executável:** revisar o diff de `2f853bd`; depois criar uma assinatura mensal controlada no ambiente autorizado, observar `new → waiting → active/paid`, simular duplicidade/recusa/aprovação tardia/cancelamento e reconciliar NFS-e/e-mail sem repetir cobrança.
+
+
+[[PAGE]]
+
 # Referências e rastreabilidade
 
 Fontes técnicas consultadas em 09/09/2026. Elas orientam o planejamento; não comprovam a configuração ou homologação específica do MiseOn. Registrar evidência de execução nos itens do backlog.
