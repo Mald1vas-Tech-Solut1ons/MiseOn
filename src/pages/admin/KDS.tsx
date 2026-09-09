@@ -9,6 +9,7 @@ import {
 import { supabase } from '../../lib/supabase';
 import { type Pedido, type EtapaKDS, type StatusPedido, type KdsEstacao } from '../../types';
 import { etapasVisiveisDaEstacao, statusAoAvancar } from '../../lib/kdsEtapas';
+import { pedidoAcabouDeEntrarNaOperacao } from '../../lib/pedidoOperacional';
 import { tocarSom } from '../../lib/som';
 import { traduzirErro, type ErroTraduzido } from '../../lib/erros';
 import { ErroAmigavel } from '../../components/ui/ErroAmigavel';
@@ -344,7 +345,8 @@ export default function KDS() {
     const canal = supabase
       .channel(`kds-${lojaId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${lojaId}` }, (payload) => {
-        if (payload.eventType === 'INSERT') tocarSom();
+        const anterior = payload.eventType === 'INSERT' ? null : payload.old as Pedido;
+        if (pedidoAcabouDeEntrarNaOperacao(anterior, payload.new as Pedido)) tocarSom();
         carregar();
       })
       .subscribe();

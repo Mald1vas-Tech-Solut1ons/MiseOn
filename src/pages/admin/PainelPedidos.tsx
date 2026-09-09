@@ -18,6 +18,7 @@ import { ModalCancelamento } from '../../components/pedidos/ModalCancelamento';
 import { ModalCodigoEntrega } from '../../components/pedidos/ModalCodigoEntrega';
 import { PainelNegociacoes } from '../../components/pedidos/PainelNegociacoes';
 import { despacharNoIfood, ehPedidoIfood, entregaEhDaLoja } from '../../lib/ifood';
+import { pedidoAcabouDeEntrarNaOperacao, pedidoEstaNaOperacao } from '../../lib/pedidoOperacional';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { HorizontalScrollContainer } from '../../components/ui';
@@ -197,11 +198,12 @@ export default function PainelPedidos() {
     const { data } = await supabase
       .from('pedidos').select(SELECT)
       .eq('loja_id', lojaId)
+      .neq('status', 'AGUARDANDO_PAGAMENTO')
       // recentes OU agendados (não importa há quanto foram marcados — senão um
       // agendamento pra daqui a 3 dias sumiria do painel antes mesmo de chegar a hora)
       .or(`criado_em.gte.${cutoff24h},agendado_para.not.is.null`)
       .order('criado_em', { ascending: false });
-    setPedidos((data as Pedido[]) ?? []);
+    setPedidos(((data as Pedido[]) ?? []).filter(pedidoEstaNaOperacao));
     setCarregando(false);
   }, [lojaId]);
 
@@ -214,9 +216,10 @@ export default function PainelPedidos() {
         { event: '*', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${lojaId}` },
         (payload) => {
           carregar();
-          if (payload.eventType === 'INSERT') {
+          const p = payload.new as Pedido;
+          const anterior = payload.eventType === 'INSERT' ? null : payload.old as Pedido;
+          if (pedidoAcabouDeEntrarNaOperacao(anterior, p)) {
             tocarSom();
-            const p = payload.new as Pedido;
             if ('Notification' in window && Notification.permission === 'granted') {
               new Notification(`🛎 Novo pedido #${p.numero}`, {
                 body: `${p.identificador_cliente} · ${fmt(Number(p.valor_total))}`,

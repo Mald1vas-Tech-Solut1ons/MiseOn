@@ -9,6 +9,7 @@ import { supabase } from '../../lib/supabase';
 import { fmt, type Pedido, type ProducaoPreparo } from '../../types';
 import type { CtxLoja } from './AdminLayout';
 import { useI18n } from '../../contexts/I18nContext';
+import { pedidoEstaNaOperacao } from '../../lib/pedidoOperacional';
 
 interface DadosDia {
   pedidosHoje: Pedido[];
@@ -48,6 +49,11 @@ export default function Dashboard() {
   const { lojaId, lojaNome, lojaSlug, papel } = ctx;
   const [dados, setDados] = useState<DadosDia | null>(null);
   const [onboarding, setOnboarding] = useState<Onboarding | null>(null);
+  /** Cartão recusado pelo provedor por motivo de CONTA — a vitrine já parou
+   *  de oferecer cartão; aqui o lojista descobre por quê, sem depender de um
+   *  cliente avisar que não conseguiu pagar. */
+  const [cartaoBloqueio, setCartaoBloqueio] = useState<{ em: string; motivo: string } | null>(null);
+  const [reativandoCartao, setReativandoCartao] = useState(false);
   const [onboardingOculto, setOnboardingOculto] = useState(() => localStorage.getItem(`miseon_onb_ocultar_${lojaId}`) === '1');
   const [metricasCozinha, setMetricasCozinha] = useState<{
     meta_min: number;
@@ -93,7 +99,8 @@ export default function Dashboard() {
       { count: waPedidosCount }
     ] = await Promise.all([
       supabase.from('pedidos').select('id, numero, status, valor_total, criado_em, tipo_pedido, identificador_cliente')
-        .eq('loja_id', lojaId).gte('criado_em', inicioHoje.toISOString()).order('criado_em', { ascending: false }),
+        .eq('loja_id', lojaId).neq('status', 'AGUARDANDO_PAGAMENTO')
+        .gte('criado_em', inicioHoje.toISOString()).order('criado_em', { ascending: false }),
       // comparação coluna x coluna não existe no PostgREST — traz os com mínimo
       // definido e filtra `quantidade_atual <= estoque_minimo` aqui no cliente
       supabase.from('insumos').select('id, nome, quantidade_atual, estoque_minimo, unidade_medida')
@@ -102,10 +109,11 @@ export default function Dashboard() {
       supabase.from('producoes_preparo').select('*')
         .eq('loja_id', lojaId).eq('status', 'ATIVO').not('vence_em', 'is', null)
         .lte('vence_em', limiteVencimento).order('vence_em'),
-      supabase.from('lojas').select('logo_url, efi_payee_code, efi_titular_documento, efi_conta, pix_chave, aceita_online').eq('id', lojaId).single(),
+      supabase.from('lojas').select('logo_url, efi_payee_code, efi_titular_documento, efi_conta, pix_chave, aceita_online, cartao_online_bloqueado_em, cartao_online_bloqueio_motivo').eq('id', lojaId).single(),
       supabase.from('produtos').select('id', { count: 'exact', head: true }).eq('loja_id', lojaId),
       supabase.from('horarios_funcionamento').select('id', { count: 'exact', head: true }).eq('loja_id', lojaId),
-      supabase.from('pedidos').select('id', { count: 'exact', head: true }).eq('loja_id', lojaId),
+      supabase.from('pedidos').select('id', { count: 'exact', head: true })
+        .eq('loja_id', lojaId).neq('status', 'AGUARDANDO_PAGAMENTO'),
       supabase.from('insumos').select('id, nome').eq('loja_id', lojaId).eq('is_preparo', true),
       // WA Metrics
       supabase.from('chat_conversations').select('id, ia_ativa').eq('loja_id', lojaId).eq('canal', 'WHATSAPP').gte('criado_em', inicioHoje.toISOString()),
@@ -116,7 +124,7 @@ export default function Dashboard() {
     const waConvs = (waConversasResult.data || []) as any[];
     
     setDados({
-      pedidosHoje: (pedidosHoje as Pedido[]) ?? [],
+      pedidosHoje: ((pedidosHoje as Pedido[]) ?? []).filter(pedidoEstaNaOperacao),
       insumosBaixos: ((insumosBaixos as DadosDia['insumosBaixos']) ?? [])
         .filter((i) => Number(i.quantidade_atual) <= Number(i.estoque_minimo))
         .slice(0, 50),
@@ -134,7 +142,15 @@ export default function Dashboard() {
     // Pix sem repasse aparecia como pronta, enquanto todo Pix caía na conta da
     // plataforma. O checklist afirmava o que não era verdade.
     // Só está pronto quem tem repasse para TODO meio online que aceita.
-    const cartaoOk = !!loja?.efi_payee_code;
+    setCartaoBloqueio(
+      loja?.cartao_online_bloqueado_em
+        ? { em: loja.cartao_online_bloqueado_em as string, motivo: (loja.cartao_online_bloqueio_motivo as string) ?? '' }
+        : null,
+    );
+
+    // Cadastro preenchido nao e o mesmo que conseguir cobrar: conta bloqueada
+    // pelo provedor reprova o checklist, senao ele afirma o que nao e verdade.
+    const cartaoOk = !!loja?.efi_payee_code && !loja?.cartao_online_bloqueado_em;
     const pixOk = !!(loja?.efi_titular_documento && loja?.efi_conta);
     const pagamentosOk = !(loja?.aceita_online ?? true) || (cartaoOk && pixOk);
     setOnboarding({
@@ -156,15 +172,29 @@ export default function Dashboard() {
     return () => { supabase.removeChannel(canal); };
   }, [carregar, lojaId, papel]);
 
+  const reativarCartaoOnline = async () => {
+    setReativandoCartao(true);
+    try {
+      const { error } = await supabase.rpc('fn_liberar_cartao_online', { p_loja_id: lojaId });
+      if (error) throw error;
+      setCartaoBloqueio(null);
+      await carregar();
+    } catch (e: any) {
+      alert(e?.message || 'Não foi possível reativar o cartão agora.');
+    } finally {
+      setReativandoCartao(false);
+    }
+  };
+
   const resumo = useMemo(() => {
     const lista = dados?.pedidosHoje ?? [];
-    const validos = lista.filter((p) => p.status !== 'CANCELADO');
+    const validos = lista.filter((p) => pedidoEstaNaOperacao(p) && p.status !== 'CANCELADO');
     const faturamento = validos.reduce((s, p) => s + Number(p.valor_total), 0);
     return {
       faturamento,
       qtd: validos.length,
       ticket: validos.length > 0 ? faturamento / validos.length : 0,
-      abertos: lista.filter((p) => !['FINALIZADO', 'CANCELADO'].includes(p.status)).length,
+      abertos: lista.filter((p) => pedidoEstaNaOperacao(p) && !['FINALIZADO', 'CANCELADO'].includes(p.status)).length,
       aguardando: lista.filter((p) => p.status === 'NOVO').length,
     };
   }, [dados]);
@@ -195,6 +225,44 @@ export default function Dashboard() {
         <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{hoje}</p>
         <h2 className="mt-1 text-2xl font-black dark:text-gray-100">{saudacao()}, {lojaNome} 👋</h2>
       </div>
+
+      {/* ── Cartão bloqueado pelo provedor ── */}
+      {cartaoBloqueio && (
+        <div role="alert" className="mb-5 rounded-2xl border-2 border-red-300 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-900/15">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400">
+              <AlertTriangle size={18} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-black text-red-800 dark:text-red-300">
+                {tDynamic('Pagamento com cartão está desativado na sua vitrine')}
+              </h3>
+              <p className="mt-1 text-[13px] leading-relaxed text-red-700/90 dark:text-red-300/80">
+                {tDynamic('O provedor de pagamento recusou as cobranças por um motivo de CONTA — não é o cartão do cliente. Enquanto isso, o cartão não aparece no seu cardápio para ninguém tentar e não conseguir. O Pix continua funcionando normalmente.')}
+              </p>
+              <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 font-['JetBrains_Mono'] text-xs text-gray-600 dark:bg-white/5 dark:text-gray-300">
+                {cartaoBloqueio.motivo || 'Sem detalhe do provedor.'}
+              </p>
+              <p className="mt-2 text-[13px] font-semibold text-red-800 dark:text-red-300">
+                {tDynamic('O que fazer: fale com o suporte da Efí e peça a liberação do limite operacional de cartão da sua conta. Depois, reative o cartão abaixo.')}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={reativarCartaoOnline}
+                  disabled={reativandoCartao}
+                  className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-red-700 disabled:opacity-50"
+                >
+                  {reativandoCartao ? tDynamic('Reativando…') : tDynamic('Já resolvi — reativar cartão')}
+                </button>
+                <p className="text-xs text-red-600/70 dark:text-red-400/70">
+                  {tDynamic('Desativado em')} {new Date(cartaoBloqueio.em).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Onboarding (primeiros passos) ── */}
       {mostrarOnboarding && (

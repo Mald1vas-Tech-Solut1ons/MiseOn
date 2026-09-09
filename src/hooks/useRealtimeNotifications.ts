@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useToast } from '../contexts/ToastContext';
 import { tocarSom } from '../lib/som';
 import { Pedido } from '../types';
+import { pedidoAcabouDeEntrarNaOperacao } from '../lib/pedidoOperacional';
 
 type NotificationContext = 'PDV' | 'PAINEL' | 'ENTREGAS' | 'ROTA' | 'CLIENTE';
 
@@ -43,9 +44,7 @@ export function useRealtimeNotifications({ lojaId, pedidoId, contexto, entregado
       const canalLoja = supabase.channel(`realtime-loja-${lojaId}-${contexto}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${lojaId}` }, (payload) => {
           const p = payload.new as Pedido;
-          // Carrinho em pagamento não é pedido: alertar aqui fazia o lojista
-          // ser avisado no instante em que o cliente abria a tela do cartão.
-          if (p.status === 'AGUARDANDO_PAGAMENTO') return;
+          if (!pedidoAcabouDeEntrarNaOperacao(null, p)) return;
           if (contexto === 'PDV' && modoPdv === 'MESA' && p.origem !== 'balcao' && p.origem !== 'garcom') {
             // Novo pedido de mesa via QR ou delivery (não feito pelo próprio PDV)
             toast(`Novo pedido #${p.numero}!`, 'info');
@@ -60,6 +59,17 @@ export function useRealtimeNotifications({ lojaId, pedidoId, contexto, entregado
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${lojaId}` }, (payload) => {
           const novo = payload.new as Pedido;
           const velho = payload.old as Pedido;
+
+          if (pedidoAcabouDeEntrarNaOperacao(velho, novo)) {
+            if (contexto === 'PDV' && modoPdv === 'MESA' && novo.origem !== 'balcao' && novo.origem !== 'garcom') {
+              toast(`Novo pedido #${novo.numero}!`, 'info');
+              tocarSom();
+            } else if (contexto === 'ENTREGAS' && novo.tipo_pedido === 'DELIVERY') {
+              const contextoAgendado = novo.agendado_para ? ' AGENDADO' : '';
+              toast(`Novo delivery${contextoAgendado} #${novo.numero}!`, 'info');
+              tocarSom();
+            }
+          }
           
           if (velho.status !== 'PRONTO' && novo.status === 'PRONTO') {
             if (contexto === 'PDV') {

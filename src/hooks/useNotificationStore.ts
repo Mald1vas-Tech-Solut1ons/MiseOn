@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { pedidoAcabouDeEntrarNaOperacao } from '../lib/pedidoOperacional';
 import { tocarSom } from '../lib/som';
 import { useToast } from '../contexts/ToastContext';
 
@@ -354,6 +355,28 @@ export function useNotificationStore(lojaId?: string) {
   useEffect(() => {
     if (!lojaId) return;
 
+    const notificarNovoPedido = (p: any) => {
+      const origemTexto =
+        p.origem === 'balcao'
+          ? 'Balcão PDV'
+          : p.origem === 'garcom'
+          ? `Mesa ${p.mesa_numero ?? ''}`
+          : p.tipo_pedido === 'DELIVERY'
+          ? 'Delivery Online'
+          : 'Cardápio Digital';
+
+      adicionarNotificacao({
+        id: `notif_PEDIDO_NOVO_${p.id}`,
+        tipo: 'PEDIDO_NOVO',
+        categoria: 'PEDIDO',
+        titulo: `Novo Pedido #${p.numero}`,
+        mensagem: `${origemTexto} • ${p.identificador_cliente || 'Cliente'} (R$ ${Number(p.valor_total || 0).toFixed(2)})`,
+        acaoUrl: p.requer_cozinha ? '/admin/kds' : '/admin/pedidos',
+        acaoRotulo: p.requer_cozinha ? 'Ver no KDS' : 'Ver Pedido',
+        metaData: { pedidoId: p.id, numero: p.numero },
+      });
+    };
+
     const canal = supabase
       .channel(`central-notificacoes-${lojaId}`)
       // 1. Novos Pedidos de qualquer origem
@@ -362,25 +385,7 @@ export function useNotificationStore(lojaId?: string) {
         { event: 'INSERT', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${lojaId}` },
         (payload) => {
           const p = payload.new as any;
-          const origemTexto =
-            p.origem === 'balcao'
-              ? 'Balcão PDV'
-              : p.origem === 'garcom'
-              ? `Mesa ${p.mesa_numero ?? ''}`
-              : p.tipo_pedido === 'DELIVERY'
-              ? 'Delivery Online'
-              : 'Cardápio Digital';
-
-          adicionarNotificacao({
-            id: `notif_PEDIDO_NOVO_${p.id}`,
-            tipo: 'PEDIDO_NOVO',
-            categoria: 'PEDIDO',
-            titulo: `Novo Pedido #${p.numero}`,
-            mensagem: `${origemTexto} • ${p.identificador_cliente || 'Cliente'} (R$ ${Number(p.valor_total || 0).toFixed(2)})`,
-            acaoUrl: p.requer_cozinha ? '/admin/kds' : '/admin/pedidos',
-            acaoRotulo: p.requer_cozinha ? 'Ver no KDS' : 'Ver Pedido',
-            metaData: { pedidoId: p.id, numero: p.numero },
-          });
+          if (pedidoAcabouDeEntrarNaOperacao(null, p)) notificarNovoPedido(p);
         }
       )
       // 2. Pedido Pronto na Cozinha
@@ -390,6 +395,7 @@ export function useNotificationStore(lojaId?: string) {
         (payload) => {
           const novo = payload.new as any;
           const velho = payload.old as any;
+          if (pedidoAcabouDeEntrarNaOperacao(velho, novo)) notificarNovoPedido(novo);
           if (velho.status !== 'PRONTO' && novo.status === 'PRONTO') {
             adicionarNotificacao({
               id: `notif_PEDIDO_PRONTO_${novo.id}`,
