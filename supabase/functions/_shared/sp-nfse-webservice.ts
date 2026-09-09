@@ -125,7 +125,12 @@ export function montarXmlRps(d: DadosRps, privateKeyPem: string): string {
   );
 
   return (
-    `<RPS>` +
+    // xmlns="" : o schema não declara elementFormDefault="qualified", então
+    // elementos locais (RPS, e tudo dentro dele) devem ficar SEM namespace —
+    // só o elemento raiz PedidoEnvioLoteRPS fica no target namespace. Sem
+    // isso o XML herda o namespace do pai e o webservice rejeita com uma
+    // mensagem confusa (nome do elemento certo, namespace errado).
+    `<RPS xmlns="">` +
     `<Assinatura>${assinatura}</Assinatura>` +
     `<ChaveRPS>` +
     `<InscricaoPrestador>${pad(d.inscricaoMunicipalPrestador.replace(/\D/g, ''), 8)}</InscricaoPrestador>` +
@@ -163,7 +168,12 @@ export function montarELoteAssinado(lote: DadosLote, cert: CertificadoDecodifica
   const cnpjDigits = lote.cnpjRemetente.replace(/\D/g, '');
   const semAssinatura =
     `<PedidoEnvioLoteRPS xmlns="http://www.prefeitura.sp.gov.br/nfe">` +
-    `<Cabecalho Versao="1">` +
+    // xmlns="" pelo mesmo motivo do RPS (ver montarXmlRps): elemento local,
+    // sem elementFormDefault="qualified" no schema, fica sem namespace.
+    // Confirmado com erro real do webservice depois dessa correção: o nome
+    // do elemento é CPFCNPJRemetente (a tabela descritiva do manual usa
+    // "CNPJRemetente" como texto, não é o nome real do elemento XML).
+    `<Cabecalho xmlns="" Versao="1">` +
     `<CPFCNPJRemetente><CNPJ>${cnpjDigits}</CNPJ></CPFCNPJRemetente>` +
     `<transacao>true</transacao>` +
     `<dtInicio>${lote.dataInicio}</dtInicio>` +
@@ -271,7 +281,12 @@ export async function enviarLoteRps(
     .map((m) => ({ codigo: m[1], descricao: m[2] ?? '' }));
   const alertas = [...retornoXml.matchAll(/<Alerta>[\s\S]*?<Codigo>(\d+)<\/Codigo>(?:[\s\S]*?<Descricao>([^<]*)<\/Descricao>)?[\s\S]*?<\/Alerta>/g)]
     .map((m) => ({ codigo: m[1], descricao: m[2] ?? '' }));
-  const numeroNFe = retornoXml.match(/<ChaveNFe>[\s\S]*?<Numero>(\d+)<\/Numero>/)?.[1];
+  // Confirmado com emissão real em producao (09/09): o campo é <NumeroNFe>
+  // direto dentro de <ChaveNFe>, não <Numero> como eu tinha assumido sem
+  // testar contra o webservice de verdade — isso fazia toda emissão bem
+  // sucedida (sucesso=true, NF-e real gerada) ficar marcada como "erro" no
+  // banco por falta desse número.
+  const numeroNFe = retornoXml.match(/<ChaveNFe>[\s\S]*?<NumeroNFe>(\d+)<\/NumeroNFe>/)?.[1];
   const codigoVerificacao = retornoXml.match(/<CodigoVerificacao>([^<]+)<\/CodigoVerificacao>/)?.[1];
   const inscricaoPrestador = retornoXml.match(/<InscricaoPrestador>(\d+)<\/InscricaoPrestador>/)?.[1];
 
