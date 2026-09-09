@@ -7,7 +7,6 @@ import { UNIDADES, destinosPermitidos, validarConversao, opcoesDeEntrada } from 
 import { OPCOES_SETOR, SETORES, validarSetor, derivarSetor } from '../../lib/estoque3d/rastreio/setores';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
-import EstoquePreparos from './EstoquePreparos';
 import { SimuladorCusto } from '../../components/custeio';
 import type { ItemEstoque, FatorItem } from '../../lib/custeio';
 import { ModalReposicaoBuffet } from '../../components/estoque/ModalReposicaoBuffet';
@@ -43,7 +42,7 @@ export default function Estoque() {
   const { tDynamic } = useI18n();
   const { lojaId, segmento_negocio, modulos_ativos } = useOutletContext<CtxLoja>();
   const isBuffet = segmento_negocio === 'SELF_SERVICE' || modulos_ativos?.balanca === true;
-  const [tab, setTab] = useState<'insumos' | 'preparos' | 'custo3d' | 'rastreio3d'>('insumos');
+  const [tab, setTab] = useState<'insumos' | 'custo3d' | 'rastreio3d'>('insumos');
   const [insumos, setInsumos] = useState<Insumo[]>([]);
   const [inativos, setInativos] = useState<Insumo[]>([]);
   const [mostrarInativos, setMostrarInativos] = useState(false);
@@ -588,7 +587,6 @@ export default function Estoque() {
          </div>
          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shadow-inner">
            <button data-tour="tour-estoque-aba-insumos" onClick={() => setTab('insumos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'insumos' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Matérias-Primas')}</button>
-           <button data-tour="tour-estoque-aba-preparos" onClick={() => setTab('preparos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'preparos' ? 'bg-white dark:bg-gray-900 shadow-sm text-orange-600 dark:text-orange-500' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Receitas & Preparos')}</button>
            <button data-tour="tour-estoque-aba-3d" onClick={() => setTab('custo3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'custo3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Custo 3D')}</button>
            <button data-tour="tour-estoque-aba-rastreio3d" onClick={() => setTab('rastreio3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'rastreio3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-emerald-600 dark:text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Rastreio 3D')}</button>
          </div>
@@ -602,8 +600,6 @@ export default function Estoque() {
         <Suspense fallback={<div className="flex h-[520px] items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/40"><MiseOnLoader status="Carregando Custo 3D..." rows={2} /></div>}>
           <EstoqueCusto3D lojaId={lojaId} />
         </Suspense>
-      ) : tab === 'preparos' ? (
-        <EstoquePreparos lojaId={lojaId} insumosTotais={[...insumos, ...inativos]} onUpdate={carregar} isBuffet={isBuffet} />
       ) : (
         <>
           {avisoEstoque && (

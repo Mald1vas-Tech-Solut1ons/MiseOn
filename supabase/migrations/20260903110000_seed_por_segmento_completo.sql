@@ -43,7 +43,7 @@ begin
   with base(nome,unidade,categoria) as (
     select * from (values
       ('Pão brioche','un','Padaria'),('Blend bovino 180g','un','Carnes'),('Queijo cheddar fatiado','fatias','Frios'),
-      ('Bacon em fatias','g','Frios'),('Alface','folha','Hortifrúti'),('Tomate','fatias','Hortifrúti'),
+      ('Bacon em fatias','g','Frios'),('Alface','folha','Hortifrúti'),('Tomate','kg','Hortifrúti'),
       ('Cebola','g','Hortifrúti'),('Molho da casa','ml','Ingrediente'),('Batata congelada','g','Congelados'),
       ('Refrigerante lata 350ml','un','Bebidas'),('Ovo','un','Mercearia'),('Frango desfiado','g','Carnes'),
       ('Sorvete de creme','g','Congelados'),('Calda de chocolate','ml','Mercearia')
@@ -70,7 +70,7 @@ begin
     union all select * from (values
       ('Arroz','g','Mercearia'),('Feijão','g','Mercearia'),('Peito de frango','g','Carnes'),
       ('Carne bovina em cubos','g','Carnes'),('Batata','g','Hortifrúti'),('Alface','folha','Hortifrúti'),
-      ('Tomate','fatias','Hortifrúti'),('Cenoura','g','Hortifrúti'),('Beterraba','g','Hortifrúti'),
+      ('Tomate','kg','Hortifrúti'),('Cenoura','g','Hortifrúti'),('Beterraba','g','Hortifrúti'),
       ('Macarrão','g','Mercearia'),('Refrigerante lata 350ml','un','Bebidas'),('Suco natural','ml','Bebidas'),
       ('Gelatina','g','Mercearia'),('Embalagem marmita','un','Descartáveis')
     ) t where v_seg='RESTAURANTE_POR_QUILO'
@@ -163,7 +163,7 @@ begin
     select * from (values
       ('X-Burger','Pão brioche',1),('X-Burger','Blend bovino 180g',1),('X-Burger','Queijo cheddar fatiado',1),
       ('X-Salada','Pão brioche',1),('X-Salada','Blend bovino 180g',1),('X-Salada','Queijo cheddar fatiado',1),
-      ('X-Salada','Alface',1),('X-Salada','Tomate',2),
+      ('X-Salada','Alface',1),('X-Salada','Tomate',0.040),
       ('X-Bacon','Pão brioche',1),('X-Bacon','Blend bovino 180g',1),('X-Bacon','Queijo cheddar fatiado',1),('X-Bacon','Bacon em fatias',40),
       ('X-Frango','Pão brioche',1),('X-Frango','Frango desfiado',120),('X-Frango','Queijo cheddar fatiado',1),('X-Frango','Molho da casa',20),
       ('X-Egg','Pão brioche',1),('X-Egg','Blend bovino 180g',1),('X-Egg','Queijo cheddar fatiado',1),('X-Egg','Ovo',1),

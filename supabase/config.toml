@@ -84,6 +84,11 @@ enabled = true
 verify_jwt = true
 entrypoint = "./functions/nutricao-estimar-ia/index.ts"
 
+[functions.preparo-sugerir]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/preparo-sugerir/index.ts"
+
 # Preserva o acesso dos links já enviados. O controle de acesso por token
 # individual e o snapshot histórico do emissor continuam no gate fiscal.
 [functions.fiscal-pdf-nfse]

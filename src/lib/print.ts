@@ -29,7 +29,8 @@ interface PrintOptions {
     rendimentoTotal: string;
     ingredientes: { nome: string; qtd: number; unidade: string; ok: boolean }[];
     dataFab?: string;
-    dataValidade?: string;
+    /** `null` = a ficha nao controla validade. Nunca sai em branco na etiqueta. */
+    dataValidade?: string | null;
     responsavel?: string;
   };
 }
@@ -296,7 +297,7 @@ function htmlEtiqueta(o: PrintOptions) {
       
       <div class="etiqueta-row">
         <span class="sm font-bold">DATA DE VALIDADE:</span>
-        <span class="font-bold uppercase text-lg">${esc(osData.dataValidade || '')}</span>
+        <span class="font-bold uppercase text-lg">${esc(osData.dataValidade || 'NAO CONTROLADA')}</span>
       </div>
 
       <div class="etiqueta-row">

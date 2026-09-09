@@ -419,3 +419,17 @@ A tela da estação exibe badge de drink, ABV, ml, kcal e ingredientes. As RPCs 
 **Recuperação e limitações conhecidas:** falha após o GET da Efí permanece na inbox como `erro` e pode ser reprocessada pelo modo autenticado de reconciliação; falha fiscal deixa a fatura paga rastreável e não recobra. Reverter código/functions para a versão anterior não deve apagar eventos/faturas. Rollback de schema requer preservar primeiro a inbox e os estados financeiros. Sem evento real, o contrato está pronto para revisão, não aceito.
 
 **Próximo passo executável:** revisar o diff de `2f853bd`; depois criar uma assinatura mensal controlada no ambiente autorizado, observar `new → waiting → active/paid`, simular duplicidade/recusa/aprovação tardia/cancelamento e reconciliar NFS-e/e-mail sem repetir cobrança.
+
+## Execução de 09/09 (parte 6) — tomate físico e central de manipulações
+
+**Objetivo:** separar matéria-prima armazenada de corte/preparo escolhido pela operação e transformar a experiência de produção em um fluxo próprio, visual e auditável.
+
+**Decisão de produto:** Estoque mantém matérias-primas, saldo, inventário e custo. Fichas de transformação e ordens de serviço passam a viver em **Produção & Manipulações**. `Tomate` do onboarding nasce em `kg`; o X-Salada consome `0,040 kg`. Fatias/rodelas continuam disponíveis como unidade do resultado quando o usuário cria uma ficha, informa o rendimento real e executa a OS. O sistema não inventa conversão massa→contagem.
+
+**Implementação:** a tela de produção ganhou abas de bancada e fichas; o editor virou uma jornada origem→resultado→controle de lote, com todas as unidades semânticas suportadas e custo estimado visível. A validade fixa de três dias foi removida. Nova RPC `fn_produzir_preparo` executa consumo PEPS, transferência de custo, entrada do resultado e criação do lote numa única transação. Produção sem ficha ou com saldo insuficiente não cria estoque negativo; exige reposição/ajuste auditável.
+
+**IA:** nova Edge Function `preparo-sugerir` usa `DEEPSEEK_API_KEY` apenas no servidor e devolve um rascunho editável. Ela não grava nem movimenta estoque. Unidade e números são validados antes de chegar à tela; rendimento e validade sempre exigem confirmação humana.
+
+**Migração de dados:** lojas já semeadas só são corrigidas automaticamente quando o tomate conserva a assinatura virgem do seed (saldo/custo zero, sem movimentos, lotes, conversões ou ficha personalizada). Dados operacionais existentes são preservados para decisão explícita do usuário.
+
+**Validação:** TypeScript e ESLint dos arquivos alterados passaram. Teste de regressão cobre a unidade física no seed, a equivalência de 2 fatias para 0,040 kg na ficha de demonstração e as guardas do backfill. Deno/Supabase CLI indisponíveis localmente; publicação e smoke real da Edge Function/migrations permanecem pendentes.

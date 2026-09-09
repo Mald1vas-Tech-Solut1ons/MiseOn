@@ -8,13 +8,31 @@ import { supabase } from '../../lib/supabase';
 import { Insumo, Loja, fmt } from '../../types';
 import type { CtxLoja } from './AdminLayout';
 import { imprimir } from '../../lib/print';
+import { UNIDADES } from '../../lib/unidades';
 import MiseOnLoader from '../../components/MiseOnLoader';
+import EstoquePreparos from './EstoquePreparos';
+import ModoPreparo from '../../components/producao/ModoPreparo';
 
 import { useI18n } from '../../contexts/I18nContext';
 type Ficha = { insumo_id: string; quantidade: number };
 
 const custoUnit = (i?: Insumo) =>
   i && Number(i.qtd_embalagem) > 0 ? Number(i.preco_embalagem) / Number(i.qtd_embalagem) : 0;
+
+/**
+ * Espelha fn_rendimento_na_unidade_do_preparo: rendimento_padrao_kg está em kg
+ * e só vale quando o preparo é medido em massa (kg -> ml exigiria densidade,
+ * que ninguém declarou). Precisa bater com a RPC, senão a tela promete uma
+ * quantidade e o estoque recebe outra.
+ */
+const rendimentoDoLote = (p: Insumo): number => {
+  const unidade = UNIDADES.find(u => u.codigo === p.unidade_medida);
+  const emKg = Number(p.rendimento_padrao_kg ?? 0);
+  if (emKg > 0 && unidade?.grandeza === 'massa' && unidade.fatorBase) {
+    return emKg / unidade.fatorBase;
+  }
+  return Number(p.rendimento_porcoes || 0) || 1;
+};
 
 // --- Subcomponente: Card da Ordem de Serviço (OS) com Timer e Etiqueta ---
 function OSCard({
@@ -28,11 +46,11 @@ function OSCard({
   pendente: boolean;
   loja: Loja | null;
   insumoById: Map<string, Insumo>;
-  onProduzir: (p: Insumo, qtdLotes: number) => Promise<void>;
+  onProduzir: (p: Insumo, qtdLotes: number, segundos?: number, segundosFogo?: number) => Promise<void>;
 }) {
   const { tDynamic } = useI18n();
   const [qtdLotes, setQtdLotes] = useState(() => {
-    const rend = Number(p.rendimento_porcoes || 1);
+    const rend = rendimentoDoLote(p);
     const deficit = Number(p.estoque_minimo) - Number(p.quantidade_atual);
     return deficit <= 0 ? 1 : Math.max(1, Math.ceil(deficit / rend));
   });
@@ -42,11 +60,12 @@ function OSCard({
   const [elapsed, setElapsed] = useState(0);
   const [isProduzindo, setIsProduzindo] = useState(false);
   const [modalFuroAberto, setModalFuroAberto] = useState(false);
+  const [modoAberto, setModoAberto] = useState(false);
 
   // Meta dados gerados ao concluir
   const [dadosFinais, setDadosFinais] = useState<{
     dataFab: string;
-    dataValidade: string;
+    dataValidade: string | null;
     osNum: number;
     tempoFormatado: string;
   } | null>(null);
@@ -64,7 +83,7 @@ function OSCard({
     });
     const custo = itens.reduce((s, it) => s + custoUnit(it.ins) * it.necessario, 0);
     const podeProduzir = itens.length > 0 && itens.every(it => it.ok);
-    const rendimento = Number(p.rendimento_porcoes || 1) * qtdLotes;
+    const rendimento = rendimentoDoLote(p) * qtdLotes;
     return { itens, custo, podeProduzir, rendimento };
   }, [p, qtdLotes, insumoById]);
 
@@ -88,42 +107,44 @@ function OSCard({
   };
 
   const handleIniciar = () => {
-    if (!podeProduzir && !semFicha) {
+    if (semFicha) return;
+    if (!podeProduzir) {
       setModalFuroAberto(true);
       return;
     }
-    setStatus('ANDAMENTO');
-    setStartTime(Date.now());
-    setElapsed(0);
+    // A OS deixa de ser um cronometro solto e vira o Modo de Preparo: mise en
+    // place conferida, roteiro passo a passo e tempo real da bancada.
+    if (status !== 'ANDAMENTO') {
+      setStatus('ANDAMENTO');
+      setStartTime(Date.now());
+      setElapsed(0);
+    }
+    setModoAberto(true);
   };
 
-  const confirmarFuro = () => {
-    setModalFuroAberto(false);
-    setStatus('ANDAMENTO');
-    setStartTime(Date.now());
-    setElapsed(0);
-  };
-
-  const handleFinalizar = async () => {
+  const handleFinalizar = async (segundos?: number, segundosFogo?: number) => {
     setIsProduzindo(true);
-    
+
     // Calcula datas
     const agora = new Date();
     const dataFab = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').slice(0,5);
     
-    // Validade padrao de 3 dias para preparos (em um sistema real, viria do banco de dados)
-    const dValidade = new Date();
-    dValidade.setDate(dValidade.getDate() + 3);
-    const dataValidade = dValidade.toLocaleDateString('pt-BR');
+    const validadeHoras = Number(p.validade_horas || 0);
+    const dataValidade = validadeHoras > 0
+      ? new Date(agora.getTime() + validadeHoras * 3600e3).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+      : null;
     
     const osNum = Number(agora.toTimeString().slice(0, 5).replace(':', ''));
-    const tempoFormatado = formatTime(elapsed);
+    const tempoFormatado = formatTime(segundos ?? elapsed);
 
-    await onProduzir(p, qtdLotes);
-    
-    setDadosFinais({ dataFab, dataValidade, osNum, tempoFormatado });
-    setStatus('CONCLUIDA');
-    setIsProduzindo(false);
+    try {
+      await onProduzir(p, qtdLotes, segundos, segundosFogo);
+      setDadosFinais({ dataFab, dataValidade, osNum, tempoFormatado });
+      setModoAberto(false);
+      setStatus('CONCLUIDA');
+    } finally {
+      setIsProduzindo(false);
+    }
   };
 
   const handleImprimirEtiqueta = () => {
@@ -199,8 +220,8 @@ function OSCard({
               <span className="font-bold">{dadosFinais.dataFab}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500 font-medium">Validade (3 dias):</span>
-              <span className="font-bold text-red-500">{dadosFinais.dataValidade}</span>
+              <span className="text-gray-500 font-medium">Validade:</span>
+              <span className={`font-bold ${dadosFinais.dataValidade ? 'text-red-500' : 'text-gray-400'}`}>{dadosFinais.dataValidade ?? 'não controlada'}</span>
             </div>
           </div>
 
@@ -257,7 +278,7 @@ function OSCard({
           <div>
             <h3 className="text-lg font-black dark:text-gray-100">{p.nome}</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              1 lote = <b>{Number(p.rendimento_porcoes || 1)} {p.unidade_medida}</b>
+              1 lote = <b>{rendimentoDoLote(p)} {p.unidade_medida}</b>
             </p>
           </div>
           
@@ -309,7 +330,7 @@ function OSCard({
         {!podeProduzir && !semFicha && (
           <div className="mt-3 flex items-start gap-2 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 p-2 rounded-lg border border-red-100 dark:border-red-900/50">
             <AlertTriangle size={16} className="shrink-0 mt-0.5" /> 
-            <p>{tDynamic('Estoque digital divergente. A produção exigirá')} <b>{tDynamic('Furo de Estoque')}</b> (balanço negativo).</p>
+            <p>{tDynamic('Falta matéria-prima para esta OS. O MiseOn preserva o saldo e pede uma entrada ou ajuste auditável antes de iniciar.')}</p>
           </div>
         )}
 
@@ -320,23 +341,35 @@ function OSCard({
                 className="flex items-center justify-center px-4 py-3 rounded-xl font-bold text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                 <Printer size={16} />
               </button>
-              <button onClick={handleIniciar} 
+              <button onClick={handleIniciar} disabled={semFicha}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-sm text-white transition-all shadow-lg hover:scale-[1.02] ${
-                  podeProduzir || semFicha 
-                    ? 'bg-blue-600 shadow-blue-500/25' 
+                  semFicha ? 'cursor-not-allowed bg-gray-400 shadow-none' : podeProduzir
+                    ? 'bg-blue-600 shadow-blue-500/25'
                     : 'bg-red-600 shadow-red-500/25'
                 }`}>
-                <Play size={16} /> {podeProduzir || semFicha ? 'Iniciar Produção' : 'Forçar Produção (Furo)'}
+                <Play size={16} /> {semFicha ? 'Complete a ficha' : podeProduzir ? 'Iniciar Produção' : 'Estoque insuficiente'}
               </button>
             </>
           ) : (
-            <button onClick={handleFinalizar} disabled={isProduzindo}
+            <button onClick={() => setModoAberto(true)} disabled={isProduzindo}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-sm text-white bg-gradient-to-r from-orange-500 to-red-500 shadow-lg shadow-orange-500/25 hover:scale-[1.02] transition-all disabled:opacity-40 disabled:hover:scale-100 disabled:shadow-none">
-              {isProduzindo ? <><Loader2 size={16} className="animate-spin" /> Finalizando…</> : <><Check size={16} /> Finalizar & Etiquetar</>}
+              {isProduzindo ? <><Loader2 size={16} className="animate-spin" /> Finalizando…</> : <><Play size={16} /> {tDynamic('Retomar modo de preparo')}</>}
             </button>
           )}
         </div>
       </div>
+
+      {modoAberto && (
+        <ModoPreparo
+          preparo={p}
+          qtdLotes={qtdLotes}
+          rendimento={rendimento}
+          custo={custo}
+          itens={itens}
+          onConcluir={handleFinalizar}
+          onFechar={() => setModoAberto(false)}
+        />
+      )}
 
       {/* MODAL DE FURO DE ESTOQUE */}
       {modalFuroAberto && (
@@ -344,14 +377,14 @@ function OSCard({
           <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md p-6 shadow-2xl border border-red-500/30" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4 text-red-600 dark:text-red-500">
               <AlertTriangle size={32} />
-              <h3 className="font-black text-xl">{tDynamic('Risco de Furo de Estoque')}</h3>
+              <h3 className="font-black text-xl">{tDynamic('Estoque insuficiente')}</h3>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 leading-relaxed">
               {tDynamic('O sistema aponta que a cozinha não tem insumos brutos suficientes. Na vida real, isso significa que seu')} <b>estoque físico divergiu do digital</b> (ex: uma compra de emergência não foi dada a entrada).
             </p>
             
             <div className="bg-red-50 dark:bg-red-900/10 rounded-xl p-3 mb-5 border border-red-100 dark:border-red-900/30">
-              <p className="text-xs opacity-90 font-black uppercase text-red-800 dark:text-red-400 mb-2 tracking-wider">{tDynamic('Insumos que ficarão negativos:')}</p>
+              <p className="text-xs opacity-90 font-black uppercase text-red-800 dark:text-red-400 mb-2 tracking-wider">{tDynamic('Itens que precisam de reposição')}</p>
               <div className="space-y-2">
                 {itens.filter(i => !i.ok).map(i => {
                   const saldoApos = Number(i.ins?.quantidade_atual) - i.necessario;
@@ -367,18 +400,11 @@ function OSCard({
               </div>
             </div>
             
-            <p className="text-sm font-medium mb-6 text-gray-700 dark:text-gray-300">
-              Deseja <b>{tDynamic('Forçar a Produção')}</b>? A operação da cozinha não será travada, mas você ou o gerente precisarão realizar um balanço de correção amanhã.
-            </p>
+            <p className="text-sm font-medium mb-6 text-gray-700 dark:text-gray-300">{tDynamic('A OS não foi iniciada. Registre a compra emergencial ou faça um ajuste de inventário auditável antes de produzir.')}</p>
             
             <div className="flex gap-3">
-              <button onClick={() => setModalFuroAberto(false)} 
-                className="flex-1 py-3.5 font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                Cancelar
-              </button>
-              <button onClick={confirmarFuro} 
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 font-black text-white bg-red-600 rounded-xl hover:bg-red-700 shadow-lg shadow-red-600/30 transition-transform hover:scale-[1.02]">
-                <Flame size={18} /> Autorizar Furo
+              <button onClick={() => setModalFuroAberto(false)} className="flex-1 py-3.5 font-black text-white bg-red-600 rounded-xl hover:bg-red-700 shadow-lg shadow-red-600/30 transition-transform hover:scale-[1.02]">
+                Entendi, corrigir estoque
               </button>
             </div>
           </div>
@@ -392,7 +418,9 @@ function OSCard({
 // --- Main Component ---
 export default function KDSProducao() {
   const { tDynamic } = useI18n();
-  const { lojaId } = useOutletContext<CtxLoja>();
+  const { lojaId, segmento_negocio, modulos_ativos } = useOutletContext<CtxLoja>();
+  const isBuffet = segmento_negocio === 'SELF_SERVICE' || modulos_ativos?.balanca === true;
+  const [aba, setAba] = useState<'ordens' | 'fichas'>('ordens');
   const [insumos, setInsumos] = useState<Insumo[]>([]);
   const [loja, setLoja] = useState<Loja | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -431,74 +459,59 @@ export default function KDSProducao() {
   const pendentes = ordenados.filter(p => Number(p.quantidade_atual) < Number(p.estoque_minimo));
   const emDia = ordenados.filter(p => Number(p.quantidade_atual) >= Number(p.estoque_minimo));
 
-  const handleProduzir = async (p: Insumo, qtdLotes: number) => {
-    const rendimento = Number(p.rendimento_porcoes || 1) * qtdLotes;
-    const ficha: Ficha[] = ((p as any).fichas_preparos || []).map((f: any) => ({
-      insumo_id: f.insumo_id, quantidade: Number(f.quantidade),
-    }));
-    const itens = ficha.map(f => ({
-      ins: insumoById.get(f.insumo_id),
-      necessario: f.quantidade * qtdLotes
-    }));
-
+  const handleProduzir = async (p: Insumo, qtdLotes: number, segundos?: number, segundosFogo?: number) => {
     try {
-      // 1. Saída dos insumos brutos — NEGATIVA: a convenção do banco é
-      // "positivo entra, negativo sai", e só o sinal negativo é custeado pelo
-      // PEPS e consome os lotes reais (Sprint 1: era positiva, custava zero e
-      // não tocava nos lotes).
-      let custoProducao = 0;
-      for (const it of itens) {
-        const { data: mov, error } = await supabase.rpc('fn_movimentar_estoque', {
-          p_insumo_id: it.ins!.id,
-          p_tipo: 'SAIDA',
-          p_quantidade: -it.necessario,
-          p_motivo: `OS Manufatura — ${p.nome} (${qtdLotes} lotes)`,
-        });
-        if (error) throw error;
-        custoProducao += Number(mov?.custo_total ?? 0);
-      }
-
-      // 2. Entrada do preparo carregando o custo real dos insumos consumidos:
-      // o preparo vale o que custou produzir, e o valor se conserva até a
-      // venda — antes o lote do preparo era custeado pelo preço de catálogo.
-      const { error: errEntrada } = await supabase.rpc('fn_movimentar_estoque', {
-        p_insumo_id: p.id, p_tipo: 'ENTRADA', p_quantidade: rendimento,
-        p_custo_total: custoProducao > 0 ? custoProducao : null,
-        p_motivo: `OS Manufatura Concluída — ${qtdLotes} lotes`,
+      // A OS inteira e uma unica transacao no banco: consumo PEPS, entrada do
+      // resultado, custo e lote de producao caminham juntos ou nada muda.
+      const { error } = await supabase.rpc('fn_produzir_preparo', {
+        p_preparo_id: p.id,
+        p_multiplicador: qtdLotes,
+        p_segundos_totais: segundos ?? null,
+        p_segundos_fogo: segundosFogo ?? null,
       });
-      if (errEntrada) throw errEntrada;
+      if (error) throw error;
 
       await carregar();
     } catch (e) {
       console.error(e);
-      alert('Erro ao registrar a produção no banco de dados.');
+      alert(e instanceof Error ? e.message : 'Erro ao registrar a produção no banco de dados.');
+      throw e;
     }
   };
 
   return (
     <div className="print:hidden p-4 sm:p-6 pb-24 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-6xl mx-auto">
-      {/* Header */}
-      <div data-tour="tour-producao-header" className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 text-white mb-6 shadow-lg shadow-orange-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div data-tour="tour-producao-header" className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-orange-950 to-orange-700 rounded-3xl p-6 text-white mb-5 shadow-xl shadow-orange-500/15 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-orange-400/20 blur-3xl" />
         <div className="flex items-center gap-4">
-          <div className="bg-white/20 p-4 rounded-full backdrop-blur-sm"><ChefHat size={32} /></div>
+          <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-sm ring-1 ring-white/15"><ChefHat size={32} /></div>
           <div>
-            <h2 className="text-2xl font-black">{tDynamic('KDS de Produção Interna')}</h2>
-            <p className="text-orange-100 text-sm mt-1 font-medium max-w-lg">
-              Sistema inteligente de manufatura. Monitore o tempo de execução, baixe os insumos brutos e imprima a etiqueta de validade e rastreabilidade para o lote.
+            <p className="mb-1 text-xs font-black uppercase tracking-[0.18em] text-orange-300">{tDynamic('Central operacional')}</p>
+            <h2 className="text-2xl font-black">{tDynamic('Produção & Manipulações')}</h2>
+            <p className="text-orange-100/80 text-sm mt-1 font-medium max-w-2xl">
+              {tDynamic('Da matéria-prima ao item pronto: ficha, ordem de produção, tempo, custo PEPS, validade e etiqueta no mesmo fluxo.')}
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="mb-6 grid grid-cols-2 gap-2 rounded-2xl bg-gray-100 p-1.5 shadow-inner dark:bg-gray-800">
+        <button onClick={() => setAba('ordens')} className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black transition-all ${aba === 'ordens' ? 'bg-white text-orange-600 shadow-md dark:bg-gray-900 dark:text-orange-400' : 'text-gray-500'}`}><Flame size={17}/> {tDynamic('Ordens & bancada')}</button>
+        <button data-tour="tour-producao-aba-fichas" onClick={() => setAba('fichas')} className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black transition-all ${aba === 'fichas' ? 'bg-white text-orange-600 shadow-md dark:bg-gray-900 dark:text-orange-400' : 'text-gray-500'}`}><ClipboardList size={17}/> {tDynamic('Fichas & manipulações')}</button>
       </div>
 
       {carregando ? (
         <div className="flex items-center justify-center py-20">
           <MiseOnLoader status="Carregando ordens de produção..." rows={2} />
         </div>
+      ) : aba === 'fichas' ? (
+        <EstoquePreparos lojaId={lojaId} insumosTotais={insumos} onUpdate={carregar} isBuffet={isBuffet} somenteCadastro />
       ) : preparos.length === 0 ? (
         <div className="text-center py-20 text-gray-400 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
           <ClipboardList size={40} className="mx-auto mb-3 opacity-40" />
-          <p className="font-semibold">Nenhum preparo cadastrado ainda.</p>
-          <p className="text-sm mt-1">{tDynamic('Cadastre receitas base em')} <b>Estoque → Preparos</b> para gerar ordens de produção (OS).</p>
+          <p className="font-semibold">{tDynamic('Nenhum preparo cadastrado ainda.')}</p>
+          <p className="text-sm mt-1">{tDynamic('Crie uma ficha de manipulação para gerar ordens de produção.')}</p>
+          <button onClick={() => setAba('fichas')} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 text-sm font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600"><Plus size={16}/> {tDynamic('Criar primeira ficha')}</button>
         </div>
       ) : (
         <div className="space-y-8">

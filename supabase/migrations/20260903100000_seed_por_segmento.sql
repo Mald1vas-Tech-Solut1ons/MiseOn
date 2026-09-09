@@ -64,7 +64,7 @@ begin
     select * from (values
       ('Pao brioche','un','Padaria'), ('Blend bovino 180g','un','Carnes'),
       ('Queijo cheddar fatiado','fatias','Frios'), ('Bacon em fatias','g','Frios'),
-      ('Alface','folha','Hortifruti'), ('Tomate','fatias','Hortifruti'),
+      ('Alface','folha','Hortifruti'), ('Tomate','kg','Hortifruti'),
       ('Cebola','g','Hortifruti'), ('Molho da casa','ml','Ingrediente'),
       ('Batata congelada','g','Congelados'), ('Refrigerante lata 350ml','un','Bebidas')
     ) t where v_seg in ('HAMBURGUERIA', 'DARK_KITCHEN')
@@ -125,7 +125,7 @@ begin
       ('X-Burger','Pao brioche',1), ('X-Burger','Blend bovino 180g',1),
       ('X-Burger','Queijo cheddar fatiado',1),
       ('X-Salada','Pao brioche',1), ('X-Salada','Blend bovino 180g',1),
-      ('X-Salada','Queijo cheddar fatiado',1), ('X-Salada','Alface',1), ('X-Salada','Tomate',2),
+      ('X-Salada','Queijo cheddar fatiado',1), ('X-Salada','Alface',1), ('X-Salada','Tomate',0.040),
       ('X-Bacon','Pao brioche',1), ('X-Bacon','Blend bovino 180g',1),
       ('X-Bacon','Queijo cheddar fatiado',1), ('X-Bacon','Bacon em fatias',40),
       ('Batata frita','Batata congelada',150),

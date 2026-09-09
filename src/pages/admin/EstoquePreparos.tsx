@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Pencil, Trash2, ChefHat, Flame, X, CheckCircle2, Clock, AlertTriangle, Timer, Copy } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChefHat, Flame, X, CheckCircle2, Clock, AlertTriangle, Timer, Copy, ArrowRight, PackageOpen, Sparkles, ArrowUp, ArrowDown, ListOrdered } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Insumo, ProducaoPreparo, fmt } from '../../types';
+import { Insumo, PassoPreparo, ProducaoPreparo, fmt } from '../../types';
+import { UNIDADES } from '../../lib/unidades';
+import SeletorInsumo from '../../components/producao/SeletorInsumo';
+import { podeEntrarNaFicha } from '../../lib/fichaTecnica';
 
 import { useI18n } from '../../contexts/I18nContext';
 /* ── Validade: status de um lote produzido ── */
@@ -26,6 +29,22 @@ function statusValidade(vence_em?: string | null): { label: string; classe: stri
 const dataHoraBr = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+/**
+ * Roteiro do Modo de Preparo vindo do banco. É jsonb livre: qualquer coisa
+ * fora do formato esperado vira lista vazia em vez de quebrar o editor.
+ */
+const lerPassos = (p: Insumo): { texto: string; minutos: string; fogo: boolean }[] => {
+  const bruto = (p as { modo_preparo?: unknown }).modo_preparo;
+  if (!Array.isArray(bruto)) return [];
+  return bruto
+    .filter((item): item is PassoPreparo => !!item && typeof (item as PassoPreparo).texto === 'string')
+    .map(item => ({
+      texto: item.texto,
+      minutos: Number(item.minutos) > 0 ? String(item.minutos) : '',
+      fogo: item.fogo === true,
+    }));
+};
+
 /** Retorno de fn_produzir_preparo — o custo real apurado na produção. */
 interface ResultadoProducao {
   preparo: string;
@@ -36,7 +55,7 @@ interface ResultadoProducao {
   ingredientes: { insumo: string; quantidade: number; custo: number }[];
 }
 
-export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuffet = false }: { lojaId: string; insumosTotais: Insumo[]; onUpdate: () => void; isBuffet?: boolean }) {
+export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuffet = false, somenteCadastro = false }: { lojaId: string; insumosTotais: Insumo[]; onUpdate: () => void; isBuffet?: boolean; somenteCadastro?: boolean }) {
   const { tDynamic } = useI18n();
   const [editando, setEditando] = useState<Insumo | 'novo' | null>(null);
   const [nome, setNome] = useState('');
@@ -47,8 +66,11 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
   const [validadeUnidade, setValidadeUnidade] = useState<'horas' | 'dias' | 'semanas' | 'meses'>('dias');
   const [producoes, setProducoes] = useState<ProducaoPreparo[]>([]);
   const [ficha, setFicha] = useState<{ insumo_id: string; quantidade: string }[]>([]);
+  const [passos, setPassos] = useState<{ texto: string; minutos: string; fogo: boolean }[]>([]);
   
   const [salvando, setSalvando] = useState(false);
+  const [sugerindo, setSugerindo] = useState(false);
+  const [avisoIA, setAvisoIA] = useState<string | null>(null);
 
   // Gamificação da Produção
   const [produzindo, setProduzindo] = useState<Insumo | null>(null);
@@ -82,7 +104,9 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
   };
 
   const preparos = insumosTotais.filter(i => i.is_preparo && i.ativo);
-  const insumosBrutos = insumosTotais.filter(i => !i.is_preparo && i.ativo);
+  // Material de limpeza, higiene, EPI e manutencao nunca sao ingrediente:
+  // a taxonomia de tipos_item ja diz isso, a tela so passou a respeitar.
+  const insumosBrutos = insumosTotais.filter(i => !i.is_preparo && i.ativo && podeEntrarNaFicha(i));
 
   const carregarProducoes = useCallback(async () => {
     const { data } = await supabase
@@ -95,8 +119,8 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
   }, [lojaId]);
 
   useEffect(() => {
-    carregarProducoes();
-  }, [carregarProducoes]);
+    if (!somenteCadastro) carregarProducoes();
+  }, [carregarProducoes, somenteCadastro]);
 
   const descartarLote = async (lote: ProducaoPreparo) => {
     const preparo = insumosTotais.find(i => i.id === lote.preparo_id);
@@ -143,6 +167,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
         insumo_id: f.insumo_id,
         quantidade: String(f.quantidade)
       })) || []);
+      setPassos(lerPassos(p));
     } else {
       setEditando('novo');
       setNome('');
@@ -152,11 +177,24 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       setValidadeQtd('');
       setValidadeUnidade('dias');
       setFicha([]);
+      setPassos([]);
     }
   };
 
   const salvar = async () => {
-    if (!nome.trim() || ficha.length === 0) return alert('Preencha o nome e adicione ingredientes.');
+    const rendimento = Number(rendimentoPorcoes);
+    const fichaValida = ficha.filter(f => f.insumo_id && Number(f.quantidade) > 0);
+    if (!nome.trim()) return alert('Dê um nome ao resultado da manipulação.');
+    if (!(rendimento > 0)) return alert('Informe quanto um lote produz.');
+    if (fichaValida.length === 0) return alert('Adicione ao menos uma matéria-prima com quantidade válida.');
+    if (new Set(fichaValida.map(f => f.insumo_id)).size !== fichaValida.length) return alert('A mesma matéria-prima aparece mais de uma vez. Agrupe a quantidade em uma única linha.');
+    const passosValidos: PassoPreparo[] = passos
+      .filter(p => p.texto.trim())
+      .map(p => ({
+        texto: p.texto.trim(),
+        minutos: Number(p.minutos) > 0 ? Number(p.minutos) : null,
+        fogo: p.fogo === true,
+      }));
     setSalvando(true);
     try {
       let preparoId = editando !== 'novo' ? editando?.id : null;
@@ -166,36 +204,39 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
         nome,
         is_preparo: true,
         unidade_medida: unidade,
-        rendimento_porcoes: Number(rendimentoPorcoes || 1),
+        rendimento_porcoes: rendimento,
         rendimento_padrao_kg: rendimentoPadraoKg !== '' ? Number(rendimentoPadraoKg) : null,
         validade_horas: calcularHorasValidade(),
+        modo_preparo: passosValidos,
         ativo: true
       };
 
       if (preparoId) {
-        await supabase.from('insumos').update(payload).eq('id', preparoId);
-        await supabase.from('fichas_preparos').delete().eq('preparo_id', preparoId);
+        const { error: erroPreparo } = await supabase.from('insumos').update(payload).eq('id', preparoId);
+        if (erroPreparo) throw erroPreparo;
+        const { error: erroLimparFicha } = await supabase.from('fichas_preparos').delete().eq('preparo_id', preparoId);
+        if (erroLimparFicha) throw erroLimparFicha;
       } else {
-        const { data } = await supabase.from('insumos').insert({ ...payload, quantidade_atual: 0, estoque_minimo: 0, preco_embalagem: 0, qtd_embalagem: 1 }).select('id').single();
+        const { data, error: erroPreparo } = await supabase.from('insumos').insert({ ...payload, quantidade_atual: 0, estoque_minimo: 0, preco_embalagem: 0, qtd_embalagem: 1 }).select('id').single();
+        if (erroPreparo) throw erroPreparo;
         preparoId = data?.id;
       }
 
       if (preparoId) {
-        const fichaValida = ficha.filter(f => f.insumo_id && Number(f.quantidade) > 0).map(f => ({
+        const linhas = fichaValida.map(f => ({
           loja_id: lojaId,
           preparo_id: preparoId,
           insumo_id: f.insumo_id,
           quantidade: Number(f.quantidade)
         }));
-        if (fichaValida.length > 0) {
-          await supabase.from('fichas_preparos').insert(fichaValida);
-        }
+        const { error: erroFicha } = await supabase.from('fichas_preparos').insert(linhas);
+        if (erroFicha) throw erroFicha;
       }
       setEditando(null);
       onUpdate();
     } catch (e) {
       console.error(e);
-      alert('Erro ao salvar preparo.');
+      alert(e instanceof Error ? e.message : 'Erro ao salvar preparo.');
     }
     setSalvando(false);
   };
@@ -213,6 +254,55 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       insumo_id: f.insumo_id,
       quantidade: String(f.quantidade)
     })) || []);
+    setPassos(lerPassos(p));
+  };
+
+  const sugerirComIA = async () => {
+    const primeiraLinha = ficha.find(f => f.insumo_id);
+    if (!primeiraLinha) return alert('Escolha primeiro a matéria-prima que será manipulada.');
+    setSugerindo(true);
+    setAvisoIA(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('preparo-sugerir', {
+        body: { loja_id: lojaId, insumo_id: primeiraLinha.insumo_id, objetivo: nome.trim() || null },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      if (data.nome_resultado) setNome(String(data.nome_resultado));
+      if (UNIDADES.some(u => u.codigo === data.unidade_resultado)) setUnidade(data.unidade_resultado);
+      if (Number(data.quantidade_resultado) > 0) setRendimentoPorcoes(String(data.quantidade_resultado));
+      if (Number(data.quantidade_consumida) > 0) {
+        let aplicou = false;
+        setFicha(atual => atual.map(f => {
+          if (!aplicou && f.insumo_id === primeiraLinha.insumo_id) {
+            aplicou = true;
+            return { ...f, quantidade: String(data.quantidade_consumida) };
+          }
+          return f;
+        }));
+      }
+      if (Array.isArray(data.passos) && data.passos.length > 0) {
+        setPassos(data.passos
+          .filter((passo: { texto?: string }) => passo?.texto?.trim())
+          .map((passo: { texto: string; minutos?: number | null; fogo?: boolean }) => ({
+            texto: passo.texto.trim(),
+            minutos: Number(passo.minutos) > 0 ? String(passo.minutos) : '',
+            fogo: passo.fogo === true,
+          })));
+      }
+      if (Number(data.validade_horas) > 0) {
+        const validade = extrairValidadeDinamica(Number(data.validade_horas));
+        setValidadeQtd(validade.qtd);
+        setValidadeUnidade(validade.u);
+      }
+      setAvisoIA(data.justificativa || 'Sugestão aplicada como rascunho. Confira o rendimento real antes de salvar.');
+    } catch (e) {
+      console.error(e);
+      setAvisoIA(e instanceof Error ? e.message : 'Não foi possível gerar a sugestão.');
+    } finally {
+      setSugerindo(false);
+    }
   };
 
   const excluir = async (p: Insumo) => {
@@ -265,27 +355,29 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
       
-      {/* HEADER GAMIFICADO */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 text-white mb-6 shadow-lg shadow-orange-500/20">
+      <div className="relative mb-6 overflow-hidden rounded-3xl border border-orange-200/60 bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 p-6 text-white shadow-xl shadow-orange-500/15 dark:border-orange-900/40">
+        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
         <div className="flex items-center gap-4">
-           <div className="bg-white/20 p-4 rounded-full backdrop-blur-sm">
+           <div className="rounded-2xl bg-white/15 p-4 shadow-inner backdrop-blur-sm">
              <ChefHat size={32} />
            </div>
            <div>
-             <h2 className="text-2xl font-black">Cozinha & Preparos</h2>
-             <p className="text-orange-100 text-sm mt-1 font-medium">{tDynamic('Transforme insumos brutos em receitas base, caldos, molhos e massas.')}</p>
+             <p className="mb-1 flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.18em] text-orange-100"><Sparkles size={13} /> {tDynamic('Engenharia de produção')}</p>
+             <h2 className="text-2xl font-black">{tDynamic('Fichas & Manipulações')}</h2>
+             <p className="mt-1 max-w-2xl text-sm font-medium text-orange-100">{tDynamic('Defina o que sai do estoque, como é transformado e o que a cozinha produz. Nenhum corte ou rendimento é presumido pelo sistema.')}</p>
            </div>
         </div>
       </div>
 
       {!editando && (
         <>
-          <button onClick={() => iniciarEdicao()} className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-900/50 py-3 font-bold transition-colors">
-            <Plus size={18} /> Criar Nova Receita Base
+          <button onClick={() => iniciarEdicao()} className="group mb-6 flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50/70 py-4 font-black text-orange-700 transition-all hover:-translate-y-0.5 hover:border-orange-500 hover:bg-orange-100 hover:shadow-lg hover:shadow-orange-500/10 dark:border-orange-900/60 dark:bg-orange-950/20 dark:text-orange-400 dark:hover:bg-orange-900/30">
+            <span className="rounded-xl bg-orange-500 p-2 text-white transition-transform group-hover:rotate-6"><Plus size={18} /></span>
+            {tDynamic('Criar nova manipulação ou receita base')}
           </button>
 
           <div className="space-y-4">
-            {preparos.length === 0 && <p className="text-center text-gray-400 py-10">Nenhum preparo cadastrado ainda.</p>}
+            {preparos.length === 0 && <div className="rounded-3xl border-2 border-dashed border-gray-200 bg-white px-6 py-12 text-center dark:border-gray-800 dark:bg-gray-900"><PackageOpen size={38} className="mx-auto mb-3 text-orange-400" /><p className="font-black text-gray-700 dark:text-gray-200">{tDynamic('Sua bancada de produção está vazia')}</p><p className="mx-auto mt-1 max-w-md text-sm text-gray-400">{tDynamic('Exemplo: 1 kg de tomate entra, a equipe higieniza e fatia, e o rendimento real sai em porções, rodelas ou fatias.')}</p></div>}
             {preparos.map(p => {
                // Calculate custo da receita base
                const fichaP = (p as any).fichas_preparos || [];
@@ -329,9 +421,9 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                        </div>
                      </div>
                      <div className="flex items-center gap-2">
-                       <button onClick={() => setProduzindo(p)} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md shadow-orange-500/20 transition-all hover:scale-105">
+                       {!somenteCadastro && <button onClick={() => setProduzindo(p)} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md shadow-orange-500/20 transition-all hover:scale-105">
                          <Flame size={16} /> Produzir
-                       </button>
+                       </button>}
                        <div className="flex flex-col gap-1 border-l pl-2 dark:border-gray-800">
                          <button onClick={() => iniciarEdicao(p)} title="Editar receita" className="p-1.5 text-gray-400 hover:text-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"><Pencil size={15} /></button>
                          <button onClick={() => duplicarPreparo(p)} title="Duplicar receita (clonar)" className="p-1.5 text-gray-400 hover:text-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20"><Copy size={15} /></button>
@@ -341,7 +433,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                    </div>
 
                    {/* ── Lotes produzidos (ordens de serviço) ── */}
-                   {lotes.length > 0 && (
+                   {!somenteCadastro && lotes.length > 0 && (
                      <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">
                        <p className="mb-2 flex items-center gap-1.5 text-xs opacity-90 font-black uppercase tracking-wider text-gray-400"><Clock size={11} /> Lotes em uso</p>
                        <div className="space-y-1.5">
@@ -386,30 +478,29 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
         const custoPorUnidade = custoFichaTotal / rend;
 
         return (
-          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-orange-200 dark:border-orange-900/30 relative">
+          <div className="relative overflow-hidden rounded-3xl border border-orange-200 bg-white shadow-xl shadow-orange-500/10 dark:border-orange-900/40 dark:bg-gray-900">
+            <div className="border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-5 dark:border-orange-900/30 dark:from-orange-950/30 dark:to-gray-900">
             <button onClick={() => setEditando(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={20} /></button>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-500">{tDynamic('Origem → processo → resultado')}</p>
+            <h3 className="mt-1 text-xl font-black text-gray-900 dark:text-gray-100">{editando === 'novo' ? 'Nova ficha de manipulação' : 'Editar ficha de produção'}</h3>
+            <p className="mt-1 text-sm text-gray-500">{tDynamic('Você define o rendimento. O MiseOn conserva custo e rastreabilidade entre a matéria-prima e o item produzido.')}</p>
+            </div>
             
-            <h3 className="font-black text-xl mb-4 text-orange-600 dark:text-orange-500">{editando === 'novo' ? 'Nova Receita Base' : 'Editar Receita'}</h3>
-            
-            <div className="space-y-4">
-              <div>
+            <div className="space-y-5 p-6">
+              <section className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/10">
+                <div className="mb-3 flex items-center gap-2"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-xs font-black text-white">1</span><div><h4 className="font-black text-emerald-900 dark:text-emerald-300">{tDynamic('O que entra pronto no estoque?')}</h4><p className="text-xs text-emerald-700/75 dark:text-emerald-500/80">{tDynamic('Nome e rendimento final de um lote.')}</p></div></div>
                 <label className="text-xs font-bold text-gray-600 dark:text-gray-400">{tDynamic('Nome do Preparo')}</label>
-                <input value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Molho de Tomate / Queijo Muçarela Ralado" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500" />
-              </div>
+                <input value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Tomate higienizado e fatiado" className="mt-1 w-full rounded-xl border border-emerald-200 bg-white p-3 font-bold outline-none focus:border-emerald-500 dark:border-emerald-900/50 dark:bg-gray-950 dark:text-gray-100" />
 
-              <div className={`grid grid-cols-2 ${isBuffet ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-3`}>
+              <div className={`mt-3 grid grid-cols-2 ${isBuffet ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-3`}>
                 <div>
-                  <label className="text-xs opacity-90 uppercase font-bold text-gray-500 dark:text-gray-400">1 Lote Rende Qtos?</label>
-                  <input value={rendimentoPorcoes} onChange={e => setRendimentoPorcoes(e.target.value)} type="number" placeholder="ex: 10" className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold text-lg" />
+                  <label className="text-xs opacity-90 uppercase font-bold text-gray-500 dark:text-gray-400">{tDynamic('Quantidade produzida')}</label>
+                  <input value={rendimentoPorcoes} onChange={e => setRendimentoPorcoes(e.target.value)} type="number" min="0" step="any" placeholder="ex: 20" className="mt-1 w-full p-2.5 rounded-xl border border-emerald-200 bg-white dark:border-emerald-900/50 dark:bg-gray-950 dark:text-gray-100 outline-none focus:border-emerald-500 text-center font-bold text-lg" />
                 </div>
                 <div>
-                  <label className="text-xs opacity-90 uppercase font-bold text-gray-500 dark:text-gray-400">Unidade</label>
-                  <select value={unidade} onChange={e => setUnidade(e.target.value)} className="mt-1 w-full p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 outline-none focus:border-orange-500 text-center font-bold">
-                    <option value="un">Un (Porção)</option>
-                    <option value="L">Litros (L)</option>
-                    <option value="ml">ml</option>
-                    <option value="kg">Kg</option>
-                    <option value="g">Gramas (g)</option>
+                  <label className="text-xs opacity-90 uppercase font-bold text-gray-500 dark:text-gray-400">{tDynamic('Unidade do resultado')}</label>
+                  <select value={unidade} onChange={e => setUnidade(e.target.value)} className="mt-1 w-full p-2.5 rounded-xl border border-emerald-200 bg-white dark:border-emerald-900/50 dark:bg-gray-950 dark:text-gray-100 outline-none focus:border-emerald-500 text-center font-bold">
+                    {UNIDADES.filter(u => u.grandeza !== 'agrupador').map(u => <option key={u.codigo} value={u.codigo}>{u.rotulo}</option>)}
                   </select>
                 </div>
                 {isBuffet && (
@@ -419,8 +510,44 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                   </div>
                 )}
               </div>
+              </section>
 
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-900/10">
+              <div className="flex items-center justify-center gap-3 text-gray-300 dark:text-gray-700"><div className="h-px flex-1 bg-current"/><ArrowRight size={20} className="text-orange-400"/><div className="h-px flex-1 bg-current"/></div>
+
+              <section className="rounded-2xl border border-orange-200 bg-orange-50/50 p-4 dark:border-orange-900/40 dark:bg-orange-950/10">
+                <div className="mb-3 flex items-center gap-2"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-500 text-xs font-black text-white">2</span><div><h4 className="font-black text-orange-900 dark:text-orange-300">{tDynamic('O que será consumido?')}</h4><p className="text-xs text-orange-700/75 dark:text-orange-500/80">{tDynamic('Matérias-primas e quantidades reais para produzir um lote.')}</p></div></div>
+                <div className="space-y-2">
+                  {ficha.map((f, i) => {
+                    const selecionado = insumosBrutos.find(ib => ib.id === f.insumo_id);
+                    return <div key={i} className="rounded-xl border border-orange-100 bg-white p-3 shadow-sm dark:border-orange-900/40 dark:bg-gray-950">
+                      <div className="flex items-center gap-2">
+                        <SeletorInsumo
+                          insumos={insumosBrutos}
+                          valor={f.insumo_id}
+                          jaUsados={ficha.map(l => l.insumo_id)}
+                          onChange={id => { const n = [...ficha]; n[i].insumo_id = id; setFicha(n); }}
+                        />
+                        <div className="flex w-36 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"><input value={f.quantidade} onChange={e => { const n = [...ficha]; n[i].quantidade = e.target.value; setFicha(n); }} type="number" min="0" step="any" placeholder="Qtd" className="min-w-0 flex-1 bg-transparent p-2 text-center text-sm font-bold dark:text-gray-100"/><span className="flex items-center bg-gray-100 px-2 text-xs font-black text-gray-500 dark:bg-gray-800">{selecionado?.unidade_medida ?? '—'}</span></div>
+                        <button onClick={() => { const n = [...ficha]; n.splice(i, 1); setFicha(n); }} className="rounded-lg bg-red-50 p-2 text-red-400 hover:text-red-600 dark:bg-red-900/20"><Trash2 size={16}/></button>
+                      </div>
+                      {selecionado && <p className="mt-2 text-xs text-gray-400">Disponível: <b>{Number(selecionado.quantidade_atual)} {selecionado.unidade_medida}</b></p>}
+                    </div>;
+                  })}
+                  <button onClick={() => setFicha([...ficha, { insumo_id: '', quantidade: '' }])} className="mt-2 flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400"><Plus size={14}/> {tDynamic('Adicionar matéria-prima')}</button>
+                </div>
+                <div className="mt-4 border-t border-orange-200/70 pt-4 dark:border-orange-900/40">
+                  <button type="button" onClick={sugerirComIA} disabled={sugerindo} className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50 dark:bg-white dark:text-slate-950">
+                    <Sparkles size={16} className={sugerindo ? 'animate-pulse' : 'text-orange-400'} /> {sugerindo ? 'Consultando chef inteligente…' : 'Sugerir transformação com IA'}
+                  </button>
+                  <p className="mt-2 text-center text-xs text-gray-400">{tDynamic('A IA cria apenas um rascunho. Você confirma rendimento, perda e validade.')}</p>
+                  {avisoIA && <p className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs font-medium leading-relaxed text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300">{avisoIA}</p>}
+                </div>
+              </section>
+
+              <div className="flex items-center justify-center gap-3 text-gray-300 dark:text-gray-700"><div className="h-px flex-1 bg-current"/><ArrowRight size={20} className="text-amber-400"/><div className="h-px flex-1 bg-current"/></div>
+
+              <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-900/10">
+                <div className="mb-3 flex items-center gap-2"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-xs font-black text-white">3</span><div><h4 className="font-black text-amber-900 dark:text-amber-300">{tDynamic('Como o lote será controlado?')}</h4><p className="text-xs text-amber-700/75 dark:text-amber-500/80">{tDynamic('Validade é definida pela operação, nunca pelo sistema.')}</p></div></div>
                 <label className="flex items-center gap-1.5 text-xs opacity-90 uppercase font-bold text-amber-700 dark:text-amber-500"><Timer size={13} /> {tDynamic('Validade após produção')}</label>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1">
@@ -445,27 +572,70 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                   </div>
                 </div>
                 <p className="mt-2 text-xs opacity-95 text-amber-700/80 dark:text-amber-500/80">{tDynamic('Cada produção vira uma ordem de serviço com data de vencimento. Deixe em branco para não controlar validade.')}</p>
-              </div>
+              </section>
 
-              <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-                <h4 className="font-bold text-sm mb-3 dark:text-gray-200">{tDynamic('Ficha Técnica (Ingredientes que compõem 1 Lote)')}</h4>
-                
+              <div className="flex items-center justify-center gap-3 text-gray-300 dark:text-gray-700"><div className="h-px flex-1 bg-current"/><ArrowRight size={20} className="text-blue-400"/><div className="h-px flex-1 bg-current"/></div>
+
+              <section className="rounded-2xl border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900/40 dark:bg-blue-950/10">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-xs font-black text-white">4</span>
+                  <div>
+                    <h4 className="flex items-center gap-1.5 font-black text-blue-900 dark:text-blue-300"><ListOrdered size={15} /> {tDynamic('Modo de preparo')}</h4>
+                    <p className="text-xs text-blue-700/75 dark:text-blue-500/80">{tDynamic('O roteiro que a cozinha vai seguir passo a passo, com tempo cronometrado.')}</p>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  {ficha.map((f, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <select value={f.insumo_id} onChange={e => { const n = [...ficha]; n[i].insumo_id = e.target.value; setFicha(n); }} className="flex-1 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-sm">
-                        <option value="">{tDynamic('Selecione um Insumo Bruto...')}</option>
-                        {insumosBrutos.map(ib => <option key={ib.id} value={ib.id}>{ib.nome} ({ib.unidade_medida})</option>)}
-                      </select>
-                      <input value={f.quantidade} onChange={e => { const n = [...ficha]; n[i].quantidade = e.target.value; setFicha(n); }} type="number" placeholder="Qtd" className="w-24 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent dark:text-gray-100 text-sm text-center" />
-                      <button onClick={() => { const n = [...ficha]; n.splice(i, 1); setFicha(n); }} className="p-2 text-red-400 hover:text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg"><Trash2 size={16}/></button>
+                  {passos.map((passo, i) => (
+                    <div key={i} className="rounded-xl border border-blue-100 bg-white p-3 shadow-sm dark:border-blue-900/40 dark:bg-gray-950">
+                      <div className="flex items-start gap-2">
+                        <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-black text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">{i + 1}</span>
+                        <textarea
+                          value={passo.texto}
+                          onChange={e => { const n = [...passos]; n[i].texto = e.target.value; setPassos(n); }}
+                          rows={2}
+                          placeholder={tDynamic('ex: Higienizar em solução clorada e escorrer bem')}
+                          className="min-w-0 flex-1 resize-y rounded-lg border border-gray-200 bg-transparent p-2 text-sm font-medium outline-none focus:border-blue-500 dark:border-gray-800 dark:text-gray-100"
+                        />
+                        <div className="flex shrink-0 flex-col gap-1">
+                          <button type="button" onClick={() => { if (i === 0) return; const n = [...passos]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; setPassos(n); }} disabled={i === 0} title={tDynamic('Subir')} className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-30 dark:hover:bg-blue-900/20"><ArrowUp size={14} /></button>
+                          <button type="button" onClick={() => { if (i === passos.length - 1) return; const n = [...passos]; [n[i + 1], n[i]] = [n[i], n[i + 1]]; setPassos(n); }} disabled={i === passos.length - 1} title={tDynamic('Descer')} className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-30 dark:hover:bg-blue-900/20"><ArrowDown size={14} /></button>
+                          <button type="button" onClick={() => { const n = [...passos]; n.splice(i, 1); setPassos(n); }} title={tDynamic('Remover etapa')} className="rounded-lg bg-red-50 p-1.5 text-red-400 hover:text-red-600 dark:bg-red-900/20"><Trash2 size={14} /></button>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2 pl-9">
+                        <Timer size={13} className="text-blue-400" />
+                        <input
+                          value={passo.minutos}
+                          onChange={e => { const n = [...passos]; n[i].minutos = e.target.value; setPassos(n); }}
+                          type="number" min="0" step="any" placeholder="—"
+                          className="w-20 rounded-lg border border-gray-200 bg-transparent p-1.5 text-center text-sm font-bold outline-none focus:border-blue-500 dark:border-gray-800 dark:text-gray-100"
+                        />
+                        <span className="text-xs font-semibold text-gray-400">{tDynamic('minutos')}</span>
+                        <button
+                          type="button"
+                          onClick={() => { const n = [...passos]; n[i].fogo = !n[i].fogo; setPassos(n); }}
+                          title={tDynamic('Marque quando a etapa fica com chama ou forno ligado — é o que vira custo de gás.')}
+                          className={`ml-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition-all ${
+                            passo.fogo
+                              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/25'
+                              : 'bg-gray-100 text-gray-400 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          <Flame size={13} /> {tDynamic('Fogo/forno')}
+                        </button>
+                      </div>
                     </div>
                   ))}
-                  <button onClick={() => setFicha([...ficha, { insumo_id: '', quantidade: '' }])} className="text-orange-600 dark:text-orange-500 font-bold text-xs flex items-center gap-1 mt-2">
-                    <Plus size={14}/> Adicionar Ingrediente
-                  </button>
+                  <button type="button" onClick={() => setPassos([...passos, { texto: '', minutos: '', fogo: false }])} className="mt-2 flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400"><Plus size={14}/> {tDynamic('Adicionar etapa')}</button>
                 </div>
-              </div>
+
+                {passos.length === 0 && (
+                  <p className="mt-3 rounded-xl border border-dashed border-blue-200 p-3 text-center text-xs font-medium text-blue-700/70 dark:border-blue-900/40 dark:text-blue-400/70">
+                    {tDynamic('Sem roteiro, a OS roda só com a conferência da mise en place. Com roteiro, a equipe executa em tela cheia, um passo por vez.')}
+                  </p>
+                )}
+              </section>
 
               {/* PAINEL DE CUSTO ESTIMADO EM TEMPO REAL */}
               {custoFichaTotal > 0 && (
@@ -483,8 +653,8 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                 </div>
               )}
 
-              <button onClick={salvar} disabled={salvando} className="w-full mt-4 bg-orange-600 text-white font-bold rounded-xl py-3 shadow-md hover:bg-orange-700 disabled:opacity-50">
-                {salvando ? 'Salvando...' : 'Salvar Receita'}
+              <button onClick={salvar} disabled={salvando} className="w-full mt-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-black rounded-2xl py-4 shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 transition disabled:opacity-50">
+                {salvando ? 'Salvando...' : 'Salvar ficha de produção'}
               </button>
             </div>
           </div>

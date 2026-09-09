@@ -668,8 +668,25 @@ export interface Insumo {
   pessoas_servidas?: number;
   validade_horas?: number | null; // preparos: horas até vencer após produção (null = não controla)
   rendimento_padrao_kg?: number | null;
+  /**
+   * Roteiro do Modo de Preparo: as etapas que a cozinha executa entre a saída
+   * da matéria-prima e a entrada do resultado. Vazio = a OS roda só com o
+   * mise en place; o sistema nunca inventa passo de preparo.
+   */
+  modo_preparo?: PassoPreparo[] | null;
   fichas_preparo?: FichaPreparo[];
   criado_em?: string;
+}
+
+/** Uma etapa do Modo de Preparo. `minutos` nulo = etapa sem tempo cronometrado. */
+export interface PassoPreparo {
+  texto: string;
+  minutos?: number | null;
+  /**
+   * Etapa com chama/forno ligado. Só o tempo dessas etapas vira custo de gás —
+   * higienizar e embalar não queimam botijão.
+   */
+  fogo?: boolean;
 }
 
 /** NUT-04. Origem do dado nutricional — sustenta o nível do selo (§4 do PLANO-NUTRICIONAL). */
