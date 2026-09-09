@@ -7,6 +7,24 @@ enabled = true
 verify_jwt = false
 entrypoint = "./functions/ifood-webhook/index.ts"
 
+# A Efí envia apenas o token da notificação, sem JWT Supabase. A função busca
+# o payload autenticado na API da Efí antes de aplicar qualquer efeito.
+[functions.efi-assinatura-webhook]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/efi-assinatura-webhook/index.ts"
+
+# Cancelamento exige JWT e ainda valida papel admin + loja no servidor.
+[functions.saas-cancelar]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/saas-cancelar/index.ts"
+
+[functions.saas-assinar]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/saas-assinar/index.ts"
+
 # A autenticação do lojista é feita dentro da função (fn_sou_admin) → pode exigir JWT.
 [functions.ifood-auth]
 enabled = true

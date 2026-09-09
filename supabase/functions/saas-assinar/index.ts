@@ -234,7 +234,10 @@ Deno.serve(async (req) => {
       }
       statusPago = status;
       valorCobrado = VALOR_MENSAL / 100;
-      chargeIdReal = `sub-${subscriptionId}-${Date.now()}`;
+      // A resposta atual da Efí informa o charge_id da primeira transação.
+      // Preservá-lo é essencial: o webhook usa esse identificador e não pode
+      // interpretar a primeira confirmação como uma segunda mensalidade.
+      chargeIdReal = String(payData?.data?.charge?.id ?? payData?.data?.charge_id ?? `sub-${subscriptionId}-${Date.now()}`);
     }
 
     // Atualiza o banco de dados da loja.

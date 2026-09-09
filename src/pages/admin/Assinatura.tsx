@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { CreditCard, CheckCircle, AlertCircle, Calendar, Lock, ShieldCheck, QrCode, Copy, Sparkles, Clock, FileText, Download, Loader2 } from 'lucide-react';
+import { CreditCard, CheckCircle, AlertCircle, Calendar, Lock, ShieldCheck, QrCode, Copy, Sparkles, Clock, FileText, Download, Loader2, XCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { avaliarAssinatura } from '../../lib/assinatura';
 import { SAAS_PRICING } from '../../lib/efiInfo';
@@ -13,7 +13,7 @@ import { useI18n } from '../../contexts/I18nContext';
 export default function Assinatura() {
   const { idioma, tDynamic } = useI18n();
   const { lojaId, lojaNome } = useOutletContext<CtxLoja>();
-  const [, setStatus] = useState<string>('trial');
+  const [status, setStatus] = useState<string>('trial');
   const [emDia, setEmDia] = useState<boolean>(true);
   const [vencimento, setVencimento] = useState<string | null>(null);
   const [diasRestantesTrial, setDiasRestantesTrial] = useState<number>(30);
@@ -40,13 +40,14 @@ export default function Assinatura() {
   const txidPix = useRef<string | null>(null);
   const [copiaCola, setCopiaCola] = useState('');
   const [copiado, setCopiado] = useState(false);
+  const [cancelando, setCancelando] = useState(false);
 
   // Notas fiscais da assinatura: o link do e-mail carrega um token próprio,
   // mas o lojista logado sempre pode reabrir por aqui — o endpoint aceita o
   // JWT do admin da loja como alternativa ao token (Sprint 15A).
   const [faturas, setFaturas] = useState<Array<{
     id: string; created_at: string; ciclo: string | null; valor_cobrado: number;
-    nfse_status: string; nfse_numero: string | null;
+    nfse_status: string; nfse_numero: string | null; efi_subscription_id: string | null;
   }>>([]);
   const [baixandoId, setBaixandoId] = useState<string | null>(null);
   const [erroNota, setErroNota] = useState('');
@@ -56,7 +57,7 @@ export default function Assinatura() {
     const [{ data }, { data: dataFaturas }] = await Promise.all([
       supabase.from('lojas').select('status_assinatura, trial_termina_em, criado_em').eq('id', lojaId).single(),
       supabase.from('faturas_assinatura')
-        .select('id, created_at, ciclo, valor_cobrado, nfse_status, nfse_numero')
+        .select('id, created_at, ciclo, valor_cobrado, nfse_status, nfse_numero, efi_subscription_id')
         .eq('loja_id', lojaId).order('created_at', { ascending: false }).limit(12),
     ]);
     if (data) {
@@ -226,6 +227,21 @@ export default function Assinatura() {
     setTimeout(() => setCopiado(false), 2000);
   };
 
+  const cancelarRecorrencia = async () => {
+    if (!window.confirm(tDynamic('Cancelar as próximas cobranças? Seu acesso continua até o fim do período já pago.'))) return;
+    setErro(''); setSucesso(''); setCancelando(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('saas-cancelar', { body: { loja_id: lojaId } });
+      if (error || data?.error) throw new Error(data?.error || error?.message || 'Não foi possível cancelar a recorrência.');
+      setSucesso(tDynamic('Recorrência cancelada. Seu acesso permanece disponível até o fim do período pago.'));
+      await carregarDados();
+    } catch (e: any) {
+      setErro(e?.message || tDynamic('Não foi possível cancelar a recorrência.'));
+    } finally {
+      setCancelando(false);
+    }
+  };
+
   if (carregando) return (
     <div className="flex h-[50vh] items-center justify-center">
       <MiseOnLoader status={tDynamic('Autenticando ambiente seguro...')} rows={2} />
@@ -289,6 +305,18 @@ export default function Assinatura() {
                 <span className="font-bold">{tDynamic('Regra de Tolerância:')}</span> {tDynamic('7 dias de carência pós-vencimento antes da suspensão automática.')}
               </div>
             </div>
+
+            {status === 'ativa' && faturas.some((f) => f.ciclo === 'mensal' && f.efi_subscription_id) && (
+              <button
+                type="button"
+                onClick={cancelarRecorrencia}
+                disabled={cancelando}
+                className="mb-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30"
+              >
+                {cancelando ? <Loader2 size={17} className="animate-spin" /> : <XCircle size={17} />}
+                {tDynamic(cancelando ? 'Confirmando com a Efí...' : 'Cancelar próximas cobranças')}
+              </button>
+            )}
 
             {/* Seletor de Ciclo Mensal vs Anual */}
             <div className="mb-6 rounded-2xl bg-gray-100 dark:bg-gray-950 p-1.5 border border-gray-200 dark:border-gray-800">

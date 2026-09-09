@@ -50,9 +50,15 @@ export function avaliarAssinatura(loja: AssinaturaLoja | null | undefined): Assi
     return { status, emDia: true, diasAtraso: 0, validaAte: parseData(loja?.trial_termina_em) };
   }
 
-  // Bloqueios explícitos definidos pelo superadmin/webhook.
+  // Cancelamento interrompe a renovação, não apaga o período já pago.
+  // Atraso/cancelamento seguem a mesma régua de 7 dias usada pelo layout.
   if (status === 'cancelada' || status === 'atrasada') {
-    return { status, emDia: false, diasAtraso: 9999, validaAte: parseData(loja?.trial_termina_em) };
+    const validaAte = parseData(loja?.trial_termina_em);
+    if (!validaAte) return { status, emDia: false, diasAtraso: 9999, validaAte: null };
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    const venc = new Date(validaAte); venc.setHours(0, 0, 0, 0);
+    const diff = Math.floor((hoje.getTime() - venc.getTime()) / DIA_MS);
+    return { status, emDia: diff <= 0, diasAtraso: Math.max(0, diff), validaAte };
   }
 
   // Trial (ou status desconhecido): vale enquanto dentro de trial_termina_em.
