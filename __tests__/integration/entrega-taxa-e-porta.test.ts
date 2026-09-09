@@ -8,8 +8,8 @@
  * diferente) fazia cair pedido com a loja fechada.
  *
  * O que estes testes travam é o COMPORTAMENTO do dinheiro, não a linha de
- * código: a taxa tem de sair das tabelas da loja (distância → faixa → bairro →
- * padrão), o raio tem de barrar, e o frete grátis legítimo tem de continuar
+ * código: a taxa tem de sair da localização real (distância → faixa), o raio
+ * tem de barrar, e o frete grátis legítimo tem de continuar
  * zerando. Cada caso aqui é um cenário que já existe na operação real.
  *
  * Cobertura:
@@ -18,8 +18,7 @@
  *  ✅ HIBRIDO: faixa com taxa fixa vence base+km
  *  ✅ HIBRIDO: acima da última faixa → fora_de_area
  *  ✅ Frete grátis por valor mínimo (atingido e não atingido)
- *  ✅ BAIRRO com acento/caixa diferente casa; bairro de OUTRA loja não casa
- *  ✅ PADRÃO quando não há coordenada nem bairro
+ *  ✅ endereço sem coordenada é recusado; nunca cai em bairro/taxa padrão
  *  ✅ fn_loja_aberta: aberto_manual vence horário (nos dois sentidos)
  *  ✅ fn_loja_aberta: turno que cruza a meia-noite (22:00–02:00)
  */
@@ -34,7 +33,6 @@ const isConfigured = Boolean(SERVICE_KEY);
 
 let db: SupabaseClient;
 let lojaId: string;
-let outraLojaId: string;
 
 /** Coordenada da loja de teste (Zona Norte de SP) e um ponto ~2 km ao sul. */
 const LOJA_LAT = -23.4492102;
@@ -45,7 +43,7 @@ const PONTO_20KM = { lat: -23.6292102, lng: LOJA_LNG };
 interface Entrega {
   taxa: number;
   distancia_km: number | null;
-  origem: 'DISTANCIA' | 'BAIRRO' | 'PADRAO' | 'NENHUM';
+  origem: 'DISTANCIA' | 'NENHUM';
   fora_de_area: boolean;
   frete_gratis: boolean;
 }
@@ -91,24 +89,11 @@ beforeAll(async () => {
     lng: LOJA_LNG,
   });
 
-  // Segunda loja: existe só para provar que o bairro de uma não vale na outra.
-  outraLojaId = await criarLoja('Outra Loja Teste Entrega', {
-    entrega_modo: 'BAIRRO',
-    entrega_taxa_padrao: 0,
-  });
-
-  await db.from('taxas_entrega').insert([
-    { loja_id: lojaId, bairro: 'São João', valor: 9.5 },
-    { loja_id: outraLojaId, bairro: 'Bairro Exclusivo da Outra', valor: 30 },
-  ]);
 });
 
 afterAll(async () => {
   if (!isConfigured) return;
-  // ON DELETE CASCADE leva taxas_entrega/faixas_entrega/horarios junto.
-  for (const id of [lojaId, outraLojaId]) {
-    if (id) await db.from('lojas').delete().eq('id', id);
-  }
+  if (lojaId) await db.from('lojas').delete().eq('id', lojaId);
 });
 
 gated(isConfigured, 'Taxa de entrega — o servidor é quem calcula', () => {
@@ -164,21 +149,9 @@ gated(isConfigured, 'Taxa de entrega — o servidor é quem calcula', () => {
     }
   });
 
-  it('BAIRRO: casa sem acento e em caixa diferente', async () => {
-    const r = await taxa(lojaId, { bairro: 'sao joao', subtotal: 50 });
-    expect(r.origem).toBe('BAIRRO');
-    expect(Number(r.taxa)).toBeCloseTo(9.5, 2);
-  });
-
-  it('BAIRRO de outra loja não vale aqui — cai no padrão da própria loja', async () => {
-    const r = await taxa(lojaId, { bairro: 'Bairro Exclusivo da Outra', subtotal: 50 });
-    expect(r.origem).toBe('PADRAO');
-    expect(Number(r.taxa)).toBeCloseTo(12, 2);
-  });
-
-  it('sem coordenada e sem bairro conhecido: taxa padrão da loja', async () => {
-    const r = await taxa(lojaId, { subtotal: 50 });
-    expect(Number(r.taxa)).toBeCloseTo(12, 2);
+  it('endereço sem coordenada é recusado em vez de virar uma taxa por bairro', async () => {
+    await expect(taxa(lojaId, { bairro: 'São João', subtotal: 50 }))
+      .rejects.toThrow('Não foi possível localizar o endereço de entrega');
   });
 
   it('loja inexistente devolve zero, nunca erro de servidor', async () => {

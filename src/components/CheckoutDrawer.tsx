@@ -8,7 +8,7 @@ import {
 import { supabase } from '../lib/supabase';
 import EnderecoMixin, { EnderecoFormData } from './EnderecoMixin';
 import {
-  Loja, Cupom, TaxaEntrega, ItemCarrinho, Cliente, FaixaEntrega, HorarioFuncionamento,
+  Loja, Cupom, ItemCarrinho, Cliente, FaixaEntrega, HorarioFuncionamento,
   MetodoPgto, fmt, precoItem,
 } from '../types';
 import { maskTelefone } from '../lib/mascaras';
@@ -30,7 +30,6 @@ interface Props {
   loja: Loja;
   aberta: boolean;
   carrinho: ItemCarrinho[];
-  taxas: TaxaEntrega[];
   faixasDistancia: FaixaEntrega[];
   horarios: HorarioFuncionamento[];
   user: User | null;
@@ -43,7 +42,7 @@ interface Props {
 }
 
 export default function CheckoutDrawer({
-  loja, aberta, carrinho, taxas, faixasDistancia, horarios, user,
+  loja, aberta, carrinho, faixasDistancia, horarios, user,
   setCarrinho, onClose, onSucesso, onCartao, onAbrirAuth, waToken,
 }: Props) {
   const { tDynamic } = useI18n();
@@ -122,7 +121,7 @@ export default function CheckoutDrawer({
     })();
   }, [user, loja.id]);
 
-  // --- Calculo da entrega (distancia -> bairro -> padrao), reativo e com debounce ---
+  // --- Cálculo da entrega por localização, reativo e com debounce ---
   const bairroAtual = enderecoObj?.bairro || bairroManual;
   const enderecoQuery = enderecoObj
     ? [enderecoObj.logradouro, enderecoObj.numero, enderecoObj.bairro, enderecoObj.cidade, enderecoObj.uf, enderecoObj.cep, 'Brasil']
@@ -131,7 +130,7 @@ export default function CheckoutDrawer({
   const subtotal = carrinho.reduce((s, i) => s + precoItem(i), 0);
   const prontoParaCalcular =
     tipo === 'DELIVERY' &&
-    ((!!enderecoObj?.logradouro && !!enderecoObj?.numero) || bairroAtual.trim().length > 0);
+    !!enderecoObj?.logradouro && !!enderecoObj?.numero;
 
   useEffect(() => {
     if (tipo !== 'DELIVERY') { setEntrega(null); return; }
@@ -141,9 +140,7 @@ export default function CheckoutDrawer({
     const id = setTimeout(async () => {
       const res = await calcularEntrega(loja, {
         enderecoQuery,
-        bairro: bairroAtual,
         subtotal,
-        taxasBairro: taxas.map((t) => ({ bairro: t.bairro, valor: t.valor })),
         faixasDistancia,
       });
       if (!cancelado) {
@@ -164,8 +161,9 @@ export default function CheckoutDrawer({
     }, [tipo, enderecoQuery, bairroAtual, subtotal, loja.id, faixasDistancia]);
 
   // --- Calculos financeiros ---
-  const taxa = tipo === 'DELIVERY' ? (entrega?.taxa ?? 0) : 0;
+  const taxa = tipo === 'DELIVERY' ? (cupom?.frete_gratis ? 0 : (entrega?.taxa ?? 0)) : 0;
   const foraDeArea = tipo === 'DELIVERY' && !!entrega?.foraDeArea;
+  const entregaLocalizada = entrega?.origem === 'DISTANCIA';
   // Espelha fn_recalcular_pedido: no cupom FIXO o desconto nunca passa do
   // subtotal (o servidor usa least(valor, subtotal)). Sem esse limite, cupom de
   // R$5 num carrinho de R$3 mostrava total negativo antes do clamp.
@@ -240,7 +238,7 @@ export default function CheckoutDrawer({
   const cancelarPedidoPendente = async (pedidoId: string) => {
     await Promise.all([
       supabase.from('pagamentos').update({ status: 'CANCELADO' }).eq('pedido_id', pedidoId).eq('status', 'PENDENTE'),
-      supabase.from('pedidos').update({ status: 'CANCELADO' }).eq('id', pedidoId).eq('status', 'NOVO'),
+      supabase.from('pedidos').update({ status: 'CANCELADO' }).eq('id', pedidoId).in('status', ['AGUARDANDO_PAGAMENTO', 'NOVO']),
     ]);
   };
 
@@ -312,6 +310,13 @@ export default function CheckoutDrawer({
     if (!nome.trim() || !telefone.trim()) return setErro('Preencha nome e telefone.');
     if (tipo === 'DELIVERY' && (!enderecoObj?.logradouro || !enderecoObj?.numero))
       return setErro('Preencha o endereco completo com número.');
+    if (tipo === 'DELIVERY' && !entregaLocalizada) {
+      return setErro(
+        entrega?.origem === 'CONFIGURACAO_PENDENTE'
+          ? 'Esta loja ainda não configurou a localização para calcular a entrega.'
+          : 'Não conseguimos localizar este endereço. Confira rua, número, cidade e CEP.',
+      );
+    }
     if (foraDeArea)
       return setErro('Seu endereco esta fora da area de entrega desta loja.');
     if (subtotal < Number(loja.pedido_minimo))
@@ -637,7 +642,7 @@ export default function CheckoutDrawer({
                       />
                     </div>
 
-                    {/* Taxa de entrega: distancia (geocoding) -> bairro -> padrao */}
+                    {/* Taxa de entrega: sempre derivada da localização. */}
                     <div className={`mt-3 rounded-2xl border p-4 transition-all ${
                       foraDeArea
                         ? 'border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
@@ -672,28 +677,17 @@ export default function CheckoutDrawer({
                             </p>
                           )}
                         </>
-                      ) : taxas.length > 0 ? (
-                        <>
-                          <select
-                            value={bairroAtual}
-                            onChange={(e) => {
-                              setBairroManual(e.target.value);
-                              if (enderecoObj) setEnderecoObj({ ...enderecoObj, bairro: e.target.value });
-                            }}
-                            className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm font-semibold outline-none transition-colors focus:border-[var(--cor-primaria)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                          >
-                            <option value="">{tDynamic('Selecione seu bairro…')}</option>
-                            {taxas.map((t) => (
-                              <option key={t.id} value={t.bairro}>{t.bairro} — {fmt(Number(t.valor))}</option>
-                            ))}
-                          </select>
-                          {entrega?.origem === 'PADRAO' && (
-                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Não localizamos seu endereço — taxa padrão de {fmt(taxa)}.</p>
-                          )}
-                        </>
+                      ) : entrega?.origem === 'CONFIGURACAO_PENDENTE' ? (
+                        <p role="alert" className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                          A loja ainda está configurando a localização para calcular a entrega.
+                        </p>
+                      ) : entrega?.origem === 'NAO_LOCALIZADO' ? (
+                        <p role="alert" className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                          Não localizamos este endereço. Confira rua, número, cidade e CEP.
+                        </p>
                       ) : (
                         <p className="text-sm font-semibold dark:text-gray-200">
-                          {taxa > 0 ? fmt(taxa) : 'Informe o endereço para calcular'}
+                          Informe o endereço completo para calcular pela localização.
                         </p>
                       )}
                     </div>
@@ -708,7 +702,9 @@ export default function CheckoutDrawer({
                   {cupom ? (
                     <div className="flex items-center justify-between gap-3 rounded-xl border border-green-300 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-900/20">
                       <span className="min-w-0 text-sm font-bold text-green-700 dark:text-green-400">
-                        {cupom.codigo} — {tDynamic('desconto de')} {fmt(desconto)}
+                        {cupom.codigo} — {cupom.frete_gratis
+                          ? `${tDynamic('frete grátis')}${desconto > 0 ? ` + ${fmt(desconto)} ${tDynamic('de desconto')}` : ''}`
+                          : `${tDynamic('desconto de')} ${fmt(desconto)}`}
                       </span>
                       <button
                         type="button"

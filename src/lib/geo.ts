@@ -1,6 +1,7 @@
 // Geolocalização e cálculo de taxa de entrega por distância.
-// Tudo é tolerante a falha: geocoding externo pode cair, então quem chama
-// deve ter fallback (bairro → taxa padrão). Nada aqui lança exceção pra fora.
+// Geocoding externo pode falhar. Nesse caso, o checkout deve pedir que o
+// endereço seja corrigido — nunca trocar localização real por uma tabela de
+// bairros e cobrar outro frete.
 
 export interface LatLng { lat: number; lng: number; }
 
@@ -42,10 +43,6 @@ export async function geocode(query: string): Promise<LatLng | null> {
   }
 }
 
-/** Normaliza texto (sem acento/caixa) para comparar bairros com robustez. */
-export const normaliza = (s?: string) =>
-  (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
-
 export interface ConfigEntrega {
   entrega_modo?: string | null;
   lat?: number | null;
@@ -72,7 +69,7 @@ export interface ResultadoEntrega {
   taxa: number;
   distanciaKm: number | null;
   foraDeArea: boolean;
-  origem: 'DISTANCIA' | 'BAIRRO' | 'PADRAO' | 'NENHUM';
+  origem: 'DISTANCIA' | 'NAO_LOCALIZADO' | 'CONFIGURACAO_PENDENTE' | 'NENHUM';
   geo: LatLng | null;
   faixaId?: string | null;
   faixaNome?: string | null;
@@ -157,7 +154,7 @@ export function lojaAtendeDistancia(
   subtotal: number = 0,
 ) {
   if (loja.lat == null || loja.lng == null) {
-    return { atende: true, distanciaKm: null as number | null, taxa: 0, faixa: null as FaixaEntregaCalculo | null, raio: obterRaioMaximo(loja, faixasDistancia), freteGratis: false };
+    return { atende: false, distanciaKm: null as number | null, taxa: 0, faixa: null as FaixaEntregaCalculo | null, raio: obterRaioMaximo(loja, faixasDistancia), freteGratis: false };
   }
 
   const distanciaKm = r2(haversineKm({ lat: Number(loja.lat), lng: Number(loja.lng) }, geoCliente));
@@ -186,13 +183,11 @@ export async function calcularEntrega(
   params: {
     enderecoQuery?: string;
     geoCliente?: LatLng | null;
-    bairro?: string;
     subtotal?: number;
-    taxasBairro?: { bairro: string; valor: number | string }[];
     faixasDistancia?: FaixaEntregaCalculo[];
   },
 ): Promise<ResultadoEntrega> {
-  const { enderecoQuery, bairro, subtotal = 0, taxasBairro = [], faixasDistancia = [] } = params;
+  const { enderecoQuery, subtotal = 0, faixasDistancia = [] } = params;
 
   // 1) Distância (Regra Principal)
   if (loja.lat != null && loja.lng != null) {
@@ -226,19 +221,24 @@ export async function calcularEntrega(
     }
   }
 
-  // 2) Bairro (Fallback de compatibilidade)
-  if (bairro && taxasBairro.length > 0) {
-    const hit = taxasBairro.find((t) => normaliza(t.bairro) === normaliza(bairro));
-    if (hit) return { taxa: Number(hit.valor), distanciaKm: null, foraDeArea: false, origem: 'BAIRRO', geo: null };
+  if (loja.lat == null || loja.lng == null) {
+    return {
+      taxa: 0,
+      distanciaKm: null,
+      foraDeArea: false,
+      origem: 'CONFIGURACAO_PENDENTE',
+      geo: null,
+      raioConsideradoKm: obterRaioMaximo(loja, faixasDistancia),
+    };
   }
 
-  // 3) Padrão
-  const padrao = Number(loja.entrega_taxa_padrao ?? 0);
+  // O endereço existe, mas o serviço de geocodificação não conseguiu dar uma
+  // posição confiável. Não há taxa honesta sem origem e destino.
   return {
-    taxa: padrao,
+    taxa: 0,
     distanciaKm: null,
     foraDeArea: false,
-    origem: padrao > 0 ? 'PADRAO' : 'NENHUM',
+    origem: 'NAO_LOCALIZADO',
     geo: null,
     raioConsideradoKm: obterRaioMaximo(loja, faixasDistancia),
   };

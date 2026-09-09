@@ -13,7 +13,7 @@ import PedidoMesaDrawer from '../components/PedidoMesaDrawer';
 import VoiceOrderModal from '../components/VoiceOrderModal';
 import { Button, Modal, SuccessCelebration, BandeiraMark, BANDEIRAS_ACEITAS, HorizontalScrollContainer } from '../components/ui';
 import {
-  Loja, Banner, Categoria, Produto, TaxaEntrega, FaixaEntrega, ItemCarrinho,
+  Loja, Banner, Categoria, Produto, FaixaEntrega, ItemCarrinho,
   HorarioFuncionamento, MetodoPgto, Mesa, fmt, fmtQtd, precoItem, Cupom,
 } from '../types';
 import { fonteFamilia, isLightColor, obterFundoLojaPorTema, obterTokensLoja, corLegivelSobre } from '../lib/personalizacao';
@@ -119,7 +119,6 @@ export default function Cardapio() {
   const [catalogoNutrientes, setCatalogoNutrientes] = useState<NutrienteCatalogo[]>([]);
   // O que cada adicional acrescenta — a tabela reage ao que o cliente escolhe.
   const [nutricaoOpcoes, setNutricaoOpcoes] = useState<Map<string, NutricaoOpcao>>(new Map());
-  const [taxas, setTaxas] = useState<TaxaEntrega[]>([]);
   const [faixasDistancia, setFaixasDistancia] = useState<FaixaEntrega[]>([]);
   const [busca, setBusca] = useState('');
   const [catAtiva, setCatAtiva] = useState<string | null>(null);
@@ -189,12 +188,11 @@ export default function Cardapio() {
       const { data: l } = await supabase.from('lojas_publicas').select('*').eq('slug', slug).single();
       if (!l) return;
       setLoja(l);
-      const [h, b, c, p, t, f, est, nut, cat, nutOpc, cup] = await Promise.all([
+      const [h, b, c, p, f, est, nut, cat, nutOpc, cup] = await Promise.all([
         supabase.from('horarios_funcionamento').select('*').eq('loja_id', l.id),
         supabase.from('banners_destaque').select('*').eq('loja_id', l.id).eq('is_ativo', true).order('ordem_exibicao'),
         supabase.from('categorias').select('*').eq('loja_id', l.id).order('ordem'),
         supabase.from('produtos').select('*, grupos_opcoes(*, opcoes(*))').eq('loja_id', l.id).order('ordem'),
-        supabase.from('taxas_entrega').select('*').eq('loja_id', l.id),
         supabase.from('faixas_entrega').select('*').eq('loja_id', l.id).eq('ativo', true).order('ordem').order('km_ate'),
         supabase.rpc('fn_produtos_com_estoque', { p_loja_id: l.id }),
         supabase.rpc('fn_nutricao_cardapio', { p_loja_id: l.id }),
@@ -223,7 +221,6 @@ export default function Cardapio() {
       setNutricao(new Map(((nut.data as NutricaoProduto[]) ?? []).map((n) => [n.produto_id, n])));
       setCatalogoNutrientes((cat.data as NutrienteCatalogo[]) ?? []);
       setNutricaoOpcoes(new Map(((nutOpc.data as NutricaoOpcao[]) ?? []).map((o) => [o.opcao_id, o])));
-      setTaxas(t.data ?? []);
       setFaixasDistancia((f.data as FaixaEntrega[]) ?? []);
       document.title = `${l.nome} — Peça online`;
 
@@ -818,7 +815,7 @@ export default function Cardapio() {
       )}
 
       {checkoutAberto && !mesaAtual && (
-        <CheckoutDrawer loja={loja} aberta={aberta} carrinho={carrinho} taxas={taxas} faixasDistancia={faixasDistancia} horarios={horarios} user={user} setCarrinho={setCarrinho} waToken={waTokenUrl}
+        <CheckoutDrawer loja={loja} aberta={aberta} carrinho={carrinho} faixasDistancia={faixasDistancia} horarios={horarios} user={user} setCarrinho={setCarrinho} waToken={waTokenUrl}
           onClose={() => setCheckoutAberto(false)} onAbrirAuth={() => setModalAuthAberto(true)}
           onCartao={(info) => { setCheckoutAberto(false); setCartao(info); }}
           onSucesso={(num, id, metodo, pixData, total) => {

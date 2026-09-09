@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone, Calculator, Tv, AlertCircle } from 'lucide-react';
+import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone, Calculator, Tv, AlertCircle, Bell } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PALETA_CORES, PALETA_FUNDO_POR_TEMA, isLightColor, fonteFamilia, obterFundoLojaPorTema, obterTokensLoja, resolverTemaLoja, type TemaLoja } from '../../lib/personalizacao';
 import ColorSwatchPicker from '../../components/ColorSwatchPicker';
@@ -295,7 +295,10 @@ export default function Loja() {
           agendamento_antecedencia_min: String(data.agendamento_antecedencia_min ?? 30),
           lat: data.lat != null ? String(data.lat) : '',
           lng: data.lng != null ? String(data.lng) : '',
-          entrega_modo: (data.entrega_modo ?? 'HIBRIDO') as EntregaModo,
+          // BAIRRO era o motor legado: preço fixo pelo nome do bairro não
+          // representa a distância real e faz o cliente escolher uma tabela.
+          // Ao editar uma loja antiga, ela migra para a configuração por raio.
+          entrega_modo: (data.entrega_modo === 'BAIRRO' ? 'DISTANCIA' : (data.entrega_modo ?? 'DISTANCIA')) as EntregaModo,
           entrega_raio_km: data.entrega_raio_km != null ? String(data.entrega_raio_km) : '8',
           entrega_taxa_base: data.entrega_taxa_base != null ? String(data.entrega_taxa_base) : '5',
           entrega_taxa_km: data.entrega_taxa_km != null ? String(data.entrega_taxa_km) : '2.0',
@@ -986,8 +989,14 @@ export default function Loja() {
                 { key: 'entregas', rotulo: 'Gestão de Entregas & Rotas', desc: 'Cálculo de km no mapa e painel de motoboys.', icon: Bike },
                 { key: 'ifood', rotulo: 'Integração Nativa iFood', desc: 'Sincronização de pedidos e cardápio unificado.', icon: ShoppingBag },
                 { key: 'fiscal', rotulo: 'Emissor Fiscal NFC-e / NF-e 4.0', desc: 'Emissão de cupom fiscal direto no PDV.', icon: Shield },
+                ...(form.modulos_ativos?.balanca
+                  ? [{ key: 'buffet_aciona_garcom', rotulo: 'Buffet Aciona o Garçom', desc: 'Ao pesar o 1º prato, nasce um chamado automático de atendimento.', icon: Bell }]
+                  : []),
               ].map(({ key, rotulo, desc, icon: IconComponent }) => {
-                const ativo = !!(form.modulos_ativos as any)?.[key];
+                // buffet_aciona_garcom nasce ligado: ausente no jsonb (loja
+                // criada antes desta config) não pode virar "desligado" na tela.
+                const valorBruto = (form.modulos_ativos as any)?.[key];
+                const ativo = key === 'buffet_aciona_garcom' ? valorBruto !== false : !!valorBruto;
 
                 return (
                   <div
@@ -1563,7 +1572,7 @@ export default function Loja() {
             </div>
 
             <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
-              {tDynamic('As taxas por bairro continuam disponíveis na aba')} <Link to="/admin/marketing" className="font-bold underline">Marketing</Link> e entram como contingência operacional quando necessário.
+              {tDynamic('A entrega é calculada pela localização real, não por uma lista de bairros. Use o valor mínimo, faixas por distância ou campanhas para configurar frete grátis.')}
             </div>
           </div>
         </div>
