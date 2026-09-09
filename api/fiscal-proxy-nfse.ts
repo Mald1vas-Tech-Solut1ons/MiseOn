@@ -64,7 +64,7 @@ export default async function handler(req: any, res: any) {
     `xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">` +
     `<soap:Body>` +
     `<${metodo}Request xmlns="http://www.prefeitura.sp.gov.br/nfe">` +
-    `<VersaoSchema>2</VersaoSchema>` +
+    `<VersaoSchema>1</VersaoSchema>` +
     `<MensagemXML>${mensagemXmlAssinada.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</MensagemXML>` +
     `</${metodo}Request>` +
     `</soap:Body>` +
