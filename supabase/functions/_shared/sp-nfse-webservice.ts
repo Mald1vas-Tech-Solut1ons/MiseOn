@@ -189,10 +189,11 @@ export function montarELoteAssinado(lote: DadosLote, cert: CertificadoDecodifica
       'http://www.w3.org/TR/2001/REC-xml-c14n-20010315',
     ],
   });
-  sig.keyInfoProvider = {
-    getKeyInfo: () => `<X509Data><X509Certificate>${cert.certDerBase64}</X509Certificate></X509Data>`,
-    getKey: () => new TextEncoder().encode(cert.privateKeyPem),
-  };
+  // `keyInfoProvider` foi removido em 09/09: era a API de uma versão antiga do
+  // xml-crypto, não existe na v6 instalada — a propriedade era ignorada e não
+  // fazia nada. A v6 já monta o <X509Data> automaticamente a partir de
+  // `publicCert` (passado no construtor acima), confirmado com teste local:
+  // o certificado aparece no <KeyInfo> do XML final sem precisar desta linha.
   sig.computeSignature(semAssinatura);
   return sig.getSignedXml();
 }
@@ -207,46 +208,49 @@ export interface RetornoEnvioLote {
   xmlBruto: string;
 }
 
-/** Chama TesteEnvioLoteRPS (não gera NF-e, só valida) ou EnvioLoteRPS (gera de verdade). */
+/**
+ * Chama TesteEnvioLoteRPS (não gera NF-e, só valida) ou EnvioLoteRPS (gera de
+ * verdade) — via o proxy `api/fiscal-proxy-nfse` na Vercel (região gru1, São
+ * Paulo), não diretamente daqui.
+ *
+ * POR QUÊ: confirmado em teste real em 09/09 que a Prefeitura de SP reseta a
+ * conexão mTLS ("Connection reset by peer") quando a origem é uma Supabase
+ * Edge Function — a mesma chamada, com o mesmo certificado, completa o
+ * handshake normalmente quando a origem é um IP brasileiro comum. Corrigido
+ * o bug de nomes de campo do Deno.createHttpClient (`cert`/`key`, não
+ * `certChain`/`privateKey`) antes de descobrir isso — não foi o problema
+ * inteiro, só parte dele. A chave privada continua nunca saindo do Supabase
+ * em claro: viaja para o proxy dentro de uma chamada HTTPS autenticada por
+ * token (FISCAL_PROXY_TOKEN), igual nos dois lados.
+ */
 export async function enviarLoteRps(
   mensagemXmlAssinada: string,
   opts: { producao: boolean; certPem: string; privateKeyPem: string },
 ): Promise<RetornoEnvioLote> {
-  // SOAPActions corretos conforme WSDL em /ws/lotenfe.asmx?WSDL
-  const metodo = opts.producao ? 'EnvioLoteRPS' : 'TesteEnvioLoteRPS';
-  const soapAction = opts.producao
-    ? 'http://www.prefeitura.sp.gov.br/nfe/ws/envioLoteRPS'
-    : 'http://www.prefeitura.sp.gov.br/nfe/ws/testeenvio';
-  const envelope =
-    `<?xml version="1.0" encoding="utf-8"?>` +
-    `<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
-    `xmlns:xsd="http://www.w3.org/2001/XMLSchema" ` +
-    `xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">` +
-    `<soap:Body>` +
-    `<${metodo}Request xmlns="http://www.prefeitura.sp.gov.br/nfe">` +
-    `<VersaoSchema>1</VersaoSchema>` +
-    `<MensagemXML>${escapeXml(mensagemXmlAssinada)}</MensagemXML>` +
-    `</${metodo}Request>` +
-    `</soap:Body>` +
-    `</soap:Envelope>`;
+  const proxyUrl = Deno.env.get('FISCAL_PROXY_URL');
+  const proxyToken = Deno.env.get('FISCAL_PROXY_TOKEN');
+  if (!proxyUrl || !proxyToken) {
+    throw new Error('FISCAL_PROXY_URL/FISCAL_PROXY_TOKEN não configurados — emissão real exige o proxy Vercel (ver sp-nfse-webservice.ts).');
+  }
 
-  // Usa Deno.createHttpClient para habilitar mTLS (autenticação mútua exigida pela Prefeitura)
-  const client = typeof Deno !== 'undefined' && Deno.createHttpClient
-    ? Deno.createHttpClient({ caCerts: [], certChain: opts.certPem, privateKey: opts.privateKeyPem })
-    : undefined;
-
-  const res = await fetch('https://nfe.prefeitura.sp.gov.br/ws/lotenfe.asmx', {
+  const proxyRes = await fetch(proxyUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'text/xml; charset=utf-8',
-      SOAPAction: `"${soapAction}"`,
-    },
-    body: envelope,
-    client, // Injeta o client com os certificados no Deno fetch
+    headers: { 'Content-Type': 'application/json', 'x-fiscal-proxy-token': proxyToken },
+    body: JSON.stringify({
+      mensagemXmlAssinada,
+      producao: opts.producao,
+      certPem: opts.certPem,
+      keyPem: opts.privateKeyPem,
+    }),
   });
-  const bodyText = await res.text();
-  if (!res.ok) {
-    return { sucesso: false, erros: [{ codigo: String(res.status), descricao: bodyText.slice(0, 2000) }], alertas: [], xmlBruto: bodyText };
+  const proxyJson = await proxyRes.json().catch(() => ({}));
+  if (!proxyRes.ok) {
+    const msg = proxyJson?.error ?? `Proxy fiscal respondeu HTTP ${proxyRes.status}`;
+    return { sucesso: false, erros: [{ codigo: String(proxyRes.status), descricao: String(msg).slice(0, 2000) }], alertas: [], xmlBruto: '' };
+  }
+  const { status, bodyText } = proxyJson as { status: number; bodyText: string };
+  if (status < 200 || status >= 300) {
+    return { sucesso: false, erros: [{ codigo: String(status), descricao: bodyText.slice(0, 2000) }], alertas: [], xmlBruto: bodyText };
   }
 
   const retornoMatch = bodyText.match(/<RetornoXML>([\s\S]*?)<\/RetornoXML>/);
