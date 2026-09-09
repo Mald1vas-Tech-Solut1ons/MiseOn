@@ -88,6 +88,19 @@ O onboarding deve configurar as capacidades baseadas em perguntas de negócio ("
 - `taxas_entrega.ativo` é ignorado tanto pelo cardápio quanto por `fn_taxa_entrega_calculada` (espelhamento deliberado, para não mudar preço no deploy do Sprint 6). Decidir se a coluna vale e aplicar nos dois lados.
 
 ## 18. Roadmap
+
+**Atualização de planejamento — 09/09/2026:** a sequência operacional proposta e os critérios de lançamento estão em [PLANO-LANCAMENTO-NATUREBA-KIOSK.md](PLANO-LANCAMENTO-NATUREBA-KIOSK.md). Ela substitui a priorização histórica NOW/NEXT/LATER abaixo para o próximo Planning; não declara os novos sprints iniciados ou concluídos.
+
+O PO confirmou o primeiro cliente: Natureba monta baguetes de 15/30 cm, vende marmitex, bebidas, salgados fritos/assados; atende mesas com garçom, iFood e delivery próprio, balcão/retirada online e retirada por motoboy com identificação/senha; precisa de crédito e Pix. Hoje usa Anota.ai e quer substituição com melhoria operacional. Rodízio permanece no plano de expansão; não foi indicado para o primeiro dia da Natureba. Data e dependências técnicas da Bravus ainda não informadas.
+
+Reconciliado o handoff com `main` em `e1076b6`, árvore inicialmente limpa. Há base de modificadores/estações, mas “6 de 7” não é aceite de lançamento. Confirmado no código o despacho com `ON CONFLICT DO NOTHING` e a conferência OCR não consumida pelo modal. Registrar como hipóteses a reproduzir, seguindo toda a cadeia SQL: despacho antes da inserção de opções; papel exclusivo de garçom no despacho; preço e validação de opções da RPC de comanda. Não afirmar falha efetiva em produção sem essa verificação.
+
+Kiosk inspecionado é simulador local (`MENU_MOCK`, aprovação por timer). Homologação operacional e afirmações de POS homologado na landing precisam de evidência. Bravus deve informar hardware/SO/periféricos e provedor/protocolo de pagamento; não presumir que o fabricante é o gateway. Painel de senhas já permite configurar DELIVERY entre os tipos: validar e evoluir a separação cliente/motoboy sem alterar indevidamente o destino do pedido.
+
+Sequência detalhada em [SPRINTS-E-UX-LANCAMENTO-MISEON.md](SPRINTS-E-UX-LANCAMENTO-MISEON.md): Sprint 15, assinatura/NFS-e; 16, pagamento, notificações e iFood; 17, estoque; 18, montagem/KDS; 19, virada Natureba/Anota.ai; 20, Cast; 21, operação mista/rodízio; 22, Kiosk Bravus. Descoberta Bravus e inventário de migração começam cedo. Plano contém backlog com IDs, dependências, responsáveis, UX por papel, DoD, ensaio, critérios de liberação e contingência. Escopo do objetivo 17 precisa ser repartido pela capacidade no Planning; não é compromisso de entrega em uma semana.
+
+Validação desta sessão de planejamento: TypeScript **PASS**; Vitest **363 PASS / 14 SKIPPED**, 31 arquivos aprovados e 6 pulados. Credencial de integração local ausente; testes pulados não certificam RPC/RLS/triggers. `npm` global com launcher inválido: usados entrypoints locais de TypeScript/Vitest; Vitest executado fora do sandbox após autorização devido ao bloqueio de leitura do esbuild. Banco remoto, hardware, pagamentos reais, Deno, lint, build completo e E2E operacional **NOT RUN**. Esse era o estado ao final da investigação; a execução posterior está registrada abaixo.
+
 **NOW**
 - Sprint 0: Go-Live e Integridade do Sprint Anterior
 - Sprint 1: Financeiro / DRE / CMV — Uma Verdade
@@ -267,3 +280,20 @@ A tela da estação exibe badge de drink, ABV, ml, kcal e ingredientes. As RPCs 
 **Achado ao vivo, corrigido na mesma sessão:** durante o teste do Rafael pelo app do garçom, um pedido de Coca-Cola (revenda direta, `estacao_preparo='DIRETO'`) virou ticket na fila da cozinha, na etapa "Ponto da carne" — `fn_despachar_kds_tickets` nunca filtrou por `estacao_preparo`, bug presente desde o Sprint 5 (08/09) e herdado sem revisão suficiente na reescrita do Sprint 12. Corrigido em duas migrations (20260909010000, 20260909020000): a regra final é DIRETO só fica fora do KDS quando o produto não tem NENHUMA `estacao_kds_id` configurada — com estação explícita (ex.: bebida "pronta" que o Bar ainda serve com copo/gelo), o item passa por ela normalmente. Ver `[[miseon-backlog-kds-operador-e-cartao]]` (memória) para o backlog decorrente: fluxo do KDS personalizável por operador logado (pedido pelo Rafael, não implementado — mudança de escopo, precisa de sprint própria).
 
 - **Publicado nesta rodada:** todas as migrations do Sprint 9–14 aplicadas em produção (verificado por introspecção, não presumido); todo o código de frontend commitado em módulos. **Não publicado:** o código novo da Edge Function `cartao-pagar` (separação `EFI_CARTAO_PROD/HOMOLOG_CLIENT_ID/SECRET`) segue só commitado, não deployado — a correção de cartão desta sessão foi por configuração (secrets + payee_code), não por código novo. Nenhum `git push` foi feito ainda nesta sessão.
+
+
+## Execução de 09/09 — cadastro fiscal e confirmação de pedido
+
+**Entregue no banco:** migração `20260909160006_email_pedido_somente_apos_entrada_operacional`. O gatilho de confirmação agora ignora checkout pendente/cancelado e acompanha a entrada após pagamento integral. A reserva da fila retém confirmações antigas enquanto o pedido aguarda pagamento. Corrigida divergência de produção: regex com escapes duplicados rejeitava e-mails válidos. Privilégios internos mantidos (worker/service role). Deduplicação original preservada.
+
+**Prova executada no banco:** `supabase/tests/email-pedido-operacional.sql`, somente na loja de provas, com subtransação revertida. PASS para intenção pendente, chamada direta à fila, fila antiga, aprovação, repetição, cancelamento, salão com cobrança posterior e ausência das fixtures ao terminar. Nenhum envio de teste, cobrança ou emissão fiscal foi disparado.
+
+**Entregue na função fiscal:** `fiscal-pdf-nfse` versão 5. Cadastro de produção comparado com contrato social fornecido em arquivo privado: já estava correto. O defeito era a identidade/endereço fixos no gerador. PDF passa a ler a configuração fiscal e retirar RPS inventado, competência baseada no dia da impressão e afirmações tributárias fixas. Só disponibiliza registro emitido com número, código e data. Identifica o arquivo como resumo auxiliar do cadastro atual e oferece consulta oficial. PDF real baixado após deploy: razão social, endereço e complemento conferem com o contrato; sem endereço fictício nem RPS inventado. Não equivale à prova de autorização fiscal: consulta da Prefeitura não carregou nesta sessão.
+
+**Frontend local:** cancelamento e estados finais não geram alerta de pedido novo. Ainda depende de publicação do frontend.
+
+**Validação:** TypeScript PASS; Vitest 377 PASS / 14 SKIPPED; ESLint dos arquivos alterados PASS; Deno check/lint do gerador PASS; teste Deno do handler completo com HTTP simulado PASS; PDF de fixture renderizado e inspecionado. A prova SQL acima complementa a suíte de integração indisponível localmente; não comprova todos os fluxos do restaurante. Advisors executados: não há apontamento específico nas três funções alteradas; permanecem avisos preexistentes do projeto.
+
+**Gates fiscais ainda abertos:** autorização consultável e recebimento real no assinante; cobrança/renovação/recusa/cancelamento e conciliação; snapshot histórico do prestador; controle de acesso do link legado (público por UUID, comportamento preservado); emissão com RPS sequencial seguro e idempotência. Não reprocessar fatura ambígua só para obter demonstração: produção tem registros em erro/processamento a reconciliar.
+
+**Natureba:** os bloqueios de montagem/rodadas KDS, teste real de iFood, carga do catálogo, UX operacional, ensaio e migração seguem no plano. Não declarar cliente pronto nem POS/Cast/Kiosk homologados a partir destas correções.

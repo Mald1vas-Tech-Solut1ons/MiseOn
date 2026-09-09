@@ -65,3 +65,10 @@ entrypoint = "./functions/chat-ai-reception/index.ts"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/nutricao-estimar-ia/index.ts"
+
+# Preserva o acesso dos links já enviados. O controle de acesso por token
+# individual e o snapshot histórico do emissor continuam no gate fiscal.
+[functions.fiscal-pdf-nfse]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/fiscal-pdf-nfse/index.ts"

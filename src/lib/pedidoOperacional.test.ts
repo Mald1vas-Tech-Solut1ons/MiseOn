@@ -23,4 +23,12 @@ describe('pedido operacional', () => {
       { status: 'PREPARANDO' },
     )).toBe(false);
   });
+
+  it.each(['CANCELADO', 'FINALIZADO', 'PRONTO', 'EM_ROTA', 'DESCONHECIDO']) (
+    'checkout que termina em %s não soa como pedido novo', (status) => {
+      expect(pedidoAcabouDeEntrarNaOperacao(
+        { status: 'AGUARDANDO_PAGAMENTO' }, { status },
+      )).toBe(false);
+    },
+  );
 });

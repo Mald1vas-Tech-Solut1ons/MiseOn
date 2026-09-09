@@ -16,4 +16,5 @@ export const pedidoEstaNaOperacao = (pedido: PedidoComStatus | null | undefined)
 export const pedidoAcabouDeEntrarNaOperacao = (
   anterior: PedidoComStatus | null | undefined,
   atual: PedidoComStatus | null | undefined,
-) => pedidoEstaNaOperacao(atual) && !pedidoEstaNaOperacao(anterior);
+) => !!atual?.status && ['NOVO', 'ACEITO', 'PREPARANDO'].includes(atual.status)
+  && !pedidoEstaNaOperacao(anterior);

@@ -29,6 +29,8 @@ jobs:
           deno-version: v2.x
       - name: Lint das Edge Functions (Deno)
         run: deno lint supabase/functions
+      - name: Regressão do PDF fiscal (HTTP isolado, sem emissão)
+        run: deno test --no-lock --node-modules-dir=none --allow-env supabase/functions/fiscal-pdf-nfse/handler_test.ts
       - name: Unit Tests
         run: npx vitest run
       - name: Typecheck + build
