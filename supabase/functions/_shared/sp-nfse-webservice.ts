@@ -188,6 +188,13 @@ export function montarELoteAssinado(lote: DadosLote, cert: CertificadoDecodifica
       'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
       'http://www.w3.org/TR/2001/REC-xml-c14n-20010315',
     ],
+    // Sem isso, xml-crypto adiciona `Id="_0"` ao elemento raiz para poder
+    // referenciá-lo (`Reference URI="#_0"`) — o schema da Prefeitura de SP
+    // não declara esse atributo em PedidoEnvioLoteRPS e rejeita a mensagem
+    // ("XML não compatível com Schema. The 'Id' attribute is not declared."),
+    // confirmado em teste real em producao. `isEmptyUri` usa `Reference URI=""`
+    // (referência ao documento inteiro, XMLDSig padrão), sem tocar no elemento.
+    isEmptyUri: true,
   });
   // `keyInfoProvider` foi removido em 09/09: era a API de uma versão antiga do
   // xml-crypto, não existe na v6 instalada — a propriedade era ignorada e não
