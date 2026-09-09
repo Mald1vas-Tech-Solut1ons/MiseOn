@@ -62,30 +62,37 @@ const json = (data: unknown, init: ResponseInit = {}) =>
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
-  try {
-    const { fatura_id } = await req.json();
-    if (!fatura_id) return json({ error: 'fatura_id é obrigatório' }, { status: 400 });
+  // Fora do try: o catch precisa deste cliente e do fatura_id (se já
+  // conhecido) para destravar a fatura caso uma exceção inesperada aconteça
+  // depois da reivindicação abaixo — sem isso, uma fatura ficaria travada em
+  // 'processando' para sempre e nenhuma retentativa futura conseguiria agir.
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+  let fatura_id: string | undefined;
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    );
+  try {
+    ({ fatura_id } = await req.json());
+    if (!fatura_id) return json({ error: 'fatura_id é obrigatório' }, { status: 400 });
 
     // Chamada function-to-function (saas-assinar, efi-assinatura-webhook) usa
     // a service role key e passa direto. Chamada com JWT de usuário real (ex:
     // botão "reprocessar" no painel do superadmin) precisa ser superadmin.
+    //
+    // Comparação direta com a service role key, não parsing de JWT: este
+    // projeto usa o formato novo de API key da Supabase (`sb_secret_...`,
+    // string opaca sem ponto), não o JWT antigo com claim `role`. Confirmado
+    // nesta sessão — a detecção antiga sempre falhava para uma chamada
+    // function-to-function de verdade (SUPABASE_SERVICE_ROLE_KEY não tem
+    // ".", então `.split('.')[1]` nunca existia), o que fazia o caminho
+    // automático (Pix confirmado → assinatura-pix.ts/efi-assinatura-webhook
+    // → esta função) retornar 403 sempre, silenciosamente (o chamador só
+    // loga o erro e segue, "não bloqueia o pagamento"). Só a chamada manual
+    // com JWT de superadmin real passava por isso sem ser notada.
     const authHeader = req.headers.get('Authorization') ?? '';
-    const jwtPayload = authHeader.replace(/^Bearer\s+/i, '').split('.')[1];
-    // base64url → base64 com padding correto antes de atob
-    const isServiceRole = (() => {
-      if (!jwtPayload) return false;
-      try {
-        const b64 = jwtPayload.replace(/-/g, '+').replace(/_/g, '/').padEnd(
-          Math.ceil(jwtPayload.length / 4) * 4, '='
-        );
-        return JSON.parse(atob(b64))?.role === 'service_role';
-      } catch { return false; }
-    })();
+    const bearer = authHeader.replace(/^Bearer\s+/i, '');
+    const isServiceRole = bearer !== '' && bearer === Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     if (!isServiceRole) {
       const supabaseUser = createClient(
         Deno.env.get('SUPABASE_URL')!,
@@ -102,6 +109,18 @@ Deno.serve(async (req) => {
     const { data: fatura, error: eFatura } = await supabase
       .from('faturas_assinatura').select('*').eq('id', fatura_id).single();
     if (eFatura || !fatura) return json({ error: 'Fatura não encontrada' }, { status: 404 });
+
+    // Idempotência: sem isso, uma segunda chamada para a mesma fatura já
+    // emitida (retentativa manual, webhook duplicado da Efí) emitiria uma
+    // SEGUNDA nota fiscal real para a mesma cobrança.
+    if (fatura.nfse_status === 'emitida') {
+      return json({
+        ok: true,
+        nfse_status: 'emitida',
+        ja_emitida: true,
+        detail: { numeroNFe: fatura.nfse_numero, codigoVerificacao: fatura.nfse_codigo_verificacao },
+      });
+    }
 
     const { data: config } = await supabase
       .from('configuracoes_fiscais_plataforma').select('*').eq('id', true).maybeSingle();
@@ -131,7 +150,22 @@ Deno.serve(async (req) => {
       return json({ error: 'Dados fiscais do tomador ausentes' }, { status: 422 });
     }
 
-    await supabase.from('faturas_assinatura').update({ nfse_status: 'processando' }).eq('id', fatura_id);
+    // Reivindicação atômica: um único UPDATE...WHERE é serializado pelo
+    // Postgres por linha. Se duas chamadas para esta mesma fatura chegarem
+    // perto uma da outra, só a primeira encontra a linha em estado elegível
+    // e a marca 'processando'; a segunda não afeta nenhuma linha (a condição
+    // já não bate mais) e sai sem tocar o webservice.
+    const { data: reivindicada } = await supabase
+      .from('faturas_assinatura')
+      .update({ nfse_status: 'processando' })
+      .eq('id', fatura_id)
+      .neq('nfse_status', 'processando')
+      .neq('nfse_status', 'emitida')
+      .select('id')
+      .maybeSingle();
+    if (!reivindicada) {
+      return json({ ok: true, nfse_status: 'processando', concorrencia: true });
+    }
 
     const isProd = config.ambiente === 'producao';
 
@@ -148,13 +182,20 @@ Deno.serve(async (req) => {
       return json({ error: msg }, { status: 500 });
     }
 
-    // Numeração do RPS: série fixa "MS" (Maldivas Software), número
-    // sequencial = quantidade de notas já emitidas + 1. Sem tabela de
-    // sequência dedicada por ora — volume da plataforma ainda é baixo o
-    // suficiente pra isso não colidir; revisitar se o volume crescer.
-    const { count: totalEmitidas } = await supabase
-      .from('faturas_assinatura').select('id', { count: 'exact', head: true }).eq('nfse_status', 'emitida');
-    const numeroRps = (totalEmitidas ?? 0) + 1;
+    // Numeração do RPS: série fixa "MS" (Maldivas Software). O número vem
+    // de um contador dedicado (fn_fiscal_reservar_numero_rps, migration
+    // 20260909180000) que incrementa com UPDATE...RETURNING atômico e
+    // persiste o número reservado na própria fatura — uma retentativa desta
+    // MESMA fatura reaproveita o número já reservado em vez de queimar um
+    // novo, e duas faturas diferentes nunca recebem o mesmo número, mesmo
+    // que a reserva aconteça no mesmo instante.
+    const { data: numeroRps, error: eNumeroRps } = await supabase
+      .rpc('fn_fiscal_reservar_numero_rps', { p_fatura_id: fatura_id });
+    if (eNumeroRps || numeroRps == null) {
+      const msg = `Falha ao reservar número de RPS: ${eNumeroRps?.message ?? 'sem retorno'}`;
+      await supabase.from('faturas_assinatura').update({ nfse_status: 'erro', nfse_erro: msg }).eq('id', fatura_id);
+      return json({ error: msg }, { status: 500 });
+    }
 
     const hoje = new Date().toISOString().slice(0, 10);
     const dadosRps: DadosRps = {
@@ -260,6 +301,20 @@ Deno.serve(async (req) => {
     return json({ ok: true, nfse_status: emitida ? 'emitida' : (isProd ? 'erro' : 'testada_ok'), detail: retorno });
   } catch (e) {
     console.error('Falha ao emitir NFS-e:', e);
-    return json({ error: String((e as Error)?.message ?? e) }, { status: 500 });
+    const msg = String((e as Error)?.message ?? e);
+    if (fatura_id) {
+      // Sem isso, uma exceção inesperada depois da reivindicação (ex.: o
+      // proxy da Vercel cair no meio do envio) deixaria a fatura travada em
+      // 'processando' para sempre — a trava de concorrência acima nunca
+      // deixaria uma retentativa futura avançar. Só reverte se ainda estava
+      // 'processando' por causa desta mesma chamada; se já tinha virado
+      // 'emitida' antes da exceção (ex.: falha no e-mail depois do sucesso),
+      // não sobrescreve.
+      await supabase.from('faturas_assinatura')
+        .update({ nfse_status: 'erro', nfse_erro: `Falha inesperada: ${msg}` })
+        .eq('id', fatura_id)
+        .eq('nfse_status', 'processando');
+    }
+    return json({ error: msg }, { status: 500 });
   }
 });
