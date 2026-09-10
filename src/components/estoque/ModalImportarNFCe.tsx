@@ -301,7 +301,12 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
           body: {
             loja_id: lojaId,
             itens: pendentes.map(({ l, i }) => ({
-              indice: i, descricao: l.itemNota.descricao, unidade: l.itemNota.unidade,
+              indice: i,
+              descricao: l.itemNota.descricao,
+              unidade: l.itemNota.unidade,
+              // O NCM vem assinado pela SEFAZ: é a evidência mais forte que a
+              // IA pode receber, e estava sendo jogada fora aqui.
+              ncm: l.itemNota.ncm || null,
             })),
             generos: CATALOGO.map((c) => ({ slug: slugDoItem(c), nome: c.nome, unidade: c.unidade })),
           },

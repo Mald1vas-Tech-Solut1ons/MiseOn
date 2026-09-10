@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   X, ChevronLeft, ChevronRight, ChefHat, Timer, Play, Pause, RotateCcw,
-  Trophy, CheckCircle2, Circle, PackageCheck, PackageX, Loader2, ListChecks, Flame, Scissors,
+  Trophy, CheckCircle2, Circle, PackageCheck, PackageX, Loader2, ListChecks, Flame, Scissors, Scale,
 } from 'lucide-react';
 import { Insumo, PassoPreparo, fmt } from '../../types';
 import { useI18n } from '../../contexts/I18nContext';
@@ -25,10 +25,11 @@ interface Props {
   custo: number;
   itens: ItemMiseEnPlace[];
   /**
-   * Recebe o tempo total da OS e quantos segundos o fogo/forno ficou ligado.
-   * O segundo número é o que vira custo de gás. Deve lançar se a produção falhar.
+   * Recebe o tempo total da OS, quantos segundos o fogo/forno ficou ligado e o
+   * quanto saiu de verdade (nulo = a equipe não pesou o lote pronto). Deve
+   * lançar se a produção falhar.
    */
-  onConcluir: (segundos: number, segundosFogo: number) => Promise<void>;
+  onConcluir: (segundos: number, segundosFogo: number, quantidadeReal: number | null) => Promise<void>;
   onFechar: () => void;
 }
 
@@ -88,6 +89,9 @@ export default function ModoPreparo({
   const [conferidos, setConferidos] = useState<Set<string>>(new Set());
   const [produzindo, setProduzindo] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  // Quanto saiu de verdade. Vazio = a equipe não pesou; vale o previsto pela
+  // ficha. Dizer que entraram 3 L quando saíram 2,4 é estoque fantasma.
+  const [rendimentoReal, setRendimentoReal] = useState('');
 
   // Cronômetro global da OS: começa junto com a tela e é o tempo que vai para
   // a etiqueta. Independe dos timers de cada etapa.
@@ -146,7 +150,12 @@ export default function ModoPreparo({
     setErro(null);
     try {
       setConcluidos(atual => new Set(atual).add(indice));
-      await onConcluir(decorrido, segundosFogoRef.current);
+      const real = Number(String(rendimentoReal).replace(',', '.'));
+      await onConcluir(
+        decorrido,
+        segundosFogoRef.current,
+        Number.isFinite(real) && real > 0 ? real : null,
+      );
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível concluir a produção.');
       setProduzindo(false);
@@ -158,6 +167,11 @@ export default function ModoPreparo({
   /** O corte que a ficha manda fazer, por extenso, para a equipe na bancada. */
   const rotuloTecnica = (codigo?: string | null) =>
     codigo ? tecnicas.find(t => t.codigo === codigo)?.rotulo ?? null : null;
+
+  const realInformado = Number(String(rendimentoReal).replace(',', '.'));
+  const desvioPct = Number.isFinite(realInformado) && realInformado > 0 && rendimento > 0
+    ? ((realInformado - rendimento) / rendimento) * 100
+    : null;
 
   const tempoTotalPasso = minutosPasso * 60;
   const progressoTimer = tempoTotalPasso > 0 ? ((tempoTotalPasso - restante) / tempoTotalPasso) * 100 : 0;
@@ -328,6 +342,46 @@ export default function ModoPreparo({
             <ChefHat size={120} />
           </div>
         </div>
+
+        {ultimaTela && (
+          <div className="shrink-0 border-t border-gray-200 bg-amber-50 px-4 py-3 dark:border-gray-800 dark:bg-amber-950/20 sm:px-5">
+            <div className="mx-auto flex max-w-xl flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-amber-800 dark:text-amber-400">
+                  <Scale size={13} /> {tDynamic('Quanto saiu de verdade?')}
+                </p>
+                <p className="text-[11px] leading-snug text-amber-700/80 dark:text-amber-500/80">
+                  {tDynamic('A ficha prevê')} <b>{rendimento} {preparo.unidade_medida}</b>.{' '}
+                  {tDynamic('Cozinhar concentra ou hidrata — pese o lote pronto e o estoque entra com o número real.')}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <div className="flex overflow-hidden rounded-xl border border-amber-300 bg-white dark:border-amber-900/50 dark:bg-gray-950">
+                  <input
+                    value={rendimentoReal}
+                    onChange={e => setRendimentoReal(e.target.value)}
+                    type="number" min="0" step="any"
+                    placeholder={String(rendimento)}
+                    disabled={produzindo}
+                    className="w-24 bg-transparent p-2 text-center text-lg font-black tabular-nums outline-none dark:text-gray-100"
+                  />
+                  <span className="flex items-center bg-amber-100 px-2 text-xs font-black text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                    {preparo.unidade_medida}
+                  </span>
+                </div>
+                {desvioPct != null && (
+                  <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-black ${
+                    Math.abs(desvioPct) < 5
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                      : 'bg-amber-200 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200'
+                  }`}>
+                    {desvioPct > 0 ? '+' : ''}{desvioPct.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Rodapé de navegação */}
         <div className="shrink-0 border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950 sm:p-5">

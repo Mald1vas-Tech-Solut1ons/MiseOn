@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Trash2, Scissors, Scale, Info, Check, Loader2, TrendingDown } from 'lucide-react';
+import { Trash2, Scissors, Scale, Info, Check, Loader2, TrendingDown, ShoppingBag } from 'lucide-react';
 import { Insumo } from '../../types';
 import { useI18n } from '../../contexts/I18nContext';
 import { opcoesDeEntrada } from '../../lib/unidades';
@@ -9,6 +9,7 @@ import {
   buscarRendimento, registrarRendimentoMedido, fatorCorrecao,
 } from '../../lib/producao/tecnicas';
 import { LinhaFicha, fatorParaEstoque } from '../../lib/producao/linhaFicha';
+import { compradoPronto } from '../../lib/fichaTecnica';
 
 const num = (v: string) => {
   const n = Number(String(v).replace(',', '.'));
@@ -96,15 +97,20 @@ export default function LinhaFichaInsumo({
   const liquido = brutoNaUnidadeDeEstoque * (pctEfetivo ?? 1);
   const perda = brutoNaUnidadeDeEstoque - liquido;
 
+  // Item comprado pronto não tem limpeza a fazer: o queijo do saquinho já vem
+  // ralado. Oferecer "descascar" ali seria o sistema fingindo que não sabe.
+  const ehRevenda = insumo ? compradoPronto(insumo) : false;
+
   const porTipo = useMemo(() => {
     const grupos = new Map<string, Tecnica[]>();
     for (const t of tecnicas) {
+      if (ehRevenda && t.tipo === 'LIMPEZA') continue;
       const lista = grupos.get(t.tipo) ?? [];
       lista.push(t);
       grupos.set(t.tipo, lista);
     }
     return [...grupos.entries()];
-  }, [tecnicas]);
+  }, [tecnicas, ehRevenda]);
 
   const tecnicaSelecionada = tecnicas.find(t => t.codigo === linha.tecnica_codigo);
 
@@ -184,6 +190,15 @@ export default function LinhaFichaInsumo({
 
       {insumo && (
         <div className="mt-2.5 space-y-2 border-t border-gray-100 pt-2.5 dark:border-gray-800">
+          {ehRevenda && (
+            <p className="flex items-start gap-1.5 rounded-lg bg-sky-50 p-2 text-[11px] leading-snug text-sky-800 dark:bg-sky-950/20 dark:text-sky-300">
+              <ShoppingBag size={13} className="mt-px shrink-0" />
+              <span>
+                <b>{tDynamic('Comprado pronto.')}</b>{' '}
+                {tDynamic('O custo é o da nota e não há limpeza a medir. Se a sua equipe é que faz esse trabalho (ralar o queijo, limpar a peça), crie uma ficha própria — vira preparo da casa, com custo de produção e lote rastreável.')}
+              </span>
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide text-gray-400">
               <Scissors size={12} /> {tDynamic('Pré-preparo')}

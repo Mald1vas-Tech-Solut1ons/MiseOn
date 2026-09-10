@@ -108,6 +108,31 @@ export async function registrarRendimentoMedido(
   return data as RendimentoTecnica & { rendimento_desta_medicao?: number };
 }
 
+export interface HistoricoCoccao {
+  producoes: number;
+  media_pct: number | null;
+  ultima_pct: number | null;
+  menor_pct: number | null;
+  maior_pct: number | null;
+}
+
+/**
+ * O que a cozinha do lojista realmente entrega nesta ficha (produzido /
+ * esperado). É a perda ou o ganho de cocção medido, não estimado: nenhuma
+ * tabela de referência sabe o ponto de redução da panela dele.
+ */
+export async function buscarHistoricoCoccao(preparoId: string): Promise<HistoricoCoccao | null> {
+  const { data, error } = await supabase.rpc('fn_rendimento_real_preparo', {
+    p_preparo_id: preparoId,
+  });
+  if (error) {
+    console.error('fn_rendimento_real_preparo:', error);
+    return null;
+  }
+  const h = data as HistoricoCoccao | null;
+  return h && Number(h.producoes) > 0 ? h : null;
+}
+
 /** Fator de correção clássico do food service: FC = bruto / líquido (≥ 1). */
 export const fatorCorrecao = (rendimentoPct: number): number =>
   rendimentoPct > 0 ? 1 / rendimentoPct : 0;

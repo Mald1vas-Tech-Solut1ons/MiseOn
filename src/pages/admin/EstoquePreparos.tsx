@@ -6,7 +6,7 @@ import { UNIDADES } from '../../lib/unidades';
 import { podeEntrarNaFicha } from '../../lib/fichaTecnica';
 import LinhaFichaInsumo from '../../components/producao/LinhaFichaInsumo';
 import { LinhaFicha, linhaVazia, fatorParaEstoque } from '../../lib/producao/linhaFicha';
-import { Tecnica, carregarTecnicas } from '../../lib/producao/tecnicas';
+import { Tecnica, carregarTecnicas, HistoricoCoccao, buscarHistoricoCoccao } from '../../lib/producao/tecnicas';
 
 import { useI18n } from '../../contexts/I18nContext';
 /* ── Validade: status de um lote produzido ── */
@@ -93,6 +93,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
   const [producoes, setProducoes] = useState<ProducaoPreparo[]>([]);
   const [ficha, setFicha] = useState<LinhaFicha[]>([]);
   const [tecnicas, setTecnicas] = useState<Tecnica[]>([]);
+  const [historicoCoccao, setHistoricoCoccao] = useState<HistoricoCoccao | null>(null);
   const [passos, setPassos] = useState<{ texto: string; minutos: string; fogo: boolean }[]>([]);
   
   const [salvando, setSalvando] = useState(false);
@@ -194,6 +195,9 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       setValidadeUnidade(v.u);
       setFicha(lerLinhasFicha(p));
       setPassos(lerPassos(p));
+      // O que a cozinha entregou nas ultimas producoes desta ficha. Serve para
+      // o lojista descobrir que o rendimento que ele declarou e otimista.
+      buscarHistoricoCoccao(p.id).then(setHistoricoCoccao);
     } else {
       setEditando('novo');
       setNome('');
@@ -204,6 +208,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       setValidadeUnidade('dias');
       setFicha([]);
       setPassos([]);
+      setHistoricoCoccao(null);
     }
   };
 
@@ -572,6 +577,36 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                   </div>
                 )}
               </div>
+              {historicoCoccao && historicoCoccao.media_pct != null && (
+                <div className={`mt-3 rounded-xl border p-3 ${
+                  Math.abs(historicoCoccao.media_pct - 1) < 0.05
+                    ? 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-900/40 dark:bg-emerald-950/10'
+                    : 'border-amber-300 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20'
+                }`}>
+                  <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-gray-500">
+                    <Flame size={12} className="text-orange-500" /> {tDynamic('O que a sua cozinha entrega')}
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-gray-700 dark:text-gray-200">
+                    {tDynamic('Nas últimas')} {historicoCoccao.producoes} {historicoCoccao.producoes === 1 ? tDynamic('produção') : tDynamic('produções')},{' '}
+                    {tDynamic('este lote rendeu em média')}{' '}
+                    <span className={Math.abs(historicoCoccao.media_pct - 1) < 0.05 ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}>
+                      {(historicoCoccao.media_pct * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%
+                    </span>{' '}
+                    {tDynamic('do previsto')}
+                    {historicoCoccao.menor_pct != null && historicoCoccao.maior_pct != null
+                      && historicoCoccao.maior_pct - historicoCoccao.menor_pct > 0.05 && (
+                      <span className="font-medium text-gray-400">
+                        {' '}({(historicoCoccao.menor_pct * 100).toFixed(0)}% a {(historicoCoccao.maior_pct * 100).toFixed(0)}%)
+                      </span>
+                    )}.
+                  </p>
+                  {historicoCoccao.media_pct < 0.95 && (
+                    <p className="mt-1 text-xs leading-snug text-amber-700/90 dark:text-amber-500/90">
+                      {tDynamic('A cocção está concentrando mais do que a ficha prevê. Ajustar a quantidade produzida para o número real deixa o custo por unidade e a compra corretos.')}
+                    </p>
+                  )}
+                </div>
+              )}
               </section>
 
               <div className="flex items-center justify-center gap-3 text-gray-300 dark:text-gray-700"><div className="h-px flex-1 bg-current"/><ArrowRight size={20} className="text-orange-400"/><div className="h-px flex-1 bg-current"/></div>

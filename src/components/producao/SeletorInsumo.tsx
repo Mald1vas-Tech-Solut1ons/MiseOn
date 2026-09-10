@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, ChevronDown, X, AlertCircle, Carrot, ChefHat, Box } from 'lucide-react';
+import { Search, ChevronDown, X, AlertCircle, Carrot, ChefHat, Box, ShoppingBag } from 'lucide-react';
 import { Insumo } from '../../types';
 import { useI18n } from '../../contexts/I18nContext';
 import { GRUPOS_FICHA, tipoDoInsumo, podeEntrarNaFicha } from '../../lib/fichaTecnica';
@@ -8,6 +8,7 @@ import { GRUPOS_FICHA, tipoDoInsumo, podeEntrarNaFicha } from '../../lib/fichaTe
 const ICONES: Record<string, typeof Carrot> = {
   ALIMENTO: Carrot,
   PREPARO: ChefHat,
+  REVENDA: ShoppingBag,
   EMBALAGEM: Box,
 };
 
@@ -111,9 +112,12 @@ export default function SeletorInsumo({ insumos, valor, onChange, jaUsados = [] 
               const Icone = grupo.icone;
               return (
                 <div key={grupo.chave}>
-                  <p className="sticky top-0 flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                    <Icone size={12} /> {tDynamic(grupo.rotulo)}
-                  </p>
+                  <div className="sticky top-0 bg-gray-50 px-3 py-1.5 dark:bg-gray-900">
+                    <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      <Icone size={12} /> {tDynamic(grupo.rotulo)}
+                    </p>
+                    <p className="text-[10px] leading-snug text-gray-400">{tDynamic(grupo.ajuda)}</p>
+                  </div>
                   {grupo.itens.map(item => {
                     const saldo = Number(item.quantidade_atual ?? 0);
                     return (

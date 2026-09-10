@@ -22,6 +22,18 @@
  * um dado assinado pela SEFAZ por um palpite. Por isso eles nem entram na
  * resposta: o schema não tem onde colocá-los.
  *
+ * ─── E O QUE ELA ENSINA ───────────────────────────────────────────────────
+ * Termo de não-alimento classificado com confiança é promovido ao léxico
+ * (`fn_aprender_termo_lexico`). Da segunda nota em diante o mesmo item resolve
+ * deterministicamente, de graça e auditável — e um aprendizado errado aparece
+ * em `vw_lexico_aprendido` com a descrição de origem, pronto para ser removido.
+ * Comida NUNCA é aprendida: classificar limpeza como alimento é risco
+ * sanitário, o inverso só tira o item da ficha até alguém corrigir.
+ *
+ * A taxonomia de categorias vem do banco (`fn_categorias_classificacao`), não
+ * de uma lista fixa aqui: foi uma lista fixa desatualizada que deixou "Sacola"
+ * ser classificada como ingrediente.
+ *
  * Tudo volta como SUGESTÃO, marcada como tal na tela, e o lojista confirma.
  */
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -78,14 +90,36 @@ interface ItemEntrada {
   indice: number;
   descricao: string;
   unidade: string;
+  /** NCM da nota. Verdade fiscal: a IA nao contradiz, so complementa. */
+  ncm?: string | null;
 }
 
-function montarPrompt(itens: ItemEntrada[], generos: { slug: string; nome: string; unidade: string }[]) {
+interface CategoriaDominio {
+  categoria: string;
+  tipo_item: string;
+  entra_ficha_tecnica: boolean;
+  aprendivel: boolean;
+}
+
+function montarPrompt(
+  itens: ItemEntrada[],
+  generos: { slug: string; nome: string; unidade: string }[],
+  categorias: CategoriaDominio[],
+) {
   const lista = itens
-    .map((i) => `${i.indice}. "${i.descricao}" (unidade na nota: ${i.unidade || '?'})`)
+    .map((i) => {
+      const ncm = i.ncm ? `, NCM ${i.ncm}` : '';
+      return `${i.indice}. "${i.descricao}" (unidade na nota: ${i.unidade || '?'}${ncm})`;
+    })
     .join('\n');
 
   const catalogo = generos.map((g) => `${g.slug} = ${g.nome} (${g.unidade})`).join('\n');
+
+  // A taxonomia sai do banco, nao de uma lista fixa aqui: quando o dominio
+  // ganha uma categoria, o prompt acompanha sem deploy desta funcao.
+  const taxonomia = categorias
+    .map((c) => `- ${c.categoria}: ${c.entra_ficha_tecnica ? 'entra na ficha tecnica do prato' : 'NAO entra na ficha tecnica'} (tipo ${c.tipo_item})`)
+    .join('\n');
 
   return `Você organiza o estoque de um restaurante brasileiro. Recebeu itens de um cupom fiscal
 de supermercado, escritos com as abreviações do mercado, e precisa dizer O QUE CADA UM É.
@@ -112,8 +146,27 @@ Para cada item, devolva:
   "ARROZ PARBOILIZADO" → "Parboilizado". Null quando não houver.
 - marca: o fabricante, quando a descrição disser. "ARROZ TIO JOAO" → "Tio João". "YPE" → "Ypê".
   Escreva a marca com acentuação correta. Null quando não houver.
-- categoria: uma destas, a que melhor descreve o item: Hortifrúti, Carnes, Frios, Pescados,
-  Laticínios, Mercearia, Padaria, Congelados, Bebidas, Limpeza, Descartáveis, Outros.
+- categoria: EXATAMENTE uma das categorias listadas abaixo, escrita igual, com acento.
+  Esta e a decisao mais importante: ela define se o item pode virar ingrediente de
+  um prato. Errar aqui coloca sabao em pó na receita.
+
+CATEGORIAS VALIDAS:
+${taxonomia}
+
+  Como escolher:
+  - o que se come ou se bebe vai para a categoria de alimento correspondente;
+  - o que LIMPA o ambiente ou o equipamento (detergente, desinfetante, sabao, alvejante,
+    esponja, saco de lixo, inseticida) e Limpeza;
+  - o que serve a HIGIENE das pessoas (papel higienico, sabonete, alcool em gel,
+    papel toalha) e Higiene;
+  - o que EMBALA ou transporta o pedido (sacola, marmitex, pote, tampa, filme, papel
+    aluminio, caixa de pizza, etiqueta) e Embalagem;
+  - o que o cliente USA e joga fora (copo, canudo, guardanapo, talher descartavel) e
+    Descartáveis;
+  - ferramenta, peca, lampada, parafuso, material de escritorio e papelaria vao para
+    Manutenção;
+  - utensilio de cozinha, panela, faca, luva, touca e avental vao para Utensílios;
+  - so use Outros quando nenhuma das anteriores servir. Outros nao e atalho.
 - conteudo_qtd e conteudo_unidade: quanto vem DENTRO de uma embalagem, quando a descrição disser.
   "ARROZ 5KG" → 5 e "kg". "OVOS PVC 20UN" → 20 e "un". "AGUA SANIT 2L" → 2 e "L".
   "REFRI 12X1L" → 12 e "L". Null nos dois quando a descrição não disser.
@@ -123,8 +176,12 @@ Para cada item, devolva:
 REGRAS RÍGIDAS:
 - Não invente quantidade comprada, preço ou valor. Esses dados vêm da nota e não são seu assunto.
 - Não traduza para outro idioma. Tudo em português do Brasil.
+- Quando houver NCM, ele e verdade fiscal e manda: capitulo 34 e Limpeza, 39 e 48 sao
+  embalagem/descartavel, 22 e Bebidas, 02 e Carnes, 03 e Pescados, 07 e 08 sao Hortifrúti,
+  04 e Laticínios, 19 e Padaria. Nao contradiga o NCM; use a descricao para refinar
+  dentro dele.
 - Item que não é comida nem insumo de cozinha (revista, pilha, brinquedo) também deve ser
-  classificado, com categoria "Outros" — quem decide se entra no estoque é o lojista.
+  classificado na categoria mais proxima — quem decide se entra no estoque é o lojista.
 - Devolva exatamente um objeto por item recebido, com o mesmo índice.
 
 Responda apenas o JSON do schema.`;
@@ -155,6 +212,14 @@ Deno.serve(async (req) => {
       return erro('Sem permissão nesta loja', 403);
     }
 
+    // A taxonomia e a do banco. Duplicar a lista aqui seria criar uma segunda
+    // verdade que envelhece sozinha -- foi assim que "Sacola" virou ingrediente.
+    const { data: catRaw } = await admin.rpc('fn_categorias_classificacao');
+    const categorias = (Array.isArray(catRaw) ? catRaw : []) as CategoriaDominio[];
+    if (categorias.length === 0) return erro('Taxonomia de categorias indisponível', 500);
+    const categoriasValidas = new Set(categorias.map((c) => c.categoria));
+    const aprendiveis = new Set(categorias.filter((c) => c.aprendivel).map((c) => c.categoria));
+
     const geminiKey = Deno.env.get('GEMINI_API_KEY');
     if (!geminiKey) return erro('Chave do Gemini não configurada no servidor', 500);
 
@@ -162,12 +227,13 @@ Deno.serve(async (req) => {
       indice: Number.isFinite(i?.indice) ? i.indice : idx,
       descricao: String(i?.descricao ?? '').slice(0, 200),
       unidade: String(i?.unidade ?? '').slice(0, 10),
+      ncm: i?.ncm ? String(i.ncm).replace(/\D/g, '').slice(0, 8) || null : null,
     })).filter((i: ItemEntrada) => i.descricao.trim());
 
     if (entrada.length === 0) return erro('Nenhum item com descrição para classificar');
 
     const corpo = JSON.stringify({
-      contents: [{ parts: [{ text: montarPrompt(entrada, Array.isArray(generos) ? generos : []) }] }],
+      contents: [{ parts: [{ text: montarPrompt(entrada, Array.isArray(generos) ? generos : [], categorias) }] }],
       generationConfig: {
         temperature: 0,
         responseMimeType: 'application/json',
@@ -219,7 +285,9 @@ Deno.serve(async (req) => {
         unidade: UNIDADES_VALIDAS.includes(unidade) ? unidade : 'un',
         variedade: c.variedade ? String(c.variedade).trim().slice(0, 60) : null,
         marca: c.marca ? String(c.marca).trim().slice(0, 60) : null,
-        categoria: String(c.categoria ?? 'Outros').trim().slice(0, 40),
+        categoria: categoriasValidas.has(String(c.categoria ?? '').trim())
+          ? String(c.categoria).trim()
+          : 'Outros',
         conteudo_qtd: Number(c.conteudo_qtd) > 0 ? Number(c.conteudo_qtd) : null,
         conteudo_unidade: c.conteudo_unidade ? String(c.conteudo_unidade).trim() : null,
         confianca: ['alta', 'media', 'baixa'].includes(String(c.confianca))
@@ -227,7 +295,27 @@ Deno.serve(async (req) => {
       };
     }).filter((c) => Number.isFinite(c.indice) && c.nome);
 
-    return json({ itens: classificados, ia_modelo: modeloUsado });
+    // O sistema aprende: termo de nao-alimento classificado com confianca vira
+    // regra deterministica. Da proxima nota em diante, resolve sem IA, de graca
+    // e auditavel. Falha aqui nunca derruba a importacao da nota.
+    const aprendidos: { termo: string; categoria: string }[] = [];
+    for (const c of classificados) {
+      if (!aprendiveis.has(c.categoria) || c.confianca === 'baixa') continue;
+      try {
+        const { data } = await admin.rpc('fn_aprender_termo_lexico', {
+          p_termo: c.nome,
+          p_categoria: c.categoria,
+          p_descricao_origem: entrada.find((i) => i.indice === c.indice)?.descricao ?? null,
+          p_loja_id: loja_id,
+        });
+        const r = data as { aprendido?: boolean } | null;
+        if (r?.aprendido) aprendidos.push({ termo: c.nome, categoria: c.categoria });
+      } catch (e) {
+        console.error('aprendizado do lexico falhou (seguindo sem ele):', e);
+      }
+    }
+
+    return json({ itens: classificados, ia_modelo: modeloUsado, aprendidos });
   } catch (e) {
     return json({ error: String((e as Error)?.message ?? e) }, { status: 500 });
   }
