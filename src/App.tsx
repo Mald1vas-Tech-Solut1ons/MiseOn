@@ -17,6 +17,7 @@ const Acesso          = lazy(() => import('./pages/Acesso'));
 const Lojas           = lazy(() => import('./pages/Lojas'));
 const CadastreSuaLoja = lazy(() => import('./pages/CadastreSuaLoja'));
 const MeusPedidos     = lazy(() => import('./pages/MeusPedidos'));
+const PerfilLoja      = lazy(() => import('./pages/PerfilLoja'));
 const AcompanharPedido= lazy(() => import('./pages/Pedido'));
 const Termos          = lazy(() => import('./pages/legal/Termos'));
 const Privacidade     = lazy(() => import('./pages/legal/Privacidade'));
@@ -248,6 +249,8 @@ export default function App() {
                 <Route path="/tv"            element={<TvPareamento />} />
                 <Route path="/tv/:slug"      element={<PainelTV />} />
                 <Route path="/cast/receiver" element={<CastReceiver />} />
+                {/* Perfil da loja: o link que o lojista cola na bio do Instagram. */}
+                <Route path="/:slug/perfil" element={<PerfilLoja />} />
                 <Route path="/:slug/meus-pedidos" element={<MeusPedidos />} />
                 <Route path="/:slug"         element={<Cardapio />} />
                 <Route path="*"             element={<Home />} />

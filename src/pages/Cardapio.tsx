@@ -480,6 +480,12 @@ export default function Cardapio() {
                 <p className="flex items-center gap-1 truncate text-xs text-white/85 sm:text-sm">
                   <MapPin size={12} /> {loja.endereco}
                 </p>
+                {/* Perfil da loja: o mesmo lugar onde o concorrente poe "Perfil da
+                    loja", e o destino que o lojista cola na bio do Instagram. */}
+                <Link to={`/${loja.slug}/perfil`}
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-white/90 underline-offset-2 hover:underline">
+                  {tDynamic('Perfil da loja')} <ChevronRight size={12} />
+                </Link>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
                   <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold backdrop-blur-sm ${aberta ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'}`}>
                     <Clock size={11} /> {aberta ? 'Aberto agora' : 'Fechado'}
@@ -1027,6 +1033,158 @@ export default function Cardapio() {
           </SuccessCelebration>
         </Modal>
       )}
+
+      {/* ── RODAPÉ DA LOJA ──────────────────────────────────────────────
+          O cardápio terminava no vazio: acabavam os produtos e a página
+          simplesmente parava. Quem chegou até o fim é exatamente quem estava
+          decidindo — e não tinha onde confirmar endereço, horário, forma de
+          pagamento ou como falar com a loja. Ele saía para o Google procurar
+          o que já era nosso.
+
+          O que entra aqui é só informação que a loja JÁ cadastrou: nada é
+          inventado, e cada bloco some quando não há dado. Rodapé com campo
+          vazio é pior do que rodapé curto. */}
+      <footer className="mt-10 border-t" style={{ borderColor: 'var(--cor-borda)', background: 'color-mix(in srgb, var(--cor-surface) 70%, transparent)' }}>
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+
+            {/* Identidade */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2.5">
+                {loja.logo_url
+                  ? <img src={getOptimizedImageUrl(loja.logo_url)} alt="" className="h-10 w-10 rounded-xl object-cover" />
+                  : <div className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-black"
+                      style={{ background: loja.cor_primaria, color: isLightColor(loja.cor_primaria) ? '#111827' : '#fff' }}>{iniciais}</div>}
+                <p className="font-black leading-tight" style={{ color: 'var(--cor-texto)' }}>{loja.nome}</p>
+              </div>
+              {loja.descricao && (
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--cor-texto-suave)' }}>{loja.descricao}</p>
+              )}
+              {(() => {
+                const redes: { rede: RedeSocial; valor?: string | null; Icone: typeof Instagram; rotulo: string }[] = [
+                  { rede: 'instagram', valor: loja.instagram, Icone: Instagram, rotulo: 'Instagram' },
+                  { rede: 'tiktok', valor: loja.tiktok, Icone: Music2, rotulo: 'TikTok' },
+                  { rede: 'facebook', valor: loja.facebook, Icone: Facebook, rotulo: 'Facebook' },
+                ];
+                const ativas = redes.map((r) => ({ ...r, url: urlDaRede(r.rede, r.valor) })).filter((r) => r.url);
+                if (!ativas.length) return null;
+                return (
+                  <div className="flex gap-2 pt-1">
+                    {ativas.map(({ rede, url, Icone, rotulo }) => (
+                      <a key={rede} href={url!} target="_blank" rel="noopener noreferrer nofollow" aria-label={rotulo}
+                        className="flex h-9 w-9 items-center justify-center rounded-full border transition hover:brightness-95"
+                        style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto-suave)' }}>
+                        <Icone size={16} />
+                      </a>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Onde estamos */}
+            {loja.endereco && (
+              <div className="space-y-2">
+                <p className="text-xs font-black uppercase tracking-wide" style={{ color: 'var(--cor-texto-fraco)' }}>{tDynamic('Onde estamos')}</p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--cor-texto-suave)' }}>{loja.endereco}</p>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loja.endereco)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold"
+                  style={{ color: 'var(--cor-primaria-texto)' }}
+                >
+                  <MapPin size={13} /> {tDynamic('Abrir no mapa')}
+                </a>
+                {loja.whatsapp && (
+                  <a
+                    href={`https://wa.me/55${String(loja.whatsapp).replace(/\D/g, '')}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="mt-1 flex items-center gap-1.5 text-xs font-bold"
+                    style={{ color: 'var(--cor-primaria-texto)' }}
+                  >
+                    <Receipt size={13} /> {tDynamic('Falar no WhatsApp')}
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Horários — a semana inteira, com hoje em destaque */}
+            {horarios.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-black uppercase tracking-wide" style={{ color: 'var(--cor-texto-fraco)' }}>{tDynamic('Horários')}</p>
+                <ul className="space-y-1">
+                  {['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'].map((nomeDia, dia) => {
+                    const doDia = horarios.filter((h) => h.dia_semana === dia);
+                    const hoje = new Date().getDay() === dia;
+                    return (
+                      <li key={dia} className="flex items-baseline justify-between gap-3 text-xs"
+                        style={{ color: hoje ? 'var(--cor-texto)' : 'var(--cor-texto-suave)', fontWeight: hoje ? 700 : 400 }}>
+                        <span>{tDynamic(nomeDia)}</span>
+                        <span className="tabular-nums">
+                          {doDia.length === 0
+                            ? tDynamic('Fechado')
+                            : doDia.map((h) => `${h.abre.slice(0, 5)}–${h.fecha.slice(0, 5)}`).join(' · ')}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
+            {/* Como pagar e receber */}
+            <div className="space-y-2">
+              <p className="text-xs font-black uppercase tracking-wide" style={{ color: 'var(--cor-texto-fraco)' }}>{tDynamic('Pagamento e entrega')}</p>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="rounded-lg border px-2 py-1 text-[11px] font-bold" style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto-suave)' }}>Pix</span>
+                <span className="rounded-lg border px-2 py-1 text-[11px] font-bold" style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto-suave)' }}>{tDynamic('Dinheiro')}</span>
+                {loja.efi_configurado && (
+                  <span className="rounded-lg border px-2 py-1 text-[11px] font-bold" style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto-suave)' }}>{tDynamic('Cartão')}</span>
+                )}
+              </div>
+              {loja.efi_configurado && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  {BANDEIRAS_ACEITAS.map((b) => <BandeiraMark key={b} id={b} />)}
+                </div>
+              )}
+              <ul className="space-y-1 pt-1 text-xs" style={{ color: 'var(--cor-texto-suave)' }}>
+                {loja.pedido_minimo > 0 && <li>{tDynamic('Pedido mínimo')} {fmt(loja.pedido_minimo)}</li>}
+                {(loja.meta_preparo_min ?? 0) > 0 && <li>{tDynamic('Preparo em cerca de')} {loja.meta_preparo_min} min</li>}
+                {loja.aceita_entrega && (
+                  <li>
+                    {Number(loja.entrega_taxa_padrao ?? 0) > 0
+                      ? `${tDynamic('Entrega')} ${fmt(Number(loja.entrega_taxa_padrao))}`
+                      : tDynamic('Entrega grátis')}
+                    {Number(loja.entrega_raio_km ?? 0) > 0 && ` · ${tDynamic('até')} ${loja.entrega_raio_km} km`}
+                  </li>
+                )}
+                {Number(loja.frete_gratis_valor_minimo ?? 0) > 0 && (
+                  <li>{tDynamic('Frete grátis acima de')} {fmt(Number(loja.frete_gratis_valor_minimo))}</li>
+                )}
+                {Number(loja.cashback_pct ?? 0) > 0 && (
+                  <li>{loja.cashback_pct}% {tDynamic('de cashback em toda compra')}</li>
+                )}
+              </ul>
+            </div>
+          </div>
+
+          {/* Assinatura: o cardápio de cada cliente é a nossa vitrine também. */}
+          <div className="mt-8 flex flex-col items-center gap-2 border-t pt-6 sm:flex-row sm:justify-between"
+            style={{ borderColor: 'var(--cor-borda)' }}>
+            <p className="text-[11px]" style={{ color: 'var(--cor-texto-fraco)' }}>
+              © {new Date().getFullYear()} {loja.nome}
+            </p>
+            <a
+              href="https://miseon.app.br"
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-[11px] font-semibold transition hover:brightness-110"
+              style={{ color: 'var(--cor-texto-fraco)' }}
+            >
+              {tDynamic('Cardápio digital por')} <span className="font-black" style={{ color: 'var(--cor-primaria-texto)' }}>MiseOn</span>
+            </a>
+          </div>
+        </div>
+      </footer>
 
       {/* Interface de Chat do Cliente */}
       <ChatInterface loja={loja} user={user} />
