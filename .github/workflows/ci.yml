@@ -81,12 +81,17 @@ jobs:
           {
             echo "SB_API_URL=$API_URL"
             echo "SB_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            # A ANON_KEY tambem precisa viajar: sem ela o cliente "publico" das
+            # suites de contrato de seguranca caia na service role e passava a
+            # IGNORAR RLS — teste de RLS rodando como superusuario e falso-verde.
+            echo "SB_ANON_KEY=$ANON_KEY"
           } >> "$GITHUB_ENV"
       - name: Testes de integração
         run: npx vitest run __tests__/integration
         env:
           VITE_SUPABASE_URL: ${{ env.SB_API_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ env.SB_SERVICE_ROLE_KEY }}
+          VITE_SUPABASE_ANON_KEY: ${{ env.SB_ANON_KEY }}
           # Gate do falso-verde (ver __tests__/integration/gate.ts): este job
           # promete integração — se a chave não chegar, BLOCKED vira FALHA
           # em vez de suíte sumir do relatório e o CI ficar verde no vazio.
