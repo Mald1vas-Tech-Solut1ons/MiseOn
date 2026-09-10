@@ -1681,17 +1681,22 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
       if (error || !data?.aprovado) {
         if ((data as any)?.detail) console.warn('[cartao-pagar] detalhe Efí:', (data as any).detail);
         let msg: unknown = data?.error ?? 'Pagamento não autorizado. Confira os dados ou tente outro cartão.';
+        // O motivo tecnico do provedor NAO e reescrito pela funcao: e nele que
+        // da pra reconhecer o caso, mesmo quando o texto do comprador muda.
+        let motivoTecnico = String((data as any)?.motivo_tecnico ?? '');
         if (error) {
           try {
             const b = await (error as any)?.context?.json?.();
             if (b?.detail) console.warn('[cartao-pagar] detalhe Efí:', b.detail);
             msg = b?.error ?? msg;
+            motivoTecnico = String(b?.motivo_tecnico ?? '');
           } catch { /* mantém msg */ }
         }
         // Garante texto: nunca joga objeto no JSX (senão o React quebra a tela).
         const texto = typeof msg === 'string' ? msg : '';
+        const sinal = `${texto} ${motivoTecnico}`;
         setErro(
-          /recebedor e cliente n[aã]o podem ser a mesma pessoa/i.test(texto)
+          /recebedor e cliente n[aã]o podem ser a mesma pessoa|mesma pessoa|4600222/i.test(sinal)
             ? 'A Efí não permite que o titular da conta recebedora pague a própria loja. Para testar outro cartão, toque em “Trocar titular” e informe o nome e o CPF do titular desse cartão.'
             : (texto || 'Pagamento não autorizado. Confira os dados ou tente outro cartão.'),
         );
@@ -1708,6 +1713,23 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
     }
     setProcessando(false);
   };
+
+  /**
+   * Nome e CPF andam juntos: sao do MESMO titular. Quando o nome digitado
+   * deixa de ser o que estava salvo, o CPF salvo perde a validade — e deixar
+   * ele no campo faz o pagamento sair com o documento de outra pessoa.
+   * Foi assim que uma compra com o cartao de terceiro seguiu com o CPF do dono
+   * da loja e o provedor recusou por "recebedor e cliente sao a mesma pessoa".
+   */
+  useEffect(() => {
+    if (!salvo?.nome || !salvo?.cpf) return;
+    const mudouDeTitular = nome.trim() !== '' && nome.trim().toUpperCase() !== salvo.nome.trim().toUpperCase();
+    if (mudouDeTitular && cpf === salvo.cpf) {
+      setCpf('');
+      setTocado((atual) => ({ ...atual, cpf: false }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nome]);
 
   const marcar = (k: string) => setTocado((t) => ({ ...t, [k]: true }));
   const trocarTitular = () => {
@@ -1844,6 +1866,11 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
                   }}
                   onBlur={() => marcar('cpf')}
                   inputMode="numeric" placeholder="000.000.000-00" className={campoCls('cpf', okCpf)} />
+                {salvo?.cpf && cpf === salvo.cpf && (
+                  <span className="mt-1 block text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                    {tDynamic('Salvo de')} {salvo.nome} — {tDynamic('confira se é o titular deste cartão')}
+                  </span>
+                )}
               </label>
               <label className="block">
                 <span className={rotuloCls}>Parcelamento</span>

@@ -1235,6 +1235,8 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Cliente pede pelo navegador, sem instalar aplicativo': 'Customers order from the browser, with no app to install',
   'Cobertura inteligente de entrega': 'Smart delivery coverage',
   'Cobrar': 'Charge',
+  'Salvo de': 'Saved from',
+  'confira se é o titular deste cartão': 'check that this is the holder of this card',
   'Para onde o banner leva': 'Where the banner goes',
   'Banner que não leva a lugar nenhum ensina o cliente que ali não se clica.': 'A banner that goes nowhere teaches the customer not to tap there.',
   'Nenhum destino': 'No destination',

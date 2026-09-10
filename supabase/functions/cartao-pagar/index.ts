@@ -314,7 +314,28 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       // produz carrinho abandonado. Marca o bloqueio; a vitrine para de
       // oferecer cartao na hora (lojas_publicas.efi_configurado) e o lojista
       // ve o motivo no painel, com o texto que ele leva para o provedor.
-      const ehProblemaDaConta = /limite operacional|recebedor|payee|marketplace|conta do|nao habilitad|não habilitad/i.test(String(motivo));
+      // ── PAGADOR IGUAL AO RECEBEDOR (Efí 4600222) ──────────────────────
+      // Medido em producao 10/09/2026: a Efi respondeu HTTP 500 com
+      //   { code: 4600222, error_description:
+      //     "Recebedor e cliente não podem ser a mesma pessoa." }
+      // porque o CPF do comprador era o do titular da conta que recebe. E uma
+      // regra do adquirente, nao um defeito da loja e nem do cartao.
+      //
+      // POR QUE ISSO PRECISAVA DE CASO PROPRIO: o texto contem a palavra
+      // "recebedor", entao caia no teste de problema-de-conta abaixo e
+      // produzia DOIS estragos de uma vez.
+      //   1. O comprador via "Nao conseguimos processar o cartao agora",
+      //      que esconde a unica informacao que resolveria: e o CPF.
+      //   2. Pior: disparava fn_bloquear_cartao_online e DESLIGAVA o cartao
+      //      da loja inteira. Ou seja, o dono testando o proprio sistema com
+      //      o proprio CPF derrubava a venda no cartao para todos os clientes
+      //      dele — um autoteste virando incidente de producao.
+      const codigoEfi = Number(charge?.code ?? charge?.error_code ?? 0);
+      const ehPagadorIgualRecebedor =
+        codigoEfi === 4600222 || /mesma pessoa/i.test(String(motivo));
+
+      const ehProblemaDaConta = !ehPagadorIgualRecebedor
+        && /limite operacional|recebedor|payee|marketplace|conta do|nao habilitad|não habilitad/i.test(String(motivo));
       if (ehProblemaDaConta) {
         await supabaseAdmin.rpc('fn_bloquear_cartao_online', {
           p_loja_id: pedido.loja_id,
@@ -325,9 +346,15 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
         });
       }
 
-      const mensagemCliente = ehProblemaDaConta
-        ? 'Não conseguimos processar o cartão agora. Você pode pagar com Pix ou escolher outra forma de pagamento.'
-        : String(motivo);
+      const mensagemCliente = ehPagadorIgualRecebedor
+        // Aqui a verdade tecnica AJUDA: quem cai neste caso e quase sempre o
+        // proprio dono testando, e a acao que resolve e trocar o CPF. Esconder
+        // isso atras de uma frase generica foi o que fez parecer que o cartao
+        // do sistema estava quebrado.
+        ? 'O CPF informado é o mesmo do titular da conta que recebe o pagamento, e o provedor não autoriza pagamento para si mesmo. Use o CPF e o cartão de outra pessoa — com o cliente real isso não acontece.'
+        : ehProblemaDaConta
+          ? 'Não conseguimos processar o cartão agora. Você pode pagar com Pix ou escolher outra forma de pagamento.'
+          : String(motivo);
 
       return json({
         aprovado: false,
