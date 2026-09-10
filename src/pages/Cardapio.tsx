@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
-import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike, ChevronLeft, ChevronRight, Instagram, Facebook, Music2 } from 'lucide-react';
+import { urlDaRede, arrobaDaRede, type RedeSocial } from '../lib/redesSociais';
 import { supabase } from '../lib/supabase';
 import { FotoProduto } from '../lib/fotoProduto';
 import { obterFotoFallback, obterFotoProduto } from '../lib/fotoProdutoUtils';
@@ -149,6 +150,53 @@ export default function Cardapio() {
   const [user, setUser] = useState<User | null>(null);
   const [temaCliente, setTemaCliente] = useState<PreferenciaTema>(() => obterTemaPreferido());
   const [modalVozAberto, setModalVozAberto] = useState(false);
+
+  /**
+   * BARRA DE BUSCA E CATEGORIAS FIXA.
+   *
+   * Antes ela rolava junto com a lista: bastava descer dois produtos para
+   * perder busca e filtro, e quem queria trocar de categoria tinha que voltar
+   * ao topo. Num cardapio de 50 itens como o da Natureba isso e a diferenca
+   * entre navegar e desistir. A pagina do concorrente ja fixa essa faixa; a
+   * nossa nao fixava.
+   *
+   * A sombra e o detalhe que faz a faixa parecer parte da pagina em vez de
+   * uma tarja colada: ela SO existe quando a barra esta grudada no topo, com o
+   * conteudo correndo por baixo. Um observador em cima de uma sentinela de 1px
+   * logo acima da barra diz exatamente esse momento — sem ouvir evento de
+   * scroll, que dispara dezenas de vezes por segundo e trava a rolagem no
+   * celular.
+   */
+  const sentinelaRef = useRef<HTMLDivElement>(null);
+  const listaRef = useRef<HTMLDivElement>(null);
+  const [barraGrudada, setBarraGrudada] = useState(false);
+
+  useEffect(() => {
+    const alvo = sentinelaRef.current;
+    if (!alvo || typeof IntersectionObserver === 'undefined') return;
+    const observador = new IntersectionObserver(
+      ([entrada]) => setBarraGrudada(!entrada.isIntersecting),
+      { threshold: 0 },
+    );
+    observador.observe(alvo);
+    return () => observador.disconnect();
+  }, [loja?.id]);
+
+  /**
+   * Trocar de categoria com a pagina no meio deixaria o resultado fora da
+   * tela: o filtro trocou, mas a pessoa continua olhando o mesmo lugar e acha
+   * que nao aconteceu nada. Depois de filtrar, leva a lista para logo abaixo
+   * da barra.
+   */
+  const filtrarCategoria = (id: string | null) => {
+    setCatAtiva(id);
+    requestAnimationFrame(() => {
+      const lista = listaRef.current;
+      if (!lista) return;
+      const topo = lista.getBoundingClientRect().top + window.scrollY - 120;
+      window.scrollTo({ top: Math.max(0, topo), behavior: 'smooth' });
+    });
+  };
 
 
   // Recuperação de vendas: quando o checkout abre com item no carrinho, registra
@@ -339,7 +387,7 @@ export default function Cardapio() {
   const iniciais = (loja.nome || '').trim() ? (loja.nome || '').trim()[0].toUpperCase() : '?';
 
   return (
-    <div className="loja-marca min-h-screen pb-28 lg:pb-16">
+    <div className="loja-marca vitrine-papel min-h-screen pb-28 lg:pb-16">
       <SEO
         title={`${loja.nome} | Cardápio Digital & Pedidos Online`}
         description={`Cardápio digital e pedidos online de ${loja.nome}. Faça seu pedido pelo site ou WhatsApp. Endereço: ${loja.endereco || 'Atendimento local e delivery'}.`}
@@ -458,6 +506,43 @@ export default function Cardapio() {
                     </span>
                   )}
                 </div>
+
+                {/* REDES DA LOJA — o cardapio e a pagina que o cliente abre com
+                    fome, o momento de maior atencao do dia. Sem isto a visita
+                    termina no pedido; com isto vira seguidor, e seguidor volta.
+                    So aparece o que esta cadastrado e resolve para um endereco
+                    valido: campo vazio, ou link colado no campo errado, nao
+                    vira botao que mente sobre para onde leva. */}
+                {(() => {
+                  const redes: { rede: RedeSocial; valor?: string | null; Icone: typeof Instagram; rotulo: string }[] = [
+                    { rede: 'instagram', valor: loja.instagram, Icone: Instagram, rotulo: 'Instagram' },
+                    { rede: 'tiktok', valor: loja.tiktok, Icone: Music2, rotulo: 'TikTok' },
+                    { rede: 'facebook', valor: loja.facebook, Icone: Facebook, rotulo: 'Facebook' },
+                  ];
+                  const ativas = redes
+                    .map((r) => ({ ...r, url: urlDaRede(r.rede, r.valor), arroba: arrobaDaRede(r.rede, r.valor) }))
+                    .filter((r) => r.url);
+                  if (ativas.length === 0) return null;
+                  return (
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      {ativas.map(({ rede, url, arroba, Icone, rotulo }) => (
+                        <a
+                          key={rede}
+                          href={url!}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          aria-label={`${rotulo}: ${arroba ?? ''}`}
+                          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold backdrop-blur-sm transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                          style={{ background: 'rgba(255,255,255,0.92)', color: '#111827' }}
+                        >
+                          <Icone size={13} />
+                          <span className="hidden sm:inline">{arroba ?? rotulo}</span>
+                          <span className="sm:hidden">{rotulo}</span>
+                        </a>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -641,6 +726,21 @@ export default function Cardapio() {
 
       <div className="mx-auto max-w-6xl lg:grid lg:grid-cols-[1fr_360px] lg:items-start lg:gap-6 lg:px-6 lg:pt-4">
         <main className="min-w-0">
+          {/* Sentinela de 1px: some da tela no instante em que a barra gruda. */}
+          <div ref={sentinelaRef} aria-hidden="true" className="h-px w-full" />
+
+          <div
+            className="sticky top-0 z-30 transition-shadow duration-300"
+            style={{
+              // Vidro: o fundo da loja aparece por baixo, borrado. Fica com a
+              // cor da marca em vez de um cinza generico colado por cima.
+              background: 'color-mix(in srgb, var(--cor-fundo) 82%, transparent)',
+              backdropFilter: 'blur(18px) saturate(140%)',
+              WebkitBackdropFilter: 'blur(18px) saturate(140%)',
+              borderBottom: barraGrudada ? '1px solid var(--cor-borda)' : '1px solid transparent',
+              boxShadow: barraGrudada ? '0 10px 30px -18px rgba(0,0,0,0.45)' : 'none',
+            }}
+          >
           {/* Busca */}
           <div className="px-4 pt-2 lg:px-0">
             <div className="vitrine-search flex items-center gap-2 rounded-2xl px-4 py-3">
@@ -668,15 +768,17 @@ export default function Cardapio() {
           <div className="px-4 py-3 lg:px-0">
             <HorizontalScrollContainer className="py-1">
               <button type="button"
-                onClick={() => setCatAtiva(null)}
+                onClick={() => filtrarCategoria(null)}
+                aria-pressed={!catAtiva}
                 className={`vitrine-chip shrink-0 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer ${!catAtiva ? 'is-active' : ''}`}
               >
-                Tudo
+                {tDynamic('Tudo')}
               </button>
               {categorias.map((c) => (
                 <button type="button"
                   key={c.id}
-                  onClick={() => setCatAtiva(c.id === catAtiva ? null : c.id)}
+                  onClick={() => filtrarCategoria(c.id === catAtiva ? null : c.id)}
+                  aria-pressed={catAtiva === c.id}
                   className={`vitrine-chip shrink-0 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer ${catAtiva === c.id ? 'is-active' : ''}`}
                 >
                   {c.nome}
@@ -684,6 +786,9 @@ export default function Cardapio() {
               ))}
             </HorizontalScrollContainer>
           </div>
+          </div>
+
+          <div ref={listaRef} />
 
           {/* Os mais pedidos */}
           {!busca && !catAtiva && maisPedidos.length > 0 && (

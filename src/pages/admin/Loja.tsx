@@ -76,6 +76,9 @@ interface FormLoja {
   cor_fundo_escuro: string;
   tema_cardapio: TemaLoja;
   whatsapp: string;
+  instagram: string;
+  tiktok: string;
+  facebook: string;
   telefone: string;
   endereco: string;
   cnpj: string;
@@ -134,6 +137,7 @@ const vazio: FormLoja = {
   cor_primaria: PALETA_CORES[5], cor_secundaria: PALETA_CORES[1],
   fonte: 'Inter', cor_texto: PALETA_CORES[13], cor_fundo_claro: PALETA_FUNDO_POR_TEMA.claro[0], cor_fundo_escuro: PALETA_FUNDO_POR_TEMA.escuro[0], tema_cardapio: 'claro',
   whatsapp: '', telefone: '', endereco: '', cnpj: '', razao_social: '', pedido_minimo: '0', pix_chave: '', efi_payee_code: '',
+  instagram: '', tiktok: '', facebook: '',
   efi_titular_documento: '', efi_conta: '', antecipacao_cartao: false,
   aceita_online: true, aceita_entrega: true,
   aceita_agendamento: false, agendamento_antecedencia_min: '30',
@@ -285,6 +289,7 @@ export default function Loja() {
           cor_fundo_escuro: data.cor_fundo_escuro ?? (!isLightColor(data.cor_texto) ? data.cor_texto : vazio.cor_fundo_escuro),
           tema_cardapio: resolverTemaLoja(data.tema_cardapio, data.cor_fundo_claro ?? data.cor_texto ?? vazio.cor_fundo_claro),
           whatsapp: data.whatsapp ?? '', telefone: data.telefone ?? '', endereco: data.endereco ?? '',
+          instagram: data.instagram ?? '', tiktok: data.tiktok ?? '', facebook: data.facebook ?? '',
           cnpj: data.cnpj ?? '', razao_social: data.razao_social ?? '',
           pedido_minimo: String(data.pedido_minimo ?? 0), pix_chave: data.pix_chave ?? '',
           efi_payee_code: data.efi_payee_code ?? '',
@@ -495,6 +500,10 @@ export default function Loja() {
       cor_fundo_escuro: fundoEscuroGerado,
       tema_cardapio: form.tema_cardapio,
       whatsapp: form.whatsapp,
+      // Guarda como ele digitou; quem resolve o endereco e a vitrine.
+      instagram: form.instagram.trim() || null,
+      tiktok: form.tiktok.trim() || null,
+      facebook: form.facebook.trim() || null,
       telefone: form.telefone || null,
       endereco: form.endereco || null,
       cnpj: form.cnpj || null,
@@ -1366,6 +1375,20 @@ export default function Loja() {
               {renderCampo('CPF / CNPJ', 'cnpj', '000.000.000-00 ou 00.000.000/0001-00')}
             </div>
             <p className="mt-2 text-xs opacity-95 text-gray-400">{tDynamic('Aparecem no cabeçalho da Nota do Cliente. Deixe em branco se não quiser exibir.')}</p>
+          </div>
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+            <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold"><Share2 size={15} /> {tDynamic('Redes sociais')}</p>
+            <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+              {tDynamic('Viram botões no topo do seu cardápio. Quem gostou do pedido passa a te seguir — e volta.')}
+            </p>
+            <div className="space-y-3">
+              {renderCampo('Instagram', 'instagram', '@suamarca')}
+              {renderCampo('TikTok', 'tiktok', '@suamarca')}
+              {renderCampo('Facebook', 'facebook', '@suamarca')}
+            </div>
+            <p className="mt-2 text-xs text-gray-400">
+              {tDynamic('Pode colar o @, só o nome ou o link inteiro. Campo vazio não vira botão.')}
+            </p>
           </div>
           {renderCampo('Pedido mínimo (R$)', 'pedido_minimo', '15')}
         </div>

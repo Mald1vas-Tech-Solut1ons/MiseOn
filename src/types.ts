@@ -141,6 +141,10 @@ export interface Loja {
   whatsapp: string;
   telefone?: string;
   endereco?: string;
+  /** Perfis como o lojista digitou; normalizados na leitura por lib/redesSociais. */
+  instagram?: string | null;
+  tiktok?: string | null;
+  facebook?: string | null;
   cnpj?: string;
   razao_social?: string;
   pedido_minimo: number;
