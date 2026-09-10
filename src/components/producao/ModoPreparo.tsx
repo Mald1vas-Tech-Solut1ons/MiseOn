@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   X, ChevronLeft, ChevronRight, ChefHat, Timer, Play, Pause, RotateCcw,
-  Trophy, CheckCircle2, Circle, PackageCheck, PackageX, Loader2, ListChecks, Flame,
+  Trophy, CheckCircle2, Circle, PackageCheck, PackageX, Loader2, ListChecks, Flame, Scissors,
 } from 'lucide-react';
 import { Insumo, PassoPreparo, fmt } from '../../types';
 import { useI18n } from '../../contexts/I18nContext';
+import { Tecnica, carregarTecnicas } from '../../lib/producao/tecnicas';
 
 export interface ItemMiseEnPlace {
   ins?: Insumo;
+  /** Bruto a retirar do estoque. */
   necessario: number;
   disponivel: number;
   ok: boolean;
+  /** Líquido esperado após o pré-preparo. Nulo = sem perda declarada. */
+  liquido?: number | null;
+  tecnica?: string | null;
 }
 
 interface Props {
@@ -66,6 +71,8 @@ export default function ModoPreparo({
   preparo, qtdLotes, rendimento, custo, itens, onConcluir, onFechar,
 }: Props) {
   const { tDynamic } = useI18n();
+  const [tecnicas, setTecnicas] = useState<Tecnica[]>([]);
+  useEffect(() => { carregarTecnicas().then(setTecnicas); }, []);
 
   const passos: PassoPreparo[] = useMemo(() => {
     const bruto = preparo.modo_preparo;
@@ -148,6 +155,10 @@ export default function ModoPreparo({
 
   const conferirTudo = () => setConferidos(new Set(itens.map(i => i.ins?.id ?? '')));
 
+  /** O corte que a ficha manda fazer, por extenso, para a equipe na bancada. */
+  const rotuloTecnica = (codigo?: string | null) =>
+    codigo ? tecnicas.find(t => t.codigo === codigo)?.rotulo ?? null : null;
+
   const tempoTotalPasso = minutosPasso * 60;
   const progressoTimer = tempoTotalPasso > 0 ? ((tempoTotalPasso - restante) / tempoTotalPasso) * 100 : 0;
 
@@ -220,14 +231,26 @@ export default function ModoPreparo({
                             : <Circle size={22} className="shrink-0 text-gray-300 dark:text-gray-700" />}
                           <span className="min-w-0">
                             <span className={`block truncate font-bold ${conferido ? 'text-emerald-800 dark:text-emerald-300' : 'text-gray-800 dark:text-gray-200'}`}>{it.ins?.nome ?? '—'}</span>
+                            {rotuloTecnica(it.tecnica) && (
+                              <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">
+                                <Scissors size={10} /> {rotuloTecnica(it.tecnica)}
+                              </span>
+                            )}
                             <span className="flex items-center gap-1 text-xs font-semibold text-gray-400">
                               {it.ok ? <PackageCheck size={12} className="text-emerald-500" /> : <PackageX size={12} className="text-red-500" />}
                               {tDynamic('Em estoque')}: {it.disponivel} {it.ins?.unidade_medida}
                             </span>
                           </span>
                         </span>
-                        <span className={`shrink-0 tabular-nums text-lg font-black ${it.ok ? 'text-gray-700 dark:text-gray-200' : 'text-red-500'}`}>
-                          {it.necessario} <span className="text-xs font-bold text-gray-400">{it.ins?.unidade_medida}</span>
+                        <span className="shrink-0 text-right">
+                          <span className={`block tabular-nums text-lg font-black ${it.ok ? 'text-gray-700 dark:text-gray-200' : 'text-red-500'}`}>
+                            {it.necessario} <span className="text-xs font-bold text-gray-400">{it.ins?.unidade_medida}</span>
+                          </span>
+                          {it.liquido != null && it.liquido < it.necessario && (
+                            <span className="block text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                              → {it.liquido.toLocaleString('pt-BR', { maximumFractionDigits: 4 })} {tDynamic('limpo')}
+                            </span>
+                          )}
                         </span>
                       </button>
                     );

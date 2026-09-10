@@ -3,8 +3,10 @@ import { Plus, Pencil, Trash2, ChefHat, Flame, X, CheckCircle2, Clock, AlertTria
 import { supabase } from '../../lib/supabase';
 import { Insumo, PassoPreparo, ProducaoPreparo, fmt } from '../../types';
 import { UNIDADES } from '../../lib/unidades';
-import SeletorInsumo from '../../components/producao/SeletorInsumo';
 import { podeEntrarNaFicha } from '../../lib/fichaTecnica';
+import LinhaFichaInsumo from '../../components/producao/LinhaFichaInsumo';
+import { LinhaFicha, linhaVazia, fatorParaEstoque } from '../../lib/producao/linhaFicha';
+import { Tecnica, carregarTecnicas } from '../../lib/producao/tecnicas';
 
 import { useI18n } from '../../contexts/I18nContext';
 /* ── Validade: status de um lote produzido ── */
@@ -45,6 +47,30 @@ const lerPassos = (p: Insumo): { texto: string; minutos: string; fogo: boolean }
     }));
 };
 
+/**
+ * Reconstrói as linhas da ficha preservando a intenção original do lojista:
+ * ele digitou "5 un" e o banco guardou 0,6 kg de bruto. As duas coisas voltam.
+ */
+const lerLinhasFicha = (p: Insumo): LinhaFicha[] =>
+  ((p as { fichas_preparos?: unknown }).fichas_preparos as Record<string, unknown>[] | undefined ?? [])
+    .map(f => {
+      const informada = Number(f.quantidade_informada);
+      const unidade = typeof f.unidade_informada === 'string' ? f.unidade_informada : '';
+      const pct = Number(f.rendimento_pct_aplicado);
+      const origem = f.rendimento_origem as LinhaFicha['rendimento_origem'];
+      return {
+        insumo_id: String(f.insumo_id ?? ''),
+        quantidade: String(informada > 0 ? informada : Number(f.quantidade ?? 0)),
+        unidade,
+        tecnica_codigo: typeof f.tecnica_codigo === 'string' ? f.tecnica_codigo : '',
+        // Só volta como sobrescrita manual o que o usuário realmente digitou;
+        // referência do sistema é recalculada, para acompanhar medições novas.
+        rendimento_pct: origem === 'USUARIO' && pct > 0 ? String(Math.round(pct * 10000) / 100) : '',
+        rendimento_origem: origem ?? null,
+        rendimento_sistema_pct: origem && origem !== 'USUARIO' && pct > 0 ? pct : null,
+      };
+    });
+
 /** Retorno de fn_produzir_preparo — o custo real apurado na produção. */
 interface ResultadoProducao {
   preparo: string;
@@ -65,7 +91,8 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
   const [validadeQtd, setValidadeQtd] = useState('');
   const [validadeUnidade, setValidadeUnidade] = useState<'horas' | 'dias' | 'semanas' | 'meses'>('dias');
   const [producoes, setProducoes] = useState<ProducaoPreparo[]>([]);
-  const [ficha, setFicha] = useState<{ insumo_id: string; quantidade: string }[]>([]);
+  const [ficha, setFicha] = useState<LinhaFicha[]>([]);
+  const [tecnicas, setTecnicas] = useState<Tecnica[]>([]);
   const [passos, setPassos] = useState<{ texto: string; minutos: string; fogo: boolean }[]>([]);
   
   const [salvando, setSalvando] = useState(false);
@@ -122,6 +149,8 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
     if (!somenteCadastro) carregarProducoes();
   }, [carregarProducoes, somenteCadastro]);
 
+  useEffect(() => { carregarTecnicas().then(setTecnicas); }, []);
+
   const descartarLote = async (lote: ProducaoPreparo) => {
     const preparo = insumosTotais.find(i => i.id === lote.preparo_id);
     if (!preparo) return;
@@ -163,10 +192,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       const v = extrairValidadeDinamica(p.validade_horas);
       setValidadeQtd(v.qtd);
       setValidadeUnidade(v.u);
-      setFicha((p as any).fichas_preparos?.map((f: any) => ({
-        insumo_id: f.insumo_id,
-        quantidade: String(f.quantidade)
-      })) || []);
+      setFicha(lerLinhasFicha(p));
       setPassos(lerPassos(p));
     } else {
       setEditando('novo');
@@ -183,11 +209,26 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
 
   const salvar = async () => {
     const rendimento = Number(rendimentoPorcoes);
-    const fichaValida = ficha.filter(f => f.insumo_id && Number(f.quantidade) > 0);
+    // Converte a intenção do usuário para a unidade de estoque: é nela que o
+    // saldo vive e é ela que a RPC de produção consome.
+    const linhasCalculadas = ficha
+      .filter(f => f.insumo_id && Number(f.quantidade) > 0)
+      .map(f => {
+        const insumo = insumosTotais.find(i => i.id === f.insumo_id);
+        const fator = fatorParaEstoque(insumo, f.unidade);
+        const bruto = fator == null ? null : Number(f.quantidade) * fator;
+        const pctManual = f.rendimento_pct === '' ? null : Number(f.rendimento_pct) / 100;
+        return { linha: f, insumo, bruto, pctManual };
+      });
+    const semConversao = linhasCalculadas.find(l => l.bruto == null);
+    if (semConversao) {
+      return alert(`"${semConversao.insumo?.nome ?? 'Item'}" não tem conversão declarada de ${semConversao.linha.unidade} para ${semConversao.insumo?.unidade_medida}. Declare o rendimento no cadastro do insumo ou informe a quantidade na unidade do estoque.`);
+    }
+    const fichaValida = linhasCalculadas.filter(l => (l.bruto ?? 0) > 0);
     if (!nome.trim()) return alert('Dê um nome ao resultado da manipulação.');
     if (!(rendimento > 0)) return alert('Informe quanto um lote produz.');
     if (fichaValida.length === 0) return alert('Adicione ao menos uma matéria-prima com quantidade válida.');
-    if (new Set(fichaValida.map(f => f.insumo_id)).size !== fichaValida.length) return alert('A mesma matéria-prima aparece mais de uma vez. Agrupe a quantidade em uma única linha.');
+    if (new Set(fichaValida.map(l => l.linha.insumo_id)).size !== fichaValida.length) return alert('A mesma matéria-prima aparece mais de uma vez. Agrupe a quantidade em uma única linha.');
     const passosValidos: PassoPreparo[] = passos
       .filter(p => p.texto.trim())
       .map(p => ({
@@ -223,12 +264,25 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
       }
 
       if (preparoId) {
-        const linhas = fichaValida.map(f => ({
-          loja_id: lojaId,
-          preparo_id: preparoId,
-          insumo_id: f.insumo_id,
-          quantidade: Number(f.quantidade)
-        }));
+        // `quantidade` é sempre o BRUTO na unidade de estoque; o líquido só é
+        // gravado quando há técnica com rendimento, e o % vai congelado
+        // (snapshot) para a auditoria não mudar sozinha depois.
+        const linhas = fichaValida.map(({ linha, bruto, pctManual }) => {
+          const pct = pctManual ?? linha.rendimento_sistema_pct ?? null;
+          const usaPct = linha.tecnica_codigo && pct != null && pct > 0 && pct < 1;
+          return {
+            loja_id: lojaId,
+            preparo_id: preparoId,
+            insumo_id: linha.insumo_id,
+            quantidade: bruto!,
+            quantidade_liquida: usaPct ? Number((bruto! * pct!).toFixed(6)) : null,
+            tecnica_codigo: linha.tecnica_codigo || null,
+            rendimento_pct_aplicado: usaPct ? pct : null,
+            rendimento_origem: usaPct ? (pctManual != null ? 'USUARIO' : linha.rendimento_origem) : null,
+            quantidade_informada: Number(linha.quantidade),
+            unidade_informada: linha.unidade || null,
+          };
+        });
         const { error: erroFicha } = await supabase.from('fichas_preparos').insert(linhas);
         if (erroFicha) throw erroFicha;
       }
@@ -250,10 +304,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
     const v = extrairValidadeDinamica(p.validade_horas);
     setValidadeQtd(v.qtd);
     setValidadeUnidade(v.u);
-    setFicha((p as any).fichas_preparos?.map((f: any) => ({
-      insumo_id: f.insumo_id,
-      quantidade: String(f.quantidade)
-    })) || []);
+    setFicha(lerLinhasFicha(p));
     setPassos(lerPassos(p));
   };
 
@@ -277,7 +328,14 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
         setFicha(atual => atual.map(f => {
           if (!aplicou && f.insumo_id === primeiraLinha.insumo_id) {
             aplicou = true;
-            return { ...f, quantidade: String(data.quantidade_consumida) };
+            // A IA fala na unidade de estoque do insumo; a linha volta para ela
+            // para o número não ser reinterpretado em outra unidade.
+            const insumo = insumosTotais.find(i => i.id === f.insumo_id);
+            return {
+              ...f,
+              quantidade: String(data.quantidade_consumida),
+              unidade: insumo?.unidade_medida ?? f.unidade,
+            };
           }
           return f;
         }));
@@ -468,11 +526,15 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
 
       {/* MODAL DE EDIÇÃO DE PREPARO */}
       {editando && (() => {
+        // O custo conta o BRUTO: a loja pagou pela casca, pelo osso e pela
+        // apara. Contar o líquido aqui subestimaria o CMV.
         const custoFichaTotal = ficha.reduce((acc, f) => {
           const ing = insumosTotais.find(x => x.id === f.insumo_id);
           if (!ing) return acc;
+          const fator = fatorParaEstoque(ing, f.unidade);
+          if (fator == null) return acc;
           const unit = Number(ing.qtd_embalagem) > 0 ? Number(ing.preco_embalagem) / Number(ing.qtd_embalagem) : 0;
-          return acc + (unit * Number(f.quantidade || 0));
+          return acc + (unit * Number(f.quantidade || 0) * fator);
         }, 0);
         const rend = Number(rendimentoPorcoes) || 1;
         const custoPorUnidade = custoFichaTotal / rend;
@@ -517,23 +579,19 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
               <section className="rounded-2xl border border-orange-200 bg-orange-50/50 p-4 dark:border-orange-900/40 dark:bg-orange-950/10">
                 <div className="mb-3 flex items-center gap-2"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-500 text-xs font-black text-white">2</span><div><h4 className="font-black text-orange-900 dark:text-orange-300">{tDynamic('O que será consumido?')}</h4><p className="text-xs text-orange-700/75 dark:text-orange-500/80">{tDynamic('Matérias-primas e quantidades reais para produzir um lote.')}</p></div></div>
                 <div className="space-y-2">
-                  {ficha.map((f, i) => {
-                    const selecionado = insumosBrutos.find(ib => ib.id === f.insumo_id);
-                    return <div key={i} className="rounded-xl border border-orange-100 bg-white p-3 shadow-sm dark:border-orange-900/40 dark:bg-gray-950">
-                      <div className="flex items-center gap-2">
-                        <SeletorInsumo
-                          insumos={insumosBrutos}
-                          valor={f.insumo_id}
-                          jaUsados={ficha.map(l => l.insumo_id)}
-                          onChange={id => { const n = [...ficha]; n[i].insumo_id = id; setFicha(n); }}
-                        />
-                        <div className="flex w-36 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"><input value={f.quantidade} onChange={e => { const n = [...ficha]; n[i].quantidade = e.target.value; setFicha(n); }} type="number" min="0" step="any" placeholder="Qtd" className="min-w-0 flex-1 bg-transparent p-2 text-center text-sm font-bold dark:text-gray-100"/><span className="flex items-center bg-gray-100 px-2 text-xs font-black text-gray-500 dark:bg-gray-800">{selecionado?.unidade_medida ?? '—'}</span></div>
-                        <button onClick={() => { const n = [...ficha]; n.splice(i, 1); setFicha(n); }} className="rounded-lg bg-red-50 p-2 text-red-400 hover:text-red-600 dark:bg-red-900/20"><Trash2 size={16}/></button>
-                      </div>
-                      {selecionado && <p className="mt-2 text-xs text-gray-400">Disponível: <b>{Number(selecionado.quantidade_atual)} {selecionado.unidade_medida}</b></p>}
-                    </div>;
-                  })}
-                  <button onClick={() => setFicha([...ficha, { insumo_id: '', quantidade: '' }])} className="mt-2 flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400"><Plus size={14}/> {tDynamic('Adicionar matéria-prima')}</button>
+                  {ficha.map((f, i) => (
+                    <LinhaFichaInsumo
+                      key={i}
+                      indice={i}
+                      linha={f}
+                      insumos={insumosBrutos}
+                      jaUsados={ficha.map(l => l.insumo_id)}
+                      tecnicas={tecnicas}
+                      onChange={linha => { const n = [...ficha]; n[i] = linha; setFicha(n); }}
+                      onRemover={() => { const n = [...ficha]; n.splice(i, 1); setFicha(n); }}
+                    />
+                  ))}
+                  <button onClick={() => setFicha([...ficha, linhaVazia()])} className="mt-2 flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400"><Plus size={14}/> {tDynamic('Adicionar matéria-prima')}</button>
                 </div>
                 <div className="mt-4 border-t border-orange-200/70 pt-4 dark:border-orange-900/40">
                   <button type="button" onClick={sugerirComIA} disabled={sugerindo} className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50 dark:bg-white dark:text-slate-950">

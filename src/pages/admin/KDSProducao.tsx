@@ -14,7 +14,14 @@ import EstoquePreparos from './EstoquePreparos';
 import ModoPreparo from '../../components/producao/ModoPreparo';
 
 import { useI18n } from '../../contexts/I18nContext';
-type Ficha = { insumo_id: string; quantidade: number };
+type Ficha = {
+  insumo_id: string;
+  /** Bruto na unidade de estoque — é o que sai do estoque e vira custo. */
+  quantidade: number;
+  /** Líquido após o pré-preparo. Nulo = sem perda declarada. */
+  quantidade_liquida: number | null;
+  tecnica_codigo: string | null;
+};
 
 const custoUnit = (i?: Insumo) =>
   i && Number(i.qtd_embalagem) > 0 ? Number(i.preco_embalagem) / Number(i.qtd_embalagem) : 0;
@@ -73,13 +80,23 @@ function OSCard({
   // Analisa custo e disponibilidade
   const { itens, custo, podeProduzir, rendimento } = useMemo(() => {
     const ficha: Ficha[] = ((p as any).fichas_preparos || []).map((f: any) => ({
-      insumo_id: f.insumo_id, quantidade: Number(f.quantidade),
+      insumo_id: f.insumo_id,
+      quantidade: Number(f.quantidade),
+      quantidade_liquida: f.quantidade_liquida == null ? null : Number(f.quantidade_liquida),
+      tecnica_codigo: f.tecnica_codigo ?? null,
     }));
     const itens = ficha.map(f => {
       const ins = insumoById.get(f.insumo_id);
       const necessario = f.quantidade * qtdLotes;
       const disponivel = Number(ins?.quantidade_atual ?? 0);
-      return { ins, necessario, disponivel, ok: disponivel >= necessario };
+      return {
+        ins,
+        necessario,
+        disponivel,
+        ok: disponivel >= necessario,
+        liquido: f.quantidade_liquida == null ? null : f.quantidade_liquida * qtdLotes,
+        tecnica: f.tecnica_codigo,
+      };
     });
     const custo = itens.reduce((s, it) => s + custoUnit(it.ins) * it.necessario, 0);
     const podeProduzir = itens.length > 0 && itens.every(it => it.ok);
