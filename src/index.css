@@ -423,3 +423,55 @@ select option {
 .nav-link-premium.is-active .nav-link-icon {
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--route-color) 60%, transparent));
 }
+
+/* ─────────────────────────────────────────────────────────────
+   CHASSI DE LAYOUT MOBILE (safe-area + barra inferior)
+
+   POR QUE ISTO EXISTE: o `AdminLayout` usava a classe `pb-safe`, que NUNCA
+   existiu neste projeto (Tailwind v4 sem plugin de safe-area e sem `@utility`
+   declarada). Era string morta: no iPhone o indicador de home ficava por cima
+   da barra inferior, e toda tela que calculava altura com `100vh - 64px`
+   ignorava tanto o header de 88px quanto os 64px + safe-area da barra.
+   Resultado: o ultimo card de cada tela ficava embaixo da navegacao.
+
+   Regra geral (nao remendo por tela): a altura util de conteudo vira uma
+   variavel unica. Quem precisa de tela cheia usa `h-[var(--app-main-h)]`,
+   quem precisa se descolar da barra usa `bottom-[var(--app-nav-h)]`.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --app-header-h: 88px;
+  /* Padrao do site publico (landing, cardapio, totem): nao existe barra
+     inferior fixa, entao nada precisa se descolar do rodape. */
+  --app-nav-h: 0px;
+  /* 0.5rem = o `pt-2` do <main> */
+  --app-main-h: calc(100dvh - var(--app-header-h) - 0.5rem);
+}
+
+/* Shell do painel do lojista: aqui SIM existe a barra inferior no mobile. */
+.miseon-shell-admin {
+  --app-nav-h: calc(64px + var(--safe-bottom));
+  --app-main-h: calc(100dvh - var(--app-header-h) - var(--app-nav-h) - 0.5rem);
+}
+
+@media (min-width: 1024px) {
+  /* no desktop a navegacao e a sidebar: a barra inferior nao e renderizada */
+  .miseon-shell-admin {
+    --app-nav-h: 0px;
+    --app-main-h: calc(100dvh - var(--app-header-h) - 0.5rem);
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: var(--safe-bottom);
+}
+@utility pt-safe {
+  padding-top: var(--safe-top);
+}
+@utility pb-nav {
+  padding-bottom: calc(var(--app-nav-h) + 1rem);
+}
+@utility h-app {
+  height: var(--app-main-h);
+}

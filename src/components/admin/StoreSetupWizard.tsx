@@ -189,7 +189,7 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
 
   return (
     <div
-      className="fixed bottom-[80px] right-3 z-[9999] w-[340px] sm:bottom-6 sm:right-6"
+      className="fixed bottom-[calc(var(--app-nav-h)+1rem)] right-3 z-[9999] w-[340px] max-w-[calc(100vw-1.5rem)] sm:bottom-6 sm:right-6"
       style={{ maxHeight: 'calc(100vh - 100px)' }}
     >
       {/* ── Card principal ── */}

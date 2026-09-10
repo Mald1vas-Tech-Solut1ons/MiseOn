@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, Trash2, Plus, Minus, Loader2, UserPlus, Search, UserCheck, X, Wallet, Check } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, Loader2, UserPlus, Search, UserCheck, X, Wallet, Check, ChevronUp } from 'lucide-react';
 import { fmt, fmtQtd, precoItem } from '../../types';
 import type { CartSidebarProps, ClientePDV } from '../../types';
 import { supabase } from '../../lib/supabase';
@@ -18,6 +18,11 @@ export function CartSidebar({
   const [sugestoes, setSugestoes] = useState<ClientePDV[]>([]);
   const [buscando, setBuscando] = useState(false);
   const [modalNovoCliente, setModalNovoCliente] = useState(false);
+
+  // Sanfona do carrinho no mobile: recolhido mostra so a barra de resumo,
+  // aberto vira uma folha rolavel. No desktop (lg+) o estado e ignorado --
+  // la o carrinho continua sendo a coluna fixa de 340px.
+  const [sheetAberto, setSheetAberto] = useState(false);
 
   // Form para modal novo cliente
   const [novoNome, setNovoNome] = useState('');
@@ -139,14 +144,95 @@ export function CartSidebar({
     setSalvandoCliente(false);
   };
 
+  const qtdItens = carrinho.reduce((soma, i) => soma + i.quantidade, 0);
+
+  // A acao principal (cobrar / enviar para a mesa) e a MESMA no rodape do
+  // carrinho e na barra de resumo do mobile. Antes havia dois botoes com
+  // regras proprias; agora ha uma regra so.
+  const acaoBloqueada =
+    carrinho.length === 0 ||
+    (modo === 'BALCAO' ? !turno : !mesaSelecionada || enviandoMesa);
+
+  const rotuloAcao = modo === 'BALCAO'
+    ? (turno ? `${tDynamic('Cobrar')} ${fmt(total)}` : tDynamic('Abra o caixa para vender'))
+    : (!mesaSelecionada
+        ? tDynamic('Selecione uma mesa')
+        : enviandoMesa
+          ? tDynamic('Enviando…')
+          : `${tDynamic('Enviar para a Mesa')} ${mesaSelecionada.numero}`);
+
+  const rotuloAcaoCurto = modo === 'BALCAO'
+    ? (turno ? tDynamic('Cobrar') : tDynamic('Abra o caixa'))
+    : (!mesaSelecionada ? tDynamic('Escolha a mesa') : tDynamic('Enviar'));
+
+  const dispararAcao = () => {
+    if (acaoBloqueada) return;
+    if (modo === 'BALCAO') {
+      setEtapa('PAGANDO');
+      setMetodo(null);
+      setErro('');
+    } else {
+      enviarParaMesa();
+    }
+  };
+
   return (
-    <div className="flex w-[340px] shrink-0 flex-col border-l border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+    <>
+      {/* Fundo escuro so enquanto a sanfona esta aberta no mobile */}
+      {sheetAberto && (
+        <div
+          className="fixed inset-0 z-30 bg-black/45 backdrop-blur-[2px] lg:hidden"
+          onClick={() => setSheetAberto(false)}
+        />
+      )}
+
+    <div className={`flex flex-col overflow-hidden bg-white dark:bg-gray-900
+      fixed inset-x-0 bottom-[var(--app-nav-h)] z-40 rounded-t-3xl border-t border-gray-200 shadow-[0_-12px_35px_-12px_rgba(0,0,0,0.35)] transition-[height] duration-300 ease-out dark:border-gray-800
+      ${sheetAberto ? 'h-[78dvh]' : 'h-[76px]'}
+      lg:static lg:z-auto lg:h-auto lg:w-[340px] lg:shrink-0 lg:overflow-visible lg:rounded-none lg:border-l lg:border-t-0 lg:shadow-none`}>
+
+      {/* ── BARRA DE RESUMO (SO MOBILE) ──
+          E o gatilho da sanfona e, ao mesmo tempo, o botao de cobrar: com o
+          carrinho recolhido o lojista continua vendo total e acao sem perder
+          a grade de produtos. */}
+      <div className="shrink-0 border-b border-gray-100 dark:border-gray-800 lg:hidden">
+        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-gray-300 dark:bg-gray-700" />
+        <div className="flex items-center gap-2 px-3 py-2">
+          <button
+            type="button"
+            onClick={() => setSheetAberto((v) => !v)}
+            aria-expanded={sheetAberto}
+            aria-label={sheetAberto ? tDynamic('Recolher carrinho') : tDynamic('Abrir carrinho')}
+            className="flex min-w-0 flex-1 items-center gap-2 text-left"
+          >
+            <ChevronUp size={18} className={`shrink-0 text-gray-400 transition-transform duration-300 ${sheetAberto ? 'rotate-180' : ''}`} />
+            <span className="flex h-6 min-w-[24px] shrink-0 items-center justify-center rounded-full bg-[var(--cor-primaria)] px-1.5 text-xs font-black text-white">
+              {qtdItens}
+            </span>
+            <span className="truncate text-sm font-black dark:text-gray-100">
+              {carrinho.length === 0 ? tDynamic('Toque nos produtos') : fmt(total)}
+            </span>
+          </button>
+          <button
+            type="button"
+            disabled={acaoBloqueada}
+            onClick={dispararAcao}
+            className="shrink-0 rounded-2xl bg-[var(--cor-primaria)] px-4 py-2.5 text-sm font-black text-white shadow-md transition active:scale-[0.97] disabled:opacity-40"
+          >
+            {rotuloAcaoCurto}
+          </button>
+        </div>
+      </div>
+
+      <div className="hidden items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800 lg:flex">
         <p className="flex items-center gap-2 text-sm font-black dark:text-gray-100"><ShoppingCart size={16} /> {tDynamic('Venda atual')}</p>
         {carrinho.length > 0 && <button onClick={limparVenda} className="text-xs font-bold text-red-500">{tDynamic('Limpar')}</button>}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 overflow-y-auto p-3">
+        {carrinho.length > 0 && (
+          <button onClick={limparVenda} className="mb-2 text-xs font-bold text-red-500 lg:hidden">{tDynamic('Limpar')}</button>
+        )}
         {carrinho.length === 0 && <p className="py-10 text-center text-sm text-gray-400">{tDynamic('Toque nos produtos')}<br />{tDynamic('para adicionar.')}</p>}
         <div className="space-y-2">
           {carrinho.map((item, idx) => (
@@ -185,7 +271,7 @@ export function CartSidebar({
         </div>
       </div>
 
-      <div className="border-t border-gray-100 p-3 dark:border-gray-800 relative">
+      <div className="relative shrink-0 border-t border-gray-100 p-3 dark:border-gray-800">
         
         {/* Campo de Cliente com Autocomplete & Cashback */}
         <div className="mb-2 space-y-1.5" ref={dropdownRef}>
@@ -302,24 +388,17 @@ export function CartSidebar({
         {descontoNum > 0 && <div className="mb-1 flex justify-between text-xs text-green-600"><span>{tDynamic('Desconto')}</span><span>-{fmt(descontoNum)}</span></div>}
         <div className="mb-3 flex justify-between text-lg font-black dark:text-gray-100"><span>{tDynamic('Total')}</span><span className="text-[var(--cor-primaria)]">{fmt(total)}</span></div>
         {erro && modo === 'MESA' && <p className="mb-2 text-center text-xs font-semibold text-red-500">{erro}</p>}
-        {modo === 'BALCAO' ? (
-          <button disabled={carrinho.length === 0 || !turno} onClick={() => { setEtapa('PAGANDO'); setMetodo(null); setErro(''); }}
-            className="w-full rounded-2xl bg-[var(--cor-primaria)] py-4 text-base font-black text-white shadow-lg transition active:scale-[0.98] disabled:opacity-40">
-            {turno ? `${tDynamic('Cobrar')} ${fmt(total)}` : tDynamic('Abra o caixa para vender')}
-          </button>
-        ) : (
-          <button disabled={carrinho.length === 0 || !mesaSelecionada || enviandoMesa} onClick={enviarParaMesa}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] py-4 text-base font-black text-white shadow-lg transition active:scale-[0.98] disabled:opacity-40">
-            {enviandoMesa && <Loader2 size={16} className="animate-spin" />}
-            {!mesaSelecionada ? tDynamic('Selecione uma mesa') : enviandoMesa ? tDynamic('Enviando…') : `${tDynamic('Enviar para a Mesa')} ${mesaSelecionada.numero}`}
-          </button>
-        )}
+        <button disabled={acaoBloqueada} onClick={dispararAcao}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] py-4 text-base font-black text-white shadow-lg transition active:scale-[0.98] disabled:opacity-40">
+          {enviandoMesa && <Loader2 size={16} className="animate-spin" />}
+          {rotuloAcao}
+        </button>
       </div>
 
       {/* Modal Rápido de Cadastro de Cliente */}
       {modalNovoCliente && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900 dark:border dark:border-gray-800">
+          <div className="w-full max-w-sm max-h-[85dvh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900 dark:border dark:border-gray-800">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-black dark:text-white flex items-center gap-2">
                 <UserPlus size={18} className="text-[var(--cor-primaria)]" /> Cadastrar Cliente
@@ -374,5 +453,6 @@ export function CartSidebar({
         </div>
       )}
     </div>
+    </>
   );
 }

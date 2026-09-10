@@ -481,7 +481,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-transparent text-gray-900 dark:text-gray-100 font-sans overflow-hidden selection:bg-[#FC5B24] selection:text-white">
+    <div className="miseon-shell-admin flex h-screen bg-transparent text-gray-900 dark:text-gray-100 font-sans overflow-hidden selection:bg-[#FC5B24] selection:text-white">
       {/* 
         Safelist invisível para o Tailwind não remover as cores dinâmicas dos grupos (bg-{color}-500, text-{color}-600/90, etc)
         Usado: slate, orange, emerald, blue, purple, indigo, sky
@@ -742,7 +742,7 @@ export default function AdminLayout() {
         )}
 
         {/* ── CONTEÚDO DA PÁGINA (SCROLLÁVEL) ── */}
-        <main className={`flex-1 overflow-y-auto relative custom-scrollbar ${isNativeFs ? 'p-0 pb-0' : 'px-6 sm:px-10 pt-2 pb-28 lg:pb-0'}`}>
+        <main className={`flex-1 overflow-y-auto relative custom-scrollbar ${isNativeFs ? 'p-0 pb-0' : 'px-6 sm:px-10 pt-2 pb-nav lg:pb-0'}`}>
 
           {/* BANNER PROATIVO: TRIAL AINDA VÁLIDO, MAS ACABANDO EM BREVE */}
           {ctx.diasAtraso === 0 && ctx.status_assinatura === 'trial' && ctx.trialTerminaEm && (() => {
@@ -837,7 +837,7 @@ export default function AdminLayout() {
       )}
 
       {/* ── BOTTOM NAV (SOMENTE MOBILE) ── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#111827] border-t border-gray-200 dark:border-gray-800 flex justify-around items-center h-16 pb-safe print:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#111827] border-t border-gray-200 dark:border-gray-800 flex justify-around items-center h-[var(--app-nav-h)] pb-safe print:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         {bottomNav.map((i) => (
           <NavLink key={i.to} to={i.to}
             className={({ isActive }) => `

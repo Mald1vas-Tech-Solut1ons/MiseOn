@@ -18,6 +18,7 @@ import { CartSidebar } from '../../components/pdv/CartSidebar';
 import { PaymentModal } from '../../components/pdv/PaymentModal';
 import { OrderSuccessModal } from '../../components/pdv/OrderSuccessModal';
 import { CaixaModal } from '../../components/pdv/CaixaModal';
+import { ComandasAbertasBar } from '../../components/pdv/ComandasAbertasBar';
 import { ModalOpcoes } from '../../components/pdv/ModalOpcoes';
 import type { NutricaoProduto } from '../../lib/nutricao';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
@@ -116,17 +117,31 @@ export default function PDV() {
 
     const [{ data: m }, { data: vendasDinheiro }] = await Promise.all([
       supabase.from('caixa_movimentacoes').select('*').eq('turno_id', turnoAtual.id).order('criado_em'),
-      // Dinheiro que passa por ESTA gaveta: balcão (retirada) e mesas fechadas em dinheiro.
-      // Delivery em dinheiro fica com o entregador, não entra na gaveta do PDV.
-      supabase.from('pedidos').select('valor_total, pagamentos(metodo, status)')
-        .eq('loja_id', lojaId).in('tipo_pedido', ['RETIRADA_BALCAO', 'SALAO']).neq('status', 'CANCELADO')
-        .gte('criado_em', turnoAtual.aberto_em),
+      // Dinheiro que passa por ESTA gaveta: balcão (retirada) e mesas fechadas
+      // em dinheiro. Delivery em dinheiro fica com o entregador, não entra na
+      // gaveta do PDV.
+      //
+      // CORRIGIDO EM 10/09/2026 — a conta anterior somava o `valor_total` do
+      // PEDIDO sempre que existisse ALGUM pagamento em dinheiro nele, e
+      // filtrava pela data de CRIAÇÃO do pedido. Isso errava dinheiro de
+      // verdade em três situações que o salão produz todo dia:
+      //   1. conta dividida (R$ 200 = R$ 50 em dinheiro + R$ 150 no cartão)
+      //      esperava R$ 200 na gaveta, sobrando R$ 150 de diferença;
+      //   2. mesa aberta ANTES do turno e paga durante ele não entrava na
+      //      conferência — o dinheiro estava na gaveta e o sistema não sabia;
+      //   3. pedido criado no turno e pago depois de fechar contava adiantado.
+      // Agora soma o que foi REALMENTE PAGO em dinheiro, pela data do
+      // PAGAMENTO — que é o instante em que a cédula entra na gaveta.
+      supabase.from('pagamentos')
+        .select('valor_pago, pedidos!inner(loja_id, tipo_pedido, status)')
+        .eq('metodo', 'DINHEIRO').eq('status', 'PAGO')
+        .gte('data_pagamento', turnoAtual.aberto_em)
+        .eq('pedidos.loja_id', lojaId)
+        .in('pedidos.tipo_pedido', ['RETIRADA_BALCAO', 'SALAO'])
+        .neq('pedidos.status', 'CANCELADO'),
     ]);
     setMovs((m as CaixaMovimentacao[]) ?? []);
-    const soma = (vendasDinheiro ?? []).reduce((s, p: any) => {
-      const pago = (p.pagamentos ?? []).some((pg: any) => pg.metodo === 'DINHEIRO' && pg.status === 'PAGO');
-      return s + (pago ? Number(p.valor_total) : 0);
-    }, 0);
+    const soma = (vendasDinheiro ?? []).reduce((s, pg: any) => s + Number(pg.valor_pago ?? 0), 0);
     setDinheiroTurno(soma);
   }, [lojaId]);
 
@@ -549,7 +564,7 @@ export default function PDV() {
   };
 
   return (
-    <div data-tour="tour-pdv-header" className="flex h-[calc(100vh-64px)] flex-col lg:h-screen">
+    <div data-tour="tour-pdv-header" className="flex h-app flex-col lg:h-screen">
       <HeaderBar
         modo={modo}
         setModo={(m) => {
@@ -561,6 +576,10 @@ export default function PDV() {
         setModalCaixa={setModalCaixa}
         setValorCaixa={setValorCaixa}
       />
+
+      {/* O salao inteiro em uma linha, dentro do caixa: quantas contas estao
+          abertas, quanto tem nelas e qual ja pediu pra fechar. */}
+      <ComandasAbertasBar lojaId={lojaId} />
 
       {pedidoMesaOk && (
         <div className="flex items-center justify-between gap-2 border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/15 dark:text-emerald-400">
@@ -688,7 +707,7 @@ export default function PDV() {
       {/* ── Modal: Pix aguardando ── */}
       {etapa === 'PIX_AGUARDANDO' && pixInfo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-gray-900">
+          <div className="w-full max-w-md max-h-[85dvh] overflow-y-auto rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-gray-900">
             <h3 className="text-lg font-black dark:text-gray-100">Pix de {fmt(total)}</h3>
             <p className="mt-1 text-xs text-gray-500">{tDynamic('Peça para o cliente apontar a câmera para o QR Code.')}</p>
             {pixInfo.qrImagem

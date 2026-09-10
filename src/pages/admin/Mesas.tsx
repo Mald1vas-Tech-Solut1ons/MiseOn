@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useOutletContext, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -86,6 +86,10 @@ export default function Mesas() {
   const [qrDataUrl, setQrDataUrl] = useState('');
 
   const [mesaDetalhe, setMesaDetalhe] = useState<MesaComComanda | null>(null);
+  // Chegada vinda do caixa: /admin/mesas?conta=<mesaId> abre a conta daquela
+  // mesa direto, sem o caixa ter que caçar a mesa no mapa com o cliente
+  // esperando no balcão.
+  const [searchParams, setSearchParams] = useSearchParams();
   const [pedidosComanda, setPedidosComanda] = useState<Pedido[]>([]);
   const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
   const [taxaEditavel, setTaxaEditavel] = useState('0');
@@ -240,6 +244,18 @@ export default function Mesas() {
     setPedidosComanda((data as unknown as Pedido[]) ?? []);
     setCarregandoDetalhe(false);
   };
+
+  // Deep link do caixa. Só dispara depois que as mesas carregaram, uma vez
+  // por chegada: o parâmetro é consumido da URL para o modal não reabrir
+  // sozinho quando o lojista fechar a conta e voltar pro mapa.
+  useEffect(() => {
+    const alvo = searchParams.get('conta');
+    if (!alvo || mesas.length === 0) return;
+    const mesa = mesas.find((m) => m.id === alvo);
+    setSearchParams((p) => { const novo = new URLSearchParams(p); novo.delete('conta'); return novo; }, { replace: true });
+    if (mesa) abrirDetalhe(mesa);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mesas, searchParams]);
 
   const subtotalComanda = useMemo(() => pedidosComanda.reduce((s, p) => s + Number(p.valor_total), 0), [pedidosComanda]);
   const valorServico = subtotalComanda * (Number(String(taxaEditavel).replace(',', '.') || 0) / 100);

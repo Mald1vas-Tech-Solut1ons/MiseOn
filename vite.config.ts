@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -5,6 +6,13 @@ import { VitePWA } from 'vite-plugin-pwa';
 import istanbul from 'vite-plugin-istanbul';
 
 export default defineConfig({
+  test: {
+    // Worktrees do Claude Code vivem dentro do repo e carregam uma CÓPIA da
+    // suite inteira. Sem esta exclusão o `vitest run` executa cada teste duas
+    // vezes — a segunda contra código defasado — e o vermelho resultante não
+    // diz nada sobre o commit em andamento.
+    exclude: ['**/node_modules/**', '**/dist/**', '**/cypress/**', '**/.claude/**'],
+  },
   plugins: [
     react(),
     tailwindcss(),

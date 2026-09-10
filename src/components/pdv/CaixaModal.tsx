@@ -15,7 +15,7 @@ export function CaixaModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => !salvandoCaixa && setModalCaixa(null)}>
-      <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-sm max-h-[85dvh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
         {modalCaixa === 'ABRIR' && (
           <>
             <h3 className="text-lg font-black dark:text-gray-100">Abrir o caixa</h3>
@@ -65,7 +65,7 @@ export function CaixaModal({
             <h3 className="text-lg font-black dark:text-gray-100">Fechar o caixa</h3>
             <div className="mt-3 space-y-1.5 rounded-2xl bg-gray-50 p-4 text-xs dark:bg-gray-800/50">
               <div className="flex justify-between text-gray-500"><span>Fundo de troco</span><span>{fmt(Number(turno.fundo_troco))}</span></div>
-              <div className="flex justify-between text-gray-500"><span>{tDynamic('Vendas em dinheiro (balcão)')}</span><span>+{fmt(dinheiroTurno)}</span></div>
+              <div className="flex justify-between text-gray-500"><span>{tDynamic('Recebido em dinheiro (balcão e salão)')}</span><span>+{fmt(dinheiroTurno)}</span></div>
               <div className="flex justify-between text-gray-500"><span>Reforços</span><span>+{fmt(reforcos)}</span></div>
               <div className="flex justify-between text-gray-500"><span>Sangrias</span><span>-{fmt(sangrias)}</span></div>
               <div className="flex justify-between border-t border-gray-200 pt-1.5 text-sm font-black dark:border-gray-700 dark:text-gray-100"><span>{tDynamic('Deve ter na gaveta')}</span><span>{fmt(dinheiroGaveta)}</span></div>

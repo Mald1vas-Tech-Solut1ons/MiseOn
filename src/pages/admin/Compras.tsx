@@ -485,7 +485,7 @@ export default function Compras() {
           )}
 
           {marcados.length > 0 && (
-            <div ref={barraRef} className="fixed bottom-16 left-0 z-30 w-full border-t border-gray-200 bg-white p-4 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] dark:border-gray-800 dark:bg-gray-900 lg:bottom-0 lg:pl-[280px]">
+            <div ref={barraRef} className="fixed bottom-[var(--app-nav-h)] left-0 z-30 w-full border-t border-gray-200 bg-white p-4 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] dark:border-gray-800 dark:bg-gray-900 lg:bottom-0 lg:pl-[280px]">
               <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-xl font-black text-gray-700 dark:bg-gray-800 dark:text-gray-300">

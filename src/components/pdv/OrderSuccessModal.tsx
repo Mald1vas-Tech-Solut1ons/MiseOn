@@ -48,7 +48,7 @@ export function OrderSuccessModal({ venda, imprimirVenda, limparVenda }: OrderSu
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-gray-900">
+      <div className="w-full max-w-md max-h-[85dvh] overflow-y-auto rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-gray-900">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30">
           <PartyPopper size={28} />
         </div>

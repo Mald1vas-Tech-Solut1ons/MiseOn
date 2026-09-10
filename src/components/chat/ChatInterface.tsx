@@ -93,7 +93,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
       {/* Botão Flutuante (Floating Action Button) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 flex h-[60px] w-[60px] items-center justify-center rounded-full text-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-transform duration-300 hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] active:scale-95"
+        className="fixed bottom-[calc(5rem+var(--safe-bottom))] right-4 lg:bottom-6 lg:right-6 z-50 flex h-[60px] w-[60px] items-center justify-center rounded-full text-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-transform duration-300 hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] active:scale-95"
         style={{ background: loja.cor_primaria || '#25D366' }} // Whatsapp-like green as fallback
       >
         <div className={`transition-all duration-300 ${isOpen ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'} absolute`}>
@@ -112,7 +112,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
 
       {/* Janela do Chat (Premium Design) */}
       <div 
-        className={`fixed bottom-[100px] right-4 lg:bottom-[90px] lg:right-6 z-40 flex h-[500px] max-h-[75vh] w-[360px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-[24px] bg-white shadow-[0_12px_40px_-12px_rgba(0,0,0,0.2)] dark:bg-gray-900 border border-black/5 dark:border-white/10 transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-8 pointer-events-none'}`}
+        className={`fixed bottom-[calc(6.25rem+var(--safe-bottom))] right-4 lg:bottom-[90px] lg:right-6 z-40 flex h-[500px] max-h-[75vh] w-[360px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-[24px] bg-white shadow-[0_12px_40px_-12px_rgba(0,0,0,0.2)] dark:bg-gray-900 border border-black/5 dark:border-white/10 transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-8 pointer-events-none'}`}
       >
         {/* Header Premium */}
         <div 

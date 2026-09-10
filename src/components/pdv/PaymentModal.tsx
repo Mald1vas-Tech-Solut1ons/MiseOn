@@ -13,7 +13,7 @@ export function PaymentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => !processando && setEtapa('CARRINHO')}>
-      <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md max-h-[85dvh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
         <div className="mb-1 flex items-center justify-between">
           <h3 className="text-lg font-black dark:text-gray-100">{tDynamic('Receber')} {fmt(total)}</h3>
           <button onClick={() => setEtapa('CARRINHO')} className="text-gray-400"><X size={20} /></button>
