@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
-import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { FotoProduto } from '../lib/fotoProduto';
 import { obterFotoFallback, obterFotoProduto } from '../lib/fotoProdutoUtils';
@@ -939,8 +939,33 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
   onClose: () => void;
   onAdd: (i: ItemCarrinho) => void;
 }) {
+  const { tDynamic } = useI18n();
   const isPeso = produto.tipo_venda === 'POR_PESO';
   const [qtd, setQtd] = useState(isPeso ? 0.350 : 1);
+
+  /**
+   * GALERIA DO PRODUTO — o que estava errado aqui.
+   *
+   * O contador era o literal `1/N`: dizia "1/2" na segunda foto também, porque
+   * nada acompanhava a rolagem. Os pontinhos eram todos iguais, então não
+   * indicavam a foto ativa. E no desktop não havia como avançar: a única
+   * affordance era "deslize", que é gesto de celular — com mouse, a segunda
+   * foto simplesmente não existia para quem não tentasse arrastar.
+   *
+   * Agora o índice sai da própria rolagem (cada slide ocupa a largura inteira,
+   * então `scrollLeft / clientWidth` arredondado é o slide visível) e as setas
+   * rolam por slide. No celular elas ficam escondidas: lá o gesto é natural e
+   * seta em cima da foto só rouba área de toque.
+   */
+  const trilhoRef = useRef<HTMLDivElement>(null);
+  const [fotoAtual, setFotoAtual] = useState(0);
+
+  const irParaFoto = (indice: number, totalFotos: number) => {
+    const trilho = trilhoRef.current;
+    if (!trilho) return;
+    const alvo = Math.max(0, Math.min(indice, totalFotos - 1));
+    trilho.scrollTo({ left: alvo * trilho.clientWidth, behavior: 'smooth' });
+  };
   const [obs, setObs] = useState('');
   const [sel, setSel] = useState<Record<string, string[]>>({}); // grupo_id -> opcao_ids
 
@@ -968,7 +993,15 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
         
         {imgs.length > 0 && (
           <div className="relative w-full overflow-hidden rounded-t-3xl bg-gray-100 dark:bg-gray-800">
-            <div className="flex w-full snap-x snap-mandatory overflow-x-auto hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div
+              ref={trilhoRef}
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                if (el.clientWidth > 0) setFotoAtual(Math.round(el.scrollLeft / el.clientWidth));
+              }}
+              className="flex w-full snap-x snap-mandatory overflow-x-auto hide-scrollbar"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               {imgs.map((url, i) => (
                 <div key={i} className="min-w-full snap-center bg-black/5 dark:bg-black/40 flex items-center justify-center">
                   <FotoProduto
@@ -983,14 +1016,44 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
             {imgs.length > 1 && (
               <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
                 {imgs.map((_, i) => (
-                   <div key={i} className="h-1.5 w-1.5 rounded-full bg-black/30 dark:bg-white/50 backdrop-blur-sm" />
+                   <div
+                     key={i}
+                     className={`h-1.5 rounded-full backdrop-blur-sm transition-all duration-300 ${
+                       i === fotoAtual ? 'w-4 bg-white shadow' : 'w-1.5 bg-black/30 dark:bg-white/50'
+                     }`}
+                   />
                 ))}
               </div>
             )}
             {imgs.length > 1 && (
               <div className="absolute top-2 right-2 rounded-full bg-black/50 px-2 py-1 text-xs opacity-90 font-bold text-white backdrop-blur-sm">
-                1/{imgs.length} <span className="opacity-70">(deslize)</span>
+                {fotoAtual + 1}/{imgs.length}
+                <span className="opacity-70 sm:hidden"> {tDynamic('(deslize)')}</span>
               </div>
+            )}
+            {/* Setas: só no desktop. No celular o gesto e natural e a seta
+                roubaria area de toque da propria foto. */}
+            {imgs.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => irParaFoto(fotoAtual - 1, imgs.length)}
+                  disabled={fotoAtual === 0}
+                  aria-label={tDynamic('Foto anterior')}
+                  className="absolute left-2 top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:pointer-events-none disabled:opacity-0 sm:flex"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => irParaFoto(fotoAtual + 1, imgs.length)}
+                  disabled={fotoAtual >= imgs.length - 1}
+                  aria-label={tDynamic('Próxima foto')}
+                  className="absolute right-2 top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:pointer-events-none disabled:opacity-0 sm:flex"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
             )}
           </div>
         )}
