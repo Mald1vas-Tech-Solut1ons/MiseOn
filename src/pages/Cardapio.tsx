@@ -1853,9 +1853,38 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
         // Garante texto: nunca joga objeto no JSX (senão o React quebra a tela).
         const texto = typeof msg === 'string' ? msg : '';
         const sinal = `${texto} ${motivoTecnico}`;
+
+        /**
+         * PAGADOR IGUAL AO RECEBEDOR: a tela RESOLVE, não só avisa.
+         *
+         * A primeira versão disto só trocava a mensagem, e mandava a pessoa
+         * tocar em "Trocar titular". Errado: o sistema JÁ SABE qual campo está
+         * errado — a recusa do provedor diz exatamente isso — e mesmo assim
+         * devolvia a tarefa para quem já tinha digitado tudo.
+         *
+         * A limpeza automática que eu tinha feito também não pegava este caso.
+         * Ela dependia do nome mudar em relação ao titular salvo; se o par
+         * guardado já era o errado (nome de uma pessoa, CPF de outra), o par
+         * é "consistente" com o que está no armazenamento e nada dispara.
+         *
+         * O gatilho certo é a própria recusa: aqui o titular salvo é apagado,
+         * nome e CPF saem do formulário e o foco vai para o nome. O número do
+         * cartão e a validade continuam preenchidos — quem errou foi o
+         * titular, não o cartão, e refazer o que estava certo é atrito à toa.
+         */
+        const pagadorIgualRecebedor = /recebedor e cliente n[aã]o podem ser a mesma pessoa|mesma pessoa|4600222/i.test(sinal);
+        if (pagadorIgualRecebedor) {
+          setNome('');
+          setCpf('');
+          setSalvarDados(false);
+          setTocado((atual) => ({ ...atual, nome: false, cpf: false }));
+          try { localStorage.removeItem(TITULAR_KEY); } catch { /* armazenamento indisponível */ }
+          setTimeout(() => nomeRef.current?.focus(), 60);
+        }
+
         setErro(
-          /recebedor e cliente n[aã]o podem ser a mesma pessoa|mesma pessoa|4600222/i.test(sinal)
-            ? 'A Efí não permite que o titular da conta recebedora pague a própria loja. Para testar outro cartão, toque em “Trocar titular” e informe o nome e o CPF do titular desse cartão.'
+          pagadorIgualRecebedor
+            ? 'Esse CPF é o do titular da conta que recebe, e a Efí não autoriza pagamento para si mesmo. Limpei o titular: informe o nome e o CPF de quem é o dono deste cartão. O número e a validade continuam preenchidos.'
             : (texto || 'Pagamento não autorizado. Confira os dados ou tente outro cartão.'),
         );
       } else {
