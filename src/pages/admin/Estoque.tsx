@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale, ClipboardCheck, Scissors, CheckCircle2, Apple } from 'lucide-react';
+import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale, ClipboardCheck, Scissors, CheckCircle2, Apple, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, TipoItem, fmt, InsumoRendimentoJSON } from '../../types';
 import { UNIDADES, destinosPermitidos, validarConversao, opcoesDeEntrada } from '../../lib/unidades';
@@ -60,6 +60,23 @@ export default function Estoque() {
   // Inventário e transformação (monta/desmonta). `undefined` = modal fechado;
   // `null` = aberto sem insumo pré-selecionado.
   const [inventarioAberto, setInventarioAberto] = useState(false);
+
+  /**
+   * DIVERGÊNCIA DE SALDO — o número que existia e ninguém via.
+   *
+   * `vw_divergencia_saldo_lotes` já apontava, em 10/09/2026, 57 de 187 insumos
+   * com o saldo do cadastro diferente da soma dos lotes. A view existia desde
+   * antes; nenhuma tela a consultava. Detecção que não chega ao lojista não é
+   * detecção — o dono só descobria no inventário, meses depois, com o CMV já
+   * contaminado (saldo sem lote faz a baixa custear por estimativa em vez de
+   * PEPS).
+   *
+   * A faixa não conserta sozinha, de propósito: reconciliar é CONTAGEM
+   * física, e `fn_reconciliar_estoque` exige a quantidade contada. O que ela
+   * faz é levar a pessoa até a contagem do item certo.
+   */
+  const [divergentes, setDivergentes] = useState<{ insumo_id: string; nome: string; unidade_medida: string; quantidade_atual: number; saldo_lotes: number; divergencia: number }[]>([]);
+  const [divergenciaAberta, setDivergenciaAberta] = useState(false);
   const [transformando, setTransformando] = useState<Insumo | null | undefined>(undefined);
   const [avisoEstoque, setAvisoEstoque] = useState<string | null>(null);
 
@@ -216,6 +233,17 @@ export default function Estoque() {
       .then(({ data, error }) => {
         if (!atual) return;
         if (error) console.error('Erro ao carregar insumos:', error);
+
+        // Consulta separada e tolerante a falha: se a view não existir num
+        // ambiente antigo, a tela de estoque continua funcionando sem a faixa.
+        supabase
+          .from('vw_divergencia_saldo_lotes')
+          .select('insumo_id, nome, unidade_medida, quantidade_atual, saldo_lotes, divergencia')
+          .eq('loja_id', lojaId)
+          .then(({ data: div, error: errDiv }) => {
+            if (errDiv) { console.error('Divergência de estoque não carregada:', errDiv.message); return; }
+            if (atual) setDivergentes((div ?? []) as typeof divergentes);
+          });
         const todos = (data as Insumo[]) ?? [];
         setInsumos(todos.filter((i) => i.ativo));
         setInativos(todos.filter((i) => !i.ativo));
@@ -591,6 +619,62 @@ export default function Estoque() {
            <button data-tour="tour-estoque-aba-rastreio3d" onClick={() => setTab('rastreio3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'rastreio3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-emerald-600 dark:text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Rastreio 3D')}</button>
          </div>
       </div>
+
+      {/* ── Saldo que não fecha com os lotes ────────────────────────────── */}
+      {tab === 'insumos' && divergentes.length > 0 && (
+        <div className="mb-5 overflow-hidden rounded-2xl border border-amber-300 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20">
+          <button
+            type="button"
+            onClick={() => setDivergenciaAberta((v) => !v)}
+            aria-expanded={divergenciaAberta}
+            className="flex w-full items-center gap-3 px-4 py-3 text-left"
+          >
+            <AlertTriangle size={18} className="shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-black text-amber-900 dark:text-amber-200">
+                {divergentes.length === 1
+                  ? tDynamic('1 item com saldo que não fecha com os lotes')
+                  : `${divergentes.length} ${tDynamic('itens com saldo que não fecha com os lotes')}`}
+              </p>
+              <p className="text-xs font-semibold text-amber-700/90 dark:text-amber-300/80">
+                {tDynamic('Enquanto não fechar, a baixa desses itens custeia por estimativa em vez do custo real do lote.')}
+              </p>
+            </div>
+            <ChevronDown size={18} className={`shrink-0 text-amber-600 transition-transform duration-300 ${divergenciaAberta ? 'rotate-180' : ''}`} />
+          </button>
+
+          {divergenciaAberta && (
+            <div className="max-h-[46dvh] space-y-2 overflow-y-auto border-t border-amber-200 px-4 py-3 dark:border-amber-900/40">
+              {divergentes.map((d) => {
+                const insumo = insumos.find((i) => i.id === d.insumo_id);
+                return (
+                  <div key={d.insumo_id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-xl bg-white px-3 py-2.5 dark:bg-gray-900">
+                    <p className="min-w-0 flex-1 truncate text-sm font-bold dark:text-gray-100">{d.nome}</p>
+                    <p className="shrink-0 font-mono text-xs text-gray-500 dark:text-gray-400">
+                      {tDynamic('cadastro')} {Number(d.quantidade_atual).toLocaleString('pt-BR')} · {tDynamic('lotes')} {Number(d.saldo_lotes).toLocaleString('pt-BR')} {d.unidade_medida}
+                    </p>
+                    <span className="shrink-0 rounded-md bg-amber-100 px-2 py-0.5 font-mono text-xs font-black text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                      {Number(d.divergencia) > 0 ? '+' : ''}{Number(d.divergencia).toLocaleString('pt-BR')}
+                    </span>
+                    {insumo && (
+                      <button
+                        type="button"
+                        onClick={() => iniciarEdicao(insumo)}
+                        className="shrink-0 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-black text-white transition hover:brightness-110"
+                      >
+                        {tDynamic('Contar este item')}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+              <p className="pt-1 text-xs text-amber-700/80 dark:text-amber-300/70">
+                {tDynamic('Contar grava a quantidade real e acerta saldo e lotes juntos, deixando a movimentação de rastro.')}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {tab === 'rastreio3d' ? (
         <Suspense fallback={<div className="flex h-[560px] items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800/40"><MiseOnLoader status="Carregando Rastreio 3D..." rows={2} /></div>}>
