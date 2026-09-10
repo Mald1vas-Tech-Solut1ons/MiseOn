@@ -51,6 +51,27 @@ export default defineConfig({
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 5_000_000,
+
+        // CACHE VELHO SERVINDO PAGINA QUEBRADA — corrigido em 10/09/2026.
+        //
+        // O service worker precacheia o index.html e o devolve em qualquer
+        // navegacao. Quando um deploy troca os hashes dos bundles, o HTML
+        // guardado continua apontando para arquivos que nao existem mais: a
+        // pagina abre como texto cru, sem CSS e sem JS. Foi assim que o painel
+        // apareceu quebrado enquanto os cinco assets respondiam 200 no
+        // servidor — o problema nunca esteve em producao, e sim no cache.
+        //
+        // `cleanupOutdatedCaches` apaga o precache da versao anterior em vez
+        // de deixar duas geracoes convivendo.
+        cleanupOutdatedCaches: true,
+
+        // E o painel do lojista sai do fallback offline. Ele nao e conteudo
+        // publico que vale servir desatualizado: e a ferramenta de trabalho de
+        // quem esta com a loja aberta. Melhor uma tela de sem-conexao honesta
+        // do que um shell antigo que abre pela metade e faz o dono achar que o
+        // sistema caiu. O cardapio do cliente continua com fallback, porque la
+        // funcionar offline vale mais.
+        navigateFallbackDenylist: [/^\/admin/, /^\/superadmin/, /^\/entregador/],
       },
     }),
   ],

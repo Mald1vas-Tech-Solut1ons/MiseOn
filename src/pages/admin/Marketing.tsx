@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Cupom, Banner, Cliente, CarrinhoAbandonado, MetodoPgto, fmt, type TipoAcaoBanner } from '../../types';
+import { condicoesDoCupom, cupomInvalidoHoje } from '../../lib/arteBanner';
 import ImageUpload from '../../components/ImageUpload';
 import CrmClientes from '../../components/admin/CrmClientes';
 import type { CtxLoja } from './AdminLayout';
@@ -130,17 +131,49 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
                     1ª Compra
                   </span>
                 )}
+                {cupomInvalidoHoje(c as never) && (
+                  <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-black text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                    {tDynamic('NÃO VALE HOJE')}
+                  </span>
+                )}
               </div>
               <span className="text-lg font-black text-[var(--cor-primaria)]">
                 {c.frete_gratis ? 'Frete grátis' : c.tipo === 'FIXO' ? fmt(Number(c.valor)) : `${c.valor}% OFF`}
               </span>
             </div>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 min-h-[32px]">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {c.descricao || 'Cupom promocional para uso na vitrine.'}
-              {c.pedido_minimo > 0 && ` · Mín: ${fmt(Number(c.pedido_minimo))}`}
-              {c.metodo_exigido && ` · Válido em: ${c.metodo_exigido}`}
             </p>
+
+            {/* Toda regra que pode fazer o cliente ouvir "cupom nao aplicado"
+                fica visivel aqui — inclusive a validade, que a lista escondia.
+                Mesma funcao que desenha as condicoes no banner: a tela do
+                lojista e a arte publica nunca contam historias diferentes. */}
+            {(() => {
+              const regras = condicoesDoCupom(c as never);
+              if (!regras.length) {
+                return (
+                  <p className="min-h-[24px] text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                    {tDynamic('Vale para qualquer pedido')}
+                  </p>
+                );
+              }
+              return (
+                <div className="flex min-h-[24px] flex-wrap gap-1">
+                  {regras.map((regra) => (
+                    <span key={regra}
+                      className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${
+                        /Venceu|Esgotado|desativado/i.test(regra)
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                          : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
+                      }`}>
+                      {regra}
+                    </span>
+                  ))}
+                </div>
+              );
+            })()}
 
             <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3 gap-2">
               <button type="button"
