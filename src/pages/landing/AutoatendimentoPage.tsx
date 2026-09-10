@@ -115,7 +115,7 @@ export default function AutoatendimentoPage() {
             <a href="#roi" className="hover:text-white transition">Calculadora ROI</a>
             <a href="#faq" className="hover:text-white transition">FAQ</a>
           </div>
-          <button
+          <button type="button"
             onClick={() => setLeadModalOpen(true)}
             className="rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-5 py-2 text-xs font-bold text-white shadow-lg shadow-[#FC5B24]/20 hover:brightness-110 transition flex items-center gap-1.5"
           >
@@ -151,7 +151,7 @@ export default function AutoatendimentoPage() {
 
           {/* Botões de Ação Hero */}
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
+            <button type="button"
               onClick={() => setLeadModalOpen(true)}
               className="w-full sm:w-auto rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-8 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 hover:scale-105 transition flex items-center justify-center gap-2"
             >
@@ -468,7 +468,7 @@ export default function AutoatendimentoPage() {
           <div className="space-y-3">
             {FAQS.map((faq, idx) => (
               <div key={idx} className="rounded-2xl border border-gray-800 bg-[#0B1120] overflow-hidden">
-                <button
+                <button type="button"
                   onClick={() => toggleFaq(idx)}
                   className="w-full p-5 text-left flex justify-between items-center text-sm font-bold text-white hover:bg-white/5 transition"
                 >
@@ -507,7 +507,7 @@ export default function AutoatendimentoPage() {
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
+            <button type="button"
               onClick={() => setLeadModalOpen(true)}
               className="w-full sm:w-auto rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-9 py-4 font-['Sora'] text-base font-bold text-white shadow-xl shadow-[#FC5B24]/30 hover:scale-105 transition flex items-center justify-center gap-2"
             >

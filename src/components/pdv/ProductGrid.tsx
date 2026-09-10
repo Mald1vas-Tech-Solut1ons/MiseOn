@@ -14,7 +14,7 @@ export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva
         </div>
       </div>
       <HorizontalScrollContainer className="p-3 pb-2">
-        <button 
+        <button type="button" 
           onClick={() => setCatAtiva('TODAS')} 
           className={`shrink-0 rounded-full px-5 py-2 text-xs font-bold transition-all duration-300 border ${
             catAtiva === 'TODAS' 
@@ -25,7 +25,7 @@ export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva
           TODAS
         </button>
         {categorias.map((c) => (
-          <button 
+          <button type="button" 
             key={c.id} 
             onClick={() => setCatAtiva(c.id)} 
             className={`shrink-0 rounded-full px-5 py-2 text-xs font-bold uppercase transition-all duration-300 border ${
@@ -40,7 +40,7 @@ export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva
       </HorizontalScrollContainer>
       <div className="grid flex-1 auto-rows-min grid-cols-2 gap-3 overflow-y-auto p-4 pb-28 pt-2 sm:grid-cols-3 lg:pb-4 xl:grid-cols-4 custom-scrollbar">
         {produtosVisiveis.map((p) => (
-          <button 
+          <button type="button" 
             key={p.id} 
             onClick={() => tocarProduto(p)}
             className="group relative flex min-h-[110px] flex-col items-start justify-between rounded-2xl border border-gray-200/50 bg-white/70 p-4 text-left shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--cor-primaria)]/10 hover:border-[var(--cor-primaria)]/30 active:scale-[0.97] active:shadow-md dark:border-white/10 dark:bg-[#070C18]/40 dark:hover:border-[var(--cor-primaria)]/50 overflow-hidden"

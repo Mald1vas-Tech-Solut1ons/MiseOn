@@ -188,7 +188,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
                   <p className="text-xs opacity-95 font-medium text-gray-400">Pedido #{numero}</p>
                 </div>
               </div>
-              <button onClick={onFechar} className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"><X size={18} /></button>
+              <button type="button" onClick={onFechar} className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"><X size={18} /></button>
             </div>
 
             <div className="px-6 py-5">
@@ -225,7 +225,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
               <div className="flex items-center gap-2">
                 <input readOnly value={pix.copia_e_cola}
                   className="w-full truncate rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-xs text-gray-600 focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400" />
-                <button onClick={copiar} aria-label={copiado ? 'Copiado' : 'Copiar código Pix'}
+                <button type="button" onClick={copiar} aria-label={copiado ? 'Copiado' : 'Copiar código Pix'}
                   className={`flex shrink-0 items-center justify-center rounded-xl p-3 transition-colors ${copiado ? 'bg-emerald-600 text-white' : 'bg-teal-100 text-teal-700 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-400'}`}>
                   {copiado ? <Check size={18} /> : <Copy size={18} />}
                 </button>
@@ -238,7 +238,7 @@ export default function PagamentoStatus({ pedidoId, numero, pix: pixInicial, onF
               <div className="mt-3 flex items-center justify-center gap-3 text-xs">
                 <Link to={`/pedido/${pedidoId}`} className="font-semibold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">Ver pedido</Link>
                 <span className="text-gray-300">·</span>
-                <button onClick={onFechar} className="font-semibold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">Fechar</button>
+                <button type="button" onClick={onFechar} className="font-semibold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">Fechar</button>
               </div>
 
               <p className="mt-4 flex items-center justify-center gap-1 text-xs opacity-90 font-semibold text-gray-400">

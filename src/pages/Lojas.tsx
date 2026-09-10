@@ -198,7 +198,7 @@ export default function Lojas() {
                 </p>
               )}
             </div>
-            <button
+            <button type="button"
               onClick={usarLocalizacaoAtual}
               disabled={localizando}
               className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#FC5B24]/40 bg-[#FC5B24]/10 px-4 py-3 text-sm font-semibold text-[#FC5B24] transition hover:bg-[#FC5B24]/20 disabled:opacity-60"

@@ -95,10 +95,10 @@ export default function AprovacaoEntregadores({ lojaId }: { lojaId: string }) {
               )}
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              <button onClick={() => abrirDocumento(e.cnh_arquivo_url)} className="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200">
+              <button type="button" onClick={() => abrirDocumento(e.cnh_arquivo_url)} className="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200">
                 <FileText size={12} /> Ver CNH
               </button>
-              <button onClick={() => abrirDocumento(e.veiculo_doc_arquivo_url)} className="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200">
+              <button type="button" onClick={() => abrirDocumento(e.veiculo_doc_arquivo_url)} className="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200">
                 <FileText size={12} /> {tDynamic('Ver doc. veículo')}
               </button>
             </div>
@@ -108,18 +108,18 @@ export default function AprovacaoEntregadores({ lojaId }: { lojaId: string }) {
                 <input value={motivo} onChange={(ev) => setMotivo(ev.target.value)} placeholder="Motivo da rejeição (o entregador vai ver isso)"
                   className="w-full rounded-lg border border-gray-200 dark:border-gray-700 p-2 text-xs dark:bg-gray-950 dark:text-white" />
                 <div className="flex gap-2">
-                  <button onClick={() => { setRejeitando(null); setMotivo(''); }} className="flex-1 rounded-lg bg-gray-100 dark:bg-gray-800 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Cancelar</button>
-                  <button onClick={() => confirmarRejeicao(e.id)} disabled={!motivo.trim() || processando === e.id}
+                  <button type="button" onClick={() => { setRejeitando(null); setMotivo(''); }} className="flex-1 rounded-lg bg-gray-100 dark:bg-gray-800 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Cancelar</button>
+                  <button type="button" onClick={() => confirmarRejeicao(e.id)} disabled={!motivo.trim() || processando === e.id}
                     className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 py-1.5 text-xs font-bold text-white disabled:opacity-50">{tDynamic('Confirmar rejeição')}</button>
                 </div>
               </div>
             ) : (
               <div className="mt-3 flex gap-2">
-                <button onClick={() => setRejeitando(e.id)} disabled={processando === e.id}
+                <button type="button" onClick={() => setRejeitando(e.id)} disabled={processando === e.id}
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-red-500/10 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-50">
                   <XCircle size={14} /> Rejeitar
                 </button>
-                <button onClick={() => aprovar(e.id)} disabled={processando === e.id}
+                <button type="button" onClick={() => aprovar(e.id)} disabled={processando === e.id}
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500/10 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50">
                   {processando === e.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} Aprovar
                 </button>

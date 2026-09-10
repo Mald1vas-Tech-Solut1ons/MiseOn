@@ -243,11 +243,11 @@ function OSCard({
           </div>
 
           <div className="flex gap-2 pt-2">
-            <button onClick={handleImprimirOS}
+            <button type="button" onClick={handleImprimirOS}
               className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl font-bold text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <Printer size={16} /> Imprimir OS
             </button>
-            <button onClick={handleImprimirEtiqueta}
+            <button type="button" onClick={handleImprimirEtiqueta}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-sm text-white bg-green-500 shadow-lg shadow-green-500/25 hover:scale-[1.02] transition-all">
               <Printer size={16} /> Imprimir Etiqueta
             </button>
@@ -301,7 +301,7 @@ function OSCard({
           
           {/* Stepper de lotes (desativado se em andamento) */}
           <div className={`flex items-center gap-2 shrink-0 ${emAndamento ? 'opacity-50 pointer-events-none' : ''}`}>
-            <button onClick={() => setQtdLotes(Math.max(1, qtdLotes - 1))}
+            <button type="button" onClick={() => setQtdLotes(Math.max(1, qtdLotes - 1))}
               className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
               <Minus size={16} />
             </button>
@@ -309,7 +309,7 @@ function OSCard({
               <span className="text-2xl font-black text-orange-600 dark:text-orange-500 leading-none">{qtdLotes}</span>
               <span className="block text-xs opacity-80 uppercase font-bold text-gray-400">lotes</span>
             </div>
-            <button onClick={() => setQtdLotes(qtdLotes + 1)}
+            <button type="button" onClick={() => setQtdLotes(qtdLotes + 1)}
               className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
               <Plus size={16} />
             </button>
@@ -357,11 +357,11 @@ function OSCard({
         <div className="mt-4 flex gap-2">
           {!emAndamento ? (
             <>
-              <button onClick={handleImprimirOS}
+              <button type="button" onClick={handleImprimirOS}
                 className="flex items-center justify-center px-4 py-3 rounded-xl font-bold text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                 <Printer size={16} />
               </button>
-              <button onClick={handleIniciar} disabled={semFicha}
+              <button type="button" onClick={handleIniciar} disabled={semFicha}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-sm text-white transition-all shadow-lg hover:scale-[1.02] ${
                   semFicha ? 'cursor-not-allowed bg-gray-400 shadow-none' : podeProduzir
                     ? 'bg-blue-600 shadow-blue-500/25'
@@ -371,7 +371,7 @@ function OSCard({
               </button>
             </>
           ) : (
-            <button onClick={() => setModoAberto(true)} disabled={isProduzindo}
+            <button type="button" onClick={() => setModoAberto(true)} disabled={isProduzindo}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-sm text-white bg-gradient-to-r from-orange-500 to-red-500 shadow-lg shadow-orange-500/25 hover:scale-[1.02] transition-all disabled:opacity-40 disabled:hover:scale-100 disabled:shadow-none">
               {isProduzindo ? <><Loader2 size={16} className="animate-spin" /> Finalizando…</> : <><Play size={16} /> {tDynamic('Retomar modo de preparo')}</>}
             </button>
@@ -425,7 +425,7 @@ function OSCard({
             <p className="text-sm font-medium mb-6 text-gray-700 dark:text-gray-300">{tDynamic('A OS não foi iniciada. Registre a compra emergencial ou faça um ajuste de inventário auditável antes de produzir.')}</p>
             
             <div className="flex gap-3">
-              <button onClick={() => setModalFuroAberto(false)} className="flex-1 py-3.5 font-black text-white bg-red-600 rounded-xl hover:bg-red-700 shadow-lg shadow-red-600/30 transition-transform hover:scale-[1.02]">
+              <button type="button" onClick={() => setModalFuroAberto(false)} className="flex-1 py-3.5 font-black text-white bg-red-600 rounded-xl hover:bg-red-700 shadow-lg shadow-red-600/30 transition-transform hover:scale-[1.02]">
                 Entendi, corrigir estoque
               </button>
             </div>
@@ -518,8 +518,8 @@ export default function KDSProducao() {
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-2 rounded-2xl bg-gray-100 p-1.5 shadow-inner dark:bg-gray-800">
-        <button onClick={() => setAba('ordens')} className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black transition-all ${aba === 'ordens' ? 'bg-white text-orange-600 shadow-md dark:bg-gray-900 dark:text-orange-400' : 'text-gray-500'}`}><Flame size={17}/> {tDynamic('Ordens & bancada')}</button>
-        <button data-tour="tour-producao-aba-fichas" onClick={() => setAba('fichas')} className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black transition-all ${aba === 'fichas' ? 'bg-white text-orange-600 shadow-md dark:bg-gray-900 dark:text-orange-400' : 'text-gray-500'}`}><ClipboardList size={17}/> {tDynamic('Fichas & manipulações')}</button>
+        <button type="button" onClick={() => setAba('ordens')} className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black transition-all ${aba === 'ordens' ? 'bg-white text-orange-600 shadow-md dark:bg-gray-900 dark:text-orange-400' : 'text-gray-500'}`}><Flame size={17}/> {tDynamic('Ordens & bancada')}</button>
+        <button type="button" data-tour="tour-producao-aba-fichas" onClick={() => setAba('fichas')} className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black transition-all ${aba === 'fichas' ? 'bg-white text-orange-600 shadow-md dark:bg-gray-900 dark:text-orange-400' : 'text-gray-500'}`}><ClipboardList size={17}/> {tDynamic('Fichas & manipulações')}</button>
       </div>
 
       {carregando ? (
@@ -533,7 +533,7 @@ export default function KDSProducao() {
           <ClipboardList size={40} className="mx-auto mb-3 opacity-40" />
           <p className="font-semibold">{tDynamic('Nenhum preparo cadastrado ainda.')}</p>
           <p className="text-sm mt-1">{tDynamic('Crie uma ficha de manipulação para gerar ordens de produção.')}</p>
-          <button onClick={() => setAba('fichas')} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 text-sm font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600"><Plus size={16}/> {tDynamic('Criar primeira ficha')}</button>
+          <button type="button" onClick={() => setAba('fichas')} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 text-sm font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600"><Plus size={16}/> {tDynamic('Criar primeira ficha')}</button>
         </div>
       ) : (
         <div className="space-y-8">

@@ -266,7 +266,7 @@ export function ModalCancelamento({
               <p className="mt-1 text-xs leading-relaxed text-[var(--cor-texto-suave)]">{fase.mensagem}</p>
               {fase.tecnico && (
                 <>
-                  <button
+                  <button type="button"
                     onClick={() => setVerTecnico((v) => !v)}
                     className="mt-2 flex items-center gap-1 text-xs opacity-95 font-semibold text-[var(--cor-texto-fraco)] hover:underline"
                   >
@@ -356,7 +356,7 @@ export function ModalCancelamento({
               {motivos.map((m) => {
                 const ativo = escolhido === m.codigo;
                 return (
-                  <button
+                  <button type="button"
                     key={m.codigo}
                     onClick={() => setEscolhido(m.codigo)}
                     className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition ${

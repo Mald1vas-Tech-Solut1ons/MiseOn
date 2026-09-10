@@ -158,7 +158,7 @@ export default function CrmClientes() {
           {/* Categorias */}
           <div className="flex flex-wrap items-center gap-1.5">
             {['TODOS', 'VIP', 'Frequente', 'Em Risco', 'Inativo', 'Novo'].map((cat) => (
-              <button
+              <button type="button"
                 key={cat}
                 onClick={() => setFiltroCategoria(cat)}
                 className={`rounded-full px-3 py-1 text-xs opacity-95 font-bold transition ${
@@ -218,14 +218,14 @@ export default function CrmClientes() {
                   <td className="py-3 px-4 text-right">
                     <div className="flex items-center justify-end gap-1.5">
                       {cliente.categoria === 'Em Risco' || cliente.categoria === 'Inativo' ? (
-                        <button
+                        <button type="button"
                           onClick={() => dispararCampanhaWhatsApp(cliente, 'retorno')}
                           className="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs opacity-95 font-bold text-amber-500 hover:bg-amber-500/20"
                         >
                           <SendIcon size={12} /> Resgatar
                         </button>
                       ) : (
-                        <button
+                        <button type="button"
                           onClick={() => dispararCampanhaWhatsApp(cliente, 'vip')}
                           className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs opacity-95 font-bold text-emerald-500 hover:bg-emerald-500/20"
                         >

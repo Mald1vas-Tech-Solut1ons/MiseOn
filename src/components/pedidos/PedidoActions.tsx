@@ -77,7 +77,7 @@ export function PedidoActions({
     <div className="p-4 flex gap-2 border-t border-gray-100 dark:border-white/5">
       {/* NOVO → ACEITO */}
       {p.status === 'NOVO' && (
-        <button disabled={processando} onClick={() => executar(() => onAvancar('ACEITO'))}
+        <button type="button" disabled={processando} onClick={() => executar(() => onAvancar('ACEITO'))}
           className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-xl py-2.5 font-['Sora'] font-bold text-sm shadow-lg shadow-orange-500/20 hover:brightness-110 transition disabled:opacity-50">
           <Check size={16} /> Aceitar pedido
         </button>
@@ -86,7 +86,7 @@ export function PedidoActions({
       {/* ACEITO com bastão no balcão: enviar pra cozinha OU consumo salão/comanda OU atalho de revenda */}
       {p.status === 'ACEITO' && !naCozinha && (
         p.requer_cozinha ? (
-          <button disabled={processando} onClick={() => executar(onEnviarCozinha)}
+          <button type="button" disabled={processando} onClick={() => executar(onEnviarCozinha)}
             className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-xl py-2.5 font-['Sora'] font-bold text-sm shadow-lg shadow-orange-500/20 hover:brightness-110 transition disabled:opacity-50">
             <Flame size={16} /> {tDynamic('Enviar para a cozinha')}
           </button>
@@ -95,7 +95,7 @@ export function PedidoActions({
             <UtensilsCrossed size={15} /> {tDynamic('Consumo Salão (Comanda Aberta)')}
           </div>
         ) : (
-          <button disabled={processando} onClick={() => executar(() => onAvancar('PRONTO'))}
+          <button type="button" disabled={processando} onClick={() => executar(() => onAvancar('PRONTO'))}
             className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 text-white rounded-xl py-2.5 font-['Sora'] font-bold text-sm shadow-lg shadow-emerald-500/20 hover:brightness-110 transition disabled:opacity-50">
             <Store size={16} /> Separar e entregar
           </button>
@@ -111,7 +111,7 @@ export function PedidoActions({
 
       {/* PRONTO com bastão no balcão: conferência antes do destino */}
       {precisaConferir && (
-        <button disabled={processando || !todosConferidos} onClick={() => executar(() => onAvancar(destinoStatus))}
+        <button type="button" disabled={processando || !todosConferidos} onClick={() => executar(() => onAvancar(destinoStatus))}
           className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 text-white rounded-xl py-2.5 font-['Sora'] font-bold text-sm shadow-lg shadow-emerald-500/20 hover:brightness-110 transition disabled:cursor-not-allowed disabled:opacity-40">
           <Check size={16} /> {destinoLabel}
         </button>
@@ -119,7 +119,7 @@ export function PedidoActions({
 
       {/* EM_ROTA → FINALIZADO (segue igual) */}
       {p.status === 'EM_ROTA' && fluxoProx && (
-        <button disabled={processando} onClick={() => executar(() => onAvancar(fluxoProx))}
+        <button type="button" disabled={processando} onClick={() => executar(() => onAvancar(fluxoProx))}
           className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-xl py-2.5 font-['Sora'] font-bold text-sm shadow-lg shadow-orange-500/20 hover:brightness-110 transition disabled:opacity-50">
           <Check size={16} /> {fluxoLabel}
         </button>
@@ -128,7 +128,7 @@ export function PedidoActions({
       {/* Entrega do iFood: quem leva é o entregador deles, então o balcão não
           despacha — só confere o código dele antes de soltar a sacola. */}
       {onConferirColeta && (
-        <button
+        <button type="button"
           disabled={processando}
           onClick={onConferirColeta}
           className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 py-2.5 font-['Sora'] text-sm font-bold text-blue-600 transition hover:bg-blue-500/20 disabled:opacity-50 dark:text-blue-400"
@@ -144,7 +144,7 @@ export function PedidoActions({
       )}
 
       <div className="relative">
-        <button
+        <button type="button"
           ref={botaoRef}
           onClick={() => setMenu((m) => !m)}
           className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 transition"
@@ -159,19 +159,19 @@ export function PedidoActions({
             className="z-[100] w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0B1120]"
           >
             <p className="px-3 pt-2.5 pb-1 text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400">Imprimir via</p>
-            <button onClick={() => { setMenu(false); onImprimir('cozinha'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
+            <button type="button" onClick={() => { setMenu(false); onImprimir('cozinha'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
               <ChefHat size={16} className="text-orange-500" /> {tDynamic('Comanda da Cozinha')}
             </button>
             {isDelivery && (
-              <button onClick={() => { setMenu(false); onImprimir('romaneio'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
+              <button type="button" onClick={() => { setMenu(false); onImprimir('romaneio'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
                 <Bike size={16} className="text-blue-500" /> {tDynamic('Romaneio do Entregador')}
               </button>
             )}
-            <button onClick={() => { setMenu(false); onImprimir('nota'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
+            <button type="button" onClick={() => { setMenu(false); onImprimir('nota'); }} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5">
               <Receipt size={16} className="text-emerald-500" /> {tDynamic('Nota do Cliente')}
             </button>
             <div className="my-1 border-t border-gray-100 dark:border-white/5"></div>
-            <button
+            <button type="button"
               onClick={handleEmitirNfe}
               disabled={emitindoNfe}
               className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5 disabled:opacity-50"
@@ -185,7 +185,7 @@ export function PedidoActions({
       </div>
 
       {['NOVO','ACEITO','PREPARANDO'].includes(p.status) && (naCozinha || p.status === 'PREPARANDO' ? papel === 'admin' : true) && (
-        <button
+        <button type="button"
           onClick={onCancelar}
           title={naCozinha || p.status === 'PREPARANDO' ? 'A cozinha já começou — só admin cancela' : 'Cancelar pedido'}
           className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition"

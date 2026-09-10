@@ -59,7 +59,7 @@ export default function BrandIntro({
           }}
         />
         
-        <button 
+        <button type="button" 
           onClick={fechar}
           style={{
             position: 'absolute',

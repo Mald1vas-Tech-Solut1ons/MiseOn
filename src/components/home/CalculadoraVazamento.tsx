@@ -71,7 +71,7 @@ export default function CalculadoraVazamento() {
             <Store size={14} /> {tDynamic('Simulação Rápida:')}
           </span>
           {PRESETS.map((p, idx) => (
-            <button
+            <button type="button"
               key={idx}
               onClick={() => aplicarPreset(p)}
               className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition border ${

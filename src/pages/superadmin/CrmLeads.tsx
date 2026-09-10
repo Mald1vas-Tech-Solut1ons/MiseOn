@@ -89,7 +89,7 @@ export default function CrmLeads() {
           </p>
         </div>
 
-        <button
+        <button type="button"
           onClick={() => setModalNovoLead(true)}
           className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition hover:bg-indigo-500"
         >
@@ -148,7 +148,7 @@ export default function CrmLeads() {
 
           <div className="flex flex-wrap items-center gap-1.5">
             {['TODAS', 'NOVO', 'EM_CONTATO', 'DEMO_TRIAL', 'FECHAMENTO', 'ASSINANTE', 'PERDIDO'].map((etapa) => (
-              <button
+              <button type="button"
                 key={etapa}
                 onClick={() => setEtapaFiltro(etapa)}
                 className={`rounded-full px-3 py-1 text-xs opacity-95 font-bold transition ${
@@ -216,7 +216,7 @@ export default function CrmLeads() {
                     {lead.origem}
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <button
+                    <button type="button"
                       onClick={() => abrirWhatsAppComercial(lead)}
                       className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 px-3 py-1.5 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30 transition"
                     >
@@ -283,10 +283,10 @@ export default function CrmLeads() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button onClick={() => setModalNovoLead(false)} className="rounded-xl px-4 py-2 text-xs font-bold text-gray-400 hover:text-white">
+              <button type="button" onClick={() => setModalNovoLead(false)} className="rounded-xl px-4 py-2 text-xs font-bold text-gray-400 hover:text-white">
                 Cancelar
               </button>
-              <button onClick={adicionarLead} className="rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white hover:bg-indigo-500">
+              <button type="button" onClick={adicionarLead} className="rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white hover:bg-indigo-500">
                 Salvar Lead
               </button>
             </div>

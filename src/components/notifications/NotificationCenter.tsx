@@ -140,7 +140,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
       `}</style>
 
       {/* ── BOTÃO DO SINO DE NOTIFICAÇÃO ── */}
-      <button
+      <button type="button"
         onClick={() => setAberto(!aberto)}
         aria-label="Central de Notificações"
         className={`group relative flex items-center justify-center h-11 w-11 rounded-2xl border transition-all duration-300 ${
@@ -191,7 +191,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
 
             <div className="flex items-center gap-1">
               {naoLidas > 0 && (
-                <button
+                <button type="button"
                   onClick={marcarTodasComoLidas}
                   title="Marcar todas como lidas (Manter salvas)"
                   className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-emerald-500 transition"
@@ -200,7 +200,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                 </button>
               )}
               {notificacoes.length > 0 && (
-                <button
+                <button type="button"
                   onClick={limparLidas}
                   title="Limpar notificações lidas"
                   className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-red-500 transition"
@@ -208,7 +208,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                   <Trash2 size={16} />
                 </button>
               )}
-              <button
+              <button type="button"
                 onClick={() => setAberto(false)}
                 className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-white transition"
               >
@@ -220,7 +220,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
           {/* Abas por Categoria */}
           <div className="flex items-center gap-1 overflow-x-auto px-4 py-2 border-b border-gray-100 dark:border-white/5 no-scrollbar bg-gray-50/30 dark:bg-black/20">
             {(['TODAS', 'ESTOQUE', 'PEDIDO', 'CHAT'] as CategoriaNotificacao[]).map((cat) => (
-              <button
+              <button type="button"
                 key={cat}
                 onClick={() => setCatAtiva(cat)}
                 className={`shrink-0 rounded-full px-3 py-1 text-xs opacity-95 font-bold transition ${
@@ -287,7 +287,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                       {/* Botões de Ação Direta + Manter/Excluir */}
                       <div className="mt-3 flex items-center justify-between gap-2">
                         {n.acaoUrl && (
-                          <button
+                          <button type="button"
                             onClick={() => handleAcao(n)}
                             className="inline-flex items-center gap-1.5 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 px-3 py-1 text-xs opacity-95 font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white transition-all shadow-sm"
                           >
@@ -298,7 +298,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
 
                         <div className="flex items-center gap-1.5 ml-auto">
                           {!n.lida ? (
-                            <button
+                            <button type="button"
                               onClick={() => marcarComoLida(n.id)}
                               title="Marcar como lida (manter salva)"
                               className="flex items-center gap-1 rounded-lg border border-gray-200 dark:border-white/10 px-2 py-1 text-xs opacity-90 font-semibold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition"
@@ -313,7 +313,7 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
                           )}
 
                           {/* Botão de Exclusão Explícita ("Já resolvi") */}
-                          <button
+                          <button type="button"
                             onClick={() => excluirNotificacao(n.id)}
                             title="Excluir notificação (já resolvi)"
                             className="flex items-center gap-1 rounded-lg border border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-950/20 px-2 py-1 text-xs opacity-90 font-bold text-red-500 hover:bg-red-500 hover:text-white transition"

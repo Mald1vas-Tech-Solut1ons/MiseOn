@@ -98,7 +98,7 @@ export default function CardapioAdmin() {
     <div data-tour="tour-cardapio-header" className="p-4 pb-28 lg:pb-12">
       <div className="mb-3 flex gap-2">
         {(['produtos', 'categorias'] as Tab[]).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
+          <button type="button" key={t} onClick={() => setTab(t)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium ${tab === t ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm dark:bg-gray-900 dark:text-gray-300 dark:border dark:border-gray-800'}`}>
             {t === 'produtos' ? tDynamic('Produtos') : tDynamic('Categorias')}
           </button>
@@ -118,19 +118,19 @@ export default function CardapioAdmin() {
           </div>
 
           <HorizontalScrollContainer className="mb-3 pb-1">
-            <button onClick={() => setCatAtiva(null)}
+            <button type="button" onClick={() => setCatAtiva(null)}
               className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${!catAtiva ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm dark:bg-gray-900 dark:text-gray-300 dark:border dark:border-gray-800'}`}>
               {tDynamic('Tudo')}
             </button>
             {categorias.map((c) => (
-              <button key={c.id} onClick={() => setCatAtiva(c.id === catAtiva ? null : c.id)}
+              <button type="button" key={c.id} onClick={() => setCatAtiva(c.id === catAtiva ? null : c.id)}
                 className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${catAtiva === c.id ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm dark:bg-gray-900 dark:text-gray-300 dark:border dark:border-gray-800'}`}>
                 {c.nome}
               </button>
             ))}
           </HorizontalScrollContainer>
 
-          <button onClick={() => setEditando('novo')}
+          <button type="button" onClick={() => setEditando('novo')}
             className="mb-3 flex w-full items-center justify-center gap-1 rounded-xl bg-[var(--cor-primaria)] py-2.5 text-sm font-semibold text-white">
             <Plus size={15} /> {tDynamic('Novo produto')}
           </button>
@@ -138,11 +138,11 @@ export default function CardapioAdmin() {
           {catAtiva && (
             <div className="mb-3 flex items-center gap-2 rounded-xl border border-dashed border-gray-200 bg-gray-50/60 px-3 py-2 text-xs dark:border-gray-800 dark:bg-gray-900/40">
               <span className="font-semibold text-gray-500 dark:text-gray-400">Marcar categoria toda:</span>
-              <button onClick={() => marcarCategoriaEstacao(catAtiva, 'DIRETO')}
+              <button type="button" onClick={() => marcarCategoriaEstacao(catAtiva, 'DIRETO')}
                 className="flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-bold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-400">
                 <Store size={12} /> Revenda direta
               </button>
-              <button onClick={() => marcarCategoriaEstacao(catAtiva, 'COZINHA')}
+              <button type="button" onClick={() => marcarCategoriaEstacao(catAtiva, 'COZINHA')}
                 className="flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 font-bold text-orange-700 hover:bg-orange-100 dark:border-orange-900/50 dark:bg-orange-900/20 dark:text-orange-400">
                 <ChefHat size={12} /> {tDynamic('Preparo na cozinha')}
               </button>
@@ -175,16 +175,16 @@ export default function CardapioAdmin() {
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-col items-center gap-1.5">
-                  <button onClick={() => toggleDestaque(p)} title="Destaque">
+                  <button type="button" onClick={() => toggleDestaque(p)} title="Destaque">
                     <Star size={16} className={p.destaque ? 'fill-amber-400 text-amber-400' : 'text-gray-300'} />
                   </button>
-                  <button onClick={() => toggleDisponivel(p)} title="Disponibilidade">
+                  <button type="button" onClick={() => toggleDisponivel(p)} title="Disponibilidade">
                     {p.disponivel ? <Eye size={16} className="text-green-600" /> : <EyeOff size={16} className="text-gray-400" />}
                   </button>
                 </div>
                 <div className="flex shrink-0 flex-col gap-1.5">
-                  <button onClick={() => setEditando(p)} className="rounded-lg border p-1.5 text-gray-500 dark:text-gray-400"><Pencil size={14} /></button>
-                  <button onClick={() => excluirProduto(p)} className="rounded-lg border border-red-200 p-1.5 text-red-500"><Trash2 size={14} /></button>
+                  <button type="button" onClick={() => setEditando(p)} className="rounded-lg border p-1.5 text-gray-500 dark:text-gray-400"><Pencil size={14} /></button>
+                  <button type="button" onClick={() => excluirProduto(p)} className="rounded-lg border border-red-200 p-1.5 text-red-500"><Trash2 size={14} /></button>
                 </div>
               </div>
             ))}
@@ -250,22 +250,22 @@ function CategoriasTab({ lojaId, categorias, onChange }: { lojaId: string; categ
       {categorias.map((c, idx) => (
         <div key={c.id} className={`flex items-center gap-2 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-2.5 shadow-sm dark:bg-gray-900 dark:border dark:border-gray-800 ${c.ativo === false ? 'opacity-50' : ''}`}>
           <div className="flex flex-col">
-            <button disabled={idx === 0} onClick={() => mover(c, -1)} className="text-gray-400 disabled:opacity-20"><ChevronUp size={14} /></button>
-            <button disabled={idx === categorias.length - 1} onClick={() => mover(c, 1)} className="text-gray-400 disabled:opacity-20"><ChevronDown size={14} /></button>
+            <button type="button" disabled={idx === 0} onClick={() => mover(c, -1)} className="text-gray-400 disabled:opacity-20"><ChevronUp size={14} /></button>
+            <button type="button" disabled={idx === categorias.length - 1} onClick={() => mover(c, 1)} className="text-gray-400 disabled:opacity-20"><ChevronDown size={14} /></button>
           </div>
           <input defaultValue={c.nome} onBlur={(e) => renomear(c, e.target.value)}
             className="flex-1 rounded-lg border-none bg-transparent p-1 text-sm font-medium outline-none focus:bg-gray-50 dark:text-gray-100 dark:focus:bg-gray-800" />
-          <button onClick={() => toggleAtiva(c)} className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          <button type="button" onClick={() => toggleAtiva(c)} className="text-xs font-medium text-gray-500 dark:text-gray-400">
             {c.ativo === false ? 'Inativa' : 'Ativa'}
           </button>
-          <button onClick={() => excluir(c)} className="rounded-lg border border-red-200 p-1.5 text-red-500"><Trash2 size={14} /></button>
+          <button type="button" onClick={() => excluir(c)} className="rounded-lg border border-red-200 p-1.5 text-red-500"><Trash2 size={14} /></button>
         </div>
       ))}
 
       <div className="flex gap-2 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-800 p-2.5 shadow-sm dark:bg-gray-900 dark:border dark:border-gray-800">
         <input value={nova} onChange={(e) => setNova(e.target.value)} placeholder="Nova categoria (ex: Bebidas)"
           className="flex-1 rounded-lg border p-2 text-sm dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700" onKeyDown={(e) => e.key === 'Enter' && criar()} />
-        <button onClick={criar} className="rounded-lg bg-[var(--cor-primaria)] px-4 text-sm font-semibold text-white">Add</button>
+        <button type="button" onClick={criar} className="rounded-lg bg-[var(--cor-primaria)] px-4 text-sm font-semibold text-white">Add</button>
       </div>
     </div>
   );
@@ -529,14 +529,14 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
       <div className="sheet max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white dark:bg-gray-900 dark:border-gray-800 p-4 dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold dark:text-gray-100">{produto ? 'Editar produto' : 'Novo produto'}</h3>
-          <button onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
+          <button type="button" onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
         </div>
 
         <div className="mt-3 space-y-2">
           <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome do produto" className="w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
           <div className="relative">
             <textarea value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Descrição" rows={3} className="w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 pb-10" />
-            <button onClick={gerarDescricaoIA} disabled={gerandoIA || !nome} className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-lg bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-600 transition-colors hover:bg-orange-200 disabled:opacity-50 dark:bg-orange-900/30 dark:text-orange-400">
+            <button type="button" onClick={gerarDescricaoIA} disabled={gerandoIA || !nome} className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-lg bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-600 transition-colors hover:bg-orange-200 disabled:opacity-50 dark:bg-orange-900/30 dark:text-orange-400">
               <Sparkles size={14} className={gerandoIA ? "animate-pulse" : ""} /> {gerandoIA ? 'Gerando Mágica...' : 'Gerar com IA'}
             </button>
           </div>
@@ -755,10 +755,10 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                 </select>
                 <input value={f.quantidade_consumida} onChange={(e) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, quantidade_consumida: e.target.value } : x))}
                   type="number" placeholder="Qtd" className="w-20 rounded-lg border p-1.5 text-xs" />
-                <button onClick={() => setFicha((arr) => arr.filter((_, i) => i !== idx))} className="text-red-400"><X size={14} /></button>
+                <button type="button" onClick={() => setFicha((arr) => arr.filter((_, i) => i !== idx))} className="text-red-400"><X size={14} /></button>
               </div>
             ))}
-            <button onClick={addInsumoFicha} disabled={!insumos.length} className="mt-1 flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)] disabled:opacity-40">
+            <button type="button" onClick={addInsumoFicha} disabled={!insumos.length} className="mt-1 flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)] disabled:opacity-40">
               <Plus size={12} /> Adicionar insumo
             </button>
             {!insumos.length && <p className="mt-1 text-xs text-gray-400">{tDynamic('Cadastre insumos em Estoque primeiro.')}</p>}
@@ -822,7 +822,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                   type="number" placeholder="Mín" className="w-14 rounded-lg border p-1.5 text-xs" />
                 <input value={g.max_escolhas} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key ? { ...x, max_escolhas: Number(e.target.value) } : x))}
                   type="number" placeholder="Máx" className="w-14 rounded-lg border p-1.5 text-xs" />
-                <button onClick={() => setGrupos((arr) => arr.filter((x) => x._key !== g._key))} className="text-red-400"><Trash2 size={14} /></button>
+                <button type="button" onClick={() => setGrupos((arr) => arr.filter((x) => x._key !== g._key))} className="text-red-400"><Trash2 size={14} /></button>
               </div>
               <div className="mt-1.5 space-y-1 pl-2">
                 {g.opcoes.map((o) => (
@@ -834,7 +834,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                       <input value={o.preco_adicional} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key
                         ? { ...x, opcoes: x.opcoes.map((y) => y._key === o._key ? { ...y, preco_adicional: Number(e.target.value) } : y) } : x))}
                         type="number" placeholder="+R$" className="w-16 rounded-lg border p-1.5 text-xs" />
-                      <button onClick={() => setGrupos((arr) => arr.map((x) => x._key === g._key
+                      <button type="button" onClick={() => setGrupos((arr) => arr.map((x) => x._key === g._key
                         ? { ...x, opcoes: x.opcoes.filter((y) => y._key !== o._key) } : x))} className="text-red-400"><X size={13} /></button>
                     </div>
                     {/* Vínculo de Estoque do Adicional */}
@@ -853,20 +853,20 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                     </div>
                   </div>
                 ))}
-                <button onClick={() => addOpcao(g._key)} className="flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
+                <button type="button" onClick={() => addOpcao(g._key)} className="flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
                   <Plus size={12} /> Opção
                 </button>
               </div>
             </div>
           ))}
-          <button onClick={addGrupo} className="min-h-11 flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
+          <button type="button" onClick={addGrupo} className="min-h-11 flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
             <Plus size={12} /> {tDynamic('Novo grupo de personalização')}
           </button>
         </div>
 
         {erro && <p className="mt-2 text-sm font-medium text-red-500">{erro}</p>}
 
-        <button onClick={salvar} disabled={salvando}
+        <button type="button" onClick={salvar} disabled={salvando}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 font-semibold text-white disabled:opacity-40">
           <Save size={16} /> {salvando ? 'Salvando…' : 'Salvar produto'}
         </button>

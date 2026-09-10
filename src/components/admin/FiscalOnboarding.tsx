@@ -189,7 +189,7 @@ export function FiscalOnboarding({
           <div className="grid gap-4 md:grid-cols-2 items-end">
             <div>
               <input type="file" ref={fileRef} accept=".pfx,.p12" className="hidden" onChange={handleFile} />
-              <button 
+              <button type="button" 
                 onClick={() => fileRef.current?.click()}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border p-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition"
               >
@@ -211,7 +211,7 @@ export function FiscalOnboarding({
 
         {erro && <p className="mt-4 text-sm font-medium text-red-500 bg-red-50 dark:bg-red-900/10 p-3 rounded-lg border border-red-100 dark:border-red-900/30">{erro}</p>}
 
-        <button 
+        <button type="button" 
           onClick={habilitar} 
           disabled={loading}
           className="mt-5 w-full flex items-center justify-center gap-2 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3.5 font-bold shadow-lg disabled:opacity-50 transition hover:scale-[1.01]"

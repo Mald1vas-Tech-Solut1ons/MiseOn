@@ -7,7 +7,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
   useEffect(() => { setEscuro(aplicarTemaSalvo()); }, []);
 
   return (
-    <button
+    <button type="button"
       onClick={() => setEscuro(alternarTema())}
       title="Alternar tema claro/escuro"
       aria-label="Alternar tema claro ou escuro"

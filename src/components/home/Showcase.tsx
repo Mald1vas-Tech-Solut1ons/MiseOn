@@ -204,14 +204,14 @@ const MockupLogistica = () => {
             <div className="text-white font-bold text-sm">Pedido #1043</div>
             <div className="text-gray-400 text-xs">{tDynamic('Rua das Flores, 123 - Centro')}</div>
           </div>
-          <button className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded transition">Despachar</button>
+          <button type="button" className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded transition">Despachar</button>
         </div>
         <div className="bg-gray-800 rounded-lg p-3 flex justify-between items-center">
           <div>
             <div className="text-white font-bold text-sm">Pedido #1044</div>
             <div className="text-gray-400 text-xs">Av. Paulista, 900 - Bela Vista</div>
           </div>
-          <button className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded transition">Despachar</button>
+          <button type="button" className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded transition">Despachar</button>
         </div>
       </div>
     </div>

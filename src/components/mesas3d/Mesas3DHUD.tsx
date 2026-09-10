@@ -25,7 +25,7 @@ export function Mesas3DHUD({ posicoes, mesas3D, onSelecionar }: Props) {
         const assentosOcupadosCount = m3d.assentos.filter((a) => a.ocupado).length;
 
         return (
-          <button
+          <button type="button"
             key={pos.mesaId}
             onClick={() => onSelecionar(m3d)}
             style={{ left: pos.telaX, top: pos.telaY }}

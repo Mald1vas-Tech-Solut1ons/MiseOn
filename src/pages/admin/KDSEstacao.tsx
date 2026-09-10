@@ -151,7 +151,7 @@ export default function KDSEstacao() {
     return (
       <div className="p-6 text-center text-gray-400">
         <p className="font-semibold">{tDynamic('Estação não encontrada.')}</p>
-          <button onClick={() => nav('/admin/kds')} className="mt-3 text-sm font-bold underline">
+          <button type="button" onClick={() => nav('/admin/kds')} className="mt-3 text-sm font-bold underline">
           {tDynamic('Voltar para o KDS')}
         </button>
       </div>
@@ -162,7 +162,7 @@ export default function KDSEstacao() {
     <div className="p-4 sm:p-6 pb-24 max-w-7xl mx-auto">
       <div className="rounded-2xl p-4 sm:p-6 text-white mb-4 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4" style={{ background: `linear-gradient(135deg, ${cor}, ${cor}CC)` }}>
         <div className="flex items-center gap-4">
-          <button onClick={() => nav('/admin/kds')} className="bg-white/20 p-3 rounded-full hover:bg-white/30 transition-colors" aria-label={tDynamic('Voltar')}>
+          <button type="button" onClick={() => nav('/admin/kds')} className="bg-white/20 p-3 rounded-full hover:bg-white/30 transition-colors" aria-label={tDynamic('Voltar')}>
             <ArrowLeft size={22} />
           </button>
           <div className="bg-white/20 p-3 rounded-full"><ChefHat size={28} /></div>
@@ -276,7 +276,7 @@ export default function KDSEstacao() {
                     ))}
                   </ul>
 
-                  <button
+                  <button type="button"
                     onClick={() => avancar(ticket)}
                     disabled={avancando === ticket.id}
                     className="w-full min-h-14 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-black text-base text-white shadow-lg transition-all hover:scale-[1.02] disabled:opacity-50"

@@ -200,7 +200,7 @@ export function RoiCalculator() {
           </div>
 
           <div>
-            <button
+            <button type="button"
               onClick={() => setModalOpen(true)}
               className="w-full rounded-2xl bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] py-4 px-6 font-['Sora'] text-sm font-bold text-white shadow-xl shadow-[#FC5B24]/25 transition hover:scale-[1.02] hover:brightness-110 flex items-center justify-center gap-2"
             >

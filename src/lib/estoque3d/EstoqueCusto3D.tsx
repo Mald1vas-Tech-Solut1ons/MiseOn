@@ -212,7 +212,7 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
           </p>
         </div>
 
-        <button
+        <button type="button"
           data-tour="tour-estoque-3d-legenda"
           onClick={() => setMostrarGuiaFisica((v) => !v)}
           className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800/50 transition-colors"
@@ -298,7 +298,7 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
       {/* Barra de Filtros por Categoria */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
         <span className="text-xs font-bold text-gray-500 dark:text-gray-400 shrink-0">Filtrar Categoria:</span>
-        <button
+        <button type="button"
           onClick={() => setFiltroCategoria(null)}
           className={`shrink-0 px-3.5 py-1 rounded-full text-xs font-bold transition-all ${!filtroCategoria ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'}`}
         >
@@ -307,7 +307,7 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
         {categoriasUnicas.map((cat) => {
           const qtd = grafo.raizes.filter((r) => r.categoria === cat).length;
           return (
-            <button
+            <button type="button"
               key={cat}
               onClick={() => setFiltroCategoria(cat)}
               className={`shrink-0 px-3.5 py-1 rounded-full text-xs font-bold transition-all ${filtroCategoria === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'}`}

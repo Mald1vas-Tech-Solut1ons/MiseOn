@@ -32,7 +32,7 @@ export function CaixaModal({
                 setValorCaixa(clean);
               }
             }} placeholder="0,00" inputMode="decimal" autoFocus className={`${inputCls} mt-1 text-center text-xl font-black`} />
-            <button onClick={abrirTurno} disabled={salvandoCaixa} className="mt-4 w-full rounded-2xl bg-[var(--cor-primaria)] py-3.5 text-sm font-black text-white disabled:opacity-50">
+            <button type="button" onClick={abrirTurno} disabled={salvandoCaixa} className="mt-4 w-full rounded-2xl bg-[var(--cor-primaria)] py-3.5 text-sm font-black text-white disabled:opacity-50">
               {salvandoCaixa ? 'Abrindo…' : 'Abrir caixa'}
             </button>
           </>
@@ -55,7 +55,7 @@ export function CaixaModal({
             }} placeholder="0,00" inputMode="decimal" autoFocus className={`${inputCls} mt-1 text-center text-xl font-black`} />
             <label className="mt-3 block text-xs font-bold text-gray-600 dark:text-gray-300">Motivo</label>
             <input value={motivoCaixa} onChange={(e) => setMotivoCaixa(e.target.value)} placeholder={modalCaixa === 'SANGRIA' ? 'ex: depósito no cofre' : 'ex: troco do banco'} className={`${inputCls} mt-1`} />
-            <button onClick={() => registrarMov(modalCaixa)} disabled={salvandoCaixa || Number(String(valorCaixa).replace(',', '.') || 0) <= 0} className="mt-4 w-full rounded-2xl bg-[var(--cor-primaria)] py-3.5 text-sm font-black text-white disabled:opacity-50">
+            <button type="button" onClick={() => registrarMov(modalCaixa)} disabled={salvandoCaixa || Number(String(valorCaixa).replace(',', '.') || 0) <= 0} className="mt-4 w-full rounded-2xl bg-[var(--cor-primaria)] py-3.5 text-sm font-black text-white disabled:opacity-50">
               {salvandoCaixa ? 'Registrando…' : 'Registrar'}
             </button>
           </>
@@ -90,7 +90,7 @@ export function CaixaModal({
               </p>
             )}
             <input value={obsFechamento} onChange={(e) => setObsFechamento(e.target.value)} placeholder="Observação (opcional)" className={`${inputCls} mt-3`} />
-            <button onClick={fecharTurno} disabled={salvandoCaixa || valorCaixa === ''} className="mt-4 w-full rounded-2xl bg-gray-900 py-3.5 text-sm font-black text-white disabled:opacity-50 dark:bg-gray-700">
+            <button type="button" onClick={fecharTurno} disabled={salvandoCaixa || valorCaixa === ''} className="mt-4 w-full rounded-2xl bg-gray-900 py-3.5 text-sm font-black text-white disabled:opacity-50 dark:bg-gray-700">
               {salvandoCaixa ? 'Fechando…' : 'Fechar turno'}
             </button>
           </>

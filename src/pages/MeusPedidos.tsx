@@ -251,7 +251,7 @@ export default function MeusPedidos() {
             <p className="mt-2 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
               {tDynamic('Seu histórico, pedidos em preparo e entregas em andamento ficam centralizados aqui.')}
             </p>
-            <button onClick={entrar} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110">
+            <button type="button" onClick={entrar} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110">
               <LogIn size={16} /> {tDynamic('Entrar com Google')}
             </button>
           </div>

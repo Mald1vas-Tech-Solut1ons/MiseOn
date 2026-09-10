@@ -197,7 +197,7 @@ export default function Ifood() {
 
       {/* ── Abas ── */}
       <div className="mb-6 flex flex-wrap gap-2 pb-1">
-        <button
+        <button type="button"
           data-tour="tour-ifood-aba-credenciais"
           onClick={() => setAba('conexao')}
           className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold transition ${
@@ -208,7 +208,7 @@ export default function Ifood() {
         >
           <Link2 size={15} /> {tDynamic('Conexão e Taxas')}
         </button>
-        <button
+        <button type="button"
           data-tour="tour-ifood-aba-depara"
           onClick={() => setAba('depara')}
           className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold transition ${
@@ -219,7 +219,7 @@ export default function Ifood() {
         >
           <Package size={15} /> {tDynamic('De-Para de Produtos')}
         </button>
-        <button
+        <button type="button"
           onClick={() => setAba('pedidos')}
           className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold transition ${
             aba === 'pedidos'
@@ -288,7 +288,7 @@ export default function Ifood() {
                   <p className="flex-1 text-xs opacity-95 leading-snug text-amber-800 dark:text-amber-300">
                     <strong>{mapeados.comCodigo} de {mapeados.total}</strong>{' '}
                     {tDynamic('produtos têm Código iFood. Os que não têm ficam de fora da sincronização — o iFood não tem como saber a qual item dele cada produto daqui corresponde.')}{' '}
-                    <button onClick={() => setAba('depara')} className="font-bold underline">
+                    <button type="button" onClick={() => setAba('depara')} className="font-bold underline">
                       {tDynamic('Preencher no De-Para')}
                     </button>
                   </p>
@@ -314,7 +314,7 @@ export default function Ifood() {
               ))}
 
               {loja.ifood_addon_ativo && loja.ifood_sync_cardapio && (
-                <button
+                <button type="button"
                   onClick={sincronizarCardapio}
                   disabled={sincronizando || mapeados.comCodigo === 0}
                   className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-red-600 p-3 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40 dark:text-red-400 dark:hover:bg-red-500/10"
@@ -384,7 +384,7 @@ function Interruptor({
   onToggle: () => void;
 }) {
   return (
-    <button
+    <button type="button"
       onClick={() => !bloqueado && onToggle()}
       disabled={bloqueado}
       className={`flex w-full items-start justify-between gap-3 rounded-xl border p-3 text-left transition ${
@@ -479,7 +479,7 @@ function ImportarCardapioModal({ lojaId }: { lojaId: string }) {
   return (
     <>
       {/* ── Botão de abertura ── */}
-      <button
+      <button type="button"
         onClick={() => { setAberto(true); buscarPrevia(); }}
         className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-emerald-600 p-3 text-sm font-black text-emerald-600 transition hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/50 dark:hover:bg-emerald-500/10"
       >
@@ -507,7 +507,7 @@ function ImportarCardapioModal({ lojaId }: { lojaId: string }) {
                   </p>
                 </div>
               </div>
-              <button onClick={fechar} className="p-2 rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+              <button type="button" onClick={fechar} className="p-2 rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
                 <XIcon size={20} />
               </button>
             </div>
@@ -633,13 +633,13 @@ function ImportarCardapioModal({ lojaId }: { lojaId: string }) {
             {/* Footer */}
             {!carregando && fase !== 'concluido' && (
               <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-gray-100 dark:border-gray-800">
-                <button
+                <button type="button"
                   onClick={fechar}
                   className="text-sm font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition"
                 >
                   {tDynamic('Cancelar')}
                 </button>
-                <button
+                <button type="button"
                   onClick={confirmar}
                   disabled={!diff || (resumo?.novos === 0 && resumo?.atualizados === 0)}
                   className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-black text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
@@ -652,7 +652,7 @@ function ImportarCardapioModal({ lojaId }: { lojaId: string }) {
 
             {fase === 'concluido' && (
               <div className="flex justify-center px-5 py-4 border-t border-gray-100 dark:border-gray-800">
-                <button
+                <button type="button"
                   onClick={fechar}
                   className="rounded-2xl bg-gray-100 px-6 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 transition"
                 >
@@ -840,7 +840,7 @@ function DeParaProdutos({ lojaId, loja }: { lojaId: string; loja: LojaIfood }) {
             className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-red-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
           />
         </div>
-        <button
+        <button type="button"
           onClick={() => setSoPendentes((s) => !s)}
           className={`rounded-xl px-3.5 py-2.5 text-xs font-bold transition ${
             soPendentes
@@ -850,7 +850,7 @@ function DeParaProdutos({ lojaId, loja }: { lojaId: string; loja: LojaIfood }) {
         >
           Só pendentes
         </button>
-        <button
+        <button type="button"
           onClick={salvarTodos}
           disabled={salvando || alterados.length === 0}
           className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-black text-white shadow-md shadow-red-600/20 transition hover:bg-red-700 disabled:opacity-40"
@@ -1050,13 +1050,13 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
           <Info size={12} className="shrink-0" />
           {tDynamic('Fora da conta:')}
           {totais.testes > 0 && (
-            <button onClick={() => setFiltro('TESTE')} className="font-bold underline decoration-dotted">
+            <button type="button" onClick={() => setFiltro('TESTE')} className="font-bold underline decoration-dotted">
               {totais.testes} {totais.testes === 1 ? tDynamic('pedido de teste') : tDynamic('pedidos de teste')}
             </button>
           )}
           {totais.testes > 0 && totais.cancelados > 0 && <span>·</span>}
           {totais.cancelados > 0 && (
-            <button onClick={() => setFiltro('CANCELADOS')} className="font-bold underline decoration-dotted">
+            <button type="button" onClick={() => setFiltro('CANCELADOS')} className="font-bold underline decoration-dotted">
               {totais.cancelados} {totais.cancelados === 1 ? tDynamic('cancelado') : tDynamic('cancelados')}
             </button>
           )}
@@ -1077,7 +1077,7 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
           const ativo = filtro === id;
           const alerta = id === 'SEM_VINCULO' && contagens.SEM_VINCULO > 0;
           return (
-            <button
+            <button type="button"
               key={id}
               onClick={() => setFiltro(id)}
               className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
@@ -1178,7 +1178,7 @@ function PedidosIfood({ lojaId, onIrParaDepara }: { lojaId: string; onIrParaDepa
               </div>
 
               {semMatch.length > 0 && (
-                <button
+                <button type="button"
                   onClick={onIrParaDepara}
                   className="mt-3 flex w-full items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-left transition hover:bg-amber-100 dark:border-amber-900/30 dark:bg-amber-900/10 dark:hover:bg-amber-900/20"
                 >

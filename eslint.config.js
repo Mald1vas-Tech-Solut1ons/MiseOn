@@ -36,24 +36,17 @@ export default tseslint.config(
     },
   },
   {
-    // Botao sem `type` dentro de <form> faz SUBMIT acidental: no Login, um
-    // clique em "mostrar senha" envia o formulario. Medido em 10/09/2026: 645
-    // botoes sem type no src, 57 deles em arquivos com formulario. A regra
-    // vale onde o defeito existe; o resto e higiene registrada como divida,
-    // nao portao de CI.
-    files: [
-      'src/components/chat/ChatInterface.tsx',
-      'src/components/estoque/ScannerQRCodeModal.tsx',
-      'src/components/ModalAuthCliente.tsx',
-      'src/pages/admin/ChatAdmin.tsx',
-      'src/pages/admin/Fiscal.tsx',
-      'src/pages/admin/Login.tsx',
-      'src/pages/admin/Mesas.tsx',
-      'src/pages/admin/MinhaConta.tsx',
-      'src/pages/RedefinirSenha.tsx',
-      'src/pages/superadmin/Login.tsx',
-      'src/pages/superadmin/Tenants.tsx',
-    ],
+    // `type` explicito em todo botao do app.
+    //
+    // Sem `type`, o padrao do HTML dentro de <form> e "submit": um clique em
+    // "mostrar senha" enviava o formulario. Media de 10/09/2026: 645 botoes sem
+    // type no src, 57 deles em arquivo com formulario. Os tres botoes de ENVIO
+    // (login do lojista, login do superadmin, redefinir senha) foram declarados
+    // `submit` a mao — fix automatico teria posto `button` e o Enter no campo
+    // de senha pararia de logar.
+    //
+    // A regra fica no repositorio inteiro para a divida nao voltar a crescer.
+    files: ['src/**/*.tsx'],
     rules: {
       'react/button-has-type': 'error',
     },

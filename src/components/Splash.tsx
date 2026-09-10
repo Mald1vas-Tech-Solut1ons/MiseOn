@@ -34,7 +34,7 @@ export default function Splash({ children }: { children: React.ReactNode }) {
             onError={fechar}
             className="max-h-[70vh] w-full max-w-md object-contain"
           />
-          <button className="absolute bottom-8 text-xs font-medium text-gray-400">toque para pular</button>
+          <button type="button" className="absolute bottom-8 text-xs font-medium text-gray-400">toque para pular</button>
         </div>
       )}
     </>

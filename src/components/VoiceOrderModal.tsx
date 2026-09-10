@@ -117,14 +117,14 @@ export default function VoiceOrderModal({
               {tDynamic('Fazer Pedido por Voz')}
             </h3>
           </div>
-          <button onClick={onFechar} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <button type="button" onClick={onFechar} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
             <X size={20} />
           </button>
         </div>
 
         {/* Círculo do Microfone com Pulso */}
         <div className="flex flex-col items-center justify-center py-6 space-y-4">
-          <button
+          <button type="button"
             onClick={ouvindo ? pararGravacao : iniciarGravacao}
             className={`relative flex h-24 w-24 items-center justify-center rounded-full transition-all ${
               ouvindo
@@ -177,7 +177,7 @@ export default function VoiceOrderModal({
             </div>
 
             {itensEncontrados.length > 0 && (
-              <button
+              <button type="button"
                 onClick={confirmarEAdicionar}
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-lg hover:brightness-110 transition-all"
               >

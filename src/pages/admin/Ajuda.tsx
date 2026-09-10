@@ -20,7 +20,7 @@ function Expansivel({ titulo, icone, aberto_inicial = false, children }: {
   const [aberto, setAberto] = useState(aberto_inicial);
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-sm transition-all hover:shadow-md">
-      <button onClick={() => setAberto((a) => !a)}
+      <button type="button" onClick={() => setAberto((a) => !a)}
         className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition hover:bg-gray-50 dark:hover:bg-white/5">
         <span className="flex items-center gap-2.5 text-sm font-bold dark:text-gray-100">
           {icone}{titulo}
@@ -87,7 +87,7 @@ export default function Ajuda() {
               {tDynamic('Percorra todos os módulos do MiseOn de ponta a ponta: do recebimento de pedidos no Balcão, baixa de estoque, Custo 3D, Salão 3D, KDS até a conciliação Efí Bank.')}
             </p>
           </div>
-          <button
+          <button type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('iniciar-guided-tour-completo'))}
             className="shrink-0 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 px-6 py-3.5 text-sm sm:text-base font-black text-white shadow-[0_0_25px_rgba(249,115,22,0.5)] hover:scale-105 transition-all"
           >
@@ -100,31 +100,31 @@ export default function Ajuda() {
 
       {/* ── Tabs Navigation ── */}
       <HorizontalScrollContainer className="mb-8 rounded-2xl bg-white p-1.5 shadow-sm dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
-        <button onClick={() => setTabAtiva('sistema')}
+        <button type="button" onClick={() => setTabAtiva('sistema')}
           className={`flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all whitespace-nowrap ${
             tabAtiva === 'sistema' ? 'bg-[var(--cor-primaria)] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
           }`}>
           <Settings size={18} /> {tDynamic('Como Funciona')}
         </button>
-        <button onClick={() => setTabAtiva('integracoes')}
+        <button type="button" onClick={() => setTabAtiva('integracoes')}
           className={`flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all whitespace-nowrap ${
             tabAtiva === 'integracoes' ? 'bg-[var(--cor-primaria)] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
           }`}>
           <MessageCircle size={18} /> {tDynamic('Integrações')}
         </button>
-        <button onClick={() => setTabAtiva('financeiro')}
+        <button type="button" onClick={() => setTabAtiva('financeiro')}
           className={`flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all whitespace-nowrap ${
             tabAtiva === 'financeiro' ? 'bg-[var(--cor-primaria)] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
           }`}>
           <Wallet size={18} /> {tDynamic('Pagamentos Efí')}
         </button>
-        <button onClick={() => setTabAtiva('indicadores')}
+        <button type="button" onClick={() => setTabAtiva('indicadores')}
           className={`flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all whitespace-nowrap ${
             tabAtiva === 'indicadores' ? 'bg-[var(--cor-primaria)] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
           }`}>
           <BarChart3 size={18} /> {tDynamic('Indicadores')}
         </button>
-        <button onClick={() => setTabAtiva('especialista')}
+        <button type="button" onClick={() => setTabAtiva('especialista')}
           className={`flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all whitespace-nowrap ${
             tabAtiva === 'especialista' ? 'bg-[var(--cor-primaria)] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
           }`}>
@@ -156,7 +156,7 @@ export default function Ajuda() {
                 </div>
               </div>
 
-              <button
+              <button type="button"
                 onClick={dispararTour}
                 className="shrink-0 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 transition-all"
               >

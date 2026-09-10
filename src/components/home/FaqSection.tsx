@@ -43,7 +43,7 @@ export default function FaqSection() {
             const aberto = faqAberto === i;
             return (
               <div key={i} style={{ border: '1px solid rgba(255,255,255,.09)', background: 'rgba(255,255,255,.02)' }} className="overflow-hidden rounded-2xl">
-                <button
+                <button type="button"
                   onClick={() => setFaqAberto(aberto ? null : i)}
                   className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition hover:bg-white/5"
                 >

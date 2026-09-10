@@ -16,7 +16,7 @@ export function PaymentModal({
       <div className="w-full max-w-md max-h-[85dvh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
         <div className="mb-1 flex items-center justify-between">
           <h3 className="text-lg font-black dark:text-gray-100">{tDynamic('Receber')} {fmt(total)}</h3>
-          <button onClick={() => setEtapa('CARRINHO')} className="text-gray-400"><X size={20} /></button>
+          <button type="button" onClick={() => setEtapa('CARRINHO')} className="text-gray-400"><X size={20} /></button>
         </div>
         <p className="mb-4 text-xs text-gray-500">{tDynamic('Como o cliente vai pagar?')}</p>
 
@@ -27,7 +27,7 @@ export function PaymentModal({
             { m: 'CREDITO' as MetodoPgto, label: tDynamic('Crédito (maquininha)'), icon: <CreditCard size={20} /> },
             { m: 'DEBITO' as MetodoPgto, label: tDynamic('Débito (maquininha)'), icon: <CreditCard size={20} /> },
           ]).map((op) => (
-            <button key={op.m} onClick={() => { setMetodo(op.m); setErro(''); }}
+            <button type="button" key={op.m} onClick={() => { setMetodo(op.m); setErro(''); }}
               className={`flex flex-col items-center gap-1.5 rounded-2xl border-2 p-4 text-sm font-bold transition ${metodo === op.m ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria)]' : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'}`}>
               {op.icon}{op.label}
             </button>
@@ -58,9 +58,9 @@ export function PaymentModal({
               className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-center text-2xl font-black outline-none focus:border-[var(--cor-primaria)] dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100" 
             />
             <div className="mt-2 flex flex-wrap gap-1.5">
-              <button onClick={() => setValorRecebido(String(total))} className="rounded-full border border-gray-300 px-3 py-1 text-xs font-bold text-gray-600 dark:border-gray-600 dark:text-gray-300">{tDynamic('Valor exato')}</button>
+              <button type="button" onClick={() => setValorRecebido(String(total))} className="rounded-full border border-gray-300 px-3 py-1 text-xs font-bold text-gray-600 dark:border-gray-600 dark:text-gray-300">{tDynamic('Valor exato')}</button>
               {NOTAS_RAPIDAS.filter((n) => n >= total).slice(0, 3).map((n) => (
-                <button key={n} onClick={() => setValorRecebido(String(n))} className="rounded-full border border-gray-300 px-3 py-1 text-xs font-bold text-gray-600 dark:border-gray-600 dark:text-gray-300">R$ {n}</button>
+                <button type="button" key={n} onClick={() => setValorRecebido(String(n))} className="rounded-full border border-gray-300 px-3 py-1 text-xs font-bold text-gray-600 dark:border-gray-600 dark:text-gray-300">R$ {n}</button>
               ))}
             </div>
             {metodo === 'DINHEIRO' && recebidoNum >= total && (
@@ -73,7 +73,7 @@ export function PaymentModal({
 
         {erro && <p className="mt-3 text-center text-sm font-semibold text-red-500">{erro}</p>}
 
-        <button disabled={!metodo || processando || (metodo === 'DINHEIRO' && recebidoNum < total)}
+        <button type="button" disabled={!metodo || processando || (metodo === 'DINHEIRO' && recebidoNum < total)}
           onClick={() => metodo && registrarVenda(metodo)}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-4 text-base font-black text-white shadow-lg disabled:opacity-40">
           {processando ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}

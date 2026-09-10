@@ -165,7 +165,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                     {tDynamic('Faça seu pedido com rapidez, personalize seus adicionais e pague na hora.')}
                   </p>
 
-                  <button
+                  <button type="button"
                     onClick={() => {
                       setEtapa('cardapio');
                       adicionarAoCarrinho(MENU_MOCK[0]);
@@ -207,7 +207,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                                 R$ {m.preco.toFixed(2).replace('.', ',')}
                               </span>
                             </div>
-                            <button
+                            <button type="button"
                               onClick={() => adicionarAoCarrinho(m)}
                               className="rounded-full bg-[#FC5B24] p-1.5 text-white hover:scale-110 transition shrink-0"
                             >
@@ -222,7 +222,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                     <div className="mt-4 p-3 rounded-2xl bg-white/5 border border-white/10">
                       <span className="text-[11px] font-bold text-gray-300 block mb-2">Personalizar X-Burger:</span>
                       <div className="flex gap-2">
-                        <button
+                        <button type="button"
                           onClick={() => setBaconExtra(!baconExtra)}
                           className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border transition ${
                             baconExtra
@@ -232,7 +232,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                         >
                           + Bacon Extra (+R$ 4,50)
                         </button>
-                        <button
+                        <button type="button"
                           onClick={() => setSemCebola(!semCebola)}
                           className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border transition ${
                             semCebola
@@ -254,7 +254,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                         R$ {totalCarrinho.toFixed(2).replace('.', ',')}
                       </span>
                     </div>
-                    <button
+                    <button type="button"
                       onClick={() => setEtapa('pagamento')}
                       disabled={carrinho.length === 0}
                       className="rounded-full bg-[#FC5B24] px-5 py-2.5 font-['Sora'] text-xs font-bold text-white shadow-lg shadow-[#FC5B24]/30 hover:brightness-110 disabled:opacity-50"
@@ -274,7 +274,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
 
                     {/* Tabs de Metodo */}
                     <div className="grid grid-cols-2 gap-2 mb-4">
-                      <button
+                      <button type="button"
                         onClick={() => setMetodoPagamento('pix')}
                         className={`p-3 rounded-2xl border text-center transition flex flex-col items-center gap-1.5 ${
                           metodoPagamento === 'pix'
@@ -285,7 +285,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                         <QrCode size={20} />
                         <span className="text-xs font-bold">{tDynamic('Pix Instantâneo')}</span>
                       </button>
-                      <button
+                      <button type="button"
                         onClick={() => setMetodoPagamento('cartao')}
                         className={`p-3 rounded-2xl border text-center transition flex flex-col items-center gap-1.5 ${
                           metodoPagamento === 'cartao'
@@ -319,7 +319,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                     </div>
                   </div>
 
-                  <button
+                  <button type="button"
                     onClick={finalizarPagamento}
                     disabled={processandoPagamento}
                     className="w-full rounded-full bg-emerald-500 py-3 text-xs font-bold text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition"
@@ -355,7 +355,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                     </div>
                   </div>
 
-                  <button
+                  <button type="button"
                     onClick={reiniciarSimulacao}
                     className="mt-5 inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition"
                   >
@@ -481,7 +481,7 @@ export function KioskSimulator({ isEmbedded = false }: { isEmbedded?: boolean })
                 {tDynamic('Sem filas no balcão, sem erro de anotação e com baixa automática de estoque no KDS.')}
               </p>
 
-              <button
+              <button type="button"
                 onClick={() => setModalOpen(true)}
                 className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#FC5B24] px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#FC5B24]/30 hover:brightness-110 transition"
               >

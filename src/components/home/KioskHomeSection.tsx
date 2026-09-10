@@ -86,7 +86,7 @@ export function KioskHomeSection() {
 
             {/* Botões de Ação */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-3">
-              <button
+              <button type="button"
                 onClick={() => setModalOpen(true)}
                 className="rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-7 py-3.5 font-['Sora'] text-sm font-bold text-white shadow-xl shadow-[#FC5B24]/25 hover:brightness-110 hover:scale-105 transition flex items-center justify-center gap-2"
               >

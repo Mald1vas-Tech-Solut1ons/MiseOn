@@ -79,14 +79,14 @@ export function ComoFuncionaPreco() {
 
             {/* Toggle Mensal / Anual */}
             <div className="mt-8 inline-flex items-center gap-1 rounded-full border border-gray-800 bg-[#0B1120] p-1 shadow-2xl">
-              <button
+              <button type="button"
                 onClick={() => setAnual(false)}
                 style={{ fontFamily: "'Sora', sans-serif" }}
                 className={`rounded-full px-6 py-2.5 text-xs sm:text-sm font-bold transition ${!anual ? 'bg-[#FC5B24] text-white' : 'text-gray-400 hover:text-white'}`}
               >
                 {tDynamic(`Mensal (R$ ${precoMensalStr}/mês)`)}
               </button>
-              <button
+              <button type="button"
                 onClick={() => setAnual(true)}
                 style={{ fontFamily: "'Sora', sans-serif" }}
                 className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-xs sm:text-sm font-bold transition ${anual ? 'bg-[#0A5CC4] text-white shadow-[0_0_20px_rgba(10,92,196,0.5)]' : 'text-gray-400 hover:text-white'}`}

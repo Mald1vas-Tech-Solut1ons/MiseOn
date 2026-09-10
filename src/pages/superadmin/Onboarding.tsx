@@ -85,13 +85,13 @@ export default function Onboarding() {
                 </p>
                 {l.observacao && <p className="mt-0.5 text-xs italic text-gray-400">"{l.observacao}"</p>}
                 <div className="mt-2 flex gap-2">
-                  <button onClick={() => usarLead(l)} className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-gray-900 py-1.5 text-xs font-semibold text-white">
+                  <button type="button" onClick={() => usarLead(l)} className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-gray-900 py-1.5 text-xs font-semibold text-white">
                     Usar esses dados <ArrowRight size={12} />
                   </button>
                   {l.status === 'novo' && (
-                    <button onClick={() => mudarStatusLead(l, 'contatado')} className="rounded-lg border px-3 text-xs font-medium">Contatado</button>
+                    <button type="button" onClick={() => mudarStatusLead(l, 'contatado')} className="rounded-lg border px-3 text-xs font-medium">Contatado</button>
                   )}
-                  <button onClick={() => mudarStatusLead(l, 'descartado')} className="rounded-lg border border-red-200 px-3 text-xs font-medium text-red-500">Descartar</button>
+                  <button type="button" onClick={() => mudarStatusLead(l, 'descartado')} className="rounded-lg border border-red-200 px-3 text-xs font-medium text-red-500">Descartar</button>
                 </div>
               </div>
             ))}
@@ -106,7 +106,7 @@ export default function Onboarding() {
         <input value={emailDono} onChange={(e) => setEmailDono(e.target.value)} placeholder="E-mail do dono da loja" className="w-full rounded-xl border p-2.5 text-sm" />
         {erro && <p className="text-sm font-medium text-red-500">{erro}</p>}
         {msg && <p className="text-sm font-medium text-green-600">{msg}</p>}
-        <button onClick={criar} disabled={enviando}
+        <button type="button" onClick={criar} disabled={enviando}
           className="w-full rounded-xl bg-gray-900 py-3 text-sm font-semibold text-white disabled:opacity-40">
           {enviando ? 'Criando…' : 'Criar loja e convidar dono'}
         </button>

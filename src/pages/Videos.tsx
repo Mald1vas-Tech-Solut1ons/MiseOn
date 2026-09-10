@@ -281,14 +281,14 @@ export default function Videos() {
             {!videoAtivo.youtubeId && (
             <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 flex items-center justify-between text-white opacity-90 hover:opacity-100 transition-opacity">
               <div className="flex items-center gap-3">
-                <button
+                <button type="button"
                   onClick={togglePlay}
                   className="rounded-lg p-2 hover:bg-white/20 transition text-white"
                   title={isPlaying ? 'Pausar' : 'Reproduzir'}
                 >
                   {isPlaying ? <Pause size={20} /> : <Play size={20} />}
                 </button>
-                <button
+                <button type="button"
                   onClick={toggleMute}
                   className="rounded-lg p-2 hover:bg-white/20 transition text-white"
                   title={isMuted ? 'Ativar som' : 'Mudar para mudo'}
@@ -302,7 +302,7 @@ export default function Videos() {
                 <span className="text-xs font-bold text-orange-400 bg-orange-500/20 px-2.5 py-1 rounded-full border border-orange-500/30">
                   MiseOn HD 1080p
                 </span>
-                <button
+                <button type="button"
                   onClick={fullScreen}
                   className="rounded-lg p-2 hover:bg-white/20 transition text-white"
                   title="Tela cheia"
@@ -368,7 +368,7 @@ export default function Videos() {
               { id: 'demonstracao', label: 'Demonstrações' },
               { id: 'case', label: 'Cases de Clientes' },
             ].map((cat) => (
-              <button
+              <button type="button"
                 key={cat.id}
                 onClick={() => setCategoriaAtiva(cat.id as any)}
                 className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${

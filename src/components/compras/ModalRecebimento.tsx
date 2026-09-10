@@ -196,7 +196,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                 {new Date(compra.data_pedido + 'T12:00:00').toLocaleDateString('pt-BR')}
               </p>
             </div>
-            <button onClick={onFechar} className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
+            <button type="button" onClick={onFechar} className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
               <X size={20} />
             </button>
           </div>
@@ -256,7 +256,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                       {it.preco_unitario_previsto ? ` · previsto ${fmt(precoPrevisto)}` : ''}
                     </p>
                   </div>
-                  <button
+                  <button type="button"
                     onClick={() => atualizar(it.id, { naoVeio: !c.naoVeio })}
                     className={`flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs opacity-95 font-bold transition-colors ${
                       c.naoVeio
@@ -408,7 +408,7 @@ export default function ModalRecebimento({ compra, insumos, onFechar, onSucesso 
                 </div>
               )}
             </div>
-            <button onClick={confirmar} disabled={salvando || carregando}
+            <button type="button" onClick={confirmar} disabled={salvando || carregando}
               className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">
               {salvando ? <><Loader2 size={16} className="animate-spin" /> Registrando...</> : <><PackageCheck size={16} /> {tDynamic('Dar entrada no estoque')}</>}
             </button>

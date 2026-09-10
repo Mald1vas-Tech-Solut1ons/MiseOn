@@ -275,7 +275,7 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">{passosFeitos} de {PASSOS_ONBOARDING.length} passos concluídos</p>
               </div>
             </div>
-            <button onClick={ocultarOnboarding} title="Ocultar (você pode continuar depois)" className="rounded-lg p-1.5 text-gray-300 hover:text-gray-500"><X size={16} /></button>
+            <button type="button" onClick={ocultarOnboarding} title="Ocultar (você pode continuar depois)" className="rounded-lg p-1.5 text-gray-300 hover:text-gray-500"><X size={16} /></button>
           </div>
           <div className="h-1.5 bg-gray-100 dark:bg-gray-800">
             <div className="h-1.5 rounded-r-full bg-[var(--cor-primaria)] transition-all" style={{ width: `${(passosFeitos / PASSOS_ONBOARDING.length) * 100}%` }} />

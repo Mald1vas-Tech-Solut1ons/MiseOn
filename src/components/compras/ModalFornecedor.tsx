@@ -62,7 +62,7 @@ export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo 
             <Truck size={18} className="text-[var(--cor-primaria)]" />
             {fornecedor ? 'Editar Fornecedor' : 'Novo Fornecedor'}
           </h2>
-          <button onClick={onFechar} className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
+          <button type="button" onClick={onFechar} className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
             <X size={20} />
           </button>
         </div>
@@ -126,7 +126,7 @@ export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo 
                 {DIAS.map((d, i) => {
                   const ativo = (f.dias_entrega ?? []).includes(i);
                   return (
-                    <button key={d} onClick={() => toggleDia(i)}
+                    <button type="button" key={d} onClick={() => toggleDia(i)}
                       className={`rounded-lg px-2.5 py-1.5 text-xs opacity-95 font-bold transition-colors ${
                         ativo ? 'bg-[var(--cor-primaria)] text-white shadow-sm'
                               : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400'}`}>
@@ -152,7 +152,7 @@ export default function ModalFornecedor({ lojaId, fornecedor, onFechar, onSalvo 
         </div>
 
         <div className="shrink-0 border-t border-gray-100 px-6 py-4 dark:border-gray-800">
-          <button onClick={salvar} disabled={salvando || !f.nome?.trim()}
+          <button type="button" onClick={salvar} disabled={salvando || !f.nome?.trim()}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md transition-transform hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100">
             {salvando ? <><Loader2 size={16} className="animate-spin" /> Salvando...</> : 'Salvar fornecedor'}
           </button>

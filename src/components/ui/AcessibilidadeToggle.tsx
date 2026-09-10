@@ -5,7 +5,7 @@ export function AcessibilidadeToggle() {
   const { escalaFonte, ciclarEscala } = useAcessibilidade();
 
   return (
-    <button
+    <button type="button"
       onClick={ciclarEscala}
       title={`Tamanho da fonte: ${escalaFonte === 'padrao' ? 'Padrão' : escalaFonte === 'grande' ? 'Grande' : 'Máximo'}`}
       className={`relative rounded-full p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${

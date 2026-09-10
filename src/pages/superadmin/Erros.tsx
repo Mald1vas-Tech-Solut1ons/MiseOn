@@ -78,13 +78,13 @@ export default function Erros() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setMostrarResolvidos((v) => !v)}
             className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-white/10"
           >
             <Filter size={14} /> {mostrarResolvidos ? 'Ocultar resolvidos' : 'Mostrar resolvidos'}
           </button>
-          <button
+          <button type="button"
             onClick={carregar}
             className="inline-flex items-center gap-2 rounded-xl bg-[#FC5B24] px-3 py-2 text-xs font-black text-white hover:brightness-110"
           >
@@ -108,7 +108,7 @@ export default function Erros() {
           {erros.map((e) => (
             <div key={e.id} className="bg-[#0B1020] p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <button
+                <button type="button"
                   onClick={() => setExpandido(expandido === e.id ? null : e.id)}
                   className="flex-1 text-left"
                 >
@@ -136,7 +136,7 @@ export default function Erros() {
                 </button>
 
                 {!e.resolvido && (
-                  <button
+                  <button type="button"
                     onClick={() => marcarResolvido(e.id)}
                     className="shrink-0 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs opacity-95 font-bold text-emerald-400 hover:bg-emerald-500/20"
                   >

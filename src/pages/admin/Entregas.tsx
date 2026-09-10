@@ -327,25 +327,25 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
             </a>
           )}
           {p.telefone_contato && (
-            <button onClick={() => setMensagemPara(p)} className="rounded-xl border border-gray-200 dark:border-gray-700 p-2.5 text-green-600">
+            <button type="button" onClick={() => setMensagemPara(p)} className="rounded-xl border border-gray-200 dark:border-gray-700 p-2.5 text-green-600">
               <MessageCircle size={16} />
             </button>
           )}
-          <button onClick={() => abrirMaps(p)} className="rounded-xl border border-gray-200 dark:border-gray-700 p-2.5 text-blue-700">
+          <button type="button" onClick={() => abrirMaps(p)} className="rounded-xl border border-gray-200 dark:border-gray-700 p-2.5 text-blue-700">
             <MapPin size={16} />
           </button>
-          <button onClick={() => {
+          <button type="button" onClick={() => {
             const d = encodeURIComponent(`${p.endereco_entrega ?? ''} ${p.bairro ?? ''}`);
             window.open(`https://waze.com/ul?q=${d}&navigate=yes`, '_blank');
           }} className="rounded-xl border border-gray-200 dark:border-gray-700 p-2.5 text-blue-500">
             <Navigation size={16} />
           </button>
           {p.status === 'PRONTO' ? (
-            <button onClick={() => iniciarRota(p)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-800 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
+            <button type="button" onClick={() => iniciarRota(p)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-800 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
               <Bike size={15} /> Iniciar Rota
             </button>
           ) : (
-            <button onClick={() => concluir(p)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 text-sm font-semibold text-white hover:bg-green-500 transition-colors">
+            <button type="button" onClick={() => concluir(p)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 text-sm font-semibold text-white hover:bg-green-500 transition-colors">
               <CheckCircle2 size={15} /> Entregue
             </button>
           )}
@@ -373,7 +373,7 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
         <div className="flex items-start gap-2.5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/30 dark:bg-red-900/10">
           <AlertTriangle size={16} className="mt-0.5 shrink-0 text-red-500" />
           <p className="flex-1 text-xs font-semibold leading-snug text-red-700 dark:text-red-300">{erroIfood}</p>
-          <button onClick={() => setErroIfood(null)} className="text-xs font-bold text-red-500 hover:underline">
+          <button type="button" onClick={() => setErroIfood(null)} className="text-xs font-bold text-red-500 hover:underline">
             Fechar
           </button>
         </div>
@@ -408,11 +408,11 @@ function FilaDeEntregas({ lojaId }: { lojaId: string }) {
           <div className="w-full max-w-lg rounded-t-3xl bg-white dark:bg-gray-900 p-5 pb-8" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold dark:text-white">Mensagem via WhatsApp</h3>
-              <button onClick={() => setMensagemPara(null)}><X size={20} /></button>
+              <button type="button" onClick={() => setMensagemPara(null)}><X size={20} /></button>
             </div>
             <div className="space-y-2">
               {MENSAGENS_RAPIDAS.map(m => (
-                <button key={m} onClick={() => enviarWhatsapp(mensagemPara, m)}
+                <button type="button" key={m} onClick={() => enviarWhatsapp(mensagemPara, m)}
                   className="w-full rounded-xl border border-gray-200 dark:border-gray-700 p-3 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                   {m}
                 </button>
@@ -788,7 +788,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
               </div>
             </div>
 
-            <button
+            <button type="button"
               onClick={despacharRota}
               disabled={!entregadorSelecionado || pedidosSelecionados.length === 0 || despachando}
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3.5 text-sm font-bold text-white disabled:opacity-40 hover:brightness-110 transition-all shadow-lg shadow-[var(--cor-primaria)]/20"
@@ -844,14 +844,14 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
                           #{p.numero} · {p.bairro ?? p.endereco_entrega}
                         </span>
                         <div className="ml-auto flex items-center gap-1">
-                          <button
+                          <button type="button"
                             onClick={() => imprimir({ template: 'VIA_ENTREGADOR', lojaNome, pedido: p, itens: p.itens_pedido })}
                             className="p-1.5 text-gray-400 hover:text-[var(--cor-primaria)] hover:bg-[var(--cor-primaria)]/10 rounded-lg transition-all"
                             title="Imprimir Romaneio"
                           >
                             <Printer size={14} />
                           </button>
-                          <button
+                          <button type="button"
                             onClick={() => setChatPedido(p)}
                             className="p-1.5 text-gray-400 hover:text-[var(--cor-primaria)] hover:bg-[var(--cor-primaria)]/10 rounded-lg transition-all"
                             title="Abrir chat"
@@ -875,7 +875,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
           <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Users size={18} className="text-[var(--cor-primaria)]" /> {tDynamic('Minha Equipe de Entrega')}
           </h2>
-          <button
+          <button type="button"
             onClick={() => setShowFormEntregador(v => !v)}
             className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-3 py-2 text-xs font-bold text-white hover:brightness-110 transition-all"
           >
@@ -915,8 +915,8 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
               <option value="a_pe">A Pé</option>
             </select>
             <div className="flex gap-2">
-              <button onClick={() => setShowFormEntregador(false)} className="flex-1 rounded-lg border border-gray-200 dark:border-gray-700 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Cancelar</button>
-              <button onClick={salvarEntregador} disabled={salvandoEntregador} className="flex-1 rounded-lg bg-[var(--cor-primaria)] py-2.5 text-sm font-bold text-white hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+              <button type="button" onClick={() => setShowFormEntregador(false)} className="flex-1 rounded-lg border border-gray-200 dark:border-gray-700 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Cancelar</button>
+              <button type="button" onClick={salvarEntregador} disabled={salvandoEntregador} className="flex-1 rounded-lg bg-[var(--cor-primaria)] py-2.5 text-sm font-bold text-white hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                 {salvandoEntregador ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                 Salvar
               </button>
@@ -944,7 +944,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
                 {e.user_id && (
                   <span className="text-xs opacity-90 font-bold bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded-full border border-green-500/20 whitespace-nowrap">App ativo</span>
                 )}
-                <button onClick={() => removerEntregador(e.id)} className="text-gray-300 dark:text-gray-600 hover:text-red-500 transition-colors p-1">
+                <button type="button" onClick={() => removerEntregador(e.id)} className="text-gray-300 dark:text-gray-600 hover:text-red-500 transition-colors p-1">
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -962,7 +962,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
                 <p className="font-bold dark:text-white">Chat · Pedido #{chatPedido.numero}</p>
                 <p className="text-xs text-gray-400">{chatPedido.identificador_cliente}</p>
               </div>
-              <button onClick={() => setChatPedido(null)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"><X size={18} /></button>
+              <button type="button" onClick={() => setChatPedido(null)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"><X size={18} /></button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -988,7 +988,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
                   placeholder="Mensagem para o cliente/entregador..."
                   className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--cor-primaria)] dark:text-white"
                 />
-                <button onClick={() => enviarChat(msgInput)} className="rounded-xl bg-[var(--cor-primaria)] p-2.5 text-white hover:brightness-110 transition-all">
+                <button type="button" onClick={() => enviarChat(msgInput)} className="rounded-xl bg-[var(--cor-primaria)] p-2.5 text-white hover:brightness-110 transition-all">
                   <Send size={18} />
                 </button>
               </div>
@@ -1020,13 +1020,13 @@ export default function Entregas() {
       {/* Tabs */}
       {papel === 'admin' && (
         <div className="flex gap-2 mb-6 p-1 bg-gray-100 dark:bg-gray-900 rounded-2xl">
-          <button
+          <button type="button"
             onClick={() => setAba('gestao')}
             className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-all ${aba === 'gestao' ? 'bg-white dark:bg-gray-800 text-[var(--cor-primaria)] shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
           >
             <Route size={16} /> Despacho & Equipe
           </button>
-          <button
+          <button type="button"
             onClick={() => setAba('fila')}
             className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-all ${aba === 'fila' ? 'bg-white dark:bg-gray-800 text-[var(--cor-primaria)] shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
           >

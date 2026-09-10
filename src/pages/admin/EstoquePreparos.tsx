@@ -434,7 +434,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
 
       {!editando && (
         <>
-          <button onClick={() => iniciarEdicao()} className="group mb-6 flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50/70 py-4 font-black text-orange-700 transition-all hover:-translate-y-0.5 hover:border-orange-500 hover:bg-orange-100 hover:shadow-lg hover:shadow-orange-500/10 dark:border-orange-900/60 dark:bg-orange-950/20 dark:text-orange-400 dark:hover:bg-orange-900/30">
+          <button type="button" onClick={() => iniciarEdicao()} className="group mb-6 flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50/70 py-4 font-black text-orange-700 transition-all hover:-translate-y-0.5 hover:border-orange-500 hover:bg-orange-100 hover:shadow-lg hover:shadow-orange-500/10 dark:border-orange-900/60 dark:bg-orange-950/20 dark:text-orange-400 dark:hover:bg-orange-900/30">
             <span className="rounded-xl bg-orange-500 p-2 text-white transition-transform group-hover:rotate-6"><Plus size={18} /></span>
             {tDynamic('Criar nova manipulação ou receita base')}
           </button>
@@ -484,13 +484,13 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                        </div>
                      </div>
                      <div className="flex items-center gap-2">
-                       {!somenteCadastro && <button onClick={() => setProduzindo(p)} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md shadow-orange-500/20 transition-all hover:scale-105">
+                       {!somenteCadastro && <button type="button" onClick={() => setProduzindo(p)} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md shadow-orange-500/20 transition-all hover:scale-105">
                          <Flame size={16} /> Produzir
                        </button>}
                        <div className="flex flex-col gap-1 border-l pl-2 dark:border-gray-800">
-                         <button onClick={() => iniciarEdicao(p)} title="Editar receita" className="p-1.5 text-gray-400 hover:text-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"><Pencil size={15} /></button>
-                         <button onClick={() => duplicarPreparo(p)} title="Duplicar receita (clonar)" className="p-1.5 text-gray-400 hover:text-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20"><Copy size={15} /></button>
-                         <button onClick={() => excluir(p)} title="Excluir receita" className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 size={15} /></button>
+                         <button type="button" onClick={() => iniciarEdicao(p)} title="Editar receita" className="p-1.5 text-gray-400 hover:text-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"><Pencil size={15} /></button>
+                         <button type="button" onClick={() => duplicarPreparo(p)} title="Duplicar receita (clonar)" className="p-1.5 text-gray-400 hover:text-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20"><Copy size={15} /></button>
+                         <button type="button" onClick={() => excluir(p)} title="Excluir receita" className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 size={15} /></button>
                        </div>
                      </div>
                    </div>
@@ -512,7 +512,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                                  {st
                                    ? <span className={`rounded-full px-2 py-0.5 text-xs opacity-90 font-bold ${st.classe}`}>{st.label}</span>
                                    : <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs opacity-90 font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400">sem validade</span>}
-                                 <button onClick={() => descartarLote(l)} title="Descartar lote (baixa como perda)" className="rounded-lg p-1 text-gray-400 hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-900/30">
+                                 <button type="button" onClick={() => descartarLote(l)} title="Descartar lote (baixa como perda)" className="rounded-lg p-1 text-gray-400 hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-900/30">
                                    <Trash2 size={13} />
                                  </button>
                                </div>
@@ -547,7 +547,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
         return (
           <div className="relative overflow-hidden rounded-3xl border border-orange-200 bg-white shadow-xl shadow-orange-500/10 dark:border-orange-900/40 dark:bg-gray-900">
             <div className="border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-5 dark:border-orange-900/30 dark:from-orange-950/30 dark:to-gray-900">
-            <button onClick={() => setEditando(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={20} /></button>
+            <button type="button" onClick={() => setEditando(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={20} /></button>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-500">{tDynamic('Origem → processo → resultado')}</p>
             <h3 className="mt-1 text-xl font-black text-gray-900 dark:text-gray-100">{editando === 'novo' ? 'Nova ficha de manipulação' : 'Editar ficha de produção'}</h3>
             <p className="mt-1 text-sm text-gray-500">{tDynamic('Você define o rendimento. O MiseOn conserva custo e rastreabilidade entre a matéria-prima e o item produzido.')}</p>
@@ -626,7 +626,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                       onRemover={() => { const n = [...ficha]; n.splice(i, 1); setFicha(n); }}
                     />
                   ))}
-                  <button onClick={() => setFicha([...ficha, linhaVazia()])} className="mt-2 flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400"><Plus size={14}/> {tDynamic('Adicionar matéria-prima')}</button>
+                  <button type="button" onClick={() => setFicha([...ficha, linhaVazia()])} className="mt-2 flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400"><Plus size={14}/> {tDynamic('Adicionar matéria-prima')}</button>
                 </div>
                 <div className="mt-4 border-t border-orange-200/70 pt-4 dark:border-orange-900/40">
                   <button type="button" onClick={sugerirComIA} disabled={sugerindo} className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 disabled:opacity-50 dark:bg-white dark:text-slate-950">
@@ -746,7 +746,7 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                 </div>
               )}
 
-              <button onClick={salvar} disabled={salvando} className="w-full mt-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-black rounded-2xl py-4 shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 transition disabled:opacity-50">
+              <button type="button" onClick={salvar} disabled={salvando} className="w-full mt-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-black rounded-2xl py-4 shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 transition disabled:opacity-50">
                 {salvando ? 'Salvando...' : 'Salvar ficha de produção'}
               </button>
             </div>
@@ -831,12 +831,12 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                   <p className="text-center text-gray-500 text-sm font-medium mb-6">{tDynamic('Quantas receitas de')} <b className="text-orange-600">{produzindo.nome}</b> você vai fazer agora?</p>
 
                   <div className="flex items-center justify-center gap-6 mb-8">
-                     <button onClick={() => setMultProducao(m => Math.max(1, m - 1))} className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-black text-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">-</button>
+                     <button type="button" onClick={() => setMultProducao(m => Math.max(1, m - 1))} className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-black text-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">-</button>
                      <div className="text-center w-24">
                        <span className="text-5xl font-black text-orange-600 dark:text-orange-500">{multProducao}x</span>
                        <span className="block text-xs opacity-90 uppercase font-bold text-gray-400 mt-1">Lotes</span>
                      </div>
-                     <button onClick={() => setMultProducao(m => m + 1)} className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-black text-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">+</button>
+                     <button type="button" onClick={() => setMultProducao(m => m + 1)} className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-black text-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">+</button>
                   </div>
 
                   <div className="bg-orange-50 dark:bg-orange-900/10 rounded-2xl p-4 border border-orange-100 dark:border-orange-900/30 mb-6 max-h-32 overflow-y-auto">
@@ -859,8 +859,8 @@ export default function EstoquePreparos({ lojaId, insumosTotais, onUpdate, isBuf
                   </div>
 
                   <div className="flex gap-3">
-                     <button onClick={() => setProduzindo(null)} className="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">Cancelar</button>
-                     <button onClick={produzir} disabled={salvando} className="flex-1 py-4 font-black text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-xl shadow-lg shadow-orange-500/30 hover:scale-105 transition-all disabled:opacity-50">
+                     <button type="button" onClick={() => setProduzindo(null)} className="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">Cancelar</button>
+                     <button type="button" onClick={produzir} disabled={salvando} className="flex-1 py-4 font-black text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-xl shadow-lg shadow-orange-500/30 hover:scale-105 transition-all disabled:opacity-50">
                        {salvando ? 'Debitando...' : 'Panela no Fogo!'}
                      </button>
                   </div>

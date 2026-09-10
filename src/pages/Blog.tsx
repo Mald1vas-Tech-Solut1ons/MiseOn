@@ -115,7 +115,7 @@ export default function Blog() {
           {CATEGORIAS.map((cat) => {
             const ativa = categoriaSel === cat;
             return (
-              <button
+              <button type="button"
                 key={cat}
                 onClick={() => setCategoriaSel(cat)}
                 className={`rounded-full px-4 py-1.5 text-xs font-bold transition ${
@@ -187,7 +187,7 @@ export default function Blog() {
           {postsFiltrados.length === 0 ? (
             <div className="py-16 text-center text-slate-400">
               <p className="text-base font-semibold">{t('blog.nenhumEncontrado')}</p>
-              <button onClick={() => { setBusca(''); setCategoriaSel('Todas'); }} className="mt-3 text-xs font-bold text-[#FC5B24] underline">
+              <button type="button" onClick={() => { setBusca(''); setCategoriaSel('Todas'); }} className="mt-3 text-xs font-bold text-[#FC5B24] underline">
                 {t('blog.limparFiltros')}
               </button>
             </div>

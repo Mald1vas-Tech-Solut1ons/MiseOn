@@ -69,7 +69,7 @@ export default function PedidoMesaDrawer({ loja, mesa, carrinho, setCarrinho, on
           <p className="flex items-center gap-2 font-black" style={{ color: 'var(--cor-texto)' }}>
             <UtensilsCrossed size={18} style={{ color: 'var(--cor-primaria)' }} /> {tDynamic('Enviar para a Mesa')} {mesa.numero}
           </p>
-          <button onClick={onClose} style={{ color: 'var(--cor-texto-fraco)' }}><X size={20} /></button>
+          <button type="button" onClick={onClose} style={{ color: 'var(--cor-texto-fraco)' }}><X size={20} /></button>
         </div>
 
         <div className="mb-4 space-y-1.5 rounded-2xl border p-3" style={{ background: 'var(--cor-surface)', borderColor: 'var(--cor-borda)' }}>
@@ -105,7 +105,7 @@ export default function PedidoMesaDrawer({ loja, mesa, carrinho, setCarrinho, on
 
         {erro && <p className="mt-2 text-sm font-semibold text-red-500">{erro}</p>}
 
-        <button onClick={enviar} disabled={enviando || carrinho.length === 0}
+        <button type="button" onClick={enviar} disabled={enviando || carrinho.length === 0}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-black text-white shadow-lg disabled:opacity-50"
           style={{ background: 'var(--cor-primaria)' }}>
           {enviando ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}

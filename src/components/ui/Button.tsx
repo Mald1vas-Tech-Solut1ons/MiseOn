@@ -34,7 +34,7 @@ export const Button = forwardRef<
   ref,
 ) {
   return (
-    <button
+    <button type="button"
       ref={ref}
       disabled={disabled || carregando}
       className={`inline-flex items-center justify-center font-semibold transition-all duration-150 active:scale-[.97] disabled:opacity-50 disabled:pointer-events-none ${variantes[variant]} ${tamanhos[size]} ${className}`}

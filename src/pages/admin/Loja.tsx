@@ -669,13 +669,13 @@ export default function Loja() {
         <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Links de Acesso Rápido')}</p>
         <div data-tour="tour-loja-tv-links" className="flex flex-wrap items-center gap-2">
           <code className="flex-1 truncate rounded-lg bg-gray-50 dark:bg-gray-800 px-2.5 py-2 text-xs text-gray-700 dark:text-gray-300 font-mono">{linkPublico}</code>
-          <button onClick={copiarLink} title="Copiar link" className="shrink-0 rounded-lg border p-2 text-gray-500 dark:text-gray-400">
+          <button type="button" onClick={copiarLink} title="Copiar link" className="shrink-0 rounded-lg border p-2 text-gray-500 dark:text-gray-400">
             {copiado ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
           </button>
           <a href={linkPublico} target="_blank" rel="noreferrer" title="Abrir" className="shrink-0 rounded-lg border p-2 text-gray-500 dark:text-gray-400">
             <ExternalLink size={15} />
           </a>
-          <button onClick={compartilharWhatsapp} title="Compartilhar no WhatsApp" className="shrink-0 rounded-lg border p-2 text-green-600">
+          <button type="button" onClick={compartilharWhatsapp} title="Compartilhar no WhatsApp" className="shrink-0 rounded-lg border p-2 text-green-600">
             <Share2 size={15} />
           </button>
           <a
@@ -865,7 +865,7 @@ export default function Loja() {
 
       <div className="mb-4 flex flex-wrap gap-2 pb-1">
         {(['aparencia', 'identidade', 'segmento', 'logistica', 'horarios', 'pagamentos', 'fiscal', 'ifood'] as Aba[]).map((a) => (
-          <button key={a} data-tour={a === 'pagamentos' ? "tour-loja-aba-pagamentos" : undefined} onClick={() => setAba(a)}
+          <button type="button" key={a} data-tour={a === 'pagamentos' ? "tour-loja-aba-pagamentos" : undefined} onClick={() => setAba(a)}
             className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ${aba === a ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm'}`}>
             {a === 'aparencia'
               ? 'Aparência'
@@ -1588,7 +1588,7 @@ export default function Loja() {
           <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="flex items-center gap-1.5 text-sm font-semibold"><Clock size={15} /> {tDynamic('Grade de Horários')}</h3>
-              <button onClick={() => setHorarios([...horarios, { dia_semana: 1, abre: '18:00', fecha: '23:00' }])}
+              <button type="button" onClick={() => setHorarios([...horarios, { dia_semana: 1, abre: '18:00', fecha: '23:00' }])}
                 className="flex items-center gap-1 rounded-lg bg-[var(--cor-primaria)]/10 px-3 py-1.5 text-xs font-bold text-[var(--cor-primaria)] transition hover:bg-[var(--cor-primaria)]/20">
                 <Plus size={14} /> Novo Turno
               </button>
@@ -1614,7 +1614,7 @@ export default function Loja() {
                       <input type="time" value={h.fecha?.substring(0, 5) || ''} onChange={(e) => { const n = [...horarios]; n[i].fecha = e.target.value; setHorarios(n); }} className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm" />
                     </div>
                     
-                    <button onClick={() => setHorarios(horarios.filter((_, idx) => idx !== i))} className="p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10">
+                    <button type="button" onClick={() => setHorarios(horarios.filter((_, idx) => idx !== i))} className="p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -1898,7 +1898,7 @@ export default function Loja() {
 
       {erro && <p className="mt-3 text-sm font-medium text-red-500">{erro}</p>}
 
-      <button onClick={salvar} disabled={salvando}
+      <button type="button" onClick={salvar} disabled={salvando}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3.5 font-semibold text-white disabled:opacity-40">
         {ok ? <><Check size={18} /> Salvo!</> : <><Save size={18} /> {salvando ? 'Salvando…' : 'Salvar alterações'}</>}
       </button>

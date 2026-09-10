@@ -217,13 +217,13 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button
+            <button type="button"
               onClick={() => setRecolhido((r) => !r)}
               className="rounded-lg p-1.5 text-white/40 hover:bg-white/8 hover:text-white/80 transition"
             >
               {recolhido ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
-            <button
+            <button type="button"
               onClick={dispensar}
               title={tDynamic('Dispensar')}
               className="rounded-lg p-1.5 text-white/40 hover:bg-white/8 hover:text-white/80 transition"
@@ -262,7 +262,7 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
             {PASSOS_WIZARD.map((passo) => {
               const feito = status[passo.id as keyof StepStatus];
               return (
-                <button
+                <button type="button"
                   key={passo.id}
                   onClick={() => navegar(passo)}
                   className={`w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all duration-200 group ${
@@ -313,7 +313,7 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
             <p className="text-[10px] text-white/25">
               {isEn ? 'Dismiss anytime' : 'Pode fechar quando quiser'}
             </p>
-            <button
+            <button type="button"
               onClick={() => window.dispatchEvent(new Event('iniciar-guided-tour'))}
               className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/15 px-3 py-1.5 text-[10px] font-black text-orange-400 hover:bg-orange-500/25 transition"
             >

@@ -411,7 +411,7 @@ export default function AcompanharPedido() {
               </div>
             </div>
             {deferredPrompt && (
-              <button onClick={handleInstallClick} className="flex items-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-4 py-3 text-sm font-bold text-white transition hover:brightness-110">
+              <button type="button" onClick={handleInstallClick} className="flex items-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-4 py-3 text-sm font-bold text-white transition hover:brightness-110">
                 <Download size={16} /> Instalar app
               </button>
             )}
@@ -430,7 +430,7 @@ export default function AcompanharPedido() {
               {tDynamic('Para nos ajudar, confirme que você já retirou ou recebeu sua encomenda.')}
             </p>
             <div className="flex flex-wrap gap-3">
-              <button 
+              <button type="button" 
                 onClick={handleConfirmarRecebimento}
                 disabled={confirmando}
                 className="flex items-center gap-2 rounded-2xl bg-green-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-green-600/20 transition hover:bg-green-700 disabled:opacity-50"
@@ -438,7 +438,7 @@ export default function AcompanharPedido() {
                 {confirmando ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
                 Confirmar Recebimento
               </button>
-              <button 
+              <button type="button" 
                 onClick={handleAbrirChat}
                 className="flex items-center gap-2 rounded-2xl border-2 border-red-200 bg-white dark:bg-gray-900 px-5 py-3 text-sm font-bold text-red-600 dark:text-red-400 transition hover:bg-red-50 dark:hover:bg-red-950/30 dark:border-red-900/30"
               >

@@ -26,7 +26,7 @@ export function ErroAmigavel({ erro, onFechar }: { erro: ErroTraduzido; onFechar
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-['Sora'] text-sm font-black text-red-800 dark:text-red-300">{erro.titulo}</h3>
-            <button
+            <button type="button"
               onClick={onFechar}
               aria-label="Fechar aviso"
               className="shrink-0 rounded-lg p-1 text-red-400 transition hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/40"
@@ -56,7 +56,7 @@ export function ErroAmigavel({ erro, onFechar }: { erro: ErroTraduzido; onFechar
             )}
           </div>
 
-          <button
+          <button type="button"
             onClick={() => setTecnicoAberto((v) => !v)}
             className="mt-2 flex items-center gap-1 text-xs opacity-95 font-semibold text-red-400 transition hover:text-red-600 dark:hover:text-red-300"
           >

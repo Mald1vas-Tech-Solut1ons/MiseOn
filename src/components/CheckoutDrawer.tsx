@@ -480,7 +480,7 @@ export default function CheckoutDrawer({
             <ShoppingBag size={20} className="text-[var(--cor-primaria-texto)]" />
             <span data-cy="checkout-titulo" className="text-base font-black dark:text-white">{tDynamic('Finalizar Pedido')}</span>
           </div>
-          <button
+          <button type="button"
             onClick={onClose}
             className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
@@ -510,7 +510,7 @@ export default function CheckoutDrawer({
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1">
-                    <button
+                    <button type="button"
                       onClick={() => item.quantidade > 1
                         ? setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade - 1 } : x))
                         : setCarrinho(carrinho.filter((_, y) => y !== idx))}
@@ -519,7 +519,7 @@ export default function CheckoutDrawer({
                       <Minus size={13} />
                     </button>
                     <span className="w-4 text-center text-xs font-bold dark:text-gray-200">{item.quantidade}</span>
-                    <button
+                    <button type="button"
                       onClick={() => setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade + 1 } : x))}
                       className="text-gray-400 hover:text-[var(--cor-primaria-texto)] transition-colors"
                     >
@@ -527,7 +527,7 @@ export default function CheckoutDrawer({
                     </button>
                   </div>
                   <p className="text-sm font-bold dark:text-gray-100 w-16 text-right">{fmt(precoItem(item))}</p>
-                  <button
+                  <button type="button"
                     onClick={() => setCarrinho(carrinho.filter((_, x) => x !== idx))}
                     className="text-gray-300 hover:text-red-500 transition-colors"
                   >
@@ -553,13 +553,13 @@ export default function CheckoutDrawer({
                     do celular logado noutra conta, ou simplesmente nao tem. O
                     ModalAuthCliente ja fazia e-mail com senha, cadastro e entrada
                     sem senha (link no e-mail) — so nao estava oferecido aqui. */}
-                <button
+                <button type="button"
                   onClick={onAbrirAuth}
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white hover:brightness-110 transition-all"
                 >
                   <Mail size={16} /> {tDynamic('Entrar com e-mail')}
                 </button>
-                <button
+                <button type="button"
                   onClick={() => entrarComGoogle(window.location.href)}
                   className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
                 >
@@ -580,7 +580,7 @@ export default function CheckoutDrawer({
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     {(['DELIVERY', 'RETIRADA_BALCAO'] as const).map((t) => (
-                      <button
+                      <button type="button"
                         key={t}
                         onClick={() => setTipo(t)}
                         className={`flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-bold transition-all ${
@@ -603,11 +603,11 @@ export default function CheckoutDrawer({
                       <CalendarClock size={12} /> {tDynamic('Quando você quer receber?')}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
-                      <button onClick={() => setQuando('AGORA')}
+                      <button type="button" onClick={() => setQuando('AGORA')}
                         className={`rounded-xl border-2 py-3 text-sm font-bold transition-all ${quando === 'AGORA' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria-texto)]' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
                         Agora
                       </button>
-                      <button onClick={() => setQuando('AGENDADO')}
+                      <button type="button" onClick={() => setQuando('AGENDADO')}
                         className={`rounded-xl border-2 py-3 text-sm font-bold transition-all ${quando === 'AGENDADO' ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria-texto)]' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'}`}>
                         Agendar
                       </button>
@@ -621,7 +621,7 @@ export default function CheckoutDrawer({
                           <>
                             <div className="flex gap-1.5 overflow-x-auto pb-1">
                               {diasDisponiveis.map((d) => (
-                                <button key={d.data} onClick={() => setDiaAgendado(d.data)}
+                                <button type="button" key={d.data} onClick={() => setDiaAgendado(d.data)}
                                   className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold capitalize transition-all ${diaAgendado === d.data ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)] text-white' : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'}`}>
                                   {d.label}
                                 </button>
@@ -633,7 +633,7 @@ export default function CheckoutDrawer({
                               ) : (
                                 <div className="flex flex-wrap gap-1.5">
                                   {slotsDoDia.map((h) => (
-                                    <button key={h} onClick={() => setHoraAgendada(h)}
+                                    <button type="button" key={h} onClick={() => setHoraAgendada(h)}
                                       className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-all ${horaAgendada === h ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)] text-white' : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'}`}>
                                       {h}
                                     </button>
@@ -792,7 +792,7 @@ export default function CheckoutDrawer({
 
                 {/* Cashback disponível */}
                 {saldoCashback > 0 && (
-                  <button
+                  <button type="button"
                     data-cy="checkout-usar-cashback"
                     onClick={() => setUsarCashback((v) => !v)}
                     className={`flex w-full items-center justify-between rounded-2xl border-2 p-4 text-left transition-all ${
@@ -829,7 +829,7 @@ export default function CheckoutDrawer({
                       </p>
                       <div className="grid grid-cols-2 gap-2">
                         {metodosOnline.map((m) => (
-                          <button key={m} onClick={() => setMetodo(m)}
+                          <button type="button" key={m} onClick={() => setMetodo(m)}
                             className={`rounded-xl border py-3 text-xs font-bold transition-all ${
                               metodo === m
                                 ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria-texto)]'
@@ -847,7 +847,7 @@ export default function CheckoutDrawer({
                       <p className="mb-1.5 text-xs opacity-95 font-bold text-gray-500 dark:text-gray-400">{tDynamic('Pague na entrega')}</p>
                       <div className="grid grid-cols-2 gap-2">
                         {metodosEntrega.map((m) => (
-                          <button key={m} onClick={() => setMetodo(m)}
+                          <button type="button" key={m} onClick={() => setMetodo(m)}
                             className={`rounded-xl border py-3 text-xs font-bold transition-all ${
                               metodo === m
                                 ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5 text-[var(--cor-primaria-texto)]'
@@ -923,7 +923,7 @@ export default function CheckoutDrawer({
                     casa com o TITULO do drawer e escolhe o primeiro no do DOM
                     — passava local e quebrava no CI conforme a ordem de
                     render mudava. */}
-                <button
+                <button type="button"
                   data-cy="checkout-finalizar"
                   onClick={enviar}
                   disabled={enviando || carrinho.length === 0 || foraDeArea}

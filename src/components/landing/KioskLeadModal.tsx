@@ -32,7 +32,7 @@ export function KioskLeadModal({
       <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-700/60 bg-[#070C18] p-6 sm:p-8 shadow-2xl shadow-black/80 animate-in zoom-in-95 duration-200 dark:border-white/15 dark:bg-[#0B1120]">
         
         {/* Close Button */}
-        <button
+        <button type="button"
           onClick={onClose}
           className="absolute right-5 top-5 rounded-full p-2 text-gray-400 hover:bg-white/10 hover:text-white transition"
           aria-label="Fechar"

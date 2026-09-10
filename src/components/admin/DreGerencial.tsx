@@ -64,7 +64,7 @@ export default function DreGerencial() {
             onChange={(e) => setMesSelecionado(e.target.value)}
             className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs font-bold text-gray-900 outline-none dark:border-white/10 dark:bg-[#070C18] dark:text-white"
           />
-          <button
+          <button type="button"
             onClick={() => window.print()}
             className="inline-flex items-center gap-1.5 rounded-xl bg-gray-100 px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white"
           >

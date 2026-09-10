@@ -365,7 +365,7 @@ function FaqItem({ pergunta, resposta }: { pergunta: string; resposta: string })
   const [aberto, setAberto] = useState(false);
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
-      <button
+      <button type="button"
         onClick={() => setAberto((a) => !a)}
         aria-expanded={aberto}
         className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-gray-50 dark:hover:bg-white/5"
@@ -757,7 +757,7 @@ export default function Home() {
 
           <div className="hidden items-center gap-3 lg:flex">
             {/* Seletor de idioma — ícone de globo + sigla, sem bandeira emoji */}
-            <button
+            <button type="button"
               onClick={() => setIdioma(idioma === 'pt-BR' ? 'en-US' : 'pt-BR')}
               title={idioma === 'pt-BR' ? 'Switch to English' : 'Mudar para Português'}
               aria-label="Alternar idioma"
@@ -801,7 +801,7 @@ export default function Home() {
           </Link>
 
           {/* Toggle mobile */}
-          <button
+          <button type="button"
             onClick={() => setMenuAberto((a) => !a)}
             aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
             className="rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 lg:hidden dark:text-gray-300 dark:hover:bg-white/10"
@@ -2012,7 +2012,7 @@ export default function Home() {
           </div>
 
           <div className="mx-auto mt-8 flex max-w-sm items-center justify-center rounded-full border border-gray-200 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
-            <button
+            <button type="button"
               onClick={() => setPlanoAnual(false)}
               className={`flex-1 rounded-full py-2.5 text-sm font-bold transition-all ${
                 !planoAnual
@@ -2022,7 +2022,7 @@ export default function Home() {
             >
               Mensal
             </button>
-            <button
+            <button type="button"
               onClick={() => setPlanoAnual(true)}
               className={`flex-1 rounded-full py-2.5 text-sm font-bold transition-all ${
                 planoAnual

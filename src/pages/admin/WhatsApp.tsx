@@ -511,7 +511,7 @@ export default function WhatsApp() {
             </div>
             {conexao && (
               <div className="flex shrink-0 flex-wrap gap-2">
-                <button
+                <button type="button"
                   onClick={testar}
                   disabled={testando}
                   className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-black text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:opacity-50"
@@ -519,14 +519,14 @@ export default function WhatsApp() {
                   {testando ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
                   Testar conexão
                 </button>
-                <button
+                <button type="button"
                   onClick={() => setTrocandoNumero((v) => !v)}
                   className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-black text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-200 dark:hover:bg-white/5"
                 >
                   <MessageCircle size={15} />
                   {trocandoNumero ? 'Cancelar troca' : 'Trocar de número'}
                 </button>
-                <button
+                <button type="button"
                   onClick={desconectar}
                   disabled={desconectando || devolvendo}
                   className="flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-xs font-black text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900/40 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-900/10"
@@ -534,7 +534,7 @@ export default function WhatsApp() {
                   {desconectando ? <Loader2 size={15} className="animate-spin" /> : <Unplug size={15} />}
                   Desconectar
                 </button>
-                <button
+                <button type="button"
                   onClick={devolverNumero}
                   disabled={devolvendo || desconectando}
                   title="Remove o número da Meta para ele voltar a funcionar no WhatsApp comum"
@@ -572,7 +572,7 @@ export default function WhatsApp() {
                 Escolha como quer conectar:
               </p>
 
-              <button
+              <button type="button"
                 onClick={conectarComFacebook}
                 disabled={finalizando}
                 className="mt-1 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-['Sora'] text-sm font-black text-emerald-950 shadow-xl transition hover:scale-105 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
@@ -588,7 +588,7 @@ export default function WhatsApp() {
 
               <div className="my-1 h-px w-40 bg-emerald-300/20" />
 
-              <button
+              <button type="button"
                 onClick={() => void conectarPorRedirect(FEATURE_CHIP_DEDICADO)}
                 disabled={finalizando}
                 className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3 font-['Sora'] text-sm font-black text-white backdrop-blur-md transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
@@ -633,7 +633,7 @@ export default function WhatsApp() {
 
           <div className="space-y-3">
             {/* Toggle IA */}
-            <button
+            <button type="button"
               onClick={() => setIaAtivo((v) => !v)}
               className="flex w-full items-center justify-between gap-3 rounded-xl border border-gray-100 px-4 py-3 text-left transition hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/5"
             >
@@ -647,7 +647,7 @@ export default function WhatsApp() {
             </button>
 
             {/* Toggle templates */}
-            <button
+            <button type="button"
               onClick={() => setTemplatesAtivo((v) => !v)}
               className="flex w-full items-center justify-between gap-3 rounded-xl border border-gray-100 px-4 py-3 text-left transition hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/5"
             >
@@ -679,7 +679,7 @@ export default function WhatsApp() {
               </span>
             </div>
 
-            <button
+            <button type="button"
               onClick={salvarConfig}
               disabled={salvandoCfg}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 p-3 text-sm font-black text-white transition hover:bg-gray-800 disabled:opacity-50 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"

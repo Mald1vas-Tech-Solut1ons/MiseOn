@@ -237,7 +237,7 @@ export default function ShowcaseTelasReais() {
             const selecionado = t.id === telaAtiva;
             const IconeComp = t.icone;
             return (
-              <button
+              <button type="button"
                 key={t.id}
                 onClick={() => setTelaAtiva(t.id)}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all border ${

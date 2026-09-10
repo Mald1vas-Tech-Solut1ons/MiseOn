@@ -363,7 +363,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
             </h2>
             <p className="text-xs text-gray-500 font-medium mt-0.5">{tDynamic('Digite, busque por código de barras ou fotografe o rótulo — salvar aqui já conta como revisado.')}</p>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-300 rounded-xl transition-colors">
+          <button type="button" onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-300 rounded-xl transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -392,7 +392,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {candidatosBase.map((c) => (
-                      <button key={c.id} onClick={() => aplicarCandidatoBase(c)}
+                      <button type="button" key={c.id} onClick={() => aplicarCandidatoBase(c)}
                         className="rounded-full border border-amber-300 dark:border-amber-800 bg-white dark:bg-gray-900 px-3 py-1.5 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors">
                         {c.nome_pt || c.nome} <span className="opacity-60">({Math.round(c.similaridade * 100)}%)</span>
                       </button>
@@ -418,12 +418,12 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                       className="w-full rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white pl-9 pr-3 py-2.5 text-sm"
                     />
                   </div>
-                  <button onClick={buscarPorEan} disabled={buscandoEan || !gtinBusca}
+                  <button type="button" onClick={buscarPorEan} disabled={buscandoEan || !gtinBusca}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 px-4 py-2.5 text-sm font-bold hover:bg-blue-100 dark:hover:bg-blue-900/30 disabled:opacity-50 transition-colors">
                     {buscandoEan ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-700 border-t-transparent" /> : <Barcode size={16} />}
                     Buscar
                   </button>
-                  <button onClick={() => inputFotoRef.current?.click()} disabled={enviandoFoto}
+                  <button type="button" onClick={() => inputFotoRef.current?.click()} disabled={enviandoFoto}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-900 px-4 py-2.5 text-sm font-bold hover:bg-purple-100 dark:hover:bg-purple-900/30 disabled:opacity-50 transition-colors">
                     {enviandoFoto ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-purple-700 border-t-transparent" /> : <Camera size={16} />}
                     Fotografar rótulo
@@ -432,7 +432,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                     ref={inputFotoRef} type="file" accept="image/*" capture="environment" className="hidden"
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) capturarFoto(f); e.target.value = ''; }}
                   />
-                  <button onClick={estimarComIa} disabled={estimandoIa}
+                  <button type="button" onClick={estimarComIa} disabled={estimandoIa}
                     title="Último recurso: a IA chuta a partir só do nome do insumo, com confiança baixa"
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 px-4 py-2.5 text-sm font-bold hover:bg-amber-100 dark:hover:bg-amber-900/30 disabled:opacity-50 transition-colors">
                     {estimandoIa ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-700 border-t-transparent" /> : <Wand2 size={16} />}
@@ -455,7 +455,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                 <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{tDynamic('Valores declarados por')}</p>
                 <div className="flex gap-2">
                   {(['g', 'ml'] as const).map((u) => (
-                    <button key={u} onClick={() => setBaseUnidade(u)}
+                    <button type="button" key={u} onClick={() => setBaseUnidade(u)}
                       className={`rounded-xl border px-4 py-2 text-sm font-bold transition-colors ${
                         baseUnidade === u
                           ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
@@ -526,7 +526,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                 <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{tDynamic('Contém alérgeno')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {ALERGENOS.map((a) => (
-                    <button key={a} onClick={() => toggle(contem, setContem, a)}
+                    <button type="button" key={a} onClick={() => toggle(contem, setContem, a)}
                       className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                         contem.has(a)
                           ? 'border-red-400 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
@@ -542,7 +542,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
                 <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{tDynamic('Pode conter (contaminação cruzada)')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {ALERGENOS.filter((a) => !contem.has(a)).map((a) => (
-                    <button key={a} onClick={() => toggle(podeConter, setPodeConter, a)}
+                    <button type="button" key={a} onClick={() => toggle(podeConter, setPodeConter, a)}
                       className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                         podeConter.has(a)
                           ? 'border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
@@ -561,7 +561,7 @@ export default function ModalNutricaoInsumo({ insumo, lojaId, onClose, onSalvo }
         </div>
 
         <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-4">
-          <button onClick={salvar} disabled={salvando || carregando}
+          <button type="button" onClick={salvar} disabled={salvando || carregando}
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 py-3 text-sm font-bold text-white shadow-md transition-colors disabled:opacity-50">
             {salvando ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <CheckCircle2 size={16} />}
             Salvar nutrição

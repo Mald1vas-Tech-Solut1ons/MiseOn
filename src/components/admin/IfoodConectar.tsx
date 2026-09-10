@@ -217,7 +217,7 @@ export default function IfoodConectar({
                     {tDynamic('Esse código não parece um ID de loja. Ele tem 5 blocos separados por hífen.')}
                   </p>
                 )}
-                <button
+                <button type="button"
                   onClick={anotarPedido}
                   disabled={!idValido || salvando}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 p-3 text-sm font-black text-white transition hover:bg-red-700 disabled:opacity-50"
@@ -259,7 +259,7 @@ export default function IfoodConectar({
                   </div>
                 </div>
 
-                <button
+                <button type="button"
                   onClick={() => verificar()}
                   disabled={verificando}
                   className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-red-600 p-3 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-900/20"
@@ -294,7 +294,7 @@ export default function IfoodConectar({
             {passoAtual === 3 && (
               <div className="mt-3 space-y-2">
                 {autorizadas.map((m) => (
-                  <button
+                  <button type="button"
                     key={m.id}
                     onClick={() => conectar(m.id)}
                     disabled={salvando}

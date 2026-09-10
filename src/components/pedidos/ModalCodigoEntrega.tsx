@@ -132,7 +132,7 @@ export function ModalCodigoEntrega({
               <p className="mt-1 text-xs leading-relaxed text-[var(--cor-texto-suave)]">{fase.mensagem}</p>
               {fase.tecnico && (
                 <>
-                  <button
+                  <button type="button"
                     onClick={() => setVerTecnico((v) => !v)}
                     className="mt-2 flex items-center gap-1 text-xs opacity-95 font-semibold text-[var(--cor-texto-fraco)] hover:underline"
                   >
@@ -215,7 +215,7 @@ export function ModalCodigoEntrega({
             </p>
           )}
 
-          <button
+          <button type="button"
             onClick={() => setVerAjuda((v) => !v)}
             className="mt-3 flex items-center gap-1.5 text-xs opacity-95 font-semibold text-[var(--cor-texto-fraco)] hover:underline"
           >

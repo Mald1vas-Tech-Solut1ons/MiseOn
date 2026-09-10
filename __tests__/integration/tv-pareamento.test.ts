@@ -5,7 +5,10 @@ import { gated } from './gate';
 
 const URL = process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
-const PUBLIC_KEY = process.env.VITE_SUPABASE_ANON_KEY ?? SERVICE_KEY;
+// Sem chave anonima NAO existe cliente publico: cair na service role faria
+// o cliente "publico" ignorar RLS, e um teste de contrato de seguranca rodando
+// como superusuario e falso-verde esperando a vez. Sem ela a suite fica BLOCKED.
+const PUBLIC_KEY = process.env.VITE_SUPABASE_ANON_KEY ?? '';
 const configured = Boolean(SERVICE_KEY && PUBLIC_KEY);
 // Senha do usuario descartavel que a suite cria e apaga. Gerada por execucao:
 // literal em repositorio publico e barrado pelo guarda de segredos do repo

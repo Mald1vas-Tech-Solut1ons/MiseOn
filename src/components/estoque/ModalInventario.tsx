@@ -88,7 +88,7 @@ export default function ModalInventario({ insumos, onFechar, onSucesso }: Props)
                 {tDynamic('Conte na unidade que estiver na mão — cabeça, caixa, quilo. O sistema converte.')}
               </p>
             </div>
-            <button onClick={onFechar} className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
+            <button type="button" onClick={onFechar} className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
               <X size={20} />
             </button>
           </div>
@@ -147,7 +147,7 @@ export default function ModalInventario({ insumos, onFechar, onSucesso }: Props)
             <input placeholder="Observação (ex: contagem de segunda)"
               className="w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-[var(--cor-primaria)] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100 sm:max-w-xs"
               value={obs} onChange={e => setObs(e.target.value)} />
-            <button onClick={aplicar} disabled={salvando || preenchidos.length === 0}
+            <button type="button" onClick={aplicar} disabled={salvando || preenchidos.length === 0}
               className="flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">
               {salvando ? <><Loader2 size={16} className="animate-spin" /> Aplicando...</>
                         : <><ClipboardCheck size={16} /> Aplicar contagem ({preenchidos.length})</>}

@@ -182,7 +182,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
                 {insumos.map(i => <option key={i.id} value={i.id}>{i.nome}</option>)}
               </select>
               {linhas.length > 1 && (
-                <button onClick={() => remover(lado, l.key)}
+                <button type="button" onClick={() => remover(lado, l.key)}
                   className="rounded-lg p-2 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20">
                   <Trash2 size={15} />
                 </button>
@@ -219,7 +219,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
         );
       })}
 
-      <button onClick={() => (lado === 'o' ? setOrigens : setDestinos)(ls => [...ls, novaLinha(insumos[0]?.id ?? '')])}
+      <button type="button" onClick={() => (lado === 'o' ? setOrigens : setDestinos)(ls => [...ls, novaLinha(insumos[0]?.id ?? '')])}
         className="flex items-center gap-1 text-xs opacity-95 font-bold text-blue-600 transition-colors hover:underline dark:text-blue-400">
         <Plus size={12} /> Adicionar {lado === 'o' ? 'origem' : 'destino'}
       </button>
@@ -243,16 +243,16 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
           </div>
           <div className="flex items-center gap-2">
             <div className="flex rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
-              <button onClick={() => setTipo('DESMONTE')}
+              <button type="button" onClick={() => setTipo('DESMONTE')}
                 className={`rounded px-3 py-1.5 text-xs font-bold transition-colors ${tipo === 'DESMONTE' ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-100' : 'text-gray-500'}`}>
                 Desmontar
               </button>
-              <button onClick={() => setTipo('MONTAGEM')}
+              <button type="button" onClick={() => setTipo('MONTAGEM')}
                 className={`rounded px-3 py-1.5 text-xs font-bold transition-colors ${tipo === 'MONTAGEM' ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-100' : 'text-gray-500'}`}>
                 Montar
               </button>
             </div>
-            <button onClick={onFechar} className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
+            <button type="button" onClick={onFechar} className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
               <X size={20} />
             </button>
           </div>
@@ -326,7 +326,7 @@ export default function ModalTransformar({ lojaId, insumos, inicial, onFechar, o
               <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{fmt(custoEstimado)}</p>
               <p className="text-xs opacity-90 text-gray-400">estimado — o valor final vem do PEPS dos lotes</p>
             </div>
-            <button onClick={confirmar} disabled={salvando}
+            <button type="button" onClick={confirmar} disabled={salvando}
               className="flex items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">
               {salvando ? <><Loader2 size={16} className="animate-spin" /> Registrando...</>
                         : <>{tipo === 'DESMONTE' ? <Scissors size={16} /> : <Package size={16} />} Confirmar</>}

@@ -127,7 +127,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
       {/* Setores — o mapa de cores do armazenamento */}
       <div className="mo-r3d-setores" role="tablist" aria-label="Setores do estoque">
         {setores.map((s) => (
-          <button
+          <button type="button"
             key={s.setor.id}
             role="tab"
             aria-selected={s.setor.id === setorId}
@@ -183,7 +183,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
       {totalPaginas > 1 && (
         <div className="mo-r3d-paginas">
           {Array.from({ length: totalPaginas }, (_, p) => (
-            <button
+            <button type="button"
               key={p}
               className={`mo-r3d-pagina ${p === paginaSegura ? 'ativa' : ''}`}
               onClick={() => setPagina(p)}
@@ -207,7 +207,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
         <aside className={`mo-r3d-recpanel ${receitaCheck.completa ? 'ok' : 'falta'}`} aria-live="polite">
           <header>
             <strong>{receitaCheck.tipo === 'preparo' ? '🥣' : '🍽️'} {receitaCheck.nome}</strong>
-            <button onClick={() => setReceitaId('')} aria-label="Fechar checagem de receita"><X size={15} /></button>
+            <button type="button" onClick={() => setReceitaId('')} aria-label="Fechar checagem de receita"><X size={15} /></button>
           </header>
           {receitaCheck.ingredientes.length === 0 ? (
             <p className="mo-r3d-rec-linha">{tDynamic('Receita sem ficha técnica cadastrada.')}</p>
@@ -243,7 +243,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
         <aside className="mo-r3d-painel" aria-live="polite">
           <header>
             <strong>{selecionado.nome}</strong>
-            <button onClick={() => setSelecionado(null)} aria-label="Fechar detalhe"><X size={15} /></button>
+            <button type="button" onClick={() => setSelecionado(null)} aria-label="Fechar detalhe"><X size={15} /></button>
           </header>
           <p className="mo-r3d-painel-meta">
             {SETORES[selecionado.setor].icone} {SETORES[selecionado.setor].rotulo} · {selecionado.categoria}
@@ -276,7 +276,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
       {/* Cartões-resumo — a versão acessível da cena */}
       <div data-tour="tour-estoque-3d-cartoes" className="mo-r3d-cartoes">
         {itensPagina.map((item) => (
-          <button
+          <button type="button"
             key={item.insumoId}
             className={`mo-r3d-cartao ${selecionado?.insumoId === item.insumoId ? 'selecionado' : ''}`}
             style={{ ['--cor-setor' as string]: SETORES[item.setor].cor }}

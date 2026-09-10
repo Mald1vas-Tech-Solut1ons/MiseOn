@@ -138,7 +138,7 @@ export function CostGraph3D(props: Props) {
                 </span>
               )}
             </div>
-            <button
+            <button type="button"
               className="mo-cg3d-fechar"
               onClick={() => setSelecionado(null)}
               aria-label="Fechar"

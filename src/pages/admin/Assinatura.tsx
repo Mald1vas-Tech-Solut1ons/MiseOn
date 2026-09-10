@@ -395,10 +395,10 @@ export default function Assinatura() {
             
             {/* Tabs */}
             <div className="flex p-1 bg-gray-100 dark:bg-gray-950 rounded-2xl mb-6">
-              <button onClick={() => setMetodo('cartao')} className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${metodo === 'cartao' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
+              <button type="button" onClick={() => setMetodo('cartao')} className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${metodo === 'cartao' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
                 <CreditCard size={18} /> {tDynamic('Cartão de Crédito (até 12x)')}
               </button>
-              <button onClick={() => setMetodo('pix')} className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${metodo === 'pix' ? 'bg-white dark:bg-gray-900 shadow-sm text-teal-600 dark:text-teal-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
+              <button type="button" onClick={() => setMetodo('pix')} className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${metodo === 'pix' ? 'bg-white dark:bg-gray-900 shadow-sm text-teal-600 dark:text-teal-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
                 <QrCode size={18} /> Pix (5% OFF)
               </button>
             </div>
@@ -477,7 +477,7 @@ export default function Assinatura() {
                     </label>
                   )}
 
-                  <button onClick={assinarCartao} disabled={processando}
+                  <button type="button" onClick={assinarCartao} disabled={processando}
                     className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 dark:bg-gray-100 py-4 font-bold text-white dark:text-gray-900 transition-transform hover:scale-[1.01] active:scale-95 disabled:pointer-events-none disabled:opacity-50">
                     {processando ? (
                       <><div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-500 border-t-white dark:border-t-gray-900"></div> {tDynamic('Autenticando no Banco...')}</>
@@ -501,7 +501,7 @@ export default function Assinatura() {
                   </div>
 
                   {!qrCode ? (
-                     <button onClick={gerarPix} disabled={processando}
+                     <button type="button" onClick={gerarPix} disabled={processando}
                        className="flex w-full max-w-sm items-center justify-center gap-2 rounded-xl bg-teal-600 py-4 font-bold text-white transition-transform hover:scale-[1.01] active:scale-95 disabled:pointer-events-none disabled:opacity-50">
                        {processando ? (
                          <><div className="h-5 w-5 animate-spin rounded-full border-2 border-teal-800 border-t-white"></div> {tDynamic('Gerando código seguro...')}</>
@@ -518,7 +518,7 @@ export default function Assinatura() {
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">{tDynamic('Pix Copia e Cola')}</p>
                         <div className="flex w-full items-center gap-2">
                            <input readOnly value={copiaCola} className="w-full rounded-xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-3 text-xs text-gray-600 dark:text-gray-400 font-mono truncate" />
-                           <button onClick={copiarPix} className={`shrink-0 flex items-center justify-center p-3 rounded-xl transition-colors ${copiado ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300'}`}>
+                           <button type="button" onClick={copiarPix} className={`shrink-0 flex items-center justify-center p-3 rounded-xl transition-colors ${copiado ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300'}`}>
                              {copiado ? <CheckCircle size={18} /> : <Copy size={18} />}
                            </button>
                         </div>
@@ -577,7 +577,7 @@ export default function Assinatura() {
                   <div className="flex items-center gap-2 shrink-0">
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${cor}`}>{rotulo[f.nfse_status] ?? f.nfse_status}</span>
                     {f.nfse_status === 'emitida' && (
-                      <button
+                      <button type="button"
                         onClick={() => baixarNota(f.id)}
                         disabled={baixandoId === f.id}
                         className="flex items-center gap-1.5 text-xs font-bold text-[var(--cor-primaria)] hover:underline disabled:opacity-50 disabled:pointer-events-none"

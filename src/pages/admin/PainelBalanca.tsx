@@ -406,7 +406,7 @@ export function PainelBalanca() {
             {conectado ? `${tDynamic('Balança Conectada')} (${config.modo_conexao})` : tDynamic('Balança Desconectada')}
           </span>
 
-          <button
+          <button type="button"
             onClick={() => engineRef.current && engineRef.current.conectar().then((ok) => setConectado(ok))}
             className="flex items-center gap-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-300 dark:border-slate-700"
           >
@@ -550,7 +550,7 @@ export function PainelBalanca() {
                 <div className="text-xs text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">{tDynamic('O que estamos pesando?')}</div>
                 <div className="flex flex-wrap gap-2">
                   {produtosPeso.map(p => (
-                    <button
+                    <button type="button"
                       key={p.id}
                       onClick={() => {
                         setProdutoAtivo(p);
@@ -642,7 +642,7 @@ export function PainelBalanca() {
                 </div>
               </div>
 
-              <button
+              <button type="button"
                 onClick={lancarPesoNaComanda}
                 disabled={processandoLancamento || leituraAtual.pesoLiquidoKg <= 0}
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 py-3.5 px-4 font-semibold text-slate-950 shadow-lg hover:brightness-110 active:scale-[0.99] disabled:opacity-50 transition"
@@ -835,7 +835,7 @@ export function PainelBalanca() {
                         className="w-full rounded-lg bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 pl-8 pr-2 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
-                    <button
+                    <button type="button"
                       onClick={() => {
                         const newProds = produtosPeso.filter((_, i) => i !== index);
                         setProdutosPeso(newProds);
@@ -848,7 +848,7 @@ export function PainelBalanca() {
                   </div>
                 ))}
                 
-                <button
+                <button type="button"
                   onClick={() => {
                     const newProds = [...produtosPeso, { id: Date.now().toString(), nome: 'Novo Botão', preco_por_quilo: 0 }];
                     setProdutosPeso(newProds as any);
@@ -861,7 +861,7 @@ export function PainelBalanca() {
               </div>
             </div>
 
-            <button
+            <button type="button"
               onClick={salvarConfiguracoes}
               disabled={salvando}
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-900 dark:bg-slate-800 py-3 text-sm font-semibold text-white border border-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 transition"
@@ -891,7 +891,7 @@ export function PainelBalanca() {
                   #{comandaParaReceber.numero_cartao ?? 'sem número'} · {tempoDecorrido(comandaParaReceber.aberta_em)}
                 </p>
               </div>
-              <button
+              <button type="button"
                 onClick={fecharModalReceber}
                 className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >

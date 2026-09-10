@@ -171,7 +171,7 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
                 className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 text-sm dark:text-white" />
             </div>
 
-            <button onClick={irParaEtapa2}
+            <button type="button" onClick={irParaEtapa2}
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90">
               Continuar <ArrowRight size={16} />
             </button>
@@ -213,10 +213,10 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
             )}
 
             <div className="mt-4 flex gap-2">
-              <button onClick={() => setEtapa(1)} className="flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300">
+              <button type="button" onClick={() => setEtapa(1)} className="flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300">
                 <ArrowLeft size={16} /> Voltar
               </button>
-              <button onClick={irParaEtapa3}
+              <button type="button" onClick={irParaEtapa3}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90">
                 Continuar <ArrowRight size={16} />
               </button>
@@ -236,10 +236,10 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
             </label>
 
             <div className="flex gap-2">
-              <button onClick={() => setEtapa(2)} disabled={enviando} className="flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 disabled:opacity-50">
+              <button type="button" onClick={() => setEtapa(2)} disabled={enviando} className="flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-3 text-sm font-semibold text-gray-600 dark:text-gray-300 disabled:opacity-50">
                 <ArrowLeft size={16} /> Voltar
               </button>
-              <button onClick={criarLoja} disabled={enviando}
+              <button type="button" onClick={criarLoja} disabled={enviando}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90 disabled:opacity-50">
                 {enviando ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
                 {enviando ? 'Criando sua loja...' : 'Criar minha loja'}

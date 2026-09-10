@@ -300,7 +300,7 @@ export function GuidedTourModal({
               </div>
             </div>
 
-            <button
+            <button type="button"
               onClick={onEncerrar}
               title={tDynamic('Encerrar Tour')}
               className="shrink-0 rounded-xl p-2 text-slate-500 hover:bg-white/8 hover:text-white transition-all duration-200 hover:rotate-90"
@@ -372,7 +372,7 @@ export function GuidedTourModal({
 
           <div className="flex items-center justify-between gap-3">
             {/* Pular Tour */}
-            <button
+            <button type="button"
               onClick={onEncerrar}
               className="text-xs font-bold text-slate-500 hover:text-slate-300 transition-colors px-1 py-1"
             >
@@ -388,7 +388,7 @@ export function GuidedTourModal({
 
             <div className="flex items-center gap-2">
               {passoIndex > 0 && (
-                <button
+                <button type="button"
                   onClick={onAnterior}
                   className="inline-flex items-center gap-1.5 rounded-2xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all duration-200 active:scale-95"
                 >
@@ -397,7 +397,7 @@ export function GuidedTourModal({
                 </button>
               )}
 
-              <button
+              <button type="button"
                 onClick={onProximo}
                 className="inline-flex items-center gap-2 rounded-2xl px-5 sm:px-6 py-2.5 text-sm sm:text-base font-black text-white transition-all duration-200 hover:scale-[1.04] active:scale-95"
                 style={{

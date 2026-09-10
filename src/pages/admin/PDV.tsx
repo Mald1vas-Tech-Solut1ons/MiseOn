@@ -588,7 +588,7 @@ export default function PDV() {
       {pedidoMesaOk && (
         <div className="flex items-center justify-between gap-2 border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/15 dark:text-emerald-400">
           <span className="flex items-center gap-1.5"><Check size={13} /> {tDynamic('Pedido')} #{pedidoMesaOk.numero} {tDynamic('enviado para a Mesa')} {pedidoMesaOk.mesaNumero}!</span>
-          <button onClick={() => setPedidoMesaOk(null)}><X size={13} /></button>
+          <button type="button" onClick={() => setPedidoMesaOk(null)}><X size={13} /></button>
         </div>
       )}
 
@@ -601,7 +601,7 @@ export default function PDV() {
               <span className="shrink-0 text-xs opacity-95 font-bold uppercase tracking-wide text-gray-400">{tDynamic('Mesa:')}</span>
               <HorizontalScrollContainer className="flex-1 min-w-0" showGradients={false}>
                 {mesas.map((m) => (
-                  <button key={m.id} onClick={() => { setMesaSelecionada(m); setAssentoSelecionado(null); }}
+                  <button type="button" key={m.id} onClick={() => { setMesaSelecionada(m); setAssentoSelecionado(null); }}
                     className={`shrink-0 rounded-full border-2 px-3.5 py-1.5 text-xs font-black transition ${mesaSelecionada?.id === m.id ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)] text-white' : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'}`}>
                     {m.numero}
                   </button>
@@ -615,7 +615,7 @@ export default function PDV() {
               <span className="flex items-center gap-1 px-1 font-bold text-gray-500 dark:text-gray-400">
                 <Users size={12} className="text-orange-500" /> {tDynamic('Assento:')}
               </span>
-              <button
+              <button type="button"
                 onClick={() => setAssentoSelecionado(null)}
                 className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
                   assentoSelecionado === null
@@ -628,7 +628,7 @@ export default function PDV() {
               {Array.from({ length: mesaSelecionada.capacidade || 4 }).map((_, idx) => {
                 const numAssento = idx + 1;
                 return (
-                  <button
+                  <button type="button"
                     key={numAssento}
                     onClick={() => setAssentoSelecionado(numAssento)}
                     className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
@@ -721,8 +721,8 @@ export default function PDV() {
               Aguardando o pagamento cair… confirma sozinho.
             </p>
             <div className="mt-4 flex gap-2">
-              <button onClick={limparVenda} className="flex-1 rounded-xl border border-gray-300 py-3 text-sm font-bold text-gray-500 dark:border-gray-700">Cancelar</button>
-              <button onClick={confirmarPixRecebido} disabled={processando} className="flex-1 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white disabled:opacity-50">{tDynamic('Já caiu — confirmar')}</button>
+              <button type="button" onClick={limparVenda} className="flex-1 rounded-xl border border-gray-300 py-3 text-sm font-bold text-gray-500 dark:border-gray-700">Cancelar</button>
+              <button type="button" onClick={confirmarPixRecebido} disabled={processando} className="flex-1 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white disabled:opacity-50">{tDynamic('Já caiu — confirmar')}</button>
             </div>
           </div>
         </div>

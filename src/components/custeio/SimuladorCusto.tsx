@@ -191,7 +191,7 @@ export function SimuladorCusto({
           <span className="sc-titulo-principal">📊 Simulador de Custo</span>
           <span className="sc-subtitulo">{item.nome} · {metodo}</span>
         </div>
-        <button
+        <button type="button"
           className="sc-btn-caminho"
           onClick={() => setMostrarCaminho((v) => !v)}
           aria-expanded={mostrarCaminho}

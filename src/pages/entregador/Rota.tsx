@@ -199,7 +199,7 @@ export default function EntregadorRota() {
         }}
       />
       <div className="bg-gray-900 border-b border-gray-800 p-4 sticky top-[60px] z-30 shadow-md">
-        <button onClick={() => navigate('/entregador')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
+        <button type="button" onClick={() => navigate('/entregador')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
           <ArrowLeft size={16} /> {tDynamic('Voltar ao Dashboard')}
         </button>
         
@@ -208,7 +208,7 @@ export default function EntregadorRota() {
             <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
             <h2 className="text-xl font-bold text-white mb-1">{tDynamic('Rota Concluída!')}</h2>
             <p className="text-gray-400 text-sm mb-6">{tDynamic('Excelente trabalho. Você finalizou todas as entregas.')}</p>
-            <button onClick={finalizarRota} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3.5 rounded-xl transition-colors">
+            <button type="button" onClick={finalizarRota} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3.5 rounded-xl transition-colors">
               Encerrar Rota e Retornar
             </button>
           </div>
@@ -229,19 +229,19 @@ export default function EntregadorRota() {
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-2">
-                <button onClick={() => abrirWaze(paradaAtual.endereco_entrega, paradaAtual.bairro, paradaAtual.cidade)} className="bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
+                <button type="button" onClick={() => abrirWaze(paradaAtual.endereco_entrega, paradaAtual.bairro, paradaAtual.cidade)} className="bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
                   <Navigation size={14} /> Waze
                 </button>
-                <button onClick={() => abrirMaps(paradaAtual.endereco_entrega, paradaAtual.bairro, paradaAtual.cidade)} className="bg-green-600 hover:bg-green-500 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
+                <button type="button" onClick={() => abrirMaps(paradaAtual.endereco_entrega, paradaAtual.bairro, paradaAtual.cidade)} className="bg-green-600 hover:bg-green-500 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
                   <MapPin size={14} /> Google Maps
                 </button>
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <button onClick={() => { setPedidoChatAtual(paradaAtual); setChatAberto(true); }} className="bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
+                <button type="button" onClick={() => { setPedidoChatAtual(paradaAtual); setChatAberto(true); }} className="bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
                   <MessageCircle size={14} /> {tDynamic('Falar com Cliente')}
                 </button>
-                <button onClick={() => finalizarEntrega(paradaAtual)} className="bg-orange-600 hover:bg-orange-500 text-white py-2.5 rounded-xl text-xs font-bold transition-colors shadow-[0_0_15px_rgba(234,88,12,0.3)]">
+                <button type="button" onClick={() => finalizarEntrega(paradaAtual)} className="bg-orange-600 hover:bg-orange-500 text-white py-2.5 rounded-xl text-xs font-bold transition-colors shadow-[0_0_15px_rgba(234,88,12,0.3)]">
                   Marcar Entregue
                 </button>
               </div>
@@ -278,7 +278,7 @@ export default function EntregadorRota() {
       {chatAberto && pedidoChatAtual && (
         <div className="fixed inset-0 z-50 bg-gray-950 flex flex-col">
           <div className="flex items-center gap-3 p-4 border-b border-gray-800 bg-gray-900 shrink-0">
-            <button onClick={() => setChatAberto(false)} className="p-2 -ml-2 text-gray-400 hover:text-white rounded-full"><ArrowLeft size={20} /></button>
+            <button type="button" onClick={() => setChatAberto(false)} className="p-2 -ml-2 text-gray-400 hover:text-white rounded-full"><ArrowLeft size={20} /></button>
             <div>
               <p className="font-bold text-white">Chat - Pedido #{pedidoChatAtual.numero}</p>
               <p className="text-xs text-gray-400">{pedidoChatAtual.identificador_cliente}</p>
@@ -301,9 +301,9 @@ export default function EntregadorRota() {
 
           <div className="p-3 bg-gray-900 border-t border-gray-800 shrink-0">
             <div className="flex gap-2 mb-3 overflow-x-auto pb-2 hide-scrollbar">
-              <button onClick={() => enviarMensagem("Estou chegando!")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">Estou chegando!</button>
-              <button onClick={() => enviarMensagem("Estou na portaria.")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">{tDynamic('Estou na portaria')}</button>
-              <button onClick={() => enviarMensagem("Não estou encontrando o endereço, pode me ajudar?")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">{tDynamic('Não acho endereço')}</button>
+              <button type="button" onClick={() => enviarMensagem("Estou chegando!")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">Estou chegando!</button>
+              <button type="button" onClick={() => enviarMensagem("Estou na portaria.")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">{tDynamic('Estou na portaria')}</button>
+              <button type="button" onClick={() => enviarMensagem("Não estou encontrando o endereço, pode me ajudar?")} className="shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs font-medium border border-gray-700 whitespace-nowrap">{tDynamic('Não acho endereço')}</button>
             </div>
             <div className="flex gap-2">
               <input 
@@ -314,7 +314,7 @@ export default function EntregadorRota() {
                 placeholder="Digite uma mensagem..." 
                 className="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-orange-500" 
               />
-              <button onClick={() => enviarMensagem(msgInput)} className="bg-orange-600 hover:bg-orange-500 text-white p-3 rounded-xl transition-colors">
+              <button type="button" onClick={() => enviarMensagem(msgInput)} className="bg-orange-600 hover:bg-orange-500 text-white p-3 rounded-xl transition-colors">
                 <Send size={18} />
               </button>
             </div>

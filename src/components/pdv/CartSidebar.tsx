@@ -226,12 +226,12 @@ export function CartSidebar({
 
       <div className="hidden items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800 lg:flex">
         <p className="flex items-center gap-2 text-sm font-black dark:text-gray-100"><ShoppingCart size={16} /> {tDynamic('Venda atual')}</p>
-        {carrinho.length > 0 && <button onClick={limparVenda} className="text-xs font-bold text-red-500">{tDynamic('Limpar')}</button>}
+        {carrinho.length > 0 && <button type="button" onClick={limparVenda} className="text-xs font-bold text-red-500">{tDynamic('Limpar')}</button>}
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {carrinho.length > 0 && (
-          <button onClick={limparVenda} className="mb-2 text-xs font-bold text-red-500 lg:hidden">{tDynamic('Limpar')}</button>
+          <button type="button" onClick={limparVenda} className="mb-2 text-xs font-bold text-red-500 lg:hidden">{tDynamic('Limpar')}</button>
         )}
         {carrinho.length === 0 && <p className="py-10 text-center text-sm text-gray-400">{tDynamic('Toque nos produtos')}<br />{tDynamic('para adicionar.')}</p>}
         <div className="space-y-2">
@@ -259,12 +259,12 @@ export function CartSidebar({
                   </span>
                 ) : (
                   <>
-                    <button onClick={() => mudarQtd(idx, -1)} className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800"><Minus size={13} /></button>
+                    <button type="button" onClick={() => mudarQtd(idx, -1)} className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800"><Minus size={13} /></button>
                     <span className="w-6 text-center text-sm font-black dark:text-gray-100">{item.quantidade}</span>
-                    <button onClick={() => mudarQtd(idx, 1)} className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800"><Plus size={13} /></button>
+                    <button type="button" onClick={() => mudarQtd(idx, 1)} className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800"><Plus size={13} /></button>
                   </>
                 )}
-                <button onClick={() => removerItem(idx)} className="ml-auto rounded-lg p-1.5 text-gray-300 hover:text-red-500"><Trash2 size={14} /></button>
+                <button type="button" onClick={() => removerItem(idx)} className="ml-auto rounded-lg p-1.5 text-gray-300 hover:text-red-500"><Trash2 size={14} /></button>
               </div>
             </div>
           ))}
@@ -388,7 +388,7 @@ export function CartSidebar({
         {descontoNum > 0 && <div className="mb-1 flex justify-between text-xs text-green-600"><span>{tDynamic('Desconto')}</span><span>-{fmt(descontoNum)}</span></div>}
         <div className="mb-3 flex justify-between text-lg font-black dark:text-gray-100"><span>{tDynamic('Total')}</span><span className="text-[var(--cor-primaria)]">{fmt(total)}</span></div>
         {erro && modo === 'MESA' && <p className="mb-2 text-center text-xs font-semibold text-red-500">{erro}</p>}
-        <button disabled={acaoBloqueada} onClick={dispararAcao}
+        <button type="button" disabled={acaoBloqueada} onClick={dispararAcao}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] py-4 text-base font-black text-white shadow-lg transition active:scale-[0.98] disabled:opacity-40">
           {enviandoMesa && <Loader2 size={16} className="animate-spin" />}
           {rotuloAcao}
@@ -403,7 +403,7 @@ export function CartSidebar({
               <h3 className="text-base font-black dark:text-white flex items-center gap-2">
                 <UserPlus size={18} className="text-[var(--cor-primaria)]" /> Cadastrar Cliente
               </h3>
-              <button onClick={() => setModalNovoCliente(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-white">
+              <button type="button" onClick={() => setModalNovoCliente(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-white">
                 <X size={18} />
               </button>
             </div>

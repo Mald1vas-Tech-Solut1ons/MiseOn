@@ -189,7 +189,7 @@ export default function EntregadorDashboard() {
           </div>
           
           <div className="rounded-2xl bg-gray-900 border border-gray-800 p-4 flex flex-col items-center justify-center text-center">
-             <button onClick={carregar} disabled={loading} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-full text-gray-400 transition-colors">
+             <button type="button" onClick={carregar} disabled={loading} className="p-3 bg-gray-800 hover:bg-gray-700 rounded-full text-gray-400 transition-colors">
                <RefreshCw size={24} className={loading ? 'animate-spin text-orange-500' : ''} />
              </button>
              <p className="text-xs opacity-90 font-bold text-gray-500 uppercase mt-2">Atualizar App</p>
@@ -244,11 +244,11 @@ export default function EntregadorDashboard() {
             
             <div className="p-4 pt-0">
               {rotaAtiva.status === 'PENDENTE' ? (
-                <button onClick={iniciarRota} className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(234,88,12,0.3)] transition-colors flex items-center justify-center gap-2">
+                <button type="button" onClick={iniciarRota} className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(234,88,12,0.3)] transition-colors flex items-center justify-center gap-2">
                   <Navigation size={18} /> Iniciar Rota Agora
                 </button>
               ) : (
-                <button onClick={() => navigate(`/entregador/rota/${rotaAtiva.id}`)} className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 rounded-xl border border-gray-700 transition-colors flex items-center justify-center gap-2">
+                <button type="button" onClick={() => navigate(`/entregador/rota/${rotaAtiva.id}`)} className="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 rounded-xl border border-gray-700 transition-colors flex items-center justify-center gap-2">
                   <Map size={18} /> {tDynamic('Acessar Navegação e Entregas')}
                 </button>
               )}

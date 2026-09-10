@@ -618,7 +618,7 @@ export default function PainelTV() {
               o centro. Fixar em Cardapio ou Senhas continua valendo para
               quem tem duas TVs, uma em cada papel. */}
           <div className="flex items-center rounded-xl bg-white/5 border border-white/10 p-1">
-            <button
+            <button type="button"
               onClick={() => trocarModo('MENU_BOARD')}
               className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                 modo === 'MENU_BOARD' ? 'bg-[#FC5B24] text-white shadow-md' : 'text-slate-400 hover:text-white'
@@ -626,7 +626,7 @@ export default function PainelTV() {
             >
               {tDynamic('Cardápio 4K')}
             </button>
-            <button
+            <button type="button"
               onClick={() => trocarModo('AUTO')}
               title="A TV alterna sozinha: chama a senha quando alguém fica pronto e volta ao cardápio quando o balcão esvazia."
               className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
@@ -640,7 +640,7 @@ export default function PainelTV() {
                 </span>
               )}
             </button>
-            <button
+            <button type="button"
               onClick={() => trocarModo('SENHAS')}
               className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                 modo === 'SENHAS' ? 'bg-[#FC5B24] text-white shadow-md' : 'text-slate-400 hover:text-white'
@@ -650,7 +650,7 @@ export default function PainelTV() {
             </button>
           </div>
 
-          <button
+          <button type="button"
             onClick={() => setSomAtivo(!somAtivo)}
             className={`p-2.5 rounded-xl border transition-all ${
               somAtivo ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-slate-500'
@@ -673,7 +673,7 @@ export default function PainelTV() {
             </span>
           )}
 
-          <button
+          <button type="button"
             onClick={alternarTelaCheia}
             className="p-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 transition-all"
             title="Alternar Tela Cheia (F11)"
@@ -798,7 +798,7 @@ export default function PainelTV() {
                 {categorias.length > 1 && (
                   <div className="flex gap-1.5">
                     {categorias.map((c, i) => (
-                      <button
+                      <button type="button"
                         key={c.id}
                         onClick={() => setCategoriaIndex(i)}
                         className={`h-2 rounded-full transition-all ${

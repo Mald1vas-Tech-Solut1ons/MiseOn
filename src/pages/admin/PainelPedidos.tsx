@@ -345,7 +345,7 @@ export default function PainelPedidos() {
             const qtd = contagem(f);
             const ativo = filtro === f.id;
             return (
-              <button
+              <button type="button"
                 key={f.id}
                 onClick={() => setFiltro(f.id)}
                 className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-['Sora'] text-xs font-bold transition ${

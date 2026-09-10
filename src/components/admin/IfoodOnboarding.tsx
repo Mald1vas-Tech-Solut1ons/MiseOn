@@ -116,7 +116,7 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess, onSalvarTax
           <p className="text-xs font-bold text-gray-600 dark:text-gray-300">
             {tDynamic('Conferir se a integração está pronta')}
           </p>
-          <button
+          <button type="button"
             onClick={rodarDiagnostico}
             disabled={diagnosticando}
             className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -162,7 +162,7 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess, onSalvarTax
               ID: <span className="font-mono text-emerald-900 dark:text-emerald-300">{ifoodMerchantId}</span>
             </p>
             
-            <button onClick={desvincular} disabled={processando} className="mt-4 rounded-xl border-2 border-red-200 px-4 py-2 text-xs font-bold text-red-500 transition hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20">
+            <button type="button" onClick={desvincular} disabled={processando} className="mt-4 rounded-xl border-2 border-red-200 px-4 py-2 text-xs font-bold text-red-500 transition hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20">
               Desvincular Conta
             </button>
           </div>
@@ -219,7 +219,7 @@ export function IfoodOnboarding({ lojaId, form, setValor, onSuccess, onSalvarTax
                 Em Configurações da Loja o componente continua sem handler e a
                 dica antiga vale, porque lá o botão global existe de verdade. */}
             {onSalvarTaxas ? (
-              <button
+              <button type="button"
                 onClick={onSalvarTaxas}
                 disabled={salvandoTaxas}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 p-3 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 disabled:opacity-50"

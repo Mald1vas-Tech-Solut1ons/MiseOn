@@ -33,7 +33,7 @@ export default function SuperAdminLayout() {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3 bg-gray-900 p-8 text-center text-white">
         <p className="font-semibold">{tDynamic('Sua conta não tem acesso ao painel SuperAdmin.')}</p>
-        <button onClick={sair} className="mt-2 rounded-xl border border-white/30 px-5 py-2.5 text-sm font-semibold">Sair</button>
+        <button type="button" onClick={sair} className="mt-2 rounded-xl border border-white/30 px-5 py-2.5 text-sm font-semibold">Sair</button>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export default function SuperAdminLayout() {
         </div>
         <div className="flex items-center gap-3">
           <LanguageToggle variant="minimal" />
-          <button onClick={sair} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
+          <button type="button" onClick={sair} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-white/10 hover:text-white">
             <LogOut size={16} /> Sair
           </button>
         </div>

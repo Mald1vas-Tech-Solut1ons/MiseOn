@@ -230,7 +230,7 @@ export function PainelGarcomMobile() {
         </p>
 
         {!pushHabilitado && (
-          <button
+          <button type="button"
             onClick={solicitarPermissaoPush}
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-950 py-2.5 text-xs font-bold text-orange-400 shadow-md hover:bg-slate-900 transition"
           >
@@ -285,13 +285,13 @@ export function PainelGarcomMobile() {
                 </p>
 
                 <div className="flex gap-2 pt-1">
-                  <button
+                  <button type="button"
                     onClick={() => atenderChamado(chamado.id)}
                     className="flex-1 rounded-xl bg-orange-500 py-2.5 text-xs font-bold text-slate-950 hover:bg-orange-400 transition"
                   >
                     Atender Agora
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => concluirChamado(chamado.id)}
                     className="rounded-xl bg-slate-800 px-3 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 transition"
                   >
@@ -409,7 +409,7 @@ export function PainelGarcomMobile() {
 
               <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                 {produtos.map((prod) => (
-                  <button
+                  <button type="button"
                     key={prod.id}
                     onClick={() => setProdutoParaFracionar(prod)}
                     className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800/80 hover:border-orange-500/50 text-left transition"
@@ -494,7 +494,7 @@ function ModalFecharComanda({
             <h3 className="text-sm font-bold text-slate-100">{tDynamic('Receber e fechar comanda')}</h3>
             <p className="text-xs text-slate-500">Comanda #{comanda.numero_cartao ?? 'sem número'}</p>
           </div>
-          <button onClick={onCancelar} disabled={processando} className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800"><X size={18} /></button>
+          <button type="button" onClick={onCancelar} disabled={processando} className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800"><X size={18} /></button>
         </div>
         <p className="mb-3 text-xs text-amber-300">{tDynamic('Confirme somente depois que o pagamento presencial tiver sido recebido.')}</p>
         <div className="grid grid-cols-2 gap-2">
@@ -576,7 +576,7 @@ function ModalLancarItemComanda({
             <h3 className="text-sm font-bold text-slate-100">Lançar item na comanda</h3>
             <p className="text-xs text-slate-500">#{comanda.numero_cartao ?? 'sem número'}</p>
           </div>
-          <button onClick={onCancelar} className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+          <button type="button" onClick={onCancelar} className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
             <X size={18} />
           </button>
         </div>
@@ -584,7 +584,7 @@ function ModalLancarItemComanda({
         {!produtoEscolhido ? (
           <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
             {produtos.map((prod) => (
-              <button
+              <button type="button"
                 key={prod.id}
                 onClick={() => setProdutoEscolhido(prod)}
                 className="w-full flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950 p-3 text-left transition hover:border-orange-500/50"

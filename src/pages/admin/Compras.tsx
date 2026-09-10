@@ -270,7 +270,7 @@ export default function Compras() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <button
+          <button type="button"
             onClick={() => setModalScannerAberto(true)}
             className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition hover:scale-105"
           >
@@ -291,7 +291,7 @@ export default function Compras() {
           </label>
           <div className="flex rounded-xl bg-gray-100 p-1 shadow-inner dark:bg-gray-800">
             {([['repor', 'Repor'], ['pedidos', 'Pedidos'], ['fornecedores', 'Fornecedores']] as const).map(([k, label]) => (
-              <button key={k} onClick={() => setAba(k)}
+              <button type="button" key={k} onClick={() => setAba(k)}
                 className={`rounded-lg px-4 py-2 text-sm font-bold transition-all ${
                   aba === k ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-100'
                             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
@@ -310,7 +310,7 @@ export default function Compras() {
           <p className="flex items-start gap-2 text-sm font-medium text-emerald-800 dark:text-emerald-400">
             <CheckCircle2 size={16} className="mt-0.5 shrink-0" /> {aviso}
           </p>
-          <button onClick={() => setAviso(null)} className="shrink-0 text-xs font-bold text-emerald-700 hover:underline dark:text-emerald-500">Fechar</button>
+          <button type="button" onClick={() => setAviso(null)} className="shrink-0 text-xs font-bold text-emerald-700 hover:underline dark:text-emerald-500">Fechar</button>
         </div>
       )}
 
@@ -334,7 +334,7 @@ export default function Compras() {
             <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{tDynamic('Comprar para cobrir')}</span>
             <div className="flex gap-1">
               {[3, 7, 15, 30].map(d => (
-                <button key={d} onClick={() => setDiasAlvo(d)}
+                <button type="button" key={d} onClick={() => setDiasAlvo(d)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
                     diasAlvo === d ? 'bg-[var(--cor-primaria)] text-white shadow-sm'
                                    : 'border border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400'}`}>
@@ -393,7 +393,7 @@ export default function Compras() {
                       return (
                         <div key={s.insumo.id} className={`flex flex-col gap-4 p-4 transition-colors sm:flex-row sm:items-center sm:p-5 ${ativo ? '' : 'bg-gray-50/50 opacity-60 dark:bg-gray-950/50'}`}>
                           <div className="flex flex-1 items-center gap-4">
-                            <button onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: ativo ? 0 : s.qtdSugerida }))}
+                            <button type="button" onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: ativo ? 0 : s.qtdSugerida }))}
                               className={`shrink-0 transition-colors ${ativo ? 'text-[var(--cor-primaria)]' : 'text-gray-300 dark:text-gray-600'}`}>
                               {ativo ? <CheckCircle2 size={26} /> : <Circle size={26} strokeWidth={1.5} />}
                             </button>
@@ -445,12 +445,12 @@ export default function Compras() {
                           <div className="flex items-center justify-between gap-6 sm:w-auto sm:justify-end">
                             <div className="flex flex-col items-center">
                               <div className="flex items-center rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
-                                <button onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: Math.max(0, qtd - 1) }))}
+                                <button type="button" onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: Math.max(0, qtd - 1) }))}
                                   className="flex h-8 w-8 items-center justify-center rounded-lg font-black text-gray-500 transition-colors hover:bg-white dark:hover:bg-gray-700">-</button>
                                 <input type="number" min="0" value={qtd}
                                   onChange={e => setSelecao(v => ({ ...v, [s.insumo.id]: Math.max(0, e.target.valueAsNumber || 0) }))}
                                   className="w-14 bg-transparent text-center text-lg font-bold focus:outline-none dark:text-gray-100" />
-                                <button onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: qtd + 1 }))}
+                                <button type="button" onClick={() => setSelecao(v => ({ ...v, [s.insumo.id]: qtd + 1 }))}
                                   className="flex h-8 w-8 items-center justify-center rounded-lg font-black text-gray-500 transition-colors hover:bg-white dark:hover:bg-gray-700">+</button>
                               </div>
                               <select
@@ -503,7 +503,7 @@ export default function Compras() {
                     <option value="NENHUM">{tDynamic('Forçar sem fornecedor')}</option>
                     {fornecedores.map(f => <option key={f.id} value={f.id}>Forçar para: {f.nome}</option>)}
                   </select>
-                  <button
+                  <button type="button"
                     onClick={() => {
                       if (marcados.length === 0) return;
                       const f = fornecedores.find(x => x.id === (fornecedorPedido !== 'AUTO' && fornecedorPedido !== 'NENHUM' ? fornecedorPedido : marcados[0]?.fornecedorId));
@@ -526,11 +526,11 @@ export default function Compras() {
                   >
                     <MessageCircle size={16} /> Enviar via WhatsApp
                   </button>
-                  <button onClick={() => gerarPedido(false)} disabled={salvando}
+                  <button type="button" onClick={() => gerarPedido(false)} disabled={salvando}
                     className="flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-3 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
                     <FileText size={16} /> Gerar pedido
                   </button>
-                  <button onClick={() => gerarPedido(true)} disabled={salvando}
+                  <button type="button" onClick={() => gerarPedido(true)} disabled={salvando}
                     className="flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">
                     {salvando ? <><Loader2 size={16} className="animate-spin" /> Criando...</> : <><Zap size={16} /> {tDynamic('Já comprei — conferir')}</>}
                   </button>
@@ -583,11 +583,11 @@ export default function Compras() {
                       </div>
                       {aberto && (
                         <>
-                          <button onClick={() => setRecebendo(c)}
+                          <button type="button" onClick={() => setRecebendo(c)}
                             className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700">
                             <PackageCheck size={14} /> Conferir
                           </button>
-                          <button onClick={async () => {
+                          <button type="button" onClick={async () => {
                             if (!window.confirm('Cancelar este pedido? O estoque já recebido não é desfeito.')) return;
                             await cancelarCompra(c.id); carregar();
                           }} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20" title="Cancelar pedido">
@@ -607,7 +607,7 @@ export default function Compras() {
       {/* ─── FORNECEDORES ──────────────────────────────────────────────── */}
       {aba === 'fornecedores' && (
         <>
-          <button onClick={() => setEditandoFornecedor(null)}
+          <button type="button" onClick={() => setEditandoFornecedor(null)}
             className="mb-4 flex items-center gap-2 rounded-xl bg-[var(--cor-primaria)] px-5 py-3 text-sm font-bold text-white shadow-md transition-transform hover:scale-[1.02]">
             <Plus size={16} /> Novo fornecedor
           </button>
@@ -646,11 +646,11 @@ export default function Compras() {
                       </div>
                     </div>
                     <div className="flex shrink-0 gap-1">
-                      <button onClick={() => setEditandoFornecedor(f)}
+                      <button type="button" onClick={() => setEditandoFornecedor(f)}
                         className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-500 dark:hover:bg-blue-900/20" title="Editar">
                         <Pencil size={15} />
                       </button>
-                      <button onClick={async () => {
+                      <button type="button" onClick={async () => {
                         if (!window.confirm(`Arquivar ${f.nome}? O histórico de compras dele continua no sistema.`)) return;
                         await arquivarFornecedor(f.id); carregar();
                       }} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20" title="Arquivar">

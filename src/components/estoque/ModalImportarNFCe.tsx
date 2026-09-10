@@ -542,7 +542,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
               </div>
             </div>
           </div>
-          <button onClick={onFechar} className="rounded-full p-2 text-gray-400 hover:bg-white hover:text-gray-600 dark:hover:bg-gray-800">
+          <button type="button" onClick={onFechar} className="rounded-full p-2 text-gray-400 hover:bg-white hover:text-gray-600 dark:hover:bg-gray-800">
             <X size={20} />
           </button>
         </div>
@@ -629,19 +629,19 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                     <span className="ml-2 font-black text-emerald-600 dark:text-emerald-400">{fmt(totalMarcado)}</span>
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    <button
+                    <button type="button"
                       onClick={() => marcarTodos(true)}
                       className="rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1 text-xs opacity-95 font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900"
                     >
                       Marcar todos
                     </button>
-                    <button
+                    <button type="button"
                       onClick={() => marcarTodos(false)}
                       className="rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1 text-xs opacity-95 font-bold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900"
                     >
                       Desmarcar todos
                     </button>
-                    <button
+                    <button type="button"
                       onClick={marcarSomenteConhecidos}
                       title="Deixa marcados só os itens que já existem no seu estoque"
                       className="rounded-lg border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 text-xs opacity-95 font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
@@ -1019,7 +1019,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                 </p>
               )}
             </div>
-            <button
+            <button type="button"
               onClick={confirmarImportacao}
               disabled={salvando || carregandoMatch || marcados.length === 0}
               className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg transition disabled:opacity-50"

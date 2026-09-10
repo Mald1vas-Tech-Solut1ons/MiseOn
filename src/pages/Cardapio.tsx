@@ -405,13 +405,13 @@ export default function Cardapio() {
                   className="rounded-full border border-white/30 bg-black/20 p-2 text-white backdrop-blur-sm transition hover:bg-black/30">
                   <History size={16} />
                 </Link>
-                <button onClick={() => setModalContaAberto(true)} title="Minha Conta"
+                <button type="button" onClick={() => setModalContaAberto(true)} title="Minha Conta"
                   className="flex items-center gap-1.5 rounded-full border border-white/30 bg-black/20 px-3 py-2 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/30">
                   <UserIcon size={14} /> Minha Conta
                 </button>
               </>
             ) : (
-              <button onClick={() => setModalAuthAberto(true)}
+              <button type="button" onClick={() => setModalAuthAberto(true)}
                 className="flex items-center gap-1.5 rounded-full border border-white/30 bg-black/20 px-3 py-2 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/30">
                 <LogIn size={14} /> Entrar
               </button>
@@ -485,7 +485,7 @@ export default function Cardapio() {
         <div className="mx-auto -mt-px max-w-6xl px-4 pt-3 sm:px-6">
           <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400">
             <span className="flex items-center gap-2.5"><PartyPopper size={18} className="shrink-0" /> {tDynamic('Pedido')} #{pedidoMesaSucesso} {tDynamic('enviado! A cozinha já está preparando.')}</span>
-            <button onClick={() => setPedidoMesaSucesso(null)} className="shrink-0"><X size={16} /></button>
+            <button type="button" onClick={() => setPedidoMesaSucesso(null)} className="shrink-0"><X size={16} /></button>
           </div>
         </div>
       )}
@@ -604,7 +604,7 @@ export default function Cardapio() {
             {cupons.map((c) => {
               const copiado = cupomCopiado === c.codigo;
               return (
-                <button
+                <button type="button"
                   key={c.id}
                   onClick={() => {
                     navigator.clipboard.writeText(c.codigo);
@@ -667,14 +667,14 @@ export default function Cardapio() {
           {/* Filtros de categoria */}
           <div className="px-4 py-3 lg:px-0">
             <HorizontalScrollContainer className="py-1">
-              <button
+              <button type="button"
                 onClick={() => setCatAtiva(null)}
                 className={`vitrine-chip shrink-0 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer ${!catAtiva ? 'is-active' : ''}`}
               >
                 Tudo
               </button>
               {categorias.map((c) => (
-                <button
+                <button type="button"
                   key={c.id}
                   onClick={() => setCatAtiva(c.id === catAtiva ? null : c.id)}
                   className={`vitrine-chip shrink-0 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer ${catAtiva === c.id ? 'is-active' : ''}`}
@@ -753,13 +753,13 @@ export default function Cardapio() {
                             <span className="px-1 text-xs font-bold" style={{ color: 'var(--cor-texto)' }}>{fmtQtd(i.quantidade, 'POR_PESO')}</span>
                           ) : (
                             <>
-                              <button onClick={() => i.quantidade > 1 ? setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade - 1 } : x)) : setCarrinho(carrinho.filter((_, y) => y !== idx))} className="transition-colors hover:text-red-500" style={{ color: 'var(--cor-texto-suave)' }}><Minus size={14} /></button>
+                              <button type="button" onClick={() => i.quantidade > 1 ? setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade - 1 } : x)) : setCarrinho(carrinho.filter((_, y) => y !== idx))} className="transition-colors hover:text-red-500" style={{ color: 'var(--cor-texto-suave)' }}><Minus size={14} /></button>
                               <span className="w-4 text-center text-xs font-bold" style={{ color: 'var(--cor-texto)' }}>{i.quantidade}</span>
-                              <button onClick={() => setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade + 1 } : x))} className="transition-colors hover:text-[var(--cor-primaria-texto)]" style={{ color: 'var(--cor-texto-suave)' }}><Plus size={14} /></button>
+                              <button type="button" onClick={() => setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade + 1 } : x))} className="transition-colors hover:text-[var(--cor-primaria-texto)]" style={{ color: 'var(--cor-texto-suave)' }}><Plus size={14} /></button>
                             </>
                           )}
                         </div>
-                        <button onClick={() => setCarrinho(carrinho.filter((_, y) => y !== idx))} className="transition-colors hover:text-red-500" style={{ color: 'var(--cor-texto-fraco)' }}>
+                        <button type="button" onClick={() => setCarrinho(carrinho.filter((_, y) => y !== idx))} className="transition-colors hover:text-red-500" style={{ color: 'var(--cor-texto-fraco)' }}>
                           <Trash2 size={15} />
                         </button>
                       </div>
@@ -775,7 +775,7 @@ export default function Cardapio() {
                 <div className="mt-4 flex items-center justify-between border-t pt-4 font-black" style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto)' }}>
                   <span>Total</span><span>{fmt(totalCarrinho)}</span>
                 </div>
-                <button onClick={() => setCheckoutAberto(true)}
+                <button type="button" onClick={() => setCheckoutAberto(true)}
                   className="vitrine-floating-cart mt-4 w-full rounded-2xl py-3.5 font-bold text-white transition hover:brightness-110">
                   Finalizar pedido
                 </button>
@@ -787,7 +787,7 @@ export default function Cardapio() {
 
       {/* Botão do carrinho — só no mobile */}
       {qtdCarrinho > 0 && (
-        <button
+        <button type="button"
           onClick={() => setCheckoutAberto(true)}
           className="vitrine-floating-cart fixed bottom-4 left-1/2 flex w-[92%] max-w-md -translate-x-1/2 items-center justify-between rounded-3xl px-5 py-3.5 font-semibold text-white lg:hidden"
         >
@@ -1028,7 +1028,7 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
                 )
               )}
             </div>
-            <button onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
+            <button type="button" onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
           </div>
           {produto.descricao && <p className="mt-1 whitespace-pre-line text-sm text-gray-500 dark:text-gray-400">{produto.descricao}</p>}
           {nutricao && (
@@ -1126,7 +1126,7 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
                   <span className="w-5 text-center font-semibold">{qtd}</span>
                   <button type="button" onClick={() => setQtd((q) => q + 1)}><Plus size={16} /></button>
                 </div>
-                <button
+                <button type="button"
                   data-cy="produto-adicionar"
                   disabled={!valido}
                   onClick={() => onAdd({ produto, quantidade: qtd, observacao: obs || undefined, opcoesSelecionadas })}
@@ -1138,7 +1138,7 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
             )}
 
             {isPeso && (
-              <button
+              <button type="button"
                 data-cy="produto-adicionar"
                 disabled={!valido}
                 onClick={() => onAdd({ produto, quantidade: qtd, observacao: obs || undefined, opcoesSelecionadas })}
@@ -1192,7 +1192,7 @@ const MaisPedidoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: 
   const pctDesconto = temDesconto ? Math.round((((p.preco_original || 0) - p.preco) / (p.preco_original || 1)) * 100) : 0;
 
   return (
-    <button
+    <button type="button"
       onClick={() => p.tem_estoque !== false && onClick()}
       disabled={p.tem_estoque === false}
       className={`vitrine-card relative flex w-56 sm:w-64 shrink-0 flex-col justify-between rounded-[28px] p-4 text-left group transition-all ${
@@ -1260,7 +1260,7 @@ const ProdutoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: Nut
   const pctDesconto = temDesconto ? Math.round((((p.preco_original || 0) - p.preco) / (p.preco_original || 1)) * 100) : 0;
 
   return (
-    <button
+    <button type="button"
       onClick={() => p.tem_estoque !== false && onClick()}
       disabled={p.tem_estoque === false}
       className={`vitrine-card relative flex w-full items-stretch justify-between gap-4 rounded-[28px] p-4 text-left group transition-all ${
@@ -1574,7 +1574,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-black" style={{ color: 'var(--cor-primaria-texto)' }}>{fmt(info.total)}</span>
-            <button onClick={onFechar} className="rounded-full p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"><X size={18} /></button>
+            <button type="button" onClick={onFechar} className="rounded-full p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"><X size={18} /></button>
           </div>
         </div>
 
@@ -1728,7 +1728,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
               <X size={15} className="mt-0.5 shrink-0" /> <span>{erro}</span>
             </div>
           )}
-          <button ref={pagarRef} onClick={pagar} disabled={processando}
+          <button type="button" ref={pagarRef} onClick={pagar} disabled={processando}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3.5 text-[15px] font-black text-white shadow-lg shadow-[var(--cor-primaria)]/30 transition-all hover:brightness-110 focus-visible:ring-4 focus-visible:ring-[var(--cor-primaria)]/40 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
             {processando ? <><Loader2 size={17} className="animate-spin" /> Processando…</> : <><Lock size={15} /> Pagar {fmt(info.total)}</>}
           </button>

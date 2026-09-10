@@ -593,7 +593,7 @@ export default function Estoque() {
          <div className="flex items-center gap-3">
             <h2 className="font-black text-2xl dark:text-gray-100">{tDynamic('Estoque Geral')}</h2>
              {isBuffet && (
-               <button
+               <button type="button"
                  onClick={() => setModalBuffetAberto(true)}
                  className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md hover:brightness-110 transition"
                >
@@ -602,11 +602,11 @@ export default function Estoque() {
              )}
              {tab === 'insumos' && (
                <>
-                 <button onClick={() => setInventarioAberto(true)}
+                 <button type="button" onClick={() => setInventarioAberto(true)}
                    className="flex items-center gap-1.5 rounded-xl border border-purple-200 px-3.5 py-1.5 text-xs font-bold text-purple-600 transition-colors hover:bg-purple-50 dark:border-purple-900/50 dark:text-purple-400 dark:hover:bg-purple-900/20">
                    <ClipboardCheck size={15} /> {tDynamic('Inventário')}
                  </button>
-                 <button onClick={() => setTransformando(null)}
+                 <button type="button" onClick={() => setTransformando(null)}
                    className="flex items-center gap-1.5 rounded-xl border border-orange-200 px-3.5 py-1.5 text-xs font-bold text-orange-600 transition-colors hover:bg-orange-50 dark:border-orange-900/50 dark:text-orange-400 dark:hover:bg-orange-900/20">
                    <Scissors size={15} /> {tDynamic('Monta / Desmonta')}
                  </button>
@@ -614,9 +614,9 @@ export default function Estoque() {
              )}
          </div>
          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shadow-inner">
-           <button data-tour="tour-estoque-aba-insumos" onClick={() => setTab('insumos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'insumos' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Matérias-Primas')}</button>
-           <button data-tour="tour-estoque-aba-3d" onClick={() => setTab('custo3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'custo3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Custo 3D')}</button>
-           <button data-tour="tour-estoque-aba-rastreio3d" onClick={() => setTab('rastreio3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'rastreio3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-emerald-600 dark:text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Rastreio 3D')}</button>
+           <button type="button" data-tour="tour-estoque-aba-insumos" onClick={() => setTab('insumos')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'insumos' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Matérias-Primas')}</button>
+           <button type="button" data-tour="tour-estoque-aba-3d" onClick={() => setTab('custo3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'custo3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Custo 3D')}</button>
+           <button type="button" data-tour="tour-estoque-aba-rastreio3d" onClick={() => setTab('rastreio3d')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${tab === 'rastreio3d' ? 'bg-white dark:bg-gray-900 shadow-sm text-emerald-600 dark:text-emerald-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{tDynamic('Rastreio 3D')}</button>
          </div>
       </div>
 
@@ -691,7 +691,7 @@ export default function Estoque() {
               <p className="flex items-start gap-2 text-sm font-medium text-emerald-800 dark:text-emerald-400">
                 <CheckCircle2 size={16} className="mt-0.5 shrink-0" /> {avisoEstoque}
               </p>
-              <button onClick={() => setAvisoEstoque(null)} className="shrink-0 text-xs font-bold text-emerald-700 hover:underline dark:text-emerald-500">Fechar</button>
+              <button type="button" onClick={() => setAvisoEstoque(null)} className="shrink-0 text-xs font-bold text-emerald-700 hover:underline dark:text-emerald-500">Fechar</button>
             </div>
           )}
 
@@ -723,7 +723,7 @@ export default function Estoque() {
           </p>
         </div>
         <div className="shrink-0 flex flex-wrap items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setModalScannerAberto(true)}
             className="flex items-center gap-2 bg-white text-orange-600 hover:bg-orange-50 font-black text-sm px-5 py-3 rounded-xl shadow-md transition-all hover:scale-105"
           >
@@ -775,7 +775,7 @@ export default function Estoque() {
              </div>
            </div>
            {editando && (
-             <button onClick={cancelarEdicao} className="text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+             <button type="button" onClick={cancelarEdicao} className="text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                {tDynamic('Cancelar Edição')}
              </button>
            )}
@@ -948,7 +948,7 @@ export default function Estoque() {
                                       ))}
                                     </select>
                                     {index > 0 && (
-                                       <button onClick={() => setPassosRendimento(passosRendimento.filter(p => p.id !== passo.id))} className="p-2 text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg transition-colors">
+                                       <button type="button" onClick={() => setPassosRendimento(passosRendimento.filter(p => p.id !== passo.id))} className="p-2 text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg transition-colors">
                                           <Trash2 size={16} />
                                        </button>
                                     )}
@@ -968,7 +968,7 @@ export default function Estoque() {
                            );
                         })}
                         
-                        <button onClick={() => setPassosRendimento([...passosRendimento, { id: Math.random().toString(), rendimento: '1', unidade: 'un' }])} className="text-xs opacity-95 font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline mt-1">
+                        <button type="button" onClick={() => setPassosRendimento([...passosRendimento, { id: Math.random().toString(), rendimento: '1', unidade: 'un' }])} className="text-xs opacity-95 font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline mt-1">
                            <Plus size={12} /> Adicionar quebra
                         </button>
 
@@ -1027,7 +1027,7 @@ export default function Estoque() {
            )}
         </div>
         
-        <button onClick={criar} disabled={salvando || !nome.trim()}
+        <button type="button" onClick={criar} disabled={salvando || !nome.trim()}
           className={`mt-5 w-full flex items-center justify-center gap-1 rounded-xl py-3.5 text-sm font-bold text-white shadow-md hover:scale-[1.01] transition-transform disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed ${editando ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--cor-primaria)]'}`}>
           {salvando ? (
             <span className="flex items-center gap-1.5"><Loader2 size={16} className="animate-spin" /> Salvando…</span>
@@ -1054,7 +1054,7 @@ export default function Estoque() {
          {/* Filtros de Categoria */}
          <div className="flex gap-2 overflow-x-auto hide-scrollbar">
             {['Tudo', ...categoriasUnicas].map(cat => (
-              <button key={cat} onClick={() => setFiltroCategoria(cat === 'Tudo' ? null : cat)} className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-colors ${filtroCategoria === cat || (!filtroCategoria && cat === 'Tudo') ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 shadow-md' : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 shadow-sm'}`}>
+              <button type="button" key={cat} onClick={() => setFiltroCategoria(cat === 'Tudo' ? null : cat)} className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-colors ${filtroCategoria === cat || (!filtroCategoria && cat === 'Tudo') ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 shadow-md' : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 shadow-sm'}`}>
                 {cat}
               </button>
             ))}
@@ -1118,7 +1118,7 @@ export default function Estoque() {
                     {/* Atalhos de entrada aprendidos: clicáveis porque um
                         rendimento digitado errado precisa ter volta. */}
                     {(i.detalhes_rendimento?.equivalencias ?? []).map((e) => (
-                      <button key={e.unidade} onClick={() => removerEquivalencia(i, e.unidade)}
+                      <button type="button" key={e.unidade} onClick={() => removerEquivalencia(i, e.unidade)}
                         title="Remover essa conversão de entrada"
                         className="text-xs opacity-80 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50 px-1.5 py-0.5 rounded hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-colors">
                         entrada: 1 {e.unidade} ➔ {e.rende_qtd} {e.rende_unidade} ✕
@@ -1128,10 +1128,10 @@ export default function Estoque() {
                 )}
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <button onClick={() => setRaioXInsumo(i)} className="rounded-lg p-2 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" title="Raio-X (Análise de Lotes e Gráficos)">
+                <button type="button" onClick={() => setRaioXInsumo(i)} className="rounded-lg p-2 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" title="Raio-X (Análise de Lotes e Gráficos)">
                    <BarChart3 size={16} />
                 </button>
-                <button onClick={() => setTransformando(i)} className="rounded-lg p-2 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-colors" title="Desmontar em outros insumos (ex: peça em fatias)">
+                <button type="button" onClick={() => setTransformando(i)} className="rounded-lg p-2 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-colors" title="Desmontar em outros insumos (ex: peça em fatias)">
                    <Scissors size={16} />
                 </button>
                 {/* Álcool em gel, detergente, uniforme... não têm tabela nutricional —
@@ -1139,7 +1139,7 @@ export default function Estoque() {
                     estado visual diz, sem abrir nada: pronto, pendente de revisão,
                     ou nunca tocado — a lacuna é sempre visível, nunca silenciosa. */}
                 {ehTipoComNutricao(i.tipo_item) && (
-                  <button onClick={() => setNutricaoInsumo(i)}
+                  <button type="button" onClick={() => setNutricaoInsumo(i)}
                     title={
                       statusNutricao[i.id] === 'completo' ? 'Nutrição revisada'
                       : statusNutricao[i.id] === 'pendente' ? 'Nutrição aguardando revisão'
@@ -1156,11 +1156,11 @@ export default function Estoque() {
                      )}
                   </button>
                 )}
-                <button onClick={() => abrirEntrada(i)}
+                <button type="button" onClick={() => abrirEntrada(i)}
                   className="rounded-lg border px-3 py-1.5 text-xs font-bold text-green-700 dark:text-green-400 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">+ Entrada</button>
                 <div className="flex items-center border-l dark:border-gray-700 pl-2 ml-1 space-x-1">
-                   <button onClick={() => iniciarEdicao(i)} className="rounded-lg p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Editar Insumo"><Pencil size={16} /></button>
-                   <button onClick={() => toggleAtivo(i)} className="rounded-lg p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Excluir/Arquivar Insumo"><Trash2 size={16} /></button>
+                   <button type="button" onClick={() => iniciarEdicao(i)} className="rounded-lg p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Editar Insumo"><Pencil size={16} /></button>
+                   <button type="button" onClick={() => toggleAtivo(i)} className="rounded-lg p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Excluir/Arquivar Insumo"><Trash2 size={16} /></button>
                 </div>
               </div>
             </div>
@@ -1170,7 +1170,7 @@ export default function Estoque() {
 
       {inativosBrutos.length > 0 && (
         <div className="mt-8">
-          <button onClick={() => setMostrarInativos((v) => !v)} className="text-xs font-medium text-gray-400 underline">
+          <button type="button" onClick={() => setMostrarInativos((v) => !v)} className="text-xs font-medium text-gray-400 underline">
             {mostrarInativos ? 'Ocultar' : 'Mostrar'} inativos ({inativosBrutos.length})
           </button>
           {mostrarInativos && (
@@ -1178,7 +1178,7 @@ export default function Estoque() {
               {inativosBrutos.map((i) => (
                 <div key={i.id} className="flex items-center justify-between rounded-xl bg-white dark:bg-gray-900 p-3 opacity-60 shadow-sm border border-gray-100 dark:border-gray-800">
                   <p className="text-sm font-medium dark:text-gray-100">{i.nome}</p>
-                  <button onClick={() => toggleAtivo(i)} className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-400 dark:border-gray-700">
+                  <button type="button" onClick={() => toggleAtivo(i)} className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-400 dark:border-gray-700">
                     <ArchiveRestore size={13} /> Reativar
                   </button>
                 </div>
@@ -1276,7 +1276,7 @@ export default function Estoque() {
                    value={entrada.validade || ''} onChange={(e) => setEntrada({ ...entrada, validade: e.target.value })} />
                </label>
             </div>
-            <button onClick={registrarEntrada} disabled={!(qtdEntradaBase > 0)}
+            <button type="button" onClick={registrarEntrada} disabled={!(qtdEntradaBase > 0)}
               className="mt-5 w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
               Registrar Estoque
             </button>

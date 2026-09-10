@@ -184,7 +184,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
             </Link>
           </div>
 
-          <button
+          <button type="button"
             onClick={() => setMenuAberto((a) => !a)}
             className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden dark:text-gray-300 dark:hover:bg-white/10"
           >
@@ -507,7 +507,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
               const aberto = faqAberto === idx;
               return (
                 <div key={idx} className="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-white/10 dark:bg-white/5">
-                  <button
+                  <button type="button"
                     onClick={() => setFaqAberto(aberto ? null : idx)}
                     className="flex w-full items-center justify-between p-5 text-left font-['Sora'] font-bold text-gray-900 dark:text-white"
                   >

@@ -157,15 +157,15 @@ export function ModalReposicaoBuffet({
               <p className="text-xs text-slate-400">{tDynamic('Transferências e apuração de sobras limpas')}</p>
             </div>
           </div>
-          <button onClick={onCancelar} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+          <button type="button" onClick={onCancelar} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
             <X size={20} />
           </button>
         </div>
 
         {/* Abas */}
         <div className="flex bg-slate-950 p-1 rounded-xl shadow-inner">
-           <button onClick={() => setAba('ENVIAR')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${aba === 'ENVIAR' ? 'bg-slate-800 text-orange-400' : 'text-slate-500 hover:text-slate-300'}`}>Enviar p/ Pista</button>
-           <button onClick={() => setAba('RECOLHER')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${aba === 'RECOLHER' ? 'bg-slate-800 text-blue-400' : 'text-slate-500 hover:text-slate-300'}`}>Recolher (Sobra Limpa)</button>
+           <button type="button" onClick={() => setAba('ENVIAR')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${aba === 'ENVIAR' ? 'bg-slate-800 text-orange-400' : 'text-slate-500 hover:text-slate-300'}`}>Enviar p/ Pista</button>
+           <button type="button" onClick={() => setAba('RECOLHER')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${aba === 'RECOLHER' ? 'bg-slate-800 text-blue-400' : 'text-slate-500 hover:text-slate-300'}`}>Recolher (Sobra Limpa)</button>
         </div>
 
         {erro && (
@@ -204,8 +204,8 @@ export function ModalReposicaoBuffet({
             </div>
             
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-              <button onClick={onCancelar} className="rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 transition">Cancelar</button>
-              <button onClick={confirmarEnvio} disabled={salvando} className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg hover:brightness-110 transition disabled:opacity-50">
+              <button type="button" onClick={onCancelar} className="rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 transition">Cancelar</button>
+              <button type="button" onClick={confirmarEnvio} disabled={salvando} className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg hover:brightness-110 transition disabled:opacity-50">
                 {salvando ? <RefreshCw className="h-4 w-4 animate-spin" /> : <><Check size={16} /><span>Confirmar Envio Pista</span></>}
               </button>
             </div>
@@ -230,7 +230,7 @@ export function ModalReposicaoBuffet({
                            <p className="text-sm font-bold text-slate-200">{cuba.preparo?.nome}</p>
                            <p className="text-xs opacity-90 text-slate-400 flex items-center gap-1 mt-0.5"><Clock size={10} /> Enviado às {new Date(cuba.criado_em).toLocaleTimeString('pt-BR')} · {cuba.peso_reposto_kg} {cuba.preparo?.unidade_medida}</p>
                          </div>
-                         <button onClick={() => setCubaSendoFechada(cuba)} className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                         <button type="button" onClick={() => setCubaSendoFechada(cuba)} className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
                            Recolher
                          </button>
                        </div>
@@ -263,8 +263,8 @@ export function ModalReposicaoBuffet({
                  </div>
                  
                  <div className="flex items-center justify-end gap-3 pt-5">
-                   <button onClick={() => setCubaSendoFechada(null)} className="text-xs text-slate-400 hover:text-slate-200 font-semibold">Voltar</button>
-                   <button onClick={confirmarRecolhimento} disabled={salvando} className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg hover:bg-blue-500 transition disabled:opacity-50">
+                   <button type="button" onClick={() => setCubaSendoFechada(null)} className="text-xs text-slate-400 hover:text-slate-200 font-semibold">Voltar</button>
+                   <button type="button" onClick={confirmarRecolhimento} disabled={salvando} className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg hover:bg-blue-500 transition disabled:opacity-50">
                      {salvando ? <RefreshCw className="h-4 w-4 animate-spin" /> : <span>Encerrar Cuba</span>}
                    </button>
                  </div>

@@ -39,7 +39,7 @@ export function Modal({
           <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-[var(--cor-borda)] bg-[var(--cor-card)]/95 backdrop-blur px-5 py-4">
             <h2 className="font-bold text-base text-[var(--cor-texto)] dark:text-[var(--cor-texto-claro)]">{titulo}</h2>
             {onFechar && (
-              <button
+              <button type="button"
                 onClick={onFechar}
                 aria-label="Fechar"
                 className="rounded-full p-1.5 text-[var(--cor-texto-fraco)] hover:bg-[var(--cor-destaque)] hover:text-[var(--cor-texto)] transition-colors"

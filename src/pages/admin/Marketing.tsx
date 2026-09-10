@@ -46,7 +46,7 @@ export default function Marketing() {
           { id: 'emails', label: 'E-mails Transacionais', icon: Mail },
           { id: 'crm', label: 'CRM & RFM', icon: Users },
         ].map(({ id, label, icon: IconComponent }) => (
-          <button
+          <button type="button"
             key={id}
             onClick={() => setTab(id as Tab)}
             className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all ${
@@ -104,7 +104,7 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
           <h3 className="text-sm font-bold text-gray-900 dark:text-white">{tDynamic('Cupons de Desconto')}</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Ofereça incentivos estratégicos para primeira compra ou pedidos mínimos.')}</p>
         </div>
-        <button
+        <button type="button"
           onClick={() => setEditando('novo')}
           className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110 transition-all"
         >
@@ -143,13 +143,13 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
             </p>
 
             <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3 gap-2">
-              <button
+              <button type="button"
                 onClick={() => setEditando(c)}
                 className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
               >
                 Editar
               </button>
-              <button
+              <button type="button"
                 onClick={() => toggleAtivo(c)}
                 className={`flex-1 rounded-xl py-1.5 text-xs font-bold transition ${
                   c.ativo === false
@@ -159,7 +159,7 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
               >
                 {c.ativo === false ? 'Ativar' : 'Pausar'}
               </button>
-              <button
+              <button type="button"
                 onClick={() => excluir(c)}
                 className="rounded-xl border border-red-200 dark:border-red-900/50 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
               >
@@ -233,7 +233,7 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
       <div className="sheet max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white dark:bg-gray-900 dark:border-gray-800 p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
           <h3 className="text-base font-bold dark:text-white">{cupom ? 'Editar cupom' : 'Criar novo cupom'}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
         </div>
 
         <div className="space-y-3 text-sm">
@@ -296,7 +296,7 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
 
         {erro && <p className="text-xs font-bold text-red-500">{erro}</p>}
 
-        <button onClick={salvar} className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">
+        <button type="button" onClick={salvar} className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">
           <Save size={16} /> Salvar Cupom
         </button>
       </div>
@@ -357,11 +357,11 @@ function BannersTab({ lojaId }: { lojaId: string }) {
                 <p className="truncate text-xs text-gray-400">{b.link_redirecionamento || 'Sem link externo'}</p>
               </div>
               <div className="flex flex-col">
-                <button disabled={idx === 0} onClick={() => mover(b, -1)} className="text-gray-400 hover:text-gray-600 disabled:opacity-20"><ChevronUp size={16} /></button>
-                <button disabled={idx === banners.length - 1} onClick={() => mover(b, 1)} className="text-gray-400 hover:text-gray-600 disabled:opacity-20"><ChevronDown size={16} /></button>
+                <button type="button" disabled={idx === 0} onClick={() => mover(b, -1)} className="text-gray-400 hover:text-gray-600 disabled:opacity-20"><ChevronUp size={16} /></button>
+                <button type="button" disabled={idx === banners.length - 1} onClick={() => mover(b, 1)} className="text-gray-400 hover:text-gray-600 disabled:opacity-20"><ChevronDown size={16} /></button>
               </div>
-              <button onClick={() => toggleAtivo(b)} className="text-xs font-bold text-gray-500 dark:text-gray-400 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg">{b.is_ativo === false ? 'Inativo' : 'Ativo'}</button>
-              <button onClick={() => excluir(b)} className="rounded-xl border border-red-200 p-2 text-red-500 hover:bg-red-50"><Trash2 size={14} /></button>
+              <button type="button" onClick={() => toggleAtivo(b)} className="text-xs font-bold text-gray-500 dark:text-gray-400 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg">{b.is_ativo === false ? 'Inativo' : 'Ativo'}</button>
+              <button type="button" onClick={() => excluir(b)} className="rounded-xl border border-red-200 p-2 text-red-500 hover:bg-red-50"><Trash2 size={14} /></button>
             </div>
           ))}
           {banners.length === 0 && <p className="py-8 text-center text-xs text-gray-400">{tDynamic('Nenhum banner cadastrado no carrossel.')}</p>}
@@ -372,7 +372,7 @@ function BannersTab({ lojaId }: { lojaId: string }) {
           <ImageUpload lojaId={lojaId} pasta="banners" value={novo.imagem_url} onChange={(u) => setNovo({ ...novo, imagem_url: u })} aspecto="aspect-[2/1]" />
           <input value={novo.titulo} onChange={(e) => setNovo({ ...novo, titulo: e.target.value })} placeholder="Título promocional (opcional)" className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none" />
           <input value={novo.link_redirecionamento} onChange={(e) => setNovo({ ...novo, link_redirecionamento: e.target.value })} placeholder="Link de redirecionamento (opcional)" className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none" />
-          <button onClick={criar} className="w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-xs font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">Adicionar Banner</button>
+          <button type="button" onClick={criar} className="w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-xs font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">Adicionar Banner</button>
         </div>
       </div>
     </div>
@@ -465,7 +465,7 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
 
         {msg && <p className={`text-xs font-bold ${msg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
 
-        <button onClick={salvar} disabled={salvando || (pct === pctOriginal && diasExpiracao === diasOriginal)}
+        <button type="button" onClick={salvar} disabled={salvando || (pct === pctOriginal && diasExpiracao === diasOriginal)}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 disabled:opacity-40">
           <Save size={16} /> {salvando ? 'Salvando…' : 'Salvar Regra de Cashback & Expiração'}
         </button>
@@ -585,7 +585,7 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        <button
+        <button type="button"
           onClick={() => setSubtab('pix')}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
             subtab === 'pix' ? 'bg-[var(--cor-primaria)] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
@@ -593,7 +593,7 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
         >
           <QrCode size={14} /> Pix Pendentes ({pixPendentes.length})
         </button>
-        <button
+        <button type="button"
           onClick={() => setSubtab('carrinhos')}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
             subtab === 'carrinhos' ? 'bg-[var(--cor-primaria)] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
@@ -617,7 +617,7 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
                 <p className="text-sm font-bold text-gray-900 dark:text-white">Pedido #{p.numero} · {p.identificador_cliente}</p>
                 <p className="text-xs text-gray-400">{fmt(Number(p.valor_total))}</p>
               </div>
-              <button onClick={() => enviarPix(p)} disabled={!p.telefone_contato} className="flex items-center gap-1.5 rounded-xl border border-green-200 bg-green-50 dark:bg-green-950/40 px-3 py-2 text-xs font-bold text-green-700 dark:text-green-300 hover:bg-green-100">
+              <button type="button" onClick={() => enviarPix(p)} disabled={!p.telefone_contato} className="flex items-center gap-1.5 rounded-xl border border-green-200 bg-green-50 dark:bg-green-950/40 px-3 py-2 text-xs font-bold text-green-700 dark:text-green-300 hover:bg-green-100">
                 <MessageCircle size={14} /> Enviar Lembrete Pix
               </button>
             </div>
@@ -638,10 +638,10 @@ function RecuperacaoTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => enviarCarrinho(c)} disabled={!c.telefone} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50">
+                <button type="button" onClick={() => enviarCarrinho(c)} disabled={!c.telefone} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50">
                   <MessageCircle size={14} /> {tDynamic('Falar no WhatsApp')}
                 </button>
-                <button onClick={() => gerarCupomEEnviar(c)} disabled={(!c.telefone && !c.email) || gerandoCupom === c.id} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] py-2 text-xs font-bold text-white shadow-sm hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45">
+                <button type="button" onClick={() => gerarCupomEEnviar(c)} disabled={(!c.telefone && !c.email) || gerandoCupom === c.id} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] py-2 text-xs font-bold text-white shadow-sm hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45">
                   <Gift size={14} /> {gerandoCupom === c.id
                     ? 'Gerando…'
                     : c.email && c.telefone
@@ -740,7 +740,7 @@ function AnunciosTab({ lojaId }: { lojaId: string }) {
 
         {msg && <p className={`text-xs font-bold ${msg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>}
 
-        <button onClick={salvar} disabled={salvando} className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">
+        <button type="button" onClick={salvar} disabled={salvando} className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">
           <Save size={16} /> {salvando ? 'Salvando…' : 'Salvar Pixels de Rastreamento'}
         </button>
       </div>
@@ -790,7 +790,7 @@ function DisparosTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string })
               { id: 'vips', label: `Clientes VIPs (+5 pedidos) (${clientes.filter(c => c.total_pedidos >= 5).length})` },
               { id: 'inativos', label: `Inativos (+30 dias sem pedir) (${clientes.filter(c => !c.ultimo_pedido || c.ultimo_pedido < trintaDiasAtras).length})` },
             ].map(({ id, label }) => (
-              <button
+              <button type="button"
                 key={id}
                 onClick={() => setSegmento(id as any)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
@@ -825,7 +825,7 @@ function DisparosTab({ lojaId, lojaSlug }: { lojaId: string; lojaSlug: string })
                 <p className="text-xs font-bold text-gray-900 dark:text-white">{c.nome || 'Cliente'}</p>
                 <p className="text-xs opacity-95 text-gray-400">{c.telefone}</p>
               </div>
-              <button
+              <button type="button"
                 onClick={() => enviarWhatsApp(c)}
                 className="flex items-center gap-1 rounded-xl border border-green-200 bg-green-50 dark:bg-green-950/40 px-3 py-1.5 text-xs font-bold text-green-700 dark:text-green-300 hover:bg-green-100"
               >
@@ -921,7 +921,7 @@ function EmailsTab({ lojaId }: { lojaId: string }) {
                 onChange={(e) => setEmailTeste(e.target.value)}
                 className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2.5 text-sm dark:text-white"
               />
-              <button
+              <button type="button"
                 onClick={enviarTeste}
                 disabled={enviando}
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-2.5 text-xs font-bold text-white shadow-md hover:brightness-110 disabled:opacity-50"

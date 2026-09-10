@@ -665,7 +665,7 @@ export default function KDS() {
                 <Clock size={12} />
                 {minTotal >= 0 ? `${Math.floor(minTotal)}m` : `em ${Math.ceil(-minTotal)}m`}
               </div>
-              <button
+              <button type="button"
                 onClick={(e) => { e.stopPropagation(); toggleCardExpandido(p.id); }}
                 className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition"
               >
@@ -711,7 +711,7 @@ export default function KDS() {
             </div>
 
             {operadorAtivo && opAtribuidoId !== operadorAtivo && !finalizadoCozinha && (
-              <button
+              <button type="button"
                 onClick={() => atribuirPedidoAOperador(p.id, operadorAtivo)}
                 className="text-[10px] font-bold uppercase tracking-wider text-orange-400 hover:text-orange-300 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-md transition"
               >
@@ -845,7 +845,7 @@ export default function KDS() {
 
         <div className="mt-3 flex items-center gap-2">
           {!finalizadoCozinha ? (
-            <button
+            <button type="button"
               onClick={() => avancar(p, etapaIndex)}
               className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 py-2.5 px-3 text-xs font-black uppercase tracking-wider text-slate-950 shadow-md shadow-orange-500/20 transition active:scale-[0.97] hover:brightness-110"
             >
@@ -857,7 +857,7 @@ export default function KDS() {
               <span className="flex items-center gap-1">
                 <Check size={14} /> {tDynamic('Concluído')}
               </span>
-              <button
+              <button type="button"
                 onClick={() => arquivarPedido(p.id)}
                 className="px-2 py-0.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-[11px] font-extrabold uppercase transition"
               >
@@ -945,21 +945,21 @@ export default function KDS() {
 
           {/* Controle de Zoom de Célula Estilo Trello Pro / Miro Board */}
           <div className="flex items-center gap-1 rounded-xl bg-black/40 border border-white/10 p-1">
-            <button
+            <button type="button"
               onClick={() => alterarZoom(-10)}
               title={tDynamic('Reduzir Zoom das Células (-10%)')}
               className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition"
             >
               <ZoomOut size={14} />
             </button>
-            <button
+            <button type="button"
               onClick={resetarZoom}
               title={tDynamic('Resetar Zoom para 100%')}
               className="px-2 py-0.5 rounded-md font-mono text-xs font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/20 transition"
             >
               {nivelZoom}%
             </button>
-            <button
+            <button type="button"
               onClick={() => alterarZoom(+10)}
               title={tDynamic('Aumentar Zoom das Células (+10%)')}
               className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition"
@@ -970,7 +970,7 @@ export default function KDS() {
 
           {/* Alternador de Modo de Layout: Orgânico | Grade | Kanban Trello */}
           <div className="flex items-center gap-1 rounded-xl bg-black/40 border border-white/10 p-1">
-            <button
+            <button type="button"
               onClick={() => alterarModoLayout('ORGANICO')}
               title={tDynamic('Layout Orgânico (Auto-collapse e largura flexível)')}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${modoLayout === 'ORGANICO'
@@ -980,7 +980,7 @@ export default function KDS() {
             >
               <Sparkles size={13} /> {tDynamic('Orgânico')}
             </button>
-            <button
+            <button type="button"
               onClick={() => alterarModoLayout('GRADE')}
               title={tDynamic('Modo Grade (Otimizado para Tablet e Telas Compactas)')}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${modoLayout === 'GRADE'
@@ -990,7 +990,7 @@ export default function KDS() {
             >
               <LayoutGrid size={13} /> {tDynamic('Grade')}
             </button>
-            <button
+            <button type="button"
               onClick={() => alterarModoLayout('KANBAN_TRELLO')}
               title={tDynamic('Modo Trello (Colunas Fixas Clássicas)')}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${modoLayout === 'KANBAN_TRELLO'
@@ -1004,21 +1004,21 @@ export default function KDS() {
 
           {/* Alternador de Densidade dos Cards */}
           <div className="hidden sm:flex items-center gap-1 rounded-xl bg-black/40 border border-white/10 p-1">
-            <button
+            <button type="button"
               onClick={() => alterarDensidadeCards('COMPACTO')}
               className={`px-2 py-1 rounded-lg text-xs font-bold transition ${densidadeCards === 'COMPACTO' ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
                 }`}
             >
               {tDynamic('Compacto')}
             </button>
-            <button
+            <button type="button"
               onClick={() => alterarDensidadeCards('PADRAO')}
               className={`px-2 py-1 rounded-lg text-xs font-bold transition ${densidadeCards === 'PADRAO' ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
                 }`}
             >
               {tDynamic('Padrão')}
             </button>
-            <button
+            <button type="button"
               onClick={() => alterarDensidadeCards('DETALHADO')}
               className={`px-2 py-1 rounded-lg text-xs font-bold transition ${densidadeCards === 'DETALHADO' ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
                 }`}
@@ -1029,21 +1029,21 @@ export default function KDS() {
 
           {/* Seletor de Estação: Todas vs Cozinha vs Bar */}
           <div className="flex items-center gap-1 rounded-xl bg-black/40 border border-white/10 p-1">
-            <button
+            <button type="button"
               onClick={() => setFiltroEstacao('TODAS')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${filtroEstacao === 'TODAS' ? 'bg-orange-500 text-slate-950' : 'text-slate-400 hover:text-white'
                 }`}
             >
               {tDynamic('Todas')}
             </button>
-            <button
+            <button type="button"
               onClick={() => setFiltroEstacao('COZINHA')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${filtroEstacao === 'COZINHA' ? 'bg-orange-500 text-slate-950' : 'text-slate-400 hover:text-white'
                 }`}
             >
               🍳 {tDynamic('Cozinha')}
             </button>
-            <button
+            <button type="button"
               onClick={() => setFiltroEstacao('BAR')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${filtroEstacao === 'BAR' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
                 }`}
@@ -1053,7 +1053,7 @@ export default function KDS() {
           </div>
 
           {/* Gaveta de Concluídos */}
-          <button
+          <button type="button"
             onClick={() => setModalConcluidosAberto(true)}
             className="relative flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 transition hover:bg-emerald-500/20"
           >
@@ -1072,14 +1072,14 @@ export default function KDS() {
             </div>
           )}
 
-          <button
+          <button type="button"
             onClick={() => setModalMetricasAberto(true)}
             className="flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs font-bold text-blue-400 transition hover:bg-blue-500/20"
           >
             <BarChart2 size={14} /> {tDynamic('Indicadores')}
           </button>
 
-          <button
+          <button type="button"
             onClick={() => setModalConfigAberto(true)}
             className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-300 transition hover:text-white hover:bg-white/10"
           >
@@ -1087,7 +1087,7 @@ export default function KDS() {
           </button>
 
           {/* Botão de Tela Cheia Imersiva (Atalho F11) */}
-          <button
+          <button type="button"
             onClick={toggleFullscreen}
             title={tDynamic('Tela cheia imersiva (F11)')}
             className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-extrabold transition shadow-md ${emFullscreen
@@ -1112,7 +1112,7 @@ export default function KDS() {
         <span className="shrink-0 font-['JetBrains_Mono'] text-xs opacity-90 font-bold uppercase tracking-[0.2em] text-[#6C7A96]">{tDynamic('Na cozinha:')}</span>
         <HorizontalScrollContainer className="flex-1 min-w-0 pb-1" showGradients={false}>
           {operadores.map((op) => (
-            <button key={op.user_id} onClick={() => escolherOperador(op.user_id)}
+            <button type="button" key={op.user_id} onClick={() => escolherOperador(op.user_id)}
               className={`shrink-0 rounded-full border px-3 py-1 text-xs font-bold transition flex items-center gap-1.5 ${operadorAtivo === op.user_id
                   ? 'border-orange-500 bg-orange-500 text-slate-950 font-black shadow-md'
                   : 'border-white/10 bg-white/5 text-white/60 hover:text-white'
@@ -1286,7 +1286,7 @@ export default function KDS() {
                       <span className="rounded-full px-2.5 py-0.5 font-['Sora'] text-xs font-black text-white shadow-sm" style={{ background: etapa.cor }}>
                         {listaPedidos.length}
                       </span>
-                      <button
+                      <button type="button"
                         onClick={() => toggleColunaRecolhida(etapa.id)}
                         title={tDynamic('Recolher coluna')}
                         className="p-1 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition ml-1"
@@ -1328,7 +1328,7 @@ export default function KDS() {
                   <p className="text-xs text-slate-400">{tDynamic('Pedidos finalizados e tirados do fluxo principal de produção.')}</p>
                 </div>
               </div>
-              <button onClick={() => setModalConcluidosAberto(false)} className="rounded-lg p-1 text-slate-400 hover:text-white">
+              <button type="button" onClick={() => setModalConcluidosAberto(false)} className="rounded-lg p-1 text-slate-400 hover:text-white">
                 <X size={20} />
               </button>
             </div>
@@ -1353,7 +1353,7 @@ export default function KDS() {
                       {tDynamic('Entregue')}
                     </span>
                     {pedidosArquivadosIds.has(p.id) && (
-                      <button
+                      <button type="button"
                         onClick={() => desarquivarPedido(p.id)}
                         className="rounded-xl border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition"
                       >
@@ -1372,7 +1372,7 @@ export default function KDS() {
             </div>
 
             <div className="mt-6 border-t border-white/10 pt-4 text-right">
-              <button
+              <button type="button"
                 onClick={() => setModalConcluidosAberto(false)}
                 className="rounded-xl bg-slate-800 px-6 py-2 text-sm font-bold text-white hover:bg-slate-700"
               >
@@ -1392,7 +1392,7 @@ export default function KDS() {
                 <BarChart2 className="text-blue-400" size={22} />
                 <h3 className="font-['Sora'] text-lg font-bold">{tDynamic('Métricas & Indicadores por Etapa')}</h3>
               </div>
-              <button onClick={() => setModalMetricasAberto(false)} className="rounded-lg p-1 text-slate-400 hover:text-white">
+              <button type="button" onClick={() => setModalMetricasAberto(false)} className="rounded-lg p-1 text-slate-400 hover:text-white">
                 <X size={20} />
               </button>
             </div>
@@ -1438,7 +1438,7 @@ export default function KDS() {
             </div>
 
             <div className="mt-6 border-t border-white/10 pt-4 text-right">
-              <button
+              <button type="button"
                 onClick={() => setModalMetricasAberto(false)}
                 className="rounded-xl bg-blue-600 px-6 py-2 text-sm font-bold text-white transition hover:bg-blue-700 font-extrabold"
               >
@@ -1458,7 +1458,7 @@ export default function KDS() {
                 <Settings className="text-orange-400" size={20} />
                 <h3 className="font-['Sora'] text-lg font-bold">{tDynamic('Configurações KDS (Etapas & Operadores)')}</h3>
               </div>
-              <button onClick={() => setModalConfigAberto(false)} className="rounded-lg p-1 text-slate-400 hover:text-white">
+              <button type="button" onClick={() => setModalConfigAberto(false)} className="rounded-lg p-1 text-slate-400 hover:text-white">
                 <X size={20} />
               </button>
             </div>
@@ -1489,7 +1489,7 @@ export default function KDS() {
                       />
                     </div>
                     {operadores.length > 1 && (
-                      <button
+                      <button type="button"
                         onClick={() => handleRemoverOperador(op.user_id)}
                         className="p-1.5 text-red-400 hover:bg-red-500/20 rounded-lg transition"
                       >
@@ -1509,7 +1509,7 @@ export default function KDS() {
                   onKeyDown={(e) => e.key === 'Enter' && handleAdicionarOperador()}
                   className="flex-1 rounded-xl border border-white/15 bg-white/10 px-3.5 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
                 />
-                <button
+                <button type="button"
                   onClick={handleAdicionarOperador}
                   className="flex items-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-orange-600 font-extrabold"
                 >
@@ -1568,14 +1568,14 @@ export default function KDS() {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <button
+                      <button type="button"
                         onClick={() => handleMoverEtapa(index, 'esquerda')}
                         disabled={index === 0}
                         className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-30"
                       >
                         <ArrowLeft size={16} />
                       </button>
-                      <button
+                      <button type="button"
                         onClick={() => handleMoverEtapa(index, 'direita')}
                         disabled={index === etapas.length - 1}
                         className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-30"
@@ -1583,7 +1583,7 @@ export default function KDS() {
                         <ArrowRight size={16} />
                       </button>
                       {etapas.length > 2 && (
-                        <button
+                        <button type="button"
                           onClick={() => handleRemoverEtapa(e.id)}
                           className="rounded-lg p-1.5 text-red-400 hover:bg-red-500/20"
                         >
@@ -1604,7 +1604,7 @@ export default function KDS() {
                   onKeyDown={(e) => e.key === 'Enter' && handleAdicionarEtapa()}
                   className="flex-1 rounded-xl border border-white/15 bg-white/10 px-3.5 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
                 />
-                <button
+                <button type="button"
                   onClick={handleAdicionarEtapa}
                   className="flex items-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-orange-600 font-extrabold"
                 >
@@ -1614,13 +1614,13 @@ export default function KDS() {
             </div>
 
             <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
-              <button
+              <button type="button"
                 onClick={() => { salvarEtapas(ETAPAS_PADRAO); salvarOperadores(OPERADORES_INICIAIS); }}
                 className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white"
               >
                 <RotateCcw size={14} /> {tDynamic('Restaurar Padrões')}
               </button>
-              <button
+              <button type="button"
                 onClick={() => setModalConfigAberto(false)}
                 className="rounded-xl bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-6 py-2 text-sm font-bold text-white shadow-lg font-extrabold"
               >

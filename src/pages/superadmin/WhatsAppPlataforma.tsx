@@ -226,11 +226,11 @@ export default function WhatsAppPlataforma() {
                   </p>
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button onClick={testar} disabled={testando}
+                  <button type="button" onClick={testar} disabled={testando}
                     className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white transition hover:bg-emerald-700 disabled:opacity-50">
                     {testando ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} Testar
                   </button>
-                  <button onClick={desconectar} disabled={desconectando}
+                  <button type="button" onClick={desconectar} disabled={desconectando}
                     className="flex items-center gap-2 rounded-xl border border-red-500/40 px-4 py-2 text-xs font-black text-red-300 transition hover:bg-red-500/10 disabled:opacity-50">
                     {desconectando ? <Loader2 size={14} className="animate-spin" /> : <Unplug size={14} />} Desconectar
                   </button>
@@ -256,7 +256,7 @@ export default function WhatsAppPlataforma() {
               <div className="flex flex-col gap-2 sm:flex-row">
                 <input type="password" value={novoToken} onChange={(e) => setNovoToken(e.target.value.trim())}
                   placeholder="EAA…" autoComplete="off" className={`flex-1 ${campoCls}`} />
-                <button onClick={atualizarToken} disabled={atualizandoToken}
+                <button type="button" onClick={atualizarToken} disabled={atualizandoToken}
                   className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-2.5 text-sm font-black text-gray-950 transition hover:bg-amber-400 disabled:opacity-50">
                   {atualizandoToken ? <Loader2 size={16} className="animate-spin" /> : <KeyRound size={16} />}
                   {atualizandoToken ? 'Validando…' : 'Atualizar'}
@@ -297,7 +297,7 @@ export default function WhatsAppPlataforma() {
                 </label>
               ))}
             </div>
-            <button onClick={conectar} disabled={conectando}
+            <button type="button" onClick={conectar} disabled={conectando}
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 p-3 text-sm font-black text-white transition hover:bg-indigo-500 disabled:opacity-50">
               {conectando ? <Loader2 size={18} className="animate-spin" /> : <Plug size={18} />}
               {conectando ? 'Configurando na Meta…' : 'Conectar WhatsApp'}

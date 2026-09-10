@@ -244,7 +244,7 @@ function ModalNegociacao({
           {/* Decisão primeiro, motivo depois: escolher o motivo antes de saber
               se aceita ou rejeita é pedir para o lojista errar. */}
           <div className="grid grid-cols-2 gap-2">
-            <button
+            <button type="button"
               onClick={() => { setDecisao('rejeitar'); setMotivo(null); }}
               className={`flex flex-col items-center gap-1 rounded-xl border-2 p-3 transition ${
                 decisao === 'rejeitar'
@@ -259,7 +259,7 @@ function ModalNegociacao({
               <span className="text-xs opacity-90 text-[var(--cor-texto-fraco)]">{tDynamic('mantenho o valor')}</span>
             </button>
 
-            <button
+            <button type="button"
               onClick={() => { setDecisao('aceitar'); setMotivo(null); }}
               className={`flex flex-col items-center gap-1 rounded-xl border-2 p-3 transition ${
                 decisao === 'aceitar'
@@ -288,7 +288,7 @@ function ModalNegociacao({
               ) : (
                 <div className="max-h-[32dvh] space-y-1.5 overflow-y-auto pr-1">
                   {lista.map((m) => (
-                    <button
+                    <button type="button"
                       key={m.codigo}
                       onClick={() => setMotivo(m.codigo)}
                       className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition ${

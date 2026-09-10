@@ -97,7 +97,7 @@ export function ModalDivisaoProdutoCaixa({
               <p className="text-xs text-slate-400">Mesa #{numeroMesa} — Distribua os produtos consumidos entre os clientes</p>
             </div>
           </div>
-          <button
+          <button type="button"
             onClick={onCancelar}
             className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
           >
@@ -202,14 +202,14 @@ export function ModalDivisaoProdutoCaixa({
 
         {/* Rodapé de Ações */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-          <button
+          <button type="button"
             onClick={onCancelar}
             className="rounded-xl bg-slate-800 px-5 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-700 transition"
           >
             Voltar
           </button>
 
-          <button
+          <button type="button"
             onClick={() => onConfirmarDivisao(resumoPorAssento)}
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg hover:brightness-110 transition"
           >

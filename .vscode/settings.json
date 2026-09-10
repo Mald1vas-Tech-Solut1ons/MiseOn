@@ -1,5 +1,11 @@
 {
-  "deno.enable": true,
+  // Deno vale SÓ para as Edge Functions. Com "deno.enable": true o servidor de
+  // linguagem trata o repositório inteiro como projeto Deno e enche o app React
+  // de erro que não existe — "Cannot find name 'button'" (o TS do Deno não
+  // carrega o JSX do React) e regras jsx-* do deno-lint em componente que nunca
+  // vai rodar em Deno. O escopo por subpasta é enable:false + enablePaths; o
+  // deno.json na raiz também declara include/exclude, para valer fora do VS Code.
+  "deno.enable": false,
   "deno.enablePaths": [
     "supabase/functions"
   ],

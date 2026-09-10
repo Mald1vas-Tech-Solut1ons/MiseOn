@@ -195,7 +195,7 @@ export default function Equipe() {
           <h2 className="text-xl font-bold dark:text-gray-100">Equipe &amp; Acessos</h2>
           <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{tDynamic('Crie logins com usuário e senha para o painel, balcão e app do entregador.')}</p>
         </div>
-        <button onClick={abrirCriacao} className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:brightness-110">
+        <button type="button" onClick={abrirCriacao} className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:brightness-110">
           <Plus size={16} /> Criar acesso
         </button>
       </div>
@@ -210,7 +210,7 @@ export default function Equipe() {
       ) : erroLista ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
           {erroLista}
-          <button onClick={carregar} className="ml-2 inline-flex items-center gap-1 font-semibold underline"><RefreshCw size={12} /> Tentar de novo</button>
+          <button type="button" onClick={carregar} className="ml-2 inline-flex items-center gap-1 font-semibold underline"><RefreshCw size={12} /> Tentar de novo</button>
         </div>
       ) : (
         <div className="space-y-2">
@@ -240,8 +240,8 @@ export default function Equipe() {
                   </div>
                   {!m.sou_eu && (
                     <div className="flex shrink-0 gap-1">
-                      <button onClick={() => abrirEdicao(m)} title="Editar / redefinir senha" className="rounded-lg border border-gray-200 p-2 text-gray-400 transition hover:text-blue-500 dark:border-gray-700"><Pencil size={14} /></button>
-                      <button onClick={() => remover(m)} title="Remover da equipe" className="rounded-lg border border-red-200 p-2 text-red-500 transition hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/30"><Trash2 size={14} /></button>
+                      <button type="button" onClick={() => abrirEdicao(m)} title="Editar / redefinir senha" className="rounded-lg border border-gray-200 p-2 text-gray-400 transition hover:text-blue-500 dark:border-gray-700"><Pencil size={14} /></button>
+                      <button type="button" onClick={() => remover(m)} title="Remover da equipe" className="rounded-lg border border-red-200 p-2 text-red-500 transition hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/30"><Trash2 size={14} /></button>
                     </div>
                   )}
                 </div>
@@ -265,7 +265,7 @@ export default function Equipe() {
             <option value="garcom">Garçom</option>
             <option value="entregador">Entregador</option>
           </select>
-          <button onClick={convidar} disabled={enviandoConvite}
+          <button type="button" onClick={convidar} disabled={enviandoConvite}
             className="rounded-xl border border-gray-300 px-4 text-sm font-semibold text-gray-600 disabled:opacity-40 dark:border-gray-700 dark:text-gray-300">
             {enviandoConvite ? 'Enviando…' : 'Convidar'}
           </button>
@@ -279,7 +279,7 @@ export default function Equipe() {
           <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="flex items-center gap-2 text-lg font-black dark:text-gray-100"><KeyRound size={18} className="text-[var(--cor-primaria)]" /> Criar acesso</h3>
-              <button onClick={() => setCriando(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+              <button type="button" onClick={() => setCriando(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
 
             {credenciais ? (
@@ -292,10 +292,10 @@ export default function Equipe() {
                 </div>
                 <p className="mt-2 text-xs opacity-95 text-gray-400">{tDynamic('A senha não fica visível depois — copie agora. Se perder, é só redefinir na edição do membro.')}</p>
                 <div className="mt-4 flex gap-2">
-                  <button onClick={copiarCredenciais} className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 py-2.5 text-sm font-bold text-gray-700 dark:border-gray-700 dark:text-gray-200">
+                  <button type="button" onClick={copiarCredenciais} className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 py-2.5 text-sm font-bold text-gray-700 dark:border-gray-700 dark:text-gray-200">
                     {copiado ? <Check size={15} className="text-green-500" /> : <Copy size={15} />} {copiado ? 'Copiado!' : 'Copiar credenciais'}
                   </button>
-                  <button onClick={() => setCriando(false)} className="flex-1 rounded-xl bg-[var(--cor-primaria)] py-2.5 text-sm font-bold text-white">Concluir</button>
+                  <button type="button" onClick={() => setCriando(false)} className="flex-1 rounded-xl bg-[var(--cor-primaria)] py-2.5 text-sm font-bold text-white">Concluir</button>
                 </div>
               </div>
             ) : (
@@ -352,7 +352,7 @@ export default function Equipe() {
                   </p>
                 )}
                 {msg && <p className={`text-sm font-semibold ${msg.tipo === 'erro' ? 'text-red-500' : 'text-green-600'}`}>{msg.texto}</p>}
-                <button onClick={criarAcesso} disabled={salvando} className="mt-1 w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md disabled:opacity-50">
+                <button type="button" onClick={criarAcesso} disabled={salvando} className="mt-1 w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md disabled:opacity-50">
                   {salvando ? 'Criando acesso…' : 'Criar login'}
                 </button>
               </div>
@@ -367,7 +367,7 @@ export default function Equipe() {
           <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
             <div className="mb-1 flex items-center justify-between">
               <h3 className="text-lg font-black dark:text-gray-100">Editar membro</h3>
-              <button onClick={() => setEditando(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+              <button type="button" onClick={() => setEditando(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
             <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">{editando.email} · acesso criado em {dataBr(editando.criado_em)}</p>
             <div className="space-y-3">
@@ -409,7 +409,7 @@ export default function Equipe() {
                 </div>
               </label>
               {msg && <p className={`text-sm font-semibold ${msg.tipo === 'erro' ? 'text-red-500' : 'text-green-600'}`}>{msg.texto}</p>}
-              <button onClick={salvarEdicao} disabled={salvando} className="w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md disabled:opacity-50">
+              <button type="button" onClick={salvarEdicao} disabled={salvando} className="w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white shadow-md disabled:opacity-50">
                 {salvando ? 'Salvando…' : 'Salvar alterações'}
               </button>
               {formEdit.nova_senha && (

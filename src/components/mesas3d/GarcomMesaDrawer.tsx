@@ -184,14 +184,14 @@ export function GarcomMesaDrawer({
               </span>
             </p>
           </div>
-          <button onClick={onClose} className="rounded-xl p-1.5 text-gray-400 hover:bg-gray-800"><X size={20} /></button>
+          <button type="button" onClick={onClose} className="rounded-xl p-1.5 text-gray-400 hover:bg-gray-800"><X size={20} /></button>
         </div>
 
         {/* Grade Visual de Assentos / Cadeiras */}
         <div className="border-b border-gray-800 bg-gray-900/50 p-3">
           <p className="mb-2 text-xs opacity-95 font-bold text-gray-400 uppercase tracking-wider">Selecione o Assento / Cadeira</p>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <button
+            <button type="button"
               onClick={() => setAssentoAtivo(null)}
               className={`flex flex-col items-center justify-center min-w-[70px] rounded-xl px-3 py-2 text-xs font-bold transition border ${
                 assentoAtivo === null
@@ -204,7 +204,7 @@ export function GarcomMesaDrawer({
             </button>
 
             {mesa3d.assentos.map((a) => (
-              <button
+              <button type="button"
                 key={a.numero}
                 onClick={() => setAssentoAtivo(a.numero)}
                 className={`flex flex-col items-center justify-center min-w-[70px] rounded-xl px-3 py-2 text-xs font-bold transition border relative ${
@@ -236,7 +236,7 @@ export function GarcomMesaDrawer({
           )}
 
           {/* Botão de Lançar Pedido no Assento */}
-          <button
+          <button type="button"
             onClick={() => onNovoPedidoAssento?.(mesa3d.mesa.numero, assentoAtivo)}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-600 px-4 py-3 text-sm font-black text-white shadow-lg transition hover:bg-orange-500"
           >
@@ -250,7 +250,7 @@ export function GarcomMesaDrawer({
             </h4>
 
             <div className="grid grid-cols-3 gap-2">
-              <button
+              <button type="button"
                 onClick={() => setModoDivisao('POR_ASSENTO')}
                 className={`rounded-xl p-2.5 text-xs font-bold border transition ${
                   modoDivisao === 'POR_ASSENTO'
@@ -261,7 +261,7 @@ export function GarcomMesaDrawer({
                 Por Assento
               </button>
 
-              <button
+              <button type="button"
                 onClick={() => setModoDivisao('IGUALITARIA')}
                 className={`rounded-xl p-2.5 text-xs font-bold border transition ${
                   modoDivisao === 'IGUALITARIA'
@@ -272,7 +272,7 @@ export function GarcomMesaDrawer({
                 Igualitária
               </button>
 
-              <button
+              <button type="button"
                 onClick={() => setModoDivisao('PARCIAL_VALOR')}
                 className={`rounded-xl p-2.5 text-xs font-bold border transition ${
                   modoDivisao === 'PARCIAL_VALOR'
@@ -301,14 +301,14 @@ export function GarcomMesaDrawer({
               <div className="mt-3 flex items-center justify-between border-t border-gray-800 pt-3 text-xs">
                 <span className="text-gray-400 font-semibold">{tDynamic('Dividir por quantas pessoas?')}</span>
                 <div className="flex items-center gap-2">
-                  <button
+                  <button type="button"
                     onClick={() => setQtdPessoasDivisao((q) => Math.max(1, q - 1))}
                     className="h-7 w-7 rounded-lg bg-gray-800 font-black text-gray-200"
                   >
                     -
                   </button>
                   <span className="font-mono text-sm font-black text-white">{qtdPessoasDivisao}</span>
-                  <button
+                  <button type="button"
                     onClick={() => setQtdPessoasDivisao((q) => q + 1)}
                     className="h-7 w-7 rounded-lg bg-gray-800 font-black text-gray-200"
                   >
@@ -348,7 +348,7 @@ export function GarcomMesaDrawer({
           {!fechandoMetodo ? (
             <div className="grid grid-cols-2 gap-2">
               {METODOS.map((m) => (
-                <button
+                <button type="button"
                   key={m.m}
                   onClick={() => setFechandoMetodo(m.m)}
                   className="flex items-center justify-center gap-2 rounded-2xl border border-gray-800 bg-gray-900 p-3 text-xs font-bold text-gray-300 transition hover:border-emerald-500 hover:text-emerald-400"
@@ -361,10 +361,10 @@ export function GarcomMesaDrawer({
             <div className="space-y-3 rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-4">
               <div className="flex justify-between text-xs font-black text-emerald-400">
                 <span>Pagar via {METODOS.find((x) => x.m === fechandoMetodo)?.label}</span>
-                <button onClick={() => setFechandoMetodo(null)} className="text-gray-400 underline">Trocar</button>
+                <button type="button" onClick={() => setFechandoMetodo(null)} className="text-gray-400 underline">Trocar</button>
               </div>
 
-              <button
+              <button type="button"
                 onClick={() => confirmarPagamento(fechandoMetodo)}
                 disabled={processando}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3 text-sm font-black text-white shadow-lg transition hover:bg-emerald-500 disabled:opacity-50"

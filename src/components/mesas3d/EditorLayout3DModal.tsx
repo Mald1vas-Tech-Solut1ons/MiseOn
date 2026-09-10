@@ -62,7 +62,7 @@ export function EditorLayout3DModal({ mesas, onClose, onSalvo }: Props) {
           <h3 className="flex items-center gap-2 text-lg font-black text-gray-100">
             <Layers size={18} className="text-orange-400" /> {tDynamic('Configurar Salão 3D')}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-200"><X size={20} /></button>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-200"><X size={20} /></button>
         </div>
 
         <div className="space-y-4">
@@ -132,7 +132,7 @@ export function EditorLayout3DModal({ mesas, onClose, onSalvo }: Props) {
             />
           </div>
 
-          <button
+          <button type="button"
             onClick={salvarAlteracoes}
             disabled={salvando}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-600 py-3.5 text-sm font-black text-white shadow-lg transition hover:bg-orange-500 disabled:opacity-50"

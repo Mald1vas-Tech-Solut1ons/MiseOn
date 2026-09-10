@@ -225,7 +225,7 @@ export default function Financeiro() {
   const rateioSimulado = Number(configCusto.expectativa_vendas_mes) > 0 ? totalFixoMensal / Number(configCusto.expectativa_vendas_mes) : 0;
 
   const abaBtn = (id: typeof aba, rotulo: string) => (
-    <button onClick={() => setAba(id)} className={`px-4 py-2 text-sm font-semibold rounded-t-xl transition-colors ${aba === id ? 'bg-white dark:bg-gray-900 border-t border-x border-gray-100 dark:border-gray-800 text-[var(--cor-primaria)] -mb-[9px] shadow-[0_-2px_4px_rgba(0,0,0,0.02)]' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
+    <button type="button" onClick={() => setAba(id)} className={`px-4 py-2 text-sm font-semibold rounded-t-xl transition-colors ${aba === id ? 'bg-white dark:bg-gray-900 border-t border-x border-gray-100 dark:border-gray-800 text-[var(--cor-primaria)] -mb-[9px] shadow-[0_-2px_4px_rgba(0,0,0,0.02)]' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
       {tDynamic(rotulo)}
     </button>
   );
@@ -254,7 +254,7 @@ export default function Financeiro() {
           {/* ── Seletor de período ── */}
           <HorizontalScrollContainer className="mb-4 pb-1">
             {PERIODOS.map((p) => (
-              <button key={p.id} onClick={() => setPeriodo(p.id)}
+              <button type="button" key={p.id} onClick={() => setPeriodo(p.id)}
                 className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-bold transition ${periodo === p.id
                   ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)] text-white shadow-md'
                   : 'border-gray-200 bg-white text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300'}`}>
@@ -533,7 +533,7 @@ export default function Financeiro() {
 
              {mensagem && <p className={`mt-4 text-center text-sm font-semibold ${mensagem.includes('Erro') ? 'text-red-500' : 'text-green-600'}`}>{mensagem}</p>}
 
-             <button onClick={salvarCustos} disabled={salvando} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50">
+             <button type="button" onClick={salvarCustos} disabled={salvando} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50">
                <Save size={18} /> {salvando ? 'Salvando...' : 'Salvar Motor de Custos'}
              </button>
           </div>

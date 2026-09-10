@@ -44,7 +44,7 @@ export function ModalOpcoes({ produto, nutricao, onConfirmar, onFechar }: {
               {isPeso ? `${fmt(Number(produto.preco_por_quilo || 0))}/kg` : `${fmt(Number(produto.preco))} base`}
             </p>
           </div>
-          <button onClick={onFechar} className="text-gray-400"><X size={20} /></button>
+          <button type="button" onClick={onFechar} className="text-gray-400"><X size={20} /></button>
         </div>
 
         {/* Quem pergunta "tem leite?" pergunta no balcão, para uma pessoa. Ela
@@ -120,7 +120,7 @@ export function ModalOpcoes({ produto, nutricao, onConfirmar, onFechar }: {
                 {(g.opcoes ?? []).filter((o) => o.disponivel).map((o) => {
                   const marcada = selecionadas.some((s) => s.id === o.id);
                   return (
-                    <button key={o.id} onClick={() => alternar(g, o)}
+                    <button type="button" key={o.id} onClick={() => alternar(g, o)}
                       className={`flex w-full items-center justify-between rounded-xl border-2 px-3 py-2.5 text-left text-sm transition ${marcada ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5' : 'border-gray-200 dark:border-gray-700'}`}>
                       <span className={`font-semibold ${marcada ? 'text-[var(--cor-primaria)]' : 'text-gray-700 dark:text-gray-200'}`}>{o.nome}</span>
                       <span className="text-xs font-bold text-gray-400">{Number(o.preco_adicional) > 0 ? `+${fmt(Number(o.preco_adicional))}` : 'grátis'}</span>
@@ -137,12 +137,12 @@ export function ModalOpcoes({ produto, nutricao, onConfirmar, onFechar }: {
         <div className="flex items-center gap-3 border-t border-gray-100 p-4 dark:border-gray-800">
           {!isPeso && (
             <div className="flex items-center gap-2">
-              <button onClick={() => setQtd((q) => Math.max(1, q - 1))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 font-black dark:bg-gray-800"><Minus size={14} /></button>
+              <button type="button" onClick={() => setQtd((q) => Math.max(1, q - 1))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 font-black dark:bg-gray-800"><Minus size={14} /></button>
               <span className="w-6 text-center font-black dark:text-gray-100">{qtd}</span>
-              <button onClick={() => setQtd((q) => q + 1)} className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 font-black dark:bg-gray-800"><Plus size={14} /></button>
+              <button type="button" onClick={() => setQtd((q) => q + 1)} className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 font-black dark:bg-gray-800"><Plus size={14} /></button>
             </div>
           )}
-          <button onClick={() => onConfirmar(selecionadas, qtd, obs)} disabled={faltandoObrigatorio}
+          <button type="button" onClick={() => onConfirmar(selecionadas, qtd, obs)} disabled={faltandoObrigatorio}
             className="flex-1 rounded-2xl bg-[var(--cor-primaria)] py-3.5 text-sm font-black text-white disabled:opacity-40">
             Adicionar {fmt(total)}
           </button>

@@ -126,7 +126,7 @@ export default function EstoquePage() {
             </Link>
           </div>
 
-          <button
+          <button type="button"
             onClick={() => setMenuAberto((a) => !a)}
             className="rounded-lg p-2 text-gray-300 hover:bg-white/10 lg:hidden"
           >
@@ -733,7 +733,7 @@ export default function EstoquePage() {
               const aberto = faqAberto === idx;
               return (
                 <div key={idx} className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
-                  <button
+                  <button type="button"
                     onClick={() => setFaqAberto(aberto ? null : idx)}
                     className="flex w-full items-center justify-between p-5 text-left font-['Sora'] font-bold text-white"
                   >

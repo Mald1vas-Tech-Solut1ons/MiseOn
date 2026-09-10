@@ -116,7 +116,7 @@ export default function ModalRaioXProduto({ insumo, onClose }: Props) {
             </h2>
             <p className="text-xs text-gray-500 font-medium mt-0.5">Estoque atual: {Number(insumo.quantidade_atual).toLocaleString('pt-BR')} {insumo.unidade_medida}</p>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-300 rounded-xl transition-colors">
+          <button type="button" onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-300 rounded-xl transition-colors">
             <X size={20} />
           </button>
         </div>

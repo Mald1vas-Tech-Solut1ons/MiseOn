@@ -54,7 +54,7 @@ export function ModalDivisaoItemGarcom({
               <p className="text-xs text-slate-400">{tDynamic('Garçom fraciona o item entre participantes')}</p>
             </div>
           </div>
-          <button
+          <button type="button"
             onClick={onCancelar}
             className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
           >
@@ -80,7 +80,7 @@ export function ModalDivisaoItemGarcom({
               <Users size={14} className="text-amber-400" />
               Selecione as pessoas que estão bebendo ({selecionados.length} participantes):
             </span>
-            <button
+            <button type="button"
               onClick={selecionarTodos}
               className="text-orange-400 hover:underline font-semibold"
             >
@@ -119,13 +119,13 @@ export function ModalDivisaoItemGarcom({
 
         {/* Ações */}
         <div className="flex items-center gap-3 pt-2">
-          <button
+          <button type="button"
             onClick={onCancelar}
             className="w-1/3 rounded-xl bg-slate-800 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-700 transition"
           >
             Cancelar
           </button>
-          <button
+          <button type="button"
             onClick={() => onConfirmar(selecionados)}
             className="w-2/3 flex items-center justify-center gap-2 rounded-xl bg-orange-500 py-3 text-sm font-bold text-slate-950 hover:bg-orange-400 shadow-lg transition"
           >

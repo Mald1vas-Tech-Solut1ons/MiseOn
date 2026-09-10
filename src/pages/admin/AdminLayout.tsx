@@ -271,8 +271,8 @@ export default function AdminLayout() {
       <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 p-8 text-center bg-gray-50 dark:bg-[#0B1120] text-gray-900 dark:text-gray-100">
         <h1 className="font-bold text-lg">{tDynamic('Não foi possível carregar os dados da loja')}</h1>
         <p className="text-xs text-gray-400 max-w-sm">{tDynamic('Verifique sua conexão com a internet ou tente recarregar a página.')}</p>
-        <button onClick={() => window.location.reload()} className="mt-2 rounded-xl bg-[var(--cor-primaria)] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:brightness-110 transition-all">{tDynamic('Tentar Novamente')}</button>
-        <button onClick={sair} className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">{tDynamic('Sair do Sistema')}</button>
+        <button type="button" onClick={() => window.location.reload()} className="mt-2 rounded-xl bg-[var(--cor-primaria)] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:brightness-110 transition-all">{tDynamic('Tentar Novamente')}</button>
+        <button type="button" onClick={sair} className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">{tDynamic('Sair do Sistema')}</button>
       </div>
     );
   }
@@ -285,7 +285,7 @@ export default function AdminLayout() {
           <p className="text-xs text-gray-400 dark:text-gray-500 max-w-md mx-auto">
             {tDynamic('Foi convidado pra equipe de uma loja que já existe? Peça pro admin te adicionar pela tela de Equipe, usando este mesmo e-mail, em vez de criar uma loja nova.')}
           </p>
-          <button onClick={sair} className="mt-3 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">{tDynamic('Sair do Sistema')}</button>
+          <button type="button" onClick={sair} className="mt-3 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">{tDynamic('Sair do Sistema')}</button>
         </div>
       </div>
     );
@@ -303,7 +303,7 @@ export default function AdminLayout() {
         <Store size={48} className="text-red-500 mb-2" />
         <h1 className="font-bold text-xl text-red-600">{tDynamic('Loja Temporariamente Suspensa')}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">{tDynamic('O acesso ao sistema operacional está suspenso. Peça para o administrador da loja regularizar a assinatura na plataforma.')}</p>
-        <button onClick={sair} className="mt-4 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 px-8 py-3 text-sm font-bold shadow-sm transition-all active:scale-95">{tDynamic('Sair do Sistema')}</button>
+        <button type="button" onClick={sair} className="mt-4 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 px-8 py-3 text-sm font-bold shadow-sm transition-all active:scale-95">{tDynamic('Sair do Sistema')}</button>
       </div>
     );
   }
@@ -541,7 +541,7 @@ export default function AdminLayout() {
             )}
           </div>
           {/* Toggle Button Luxuoso */}
-          <button
+          <button type="button"
             onClick={toggleSidebar}
             className={`absolute -right-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-[#0A101D]/90 backdrop-blur-md border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-300 rounded-full p-2 shadow-[0_4px_20px_rgba(0,0,0,0.15)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.6)] transition-all duration-500 z-50 hover:scale-110 hover:text-[#FC5B24] ring-4 ring-[#F4F7FA] dark:ring-[#070C18] ${isCollapsed ? 'rotate-180' : ''}`}
           >
@@ -669,7 +669,7 @@ export default function AdminLayout() {
             <UserCircle size={18} className="nav-link-icon shrink-0 transition-transform duration-300" />
             {!isCollapsed && <span className="w-full truncate text-center">{tDynamic('Minha conta')}</span>}
           </NavLink>
-          <button
+          <button type="button"
             onClick={sair}
             title={tDynamic('Sair do Sistema')}
             className="group relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-gray-500 transition-colors hover:bg-red-500/15 hover:text-red-500 dark:text-gray-400 dark:hover:bg-red-500/20 dark:hover:text-red-400"
@@ -690,14 +690,14 @@ export default function AdminLayout() {
 
             <div className="flex items-center gap-4">
               {/* Mobile Menu Toggle */}
-              <button onClick={() => setMenuMobileAberto(true)} className="lg:hidden p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
+              <button type="button" onClick={() => setMenuMobileAberto(true)} className="lg:hidden p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
                 <Menu size={24} />
               </button>
 
               {/* Mobile Brand / Back Button */}
               <div className="flex lg:hidden items-center gap-2 min-w-0">
                 {ehSubRota && (
-                  <button onClick={() => nav(-1)} aria-label="Voltar" className="flex items-center shrink-0 text-sm font-bold text-[#004198] dark:text-[#6B9EFF]">
+                  <button type="button" onClick={() => nav(-1)} aria-label="Voltar" className="flex items-center shrink-0 text-sm font-bold text-[#004198] dark:text-[#6B9EFF]">
                     <ChevronLeft size={20} />
                   </button>
                 )}
@@ -708,7 +708,7 @@ export default function AdminLayout() {
               {/* Desktop Page Title (Optional) */}
               <div className="hidden lg:flex items-center gap-3">
                 {ehSubRota && (
-                  <button onClick={() => nav(-1)} aria-label="Voltar" className="mr-1 p-2 rounded-xl text-gray-400 hover:bg-white/50 dark:hover:bg-white/10 transition-colors shadow-sm">
+                  <button type="button" onClick={() => nav(-1)} aria-label="Voltar" className="mr-1 p-2 rounded-xl text-gray-400 hover:bg-white/50 dark:hover:bg-white/10 transition-colors shadow-sm">
                     <ChevronLeft size={20} />
                   </button>
                 )}
@@ -723,7 +723,7 @@ export default function AdminLayout() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button
+              <button type="button"
                 onClick={() => {
                   if (location.pathname === '/admin/ajuda') {
                     tour.iniciarTourCompleto();
@@ -766,7 +766,7 @@ export default function AdminLayout() {
                     <p className="text-xs opacity-95 text-blue-600/80 dark:text-blue-400/80 mt-0.5">{tDynamic('Garanta sua assinatura pra não perder o acesso.')}</p>
                   </div>
                 </div>
-                <button onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs opacity-95 uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">
+                <button type="button" onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs opacity-95 uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">
                   Assinar agora
                 </button>
               </div>
@@ -785,7 +785,7 @@ export default function AdminLayout() {
                   <p className="text-xs opacity-95 text-amber-600/80 dark:text-amber-400/80 mt-0.5">O acesso total será suspenso em {8 - ctx.diasAtraso} dias caso não seja regularizado.</p>
                 </div>
               </div>
-              <button onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs opacity-95 uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">
+              <button type="button" onClick={() => nav('/admin/assinatura')} className="whitespace-nowrap px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs opacity-95 uppercase tracking-wider font-bold rounded-lg shadow-sm transition-colors">
                 Regularizar Assinatura
               </button>
             </div>
@@ -813,7 +813,7 @@ export default function AdminLayout() {
                 </div>
                 <span className="font-bold">MiseOn</span>
               </div>
-              <button onClick={() => setMenuMobileAberto(false)} className="p-2 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+              <button type="button" onClick={() => setMenuMobileAberto(false)} className="p-2 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
                 <X size={20} />
               </button>
             </div>
@@ -833,7 +833,7 @@ export default function AdminLayout() {
               <NavLink to="/admin/conta" onClick={() => setMenuMobileAberto(false)} className="flex items-center justify-center gap-2 w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 font-bold text-gray-700 dark:text-gray-200">
                 <UserCircle size={18} /> Minha Conta
               </NavLink>
-              <button onClick={sair} className="flex items-center justify-center gap-2 w-full p-3 rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 font-bold">
+              <button type="button" onClick={sair} className="flex items-center justify-center gap-2 w-full p-3 rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 font-bold">
                 Sair
               </button>
             </div>
@@ -858,7 +858,7 @@ export default function AdminLayout() {
             )}
           </NavLink>
         ))}
-        <button
+        <button type="button"
           onClick={() => setMenuMobileAberto(true)}
           className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${emRotaSoDoMenu ? 'text-[#004198] dark:text-[#6B9EFF]' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'}`}
         >

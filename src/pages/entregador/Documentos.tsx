@@ -130,7 +130,7 @@ export default function EntregadorDocumentos() {
         <input value={cnhNumero} onChange={(e) => setCnhNumero(e.target.value)} placeholder="Número da CNH"
           className="w-full rounded-xl border border-gray-700 bg-gray-950 p-3 text-sm text-white" />
         <input type="file" ref={cnhRef} accept="image/*,.pdf" className="hidden" onChange={(e) => setNovoCnhArquivo(e.target.files?.[0] ?? null)} />
-        <button onClick={() => cnhRef.current?.click()}
+        <button type="button" onClick={() => cnhRef.current?.click()}
           className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 p-3 text-sm font-semibold text-gray-300 hover:bg-gray-800">
           <UploadCloud size={18} /> {novoCnhArquivo ? novoCnhArquivo.name : cnhArquivoPath ? 'Trocar arquivo da CNH' : 'Enviar foto/PDF da CNH'}
         </button>
@@ -145,13 +145,13 @@ export default function EntregadorDocumentos() {
             className="rounded-xl border border-gray-700 bg-gray-950 p-3 text-sm text-white" />
         </div>
         <input type="file" ref={veiculoRef} accept="image/*,.pdf" className="hidden" onChange={(e) => setNovoVeiculoArquivo(e.target.files?.[0] ?? null)} />
-        <button onClick={() => veiculoRef.current?.click()}
+        <button type="button" onClick={() => veiculoRef.current?.click()}
           className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-700 p-3 text-sm font-semibold text-gray-300 hover:bg-gray-800">
           <FileText size={18} /> {novoVeiculoArquivo ? novoVeiculoArquivo.name : veiculoArquivoPath ? 'Trocar documento do veículo (CRLV)' : 'Enviar documento do veículo (CRLV)'}
         </button>
       </div>
 
-      <button onClick={enviar} disabled={enviando}
+      <button type="button" onClick={enviar} disabled={enviando}
         className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-500 py-4 font-bold text-white shadow-lg disabled:opacity-50">
         {enviando ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
         {enviando ? 'Enviando...' : 'Enviar para aprovação'}

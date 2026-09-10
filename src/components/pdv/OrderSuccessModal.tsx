@@ -77,18 +77,18 @@ export function OrderSuccessModal({ venda, imprimirVenda, limparVenda }: OrderSu
         )}
         <div className="mt-4 grid grid-cols-2 gap-2">
           {venda.temCozinha && (
-            <button onClick={() => imprimirVenda('COMANDA_COZINHA')} className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 py-3 text-xs font-bold text-gray-600 dark:border-gray-700 dark:text-gray-300">
+            <button type="button" onClick={() => imprimirVenda('COMANDA_COZINHA')} className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 py-3 text-xs font-bold text-gray-600 dark:border-gray-700 dark:text-gray-300">
               <ChefHat size={14} /> Comanda cozinha
             </button>
           )}
-          <button onClick={() => imprimirVenda('RECIBO_CLIENTE')} className={`flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 py-3 text-xs font-bold text-gray-600 dark:border-gray-700 dark:text-gray-300 ${!venda.temCozinha ? 'col-span-2' : ''}`}>
+          <button type="button" onClick={() => imprimirVenda('RECIBO_CLIENTE')} className={`flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 py-3 text-xs font-bold text-gray-600 dark:border-gray-700 dark:text-gray-300 ${!venda.temCozinha ? 'col-span-2' : ''}`}>
             <Receipt size={14} /> Nota cliente
           </button>
         </div>
 
         <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
           {!nfeUrl ? (
-            <button 
+            <button type="button" 
               onClick={emitirNfce} 
               disabled={emitindo}
               className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 py-3 text-sm font-bold text-[var(--cor-primaria)] transition hover:bg-[var(--cor-primaria)]/20 disabled:opacity-50"
@@ -109,7 +109,7 @@ export function OrderSuccessModal({ venda, imprimirVenda, limparVenda }: OrderSu
           {nfeErro && <p className="mt-2 text-xs font-semibold text-red-500">{nfeErro}</p>}
         </div>
 
-        <button onClick={limparVenda} className="mt-4 w-full rounded-2xl bg-[var(--cor-primaria)] py-4 text-base font-black text-white shadow-lg">
+        <button type="button" onClick={limparVenda} className="mt-4 w-full rounded-2xl bg-[var(--cor-primaria)] py-4 text-base font-black text-white shadow-lg">
           Nova venda
         </button>
       </div>

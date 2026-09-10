@@ -226,7 +226,7 @@ export default function ModalMinhaConta({
         {/* Cabeçalho */}
         <div className="flex items-center justify-between border-b px-6 py-4 dark:border-gray-800">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">{tDynamic('Minha Conta')}</h2>
-          <button onClick={onClose} className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+          <button type="button" onClick={onClose} className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
             <X size={20} />
           </button>
         </div>
@@ -234,7 +234,7 @@ export default function ModalMinhaConta({
         {/* Abas */}
         <div className="flex w-full overflow-x-auto border-b px-2 dark:border-gray-800 hide-scrollbar">
           {(['DADOS', 'ENDERECOS', 'PEDIDOS', 'FAVORITOS', 'COMUNICACAO'] as Aba[]).map((aba) => (
-            <button
+            <button type="button"
               key={aba}
               onClick={() => setAbaAtiva(aba)}
               className={`flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
@@ -299,7 +299,7 @@ export default function ModalMinhaConta({
                     </div>
                   </div>
 
-                  <button
+                  <button type="button"
                     onClick={salvarDadosPerfil}
                     disabled={salvando}
                     className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--cor-primaria)] py-3.5 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
@@ -309,7 +309,7 @@ export default function ModalMinhaConta({
                   </button>
 
                   <div className="border-t pt-6 mt-6 dark:border-gray-800">
-                    <button
+                    <button type="button"
                       onClick={async () => {
                         await supabase.auth.signOut();
                         onClose();
@@ -348,11 +348,11 @@ export default function ModalMinhaConta({
                               </div>
                               <div className="mt-3 flex gap-2">
                                 {!end.padrao && (
-                                  <button onClick={() => tornarPadrao(end.id)} disabled={salvando} className="text-xs font-semibold text-gray-500 hover:text-[var(--cor-primaria-texto)] dark:text-gray-400">
+                                  <button type="button" onClick={() => tornarPadrao(end.id)} disabled={salvando} className="text-xs font-semibold text-gray-500 hover:text-[var(--cor-primaria-texto)] dark:text-gray-400">
                                     {tDynamic('Tornar padrão')}
                                   </button>
                                 )}
-                                <button onClick={() => deletarEndereco(end.id)} disabled={salvando} className="text-xs font-semibold text-red-500 hover:text-red-600">
+                                <button type="button" onClick={() => deletarEndereco(end.id)} disabled={salvando} className="text-xs font-semibold text-red-500 hover:text-red-600">
                                   {tDynamic('Excluir')}
                                 </button>
                               </div>
@@ -361,7 +361,7 @@ export default function ModalMinhaConta({
                         </div>
                       )}
                       
-                      <button
+                      <button type="button"
                         onClick={() => setCriandoEndereco(true)}
                         className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 py-4 text-sm font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                       >
@@ -375,13 +375,13 @@ export default function ModalMinhaConta({
                         onMudanca={(dados) => setNovoEndereco(dados)} 
                       />
                       <div className="mt-4 flex gap-2">
-                        <button
+                        <button type="button"
                           onClick={() => setCriandoEndereco(false)}
                           className="w-1/3 rounded-xl border py-3 text-sm font-bold text-gray-600 dark:border-gray-700 dark:text-gray-300"
                         >
                           {tDynamic('Cancelar')}
                         </button>
-                        <button
+                        <button type="button"
                           onClick={salvarNovoEndereco}
                           disabled={salvando}
                           className="flex-1 rounded-xl bg-[var(--cor-primaria)] py-3 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
@@ -446,7 +446,7 @@ export default function ModalMinhaConta({
                             <p className="text-xs font-semibold text-[var(--cor-primaria-texto)]">{fmt(Number(f.produto?.preco))}</p>
                           </div>
                         </div>
-                        <button onClick={() => deletarFavorito(f.id)} disabled={salvando} className="p-2 text-gray-400 hover:text-red-500">
+                        <button type="button" onClick={() => deletarFavorito(f.id)} disabled={salvando} className="p-2 text-gray-400 hover:text-red-500">
                           <Trash2 size={16} />
                         </button>
                       </div>

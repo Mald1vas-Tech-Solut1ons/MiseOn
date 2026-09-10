@@ -256,7 +256,7 @@ export default function FiscalPlataforma() {
           <div className="grid gap-4 md:grid-cols-2 items-end">
             <div>
               <input type="file" ref={fileRef} accept=".pfx,.p12" className="hidden" onChange={handleFile} />
-              <button onClick={() => fileRef.current?.click()}
+              <button type="button" onClick={() => fileRef.current?.click()}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 p-3 text-sm font-semibold text-gray-200 hover:bg-white/5 transition">
                 <UploadCloud size={18} /> {pfxName || 'Selecionar arquivo .pfx'}
               </button>
@@ -277,7 +277,7 @@ export default function FiscalPlataforma() {
         {erro && <p className="text-sm font-medium text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">{erro}</p>}
         {sucesso && <p className="text-sm font-medium text-emerald-400 bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20">{sucesso}</p>}
 
-        <button onClick={salvar} disabled={salvando}
+        <button type="button" onClick={salvar} disabled={salvando}
           className="w-full flex items-center justify-center gap-2 rounded-xl bg-white text-gray-900 py-3.5 font-bold shadow-lg disabled:opacity-50 transition hover:scale-[1.01]">
           {salvando ? <Loader2 size={18} className="animate-spin" /> : <Receipt size={18} />}
           {salvando ? 'Salvando…' : 'Salvar Configuração Fiscal'}

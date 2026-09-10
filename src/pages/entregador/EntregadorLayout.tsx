@@ -98,7 +98,7 @@ export default function EntregadorLayout() {
         <p className="max-w-sm text-sm text-gray-400">
           {tDynamic('Você continua conectado normalmente na sua conta. Para usar o app de entregas, peça para a loja te cadastrar como entregador e entre com aquele acesso.')}
         </p>
-        <button
+        <button type="button"
           onClick={handleLogout}
           className="mt-3 rounded-xl border border-gray-700 px-6 py-2.5 text-sm font-bold hover:bg-gray-800 transition-colors"
         >
@@ -134,7 +134,7 @@ export default function EntregadorLayout() {
           <NavLink to="/entregador/conta" className={({isActive}) => `rounded-full p-2 transition-colors ${isActive ? 'bg-[var(--cor-primaria)] text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700 bg-gray-800'}`}>
             <UserCircle size={16} />
           </NavLink>
-          <button onClick={handleLogout} className="rounded-full bg-red-500/10 p-2 text-red-500 hover:text-red-400 hover:bg-red-500/20 transition-colors">
+          <button type="button" onClick={handleLogout} className="rounded-full bg-red-500/10 p-2 text-red-500 hover:text-red-400 hover:bg-red-500/20 transition-colors">
             <LogOut size={16} />
           </button>
         </div>

@@ -195,7 +195,7 @@ export default function ModoPreparo({
               <p className="text-[10px] font-black uppercase tracking-wider text-orange-200">{tDynamic('Tempo da OS')}</p>
               <p className="tabular-nums text-lg font-black leading-none">{formatarRelogio(decorrido)}</p>
             </div>
-            <button onClick={onFechar} title={tDynamic('Sair sem produzir')} className="rounded-full p-2 transition-colors hover:bg-white/20"><X size={22} /></button>
+            <button type="button" onClick={onFechar} title={tDynamic('Sair sem produzir')} className="rounded-full p-2 transition-colors hover:bg-white/20"><X size={22} /></button>
           </div>
         </div>
 
@@ -226,7 +226,7 @@ export default function ModoPreparo({
                     const id = it.ins?.id ?? String(i);
                     const conferido = conferidos.has(id);
                     return (
-                      <button
+                      <button type="button"
                         key={id}
                         onClick={() => setConferidos(atual => {
                           const proximo = new Set(atual);
@@ -272,7 +272,7 @@ export default function ModoPreparo({
                 </div>
 
                 {faltamConferir > 0 && (
-                  <button onClick={conferirTudo} className="mt-3 w-full rounded-xl bg-gray-100 py-2.5 text-xs font-black uppercase tracking-wider text-gray-500 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
+                  <button type="button" onClick={conferirTudo} className="mt-3 w-full rounded-xl bg-gray-100 py-2.5 text-xs font-black uppercase tracking-wider text-gray-500 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
                     {tDynamic('Conferi tudo')} ({faltamConferir})
                   </button>
                 )}
@@ -305,7 +305,7 @@ export default function ModoPreparo({
                       {formatarRelogio(restante)}
                     </div>
                     <div className="flex items-center justify-center gap-3">
-                      <button
+                      <button type="button"
                         onClick={() => setRodando(r => !r)}
                         disabled={restante === 0}
                         className={`flex items-center gap-2 rounded-full px-6 py-2.5 font-black transition-all disabled:opacity-40 ${
@@ -317,7 +317,7 @@ export default function ModoPreparo({
                         {rodando ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
                         {rodando ? tDynamic('Pausar') : tDynamic('Iniciar')}
                       </button>
-                      <button
+                      <button type="button"
                         onClick={() => { setRodando(false); setRestante(tempoTotalPasso); }}
                         title={tDynamic('Reiniciar timer')}
                         className="rounded-full p-2.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
@@ -389,7 +389,7 @@ export default function ModoPreparo({
             <p className="mb-3 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-bold text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400">{erro}</p>
           )}
           <div className="flex items-center justify-between gap-3">
-            <button
+            <button type="button"
               onClick={() => setIndice(i => Math.max(0, i - 1))}
               disabled={indice === 0 || produzindo}
               className="flex items-center gap-2 rounded-xl px-4 py-3 font-bold text-gray-600 transition-all hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800 dark:disabled:text-gray-700 sm:px-6"
@@ -400,7 +400,7 @@ export default function ModoPreparo({
             <span className="tabular-nums text-sm font-black text-gray-400 sm:hidden">{formatarRelogio(decorrido)}</span>
 
             {ultimaTela ? (
-              <button
+              <button type="button"
                 onClick={finalizar}
                 disabled={produzindo || !miseEnPlaceOk}
                 className="flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-black text-white shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.03] hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 sm:px-8"
@@ -410,7 +410,7 @@ export default function ModoPreparo({
                   : <><Trophy size={20} /> {tDynamic('Concluir OS & Etiquetar')}</>}
               </button>
             ) : (
-              <button
+              <button type="button"
                 onClick={avancar}
                 disabled={!miseEnPlaceOk}
                 className="flex items-center gap-2 rounded-xl bg-orange-500 px-6 py-3 font-black text-white shadow-lg shadow-orange-500/30 transition-all hover:scale-[1.03] hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 sm:px-8"

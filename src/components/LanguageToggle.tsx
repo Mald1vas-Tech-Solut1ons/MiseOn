@@ -17,7 +17,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
 
   if (variant === 'minimal') {
     return (
-      <button
+      <button type="button"
         onClick={toggleLanguage}
         title={idioma === 'pt-BR' ? 'Switch to English' : 'Mudar para Português'}
         aria-label="Alternar Idioma"
@@ -43,7 +43,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
 
         {open && (
           <div className="absolute right-0 top-full mt-2 w-44 rounded-2xl border border-gray-200 bg-white/95 p-1.5 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#0B1120]/95 z-50">
-            <button
+            <button type="button"
               onClick={() => { setIdioma('pt-BR'); setOpen(false); }}
               className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${
                 idioma === 'pt-BR' ? 'bg-[#FC5B24]/10 text-[#FC5B24]' : 'text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10'
@@ -52,7 +52,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
               <span className="flex items-center gap-2">🇧🇷 Português</span>
               {idioma === 'pt-BR' && <Check size={14} />}
             </button>
-            <button
+            <button type="button"
               onClick={() => { setIdioma('en-US'); setOpen(false); }}
               className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${
                 idioma === 'en-US' ? 'bg-[#FC5B24]/10 text-[#FC5B24]' : 'text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10'
@@ -70,7 +70,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
   // Pill por padrão
   return (
     <div className={`inline-flex items-center rounded-full border border-gray-200/80 bg-gray-100/80 p-0.5 backdrop-blur-md dark:border-white/15 dark:bg-white/5 ${className}`}>
-      <button
+      <button type="button"
         onClick={() => setIdioma('pt-BR')}
         className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs opacity-95 font-bold transition ${
           idioma === 'pt-BR'
@@ -80,7 +80,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
       >
         <span>🇧🇷</span> PT
       </button>
-      <button
+      <button type="button"
         onClick={() => setIdioma('en-US')}
         className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs opacity-95 font-bold transition ${
           idioma === 'en-US'

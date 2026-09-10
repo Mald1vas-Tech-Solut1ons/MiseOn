@@ -114,7 +114,7 @@ export default function DemonstracaoFluxo() {
           {ETAPAS.map((e) => {
             const selecionado = e.id === etapaAtiva;
             return (
-              <button
+              <button type="button"
                 key={e.id}
                 onClick={() => setEtapaAtiva(e.id)}
                 className={`flex items-center gap-3 rounded-2xl p-4 text-left border transition-all duration-200 ${
