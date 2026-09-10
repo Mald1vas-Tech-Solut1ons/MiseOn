@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { MetodoPgto } from '../types';
 
 /**
  * Retorna o id da comanda ABERTA da mesa (reaproveitando entre várias
@@ -49,4 +50,17 @@ export async function lancarItemAvulsoComanda(params: {
   });
   if (error) throw error;
   return data as { comanda_id: string; pedido_id: string; valor_total: number };
+}
+
+/** Registra o recebimento presencial e fecha a comanda de forma atômica. */
+export async function fecharComandaBuffet(
+  comandaId: string,
+  metodoPagamento: Exclude<MetodoPgto, 'IFOOD'>,
+): Promise<{ comanda_id: string; status: 'FECHADA'; valor_pago: number; metodo_pagamento: MetodoPgto }> {
+  const { data, error } = await supabase.rpc('fn_fechar_comanda_buffet', {
+    p_comanda_id: comandaId,
+    p_metodo_pagamento: metodoPagamento,
+  });
+  if (error) throw error;
+  return data as { comanda_id: string; status: 'FECHADA'; valor_pago: number; metodo_pagamento: MetodoPgto };
 }

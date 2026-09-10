@@ -817,7 +817,10 @@ export default function Cardapio() {
       {checkoutAberto && !mesaAtual && (
         <CheckoutDrawer loja={loja} aberta={aberta} carrinho={carrinho} faixasDistancia={faixasDistancia} horarios={horarios} user={user} setCarrinho={setCarrinho} waToken={waTokenUrl}
           onClose={() => setCheckoutAberto(false)} onAbrirAuth={() => setModalAuthAberto(true)}
-          onCartao={(info) => { setCheckoutAberto(false); setCartao(info); }}
+          // Mantém o checkout montado atrás do modal. Se a adquirente recusar,
+          // o cliente volta exatamente para nome, telefone, endereço, cupom e
+          // forma de pagamento que já preencheu.
+          onCartao={(info) => setCartao(info)}
           onSucesso={(num, id, metodo, pixData, total) => {
             guardarUltimoPedido(slug, id, num);
             if (user) marcarCarrinhoRecuperado(loja.id, user);
@@ -831,7 +834,7 @@ export default function Cardapio() {
       }} onAprovado={() => {
         guardarUltimoPedido(slug, cartao.pedidoId, cartao.numero);
         if (user) marcarCarrinhoRecuperado(loja.id, user);
-        setCartao(null); setPedidoNumero(cartao.numero); setPedidoId(cartao.pedidoId); setPedidoTotal(cartao.total); setMetodo('CREDITO');
+        setCarrinho([]); setCheckoutAberto(false); setCartao(null); setPedidoNumero(cartao.numero); setPedidoId(cartao.pedidoId); setPedidoTotal(cartao.total); setMetodo('CREDITO');
       }} />}
 
       <ModalAuthCliente isOpen={modalAuthAberto} onClose={() => setModalAuthAberto(false)} />
@@ -1518,7 +1521,12 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
           } catch { /* mantém msg */ }
         }
         // Garante texto: nunca joga objeto no JSX (senão o React quebra a tela).
-        setErro(typeof msg === 'string' ? msg : 'Pagamento não autorizado. Confira os dados ou tente outro cartão.');
+        const texto = typeof msg === 'string' ? msg : '';
+        setErro(
+          /recebedor e cliente n[aã]o podem ser a mesma pessoa/i.test(texto)
+            ? 'A Efí não permite que o titular da conta recebedora pague a própria loja. Para testar outro cartão, toque em “Trocar titular” e informe o nome e o CPF do titular desse cartão.'
+            : (texto || 'Pagamento não autorizado. Confira os dados ou tente outro cartão.'),
+        );
       } else {
         // Guarda (ou limpa) os dados do titular para a próxima compra.
         try {
@@ -1534,6 +1542,14 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
   };
 
   const marcar = (k: string) => setTocado((t) => ({ ...t, [k]: true }));
+  const trocarTitular = () => {
+    setNome('');
+    setCpf('');
+    setSalvarDados(false);
+    setTocado((atual) => ({ ...atual, nome: false, cpf: false }));
+    try { localStorage.removeItem(TITULAR_KEY); } catch { /* armazenamento indisponível */ }
+    nomeRef.current?.focus();
+  };
   const invalido = (k: string, ok: boolean) => tocado[k] && !ok;
   const campoCls = (k: string, ok: boolean) =>
     `w-full rounded-lg border bg-white px-3 py-2.5 text-sm outline-none transition-colors dark:bg-gray-800 dark:text-gray-100 ${
@@ -1680,6 +1696,15 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
               <span className="block text-xs opacity-90 text-gray-400">{tDynamic('Nunca guardamos o número nem o CVV do cartão.')}</span>
             </span>
           </label>
+          {(nome || cpf) && (
+            <button
+              type="button"
+              onClick={trocarTitular}
+              className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600 transition hover:border-[var(--cor-primaria)] hover:text-[var(--cor-primaria-texto)] dark:border-gray-700 dark:text-gray-300"
+            >
+              {tDynamic('Trocar titular deste cartão')}
+            </button>
+          )}
 
           {/* Selos de confiança */}
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs opacity-90 text-gray-400">

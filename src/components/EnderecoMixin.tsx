@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MapPin, Search, Loader2 } from 'lucide-react';
 
 import { maskCEP } from '../lib/mascaras';
@@ -21,20 +21,62 @@ interface Props {
   className?: string;
 }
 
+const normalizarEndereco = (valor?: Partial<EnderecoFormData>): EnderecoFormData => ({
+  cep: valor?.cep ?? '',
+  logradouro: valor?.logradouro ?? '',
+  numero: valor?.numero ?? '',
+  complemento: valor?.complemento ?? '',
+  bairro: valor?.bairro ?? '',
+  cidade: valor?.cidade ?? '',
+  uf: valor?.uf ?? '',
+  ponto_referencia: valor?.ponto_referencia ?? '',
+  sem_numero: valor?.sem_numero ?? false,
+});
+
 export default function EnderecoMixin({ valorInicial, onMudanca, className = '' }: Props) {
-  const [dados, setDados] = useState<EnderecoFormData>({
-    cep: valorInicial?.cep ?? '',
-    logradouro: valorInicial?.logradouro ?? '',
-    numero: valorInicial?.numero ?? '',
-    complemento: valorInicial?.complemento ?? '',
-    bairro: valorInicial?.bairro ?? '',
-    cidade: valorInicial?.cidade ?? '',
-    uf: valorInicial?.uf ?? '',
-    ponto_referencia: valorInicial?.ponto_referencia ?? '',
-    sem_numero: valorInicial?.sem_numero ?? false,
-  });
+  const [dados, setDados] = useState<EnderecoFormData>(() => normalizarEndereco(valorInicial));
   const [buscando, setBuscando] = useState(false);
   const [erroCep, setErroCep] = useState('');
+  const {
+    cep: cepInicial,
+    logradouro: logradouroInicial,
+    numero: numeroInicial,
+    complemento: complementoInicial,
+    bairro: bairroInicial,
+    cidade: cidadeInicial,
+    uf: ufInicial,
+    ponto_referencia: referenciaInicial,
+    sem_numero: semNumeroInicial,
+  } = valorInicial ?? {};
+
+  // O perfil e o endereço padrão chegam do Supabase depois que o drawer já
+  // montou. Antes o formulário copiava `valorInicial` somente no primeiro
+  // render e continuava vazio para sempre, embora o endereço estivesse salvo.
+  useEffect(() => {
+    if (!valorInicial) return;
+    setDados(normalizarEndereco({
+      cep: cepInicial,
+      logradouro: logradouroInicial,
+      numero: numeroInicial,
+      complemento: complementoInicial,
+      bairro: bairroInicial,
+      cidade: cidadeInicial,
+      uf: ufInicial,
+      ponto_referencia: referenciaInicial,
+      sem_numero: semNumeroInicial,
+    }));
+  }, [
+    valorInicial,
+    cepInicial,
+    logradouroInicial,
+    numeroInicial,
+    complementoInicial,
+    bairroInicial,
+    cidadeInicial,
+    ufInicial,
+    referenciaInicial,
+    semNumeroInicial,
+  ]);
 
   const atualizar = (campo: keyof EnderecoFormData, valor: any) => {
     const novosDados = { ...dados, [campo]: valor };

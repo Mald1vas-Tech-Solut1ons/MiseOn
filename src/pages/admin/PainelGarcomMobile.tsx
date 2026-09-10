@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bell, Smartphone, CheckCircle, Volume2, Divide, ChevronRight, Zap, Receipt, Clock, Plus, X, Minus } from 'lucide-react';
+import { Bell, Smartphone, CheckCircle, Volume2, Divide, ChevronRight, Zap, Receipt, Clock, Plus, X, Minus, WalletCards } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useGarcomPush } from '../../hooks/useGarcomPush';
-import { lancarItemAvulsoComanda } from '../../lib/comandas';
+import { fecharComandaBuffet, lancarItemAvulsoComanda } from '../../lib/comandas';
 import type { CtxLoja } from './AdminLayout';
-import type { Mesa, Produto, Comanda } from '../../types';
+import type { Mesa, Produto, Comanda, MetodoPgto } from '../../types';
 import { ModalDivisaoItemGarcom } from '../../components/mesas/ModalDivisaoItemGarcom';
 
 import { useI18n } from '../../contexts/I18nContext';
@@ -36,6 +36,7 @@ export function PainelGarcomMobile() {
   const [mesaSelecionada, setMesaSelecionada] = useState<Mesa | null>(null);
   const [produtoParaFracionar, setProdutoParaFracionar] = useState<Produto | null>(null);
   const [comandaParaLancar, setComandaParaLancar] = useState<Comanda | null>(null);
+  const [comandaParaFechar, setComandaParaFechar] = useState<Comanda | null>(null);
   const [observacaoMesa, setObservacaoMesa] = useState('');
 
   const carregarMesasEProdutos = useCallback(async () => {
@@ -88,6 +89,18 @@ export function PainelGarcomMobile() {
     } catch (err: any) {
       console.error('Erro ao lançar item na comanda do buffet:', err);
       alert(err?.message || 'Falha ao lançar item na comanda.');
+    }
+  };
+
+  const receberEFecharComanda = async (metodo: Exclude<MetodoPgto, 'IFOOD'>) => {
+    if (!comandaParaFechar) return;
+    try {
+      await fecharComandaBuffet(comandaParaFechar.id, metodo);
+      setComandaParaFechar(null);
+      await carregarMesasEProdutos();
+    } catch (err: any) {
+      console.error('Erro ao receber e fechar comanda:', err);
+      alert(err?.message || 'Falha ao fechar a comanda. Confira o recebimento e tente novamente.');
     }
   };
 
@@ -306,27 +319,40 @@ export function PainelGarcomMobile() {
         ) : (
           <div className="space-y-2.5">
             {comandasBuffet.map((comanda) => (
-              <button
+              <div
                 key={comanda.id}
-                type="button"
-                onClick={() => setComandaParaLancar(comanda)}
-                className="w-full flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4 text-left transition hover:border-orange-500/50 active:scale-[0.99]"
+                className="w-full rounded-2xl border border-slate-800 bg-slate-900 p-4"
               >
-                <div>
-                  <div className="flex items-center gap-2 font-bold text-slate-100 text-sm">
-                    #{comanda.numero_cartao ?? 'sem número'}
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> {tDynamic('Viva')}
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-                    <Clock size={12} /> {tempoDecorrido(comanda.aberta_em)}
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 font-bold text-slate-100 text-sm">
+                      #{comanda.numero_cartao ?? 'sem número'}
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> {tDynamic('Viva')}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+                      <Clock size={12} /> {tempoDecorrido(comanda.aberta_em)}
+                    </div>
                   </div>
                 </div>
-                <span className="flex items-center gap-1 text-xs font-bold text-orange-400">
-                  <Plus size={14} /> {tDynamic('Lançar item')}
-                </span>
-              </button>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setComandaParaLancar(comanda)}
+                    className="flex items-center justify-center gap-1 rounded-xl bg-slate-800 px-3 py-2.5 text-xs font-bold text-orange-400 hover:bg-slate-700"
+                  >
+                    <Plus size={14} /> {tDynamic('Lançar item')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setComandaParaFechar(comanda)}
+                    className="flex items-center justify-center gap-1 rounded-xl bg-emerald-500 px-3 py-2.5 text-xs font-bold text-slate-950 hover:bg-emerald-400"
+                  >
+                    <WalletCards size={14} /> {tDynamic('Receber e fechar')}
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -424,6 +450,64 @@ export function PainelGarcomMobile() {
           onConfirmar={lancarItemNaComandaBuffet}
         />
       )}
+
+      {comandaParaFechar && (
+        <ModalFecharComanda
+          comanda={comandaParaFechar}
+          onCancelar={() => setComandaParaFechar(null)}
+          onConfirmar={receberEFecharComanda}
+        />
+      )}
+    </div>
+  );
+}
+
+function ModalFecharComanda({
+  comanda,
+  onCancelar,
+  onConfirmar,
+}: {
+  comanda: Comanda;
+  onCancelar: () => void;
+  onConfirmar: (metodo: Exclude<MetodoPgto, 'IFOOD'>) => Promise<void>;
+}) {
+  const { tDynamic } = useI18n();
+  const [metodo, setMetodo] = useState<Exclude<MetodoPgto, 'IFOOD'>>('PIX');
+  const [processando, setProcessando] = useState(false);
+  const metodos: { id: Exclude<MetodoPgto, 'IFOOD'>; label: string }[] = [
+    { id: 'PIX', label: 'Pix' },
+    { id: 'CREDITO', label: 'Crédito' },
+    { id: 'DEBITO', label: 'Débito' },
+    { id: 'DINHEIRO', label: 'Dinheiro' },
+  ];
+
+  const confirmar = async () => {
+    setProcessando(true);
+    try { await onConfirmar(metodo); } finally { setProcessando(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center" onClick={onCancelar}>
+      <div className="w-full max-w-md rounded-t-3xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-slate-100">{tDynamic('Receber e fechar comanda')}</h3>
+            <p className="text-xs text-slate-500">Comanda #{comanda.numero_cartao ?? 'sem número'}</p>
+          </div>
+          <button onClick={onCancelar} disabled={processando} className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800"><X size={18} /></button>
+        </div>
+        <p className="mb-3 text-xs text-amber-300">{tDynamic('Confirme somente depois que o pagamento presencial tiver sido recebido.')}</p>
+        <div className="grid grid-cols-2 gap-2">
+          {metodos.map((item) => (
+            <button key={item.id} type="button" onClick={() => setMetodo(item.id)} className={`rounded-xl border px-3 py-3 text-xs font-bold ${metodo === item.id ? 'border-emerald-400 bg-emerald-500/15 text-emerald-300' : 'border-slate-800 bg-slate-950 text-slate-300'}`}>
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <button type="button" onClick={confirmar} disabled={processando} className="mt-4 w-full rounded-xl bg-emerald-500 py-3 text-sm font-black text-slate-950 hover:bg-emerald-400 disabled:opacity-60">
+          {processando ? tDynamic('Fechando…') : tDynamic('Confirmar recebimento e fechar')}
+        </button>
+      </div>
     </div>
   );
 }
