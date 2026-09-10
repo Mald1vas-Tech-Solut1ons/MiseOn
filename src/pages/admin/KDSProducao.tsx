@@ -325,13 +325,16 @@ function OSCard({
             <ul className="space-y-1.5">
               {itens.map((it, idx) => (
                 <li key={idx} className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-1.5">
+                  {/* min-w-0 + truncate no nome e shrink-0 na quantidade: nome de
+                      insumo longo espremia a coluna "necessario / disponivel" ate
+                      ela quebrar em duas linhas no celular. */}
+                  <span className="flex min-w-0 items-center gap-1.5">
                     {it.ok
                       ? <PackageCheck size={15} className="text-green-500 shrink-0" />
                       : <PackageX size={15} className="text-red-500 shrink-0" />}
-                    <span className="font-medium text-gray-700 dark:text-gray-300">{it.ins?.nome ?? '—'}</span>
+                    <span className="truncate font-medium text-gray-700 dark:text-gray-300">{it.ins?.nome ?? '—'}</span>
                   </span>
-                  <span className={`font-bold tabular-nums ${it.ok ? 'text-gray-600 dark:text-gray-400' : 'text-red-500'}`}>
+                  <span className={`shrink-0 pl-2 font-bold tabular-nums ${it.ok ? 'text-gray-600 dark:text-gray-400' : 'text-red-500'}`}>
                     {it.necessario} / {it.disponivel} {it.ins?.unidade_medida}
                   </span>
                 </li>
@@ -391,7 +394,9 @@ function OSCard({
       {/* MODAL DE FURO DE ESTOQUE */}
       {modalFuroAberto && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 animate-in fade-in" onClick={() => setModalFuroAberto(false)}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md p-6 shadow-2xl border border-red-500/30" onClick={e => e.stopPropagation()}>
+          {/* max-h + rolagem: a lista de itens em falta cresce com a ficha tecnica.
+              Numa OS com muitos insumos faltando o botao "Entendi" saia da tela. */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md max-h-[85dvh] overflow-y-auto p-6 shadow-2xl border border-red-500/30" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4 text-red-600 dark:text-red-500">
               <AlertTriangle size={32} />
               <h3 className="font-black text-xl">{tDynamic('Estoque insuficiente')}</h3>
@@ -406,9 +411,9 @@ function OSCard({
                 {itens.filter(i => !i.ok).map(i => {
                   const saldoApos = Number(i.ins?.quantidade_atual) - i.necessario;
                   return (
-                    <div key={i.ins?.id} className="flex justify-between items-center text-sm">
-                      <span className="font-semibold text-gray-800 dark:text-gray-200">{i.ins?.nome}</span>
-                      <span className="font-bold text-red-600 dark:text-red-400 tabular-nums">
+                    <div key={i.ins?.id} className="flex justify-between items-center gap-2 text-sm">
+                      <span className="min-w-0 truncate font-semibold text-gray-800 dark:text-gray-200">{i.ins?.nome}</span>
+                      <span className="shrink-0 font-bold text-red-600 dark:text-red-400 tabular-nums">
                         {Number(i.ins?.quantidade_atual)} ➔ <span className="bg-red-100 dark:bg-red-900/50 px-1.5 py-0.5 rounded">{saldoApos}</span> {i.ins?.unidade_medida}
                       </span>
                     </div>

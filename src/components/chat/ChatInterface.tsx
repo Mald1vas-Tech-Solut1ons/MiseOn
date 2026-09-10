@@ -91,7 +91,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
   return (
     <>
       {/* Botão Flutuante (Floating Action Button) */}
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-[calc(5rem+var(--safe-bottom))] right-4 lg:bottom-6 lg:right-6 z-50 flex h-[60px] w-[60px] items-center justify-center rounded-full text-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-transform duration-300 hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] active:scale-95"
         style={{ background: loja.cor_primaria || '#25D366' }} // Whatsapp-like green as fallback
@@ -142,7 +142,7 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
             </p>
           </div>
           
-          <button 
+          <button type="button" 
             onClick={() => setIsOpen(false)} 
             className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/20 transition-colors"
           >

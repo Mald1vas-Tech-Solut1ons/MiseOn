@@ -310,7 +310,11 @@ export default function PainelPedidos() {
   const visiveisLimitados = visiveis.slice(0, limiteRender);
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-5 dark:bg-[#070C18]">
+    // `min-h-full` no lugar de `min-h-screen` (=100vh): a pagina roda dentro do
+    // <main> do painel, que ja e mais baixo que a janela (header de 88px + barra
+    // inferior no celular). Com 100vh sobrava uma faixa vazia depois do ultimo
+    // card e a rolagem continuava sem ter mais nada para mostrar.
+    <div className="min-h-full bg-gray-50 px-4 py-5 dark:bg-[#070C18]">
       <div className="print:hidden mb-6">
         <div className="flex items-center gap-2 mb-1">
           <span className="font-['JetBrains_Mono'] text-xs opacity-95 tracking-[0.28em] text-orange-500 uppercase">{tDynamic('PAINEL · AO VIVO')}</span>

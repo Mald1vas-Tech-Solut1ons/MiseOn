@@ -37,7 +37,7 @@ export const DICIONARIO = {
     'nicho.restauranteBar': 'Restaurantes & Bares',
     'nicho.restauranteBarDesc': 'Comanda no celular do garçom, mapa de mesas com divisão de conta, DRE financeiro e NFC-e.',
     'nicho.darkKitchen': 'Dark Kitchens',
-    'nicho.darkKitchenDesc': 'Operação multi-marcas virtuais na mesma cozinha física e estoque PEPS.',
+    'nicho.darkKitchenDesc': 'Operação só delivery: iFood e cardápio próprio na mesma fila, com estoque PEPS.',
     'nicho.verSolucao': 'Ver solução para',
 
     // Hero
@@ -169,7 +169,7 @@ export const DICIONARIO = {
     'nicho.restauranteBar': 'Restaurants & Bars',
     'nicho.restauranteBarDesc': 'Mobile waiter tab, 3D table map with check splitting, management P&L, and NFC-e.',
     'nicho.darkKitchen': 'Dark Kitchens',
-    'nicho.darkKitchenDesc': 'Multi-brand virtual operation in the same physical kitchen with FIFO stock.',
+    'nicho.darkKitchenDesc': 'Delivery-only operation: iFood and your own menu in one queue, with FIFO stock.',
     'nicho.verSolucao': 'View solution for',
 
     // Hero
@@ -490,7 +490,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Como o MiseOn protege seu lucro': 'How MiseOn protects your profit',
   'Forno & Delivery': 'Oven & Delivery',
   'Mesmo com poucos gargalos, pequenos desvios acumulam grandes valores fora do seu caixa no final do ano.': 'Even with few bottlenecks, small leaks accumulate large amounts outside your register by the end of the year.',
-  'Multi-Marcas & iFood': 'Multi-Brand & iFood',
+  'Só Delivery & iFood': 'Delivery-Only & iFood',
   'MÓDULO R$/KG': '$/KG MODULE',
   'Na sua rotina atual...': 'In your current routine...',
   'O que acontece no seu bolso e caixa': 'What happens to your pocket and register',
@@ -1000,7 +1000,17 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Dark Kitchen (Delivery Apenas)': 'Dark Kitchen (Delivery Only)',
   'OPERAÇÃO SEM SALÃO': 'GHOST KITCHEN OPERATION',
   'PERFIL DE NEGOCIO': 'BUSINESS PROFILE',
-  'Opere múltiplas marcas virtuais no mesmo restaurante compartilhando a mesma cozinha física e a mesma baixa de estoque PEPS.': 'Operate multiple virtual brands from the same physical kitchen with unified FIFO inventory deduction.',
+  'Perfil de operação só delivery: o painel esconde mapa de mesas e garçom, os pedidos do iFood e do seu cardápio próprio entram na mesma fila da cozinha e a baixa de estoque sai da ficha técnica pelo custo PEPS.': 'Delivery-only business profile: the panel hides the table map and waiter app, iFood and your own menu orders land in the same kitchen queue, and stock is deducted from the recipe card at FIFO cost.',
+  'Perfil Dark Kitchen: painel sem mesa e sem garçom, só delivery': 'Dark Kitchen profile: panel with no tables and no waiter app, delivery only',
+
+  // Landing /sistema-para-dark-kitchen — copy revisada em 10/09/2026 para bater
+  // com o que o produto entrega hoje (uma loja, um cardápio, um estoque).
+  'Sem salão para diluir custo, a dark kitchen vive de duas coisas: volume de pedido e CMV sob controle. O MiseOn junta iFood e canal próprio numa tela só, e mostra o custo real de cada prato.': 'With no dining room to spread costs over, a dark kitchen lives on two things: order volume and food cost under control. MiseOn brings iFood and your own channel into a single screen and shows the real cost of every dish.',
+  'O painel se ajusta ao negócio que só entrega — uma loja, um cardápio, um estoque:': 'The panel adapts to a delivery-only business — one store, one menu, one inventory:',
+  'Dá para operar várias marcas virtuais na mesma cozinha?': 'Can I run several virtual brands from the same kitchen?',
+  'Hoje não. O painel atende uma loja por acesso: um cardápio, um link e um estoque. Não existe cadastro de marcas separadas dentro da mesma loja, nem troca de marca dentro do painel, nem faturamento quebrado por marca. O que existe é a separação por canal — iFood e cardápio próprio convivem na mesma fila com selo de origem, e o resultado sai separado por origem. Operação multimarcas está no roadmap, não no produto de hoje.': 'Not today. The panel serves one store per login: one menu, one link, one inventory. There is no separate brand registry inside a store, no brand switcher in the panel, and no revenue broken down by brand. What does exist is channel separation — iFood and your own menu share the same queue with an origin tag, and results are reported per origin. Multi-brand operation is on the roadmap, not in today\'s product.',
+  'Não. O MiseOn roda no navegador do computador, tablet ou celular que você já tem. A cozinha usa uma tela comum como KDS e o cardápio digital dispensa impressão.': 'No. MiseOn runs in the browser on the computer, tablet or phone you already have. The kitchen uses an ordinary screen as the KDS and the digital menu needs no printing.',
+  'Impressão térmica de comanda, via do entregador e etiqueta (58/80 mm)': 'Thermal printing of kitchen tickets, courier copies and labels (58/80 mm)',
 
   'Gestão de Entregas por Km': 'Delivery Distance Fee Management',
   'TAXA POR DISTÂNCIA': 'DISTANCE-BASED FEE',
@@ -2536,6 +2546,7 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Nao': 'No',
   'Todos': 'All',
   'Voltar ao Início': 'Back to Home',
+  'Voltar para a lista de conversas': 'Back to the conversation list',
   'Voltar para a página inicial': 'Back to Homepage',
   'Voltar para o início': 'Back to Home',
   'Criar Minha Conta Grátis': 'Create My Free Account',

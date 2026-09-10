@@ -875,9 +875,16 @@ export default function KDS() {
   const nomeGargalo = etapas.find(e => e.id === metricasPorEtapa.gargaloId)?.nome;
 
   return (
+    // Alturas pelo chassi, nao por `screen`:
+    // - fullscreen usava `h-screen w-screen` (=100vh/100vw). No celular o 100vh
+    //   inclui a barra do navegador, entao o rodape do quadro ficava fora da tela;
+    //   e o 100vw ignora a barra de rolagem, criando rolagem lateral no desktop.
+    //   O `inset-0` ja da o tamanho certo, so precisava parar de ser sobrescrito.
+    // - fora do fullscreen o `min-h-screen` deixava a pagina mais alta que a area
+    //   util do painel (header de 88px + barra inferior), sobrando um vazio no fim.
     <div className={`flex flex-col bg-[#070C18] transition-all duration-300 ${emFullscreen
-        ? 'fixed inset-0 z-[9999] h-screen w-screen p-3 lg:p-4 overflow-hidden'
-        : 'min-h-screen px-3 pt-3 lg:px-4'
+        ? 'fixed inset-0 z-[9999] h-[100dvh] w-full p-3 lg:p-4 overflow-hidden'
+        : 'min-h-full px-3 pt-3 lg:px-4'
       }`}>
 
       {/* ── Sprint 5: aviso do modelo novo (só aparece se a loja tem estações configuradas) ── */}
@@ -1326,7 +1333,7 @@ export default function KDS() {
               </button>
             </div>
 
-            <div className="mt-4 max-h-[60vh] space-y-3 overflow-y-auto pr-1">
+            <div className="mt-4 max-h-[60dvh] space-y-3 overflow-y-auto pr-1">
               {pedidosArquivadosList.map((p) => (
                 <div key={p.id} className="flex items-center justify-between rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
                   <div className="space-y-1">
@@ -1445,7 +1452,7 @@ export default function KDS() {
       {/* ── MODAL: CONFIGURAR ETAPAS E OPERADORES DO KDS ── */}
       {modalConfigAberto && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl rounded-3xl border border-white/15 bg-[#0F172A] p-6 text-white shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-3xl border border-white/15 bg-[#0F172A] p-6 text-white shadow-2xl max-h-[90dvh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Settings className="text-orange-400" size={20} />

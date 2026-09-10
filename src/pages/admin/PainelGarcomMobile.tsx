@@ -563,8 +563,12 @@ function ModalLancarItemComanda({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center" onClick={onCancelar}>
+      {/* max-h + rolagem: depois de escolher o produto a folha passa a listar
+          TODOS os grupos de modificadores do item, mais quantidade e observacao.
+          Com dois ou tres grupos ela ja passava da altura do celular e o botao
+          de confirmar o lancamento ficava fora da tela, sem como rolar. */}
       <div
-        className="w-full max-w-md rounded-t-3xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:rounded-3xl"
+        className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">

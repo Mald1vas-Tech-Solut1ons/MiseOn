@@ -183,7 +183,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     badge: 'Operação 100% Delivery',
     h1Title: 'Cozinha sem salão precisa de',
     h1Highlight: 'margem, não de mesa',
-    subheadline: 'Sem salão para diluir custo, a dark kitchen vive de duas coisas: volume de pedido e CMV sob controle. O MiseOn junta iFood e canal próprio numa tela so, e mostra o custo real de cada prato.',
+    subheadline: 'Sem salão para diluir custo, a dark kitchen vive de duas coisas: volume de pedido e CMV sob controle. O MiseOn junta iFood e canal próprio numa tela só, e mostra o custo real de cada prato.',
     heroMetrics: [
       { label: 'Canais', value: 'iFood + próprio' },
       { label: 'Comissão no canal próprio', value: 'Zero' },
@@ -239,13 +239,14 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     ],
     businessRules: {
       title: 'Como o MiseOn trata uma operação sem salão',
-      description: 'O painel se ajusta ao negocio que so entrega:',
+      description: 'O painel se ajusta ao negócio que só entrega — uma loja, um cardápio, um estoque:',
       items: [
-        'O perfil Dark Kitchen tira mesa e balcão da frente de quem so opera delivery.',
-        'Pedidos de marketplace e do canal próprio convivem na mesma fila de produção, sem retranscricao.',
+        'O perfil Dark Kitchen esconde o mapa de mesas e o app do garçom de quem só opera delivery.',
+        'Pedidos de marketplace e do canal próprio convivem na mesma fila de produção, sem retranscrição.',
         'O faturamento fica separado por origem, para você comparar quanto custa cada canal.',
         'A baixa de estoque acontece por ficha técnica, independente do canal que originou o pedido.',
-        'Entregas próprias tem taxa por faixa de distancia e acompanhamento da rota ao vivo.',
+        'Entregas próprias têm taxa por faixa de distância e acompanhamento da rota ao vivo.',
+        'O painel atende uma loja por acesso: não há cadastro de marcas virtuais separadas dentro da mesma loja.',
       ],
     },
     faqs: [
@@ -259,7 +260,11 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         pergunta: 'Preciso de equipamento específico?',
-        resposta: 'Não. O MiseOn roda no navegador do computador, tablet ou celular que você ja tem. A cozinha usa uma tela comum como KDS e o cardápio digital dispensa impressão.',
+        resposta: 'Não. O MiseOn roda no navegador do computador, tablet ou celular que você já tem. A cozinha usa uma tela comum como KDS e o cardápio digital dispensa impressão.',
+      },
+      {
+        pergunta: 'Dá para operar várias marcas virtuais na mesma cozinha?',
+        resposta: 'Hoje não. O painel atende uma loja por acesso: um cardápio, um link e um estoque. Não existe cadastro de marcas separadas dentro da mesma loja, nem troca de marca dentro do painel, nem faturamento quebrado por marca. O que existe é a separação por canal — iFood e cardápio próprio convivem na mesma fila com selo de origem, e o resultado sai separado por origem. Operação multimarcas está no roadmap, não no produto de hoje.',
       },
     ],
     screenshots: [

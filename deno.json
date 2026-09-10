@@ -1,5 +1,15 @@
 {
   // Config do Deno usada pelo CI (`deno lint supabase/functions`) e pelo pre-commit.
+  //
+  // ESCOPO (10/09/2026): só `supabase/functions` roda em Deno. O resto do repo
+  // é app React (Vite + tsc + ESLint). Sem estas duas listas, um editor que
+  // encontra este arquivo na raiz passa a tratar `src/**` como Deno e enche a
+  // tela de erro que não existe — "Cannot find name 'button'" (o TS do Deno não
+  // carrega o JSX do React) e regras `jsx-*` do deno-lint em componente que
+  // nunca vai executar em Deno. O ESLint do projeto passa limpo nesses mesmos
+  // arquivos: o erro era do escopo, não do código.
+  "include": ["supabase/functions"],
+  "exclude": ["src", "api", "scripts", "cypress", "__tests__", "dist", "node_modules", "public", "k6"],
   // REGRAS EXCLUÍDAS — cada exclusão é dívida registrada, não aprovação:
   // - no-explicit-any (107 ocorrências): tipagem gradual nas edge functions.
   //   Corrigir tudo de uma vez seria churn cosmético em código de pagamento;
@@ -9,6 +19,8 @@
   //   trocar por `npm:`/versões fixas é migração de build, não correção de defeito.
   // TODAS as demais regras continuam ativas e são portão do CI.
   "lint": {
+    "include": ["supabase/functions"],
+    "exclude": ["src", "api", "scripts", "cypress", "__tests__", "dist", "node_modules", "public", "k6"],
     "rules": {
       "exclude": ["no-explicit-any", "no-import-prefix", "no-unversioned-import"]
     }

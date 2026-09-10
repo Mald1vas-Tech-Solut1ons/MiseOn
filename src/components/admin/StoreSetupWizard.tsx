@@ -189,8 +189,11 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
 
   return (
     <div
-      className="fixed bottom-[calc(var(--app-nav-h)+1rem)] right-3 z-[9999] w-[340px] max-w-[calc(100vw-1.5rem)] sm:bottom-6 sm:right-6"
-      style={{ maxHeight: 'calc(100vh - 100px)' }}
+      className="fixed bottom-[calc(var(--app-nav-h)+1rem)] right-3 z-[9999] w-[340px] max-w-[calc(100vw-1.5rem)] overflow-y-auto sm:bottom-6 sm:right-6"
+      // 100dvh e desconto da barra inferior: com 100vh o teto era maior que a area
+      // visivel do celular, entao o topo do cartao (titulo e botao de fechar) saia
+      // pela parte de cima da tela — e sem `overflow-y-auto` o limite nao fazia nada.
+      style={{ maxHeight: 'calc(100dvh - var(--app-nav-h) - 6rem)' }}
     >
       {/* ── Card principal ── */}
       <div className="flex flex-col rounded-[24px] border border-orange-500/20 bg-[#0B1220]/96 text-white shadow-[0_24px_80px_rgba(0,0,0,0.85),0_0_0_1px_rgba(249,115,22,0.1)] backdrop-blur-xl overflow-hidden">

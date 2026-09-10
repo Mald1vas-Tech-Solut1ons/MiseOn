@@ -99,7 +99,7 @@ Não deixe sua margem de lucro escorrer pelo ralo. Coloque a engenharia de dados
   {
     slug: 'dark-kitchen-hamburgueria-gestao-multi-marcas-logistica-delivery',
     title: 'Dark Kitchens e Hamburguerias de Escala: Como Operar Multi-Marcas no Mesmo Estoque com KDS Centralizado',
-    description: 'Guia avançado de engenharia de delivery: gestão de múltiplas marcas virtuais, unificação de insumos em chapa de alta produção e roteamento de despacho sem erros.',
+    description: 'Guia de engenharia de delivery: o que o modelo multimarcas exige de um sistema, o que o MiseOn entrega hoje (estoque único por loja, KDS por estação e selo de canal) e o que ainda está no roadmap.',
     category: 'Operação & KDS',
     publishedAt: '2026-08-18',
     readTime: '10 min de leitura',
@@ -112,11 +112,11 @@ Não deixe sua margem de lucro escorrer pelo ralo. Coloque a engenharia de dados
     tags: ['Dark Kitchen', 'Hamburgueria', 'Multi-Marcas', 'KDS Centralizado', 'Delivery de Escala'],
     seo: {
       title: 'Dark Kitchens & Hamburguerias Multi-Marcas: Operação & KDS — MiseOn',
-      description: 'Saiba como rodar múltiplas marcas virtuais de hamburgueria e delivery no mesmo espaço físico com KDS unificado e controle de estoque por PEPS.',
+      description: 'O modelo de dark kitchen multimarcas, o que ele exige de sistema e o que o MiseOn entrega hoje: estoque único por loja, KDS por estação e faturamento separado por canal de origem.',
       keywords: 'dark kitchen brasil, hamburgueria delivery kds, sistema multi marcas delivery, comanda digital hamburgueria, gestão de dark kitchen',
       canonicalUrl: 'https://miseon.app.br/blog/dark-kitchen-hamburgueria-gestao-multi-marcas-logistica-delivery',
     },
-    summary: 'Operar uma Dark Kitchen ou hamburgueria de alto volume exige máxima eficiência por metro quadrado. Veja como integrar múltiplas marcas no mesmo estoque de pães e carnes, rotear pedidos para praças distintas e zerar o tempo de embalagem com o KDS MiseOn.',
+    summary: 'Operar uma Dark Kitchen ou hamburgueria de alto volume exige máxima eficiência por metro quadrado. Veja o que o modelo multimarcas cobra de um sistema, como o MiseOn trata insumo compartilhado, roteamento por praça de produção e tempo de expedição — e onde estão os limites do que ele faz hoje.',
     content: `
 # Dark Kitchens e Hamburguerias de Escala: Operação Multi-Marcas com KDS Centralizado
 
@@ -138,10 +138,12 @@ Em vez de comprar 5 tipos de queijo e 4 tipos de batata para marcas diferentes:
 - As marcas compartilham o mesmo pão brioche, a mesma maionese da casa e o mesmo blend de carne bovina.
 - Cada marca diferencia seu produto final pelo **molho especial, topping exclusivo e embalagem personalizada**.
 
-No **MiseOn**:
-- O estoque de insumos (ex: *Lote de Blend de Carne 160g*) é **único e centralizado**.
-- Quando entra um pedido da *Marca A (Burger Classic)* ou da *Marca B (Smash King)*, a Ficha Técnica deduz do **mesmo saldo de carne no estoque PEPS**.
-- O gestor enxerga o consumo consolidado por insumo e o faturamento individual por marca no DRE.
+**O que o MiseOn faz hoje — e o que ele ainda não faz.** Vale ser exato aqui, porque essa é a diferença entre um sistema que te ajuda e uma promessa que você descobre quebrada no primeiro sábado:
+
+- O estoque de insumos (ex: *Lote de Blend de Carne 160g*) é **único e centralizado por loja**, e a baixa sai da ficha técnica pelo custo PEPS do lote que entrou.
+- Se as suas linhas de produto convivem **no mesmo cardápio** — Smash, Artesanal e Porções como categorias da mesma loja —, tudo isso já funciona: mesmo saldo de carne, mesmo CMV, mesmo DRE.
+- O que **não existe hoje** é cadastro de marcas virtuais separadas dentro de uma mesma loja: não há troca de marca no painel, logotipo por marca no pedido nem faturamento quebrado por marca no DRE. O corte que o MiseOn entrega é **por canal de origem** (iFood, cardápio próprio, WhatsApp, balcão), não por marca.
+- Marca virtual como entidade própria está no roadmap. Enquanto não estiver no produto, não vamos dizer que está.
 
 ---
 
@@ -149,13 +151,13 @@ No **MiseOn**:
 
 Na chapa durante o pico das 21h de domingo, o chapeiro não pode ficar olhando para 3 celulares ou 4 impressoras térmicas diferentes cuspindo papel.
 
-O **KDS Multi-Marcas do MiseOn** unifica todas as origens em um único painel central inteligente:
+O **KDS do MiseOn** unifica todas as origens em um único painel central:
 
-1. **Badge de Identificação de Marca**: Cada card de pedido no KDS exibe a cor e o logotipo da marca de origem (*ex: 🔴 Smash Burger Co. | 🔵 Smash & Shake*).
+1. **Selo de origem no card**: cada pedido no KDS mostra de onde veio — iFood, cardápio próprio, WhatsApp ou balcão — para a cozinha saber a régua de tempo e o faturamento sair separado por canal. É selo de canal, não de marca.
 2. **Agrupamento por Praça de Produção**:
    - **Chapa**: Recebe apenas as carnes que devem ir para a grelha/chapa com a gramatura e ponto indicados.
    - **Fritadeira**: Recebe as porções de batata, anéis de cebola e nugggets.
-   - **Montagem & Embalagem**: Exibe o pedido completo e a embalagem exata (Saco Kraft da Marca A ou Caixa Premium da Marca B).
+   - **Montagem & Embalagem**: exibe o pedido completo para o expedidor conferir antes de lacrar.
 
 ---
 
@@ -164,11 +166,11 @@ O **KDS Multi-Marcas do MiseOn** unifica todas as origens em um único painel ce
 Em uma Dark Kitchen, o cliente não está vendo a cozinha. A única experiência dele é a velocidade e a temperatura em que o lanche chega na casa dele.
 
 O MiseOn integra a esteira de despacho:
-- **Status em Tempo Real**: Assim que a embalagem recebe o lacre, o operador toca no botão **"PRONTO PARA EXPEDIÇÃO"**.
-- **Notificação Automática via WhatsApp**: O cliente e o motoboy cadastrado recebem a mensagem: *"Seu pedido da Burger Co. está pronto e saindo para entrega com o entregador Marcos!"*.
-- **Controle de Tempo de Balcão**: Se a embalagem fica mais de 5 minutos aguardando retirada na bancada de expedição, a tela de expedição acende um alerta visual para o gerente intervir.
+- **Status em Tempo Real**: assim que a embalagem recebe o lacre, o operador toca no botão **"PRONTO PARA EXPEDIÇÃO"** e o pedido some da fila de produção.
+- **Aviso no WhatsApp**: pedido que nasceu no WhatsApp recebe automaticamente a confirmação com o link de acompanhamento quando é aceito. Nos demais canais o aviso ao cliente e ao entregador é disparado pela tela de Entregas, com um toque — não é automático em toda mudança de status.
+- **Controle de Tempo de Balcão**: a tela de expedição conta o tempo de cada ficha e acende **ATENÇÃO aos 10 minutos** e **ATRASADO aos 20**, para o gerente intervir antes do cliente reclamar.
 
-Com o MiseOn, sua Dark Kitchen ganha escala de multinacional com a simplicidade de um software intuitivo feito para o dia a dia gastronômico.
+Com o MiseOn, sua Dark Kitchen ganha controle de custo e de tempo sem trocar de sistema a cada canal novo.
 `,
   },
   {

@@ -268,7 +268,7 @@ export default function AdminLayout() {
 
   if (erroConexao) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 p-8 text-center bg-gray-50 dark:bg-[#0B1120] text-gray-900 dark:text-gray-100">
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 p-8 text-center bg-gray-50 dark:bg-[#0B1120] text-gray-900 dark:text-gray-100">
         <h1 className="font-bold text-lg">{tDynamic('Não foi possível carregar os dados da loja')}</h1>
         <p className="text-xs text-gray-400 max-w-sm">{tDynamic('Verifique sua conexão com a internet ou tente recarregar a página.')}</p>
         <button onClick={() => window.location.reload()} className="mt-2 rounded-xl bg-[var(--cor-primaria)] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:brightness-110 transition-all">{tDynamic('Tentar Novamente')}</button>
@@ -299,7 +299,7 @@ export default function AdminLayout() {
   const isLockdown = ctx.diasAtraso > 7;
   if (isLockdown && ctx.papel !== 'admin') {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 p-8 text-center bg-gray-50 dark:bg-[#0B1120] text-gray-900 dark:text-gray-100">
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 p-8 text-center bg-gray-50 dark:bg-[#0B1120] text-gray-900 dark:text-gray-100">
         <Store size={48} className="text-red-500 mb-2" />
         <h1 className="font-bold text-xl text-red-600">{tDynamic('Loja Temporariamente Suspensa')}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">{tDynamic('O acesso ao sistema operacional está suspenso. Peça para o administrador da loja regularizar a assinatura na plataforma.')}</p>
@@ -481,7 +481,12 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="miseon-shell-admin flex h-screen bg-transparent text-gray-900 dark:text-gray-100 font-sans overflow-hidden selection:bg-[#FC5B24] selection:text-white">
+    // `h-[100dvh]` e nao `h-screen` (=100vh): no celular a barra do navegador
+    // entra na conta do 100vh, entao o shell ficava mais alto que a area visivel.
+    // Como o shell e `overflow-hidden` e quem rola e o <main> interno, os ultimos
+    // pixels do conteudo caiam fora da tela e nao havia como alcanca-los —
+    // era o "card do final coberto". O `--app-main-h` ja usava 100dvh; o shell nao.
+    <div className="miseon-shell-admin flex h-[100dvh] bg-transparent text-gray-900 dark:text-gray-100 font-sans overflow-hidden selection:bg-[#FC5B24] selection:text-white">
       {/* 
         Safelist invisível para o Tailwind não remover as cores dinâmicas dos grupos (bg-{color}-500, text-{color}-600/90, etc)
         Usado: slate, orange, emerald, blue, purple, indigo, sky

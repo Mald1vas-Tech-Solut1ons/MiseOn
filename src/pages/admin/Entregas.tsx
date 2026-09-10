@@ -956,7 +956,7 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
       {/* ── Modal de Chat ─── */}
       {chatPedido && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="w-full sm:max-w-md bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl flex flex-col" style={{ maxHeight: '90vh' }}>
+          <div className="w-full sm:max-w-md bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl flex flex-col" style={{ maxHeight: '90dvh' }}>
             <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
               <div>
                 <p className="font-bold dark:text-white">Chat · Pedido #{chatPedido.numero}</p>

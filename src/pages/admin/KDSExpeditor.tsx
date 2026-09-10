@@ -249,7 +249,11 @@ export default function KDSExpeditor() {
   const atrasados = ticketsDaEstacao.filter((t) => minutosDesde(t.iniciado_em || t.criado_em) >= 20).length;
 
   return (
-    <main className="min-h-[calc(100vh-5rem)] bg-slate-100 p-3 pb-24 dark:bg-[#070d18] sm:p-5">
+    // `min-h-full` no lugar de `min-h-[calc(100vh-5rem)]`: os 5rem chutados nao
+    // correspondem ao header de 88px nem a barra inferior do celular, e no mobile
+    // o 100vh ainda soma a barra do navegador. Resultado: sobra vazia no fim da
+    // pagina e rolagem alem do conteudo. O pai ja tem a altura util do painel.
+    <main className="min-h-full bg-slate-100 p-3 pb-24 dark:bg-[#070d18] sm:p-5">
       <section className="mx-auto max-w-[1800px]">
         <header className="overflow-hidden rounded-3xl bg-[#0b1423] text-white shadow-xl">
           <div className="flex flex-col gap-5 p-5 xl:flex-row xl:items-center xl:justify-between">

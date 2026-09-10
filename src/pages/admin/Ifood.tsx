@@ -513,7 +513,7 @@ function ImportarCardapioModal({ lojaId }: { lojaId: string }) {
             </div>
 
             {/* Corpo */}
-            <div className="px-5 py-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            <div className="px-5 py-4 max-h-[60dvh] overflow-y-auto custom-scrollbar">
 
               {/* Carregando */}
               {carregando && (

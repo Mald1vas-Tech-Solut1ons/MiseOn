@@ -406,7 +406,7 @@ export default function Fiscal() {
 
       {/* Navegação por Abas */}
       <div className="flex border-b border-gray-200 dark:border-gray-800 gap-4">
-        <button
+        <button type="button"
           onClick={() => setAbaAtiva('config')}
           className={`pb-3 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
             abaAtiva === 'config'
@@ -417,7 +417,7 @@ export default function Fiscal() {
           <Building2 size={18} /> {tDynamic('Configurações Fiscais do Tenant')}
         </button>
 
-        <button
+        <button type="button"
           onClick={() => setAbaAtiva('notas')}
           className={`pb-3 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
             abaAtiva === 'notas'
@@ -428,7 +428,7 @@ export default function Fiscal() {
           <Layers size={18} /> Gestão de Notas Fiscais ({notas.length})
         </button>
 
-        <button
+        <button type="button"
           onClick={() => setAbaAtiva('importar')}
           className={`pb-3 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
             abaAtiva === 'importar'
@@ -833,7 +833,7 @@ export default function Fiscal() {
                 <option value="importada">Importada</option>
               </select>
 
-              <button
+              <button type="button"
                 onClick={carregarNotas}
                 className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-all"
               >
@@ -935,7 +935,7 @@ export default function Fiscal() {
                             )}
 
                             {nota.status === 'AUTORIZADA' && (
-                              <button
+                              <button type="button"
                                 onClick={() => setNotaParaCancelar(nota)}
                                 className="p-2 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all"
                                 title="Cancelar Nota Fiscal"
@@ -1014,7 +1014,9 @@ export default function Fiscal() {
       {/* Modal de Cancelamento de Nota */}
       {notaParaCancelar && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0B1120] rounded-3xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-800 shadow-2xl space-y-4">
+          {/* max-h + rolagem: com o teclado aberto para digitar a justificativa o
+              botao de confirmar o cancelamento saia da area visivel do celular. */}
+          <div className="bg-white dark:bg-[#0B1120] rounded-3xl max-w-md w-full max-h-[85dvh] overflow-y-auto p-6 border border-gray-200 dark:border-gray-800 shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-red-600">
               <AlertTriangle size={24} />
               <h3 className="font-bold text-lg text-gray-900 dark:text-white">Cancelar Nota Fiscal SEFAZ</h3>

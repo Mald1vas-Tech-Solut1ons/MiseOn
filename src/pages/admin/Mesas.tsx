@@ -479,7 +479,7 @@ export default function Mesas() {
         <div className="flex items-center gap-2">
           {/* Seletor de Modo: Salão 3D vs Grade 2D */}
           <div className="flex rounded-xl border border-gray-200 bg-gray-100 p-1 dark:border-gray-800 dark:bg-gray-900">
-            <button
+            <button type="button"
               onClick={() => setViewModo('SALAO_3D')}
               className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
                 viewModo === 'SALAO_3D'
@@ -489,7 +489,7 @@ export default function Mesas() {
             >
               <Box size={14} /> {tDynamic('Salão 3D')}
             </button>
-            <button
+            <button type="button"
               onClick={() => setViewModo('GRADE')}
               className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
                 viewModo === 'GRADE'
@@ -503,7 +503,7 @@ export default function Mesas() {
 
           {viewModo === 'SALAO_3D' && (
             <>
-              <button
+              <button type="button"
                 onClick={() => setModoEdicao3D(!modoEdicao3D)}
                 className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition ${
                   modoEdicao3D
@@ -514,7 +514,7 @@ export default function Mesas() {
                 <Move size={14} /> {modoEdicao3D ? tDynamic('Arraste Ativo') : tDynamic('Mover Mesas')}
               </button>
 
-              <button
+              <button type="button"
                 onClick={() => setModalEditorLayout(true)}
                 className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-600 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
               >
@@ -523,7 +523,7 @@ export default function Mesas() {
             </>
           )}
 
-          <button onClick={() => setModalNovaMesa(true)} className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-4 py-2 text-sm font-bold text-white shadow-md transition hover:brightness-110">
+          <button type="button" onClick={() => setModalNovaMesa(true)} className="flex items-center gap-1.5 rounded-xl bg-[var(--cor-primaria)] px-4 py-2 text-sm font-bold text-white shadow-md transition hover:brightness-110">
             <Plus size={16} /> {tDynamic('Nova mesa')}
           </button>
         </div>
@@ -554,7 +554,7 @@ export default function Mesas() {
             return (
               <div key={m.id}
                 className={`group relative overflow-hidden rounded-2xl border-2 p-4 shadow-sm transition ${ocupada ? 'border-orange-400 bg-orange-50 dark:border-orange-900/60 dark:bg-orange-900/10' : 'border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900'}`}>
-                <button onClick={() => abrirDetalhe(m)} className="block w-full text-left">
+                <button type="button" onClick={() => abrirDetalhe(m)} className="block w-full text-left">
                   <div className="flex items-start justify-between">
                     <span className="font-['Sora'] text-2xl font-black dark:text-gray-100">{m.numero}</span>
                     {ocupada
@@ -573,9 +573,9 @@ export default function Mesas() {
                   )}
                 </button>
                 <div className="mt-2 flex gap-1.5 border-t border-gray-100 pt-2 dark:border-gray-800">
-                  <button onClick={() => abrirQr(m)} className="flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 text-xs opacity-95 font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"><QrCode size={12} /> QR Code</button>
+                  <button type="button" onClick={() => abrirQr(m)} className="flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 text-xs opacity-95 font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"><QrCode size={12} /> QR Code</button>
                   {!ocupada && (
-                    <button onClick={() => excluirMesa(m)} className="rounded-lg px-2 py-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"><Trash2 size={12} /></button>
+                    <button type="button" onClick={() => excluirMesa(m)} className="rounded-lg px-2 py-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"><Trash2 size={12} /></button>
                   )}
                 </div>
               </div>
@@ -587,7 +587,9 @@ export default function Mesas() {
       {/* ── Modal: nova mesa ── */}
       {modalNovaMesa && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => !salvandoMesa && setModalNovaMesa(false)}>
-          <form onSubmit={handleSubmit(criarMesa)} className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
+          {/* max-h + rolagem: o campo "numero" tem autoFocus, entao o teclado sobe
+              junto com o modal; em 375px o botao "Criar mesa" ficava atras do teclado. */}
+          <form onSubmit={handleSubmit(criarMesa)} className="max-h-[85dvh] w-full max-w-sm overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-black dark:text-gray-100">Nova mesa</h3>
               <button type="button" onClick={() => setModalNovaMesa(false)} className="text-gray-400"><X size={20} /></button>
@@ -616,13 +618,13 @@ export default function Mesas() {
           <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-lg font-black dark:text-gray-100">QR · Mesa {mesaQr.numero}</h3>
-              <button onClick={() => setMesaQr(null)} className="text-gray-400"><X size={20} /></button>
+              <button type="button" onClick={() => setMesaQr(null)} className="text-gray-400"><X size={20} /></button>
             </div>
             {qrDataUrl
               ? <img src={qrDataUrl} alt={`QR Mesa ${mesaQr.numero}`} className="mx-auto w-56 rounded-2xl border border-gray-200 dark:border-gray-700" />
               : <div className="flex h-56 items-center justify-center"><Loader2 className="animate-spin text-gray-300" /></div>}
             <p className="mt-3 text-xs text-gray-500">O cliente aponta a câmera e cai direto no cardápio, já identificado como Mesa {mesaQr.numero} — sem precisar criar login.</p>
-            <button onClick={imprimirQr} disabled={!qrDataUrl} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] py-3.5 text-sm font-black text-white disabled:opacity-50">
+            <button type="button" onClick={imprimirQr} disabled={!qrDataUrl} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cor-primaria)] py-3.5 text-sm font-black text-white disabled:opacity-50">
               <Printer size={16} /> {tDynamic('Imprimir para a mesa')}
             </button>
           </div>
@@ -632,19 +634,19 @@ export default function Mesas() {
       {/* ── Modal: detalhe da mesa / fechar conta ── */}
       {mesaDetalhe && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => !processandoFechamento && setMesaDetalhe(null)}>
-          <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-3xl bg-white shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
+          <div className="flex max-h-[90dvh] w-full max-w-lg flex-col rounded-3xl bg-white shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
               <h3 className="text-lg font-black dark:text-gray-100">Mesa {mesaDetalhe.numero}</h3>
               <div className="flex items-center gap-3">
                 {mesaDetalhe.comanda && (
                   <>
-                    <button onClick={() => setModalDivisaoCaixa(true)} className="text-xs font-bold text-orange-500 hover:underline">
+                    <button type="button" onClick={() => setModalDivisaoCaixa(true)} className="text-xs font-bold text-orange-500 hover:underline">
                       {tDynamic('Rachar por Produto')}
                     </button>
-                    <button onClick={() => setMostrarTransferencia(!mostrarTransferencia)} className="text-xs font-bold text-[var(--cor-primaria)]">Mover</button>
+                    <button type="button" onClick={() => setMostrarTransferencia(!mostrarTransferencia)} className="text-xs font-bold text-[var(--cor-primaria)]">Mover</button>
                   </>
                 )}
-                <button onClick={() => { setMesaDetalhe(null); setMostrarTransferencia(false); }} className="text-gray-400"><X size={20} /></button>
+                <button type="button" onClick={() => { setMesaDetalhe(null); setMostrarTransferencia(false); }} className="text-gray-400"><X size={20} /></button>
               </div>
             </div>
 
@@ -656,7 +658,7 @@ export default function Mesas() {
                     <option value="">{tDynamic('Selecione uma mesa livre')}</option>
                     {livres.map(m => <option key={m.id} value={m.numero}>Mesa {m.numero}</option>)}
                   </select>
-                  <button onClick={transferirMesa} disabled={!transferindoPara || processandoFechamento} className="rounded-xl bg-[var(--cor-primaria)] px-4 text-sm font-bold text-white disabled:opacity-50">
+                  <button type="button" onClick={transferirMesa} disabled={!transferindoPara || processandoFechamento} className="rounded-xl bg-[var(--cor-primaria)] px-4 text-sm font-bold text-white disabled:opacity-50">
                     Mover
                   </button>
                 </div>
@@ -726,7 +728,7 @@ export default function Mesas() {
                   </div>
 
                   {saldoDevedor > 0 && (
-                    <button onClick={imprimirPreviaConta} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2 text-xs font-bold text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/5">
+                    <button type="button" onClick={imprimirPreviaConta} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2 text-xs font-bold text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/5">
                       <Printer size={13} /> Imprimir conta parcial
                     </button>
                   )}
@@ -734,19 +736,19 @@ export default function Mesas() {
                   {!fechando ? (
                     <div className="mt-4 grid grid-cols-2 gap-2">
                       {saldoDevedor > 0 ? METODOS.map((op) => (
-                        <button key={op.m} onClick={() => { setFechando(op.m); setErroFechamento(''); setValorRecebido(''); }} disabled={bloqueadoPorPreparo}
+                        <button type="button" key={op.m} onClick={() => { setFechando(op.m); setErroFechamento(''); setValorRecebido(''); }} disabled={bloqueadoPorPreparo}
                           className="flex flex-col items-center gap-1.5 rounded-2xl border-2 border-gray-200 p-3 text-xs font-bold text-gray-600 transition hover:border-[var(--cor-primaria)] hover:text-[var(--cor-primaria)] disabled:opacity-40 dark:border-gray-700 dark:text-gray-300">
                           <op.icon size={18} />{op.label}
                         </button>
                       )) : (
-                        <div className="col-span-2 text-center text-sm font-bold text-emerald-600">{tDynamic('A conta já foi 100% paga.')} <button onClick={() => confirmarFechamento('DINHEIRO')} className="underline">Fechar comanda agora.</button></div>
+                        <div className="col-span-2 text-center text-sm font-bold text-emerald-600">{tDynamic('A conta já foi 100% paga.')} <button type="button" onClick={() => confirmarFechamento('DINHEIRO')} className="underline">Fechar comanda agora.</button></div>
                       )}
                     </div>
                   ) : (
                     <div className="mt-4 rounded-2xl bg-gray-50 p-4 dark:bg-gray-800/50">
                       <div className="mb-2 flex items-center justify-between">
                         <p className="text-sm font-black dark:text-gray-100">{METODOS.find((m) => m.m === fechando)?.label}</p>
-                        <button onClick={() => setFechando(null)} className="text-xs font-bold text-gray-400">trocar</button>
+                        <button type="button" onClick={() => setFechando(null)} className="text-xs font-bold text-gray-400">trocar</button>
                       </div>
                       {fechando === 'DINHEIRO' && (
                         <>
@@ -806,7 +808,7 @@ export default function Mesas() {
 
                       {erroFechamento && <p className="mt-2 text-center text-xs font-semibold text-red-500">{erroFechamento}</p>}
 
-                      <button onClick={() => confirmarFechamento(fechando)} disabled={processandoFechamento || recebidoNum <= 0}
+                      <button type="button" onClick={() => confirmarFechamento(fechando)} disabled={processandoFechamento || recebidoNum <= 0}
                         className={`mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-black text-white disabled:opacity-40 ${recebidoNum < saldoDevedor ? 'bg-amber-600' : 'bg-emerald-600'}`}>
                         {processandoFechamento ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
                         {processandoFechamento ? 'Processando…' : recebidoNum < saldoDevedor ? 'Confirmar pagamento parcial' : 'Confirmar e fechar conta'}

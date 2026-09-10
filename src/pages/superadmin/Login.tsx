@@ -97,7 +97,7 @@ export default function SuperAdminLogin() {
               </div>
             </div>
 
-            <button
+            <button type="submit"
               disabled={carregando}
               className="mt-6 flex w-full items-center justify-center rounded-xl bg-[var(--cor-primaria)] py-3.5 font-bold text-white shadow-lg shadow-[var(--cor-primaria)]/30 transition-all hover:opacity-90 disabled:opacity-50"
             >

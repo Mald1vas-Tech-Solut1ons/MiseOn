@@ -291,7 +291,7 @@ export default function ScannerQRCodeModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={onFechar}>
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900 dark:border dark:border-gray-800 relative" onClick={e => e.stopPropagation()}>
-        <button onClick={onFechar} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+        <button type="button" onClick={onFechar} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
           <X size={20} />
         </button>
 
@@ -306,16 +306,16 @@ export default function ScannerQRCodeModal({
         </div>
 
         <div className="flex rounded-xl bg-gray-100 p-1 dark:bg-gray-800 mb-4">
-          <button onClick={() => setModo('CAMERA')} className={classeAba('CAMERA')}>
+          <button type="button" onClick={() => setModo('CAMERA')} className={classeAba('CAMERA')}>
             <Camera size={14} /> Câmera
           </button>
-          <button onClick={() => setModo('FOTO')} className={classeAba('FOTO')}>
+          <button type="button" onClick={() => setModo('FOTO')} className={classeAba('FOTO')}>
             <ImageIcon size={14} /> Foto
           </button>
-          <button onClick={() => setModo('CUPOM')} className={classeAba('CUPOM')}>
+          <button type="button" onClick={() => setModo('CUPOM')} className={classeAba('CUPOM')}>
             <Sparkles size={14} /> {tDynamic('Cupom')}
           </button>
-          <button onClick={() => setModo('DIGITACAO')} className={classeAba('DIGITACAO')}>
+          <button type="button" onClick={() => setModo('DIGITACAO')} className={classeAba('DIGITACAO')}>
             <Keyboard size={14} /> URL
           </button>
         </div>
@@ -335,10 +335,10 @@ export default function ScannerQRCodeModal({
                 <AlertCircle size={28} className="mx-auto text-amber-600 dark:text-amber-400 mb-2" />
                 <p className="text-xs text-amber-800 dark:text-amber-300 font-medium mb-3">{erroCamera}</p>
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-                  <button onClick={() => setModo('FOTO')} className="bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-amber-700">
+                  <button type="button" onClick={() => setModo('FOTO')} className="bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-amber-700">
                     {tDynamic('Ler a partir de uma foto')}
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => setTentativa((n) => n + 1)}
                     className="border border-amber-600 text-amber-700 dark:text-amber-300 font-bold text-xs px-4 py-2 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30"
                   >
@@ -363,7 +363,7 @@ export default function ScannerQRCodeModal({
                     {usandoNativo && <span className="block text-emerald-600 dark:text-emerald-400">{tDynamic('Leitor do próprio aparelho ativo.')}</span>}
                   </p>
                   {temLanterna && (
-                    <button
+                    <button type="button"
                       onClick={alternarLanterna}
                       className="flex shrink-0 items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-700 px-2.5 py-1.5 text-xs opacity-95 font-bold text-gray-700 dark:text-gray-300"
                     >
@@ -404,7 +404,7 @@ export default function ScannerQRCodeModal({
                   e.target.value = '';
                 }}
               />
-              <button
+              <button type="button"
                 onClick={() => inputFotoRef.current?.click()}
                 disabled={lendoFoto}
                 className="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl shadow-md transition disabled:opacity-50"
@@ -500,7 +500,7 @@ export default function ScannerQRCodeModal({
               )}
 
               <div className="flex flex-col gap-2">
-                <button
+                <button type="button"
                   onClick={() => inputCupomRef.current?.click()}
                   disabled={preparandoCupom || fotosCupom.length >= MAX_FOTOS}
                   className="flex w-full items-center justify-center gap-2 rounded-xl border border-violet-300 py-2.5 text-xs font-bold text-violet-700 transition hover:bg-violet-50 disabled:opacity-50 dark:border-violet-900/60 dark:text-violet-300 dark:hover:bg-violet-900/20"
@@ -512,7 +512,7 @@ export default function ScannerQRCodeModal({
                 </button>
 
                 {fotosCupom.length > 0 && (
-                  <button
+                  <button type="button"
                     onClick={enviarFotosCupom}
                     disabled={preparandoCupom}
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 py-3 font-bold text-white shadow-md transition hover:bg-violet-700 disabled:opacity-50"

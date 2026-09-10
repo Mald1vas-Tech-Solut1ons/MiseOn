@@ -227,7 +227,10 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
 
   return (
     <div className="fade fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="sheet w-full max-w-lg rounded-3xl bg-white dark:bg-gray-900 dark:border-gray-800 p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+      {/* max-h + rolagem propria: o formulario tem 10 campos e passava de 700px.
+          Em 375px (pior ainda com o teclado aberto) o botao "Salvar Cupom" ficava
+          fora da tela e o overlay `fixed` nao rola, entao nao havia como chegar nele. */}
+      <div className="sheet max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white dark:bg-gray-900 dark:border-gray-800 p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
           <h3 className="text-base font-bold dark:text-white">{cupom ? 'Editar cupom' : 'Criar novo cupom'}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>

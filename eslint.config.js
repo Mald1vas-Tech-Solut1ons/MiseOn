@@ -34,5 +34,28 @@ export default tseslint.config(
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
+  },
+  {
+    // Botao sem `type` dentro de <form> faz SUBMIT acidental: no Login, um
+    // clique em "mostrar senha" envia o formulario. Medido em 10/09/2026: 645
+    // botoes sem type no src, 57 deles em arquivos com formulario. A regra
+    // vale onde o defeito existe; o resto e higiene registrada como divida,
+    // nao portao de CI.
+    files: [
+      'src/components/chat/ChatInterface.tsx',
+      'src/components/estoque/ScannerQRCodeModal.tsx',
+      'src/components/ModalAuthCliente.tsx',
+      'src/pages/admin/ChatAdmin.tsx',
+      'src/pages/admin/Fiscal.tsx',
+      'src/pages/admin/Login.tsx',
+      'src/pages/admin/Mesas.tsx',
+      'src/pages/admin/MinhaConta.tsx',
+      'src/pages/RedefinirSenha.tsx',
+      'src/pages/superadmin/Login.tsx',
+      'src/pages/superadmin/Tenants.tsx',
+    ],
+    rules: {
+      'react/button-has-type': 'error',
+    },
   }
 );

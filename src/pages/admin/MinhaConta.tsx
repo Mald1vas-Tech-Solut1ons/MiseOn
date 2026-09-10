@@ -459,7 +459,10 @@ export default function MinhaConta() {
       {/* ── MODAL OTP: CONFIRMAÇÃO DE TROCA DE E-MAIL ── */}
       {modalOtpAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => !verificandoOtp && setModalOtpAberto(false)}>
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800" onClick={(e) => e.stopPropagation()}>
+          {/* max-h + rolagem: o input do codigo tem autoFocus, entao no celular o
+              teclado abre junto com o modal e corta a altura visivel pela metade —
+              sem isso os botoes "Reenviar"/"Confirmar" ficavam abaixo do teclado. */}
+          <div className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10 text-[var(--cor-primaria)]">
@@ -470,7 +473,7 @@ export default function MinhaConta() {
                   <p className="text-xs text-gray-500 dark:text-gray-400">{tDynamic('Confirmação de alteração de e-mail')}</p>
                 </div>
               </div>
-              <button onClick={() => setModalOtpAberto(false)} disabled={verificandoOtp} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+              <button type="button" onClick={() => setModalOtpAberto(false)} disabled={verificandoOtp} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <X size={20} />
               </button>
             </div>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   Send, User, MessageSquare, Search, Globe,
-  Wifi, WifiOff, RefreshCw, BotMessageSquare, PhoneCall,
+  Wifi, WifiOff, RefreshCw, BotMessageSquare, PhoneCall, ArrowLeft,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { tocarSom } from '../../lib/som';
@@ -377,10 +377,20 @@ export default function ChatAdmin() {
 
   // ── UI ────────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-[calc(100vh-80px)] overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900">
+    // `h-full` no lugar de `h-[calc(100vh-80px)]`: os 80px chutados nao batiam com
+    // nada — o header do painel tem 88px e no celular ainda existe a barra inferior
+    // de 64px + safe-area. O container ficava mais alto que a area util e o campo
+    // de digitar mensagem (que fica no fim da coluna) caia atras da navegacao.
+    // O wrapper de pagina do AdminLayout ja e `h-full` com o padding do chassi
+    // (`pt-2 pb-nav`) descontado, entao herdar dele acerta os dois tamanhos.
+    <div className="flex h-full min-h-0 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900">
 
       {/* ═══ Sidebar ══════════════════════════════════════════════════════════ */}
-      <div className="w-80 flex-shrink-0 flex flex-col border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+      {/* Mestre/detalhe no celular: a lista tinha `w-80` fixo (320px) sem breakpoint,
+          entao em 375px sobravam ~55px para a conversa — a tela era inutilizavel.
+          Abaixo de md a lista ocupa a largura toda e da lugar ao chat quando o
+          lojista escolhe uma conversa (a volta e pela seta no header do chat). */}
+      <div className={`${ativa ? 'hidden md:flex' : 'flex'} w-full md:w-80 flex-shrink-0 flex-col border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950`}>
 
         {/* Header Sidebar */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3">
@@ -394,14 +404,14 @@ export default function ChatAdmin() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <button
+              <button type="button"
                 onClick={carregarConversas}
                 title="Recarregar conversas"
                 className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/10 transition"
               >
                 <RefreshCw size={14} />
               </button>
-              <button
+              <button type="button"
                 onClick={toggleIa}
                 title={chatIaAtivo ? 'Desativar IA Geral' : 'Ativar IA Geral'}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition border ${
@@ -442,7 +452,7 @@ export default function ChatAdmin() {
             </div>
           ) : (
             conversasFiltradas.map(conv => (
-              <button
+              <button type="button"
                 key={conv.id}
                 onClick={() => setAtiva(conv.id)}
                 className={`w-full flex items-start gap-3 p-4 text-left border-b border-gray-100 dark:border-gray-800/60 transition-colors ${
@@ -498,7 +508,8 @@ export default function ChatAdmin() {
       </div>
 
       {/* ═══ Área de Chat ══════════════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* No celular so aparece depois de escolher a conversa (par do bloco acima). */}
+      <div className={`${ativa ? 'flex' : 'hidden md:flex'} flex-1 flex-col min-w-0`}>
 
         {!ativa ? (
           <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
@@ -509,7 +520,17 @@ export default function ChatAdmin() {
         ) : (
           <>
             {/* Header do Chat */}
-            <div className="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center px-5 gap-3 flex-shrink-0 bg-white dark:bg-gray-900">
+            <div className="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center px-3 sm:px-5 gap-3 flex-shrink-0 bg-white dark:bg-gray-900">
+              {/* Volta para a lista no celular: sem isso o lojista entrava numa
+                  conversa e nao tinha como trocar (a lista fica escondida em <md). */}
+              <button
+                type="button"
+                onClick={() => setAtiva(null)}
+                aria-label={tDynamic('Voltar para a lista de conversas')}
+                className="md:hidden -ml-1 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/10 transition flex-shrink-0"
+              >
+                <ArrowLeft size={18} />
+              </button>
               <div className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${
                 convAtiva?.canal === 'WHATSAPP' ? 'bg-green-100 dark:bg-green-900/40' : 'bg-gray-100 dark:bg-gray-800'
               }`}>
@@ -523,7 +544,7 @@ export default function ChatAdmin() {
                   </h3>
                   {convAtiva && <BadgeCanal canal={convAtiva.canal} />}
                   {convAtiva && (
-                    <button
+                    <button type="button"
                       onClick={() => toggleIaConversa(convAtiva.id, convAtiva.ia_ativa)}
                       title={convAtiva.ia_ativa ? 'IA respondendo — clique para assumir' : 'Você está no controle — clique para reativar IA'}
                       className={`inline-flex items-center gap-1 text-xs opacity-90 font-bold px-2 py-0.5 rounded-full transition ${

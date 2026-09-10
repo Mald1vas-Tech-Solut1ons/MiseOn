@@ -106,7 +106,7 @@ const RECURSOS = [
     ],
     metrica: 'OPERAÇÃO SEM SALÃO',
     badge: 'PERFIL DE NEGOCIO',
-    texto: 'Opere múltiplas marcas virtuais no mesmo restaurante compartilhando a mesma cozinha física e a mesma baixa de estoque PEPS.',
+    texto: 'Perfil de operação só delivery: o painel esconde mapa de mesas e garçom, os pedidos do iFood e do seu cardápio próprio entram na mesma fila da cozinha e a baixa de estoque sai da ficha técnica pelo custo PEPS.',
     cor: 'text-indigo-400',
     fundo: 'bg-indigo-500/10',
   },
@@ -240,11 +240,11 @@ const PLATAFORMA = [
     grupo: 'Operar',
     itens: [
       'Cozinha KDS sem papel com estações de preparo',
-      'Suporte a Dark Kitchen Multi-Brand (Múltiplas Marcas)',
+      'Perfil Dark Kitchen: painel sem mesa e sem garçom, só delivery',
       'Gestão de entregas por Km com GPS Tracking ao vivo',
       'Acessibilidade Visual (Escala de Fonte em 1-Clique)',
       'Status do pedido que o cliente acompanha',
-      'Impressão de pedido para produção (WebSerial HID)',
+      'Impressão térmica de comanda, via do entregador e etiqueta (58/80 mm)',
       'Equipe com papéis e permissões de acesso',
     ],
   },
@@ -1247,7 +1247,7 @@ export default function Home() {
                     <ShoppingBag size={28} />
                   </div>
                   <span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-[11px] font-black uppercase text-indigo-300">
-                    {tDynamic('Multi-Marcas & iFood')}
+                    {tDynamic('Só Delivery & iFood')}
                   </span>
                 </div>
                 <h3 className="mt-4 font-['Sora'] text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">

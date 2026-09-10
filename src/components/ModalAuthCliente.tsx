@@ -59,7 +59,7 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6 backdrop-blur-sm">
       <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 sm:p-8 shadow-2xl">
-        <button onClick={onClose} className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+        <button type="button" onClick={onClose} className="absolute right-4 top-4 rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
           <X size={20} />
         </button>
 
@@ -111,7 +111,7 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
         </form>
 
         {modo === 'LOGIN' && (
-          <button
+          <button type="button"
             onClick={() => { setModo('MAGIC_LINK'); setErro(''); setSucesso(''); }}
             className="mt-4 w-full text-center text-sm font-medium text-[var(--cor-primaria)] hover:underline"
           >
@@ -125,7 +125,7 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
           <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800"></div>
         </div>
 
-        <button
+        <button type="button"
           onClick={entrarComGoogle}
           className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 py-3.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300 dark:hover:bg-gray-900"
         >
@@ -140,7 +140,7 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
 
         <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
           {modo === 'LOGIN' ? tDynamic('Ainda não tem conta? ') : tDynamic('Já tem uma conta? ')}
-          <button
+          <button type="button"
             onClick={() => { setModo(modo === 'LOGIN' ? 'CADASTRO' : 'LOGIN'); setErro(''); setSucesso(''); }}
             className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
           >
