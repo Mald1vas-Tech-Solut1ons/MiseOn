@@ -243,6 +243,22 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
         // homologacao — foi o que escondeu a causa da recusa de 08/09.
         host_efi: efiCobUrl,
         ambiente: credenciaisPadrao.ambiente,
+        // DOCUMENTO DO PAGADOR, MASCARADO.
+        //
+        // A recusa 4600222 diz "recebedor e cliente sao a mesma pessoa", mas o
+        // log nao dizia QUAL documento chegou aqui — entao nao havia como
+        // separar "o formulario mandou o CPF errado" de "o formulario mandou o
+        // certo e a Efi recusou por outro motivo". Discutir isso no escuro
+        // custou duas rodadas.
+        //
+        // Mascarado de proposito: os tres primeiros e os dois ultimos digitos
+        // bastam para reconhecer de quem e o documento sem guardar dado
+        // pessoal completo em log.
+        pagador_documento: (() => {
+          const d = String(customer?.cpf ?? '').replace(/\D/g, '');
+          return d.length >= 5 ? `${d.slice(0, 3)}***${d.slice(-2)} (${d.length} digitos)` : `invalido (${d.length} digitos)`;
+        })(),
+        pagador_nome_preenchido: Boolean(String(customer?.name ?? '').trim()),
       },
     });
     const marketplace = usarSplit

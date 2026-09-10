@@ -1918,22 +1918,22 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
     setProcessando(false);
   };
 
-  /**
-   * Nome e CPF andam juntos: sao do MESMO titular. Quando o nome digitado
-   * deixa de ser o que estava salvo, o CPF salvo perde a validade — e deixar
-   * ele no campo faz o pagamento sair com o documento de outra pessoa.
-   * Foi assim que uma compra com o cartao de terceiro seguiu com o CPF do dono
-   * da loja e o provedor recusou por "recebedor e cliente sao a mesma pessoa".
+  /*
+   * REMOVIDO: limpeza do CPF ao editar o nome.
+   *
+   * A ideia era proteger contra o CPF de um titular ficar preso ao cartão de
+   * outro. Na prática virou armadilha: o efeito comparava cada tecla digitada
+   * no nome contra o titular salvo e, batendo, apagava o CPF. Como o titular
+   * passou a ser gravado a cada tentativa de pagamento, bastava corrigir uma
+   * letra do nome para o CPF sumir do campo — e a tela então acusava campo
+   * vazio para quem tinha acabado de preencher.
+   *
+   * O caso real que eu queria cobrir já é tratado onde há EVIDÊNCIA em vez de
+   * palpite: quando o provedor recusa por 4600222 ("recebedor e cliente não
+   * podem ser a mesma pessoa"), aí sim o titular é limpo — porque naquele
+   * momento o documento está provadamente errado. Adivinhar pelo nome digitado
+   * atrapalhava mais do que protegia.
    */
-  useEffect(() => {
-    if (!salvo?.nome || !salvo?.cpf) return;
-    const mudouDeTitular = nome.trim() !== '' && nome.trim().toUpperCase() !== salvo.nome.trim().toUpperCase();
-    if (mudouDeTitular && cpf === salvo.cpf) {
-      setCpf('');
-      setTocado((atual) => ({ ...atual, cpf: false }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nome]);
 
   const marcar = (k: string) => setTocado((t) => ({ ...t, [k]: true }));
   const trocarTitular = () => {
