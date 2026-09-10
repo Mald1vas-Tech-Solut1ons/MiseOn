@@ -397,6 +397,23 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
   const isIfoodActive = lojaInfo?.ifood_addon_ativo && lojaInfo?.ifood_taxa_pct > 0;
 
   const addGrupo = () => setGrupos((g) => [...g, { _key: crypto.randomUUID(), nome: '', min_escolhas: 0, max_escolhas: 1, opcoes: [] }]);
+  const addGrupoPontoCarne = () => {
+    const existente = grupos.some((g) => g.nome.trim().toLocaleLowerCase('pt-BR') === 'ponto da carne');
+    if (existente) return setErro('O grupo Ponto da carne já existe neste produto.');
+    setGrupos((atuais) => [...atuais, {
+      _key: crypto.randomUUID(),
+      nome: 'Ponto da carne',
+      min_escolhas: 1,
+      max_escolhas: 1,
+      opcoes: ['Mal passado', 'Ao ponto', 'Bem passado'].map((nomeOpcao) => ({
+        _key: crypto.randomUUID(),
+        nome: nomeOpcao,
+        preco_adicional: 0,
+        disponivel: true,
+      })),
+    }]);
+    setErro('');
+  };
   const addOpcao = (gKey: string) => setGrupos((g) => g.map((x) => x._key === gKey
     ? { ...x, opcoes: [...x.opcoes, { _key: crypto.randomUUID(), nome: '', preco_adicional: 0, disponivel: true }] }
     : x));
@@ -405,6 +422,17 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
   const salvar = async () => {
     setErro('');
     if (!nome.trim() || !preco) return setErro('Preencha nome e preço.');
+    for (const grupo of grupos.filter((g) => g.nome.trim())) {
+      const opcoesValidas = grupo.opcoes.filter((o) => o.nome.trim());
+      if (grupo.min_escolhas < 0 || grupo.max_escolhas < 1 || grupo.min_escolhas > grupo.max_escolhas) {
+        return setErro(`Revise os limites do grupo "${grupo.nome}".`);
+      }
+      if (opcoesValidas.length < grupo.min_escolhas || opcoesValidas.length < grupo.max_escolhas) {
+        return setErro(`O grupo "${grupo.nome}" precisa ter opções suficientes para os limites configurados.`);
+      }
+      const nomes = opcoesValidas.map((o) => o.nome.trim().toLocaleLowerCase('pt-BR'));
+      if (new Set(nomes).size !== nomes.length) return setErro(`O grupo "${grupo.nome}" tem opções repetidas.`);
+    }
     setSalvando(true);
     try {
       const payload = {
@@ -771,9 +799,20 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
           onConfigChange={setNutriConfig}
         />
 
-        {/* Adicionais */}
+        {/* Personalizações do item: instruções como ponto da carne pertencem
+            ao item do pedido e viajam até o KDS; nunca são etapas do workflow. */}
         <div className="mt-4 rounded-2xl border p-3 dark:border-gray-800">
-          <p className="mb-2 text-sm font-semibold dark:text-gray-200">Adicionais / extras</p>
+          <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold dark:text-gray-200">{tDynamic('Personalizações do item')}</p>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                {tDynamic('Ponto da carne, tamanho, recheio, gelo e limão aparecem no item do pedido e no cartão do KDS — não viram etapas da cozinha.')}
+              </p>
+            </div>
+            <button type="button" onClick={addGrupoPontoCarne} className="min-h-11 rounded-xl border border-orange-300 bg-orange-50 px-3 text-xs font-black text-orange-800 hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-950/30 dark:text-orange-200">
+              + {tDynamic('Ponto da carne obrigatório')}
+            </button>
+          </div>
           {grupos.map((g) => (
             <div key={g._key} className="mb-2 rounded-xl bg-gray-50 p-2 dark:bg-gray-800">
               <div className="flex items-center gap-1.5">
@@ -820,8 +859,8 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
               </div>
             </div>
           ))}
-          <button onClick={addGrupo} className="flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
-            <Plus size={12} /> {tDynamic('Novo grupo de adicionais')}
+          <button onClick={addGrupo} className="min-h-11 flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
+            <Plus size={12} /> {tDynamic('Novo grupo de personalização')}
           </button>
         </div>
 

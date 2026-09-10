@@ -73,6 +73,14 @@ export interface ItemKdsTicket {
   quantidade: number;
   observacao: string | null;
   opcoes: string[];
+  /** Instruções estruturadas do item (ex.: ponto da carne), preservadas no pedido. */
+  modificadores?: Array<{
+    opcao_id: string;
+    grupo_id: string;
+    grupo_nome: string;
+    nome: string;
+    preco_adicional: number;
+  }>;
   perfil_preparo?: 'ALIMENTO' | 'DRINK' | 'BEBIDA_PRONTA';
   teor_alcoolico_pct?: number | null;
   volume_porcao_ml?: number | null;
@@ -86,11 +94,18 @@ export interface KdsTicket {
   loja_id: string;
   estacao_id: string;
   workflow_id: string;
+  /** Rodadas são independentes: concluir uma nunca engole nem reabre a próxima. */
+  rodada_numero?: number;
+  /** Snapshot impede uma edição futura do workflow de mudar trabalho já aberto. */
+  workflow_snapshot?: EtapaKdsWorkflow[];
   itens: ItemKdsTicket[];
   etapa_atual_idx: number;
   status: StatusKdsTicket;
   iniciado_em: string | null;
   concluido_em: string | null;
+  /** Expedição persistida e compartilhada; nunca depende do navegador do operador. */
+  expedido_em?: string | null;
+  expedido_por?: string | null;
   criado_em: string;
 }
 

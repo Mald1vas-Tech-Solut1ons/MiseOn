@@ -30,6 +30,8 @@ const EstoquePage      = lazy(() => import('./pages/landing/EstoquePage'));
 const Blog             = lazy(() => import('./pages/Blog'));
 const BlogPost         = lazy(() => import('./pages/BlogPost'));
 const PainelTV         = lazy(() => import('./pages/PainelTV'));
+const TvPareamento     = lazy(() => import('./pages/TvPareamento'));
+const CastReceiver     = lazy(() => import('./pages/CastReceiver'));
 const MarketingStrategyPage = lazy(() => import('./pages/landing/MarketingStrategyPage'));
 const AutoatendimentoPage = lazy(() => import('./pages/landing/AutoatendimentoPage'));
 const DemoKioskPage       = lazy(() => import('./pages/landing/DemoKioskPage'));
@@ -130,6 +132,11 @@ function AuthRecoveryRedirect() {
   return null;
 }
 
+function CookieBannerForaDoReceiver() {
+  const location = useLocation();
+  return location.pathname === '/cast/receiver' || location.pathname === '/tv' ? null : <CookieBanner />;
+}
+
 export default function App() {
   return (
     <I18nProvider>
@@ -137,7 +144,7 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <AuthRecoveryRedirect />
-            <CookieBanner />
+            <CookieBannerForaDoReceiver />
             <ScreenTransition>
               <Suspense fallback={<BrandLoader title="CARREGANDO MISEON..." />}>
               <Routes>
@@ -147,8 +154,9 @@ export default function App() {
                   <Route index element={<Navigate to="inicio" replace />} />
                   <Route path="inicio"    element={<Dashboard />} />
                   <Route path="pdv"       element={<PDV />} />
-                  <Route path="kds"       element={<KDS />} />
+                  <Route path="kds"       element={<KDSExpeditor />} />
                   <Route path="kds/expeditor" element={<KDSExpeditor />} />
+                  <Route path="kds/legado" element={<KDS />} />
                   <Route path="kds/estacao/:estacaoId" element={<KDSEstacao />} />
                   <Route path="mesas"     element={<Mesas />} />
                   <Route path="balanca"   element={<PainelBalanca />} />
@@ -237,7 +245,9 @@ export default function App() {
                 <Route path="/blog"                      element={<Blog />} />
                 <Route path="/blog/:slug"                element={<BlogPost />} />
 
+                <Route path="/tv"            element={<TvPareamento />} />
                 <Route path="/tv/:slug"      element={<PainelTV />} />
+                <Route path="/cast/receiver" element={<CastReceiver />} />
                 <Route path="/:slug/meus-pedidos" element={<MeusPedidos />} />
                 <Route path="/:slug"         element={<Cardapio />} />
                 <Route path="*"             element={<Home />} />

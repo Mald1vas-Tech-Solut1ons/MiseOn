@@ -54,6 +54,7 @@ export default function PainelTV() {
   // slug (compatibilidade com TV ja instalada).
   const [searchParams] = useSearchParams();
   const painelToken = searchParams.get('token');
+  const sessaoTv = searchParams.get('sessao');
   const [loja, setLoja] = useState<Loja | null>(null);
   const [categorias, setCategorias] = useState<(Categoria & { produtos: Produto[] })[]>([]);
   const [pedidos, setPedidos] = useState<SenhaTV[]>([]);
@@ -305,10 +306,9 @@ export default function PainelTV() {
     // Senhas do dia via RPC. A TV do balcão não loga, e `pedidos` não tem
     // (nem deve ter) policy de SELECT público — a RPC devolve só número,
     // status e primeiro nome. Ver migration 20260815202000.
-    const { data: peds, error: erroSenhas } = await supabase.rpc('fn_painel_tv_senhas', {
-      p_slug: slug,
-      p_token: painelToken,
-    });
+    const { data: peds, error: erroSenhas } = sessaoTv
+      ? await supabase.rpc('fn_painel_tv_senhas_sessao', { p_slug: slug, p_sessao: sessaoTv })
+      : await supabase.rpc('fn_painel_tv_senhas', { p_slug: slug, p_token: painelToken });
     if (erroSenhas) {
       // Token ausente ou errado: a TV segue mostrando o cardapio, mas isso
       // precisa APARECER. Antes so ia pro console e a tela exibia "(0)", que
@@ -316,8 +316,10 @@ export default function PainelTV() {
       // ve zero senha e acha que o produto nao funciona.
       console.error('Painel de senhas:', erroSenhas.message);
       setErroSenhas(
-        /token/i.test(erroSenhas.message)
-          ? 'Esta TV precisa do link com token. Copie o endereço em Configurações da Loja › Painel de TV.'
+        /token|sess[aã]o/i.test(erroSenhas.message)
+          ? sessaoTv
+            ? 'A sessão desta TV expirou ou foi revogada. Abra /tv para parear novamente.'
+            : 'Esta TV precisa do link com token. Copie o endereço em Configurações da Loja › Painel de TV.'
           : 'Não foi possível carregar as senhas agora.',
       );
       setPedidos([]);
@@ -329,15 +331,14 @@ export default function PainelTV() {
 
     // Promocoes usam a mesma porta do painel de senhas: `cupons` nao e legivel
     // por anon (codigo exposto vira abuso), entao vem por RPC com token.
-    const { data: promos } = await supabase.rpc('fn_painel_tv_promocoes', {
-      p_slug: slug,
-      p_token: painelToken,
-    });
+    const { data: promos } = sessaoTv
+      ? await supabase.rpc('fn_painel_tv_promocoes_sessao', { p_slug: slug, p_sessao: sessaoTv })
+      : await supabase.rpc('fn_painel_tv_promocoes', { p_slug: slug, p_token: painelToken });
     setPromocoes((promos as PromoTV[]) ?? []);
     setUltimaAtualizacao(Date.now());
     setOffline(false);
     setCarregando(false);
-  }, [slug, painelToken]);
+  }, [slug, painelToken, sessaoTv]);
 
   /** Envolve a carga para que falha de rede vire ESTADO VISIVEL, nao silencio.
    *  A promessa rejeitada tambem parava o `setInterval` de ter efeito util. */

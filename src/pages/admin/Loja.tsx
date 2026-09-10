@@ -18,6 +18,8 @@ import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
 import { geocode } from '../../lib/geo';
 import { useI18n } from '../../contexts/I18nContext';
 import { useToast } from '../../contexts/ToastContext';
+import { CastTvControl } from '../../components/admin/CastTvControl';
+import { TvPairingControl } from '../../components/admin/TvPairingControl';
 
 const PRESETS_SEGMENTOS: Record<SegmentoNegocio, { rotulo: string; descricao: string; modulos: ModulosAtivos }> = {
   HAMBURGUERIA: {
@@ -728,6 +730,9 @@ export default function Loja() {
             {tvCopiado === 'senhas' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
           </button>
         </div>
+
+        <CastTvControl criarUrl={urlTv} tokenDisponivel={!!tokenTv} />
+        <TvPairingControl lojaId={lojaId} />
 
         {/* ── Quais pedidos são chamados na TV ──────────────────────────────
             Senha é chamada de balcão: só faz sentido para quem está no salão

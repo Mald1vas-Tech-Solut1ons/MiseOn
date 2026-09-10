@@ -9,6 +9,7 @@ import {
 } from '../../types';
 import { imprimir } from '../../lib/print';
 import { obterOuCriarComandaAberta } from '../../lib/comandas';
+import { somarRecebidoEmDinheiro, somarMovimentacoes, calcularDinheiroGaveta, diferencaDeFechamento } from '../../lib/caixa';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
 
@@ -141,8 +142,7 @@ export default function PDV() {
         .neq('pedidos.status', 'CANCELADO'),
     ]);
     setMovs((m as CaixaMovimentacao[]) ?? []);
-    const soma = (vendasDinheiro ?? []).reduce((s, pg: any) => s + Number(pg.valor_pago ?? 0), 0);
-    setDinheiroTurno(soma);
+    setDinheiroTurno(somarRecebidoEmDinheiro(vendasDinheiro ?? []));
   }, [lojaId]);
 
   useEffect(() => {
@@ -183,9 +183,13 @@ export default function PDV() {
   const recebidoNum = Number(String(valorRecebido).replace(',', '.') || 0);
   const troco = metodo === 'DINHEIRO' ? Math.max(0, recebidoNum - total) : 0;
 
-  const reforcos = movs.filter((m) => m.tipo === 'REFORCO').reduce((s, m) => s + Number(m.valor), 0);
-  const sangrias = movs.filter((m) => m.tipo === 'SANGRIA').reduce((s, m) => s + Number(m.valor), 0);
-  const dinheiroGaveta = Number(turno?.fundo_troco ?? 0) + dinheiroTurno + reforcos - sangrias;
+  const { reforcos, sangrias } = useMemo(() => somarMovimentacoes(movs), [movs]);
+  const dinheiroGaveta = calcularDinheiroGaveta({
+    fundoTroco: turno?.fundo_troco,
+    recebidoEmDinheiro: dinheiroTurno,
+    reforcos,
+    sangrias,
+  });
 
   /* ── carrinho ── */
   const adicionarProduto = (p: Produto, opcoes: Opcao[] = [], quantidade = 1, observacao = '') => {
@@ -530,7 +534,7 @@ export default function PDV() {
       fechado_por: user?.id ?? null,
       valor_esperado: dinheiroGaveta,
       valor_contado: contado,
-      diferenca: contado - dinheiroGaveta,
+      diferenca: diferencaDeFechamento(contado, dinheiroGaveta),
       observacao: obsFechamento.trim() || null,
     }).eq('id', turno.id);
     setSalvandoCaixa(false);
