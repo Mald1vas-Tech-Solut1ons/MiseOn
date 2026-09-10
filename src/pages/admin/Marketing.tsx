@@ -5,7 +5,7 @@ import {
   Wallet, QrCode, ShoppingCart, Gift, Target, Megaphone, Users, Mail, Send
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Cupom, Banner, Cliente, CarrinhoAbandonado, MetodoPgto, fmt } from '../../types';
+import { Cupom, Banner, Cliente, CarrinhoAbandonado, MetodoPgto, fmt, type TipoAcaoBanner } from '../../types';
 import ImageUpload from '../../components/ImageUpload';
 import CrmClientes from '../../components/admin/CrmClientes';
 import type { CtxLoja } from './AdminLayout';
@@ -310,6 +310,45 @@ function BannersTab({ lojaId }: { lojaId: string }) {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [novo, setNovo] = useState({ imagem_url: '', titulo: '', link_redirecionamento: '' });
 
+  /**
+   * DESTINO DO BANNER.
+   *
+   * A vitrine ja sabia abrir produto, filtrar categoria, copiar cupom e abrir
+   * link a partir de `tipo_acao`/`acao_target_id` — mas nao existia tela para
+   * preencher isso, nem coluna no banco (corrigido na migration
+   * 20260911000000). Sem destino, o banner ocupa a faixa mais nobre da pagina
+   * e nao responde ao toque, o que ensina o cliente que ali nao se clica.
+   */
+  const [acao, setAcao] = useState<TipoAcaoBanner>('NENHUM');
+  const [alvo, setAlvo] = useState('');
+  const [produtos, setProdutos] = useState<{ id: string; nome: string }[]>([]);
+  const [categorias, setCategorias] = useState<{ id: string; nome: string }[]>([]);
+  const [cupons, setCupons] = useState<{ codigo: string }[]>([]);
+
+  useEffect(() => {
+    if (!lojaId) return;
+    Promise.all([
+      supabase.from('produtos').select('id, nome').eq('loja_id', lojaId).eq('disponivel', true).order('nome'),
+      supabase.from('categorias').select('id, nome').eq('loja_id', lojaId).order('ordem'),
+      supabase.from('cupons').select('codigo').eq('loja_id', lojaId).order('codigo'),
+    ]).then(([p, c, cu]) => {
+      setProdutos((p.data as { id: string; nome: string }[]) ?? []);
+      setCategorias((c.data as { id: string; nome: string }[]) ?? []);
+      // Cupom pode nem existir nesta loja: a lista vazia so tira a opcao de
+      // escolher da lista, o campo livre continua valendo.
+      setCupons((cu.data as { codigo: string }[]) ?? []);
+    });
+  }, [lojaId]);
+
+  /** Como o destino aparece na lista, em portugues de dono de loja. */
+  const descreverDestino = (b: Banner): string => {
+    if (b.tipo_acao === 'PRODUTO') return `Abre o produto: ${produtos.find((p) => p.id === b.acao_target_id)?.nome ?? '(produto removido)'}`;
+    if (b.tipo_acao === 'CATEGORIA') return `Filtra a categoria: ${categorias.find((c) => c.id === b.acao_target_id)?.nome ?? '(categoria removida)'}`;
+    if (b.tipo_acao === 'CUPOM') return `Copia o cupom ${b.acao_target_id}`;
+    if (b.tipo_acao === 'LINK_EXTERNO') return `Abre ${b.acao_target_id ?? b.link_redirecionamento}`;
+    return 'Sem destino — o toque nao faz nada';
+  };
+
   const carregar = useCallback(async () => {
     const { data } = await supabase.from('banners_destaque').select('*').eq('loja_id', lojaId).order('ordem_exibicao');
     setBanners((data as Banner[]) ?? []);
@@ -320,8 +359,22 @@ function BannersTab({ lojaId }: { lojaId: string }) {
   const criar = async () => {
     if (!novo.imagem_url) return;
     const ordem = banners.length ? Math.max(...banners.map((b) => b.ordem_exibicao)) + 1 : 0;
-    await supabase.from('banners_destaque').insert({ loja_id: lojaId, ...novo, ordem_exibicao: ordem });
+    // A constraint do banco recusa tipo com alvo vazio e alvo sem tipo — a
+    // tela avisa antes de bater la, com a frase que resolve.
+    if (acao !== 'NENHUM' && !alvo.trim()) {
+      alert('Escolha para onde o banner leva, ou deixe o destino como "Nenhum".');
+      return;
+    }
+    await supabase.from('banners_destaque').insert({
+      loja_id: lojaId,
+      ...novo,
+      tipo_acao: acao,
+      acao_target_id: acao === 'NENHUM' ? null : alvo.trim(),
+      ordem_exibicao: ordem,
+    });
     setNovo({ imagem_url: '', titulo: '', link_redirecionamento: '' });
+    setAcao('NENHUM');
+    setAlvo('');
     carregar();
   };
   const mover = async (b: Banner, dir: -1 | 1) => {
@@ -354,7 +407,9 @@ function BannersTab({ lojaId }: { lojaId: string }) {
               <img src={getOptimizedImageUrl(b.imagem_url)} className="h-16 w-28 shrink-0 rounded-xl object-cover" alt="" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-gray-900 dark:text-white">{b.titulo || '(sem título)'}</p>
-                <p className="truncate text-xs text-gray-400">{b.link_redirecionamento || 'Sem link externo'}</p>
+                <p className={`truncate text-xs ${b.tipo_acao && b.tipo_acao !== 'NENHUM' ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-amber-600 dark:text-amber-400'}`}>
+                  {descreverDestino(b)}
+                </p>
               </div>
               <div className="flex flex-col">
                 <button type="button" disabled={idx === 0} onClick={() => mover(b, -1)} className="text-gray-400 hover:text-gray-600 disabled:opacity-20"><ChevronUp size={16} /></button>
@@ -371,7 +426,54 @@ function BannersTab({ lojaId }: { lojaId: string }) {
           <p className="text-sm font-bold dark:text-white">Adicionar Novo Banner</p>
           <ImageUpload lojaId={lojaId} pasta="banners" value={novo.imagem_url} onChange={(u) => setNovo({ ...novo, imagem_url: u })} aspecto="aspect-[2/1]" />
           <input value={novo.titulo} onChange={(e) => setNovo({ ...novo, titulo: e.target.value })} placeholder="Título promocional (opcional)" className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none" />
-          <input value={novo.link_redirecionamento} onChange={(e) => setNovo({ ...novo, link_redirecionamento: e.target.value })} placeholder="Link de redirecionamento (opcional)" className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none" />
+
+          <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-3">
+            <p className="mb-1 text-xs font-bold uppercase tracking-wide text-gray-400">{tDynamic('Para onde o banner leva')}</p>
+            <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+              {tDynamic('Banner que não leva a lugar nenhum ensina o cliente que ali não se clica.')}
+            </p>
+            <select
+              value={acao}
+              onChange={(e) => { setAcao(e.target.value as TipoAcaoBanner); setAlvo(''); }}
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none"
+            >
+              <option value="NENHUM">{tDynamic('Nenhum destino')}</option>
+              <option value="PRODUTO">{tDynamic('Abrir um produto')}</option>
+              <option value="CATEGORIA">{tDynamic('Ir para uma categoria')}</option>
+              <option value="CUPOM">{tDynamic('Copiar um cupom')}</option>
+              <option value="LINK_EXTERNO">{tDynamic('Abrir um link')}</option>
+            </select>
+
+            {acao === 'PRODUTO' && (
+              <select value={alvo} onChange={(e) => setAlvo(e.target.value)}
+                className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none">
+                <option value="">{tDynamic('Escolha o produto…')}</option>
+                {produtos.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
+              </select>
+            )}
+            {acao === 'CATEGORIA' && (
+              <select value={alvo} onChange={(e) => setAlvo(e.target.value)}
+                className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none">
+                <option value="">{tDynamic('Escolha a categoria…')}</option>
+                {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              </select>
+            )}
+            {acao === 'CUPOM' && (
+              <>
+                <input list="cupons-da-loja" value={alvo} onChange={(e) => setAlvo(e.target.value.toUpperCase())}
+                  placeholder={tDynamic('Código do cupom')}
+                  className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none" />
+                <datalist id="cupons-da-loja">
+                  {cupons.map((c) => <option key={c.codigo} value={c.codigo} />)}
+                </datalist>
+              </>
+            )}
+            {acao === 'LINK_EXTERNO' && (
+              <input value={alvo} onChange={(e) => setAlvo(e.target.value)}
+                placeholder="https://instagram.com/suamarca"
+                className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-xs outline-none" />
+            )}
+          </div>
           <button type="button" onClick={criar} className="w-full rounded-xl bg-[var(--cor-primaria)] py-3 text-xs font-bold text-white shadow-md shadow-[var(--cor-primaria)]/20 hover:brightness-110">Adicionar Banner</button>
         </div>
       </div>
