@@ -1760,6 +1760,27 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
       setTocado({ numero: true, nome: true, cpf: true, validade: true, cvv: true });
       return setErro('Confira os dados do cartão destacados em vermelho.');
     }
+    /**
+     * "SALVAR MEU NOME E CPF" PASSA A SALVAR DE VERDADE.
+     *
+     * A gravação vivia no ramo de sucesso: só acontecia se a cobranca fosse
+     * APROVADA. Quem tomou uma recusa — por qualquer motivo, do limite do
+     * cartao a uma regra do provedor — digitava nome e CPF de novo a cada
+     * tentativa, com a caixinha marcada, achando que o sistema ignorava a
+     * escolha dela. E ignorava mesmo: a promessa da caixinha era "para a
+     * proxima compra", nao "se der certo".
+     *
+     * Salvar aqui e seguro: sao dados NAO SENSIVEIS (nome e CPF), o formulario
+     * ja passou pela validacao completa logo acima, e numero e CVV do cartao
+     * nunca entram neste armazenamento. Se a recusa for justamente por CPF
+     * errado (4600222), o tratamento la embaixo apaga o que foi salvo — e e o
+     * unico caso em que apagar e a atitude certa.
+     */
+    try {
+      if (salvarDados) localStorage.setItem(TITULAR_KEY, JSON.stringify({ nome, cpf }));
+      else localStorage.removeItem(TITULAR_KEY);
+    } catch { /* armazenamento indisponível: segue sem lembrar */ }
+
     setProcessando(true);
     try {
       // SDK oficial da Efí: tokeniza o cartão no navegador (o número nunca sai daqui)
@@ -1888,11 +1909,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
             : (texto || 'Pagamento não autorizado. Confira os dados ou tente outro cartão.'),
         );
       } else {
-        // Guarda (ou limpa) os dados do titular para a próxima compra.
-        try {
-          if (salvarDados) localStorage.setItem(TITULAR_KEY, JSON.stringify({ nome, cpf }));
-          else localStorage.removeItem(TITULAR_KEY);
-        } catch { /* localStorage indisponível: ignora */ }
+        // O titular ja foi guardado no envio — aqui so conclui.
         onAprovado();
       }
     } catch (e: any) {
