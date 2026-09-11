@@ -173,8 +173,36 @@ async function main() {
   if (!appShell.includes('content="noindex, follow"')) {
     throw new Error('Não consegui aplicar noindex no app.html — a meta robots do index.html mudou?');
   }
+
+  // ── O SHELL NÃO CARREGA O TEXTO DA HOME ────────────────────────────────
+  //
+  // `index.html` traz um H1 e um parágrafo reais dentro de #root, e isso está
+  // certo PARA A HOME: é o conteúdo indexado, e esconder texto por CSS já foi
+  // tentado aqui e é descontado por analisador de SEO (ver comentário no
+  // index.html).
+  //
+  // Só que o app.html era uma cópia dele. Resultado: /lanchepaulista,
+  // /admin e /entregador abriam piscando o título da home como texto cru,
+  // sem estilo, até o React montar — e, quando o JS demorava ou falhava,
+  // ficavam ASSIM. Era o que parecia "site quebrado" no celular do cliente.
+  //
+  // O shell é `noindex`, então esse texto não servia nem para busca. Fica
+  // vazio: a folha de estilo é render-blocking, então o primeiro paint já sai
+  // com o fundo certo do tema em vez de letra preta no branco. Cada tela
+  // mostra o próprio loader assim que monta.
+  const shellVazio = '<div id="root"></div>';
+  const antes = appShell;
+  appShell = appShell.replace(/<div id="root">[\s\S]*?<\/div>/, shellVazio);
+  if (appShell === antes || !appShell.includes(shellVazio)) {
+    throw new Error('Não consegui esvaziar o #root do app.html — a estrutura do index.html mudou?');
+  }
+  appShell = appShell.replace(
+    /<noscript>[\s\S]*?<\/noscript>/,
+    '<noscript><p>Este aplicativo precisa de JavaScript para funcionar. Ative o JavaScript no seu navegador.</p></noscript>',
+  );
+
   await writeFile(path.join(DIST, 'app.html'), appShell, 'utf-8');
-  console.log('  ✓ app.html (shell da SPA para rotas dinâmicas, noindex)');
+  console.log('  ✓ app.html (shell da SPA para rotas dinâmicas, noindex, #root vazio)');
 
   const routes = [
     ...PUBLIC_ROUTES.filter((r) => r.prerender !== false).map((r) => r.path),
