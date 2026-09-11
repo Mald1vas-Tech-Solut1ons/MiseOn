@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone, Calculator, Tv, AlertCircle, Bell } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { KIOSK_COMERCIAL, kioskMensalidadeFormatada } from '../../data/kiosk';
 import { PALETA_CORES, PALETA_FUNDO_POR_TEMA, isLightColor, fonteFamilia, obterFundoLojaPorTema, obterTokensLoja, resolverTemaLoja, type TemaLoja } from '../../lib/personalizacao';
 import ColorSwatchPicker from '../../components/ColorSwatchPicker';
 import FontPicker from '../../components/FontPicker';
@@ -192,6 +193,8 @@ export default function Loja() {
   const [tokenTotem, setTokenTotem] = useState<string | null>(null);
   const [gerandoTotem, setGerandoTotem] = useState(false);
   const [totemCopiado, setTotemCopiado] = useState(false);
+  const [pedindoKiosk, setPedindoKiosk] = useState(false);
+  const [kioskSolicitado, setKioskSolicitado] = useState(false);
   // Semeadura do cardapio base. So aparece para loja que ainda nao tem produto:
   // depois que o dono cadastrou o dele, oferecer "aplicar base" so assusta.
   const [temProduto, setTemProduto] = useState<boolean | null>(null);
@@ -246,6 +249,30 @@ export default function Loja() {
     if (tokenTv) params.set('token', tokenTv);
     const q = params.toString();
     return q ? `${base}?${q}` : base;
+  };
+
+  /**
+   * Interesse no Kiosk vindo de QUEM JA E CLIENTE.
+   *
+   * O formulario da landing atende quem chega de fora. Quem ja usa o sistema
+   * estava sem porta: o bloco dizia "fale com a MiseOn" e parava ali, obrigando
+   * o lojista a sair do painel e procurar um formulario publico. Aqui o pedido
+   * sai identificado — loja, slug e contato ja conhecidos — e cai no mesmo CRM.
+   */
+  const queroOKiosk = async () => {
+    setPedindoKiosk(true);
+    const { error } = await supabase.from('leads').insert({
+      nome: form.nome || slug,
+      whatsapp: form.whatsapp || form.telefone || '',
+      email: null,
+      segmento: form.segmento_negocio || null,
+      cidade: form.endereco || null,
+      mensagem: `[MiseOn Kiosk] Cliente ATIVO pedindo upgrade pelo painel. Loja: ${form.nome} (/${slug}).`,
+      origem: 'kiosk_painel',
+    });
+    setPedindoKiosk(false);
+    if (error) { setErro(`Nao consegui registrar seu interesse: ${error.message}`); return; }
+    setKioskSolicitado(true);
   };
 
   /** URL que o aparelho do totem deve abrir. Sem o `k` ele nao cria pedido. */
@@ -1793,9 +1820,41 @@ export default function Loja() {
             </div>
 
             {!kioskAtivo ? (
-              <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                {tDynamic('O MiseOn Kiosk é um produto à parte (totem + licença), não incluso no seu plano. Com ele o cliente pede e paga sozinho, e o pedido cai direto na cozinha. Fale com a MiseOn para contratar.')}
-              </p>
+              <>
+                <p className="mb-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                  {tDynamic('O MiseOn Kiosk é um produto à parte (totem + licença), não incluso no seu plano. Com ele o cliente pede e paga sozinho, e o pedido cai direto na cozinha.')}
+                </p>
+
+                {/* Preço vem de data/kiosk.ts — fonte única. Enquanto for
+                    provisório a tela diz "a partir de": prometer valor fechado
+                    que ainda não passou pela reunião de custos é o que quebra a
+                    confiança na primeira renegociação. */}
+                <div className="mb-3 rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+                  <p className="text-lg font-black text-gray-900 dark:text-gray-100">
+                    {KIOSK_COMERCIAL.provisorio ? `${tDynamic('a partir de')} ` : ''}
+                    {kioskMensalidadeFormatada()}
+                    <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{tDynamic('/mês')}</span>
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {tDynamic('Totem em comodato — o aparelho é da MiseOn e vem junto com a mensalidade.')}
+                  </p>
+                  {!KIOSK_COMERCIAL.compraDisponivel && (
+                    <p className="mt-1 text-xs text-gray-400">
+                      {tDynamic('Prefere comprar o aparelho? Peça a condição na conversa.')}
+                    </p>
+                  )}
+                </div>
+                {kioskSolicitado ? (
+                  <p className="rounded-lg bg-emerald-50 px-3 py-2.5 text-xs font-bold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+                    {tDynamic('Pedido registrado. A MiseOn entra em contato com a proposta do totem.')}
+                  </p>
+                ) : (
+                  <button type="button" onClick={queroOKiosk} disabled={pedindoKiosk}
+                    className="rounded-lg bg-[var(--cor-primaria)] px-4 py-2 text-xs font-black text-white transition hover:brightness-110 disabled:opacity-60">
+                    {pedindoKiosk ? tDynamic('Enviando...') : tDynamic('Quero o MiseOn Kiosk na minha loja')}
+                  </button>
+                )}
+              </>
             ) : (
               <>
                 <p className="mb-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">

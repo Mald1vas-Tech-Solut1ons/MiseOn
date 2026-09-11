@@ -1905,6 +1905,19 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Salvar esta estação': 'Save this station',
   'Ativa': 'Active',
   'Inativa': 'Inactive',
+  // ── MiseOn Kiosk: upgrade pelo painel ──
+  'O MiseOn Kiosk é um produto à parte (totem + licença), não incluso no seu plano. Com ele o cliente pede e paga sozinho, e o pedido cai direto na cozinha.':
+    'MiseOn Kiosk is a separate product (kiosk + licence), not included in your plan. With it the customer orders and pays on their own, and the order goes straight to the kitchen.',
+  'Quero o MiseOn Kiosk na minha loja': 'I want MiseOn Kiosk in my store',
+  'Enviando...': 'Sending…',
+  'Pedido registrado. A MiseOn entra em contato com a proposta do totem.':
+    'Request registered. MiseOn will reach out with the kiosk proposal.',
+  'a partir de': 'from',
+  '/mês': '/month',
+  'Totem em comodato — o aparelho é da MiseOn e vem junto com a mensalidade.':
+    'Kiosk on loan — the device belongs to MiseOn and comes with the monthly fee.',
+  'Prefere comprar o aparelho? Peça a condição na conversa.':
+    'Rather buy the device? Ask for terms when we talk.',
   // ── MiseOn Kiosk: totem, Pix e o cadastro do aparelho ──
   'Recomeçar': 'Start over',
   'Ver pedido': 'View order',

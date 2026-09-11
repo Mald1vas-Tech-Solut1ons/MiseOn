@@ -6,7 +6,7 @@ import { Users, DollarSign, Activity, TrendingUp } from 'lucide-react';
 
 import { useI18n } from '../../contexts/I18nContext';
 interface Loja {
-  id: string; slug: string; nome: string; ativo: boolean;
+  id: string; slug: string; nome: string; ativo: boolean; totem_ativo: boolean;
   plano: string; status_assinatura: string; trial_termina_em: string | null; observacao_admin: string | null;
 }
 interface Metrica { loja_id: string; pedidos_30d: number; gmv_30d: number; ultimo_pedido: string | null }
@@ -48,7 +48,7 @@ export default function Tenants() {
     if (user) setMeuId(user.id);
 
     const [{ data: l }, { data: m }] = await Promise.all([
-      supabase.from('lojas').select('id, slug, nome, ativo, plano, status_assinatura, trial_termina_em, observacao_admin').order('nome'),
+      supabase.from('lojas').select('id, slug, nome, ativo, totem_ativo, plano, status_assinatura, trial_termina_em, observacao_admin').order('nome'),
       supabase.functions.invoke('superadmin-metricas'),
     ]);
     setLojas((l as Loja[]) ?? []);
@@ -132,6 +132,27 @@ export default function Tenants() {
     await registrar(l.id, l.ativo ? 'loja_inativada' : 'loja_ativada', {});
     carregar();
   };
+  /**
+   * Liberar o MiseOn Kiosk para uma loja.
+   *
+   * Kiosk e venda separada (totem + licenca), fora do plano de balcao — entao
+   * quem liga e a PLATAFORMA, nunca o lojista. Sem isto a liberacao so existia
+   * como SQL na mao, e a regra de negocio ficava fora do produto.
+   *
+   * Desligar NAO apaga a credencial do aparelho: se o contrato voltar, o totem
+   * que ja esta instalado volta a funcionar com o mesmo link. O que impede o
+   * uso enquanto desligado e a propria fn_totem_criar_pedido, que exige as
+   * duas chaves.
+   */
+  const toggleKiosk = async (l: Loja) => {
+    const ligando = !l.totem_ativo;
+    if (!ligando && !confirm(
+      `Desligar o MiseOn Kiosk de "${l.nome}"? O totem dela para de aceitar pedidos na hora.`)) return;
+    await supabase.from('lojas').update({ totem_ativo: ligando }).eq('id', l.id);
+    await registrar(l.id, ligando ? 'kiosk_contratado' : 'kiosk_desligado', {});
+    carregar();
+  };
+
   const mudarPlano = async (l: Loja, plano: string) => {
     await supabase.from('lojas').update({ plano }).eq('id', l.id);
     await registrar(l.id, 'plano_alterado', { plano });
@@ -294,6 +315,21 @@ export default function Tenants() {
                       {['trial', 'ativa', 'atrasada', 'cancelada', 'vitalicio'].map((s) => <option key={s} value={s}>{s.toUpperCase()}</option>)}
                     </select>
                   </div>
+
+                  {/* MiseOn Kiosk: produto contratado a parte, fora do plano.
+                      Fica separado dos seletores de plano de proposito — nao e
+                      um nivel de plano, e outra venda. */}
+                  <button type="button" onClick={() => toggleKiosk(l)}
+                    className={`flex w-full items-center justify-between gap-2 rounded-lg border p-2 text-xs font-bold transition ${
+                      l.totem_ativo
+                        ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
+                        : 'border-white/15 bg-white/5 text-gray-400 hover:bg-white/10'
+                    }`}>
+                    <span>MiseOn Kiosk (totem)</span>
+                    <span className="rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide">
+                      {l.totem_ativo ? 'Contratado' : 'Desligado'}
+                    </span>
+                  </button>
                 </div>
 
                 <input defaultValue={l.observacao_admin ?? ''} onBlur={(e) => salvarNota(l, e.target.value)}

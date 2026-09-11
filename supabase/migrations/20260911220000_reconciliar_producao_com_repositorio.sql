@@ -220,3 +220,45 @@ end; $fn$;
 
 revoke all on function public.fn_totem_cancelar_pedido(uuid, uuid) from public;
 grant execute on function public.fn_totem_cancelar_pedido(uuid, uuid) to anon, authenticated;
+
+-- ── 6. LIBERAR O KIOSK ENTREGA A CREDENCIAL ────────────────────────────────
+-- Ligar o contrato era metade do trabalho: o lojista ficava sabendo por fora e
+-- ainda tinha de achar um botão para gerar a credencial. Produto recém-comprado
+-- não deveria exigir caça ao tesouro.
+create or replace function public.fn_trg_kiosk_contratado()
+returns trigger language plpgsql security definer
+set search_path to 'public','pg_temp' as $fn$
+declare v_dest text; v_link text;
+begin
+  -- Só na virada para LIGADO. Desligar não manda nada, e religar não troca a
+  -- credencial — o totem já instalado continua valendo.
+  if coalesce(old.totem_ativo,false) or not coalesce(new.totem_ativo,false) then
+    return new;
+  end if;
+
+  if new.totem_token is null then
+    new.totem_token := gen_random_uuid();
+  end if;
+
+  select u.email into v_dest
+    from usuarios_loja ul join auth.users u on u.id = ul.user_id
+   where ul.loja_id = new.id and ul.papel = 'admin'
+   order by ul.criado_em nulls last limit 1;
+
+  -- Loja sem admin cadastrado não impede a liberação: o link continua no painel.
+  if v_dest is null then return new; end if;
+
+  v_link := 'https://miseon.app.br/' || new.slug || '/totem?k=' || new.totem_token::text;
+
+  insert into email_fila (loja_id, evento, referencia_id, destinatario, classe, payload, status)
+  values (new.id, 'kiosk-credencial', new.id, v_dest, 'TRANSACIONAL',
+          jsonb_build_object('totem_url', v_link, 'loja_nome', new.nome,
+                             'painel_url', 'https://miseon.app.br/admin/loja'),
+          'PENDENTE');
+  return new;
+end; $fn$;
+
+drop trigger if exists trg_kiosk_contratado on public.lojas;
+create trigger trg_kiosk_contratado
+  before update of totem_ativo on public.lojas
+  for each row execute function public.fn_trg_kiosk_contratado();
