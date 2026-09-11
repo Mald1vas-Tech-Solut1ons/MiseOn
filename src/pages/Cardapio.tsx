@@ -1682,6 +1682,17 @@ function lerTitularSalvo(): { nome: string; cpf: string } | null {
   try { const r = localStorage.getItem(TITULAR_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
 }
 
+/** Uma linha de `meus_cartoes` — a view do cliente, sem o token de cobrança. */
+type CartaoGuardado = {
+  id: string;
+  bandeira: string | null;
+  ultimos_digitos: string;
+  titular_nome: string;
+  validade_mes: number | null;
+  validade_ano: number | null;
+  apelido: string | null;
+};
+
 function CartaoModal({ loja, info, onFechar, onAprovado }: {
   loja: Loja;
   info: { pedidoId: string; numero: number; total: number };
@@ -1697,6 +1708,14 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
   const [cvv, setCvv] = useState('');
   const [parcelas, setParcelas] = useState(1);
   const [salvarDados, setSalvarDados] = useState(!!salvo);
+  // ── CARTEIRA DO CLIENTE ───────────────────────────────────────────────────
+  // A carteira vem da view `meus_cartoes`, que NÃO expõe o token de cobrança —
+  // o navegador vê bandeira, final e titular, nada que cobre. Pagar com um
+  // deles manda só o `id`; a troca id → token acontece na edge function.
+  const [cartoes, setCartoes] = useState<CartaoGuardado[]>([]);
+  const [cartaoEscolhido, setCartaoEscolhido] = useState<string | null>(null);
+  const [usarNovoCartao, setUsarNovoCartao] = useState(false);
+  const [guardarCartao, setGuardarCartao] = useState(true);
   const [erro, setErro] = useState('');
   const [processando, setProcessando] = useState(false);
   const [verso, setVerso] = useState(false); // vira o cartão ao focar o CVV
@@ -1722,6 +1741,28 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // Carrega a carteira do cliente nesta loja. Sem sessão a view devolve vazio
+  // (security_invoker + auth.uid()), então o fluxo cai sozinho no cartão novo.
+  useEffect(() => {
+    let vivo = true;
+    (async () => {
+      const { data } = await supabase
+        .from('meus_cartoes')
+        .select('id, bandeira, ultimos_digitos, titular_nome, validade_mes, validade_ano, apelido')
+        .eq('loja_id', loja.id)
+        .order('ultimo_uso_em', { ascending: false, nullsFirst: false });
+      if (!vivo || !data?.length) return;
+      setCartoes(data as CartaoGuardado[]);
+      setCartaoEscolhido(data[0].id);
+    })();
+    return () => { vivo = false; };
+  }, [loja.id]);
+
+  // Enquanto houver um cartão da carteira escolhido, o formulário não aparece —
+  // e nada dele é validado. Exigir número e CVV de um cartão já guardado seria
+  // desfazer a única coisa que este caminho entrega.
+  const pagandoComGuardado = !!cartaoEscolhido && !usarNovoCartao;
+
   const efiEnvironment =
     import.meta.env.VITE_MISEON_EFI_SANDBOX === 'true' || import.meta.env.VITE_EFI_SANDBOX === 'true'
       ? 'sandbox'
@@ -1756,9 +1797,37 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
     if (!loja.efi_configurado) {
       return setErro('Cartão online indisponível para esta loja no momento.');
     }
-    if (!tudoOk) {
+    if (!pagandoComGuardado && !tudoOk) {
       setTocado({ numero: true, nome: true, cpf: true, validade: true, cvv: true });
       return setErro('Confira os dados do cartão destacados em vermelho.');
+    }
+
+    // ── PAGAMENTO COM CARTÃO DA CARTEIRA ──────────────────────────────────
+    // Nada é tokenizado aqui: o token reutilizável já existe no banco e não
+    // pode chegar ao navegador. Vai só o id do cartão escolhido.
+    if (pagandoComGuardado) {
+      setProcessando(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('cartao-pagar', {
+          body: { pedido_id: info.pedidoId, cartao_salvo_id: cartaoEscolhido, installments: parcelas },
+        });
+        if (error || !data?.aprovado) {
+          let msg: unknown = data?.error ?? 'Pagamento não autorizado com este cartão.';
+          if (error) {
+            try {
+              const b = await (error as any)?.context?.json?.();
+              msg = b?.error ?? msg;
+            } catch { /* mantém msg */ }
+          }
+          setErro(typeof msg === 'string' ? msg : 'Pagamento não autorizado com este cartão.');
+        } else {
+          onAprovado();
+        }
+      } catch (e: any) {
+        setErro(e?.message ?? 'Não foi possível processar o cartão. Tente novamente.');
+      }
+      setProcessando(false);
+      return;
     }
     /**
      * "SALVAR MEU NOME E CPF" PASSA A SALVAR DE VERDADE.
@@ -1845,7 +1914,11 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
           expirationYear: aa.length === 2 ? `20${aa}` : aa,
           holderName: nome,
           holderDocument: cpf.replace(/\D/g, ''),
-          reuse: false,
+          // `reuse: true` é o que torna o token PERMANENTE — sem isso não há o
+          // que guardar, e a caixinha "salvar cartão" seria só enfeite. É a
+          // própria Efí que retém o cartão; nós ficamos com o token e a
+          // máscara. Número e CVV continuam sem sair deste formulário.
+          reuse: guardarCartao,
         })
         .getPaymentToken();
 
@@ -1855,6 +1928,18 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
           payment_token: result.payment_token,
           installments: parcelas,
           customer: { name: nome, cpf },
+          // A máscara vai junto para a carteira ser reconhecível na próxima
+          // compra. Só é gravada se a cobrança for aprovada.
+          ...(guardarCartao
+            ? {
+                salvar_cartao: {
+                  bandeira: (brand || bandeira?.id) ?? undefined,
+                  ultimos_digitos: digitos.slice(-4),
+                  validade_mes: Number(mm),
+                  validade_ano: Number(aa.length === 2 ? `20${aa}` : aa),
+                },
+              }
+            : {}),
         },
       });
       if (error || !data?.aprovado) {
@@ -1975,6 +2060,58 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
         {/* Corpo rolável — min-h-0 é obrigatório: sem ele o flex item não encolhe
             e empurra o rodapé (botão de pagar) para fora da tela. */}
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+          {/* ── Carteira: cartões que este cliente já usou nesta loja ──────
+              O segundo pedido é onde o delivery se ganha ou se perde. Quem já
+              comeu aqui quer repetir em dois toques, não preencher cinco
+              campos de novo com o celular na mão. */}
+          {cartoes.length > 0 && (
+            <div className="mb-3 space-y-2">
+              {cartoes.map((c) => {
+                const escolhido = pagandoComGuardado && cartaoEscolhido === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => { setCartaoEscolhido(c.id); setUsarNovoCartao(false); setErro(''); }}
+                    className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
+                      escolhido
+                        ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/5'
+                        : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                    }`}
+                  >
+                    {c.bandeira
+                      ? <BandeiraMark id={c.bandeira} className="h-6 w-auto shrink-0" />
+                      : <CreditCard size={20} className="shrink-0 text-gray-400" />}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[13px] font-bold text-gray-900 dark:text-gray-100">
+                        {c.apelido || `•••• ${c.ultimos_digitos}`}
+                      </span>
+                      <span className="block truncate text-[11px] text-gray-500 dark:text-gray-400">
+                        {c.titular_nome}
+                        {c.validade_mes && c.validade_ano
+                          ? ` · ${String(c.validade_mes).padStart(2, '0')}/${String(c.validade_ano).slice(-2)}`
+                          : ''}
+                      </span>
+                    </span>
+                    {escolhido && <Check size={16} className="shrink-0 text-[var(--cor-primaria)]" />}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => { setUsarNovoCartao(true); setErro(''); setTimeout(() => numeroRef.current?.focus(), 60); }}
+                className={`w-full rounded-xl border border-dashed px-3 py-2.5 text-[12px] font-bold transition ${
+                  usarNovoCartao
+                    ? 'border-[var(--cor-primaria)] text-[var(--cor-primaria-texto)]'
+                    : 'border-gray-300 text-gray-500 hover:border-gray-400 dark:border-gray-600 dark:text-gray-400'
+                }`}
+              >
+                {tDynamic('Usar outro cartão')}
+              </button>
+            </div>
+          )}
+
+          {!pagandoComGuardado && (<>
           {/* Mini-cartão compacto que reage ao que é digitado (flip no CVV) */}
           <div className="mb-3 [perspective:1000px]">
             <div className={`relative h-36 w-full transition-transform duration-500 [transform-style:preserve-3d] ${verso ? '[transform:rotateY(180deg)]' : ''}`}>
@@ -2086,8 +2223,18 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
             </div>
           </div>
 
-          {/* Salvar dados do titular — só nome e CPF, jamais número/CVV */}
+          {/* Guardar o cartão — o token fica com a Efí, nunca o número nem o CVV */}
           <label className="mt-3 flex cursor-pointer items-center gap-2.5 rounded-xl border border-gray-200 px-3 py-2.5 dark:border-gray-700">
+            <input type="checkbox" checked={guardarCartao} onChange={(e) => setGuardarCartao(e.target.checked)}
+              className="h-4 w-4 shrink-0 accent-[var(--cor-primaria)]" />
+            <span className="text-[12px] leading-tight text-gray-600 dark:text-gray-300">
+              Guardar <b>este cartão</b> para a próxima compra
+              <span className="block text-xs opacity-90 text-gray-400">{tDynamic('Da próxima vez é só escolher o cartão e pagar. O número e o CVV ficam com a Efí — nunca conosco.')}</span>
+            </span>
+          </label>
+
+          {/* Salvar dados do titular — só nome e CPF, jamais número/CVV */}
+          <label className="mt-2 flex cursor-pointer items-center gap-2.5 rounded-xl border border-gray-200 px-3 py-2.5 dark:border-gray-700">
             <input type="checkbox" checked={salvarDados} onChange={(e) => setSalvarDados(e.target.checked)}
               className="h-4 w-4 shrink-0 accent-[var(--cor-primaria)]" />
             <span className="text-[12px] leading-tight text-gray-600 dark:text-gray-300">
@@ -2104,6 +2251,7 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
               {tDynamic('Trocar titular deste cartão')}
             </button>
           )}
+          </>)}
 
           {/* Selos de confiança */}
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs opacity-90 text-gray-400">

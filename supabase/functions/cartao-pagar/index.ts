@@ -68,28 +68,45 @@ function credenciaisCartao(sandbox: boolean | null | undefined) {
 
   // A COBRANCA TEM QUE SAIR NA MESMA CONTA QUE EMITIU O TOKEN.
   //
-  // O token do cartao e gerado no navegador com
-  // `EfiPay.CreditCard.setAccount(efi_payee_code)` — o identificador da conta
-  // PJ (CNPJ titular gravado em lojas.efi_titular_documento). A cobranca, no
-  // entanto, autenticava com EFI_CARTAO_PROD_*, que e a conta PESSOAL (o
-  // cartao ficou nela em carater temporario, ate a Efi liberar a PJ).
+  // MAPA DAS CONTAS — medido em 11/09/2026 autenticando cada par de credencial
+  // e lendo o `key_id` de dentro do proprio access_token (nenhum segredo
+  // impresso). Este bloco existe porque o mapa ja foi anotado ao contrario
+  // aqui, e a suposicao errada custou dias:
   //
-  // Duas consequencias, e a segunda explica meses de recusa:
-  //   1. token emitido numa conta e cobrado em outra;
-  //   2. a conta que cobra passa a ser a PESSOA FISICA — e o dono, pagando na
-  //      propria loja, vira literalmente "recebedor e cliente a mesma pessoa"
-  //      (Efi 4600222). Medido em 11/09/2026: a mesma cobranca, com o mesmo
-  //      CPF, enviada com EFI_CLIENT_* passa da validacao de identidade e para
-  //      so no payment_token; com EFI_CARTAO_PROD_* volta 4600222.
+  //   conta PESSOAL (931902)  -> key_id 3108186  -> payee f03566ad…c448
+  //   conta PJ      (950009)  -> key_id 3102801  -> payee baf9ef35…1e16
   //
-  // Em producao o cartao passa a usar EFI_CLIENT_*, que e a credencial da
-  // conta dona do `efi_payee_code`. Homologacao continua no par proprio.
+  //   EFI_COBRANCAS_*        = PESSOAL producao
+  //   EFI_CARTAO_PROD_*      = PESSOAL producao   (mesma conta, outro par)
+  //   EFI_CLIENT_*           = PJ      producao   <- NAO serve para cartao
+  //   EFI_PIX_*              = PJ      producao
+  //
+  // REGRA DO NEGOCIO (decisao do dono, 11/09/2026): o cartao roda na conta
+  // PESSOAL, que e a que tem limite de transacao liberado pelo banco; o Pix
+  // roda na conta PJ. O identificador que o navegador usa em
+  // `EfiPay.CreditCard.setAccount(...)` vem de
+  // `plataforma_pagamento_publico.efi_payee_code` = f03566ad… = PESSOAL.
+  // Logo a cobranca TEM de autenticar na PESSOAL: token emitido numa conta e
+  // cobrado em outra devolve "payment_token nao existe" para todo mundo — foi
+  // o que aconteceu quando o cartao passou a usar EFI_CLIENT_* (a PJ).
+  //
+  // Por isso producao NAO tem EFI_CLIENT_* na lista: um fallback que muda de
+  // conta nao degrada, quebra. Se as secrets da conta pessoal sumirem, e
+  // melhor a funcao falhar com "Secret ausente" do que cobrar na conta errada.
+  //
+  // Os unicos pagamentos de cartao APROVADOS deste sistema foram em
+  // 15/07/2026, quando a funcao autenticava com
+  // `envFirst('EFI_COBRANCAS_CLIENT_ID', ...)` — a mesma conta pessoal que
+  // esta na primeira posicao abaixo.
+  //
+  // Homologacao mantem o par proprio (EFI_CARTAO_HOMOLOG_*, que hoje e a
+  // conta PJ de homologacao).
   const nomesId = homologacao
     ? [`EFI_CARTAO_${ambiente}_CLIENT_ID`]
-    : ['EFI_CLIENT_ID', `EFI_CARTAO_${ambiente}_CLIENT_ID`];
+    : ['EFI_COBRANCAS_CLIENT_ID', `EFI_CARTAO_${ambiente}_CLIENT_ID`];
   const nomesSecret = homologacao
     ? [`EFI_CARTAO_${ambiente}_CLIENT_SECRET`]
-    : ['EFI_CLIENT_SECRET', `EFI_CARTAO_${ambiente}_CLIENT_SECRET`];
+    : ['EFI_COBRANCAS_CLIENT_SECRET', `EFI_CARTAO_${ambiente}_CLIENT_SECRET`];
 
   return {
     ambiente: homologacao ? 'homologacao' : 'producao',
@@ -119,9 +136,30 @@ import { z } from 'npm:zod';
 import { withAuthAndValidation } from '../_shared/validate-middleware.ts';
 import { logger } from '../_shared/logger.ts';
 
+// ── DOIS JEITOS DE PAGAR ─────────────────────────────────────────────────────
+// 1. `payment_token` — cartão digitado agora no checkout.
+// 2. `cartao_salvo_id` — cartão que o cliente já usou antes. O token fica no
+//    banco, fechado para o navegador; quem o lê é esta função, com service
+//    role. Assim repetir um pedido não exige redigitar número, validade, CVV,
+//    nome e CPF — que era o atrito que fazia o segundo pedido não acontecer.
+//
+// `customer` vira opcional porque, no cartão salvo, nome e CPF do titular já
+// estão gravados: pedi-los de novo seria exatamente o que este caminho existe
+// para eliminar.
 const cartaoPagarSchema = z.object({
   pedido_id: z.string().uuid(),
-  payment_token: z.string(),
+  payment_token: z.string().optional(),
+  cartao_salvo_id: z.string().uuid().optional(),
+  // Presente quando o cliente marcou "salvar este cartão". A máscara vem do
+  // navegador; o número completo e o CVV não passam por aqui em hipótese
+  // nenhuma (ver migração 20260911030000_cartao_salvo).
+  salvar_cartao: z.object({
+    bandeira: z.string().max(30).optional(),
+    ultimos_digitos: z.string().regex(/^\d{4}$/),
+    validade_mes: z.number().int().min(1).max(12).optional(),
+    validade_ano: z.number().int().min(2000).max(2100).optional(),
+    apelido: z.string().max(40).optional(),
+  }).optional(),
   installments: z.number().int().min(1).optional().default(1),
   customer: z.object({
     name: z.string(),
@@ -129,13 +167,22 @@ const cartaoPagarSchema = z.object({
     email: z.string().email().optional(),
     phone: z.string().optional(),
     birth: z.string().optional() // YYYY-MM-DD
-  })
-});
+  }).optional(),
+}).refine(
+  (v) => !!v.payment_token || !!v.cartao_salvo_id,
+  { message: 'Informe payment_token (cartão novo) ou cartao_salvo_id (cartão já guardado).' },
+).refine(
+  (v) => !!v.cartao_salvo_id || (!!v.customer?.name && !!v.customer?.cpf),
+  { message: 'customer{name,cpf} é obrigatório quando o cartão é digitado agora.' },
+);
 
 const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z.infer<typeof cartaoPagarSchema>) => {
   const reqLogger = logger.withContext({ req_id: crypto.randomUUID(), tenant_id: ctx.user?.id });
   try {
-    const { pedido_id, payment_token, installments, customer } = body;
+    const { pedido_id, installments, cartao_salvo_id, salvar_cartao } = body;
+    // Reatribuídos abaixo quando o pagamento usa um cartão já guardado.
+    let payment_token = body.payment_token;
+    let customer = body.customer;
 
     // Utilize o client injetado pelo withAuth que já está autenticado,
     // mas se precisarmos de bypass de RLS para mutação (como estava no código original), 
@@ -170,6 +217,52 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
           return json({ error: 'Acesso não autorizado para este pedido' }, { status: 403 });
         }
       }
+    }
+
+    // ── CARTÃO JÁ GUARDADO ─────────────────────────────────────────────────
+    //
+    // O token reutilizável COBRA o cartão. Por isso ele nunca é servido ao
+    // navegador (a vitrine lê a view `meus_cartoes`, que não tem a coluna) e a
+    // troca id → token acontece só aqui, com service role.
+    //
+    // A dona do cartão é verificada contra `auth.uid()`, não contra o pedido:
+    // sem isso, quem conseguisse adivinhar um uuid cobraria o cartão alheio.
+    if (cartao_salvo_id) {
+      const { data: cartao } = await supabaseAdmin
+        .from('cartoes_salvos')
+        .select('payment_token, titular_nome, titular_documento, ultimos_digitos, clientes!inner(user_id)')
+        .eq('id', cartao_salvo_id)
+        .eq('loja_id', pedido.loja_id)
+        .eq('ativo', true)
+        .maybeSingle();
+
+      const donoDoCartao = (cartao as any)?.clientes?.user_id as string | undefined;
+      const ehServico = ctx.user?.role === 'service_role';
+      if (!cartao || (!ehServico && donoDoCartao !== ctx.user?.id)) {
+        // Mesma resposta para "não existe" e "não é seu": responder coisas
+        // diferentes transformaria este endpoint num detector de cartões.
+        return json({ error: 'Cartão salvo não encontrado.' }, { status: 404 });
+      }
+
+      payment_token = String((cartao as any).payment_token);
+      customer = {
+        ...(customer ?? {}),
+        name: customer?.name ?? String((cartao as any).titular_nome),
+        cpf: customer?.cpf ?? String((cartao as any).titular_documento),
+      };
+
+      await supabaseAdmin
+        .from('cartoes_salvos')
+        .update({ ultimo_uso_em: new Date().toISOString() })
+        .eq('id', cartao_salvo_id);
+
+      reqLogger.info('Pagamento com cartão guardado', {
+        context: { pedido_id, final: String((cartao as any).ultimos_digitos) },
+      });
+    }
+
+    if (!payment_token || !customer?.name || !customer?.cpf) {
+      return json({ error: 'Dados do cartão incompletos.' }, { status: 400 });
     }
 
     const { data: totalReal, error: erroRecalc } = await supabaseAdmin.rpc('fn_recalcular_pedido', { p_pedido_id: pedido_id });
@@ -256,6 +349,40 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
     const usarSplit = !!payeeCode
       && payeeCode.length > 5
       && !payeesDaPlataforma.has(payeeCode.toLowerCase());
+
+    // ── SEM SPLIT NÃO É NEUTRO: A VENDA FICA COM A PLATAFORMA ──────────────
+    //
+    // Quando o split é desligado, a cobrança inteira é creditada na conta que
+    // processa (a pessoal) e a loja não recebe nada. Isso é correto para a
+    // venda da própria MiseOn e ERRADO para a venda de um lojista.
+    //
+    // Foi exatamente esse estado que produziu a recusa 4600222 do pedido #298
+    // em 11/09/2026: o Lanche do Paulista estava gravado com o payee_code DA
+    // PLATAFORMA, o split foi desligado, e a Efí passou a ver o recebedor
+    // (dona da conta pessoal) e a pagadora como a mesma pessoa. O erro
+    // chegava ao cliente como "cartão recusado", sem nenhum rastro de que a
+    // causa era cadastro.
+    //
+    // Agora o caso fica gravado em `pagamentos.split_status` com nome próprio
+    // — dá para achar por SQL toda venda que foi parar na conta errada.
+    const repasseApontaParaPlataforma = !!payeeCode
+      && payeesDaPlataforma.has(payeeCode.toLowerCase());
+    const statusDoRepasse = usarSplit
+      ? 'marketplace_repasse'
+      : (repasseApontaParaPlataforma ? 'creditado_na_plataforma' : 'loja_sem_payee');
+
+    if (!usarSplit) {
+      reqLogger.warn('Venda de loja sem repasse: o valor fica na conta da plataforma', {
+        context: {
+          pedido_id,
+          loja_id: pedido.loja_id,
+          motivo: repasseApontaParaPlataforma
+            ? 'a loja esta cadastrada com o payee_code da plataforma'
+            : 'a loja nao tem efi_payee_code',
+          consequencia: 'a loja nao recebe, e a Efi pode recusar com 4600222 quando o pagador for a propria dona da conta',
+        },
+      });
+    }
 
     reqLogger.info('Cobranca de cartao montada', {
       context: {
@@ -387,17 +514,20 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
             // do pedido, senao um endereco por pedido que nao pertence a
             // ninguem. Endereco da plataforma nao entra em nenhuma hipotese.
             email: emailDoComprador,
-            // TELEFONE DO PAGADOR — mesma regra do e-mail.
+            // TELEFONE DO PAGADOR — CAMPO OBRIGATORIO NA EFI.
             //
-            // Antes caia em `p.telefone_contato`, que e o contato DO PEDIDO.
-            // Quando quem lanca o pedido e a equipe da loja, esse telefone e
-            // do recebedor — e ia junto com o CPF de outra pessoa, dando a
-            // Efi mais um motivo para tratar pagador e recebedor como a mesma
-            // pessoa. Com comprador da loja, so vai o que o checkout informar.
+            // Eu tinha tornado este campo opcional quando o comprador e da
+            // equipe da loja, achando que o telefone do pedido contribuia para
+            // a Efi confundir pagador e recebedor. Nao contribuia — a causa era
+            // a credencial trocada em 09/09 — e omitir o campo produziu
+            // "A propriedade [phone_number] e obrigatoria".
+            //
+            // Volta a regra simples: o telefone que o checkout informar; na
+            // falta dele, o contato do pedido, que sempre existe.
             phone_number: (
               String(customer.phone ?? '').replace(/\D/g, '')
-              || (compradorEhDaLoja ? '' : String(p.telefone_contato ?? '').replace(/\D/g, ''))
-            ) || undefined,
+              || String(p.telefone_contato ?? '').replace(/\D/g, '')
+            ),
             ...(customer.birth ? { birth: String(customer.birth) } : {}),
           },
         },
@@ -530,7 +660,7 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
         data_pagamento: aprovado ? new Date().toISOString() : null,
         modalidade: usarAntecipado ? 'antecipado' : 'padrao',
         aviso: avisoModalidade,
-        split_status: usarSplit ? 'marketplace_repasse' : 'sem_dados_repasse',
+        split_status: statusDoRepasse,
       })
       .eq('pedido_id', pedido_id)
       .eq('metodo', 'CREDITO');
@@ -540,6 +670,46 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       // aparece para o lojista (ver AGUARDANDO_PAGAMENTO, 20260908).
       await supabaseAdmin.from('pedidos').update({ status: 'ACEITO' })
         .eq('id', pedido_id).in('status', ['NOVO', 'AGUARDANDO_PAGAMENTO']);
+    }
+
+    // ── GUARDAR O CARTÃO PARA A PRÓXIMA COMPRA ─────────────────────────────
+    //
+    // Só depois de APROVADO: guardar um cartão que o emissor acabou de recusar
+    // é oferecer ao cliente, na próxima compra, um atalho que já se sabe que
+    // não funciona.
+    //
+    // Só para cliente identificado e dono do pedido — carteira é de pessoa,
+    // não de pedido. O que entra aqui é o token reutilizável mais a máscara;
+    // número completo e CVV não existem nesta função.
+    if (aprovado && salvar_cartao && !cartao_salvo_id && pedido.cliente_id) {
+      const podeGuardar = ctx.user?.role === 'service_role'
+        || (!!pedido.cliente_user_id && pedido.cliente_user_id === ctx.user?.id);
+      if (podeGuardar) {
+        const { error: erroSalvar } = await supabaseAdmin
+          .from('cartoes_salvos')
+          .upsert({
+            cliente_id: pedido.cliente_id,
+            loja_id: pedido.loja_id,
+            payment_token,
+            bandeira: salvar_cartao.bandeira ?? null,
+            ultimos_digitos: salvar_cartao.ultimos_digitos,
+            titular_nome: customer.name,
+            titular_documento: String(customer.cpf).replace(/\D/g, ''),
+            validade_mes: salvar_cartao.validade_mes ?? null,
+            validade_ano: salvar_cartao.validade_ano ?? null,
+            apelido: salvar_cartao.apelido ?? null,
+            ultimo_uso_em: new Date().toISOString(),
+          }, { onConflict: 'cliente_id,loja_id,payment_token' });
+
+        // Falhar em guardar NÃO pode derrubar um pagamento já aprovado: o
+        // dinheiro entrou, o pedido é válido. Fica no log, e o cliente só
+        // digita de novo da próxima vez.
+        if (erroSalvar) {
+          reqLogger.warn('Pagamento aprovado, mas o cartão não pôde ser guardado', {
+            context: { pedido_id, motivo: String(erroSalvar.message ?? erroSalvar) },
+          });
+        }
+      }
     }
 
     reqLogger.info('Pagamento com cartão processado com sucesso', { charge_id: data.charge_id, aprovado });
@@ -553,7 +723,7 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       modalidade: usarAntecipado ? 'antecipado' : 'padrao',
       modalidade_solicitada: querAntecipado ? 'antecipado' : 'padrao',
       aviso: avisoModalidade,
-      split_status: usarSplit ? 'marketplace_repasse' : 'sem_dados_repasse',
+      split_status: statusDoRepasse,
     });
   } catch (e) {
     reqLogger.error('Erro na função cartao-pagar', e);

@@ -9,6 +9,13 @@ interface EdgeLogPayload {
   req_id?: string;
   context?: Record<string, any>;
   error?: Error | unknown;
+  // O `log()` abaixo já recolhe qualquer chave fora do contrato e a coloca
+  // dentro de `context` — foi a correção que impediu logs de dinheiro de saírem
+  // com `context: {}`. O TIPO, porém, continuava proibindo essas chaves, então
+  // `logger.warn(msg, { pedido_id })` — que funciona perfeitamente em runtime —
+  // quebrava `deno check`. Declarar o que a classe realmente aceita mantém o
+  // typecheck honesto em vez de virar ruído que se aprende a ignorar.
+  [chaveExtra: string]: unknown;
 }
 
 export class EdgeLogger {
