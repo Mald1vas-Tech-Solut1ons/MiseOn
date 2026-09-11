@@ -122,7 +122,7 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
 
     const { data: pedido } = await supabaseAdmin
       .from('pedidos')
-      .select('id, numero, valor_total, cliente_id, cliente_user_id, loja_id, telefone_contato, cep, logradouro, numero_endereco, complemento, bairro, cidade, uf, lojas(efi_payee_code, antecipacao_cartao), itens_pedido(nome_produto, preco_unitario, quantidade)')
+      .select('id, numero, valor_total, cliente_id, cliente_user_id, loja_id, telefone_contato, cep, logradouro, numero_endereco, complemento, bairro, cidade, uf, lojas(efi_payee_code, antecipacao_cartao), clientes(email), itens_pedido(nome_produto, preco_unitario, quantidade)')
       .eq('id', pedido_id)
       .single();
     if (!pedido) return json({ error: 'pedido não encontrado' }, { status: 404 });
@@ -265,6 +265,40 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       ? { marketplace: { repasses: [{ payee_code: payeeCode, percentage: 10000 }] } }
       : {};
 
+    // ── QUEM É O COMPRADOR, PARA A EFÍ ─────────────────────────────────────
+    // Quando quem está logado é a EQUIPE DA LOJA (dono testando, operador
+    // lançando pelo balcão), o e-mail do "cliente" do pedido é o e-mail de
+    // alguém ligado ao recebedor. Mandar isso junto com o CPF de outra pessoa
+    // é o que faz a Efí concluir "recebedor e cliente são a mesma pessoa"
+    // (4600222) mesmo com o documento correto — medido em 10/09/2026.
+    // Nesse caso vai um endereço por pedido, que não pertence a ninguém.
+    const emailDoCliente = (pedido as any)?.clientes?.email as string | undefined;
+    let compradorEhDaLoja = false;
+    if ((pedido as any).cliente_user_id) {
+      const { data: vinculo } = await supabaseAdmin
+        .from('usuarios_loja')
+        .select('papel')
+        .eq('loja_id', pedido.loja_id)
+        .eq('user_id', (pedido as any).cliente_user_id)
+        .maybeSingle();
+      compradorEhDaLoja = !!vinculo;
+    }
+    const emailDoComprador =
+      customer.email
+      ?? (compradorEhDaLoja ? undefined : emailDoCliente)
+      ?? `pedido-${pedido.numero}@clientes.miseon.app.br`;
+
+    // Só o domínio: basta para saber se o e-mail que foi para a Efí pertencia
+    // ao comprador ou ao recebedor, sem guardar endereço pessoal no log.
+    reqLogger.info('Identidade do comprador resolvida', {
+      context: {
+        pedido_id,
+        comprador_e_da_loja: compradorEhDaLoja,
+        email_dominio: String(emailDoComprador).split('@')[1] ?? '(sem dominio)',
+        email_veio_de: customer.email ? 'checkout' : (compradorEhDaLoja ? 'neutro-por-pedido' : (emailDoCliente ? 'cadastro-do-cliente' : 'neutro-por-pedido')),
+      },
+    });
+
     const p = pedido as any;
     const billing_address = {
       street: String(p.logradouro || 'Nao informado').slice(0, 255),
@@ -291,7 +325,23 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
           customer: {
             name: customer.name,
             cpf: String(customer.cpf).replace(/\D/g, ''),
-            email: customer.email ?? 'contato@miseon.app.br',
+            // E-MAIL DO COMPRADOR — NUNCA O DA PLATAFORMA.
+            //
+            // Antes: `customer.email ?? 'contato@miseon.app.br'`. O checkout
+            // manda só nome e CPF, entao TODA cobranca de cartao saia com o
+            // e-mail da propria MiseOn no lugar do e-mail do comprador. A Efi
+            // recebia CPF de uma pessoa e e-mail do recebedor — que e um jeito
+            // direto de a validacao dela concluir "recebedor e cliente sao a
+            // mesma pessoa" (code 4600222), mesmo com o CPF certo.
+            //
+            // Medido em 10/09/2026: cobranca com `customer.cpf` da compradora,
+            // pedido de R$ 7,00, recusada com 4600222 enquanto o e-mail
+            // enviado era contato@miseon.app.br.
+            //
+            // Ordem agora: o que o checkout mandar, senao o e-mail do CLIENTE
+            // do pedido, senao um endereco por pedido que nao pertence a
+            // ninguem. Endereco da plataforma nao entra em nenhuma hipotese.
+            email: emailDoComprador,
             phone_number: (String(customer.phone ?? '').replace(/\D/g, '') || String(p.telefone_contato ?? '').replace(/\D/g, '')),
             ...(customer.birth ? { birth: String(customer.birth) } : {}),
           },

@@ -1235,6 +1235,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Cliente pede pelo navegador, sem instalar aplicativo': 'Customers order from the browser, with no app to install',
   'Cobertura inteligente de entrega': 'Smart delivery coverage',
   'Cobrar': 'Charge',
+  'Renovar por 30 dias': 'Renew for 30 days',
   'NÃO VALE HOJE': 'NOT VALID TODAY',
   'Vale para qualquer pedido': 'Valid on any order',
   'Perfil da loja': 'Store profile',

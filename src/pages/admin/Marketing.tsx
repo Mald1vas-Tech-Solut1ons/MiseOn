@@ -81,6 +81,22 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
   const [cupons, setCupons] = useState<Cupom[]>([]);
   const [editando, setEditando] = useState<Cupom | 'novo' | null>(null);
 
+  /**
+   * Renova a validade a partir de HOJE, não da data vencida.
+   *
+   * Somar dias sobre uma validade que já passou devolveria outra data no
+   * passado — o cupom continuaria morto e o botão pareceria quebrado. A conta
+   * certa é sempre "a partir de agora".
+   */
+  const renovar = async (c: Cupom, dias: number) => {
+    const nova = new Date();
+    nova.setDate(nova.getDate() + dias);
+    const iso = `${nova.getFullYear()}-${String(nova.getMonth() + 1).padStart(2, '0')}-${String(nova.getDate()).padStart(2, '0')}`;
+    const { error } = await supabase.from('cupons').update({ validade: iso, ativo: true }).eq('id', c.id);
+    if (error) { alert(`Não foi possível renovar: ${error.message}`); return; }
+    carregar();
+  };
+
   const carregar = useCallback(async () => {
     const { data } = await supabase.from('cupons').select('*').eq('loja_id', lojaId).order('codigo');
     setCupons((data as Cupom[]) ?? []);
@@ -174,6 +190,16 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
                 </div>
               );
             })()}
+
+            {cupomInvalidoHoje(c as never) && c.validade && (
+              <button
+                type="button"
+                onClick={() => renovar(c, 30)}
+                className="w-full rounded-xl bg-amber-500 py-2 text-xs font-black text-white transition hover:brightness-110"
+              >
+                {tDynamic('Renovar por 30 dias')}
+              </button>
+            )}
 
             <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3 gap-2">
               <button type="button"
