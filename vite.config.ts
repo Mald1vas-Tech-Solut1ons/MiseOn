@@ -65,13 +65,53 @@ export default defineConfig({
         // de deixar duas geracoes convivendo.
         cleanupOutdatedCaches: true,
 
-        // E o painel do lojista sai do fallback offline. Ele nao e conteudo
-        // publico que vale servir desatualizado: e a ferramenta de trabalho de
-        // quem esta com a loja aberta. Melhor uma tela de sem-conexao honesta
-        // do que um shell antigo que abre pela metade e faz o dono achar que o
-        // sistema caiu. O cardapio do cliente continua com fallback, porque la
-        // funcionar offline vale mais.
-        navigateFallbackDenylist: [/^\/admin/, /^\/superadmin/, /^\/entregador/],
+        // ── A NAVEGACAO VOLTA A FALAR COM A REDE ──────────────────────────
+        //
+        // `cleanupOutdatedCaches` nao resolveu, e agora esta medido o porque.
+        // O sw.js publicado continha:
+        //
+        //   registerRoute(new NavigationRoute(createHandlerBoundToURL("index.html")))
+        //
+        // Isso responde TODA navegacao com o index.html do precache, sem
+        // tocar na rede. Duas consequencias:
+        //
+        //   1. Deploy novo troca os hashes dos bundles. O HTML guardado
+        //      continua apontando para /assets/index-<hash antigo>.js, que nao
+        //      existe mais: 404 nos scripts, nada hidrata, e a tela mostra so
+        //      o markup estatico. Foi exatamente o que aconteceu em 11/09/2026
+        //      — servidor respondendo 200 em todos os assets e a pagina abrindo
+        //      crua, exigindo Ctrl+F5 a cada acesso.
+        //   2. Mesmo funcionando, /lanchepaulista recebia o index.html da RAIZ
+        //      e jogava fora o HTML pre-renderizado daquela rota — que existe
+        //      justamente para o primeiro paint e para o buscador.
+        //
+        // `NetworkFirst` conserta os dois: a rede manda, e o cache guarda o
+        // HTML CERTO DE CADA ROTA, usado so quando nao ha conexao. O deploy
+        // novo passa a aparecer sozinho, sem recarga forcada.
+        navigateFallback: null,
+        runtimeCaching: [
+          {
+            // O painel do lojista nunca sai do cache: e ferramenta de trabalho
+            // de quem esta com a loja aberta, e um shell antigo faz o dono
+            // achar que o sistema caiu. Sem conexao, erro honesto.
+            urlPattern: ({ request, url }: { request: Request; url: URL }) =>
+              request.mode === 'navigate'
+              && /^\/(admin|superadmin|entregador)/.test(url.pathname),
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: ({ request }: { request: Request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'html-de-navegacao',
+              // Conexao ruim de salao nao pode travar a tela: passou disso,
+              // serve o que ja foi visto daquela rota.
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
       },
     }),
   ],
