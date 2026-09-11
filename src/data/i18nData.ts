@@ -1890,6 +1890,8 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Estamos tentando de novo automaticamente. Se persistir, fale com o suporte.':
     'We are retrying automatically. If it persists, contact support.',
   'última verificação': 'last checked',
+  'Verificar agora': 'Check now',
+  'Verificando…': 'Checking…',
   'Percentual de Cashback por Pedido': 'Cashback percentage per order',
   'Pix recebido na sua conta': 'Pix received in your account',
   'Política Zero-Trust para o seu Certificado': 'Zero-trust policy for your certificate',

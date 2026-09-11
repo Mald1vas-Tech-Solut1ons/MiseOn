@@ -112,6 +112,28 @@ export default function Ifood() {
     if (data) setSaude(data as SaudeIfood);
   }, []);
 
+  const [verificando, setVerificando] = useState(false);
+
+  /** Uma tentativa real contra o iFood, agora, ignorando o backoff do polling. */
+  const verificarAgora = useCallback(async () => {
+    setVerificando(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ifood-verificar');
+      if (!error && data) {
+        setSaude((s) => ({
+          ...(s ?? { falhas_seguidas: 0 }),
+          estado: data.estado,
+          http_status: data.http_status ?? null,
+          mensagem: data.mensagem ?? null,
+          verificado_em: new Date().toISOString(),
+          falhas_seguidas: data.estado === 'OK' ? 0 : ((s?.falhas_seguidas ?? 0) + 1),
+        } as SaudeIfood));
+      }
+    } finally {
+      setVerificando(false);
+    }
+  }, []);
+
   const carregarMapeamento = useCallback(async () => {
     const { data } = await supabase
       .from('produtos')
@@ -265,6 +287,19 @@ export default function Ifood() {
             {new Date(saude.verificado_em).toLocaleString('pt-BR')}
             {saude.http_status ? ` · HTTP ${saude.http_status}` : ''}
           </p>
+
+          {/* O laço se fecha aqui. Depois que a permissão é concedida no portal
+              do iFood, o polling só reverificaria em até 30 minutos — e é
+              exatamente o momento em que a pessoa precisa de resposta na hora.
+              Um clique, uma tentativa real, o selo muda. */}
+          <button
+            type="button"
+            onClick={verificarAgora}
+            disabled={verificando}
+            className="mt-3 rounded-lg bg-red-600 px-3.5 py-2 text-xs font-black text-white transition hover:brightness-110 disabled:opacity-60"
+          >
+            {verificando ? tDynamic('Verificando…') : tDynamic('Verificar agora')}
+          </button>
         </div>
       )}
 
