@@ -1905,6 +1905,30 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Salvar esta estação': 'Save this station',
   'Ativa': 'Active',
   'Inativa': 'Inactive',
+  // ── MiseOn Kiosk: totem, Pix e o cadastro do aparelho ──
+  'Recomeçar': 'Start over',
+  'Ver pedido': 'View order',
+  'Opcional': 'Optional',
+  'Escolha uma opção': 'Pick one',
+  'Pronto': 'Done',
+  'Pague com Pix para a cozinha começar': 'Pay with Pix so the kitchen can start',
+  'Abra o app do banco, aponte a câmera para o código e confirme.':
+    'Open your banking app, point the camera at the code and confirm.',
+  'Aguardando o pagamento…': 'Waiting for payment…',
+  'Pedido': 'Order',
+  'Não consegui pagar — cancelar pedido': 'I could not pay — cancel order',
+  'Totem de autoatendimento (MiseOn Kiosk)': 'Self-service kiosk (MiseOn Kiosk)',
+  'Contratado': 'Active',
+  'Não contratado': 'Not contracted',
+  'O MiseOn Kiosk é um produto à parte (totem + licença), não incluso no seu plano. Com ele o cliente pede e paga sozinho, e o pedido cai direto na cozinha. Fale com a MiseOn para contratar.':
+    'MiseOn Kiosk is a separate product (kiosk + licence), not included in your plan. With it the customer orders and pays on their own, and the order goes straight to the kitchen. Talk to MiseOn to get it.',
+  'Abra o link abaixo no navegador do totem, em tela cheia. Ele leva a credencial do aparelho no final — sem ela o totem não cria pedido. Guarde o link: qualquer pessoa com ele pode lançar pedidos nesta loja.':
+    'Open the link below in the kiosk’s own browser, full screen. It carries the device credential at the end — without it the kiosk cannot create orders. Keep the link safe: anyone who has it can place orders for this store.',
+  'Este totem ainda não tem credencial. Gere uma para vincular o aparelho.':
+    'This kiosk has no credential yet. Generate one to pair the device.',
+  'Gerar credencial do totem': 'Generate kiosk credential',
+  'Use se o link vazou. O totem vai precisar do link novo.':
+    'Use it if the link leaked. The kiosk will need the new link.',
   // ── MiseOn Kiosk: a tela que roda no totem ──
   'Começar pedido': 'Start order',
   'Continuar': 'Continue',

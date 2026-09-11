@@ -188,3 +188,35 @@ $fn$;
 
 revoke all on function public.fn_totem_criar_pedido(uuid, jsonb) from public;
 grant execute on function public.fn_totem_criar_pedido(uuid, jsonb) to anon, authenticated;
+
+-- ── 5. O TOTEM PRECISA PODER DESISTIR ──────────────────────────────────────
+-- Situação real de fila: a pessoa chega no Pix e descobre que não tem saldo.
+-- Sem este caminho o pedido fica AGUARDANDO_PAGAMENTO para sempre — lixo no
+-- painel do lojista — e o próximo da fila espera o totem se soltar sozinho.
+create or replace function public.fn_totem_cancelar_pedido(p_token uuid, p_pedido_id uuid)
+returns jsonb language plpgsql security definer
+set search_path to 'public','pg_temp' as $fn$
+declare v_loja uuid; v_status status_pedido;
+begin
+  select id into v_loja from lojas
+   where totem_ativo is true and totem_token is not null and totem_token = p_token;
+  if v_loja is null then raise exception 'Totem nao autorizado.'; end if;
+
+  select status into v_status from pedidos
+   where id = p_pedido_id and loja_id = v_loja and origem = 'totem';
+  if v_status is null then raise exception 'Pedido nao pertence a este totem.'; end if;
+
+  -- Já saiu do carrinho (pago, aceito, cancelado antes): não mexe, e diz por
+  -- quê. Silenciar esconderia a corrida entre o webhook do Pix e o dedo da
+  -- pessoa no botão.
+  if v_status <> 'AGUARDANDO_PAGAMENTO' then
+    return jsonb_build_object('cancelado', false, 'motivo', 'ja_saiu_do_carrinho', 'status', v_status::text);
+  end if;
+
+  update pedidos set status = 'CANCELADO' where id = p_pedido_id;
+  update pagamentos set status = 'CANCELADO' where pedido_id = p_pedido_id and status <> 'PAGO';
+  return jsonb_build_object('cancelado', true);
+end; $fn$;
+
+revoke all on function public.fn_totem_cancelar_pedido(uuid, uuid) from public;
+grant execute on function public.fn_totem_cancelar_pedido(uuid, uuid) to anon, authenticated;

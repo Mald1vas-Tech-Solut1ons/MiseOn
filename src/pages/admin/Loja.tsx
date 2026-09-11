@@ -186,6 +186,12 @@ export default function Loja() {
   // que o lojista edita, e um save comum nunca deve reescreve-la por acidente
   // — reescrever aqui derruba todas as TVs da loja de uma vez.
   const [tokenTv, setTokenTv] = useState<string | null>(null);
+  // MiseOn Kiosk: produto contratado a parte. `totem_ativo` e a chave
+  // comercial (so a plataforma liga) e `totem_token` e a do aparelho.
+  const [kioskAtivo, setKioskAtivo] = useState(false);
+  const [tokenTotem, setTokenTotem] = useState<string | null>(null);
+  const [gerandoTotem, setGerandoTotem] = useState(false);
+  const [totemCopiado, setTotemCopiado] = useState(false);
   // Semeadura do cardapio base. So aparece para loja que ainda nao tem produto:
   // depois que o dono cadastrou o dele, oferecer "aplicar base" so assusta.
   const [temProduto, setTemProduto] = useState<boolean | null>(null);
@@ -242,6 +248,28 @@ export default function Loja() {
     return q ? `${base}?${q}` : base;
   };
 
+  /** URL que o aparelho do totem deve abrir. Sem o `k` ele nao cria pedido. */
+  const urlTotem = () =>
+    tokenTotem ? `${window.location.origin}/${slug}/totem?k=${tokenTotem}` : '';
+
+  const gerarTokenTotem = async () => {
+    if (tokenTotem && !confirm(
+      'Gerar uma credencial nova invalida o link que o totem esta usando. '
+      + 'O aparelho vai precisar do link novo. Continuar?')) return;
+    setGerandoTotem(true);
+    const novo = crypto.randomUUID();
+    const { error } = await supabase.from('lojas').update({ totem_token: novo }).eq('id', lojaId);
+    setGerandoTotem(false);
+    if (error) { setErro(`Nao consegui gerar a credencial do totem: ${error.message}`); return; }
+    setTokenTotem(novo);
+  };
+
+  const copiarLinkTotem = async () => {
+    await navigator.clipboard.writeText(urlTotem());
+    setTotemCopiado(true);
+    setTimeout(() => setTotemCopiado(false), 2500);
+  };
+
   const regenerarTokenTv = async () => {
     if (!lojaId) return;
     // Confirmacao explicita: isto invalida TODA TV ja configurada da loja, e
@@ -275,6 +303,8 @@ export default function Loja() {
         );
         setSlug(data.slug ?? '');
         setTokenTv(data.painel_tv_token ?? null);
+        setKioskAtivo(data.totem_ativo === true);
+        setTokenTotem(data.totem_token ?? null);
         setForm({
           painel_tv_tipos: data.painel_tv_tipos ?? ['RETIRADA_BALCAO', 'SALAO'],
           painel_tv_promocoes: data.painel_tv_promocoes ?? true,
@@ -1745,6 +1775,68 @@ export default function Loja() {
           nunca mais esbarra nisso. */}
       {aba === 'telas' && (
         <div className="space-y-4">
+          {/* ── MISEON KIOSK ────────────────────────────────────────────────
+              A regra de negocio precisa VIVER NO PRODUTO, nao num SQL meu.
+              Kiosk e venda separada do plano de balcao, entao a tela mostra
+              coisas diferentes para quem contratou e para quem nao contratou —
+              e o lojista nunca liga o proprio contrato: isso e da plataforma. */}
+          <div className="rounded-2xl bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              <p className="text-sm font-bold dark:text-gray-100">{tDynamic('Totem de autoatendimento (MiseOn Kiosk)')}</p>
+              <span className={`rounded-full px-3 py-1 text-[11px] font-black uppercase ${
+                kioskAtivo
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                  : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400'
+              }`}>
+                {kioskAtivo ? tDynamic('Contratado') : tDynamic('Não contratado')}
+              </span>
+            </div>
+
+            {!kioskAtivo ? (
+              <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                {tDynamic('O MiseOn Kiosk é um produto à parte (totem + licença), não incluso no seu plano. Com ele o cliente pede e paga sozinho, e o pedido cai direto na cozinha. Fale com a MiseOn para contratar.')}
+              </p>
+            ) : (
+              <>
+                <p className="mb-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                  {tDynamic('Abra o link abaixo no navegador do totem, em tela cheia. Ele leva a credencial do aparelho no final — sem ela o totem não cria pedido. Guarde o link: qualquer pessoa com ele pode lançar pedidos nesta loja.')}
+                </p>
+
+                {tokenTotem ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <code className="min-w-0 flex-1 truncate rounded-lg bg-gray-50 px-2.5 py-2 font-mono text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                      {urlTotem()}
+                    </code>
+                    <button type="button" onClick={copiarLinkTotem} title="Copiar o link do totem"
+                      className="shrink-0 rounded-lg border p-2 text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                      {totemCopiado ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
+                    </button>
+                    <a href={urlTotem()} target="_blank" rel="noreferrer" title="Abrir para conferir"
+                      className="shrink-0 rounded-lg border p-2 text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                      <ExternalLink size={15} />
+                    </a>
+                  </div>
+                ) : (
+                  <p className="mb-2 text-xs font-bold text-amber-600 dark:text-amber-400">
+                    {tDynamic('Este totem ainda não tem credencial. Gere uma para vincular o aparelho.')}
+                  </p>
+                )}
+
+                <button type="button" onClick={gerarTokenTotem} disabled={gerandoTotem}
+                  className="mt-3 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                  {gerandoTotem
+                    ? tDynamic('Gerando...')
+                    : tokenTotem ? tDynamic('Gerar credencial nova') : tDynamic('Gerar credencial do totem')}
+                </button>
+                {tokenTotem && (
+                  <span className="ml-2 text-xs text-gray-400">
+                    {tDynamic('Use se o link vazou. O totem vai precisar do link novo.')}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+
           <div className="rounded-2xl bg-white p-3.5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <p className="mb-1 text-sm font-bold dark:text-gray-100">{tDynamic('Painel na TV')}</p>
             <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">

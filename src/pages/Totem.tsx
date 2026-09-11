@@ -41,6 +41,8 @@ import type { Produto, Categoria, GrupoOpcoes, Opcao } from '../types';
 
 /** Volta ao repouso e ESQUECE o carrinho. Ver regra 8. */
 const SEGUNDOS_ATE_ESQUECER = 75;
+/** Na tela do Pix a espera e menor: se ninguem pagou, a fila nao pode parar. */
+const SEGUNDOS_ATE_ESQUECER_NO_PIX = 180;
 /** Aviso antes de esquecer: quem só parou para pensar merece a chance de ficar. */
 const SEGUNDOS_DE_AVISO = 15;
 
@@ -59,7 +61,7 @@ type LinhaCarrinho = {
  * refeição, e a identificação vem por último — pedir e-mail antes de a pessoa
  * saber o que quer é o jeito mais rápido de perder o pedido na fila.
  */
-type Tela = 'repouso' | 'cardapio' | 'item' | 'carrinho' | 'sugestao' | 'identificacao' | 'pagamento' | 'pronto';
+type Tela = 'repouso' | 'cardapio' | 'item' | 'carrinho' | 'sugestao' | 'identificacao' | 'pagamento' | 'pix' | 'pronto';
 
 /** Categorias que valem como sobremesa para a sugestão do fim do fluxo. */
 const PALAVRAS_SOBREMESA = /sobremesa|doce|sorvete|açaí|acai|milk\s?shake|torta|pudim/i;
@@ -88,10 +90,12 @@ export default function Totem() {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
   const [resultado, setResultado] = useState<
-    { senha: number | null; numero: number; total: number; identificado: boolean; cashbackPct: number } | null
+    { pedidoId: string; senha: number | null; numero: number; total: number; identificado: boolean; cashbackPct: number } | null
   >(null);
   const [segundosRestantes, setSegundosRestantes] = useState<number | null>(null);
   const [contato, setContato] = useState('');
+  const [pix, setPix] = useState<{ pedidoId: string; qr: string; copiaECola: string } | null>(null);
+  const [aguardandoPix, setAguardandoPix] = useState(false);
 
   // ── Cardápio real da loja ────────────────────────────────────────────────
   useEffect(() => {
@@ -119,11 +123,29 @@ export default function Totem() {
   }, [slug]);
 
   // ── Regra 8: inatividade limpa tudo ──────────────────────────────────────
+  /**
+   * Desistir de um pedido que ainda não foi pago.
+   *
+   * Situação real de fila: a pessoa chega no Pix e descobre que não tem saldo.
+   * Sem isto o pedido fica AGUARDANDO_PAGAMENTO para sempre — lixo no painel
+   * do lojista — e o totem continua preso na tela dela.
+   *
+   * Não espera resposta de propósito: quem está atrás precisa da tela AGORA, e
+   * o servidor recusa sozinho se o pagamento tiver entrado nesse instante.
+   */
+  const desistirDoPedido = useCallback((pedidoId: string | undefined) => {
+    if (!pedidoId) return;
+    void supabase.rpc('fn_totem_cancelar_pedido', { p_token: token, p_pedido_id: pedidoId });
+  }, [token]);
+
   const zerar = useCallback(() => {
     setCarrinho([]); setItemAberto(null); setEscolhas({}); setQtdItem(1);
+    // Se havia pedido esperando pagamento, ele morre junto com a sessão.
+    if (aguardandoPix) desistirDoPedido(resultado?.pedidoId);
     setErro(''); setResultado(null); setSegundosRestantes(null); setContato('');
+    setPix(null); setAguardandoPix(false);
     setTela('repouso');
-  }, []);
+  }, [aguardandoPix, resultado, desistirDoPedido]);
 
   const ultimoToque = useRef(Date.now());
   useEffect(() => {
@@ -137,7 +159,8 @@ export default function Totem() {
     if (tela === 'repouso' || tela === 'pronto') return;
     const t = setInterval(() => {
       const parado = Math.floor((Date.now() - ultimoToque.current) / 1000);
-      const falta = SEGUNDOS_ATE_ESQUECER - parado;
+      const limite = tela === 'pix' ? SEGUNDOS_ATE_ESQUECER_NO_PIX : SEGUNDOS_ATE_ESQUECER;
+      const falta = limite - parado;
       if (falta <= 0) { zerar(); return; }
       setSegundosRestantes(falta <= SEGUNDOS_DE_AVISO ? falta : null);
     }, 1000);
@@ -255,15 +278,40 @@ export default function Totem() {
     if (error) { setErro(error.message); return; }
 
     const r = data as {
-      senha: number | null; numero: number; valor_total: number;
+      pedido_id: string; senha: number | null; numero: number; valor_total: number;
       identificado: boolean; cashback_pct: number;
     };
     const fechado = {
+      pedidoId: r.pedido_id,
       senha: r.senha, numero: r.numero, total: Number(r.valor_total),
       identificado: !!r.identificado, cashbackPct: Number(r.cashback_pct ?? 0),
     };
     setResultado(fechado);
 
+    // ── O PIX, QUE É O QUE FALTAVA ─────────────────────────────────────────
+    // Sem esta etapa o pedido nascia AGUARDANDO_PAGAMENTO e ficava lá para
+    // sempre: nunca chegava na cozinha, e a tela ainda dizia que o QR
+    // apareceria "na tela ao lado" — coisa que não existe.
+    //
+    // A cobrança é criada AGORA, com o pedido já gravado, e o valor vem do
+    // servidor (a função recalcula a partir dos preços reais).
+    const { data: cob, error: erroPix } = await supabase.functions.invoke('pix-criar-cobranca', {
+      body: { pedido_id: fechado.pedidoId },
+    });
+    if (erroPix || !cob?.qr_imagem) {
+      // O pedido existe, mas sem cobrança não há como pagar: melhor mandar a
+      // pessoa ao balcão do que deixá-la olhando para um QR que não veio.
+      setErro('Não consegui gerar o Pix. Finalize no balcão informando o número do pedido.');
+      setTela('pronto');
+      return;
+    }
+    setPix({ pedidoId: fechado.pedidoId, qr: cob.qr_imagem, copiaECola: cob.copia_e_cola ?? '' });
+    setAguardandoPix(true);
+    setTela('pix');
+  };
+
+  /** Imprime o recibo com a senha. Só depois do pagamento confirmado. */
+  const concluirPago = useCallback((fechado: NonNullable<typeof resultado>, linhas: LinhaCarrinho[]) => {
     // Recibo em bobina, com a senha impressa. Sai do que está em memória: o
     // totem é anônimo e não consegue reler o pedido pelo RLS.
     try {
@@ -278,7 +326,7 @@ export default function Totem() {
           valor_total: fechado.total,
           tipo_pedido: 'RETIRADA_BALCAO',
         } as unknown as Parameters<typeof imprimir>[0]['pedido'],
-        itens: carrinho.map((l) => ({
+        itens: linhas.map((l) => ({
           nome_produto: l.produto.nome,
           quantidade: l.quantidade,
           preco_unitario: Number(l.produto.preco),
@@ -293,8 +341,28 @@ export default function Totem() {
     }
 
     setCarrinho([]);
+    setAguardandoPix(false);
     setTela('pronto');
-  };
+  }, [loja]);
+
+  // ── Conferência do Pix ───────────────────────────────────────────────────
+  // O webhook da Efí é o caminho principal, mas o totem não pode DEPENDER dele:
+  // se ele atrasar, a pessoa fica parada na frente da máquina sem saber se
+  // pagou. Pergunta a cada 3s — é o mesmo par "webhook + consulta" que o
+  // checkout online já usa.
+  useEffect(() => {
+    if (!aguardandoPix || !pix || !resultado) return;
+    let vivo = true;
+    const t = setInterval(async () => {
+      const { data } = await supabase.functions.invoke('pix-criar-cobranca', {
+        body: { pedido_id: pix.pedidoId, acao: 'status' },
+      });
+      if (!vivo || !data?.pago) return;
+      clearInterval(t);
+      concluirPago(resultado, carrinho);
+    }, 3000);
+    return () => { vivo = false; clearInterval(t); };
+  }, [aguardandoPix, pix, resultado, carrinho, concluirPago]);
 
   // ── Telas ────────────────────────────────────────────────────────────────
   if (carregando) {
@@ -322,7 +390,48 @@ export default function Totem() {
   const produtosDaCategoria = produtos.filter((p) => p.categoria_id === catAtiva);
 
   return (
-    <div className="flex min-h-[100dvh] select-none flex-col bg-[#070C18] text-white [touch-action:manipulation]">
+    <div className="relative flex min-h-[100dvh] select-none flex-col overflow-hidden bg-[#070C18] text-white [touch-action:manipulation]">
+      {/* ── MARCA AO FUNDO ──────────────────────────────────────────────────
+          O totem fica em pé no salão, visto de longe e por muita gente: é a
+          peça de marca mais exposta que o restaurante tem. Fundo chapado
+          entrega ar de protótipo.
+
+          `mix-blend-screen` dispensa editar o arquivo — sobre fundo escuro o
+          preto do PNG some e só o símbolo fica. As duas auras coloridas dão
+          profundidade sem competir com a foto do produto, que é quem tem de
+          chamar atenção. `aria-hidden` porque é decoração. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-40 -top-40 h-[42rem] w-[42rem] rounded-full bg-[#FC5B24]/12 blur-[160px]" />
+        <div className="absolute -bottom-52 -right-40 h-[46rem] w-[46rem] rounded-full bg-sky-500/10 blur-[170px]" />
+        <img
+          src="/Mfavicon.png"
+          alt=""
+          className="absolute left-1/2 top-1/2 w-[130vw] max-w-[1200px] -translate-x-1/2 -translate-y-1/2 opacity-[0.055] mix-blend-screen"
+        />
+      </div>
+
+      {/* Tudo que é conteúdo vive acima da marca. */}
+      <div className="relative z-10 flex min-h-[100dvh] flex-col">
+
+      {/* ── SAÍDA SEMPRE À MÃO (regra 6) ─────────────────────────────────
+          O "Cancelar" só existia em duas telas. Quem desistia no meio do
+          caminho deixava o totem preso na tela dele, e o PRÓXIMO DA FILA
+          tinha de esperar os 75 segundos de inatividade para poder começar —
+          numa fila, isso é uma eternidade e manda a pessoa para o caixa.
+
+          Agora é um toque, de qualquer tela, e o carrinho é esquecido junto.
+          Fica no alto e à direita, longe do polegar que está escolhendo: sair
+          tem de ser fácil de achar e difícil de tocar sem querer. */}
+      {tela !== 'repouso' && tela !== 'pronto' && (
+        <button
+          type="button"
+          onClick={zerar}
+          className="fixed right-5 top-5 z-40 flex min-h-[64px] items-center gap-2 rounded-2xl border-2 border-white/25 bg-black/50 px-6 text-xl font-black text-white backdrop-blur-sm active:bg-white/15"
+        >
+          <X size={22} /> {tDynamic('Recomeçar')}
+        </button>
+      )}
+
       {/* Aviso de inatividade — regra 8. Aparece com tempo de reagir. */}
       {segundosRestantes !== null && tela !== 'repouso' && tela !== 'pronto' && (
         <button
@@ -424,9 +533,13 @@ export default function Totem() {
                   <div className="mb-3 flex flex-wrap items-center gap-3">
                     <h3 className="text-3xl font-black">{g.nome}</h3>
                     <span className={`rounded-full px-4 py-1.5 text-lg font-black ${
-                      obrigatorio ? 'bg-red-500/20 text-red-300' : 'bg-white/10 text-slate-400'
+                      obrigatorio && marcadas.length === 0
+                        ? 'animate-pulse bg-red-500 text-white'
+                        : obrigatorio ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-slate-400'
                     }`}>
-                      {obrigatorio ? 'Obrigatório' : 'Opcional'}
+                      {obrigatorio
+                        ? (marcadas.length === 0 ? tDynamic('Escolha uma opção') : tDynamic('Pronto'))
+                        : tDynamic('Opcional')}
                     </span>
                   </div>
                   <div className="space-y-3">
@@ -471,8 +584,21 @@ export default function Totem() {
                   <Plus size={30} />
                 </button>
               </div>
+              {/* O botao DIZ o que falta, em vez de recusar em silencio.
+                  Antes ele aceitava o toque, escrevia "Escolha: Ponto da
+                  carne" no rodape de uma tela de 1080 e parecia quebrado —
+                  foi assim que o dono concluiu que "adicionar nao funciona".
+                  Padrao de quiosque: o obrigatorio bloqueia a acao, e a
+                  propria acao explica o porque. */}
               <button type="button" onClick={adicionarAoCarrinho}
-                className="flex min-h-[80px] flex-1 items-center justify-center rounded-2xl bg-[#FC5B24] text-3xl font-black">{tDynamic('Adicionar')}</button>
+                disabled={faltamObrigatorias.length > 0}
+                className={`flex min-h-[80px] flex-1 items-center justify-center rounded-2xl px-6 text-center text-3xl font-black transition ${
+                  faltamObrigatorias.length
+                    ? 'cursor-not-allowed bg-white/10 text-slate-400'
+                    : 'bg-[#FC5B24] text-white shadow-lg shadow-[#FC5B24]/30'
+                }`}>
+                {faltamObrigatorias.length ? `Escolha ${faltamObrigatorias[0]}` : tDynamic('Adicionar')}
+              </button>
             </div>
           </footer>
         </>
@@ -644,6 +770,41 @@ export default function Totem() {
         </>
       )}
 
+      {/* ══════════ PIX ══════════
+          A tela que faltava. Sem ela o pedido nascia AGUARDANDO_PAGAMENTO e
+          morria ali: nunca chegava na cozinha. O QR é grande porque a pessoa
+          lê de longe, com o celular na mão, em pé. */}
+      {tela === 'pix' && pix && resultado && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
+          <p className="font-['Sora'] text-4xl font-black">{tDynamic('Pague com Pix para a cozinha começar')}</p>
+          <p className="text-6xl font-black text-[#FC5B24]">{dinheiro(resultado.total)}</p>
+
+          <div className="rounded-3xl bg-white p-5">
+            <img src={pix.qr} alt="QR Code do Pix" className="h-[360px] w-[360px]" />
+          </div>
+
+          <p className="max-w-2xl text-2xl text-slate-300">
+            {tDynamic('Abra o app do banco, aponte a câmera para o código e confirme.')}
+          </p>
+
+          <div className="flex items-center gap-3 rounded-2xl bg-white/5 px-6 py-4 text-2xl font-black text-emerald-300">
+            <Loader2 size={28} className="animate-spin" /> {tDynamic('Aguardando o pagamento…')}
+          </div>
+
+          <p className="text-xl text-slate-500">
+            {tDynamic('Pedido')} #{resultado.numero}
+          </p>
+
+          {/* A saída honesta. Sem ela, quem descobre no Pix que não tem saldo
+              fica encurralado: ou espera o tempo de inatividade, ou o próximo
+              da fila espera por ela. Um toque cancela o pedido e libera a tela. */}
+          <button type="button" onClick={zerar}
+            className="mt-2 min-h-[80px] rounded-2xl border-2 border-white/25 px-10 text-2xl font-black text-slate-300 active:bg-white/10">
+            {tDynamic('Não consegui pagar — cancelar pedido')}
+          </button>
+        </div>
+      )}
+
       {/* ══════════ PRONTO ══════════ */}
       {tela === 'pronto' && resultado && (
         <div className="flex flex-1 flex-col items-center justify-center gap-8 p-10 text-center">
@@ -679,9 +840,10 @@ export default function Totem() {
           <span className="flex items-center gap-3">
             <ShoppingBag size={34} /> {itensNoCarrinho} {itensNoCarrinho === 1 ? 'item' : 'itens'}
           </span>
-          <span>{dinheiro(totalVisual)} · Ver pedido</span>
+          <span>{dinheiro(totalVisual)} · {tDynamic('Ver pedido')}</span>
         </button>
       )}
+      </div>
     </div>
   );
 }
