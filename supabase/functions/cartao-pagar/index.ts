@@ -291,7 +291,7 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
     // sem redeploy e sem depender de variavel de build da Vercel.
     const { data: cfgPlataforma } = await supabaseAdmin
       .from('configuracoes_fiscais_plataforma')
-      .select('efi_payee_code, efi_payee_code_antecipado, efi_sandbox')
+      .select('efi_payee_code, efi_payee_code_antecipado, efi_sandbox, efi_key_id')
       .eq('id', true)
       .maybeSingle();
 
@@ -325,6 +325,45 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
           credenciaisPadrao.clientId,
           credenciaisPadrao.clientSecret,
         );
+
+    // ── AS TRÊS PONTAS TÊM DE SER A MESMA CONTA ────────────────────────────
+    //
+    // O token é emitido no navegador com `setAccount(<identificador>)`; a
+    // cobrança autentica com um par CLIENT_ID/SECRET; e a Efí credita quem
+    // autenticou (a doc do split: o restante do repasse vai "automaticamente
+    // para a conta do integrador"). Se a credencial autenticar noutra conta,
+    // a Efí responde "payment_token não existe" — para TODO cliente, não só
+    // para quem configurou errado. Foi o estrago de 09/09/2026, causado por
+    // uma secret nova entrar na frente numa lista de precedência.
+    //
+    // O `key_id` vem dentro do access_token e diz, sem expor segredo, em qual
+    // conta a credencial entrou. Comparado com o que está declarado na
+    // configuração, transforma aquele mês de recusa inexplicável num erro
+    // explícito na primeira tentativa.
+    const keyIdAutenticado = (() => {
+      try {
+        const meio = token.split('.')[1];
+        const dados = JSON.parse(atob(meio.replace(/-/g, '+').replace(/_/g, '/')));
+        return Number(dados?.data?.key_id) || null;
+      } catch { return null; }
+    })();
+    const keyIdDeclarado = Number((cfgPlataforma as any)?.efi_key_id) || null;
+
+    if (keyIdDeclarado && keyIdAutenticado && keyIdDeclarado !== keyIdAutenticado) {
+      reqLogger.error('Credencial de cartão autenticou em outra conta Efí', undefined, {
+        context: {
+          pedido_id,
+          key_id_declarado: keyIdDeclarado,
+          key_id_autenticado: keyIdAutenticado,
+          payee_da_plataforma: String((cfgPlataforma as any)?.efi_payee_code ?? '').slice(0, 8) + '…',
+        },
+      });
+      return json({
+        aprovado: false,
+        error: 'Não conseguimos processar o cartão agora. Você pode pagar com Pix ou escolher outra forma de pagamento.',
+        motivo_tecnico: `A credencial de cartao autenticou na conta Efi ${keyIdAutenticado}, mas a plataforma esta declarada como ${keyIdDeclarado}. O token do navegador foi emitido para a conta declarada, entao esta cobranca seria recusada com "payment_token nao existe". Corrija a secret ou o efi_key_id em configuracoes_fiscais_plataforma.`,
+      }, { status: 200 });
+    }
 
     const payeeCode = (pedido as any).lojas?.efi_payee_code?.trim();
 
@@ -653,7 +692,18 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
         // proprio dono testando, e a acao que resolve e trocar o CPF. Esconder
         // isso atras de uma frase generica foi o que fez parecer que o cartao
         // do sistema estava quebrado.
-        ? 'O CPF informado é o mesmo do titular da conta que recebe o pagamento, e o provedor não autoriza pagamento para si mesmo. Use o CPF e o cartão de outra pessoa — com o cliente real isso não acontece.'
+        // A REGRA REAL, da documentação do split da Efí: quem autentica a
+        // cobrança é sempre recebedor — "o valor restante será automaticamente
+        // transferido para a conta do integrador". Logo a comparação da Efí é
+        // contra o titular da conta da PLATAFORMA, não contra a loja e não
+        // contra os payees do repasse.
+        //
+        // Isso foi medido: o pedido #300 (11/09/2026) repassava 100% para a
+        // conta da loja e mesmo assim voltou 4600222, porque a conta que
+        // cobrava era a mesma do documento informado. Antes esta mensagem
+        // dizia "titular da conta que recebe", o que mandava procurar no lugar
+        // errado — o problema não está no cadastro da loja.
+        ? 'O CPF informado é o do titular da conta que processa os pagamentos da plataforma, e a Efí não autoriza cobrança para si mesmo. Use o CPF e o cartão de outra pessoa — com um cliente real isso não acontece.'
         : ehProblemaDaConta
           ? 'Não conseguimos processar o cartão agora. Você pode pagar com Pix ou escolher outra forma de pagamento.'
           : String(motivo);
