@@ -109,9 +109,25 @@ export function KioskHomeSection() {
             <div className="relative group w-full max-w-md">
               <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#FC5B24]/30 to-blue-600/30 blur-xl opacity-75 group-hover:opacity-100 transition duration-500" />
               <div className="relative rounded-2xl overflow-hidden border border-gray-700 bg-[#0B1120] shadow-2xl">
-                <img
-                  src="/images/kiosk/hero_bravus_totem.png"
-                  alt="Totem de Autoatendimento MiseOn Kiosk Bravus Core 21"
+                {/* O totem em USO, não o totem parado.
+                    Foto de hardware mostra um móvel; o que vende
+                    autoatendimento é a cena — a pessoa chega, escolhe, paga e
+                    sai, sem fila no caixa e sem ninguém anotando.
+
+                    `muted` + `playsInline` são obrigatórios para o autoplay
+                    não ser bloqueado em iOS e Chrome, e o `poster` é o que
+                    aparece enquanto carrega (ou fica, se o aparelho bloquear).
+                    Servido do Storage: 790 KB não têm por que entrar no bundle
+                    e atrasar o deploy de todo mundo. */}
+                <video
+                  src="https://zzuxklwhaoisuuvndtfw.supabase.co/storage/v1/object/public/loja-assets/marketing/totem-miseon.mp4"
+                  poster="https://zzuxklwhaoisuuvndtfw.supabase.co/storage/v1/object/public/loja-assets/marketing/totem-poster.jpg"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-label="Cliente fazendo o próprio pedido no totem de autoatendimento MiseOn e pagando na tela"
                   className="w-full h-auto object-cover transition transform group-hover:scale-105 duration-500"
                 />
                 

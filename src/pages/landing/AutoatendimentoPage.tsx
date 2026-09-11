@@ -174,9 +174,29 @@ export default function AutoatendimentoPage() {
 
           {/* Hero Visual Mockup */}
           <div className="mt-12 max-w-4xl mx-auto rounded-3xl border border-gray-800 bg-[#0B1120] p-4 shadow-2xl relative">
-            <img
-              src="/images/kiosk/hero_bravus_totem.png"
-              alt="MiseOn Kiosk Totem Bravus Core 21 em Restaurante"
+            {/* ── Vídeo do totem em uso ────────────────────────────────────
+                Uma foto de totem parado não comunica o que o produto faz. O
+                que vende autoatendimento é a CENA: a pessoa chega, escolhe,
+                paga e sai — sem fila no caixa, sem alguém anotando.
+
+                `muted` + `playsInline` são obrigatórios para o autoplay
+                acontecer em iOS e Chrome; sem eles o navegador bloqueia e o
+                visitante encontra um quadro congelado. `poster` é o que ele vê
+                enquanto o arquivo carrega — e é o que fica se o autoplay for
+                bloqueado por configuração do aparelho.
+
+                Vem do Storage e não de /public de propósito: 790 KB no bundle
+                atrasariam o build e o deploy de todo mundo, e o arquivo não
+                muda junto com o código. */}
+            <video
+              src="https://zzuxklwhaoisuuvndtfw.supabase.co/storage/v1/object/public/loja-assets/marketing/totem-miseon.mp4"
+              poster="https://zzuxklwhaoisuuvndtfw.supabase.co/storage/v1/object/public/loja-assets/marketing/totem-poster.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="Cliente fazendo o pedido sozinha no totem de autoatendimento MiseOn e pagando na própria tela"
               className="w-full h-auto rounded-2xl object-cover"
             />
             
