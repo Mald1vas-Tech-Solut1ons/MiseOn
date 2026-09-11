@@ -1890,6 +1890,9 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Estamos tentando de novo automaticamente. Se persistir, fale com o suporte.':
     'We are retrying automatically. If it persists, contact support.',
   'última verificação': 'last checked',
+  'Painel na TV': 'TV display',
+  'Abra um destes links no navegador da própria TV. Copie o link por aqui: ele leva a credencial no final.':
+    'Open one of these links in the TV’s own browser. Copy the link from here: it carries the credential at the end.',
   'Verificar agora': 'Check now',
   'Verificando…': 'Checking…',
   'Percentual de Cashback por Pedido': 'Cashback percentage per order',

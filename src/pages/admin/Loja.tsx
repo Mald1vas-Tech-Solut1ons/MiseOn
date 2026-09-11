@@ -152,7 +152,7 @@ const vazio: FormLoja = {
   nutricao_disclaimer: '',
 };
 
-type Aba = 'aparencia' | 'identidade' | 'segmento' | 'logistica' | 'horarios' | 'pagamentos' | 'fiscal' | 'ifood';
+type Aba = 'aparencia' | 'identidade' | 'segmento' | 'logistica' | 'horarios' | 'pagamentos' | 'telas' | 'fiscal' | 'ifood';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -687,152 +687,6 @@ export default function Loja() {
           <button type="button" onClick={compartilharWhatsapp} title="Compartilhar no WhatsApp" className="shrink-0 rounded-lg border p-2 text-green-600">
             <Share2 size={15} />
           </button>
-          <a
-            href={urlTv('auto')}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-600 dark:text-amber-300 hover:bg-amber-500/20 transition-all"
-            title="Recomendado para uma TV só: mostra o cardápio e corta sozinho para a senha quando um pedido fica pronto"
-          >
-            <Tv size={15} /> {tDynamic('TV Automática (recomendado)')}
-          </a>
-          <button
-            type="button"
-            onClick={() => copiarLinkTv('auto')}
-            title="Copiar o link da TV automática (com a credencial)"
-            className="shrink-0 rounded-lg border border-amber-500/30 p-2 text-amber-600 dark:text-amber-300"
-          >
-            {tvCopiado === 'auto' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
-          </button>
-          <a
-            href={urlTv('cardapio')}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-xs font-bold text-purple-600 dark:text-purple-300 hover:bg-purple-500/20 transition-all"
-            title="Fixa a TV no cardápio — para a segunda TV, a do salão"
-          >
-            <Tv size={15} /> {tDynamic('Cardápio na TV 4K')}
-          </a>
-          <button
-            type="button"
-            onClick={() => copiarLinkTv('cardapio')}
-            title="Copiar o link do cardápio na TV (com a credencial)"
-            className="shrink-0 rounded-lg border border-purple-500/30 p-2 text-purple-600 dark:text-purple-300"
-          >
-            {tvCopiado === 'cardapio' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
-          </button>
-          <a
-            href={urlTv('senhas')}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/20 transition-all"
-            title="Abrir já no painel de senhas — a TV lembra deste modo mesmo depois de reiniciar"
-          >
-            <Tv size={15} /> {tDynamic('Painel de Senhas na TV')}
-          </a>
-          <button
-            type="button"
-            onClick={() => copiarLinkTv('senhas')}
-            title="Copiar o link do painel de senhas (com a credencial)"
-            className="shrink-0 rounded-lg border border-emerald-500/30 p-2 text-emerald-600 dark:text-emerald-300"
-          >
-            {tvCopiado === 'senhas' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
-          </button>
-        </div>
-
-        <CastTvControl criarUrl={urlTv} tokenDisponivel={!!tokenTv} />
-        <TvPairingControl lojaId={lojaId} />
-
-        {/* ── Quais pedidos são chamados na TV ──────────────────────────────
-            Senha é chamada de balcão: só faz sentido para quem está no salão
-            esperando. Delivery entra aqui como escolha explícita da loja, e
-            fica DESLIGADO por padrão — antes, o painel anunciava em voz alta
-            "retire no balcão" para pedido de iFood, com o cliente em casa. */}
-        <div data-tour="tour-loja-tv-tipos" className="mt-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs font-bold text-gray-700 dark:text-gray-200">
-            {tDynamic('Chamar na TV os pedidos de')}
-          </p>
-          <p className="mb-2 text-xs opacity-95 text-gray-500 dark:text-gray-400">
-            {tDynamic('A senha zera todo dia e vai de 1 a 999. Delivery não é chamado: o cliente não está no balcão.')}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {([
-              ['RETIRADA_BALCAO', 'Balcão'],
-              ['SALAO', 'Mesa / Salão'],
-              ['DELIVERY', 'Delivery'],
-            ] as const).map(([valor, rotulo]) => {
-              const ativo = form.painel_tv_tipos.includes(valor);
-              const ultimoLigado = ativo && form.painel_tv_tipos.length === 1;
-              return (
-                <button
-                  key={valor}
-                  type="button"
-                  // Nunca deixar a lista vazia: painel sem tipo nenhum nunca
-                  // mostra nada, e o lojista descobriria no meio do serviço.
-                  // O banco também recusa (ck_lojas_painel_tv_tipos_nao_vazio).
-                  disabled={ultimoLigado}
-                  title={ultimoLigado ? 'Pelo menos um tipo precisa ficar ligado.' : undefined}
-                  onClick={() =>
-                    setForm((f) => ({
-                      ...f,
-                      painel_tv_tipos: ativo
-                        ? f.painel_tv_tipos.filter((t) => t !== valor)
-                        : [...f.painel_tv_tipos, valor],
-                    }))
-                  }
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
-                    ativo
-                      ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)]'
-                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
-                  }`}
-                >
-                  {tDynamic(rotulo)}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Promocoes na TV sao escolha do lojista: tem casa que quer a tela
-              so com o cardapio, e cupom exposto na parede nem sempre e o que
-              se quer. Ligado por padrao porque a TV do balcao e tela de venda. */}
-          <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.painel_tv_promocoes}
-                onChange={(e) => setForm((f) => ({ ...f, painel_tv_promocoes: e.target.checked }))}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--cor-primaria)]"
-              />
-              <span>
-                <span className="block text-sm font-bold text-gray-800 dark:text-gray-100">
-                  {tDynamic('Mostrar promoções na TV')}
-                </span>
-                <span className="block text-xs opacity-95 text-gray-500 dark:text-gray-400">
-                  {tDynamic('Exibe o banner da loja, o cashback e os cupons públicos numa faixa acima do cardápio. Cupom de primeira compra e cupom vencido nunca aparecem.')}
-                </span>
-              </span>
-            </label>
-          </div>
-
-          {/* O lojista precisa entender POR QUE o link tem um codigo no fim,
-              senao ele copia a URL "limpa" da barra do navegador e a TV para
-              de mostrar senhas sem explicacao. */}
-          <div data-tour="tour-loja-tv-credencial" className="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
-            <p className="text-xs opacity-95 text-gray-500 dark:text-gray-400">
-              {tDynamic('Os links acima levam uma credencial no final. Ela é o que impede qualquer pessoa de abrir o painel da sua loja — copie o link por aqui, não da barra do navegador da TV.')}
-            </p>
-            <button
-              type="button"
-              onClick={regenerarTokenTv}
-              disabled={regenerandoTv}
-              className="mt-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs opacity-95 font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
-            >
-              {regenerandoTv ? tDynamic('Gerando...') : tDynamic('Gerar credencial nova')}
-            </button>
-            <span className="ml-2 text-xs opacity-95 text-gray-400">
-              {tDynamic('Use se o link vazou. As TVs atuais vão precisar do link novo.')}
-            </span>
-          </div>
         </div>
         {copiado && <p className="text-xs opacity-95 font-medium text-green-600">Link copiado!</p>}
       </div>
@@ -873,7 +727,7 @@ export default function Loja() {
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2 pb-1">
-        {(['aparencia', 'identidade', 'segmento', 'logistica', 'horarios', 'pagamentos', 'fiscal', 'ifood'] as Aba[]).map((a) => (
+        {(['aparencia', 'identidade', 'segmento', 'logistica', 'horarios', 'pagamentos', 'telas', 'fiscal', 'ifood'] as Aba[]).map((a) => (
           <button type="button" key={a} data-tour={a === 'pagamentos' ? "tour-loja-aba-pagamentos" : undefined} onClick={() => setAba(a)}
             className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ${aba === a ? 'bg-[var(--cor-primaria)] text-white' : 'bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-600 dark:text-gray-300 shadow-sm'}`}>
             {a === 'aparencia'
@@ -888,6 +742,8 @@ export default function Loja() {
               ? 'Horários'
               : a === 'pagamentos'
               ? 'Pagamentos'
+              : a === 'telas'
+              ? 'Telas e TV'
               : a === 'fiscal'
               ? 'Fiscal (NFC-e)'
               : 'Integrações (iFood)'}
@@ -1873,6 +1729,176 @@ export default function Loja() {
                 <a href={EFI_LINKS.tarifas} target="_blank" rel="noreferrer" className="font-semibold underline">sejaefi.com.br/tarifas</a>.
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TELAS E TV ────────────────────────────────────────────────────
+          Isto morava ACIMA das abas, na mesma linha do link publico: a
+          primeira coisa que o lojista via ao abrir "Configurar Loja" eram tres
+          botoes de TV, os respectivos "copiar link", o controle de Cast, o
+          pareamento e os toggles de quais pedidos sao chamados — antes de
+          qualquer configuracao de verdade.
+          E instalacao que se faz UMA VEZ, ou nunca. Ocupando o topo, empurrava
+          para baixo o que se usa todo dia e fazia a tela parecer complicada
+          logo no primeiro minuto de uso. Aqui vira uma aba, e quem nao tem TV
+          nunca mais esbarra nisso. */}
+      {aba === 'telas' && (
+        <div className="space-y-4">
+          <div className="rounded-2xl bg-white p-3.5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <p className="mb-1 text-sm font-bold dark:text-gray-100">{tDynamic('Painel na TV')}</p>
+            <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+              {tDynamic('Abra um destes links no navegador da própria TV. Copie o link por aqui: ele leva a credencial no final.')}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+          <a
+            href={urlTv('auto')}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-600 dark:text-amber-300 hover:bg-amber-500/20 transition-all"
+            title="Recomendado para uma TV só: mostra o cardápio e corta sozinho para a senha quando um pedido fica pronto"
+          >
+            <Tv size={15} /> {tDynamic('TV Automática (recomendado)')}
+          </a>
+          <button
+            type="button"
+            onClick={() => copiarLinkTv('auto')}
+            title="Copiar o link da TV automática (com a credencial)"
+            className="shrink-0 rounded-lg border border-amber-500/30 p-2 text-amber-600 dark:text-amber-300"
+          >
+            {tvCopiado === 'auto' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
+          </button>
+          <a
+            href={urlTv('cardapio')}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-xs font-bold text-purple-600 dark:text-purple-300 hover:bg-purple-500/20 transition-all"
+            title="Fixa a TV no cardápio — para a segunda TV, a do salão"
+          >
+            <Tv size={15} /> {tDynamic('Cardápio na TV 4K')}
+          </a>
+          <button
+            type="button"
+            onClick={() => copiarLinkTv('cardapio')}
+            title="Copiar o link do cardápio na TV (com a credencial)"
+            className="shrink-0 rounded-lg border border-purple-500/30 p-2 text-purple-600 dark:text-purple-300"
+          >
+            {tvCopiado === 'cardapio' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
+          </button>
+          <a
+            href={urlTv('senhas')}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/20 transition-all"
+            title="Abrir já no painel de senhas — a TV lembra deste modo mesmo depois de reiniciar"
+          >
+            <Tv size={15} /> {tDynamic('Painel de Senhas na TV')}
+          </a>
+          <button
+            type="button"
+            onClick={() => copiarLinkTv('senhas')}
+            title="Copiar o link do painel de senhas (com a credencial)"
+            className="shrink-0 rounded-lg border border-emerald-500/30 p-2 text-emerald-600 dark:text-emerald-300"
+          >
+            {tvCopiado === 'senhas' ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
+          </button>
+        </div>
+
+        <CastTvControl criarUrl={urlTv} tokenDisponivel={!!tokenTv} />
+        <TvPairingControl lojaId={lojaId} />
+
+        {/* ── Quais pedidos são chamados na TV ──────────────────────────────
+            Senha é chamada de balcão: só faz sentido para quem está no salão
+            esperando. Delivery entra aqui como escolha explícita da loja, e
+            fica DESLIGADO por padrão — antes, o painel anunciava em voz alta
+            "retire no balcão" para pedido de iFood, com o cliente em casa. */}
+        <div data-tour="tour-loja-tv-tipos" className="mt-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+          <p className="text-xs font-bold text-gray-700 dark:text-gray-200">
+            {tDynamic('Chamar na TV os pedidos de')}
+          </p>
+          <p className="mb-2 text-xs opacity-95 text-gray-500 dark:text-gray-400">
+            {tDynamic('A senha zera todo dia e vai de 1 a 999. Delivery não é chamado: o cliente não está no balcão.')}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {([
+              ['RETIRADA_BALCAO', 'Balcão'],
+              ['SALAO', 'Mesa / Salão'],
+              ['DELIVERY', 'Delivery'],
+            ] as const).map(([valor, rotulo]) => {
+              const ativo = form.painel_tv_tipos.includes(valor);
+              const ultimoLigado = ativo && form.painel_tv_tipos.length === 1;
+              return (
+                <button
+                  key={valor}
+                  type="button"
+                  // Nunca deixar a lista vazia: painel sem tipo nenhum nunca
+                  // mostra nada, e o lojista descobriria no meio do serviço.
+                  // O banco também recusa (ck_lojas_painel_tv_tipos_nao_vazio).
+                  disabled={ultimoLigado}
+                  title={ultimoLigado ? 'Pelo menos um tipo precisa ficar ligado.' : undefined}
+                  onClick={() =>
+                    setForm((f) => ({
+                      ...f,
+                      painel_tv_tipos: ativo
+                        ? f.painel_tv_tipos.filter((t) => t !== valor)
+                        : [...f.painel_tv_tipos, valor],
+                    }))
+                  }
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                    ativo
+                      ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)]'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  {tDynamic(rotulo)}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Promocoes na TV sao escolha do lojista: tem casa que quer a tela
+              so com o cardapio, e cupom exposto na parede nem sempre e o que
+              se quer. Ligado por padrao porque a TV do balcao e tela de venda. */}
+          <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.painel_tv_promocoes}
+                onChange={(e) => setForm((f) => ({ ...f, painel_tv_promocoes: e.target.checked }))}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--cor-primaria)]"
+              />
+              <span>
+                <span className="block text-sm font-bold text-gray-800 dark:text-gray-100">
+                  {tDynamic('Mostrar promoções na TV')}
+                </span>
+                <span className="block text-xs opacity-95 text-gray-500 dark:text-gray-400">
+                  {tDynamic('Exibe o banner da loja, o cashback e os cupons públicos numa faixa acima do cardápio. Cupom de primeira compra e cupom vencido nunca aparecem.')}
+                </span>
+              </span>
+            </label>
+          </div>
+
+          {/* O lojista precisa entender POR QUE o link tem um codigo no fim,
+              senao ele copia a URL "limpa" da barra do navegador e a TV para
+              de mostrar senhas sem explicacao. */}
+          <div data-tour="tour-loja-tv-credencial" className="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
+            <p className="text-xs opacity-95 text-gray-500 dark:text-gray-400">
+              {tDynamic('Os links acima levam uma credencial no final. Ela é o que impede qualquer pessoa de abrir o painel da sua loja — copie o link por aqui, não da barra do navegador da TV.')}
+            </p>
+            <button
+              type="button"
+              onClick={regenerarTokenTv}
+              disabled={regenerandoTv}
+              className="mt-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs opacity-95 font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+            >
+              {regenerandoTv ? tDynamic('Gerando...') : tDynamic('Gerar credencial nova')}
+            </button>
+            <span className="ml-2 text-xs opacity-95 text-gray-400">
+              {tDynamic('Use se o link vazou. As TVs atuais vão precisar do link novo.')}
+            </span>
+          </div>
+        </div>
+
           </div>
         </div>
       )}
