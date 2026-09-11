@@ -81,47 +81,46 @@ function credenciaisCartao(sandbox: boolean | null | undefined) {
   //   EFI_CLIENT_*           = PJ      producao   <- NAO serve para cartao
   //   EFI_PIX_*              = PJ      producao
   //
-  // O CARTAO VOLTA PARA A CONTA QUE FUNCIONAVA — A PJ.
+  // O CARTAO RODA NA CONTA PESSOAL. MEDIDO, NAO SUPOSTO.
   //
-  // O unico pagamento de cartao APROVADO deste sistema foi em 15/07/2026
-  // (pedido #23, R$ 5,00, pagadora Elisangela Trassi). Naquela data a funcao
-  // autenticava com:
+  // 11/09/2026, cobranca de R$ 7,00 disparada direto na API com cartao
+  // sintetico (nenhum dinheiro se move; o que se mede e ate onde a Efi deixa
+  // chegar):
   //
-  //     envFirst('EFI_COBRANCAS_CLIENT_ID', 'EFI_CLIENT_ID')
+  //   conta PESSOAL (3108186): CPF de terceiro -> 200, chega no emissor
+  //                            CPF da pagadora -> 200, chega no emissor
+  //   conta PJ      (3102801): CPF da pagadora -> 4600037, "valor da emissao
+  //                            e superior ao limite operacional da conta"
   //
-  // E os carimbos de criacao dos secrets no Supabase dizem o resto:
+  // Ou seja: a PJ esta com limite operacional bloqueado ate para R$ 7,00, e a
+  // PESSOAL nao rejeita a pagadora. A instrucao do dono — cartao na conta
+  // pessoal, que e a que tem limite liberado pelo banco — e a que funciona.
+  // Eu cheguei a mover o cartao para a PJ hoje com base numa inferencia
+  // errada; o teste acima desfez isso.
   //
-  //     EFI_CLIENT_*     (PJ)      criado em 02/09/2026
-  //     EFI_COBRANCAS_*  (PESSOAL) criado em 09/09/2026 02:48
+  // A CAUSA DO 4600222 NAO ESTAVA AQUI. Ficou registrada em
+  // `_shared/pagador.ts`: era o `phone_number`, que ia com o telefone de
+  // contato do pedido — o do dono, que e o cadastrado nesta conta. Trocar de
+  // conta nao resolvia nada, e eu tentei duas vezes antes de medir.
   //
-  // Em julho `EFI_COBRANCAS_*` NAO EXISTIA. O `envFirst` caia no segundo nome
-  // e o cartao cobrava na **PJ**. Em 09/09 as secrets da conta pessoal foram
-  // criadas, o primeiro nome passou a existir, e a cobranca migrou de conta
-  // sem ninguem mexer numa linha de codigo. Dai em diante, 4600222
-  // "Recebedor e cliente nao podem ser a mesma pessoa" em toda tentativa:
-  // na conta PESSOAL a pagadora e tratada como a propria titular; na PJ, nao.
-  //
-  // Medido: a mesma cobranca com o CPF dela enviada direto a API com
-  // EFI_CLIENT_* (PJ) passa a validacao de identidade e so para no
-  // payment_token; com as credenciais da pessoal volta 4600222. E o pedido
-  // #300 (11/09, com split ligado e repasse para a PJ) ainda assim foi
-  // recusado — ou seja, o split nunca foi a causa: a causa e a CONTA QUE
-  // COBRA.
-  //
-  // Producao usa so EFI_CLIENT_* de proposito. Fallback que troca de conta
-  // nao degrada, quebra: o token e emitido no navegador com
+  // Producao lista UM par de nomes so, de proposito. Fallback que troca de
+  // conta nao degrada, quebra: o token e emitido no navegador com
   // `setAccount(plataforma_pagamento_publico.efi_payee_code)`, e cobrar numa
   // conta diferente da que emitiu devolve "payment_token nao existe" para
-  // todo mundo. Se a secret sumir, melhor falhar com "Secret ausente" do que
-  // cobrar na conta errada.
+  // TODO cliente. Foi o que aconteceu em 09/09/2026, quando uma secret nova
+  // entrou na frente de uma lista de precedencia e a cobranca migrou de conta
+  // sem uma linha de codigo mudar. Se a secret sumir, e melhor falhar com
+  // "Secret ausente" do que cobrar na conta errada — e o guarda de
+  // `efi_key_id` la embaixo recusa antes de falar com a Efi se ainda assim
+  // divergir.
   //
-  // Homologacao mantem o par proprio (EFI_CARTAO_HOMOLOG_*, tambem da PJ).
+  // Homologacao mantem o par proprio (EFI_CARTAO_HOMOLOG_*, da PJ).
   const nomesId = homologacao
     ? [`EFI_CARTAO_${ambiente}_CLIENT_ID`]
-    : ['EFI_CLIENT_ID'];
+    : ['EFI_COBRANCAS_CLIENT_ID'];
   const nomesSecret = homologacao
     ? [`EFI_CARTAO_${ambiente}_CLIENT_SECRET`]
-    : ['EFI_CLIENT_SECRET'];
+    : ['EFI_COBRANCAS_CLIENT_SECRET'];
 
   return {
     ambiente: homologacao ? 'homologacao' : 'producao',
@@ -150,6 +149,7 @@ async function getToken(baseUrl: string, clientId: string, clientSecret: string)
 import { z } from 'npm:zod';
 import { withAuthAndValidation } from '../_shared/validate-middleware.ts';
 import { logger } from '../_shared/logger.ts';
+import { telefoneDoPagador } from '../_shared/pagador.ts';
 
 // ── DOIS JEITOS DE PAGAR ─────────────────────────────────────────────────────
 // 1. `payment_token` — cartão digitado agora no checkout.
@@ -291,7 +291,7 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
     // sem redeploy e sem depender de variavel de build da Vercel.
     const { data: cfgPlataforma } = await supabaseAdmin
       .from('configuracoes_fiscais_plataforma')
-      .select('efi_payee_code, efi_payee_code_antecipado, efi_sandbox, efi_key_id')
+      .select('efi_payee_code, efi_payee_code_antecipado, efi_sandbox, efi_key_id, efi_titular_telefone')
       .eq('id', true)
       .maybeSingle();
 
@@ -514,6 +514,24 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
       ?? (compradorEhDaLoja ? undefined : emailDoCliente)
       ?? `pedido-${pedido.numero}@clientes.miseon.app.br`;
 
+    // O TELEFONE SEGUE A MESMA REGRA DO E-MAIL.
+    //
+    // `phone_number` é obrigatório na Efí, então não dá para omitir — omitir
+    // devolve "A propriedade [phone_number] é obrigatória" (medido em
+    // 10/09/2026, e foi por isso que eu tinha revertido a primeira tentativa
+    // de tratar este campo). O que dá, e é o certo, é não mandar o telefone
+    // do RECEBEDOR como se fosse o do pagador.
+    //
+    // Ordem: o que o checkout informar; senão o contato do pedido; e quando
+    // quem compra é da equipe da loja, um número de preenchimento, porque
+    // naquele caso o contato do pedido é o do dono da conta que recebe.
+    const { numero: foneDoPagador, origem: origemDoFone } = telefoneDoPagador({
+      doCheckout: customer.phone,
+      doPedido: (pedido as any).telefone_contato,
+      compradorEhDaLoja,
+      telefoneDoTitularDaConta: (cfgPlataforma as any)?.efi_titular_telefone,
+    });
+
     // Só o domínio: basta para saber se o e-mail que foi para a Efí pertencia
     // ao comprador ou ao recebedor, sem guardar endereço pessoal no log.
     reqLogger.info('Identidade do comprador resolvida', {
@@ -522,6 +540,9 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
         comprador_e_da_loja: compradorEhDaLoja,
         email_dominio: String(emailDoComprador).split('@')[1] ?? '(sem dominio)',
         email_veio_de: customer.email ? 'checkout' : (compradorEhDaLoja ? 'neutro-por-pedido' : (emailDoCliente ? 'cadastro-do-cliente' : 'neutro-por-pedido')),
+        // O campo que causou o 4600222. Sem isto no log, a proxima recusa
+        // volta a ser adivinhacao.
+        telefone_veio_de: origemDoFone,
       },
     });
 
@@ -578,10 +599,30 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
             //
             // Volta a regra simples: o telefone que o checkout informar; na
             // falta dele, o contato do pedido, que sempre existe.
-            phone_number: (
-              String(customer.phone ?? '').replace(/\D/g, '')
-              || String(p.telefone_contato ?? '').replace(/\D/g, '')
-            ),
+            //
+            // ── 11/09/2026: ERA O TELEFONE. ────────────────────────────────
+            // Bisseccionado na API da Efi, um campo por vez, mesma conta,
+            // mesmo CPF, sem split, cartao sintetico:
+            //
+            //   telefone (11) 91988-9233 + e-mail neutro -> 4600222
+            //   e-mail por pedido + telefone neutro      -> 200, vai ao emissor
+            //   os dois como a funcao mandava            -> 4600222
+            //
+            // (11) 91988-9233 e o telefone cadastrado na conta Efi que
+            // processa. A Efi casa o pagador com o titular PELO TELEFONE, nao
+            // so pelo CPF — e o `telefone_contato` do pedido e o contato de
+            // ENTREGA, que num pedido feito pela propria equipe da loja e o
+            // do dono. Resultado: toda tentativa recusada com uma mensagem
+            // que falava de "mesma pessoa" sem dizer por qual campo.
+            //
+            // Em julho funcionou porque o pedido #23 tinha outro telefone.
+            //
+            // Mesmo tratamento que ja era dado ao e-mail logo acima: quando
+            // quem compra e da equipe da loja, o contato do pedido pertence ao
+            // RECEBEDOR e nao pode ir como dado do pagador. Cliente de
+            // verdade continua mandando o telefone dele, que e o certo para
+            // antifraude.
+            phone_number: foneDoPagador,
             ...(customer.birth ? { birth: String(customer.birth) } : {}),
           },
         },
@@ -703,7 +744,7 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
         // cobrava era a mesma do documento informado. Antes esta mensagem
         // dizia "titular da conta que recebe", o que mandava procurar no lugar
         // errado — o problema não está no cadastro da loja.
-        ? 'O CPF informado é o do titular da conta que processa os pagamentos da plataforma, e a Efí não autoriza cobrança para si mesmo. Use o CPF e o cartão de outra pessoa — com um cliente real isso não acontece.'
+        ? 'Os dados do pagador coincidem com os do titular da conta que processa os pagamentos — pode ser o CPF, o e-mail ou o TELEFONE, e a Efí não autoriza cobrança para si mesmo. Confira principalmente o telefone de contato do pedido. Com um cliente real isso não acontece.'
         : ehProblemaDaConta
           ? 'Não conseguimos processar o cartão agora. Você pode pagar com Pix ou escolher outra forma de pagamento.'
           : String(motivo);

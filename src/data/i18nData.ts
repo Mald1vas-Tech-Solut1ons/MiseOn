@@ -2270,6 +2270,9 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Novidades do sistema, dicas operacionais e promoções exclusivas.': 'System news, operational tips and exclusive offers.',
   'Novo grupo de adicionais': 'New add-on group',
   'Nunca guardamos o número nem o CVV do cartão.': 'We never store the card number or the CVV.',
+  'Da próxima vez é só escolher o cartão e pagar. O número e o CVV ficam com a Efí — nunca conosco.':
+    'Next time just pick the card and pay. The number and the CVV stay with Efí — never with us.',
+  'Usar outro cartão': 'Use another card',
   'Fechando…': 'Closing…',
   'Receber e fechar': 'Take payment and close',
   'Receber e fechar comanda': 'Take payment and close tab',
