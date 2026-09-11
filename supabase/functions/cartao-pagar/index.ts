@@ -81,32 +81,47 @@ function credenciaisCartao(sandbox: boolean | null | undefined) {
   //   EFI_CLIENT_*           = PJ      producao   <- NAO serve para cartao
   //   EFI_PIX_*              = PJ      producao
   //
-  // REGRA DO NEGOCIO (decisao do dono, 11/09/2026): o cartao roda na conta
-  // PESSOAL, que e a que tem limite de transacao liberado pelo banco; o Pix
-  // roda na conta PJ. O identificador que o navegador usa em
-  // `EfiPay.CreditCard.setAccount(...)` vem de
-  // `plataforma_pagamento_publico.efi_payee_code` = f03566ad… = PESSOAL.
-  // Logo a cobranca TEM de autenticar na PESSOAL: token emitido numa conta e
-  // cobrado em outra devolve "payment_token nao existe" para todo mundo — foi
-  // o que aconteceu quando o cartao passou a usar EFI_CLIENT_* (a PJ).
+  // O CARTAO VOLTA PARA A CONTA QUE FUNCIONAVA — A PJ.
   //
-  // Por isso producao NAO tem EFI_CLIENT_* na lista: um fallback que muda de
-  // conta nao degrada, quebra. Se as secrets da conta pessoal sumirem, e
-  // melhor a funcao falhar com "Secret ausente" do que cobrar na conta errada.
+  // O unico pagamento de cartao APROVADO deste sistema foi em 15/07/2026
+  // (pedido #23, R$ 5,00, pagadora Elisangela Trassi). Naquela data a funcao
+  // autenticava com:
   //
-  // Os unicos pagamentos de cartao APROVADOS deste sistema foram em
-  // 15/07/2026, quando a funcao autenticava com
-  // `envFirst('EFI_COBRANCAS_CLIENT_ID', ...)` — a mesma conta pessoal que
-  // esta na primeira posicao abaixo.
+  //     envFirst('EFI_COBRANCAS_CLIENT_ID', 'EFI_CLIENT_ID')
   //
-  // Homologacao mantem o par proprio (EFI_CARTAO_HOMOLOG_*, que hoje e a
-  // conta PJ de homologacao).
+  // E os carimbos de criacao dos secrets no Supabase dizem o resto:
+  //
+  //     EFI_CLIENT_*     (PJ)      criado em 02/09/2026
+  //     EFI_COBRANCAS_*  (PESSOAL) criado em 09/09/2026 02:48
+  //
+  // Em julho `EFI_COBRANCAS_*` NAO EXISTIA. O `envFirst` caia no segundo nome
+  // e o cartao cobrava na **PJ**. Em 09/09 as secrets da conta pessoal foram
+  // criadas, o primeiro nome passou a existir, e a cobranca migrou de conta
+  // sem ninguem mexer numa linha de codigo. Dai em diante, 4600222
+  // "Recebedor e cliente nao podem ser a mesma pessoa" em toda tentativa:
+  // na conta PESSOAL a pagadora e tratada como a propria titular; na PJ, nao.
+  //
+  // Medido: a mesma cobranca com o CPF dela enviada direto a API com
+  // EFI_CLIENT_* (PJ) passa a validacao de identidade e so para no
+  // payment_token; com as credenciais da pessoal volta 4600222. E o pedido
+  // #300 (11/09, com split ligado e repasse para a PJ) ainda assim foi
+  // recusado — ou seja, o split nunca foi a causa: a causa e a CONTA QUE
+  // COBRA.
+  //
+  // Producao usa so EFI_CLIENT_* de proposito. Fallback que troca de conta
+  // nao degrada, quebra: o token e emitido no navegador com
+  // `setAccount(plataforma_pagamento_publico.efi_payee_code)`, e cobrar numa
+  // conta diferente da que emitiu devolve "payment_token nao existe" para
+  // todo mundo. Se a secret sumir, melhor falhar com "Secret ausente" do que
+  // cobrar na conta errada.
+  //
+  // Homologacao mantem o par proprio (EFI_CARTAO_HOMOLOG_*, tambem da PJ).
   const nomesId = homologacao
     ? [`EFI_CARTAO_${ambiente}_CLIENT_ID`]
-    : ['EFI_COBRANCAS_CLIENT_ID', `EFI_CARTAO_${ambiente}_CLIENT_ID`];
+    : ['EFI_CLIENT_ID'];
   const nomesSecret = homologacao
     ? [`EFI_CARTAO_${ambiente}_CLIENT_SECRET`]
-    : ['EFI_COBRANCAS_CLIENT_SECRET', `EFI_CARTAO_${ambiente}_CLIENT_SECRET`];
+    : ['EFI_CLIENT_SECRET'];
 
   return {
     ambiente: homologacao ? 'homologacao' : 'producao',
