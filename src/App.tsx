@@ -36,6 +36,7 @@ const CastReceiver     = lazy(() => import('./pages/CastReceiver'));
 const MarketingStrategyPage = lazy(() => import('./pages/landing/MarketingStrategyPage'));
 const AutoatendimentoPage = lazy(() => import('./pages/landing/AutoatendimentoPage'));
 const DemoKioskPage       = lazy(() => import('./pages/landing/DemoKioskPage'));
+const Totem               = lazy(() => import('./pages/Totem'));
 
 // ── Lazy: ADMIN_LAYOUT (único layout compartilhado — carrega rápido) ─────────
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -254,6 +255,8 @@ export default function App() {
                 {/* Perfil da loja: o link que o lojista cola na bio do Instagram. */}
                 <Route path="/:slug/perfil" element={<PerfilLoja />} />
                 <Route path="/:slug/meus-pedidos" element={<MeusPedidos />} />
+                {/* Antes do catch-all /:slug, senao o cardapio engole a rota. */}
+                <Route path="/:slug/totem"   element={<Totem />} />
                 <Route path="/:slug"         element={<Cardapio />} />
                 <Route path="*"             element={<Home />} />
               </Routes>

@@ -1905,6 +1905,27 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Salvar esta estação': 'Save this station',
   'Ativa': 'Active',
   'Inativa': 'Inactive',
+  // ── MiseOn Kiosk: a tela que roda no totem ──
+  'Começar pedido': 'Start order',
+  'Continuar': 'Continue',
+  'Continuar pedindo': 'Keep ordering',
+  'Nada nesta categoria agora.': 'Nothing in this category right now.',
+  'Seu pedido': 'Your order',
+  'Seu pedido está vazio.': 'Your order is empty.',
+  'Tirar': 'Remove',
+  'Vai uma sobremesa?': 'How about dessert?',
+  'Toque para adicionar ao seu pedido.': 'Tap to add it to your order.',
+  'Agora não, continuar': 'Not now, continue',
+  'Pular': 'Skip',
+  'Informe seu telefone e o valor volta como crédito para a próxima compra.':
+    'Enter your phone number and the amount comes back as credit on your next purchase.',
+  'Total a pagar': 'Amount due',
+  'O QR aparece na tela ao lado do totem para você pagar pelo celular.':
+    'The QR code appears on the screen beside the kiosk so you can pay from your phone.',
+  'Pedido enviado!': 'Order sent!',
+  'Use na próxima compra informando o mesmo telefone.':
+    'Use it on your next purchase with the same phone number.',
+  'Seu comprovante está sendo impresso.': 'Your receipt is printing.',
   'Painel na TV': 'TV display',
   'Abra um destes links no navegador da própria TV. Copie o link por aqui: ele leva a credencial no final.':
     'Open one of these links in the TV’s own browser. Copy the link from here: it carries the credential at the end.',

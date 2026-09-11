@@ -14,6 +14,20 @@ export function KioskHomeSection() {
       <div className="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-[#FC5B24]/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-blue-600/10 blur-[140px] pointer-events-none" />
 
+      {/* Marca d'água da marca, ao fundo.
+          `mix-blend-screen` é o que dispensa editar o arquivo: sobre um fundo
+          escuro o preto do PNG some e só o símbolo fica. Sem isso seria
+          preciso um PNG com transparência, e o que existe no projeto
+          (Mfavicon.png) tem fundo preto chapado.
+          `aria-hidden` porque é decoração: anunciar "logo MiseOn" a cada
+          seção só atrapalha quem usa leitor de tela. */}
+      <img
+        src="/Mfavicon.png"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 top-1/2 hidden w-[540px] -translate-y-1/2 select-none opacity-[0.07] mix-blend-screen lg:block"
+      />
+
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         
         {/* Badge Institucional Superior */}
@@ -106,7 +120,7 @@ export function KioskHomeSection() {
 
           {/* Lado Direito: Apresentação Visual do Totem Bravus */}
           <div className="lg:col-span-6 flex justify-center">
-            <div className="relative group w-full max-w-md">
+            <div className="relative group w-full max-w-xl xl:max-w-2xl">
               <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#FC5B24]/30 to-blue-600/30 blur-xl opacity-75 group-hover:opacity-100 transition duration-500" />
               <div className="relative rounded-2xl overflow-hidden border border-gray-700 bg-[#0B1120] shadow-2xl">
                 {/* O totem em USO, não o totem parado.
