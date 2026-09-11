@@ -131,13 +131,18 @@ export function KioskHomeSection() {
                   className="w-full h-auto object-cover transition transform group-hover:scale-105 duration-500"
                 />
                 
-                {/* Overlay Badge de Integração */}
-                <div className="absolute bottom-4 left-4 right-4 p-3.5 rounded-xl bg-[#070C18]/90 backdrop-blur-md border border-gray-700/80 flex items-center justify-between">
+                {/* Faixa de integração — ABAIXO do vídeo, não por cima.
+                    Ela nasceu sobreposta porque cobria uma FOTO vertical do
+                    totem, onde a parte de baixo era só o pedestal. O vídeo é
+                    2:1, e ali embaixo estão a cliente e o leitor de cartão —
+                    justamente a cena que vende. Sobreposta, a tarja comia
+                    metade do que havia para ver. */}
+                <div className="flex items-center justify-between gap-3 border-t border-gray-700/80 bg-[#070C18] px-3.5 py-2.5">
                   <div>
-                    <span className="text-[10px] text-gray-400 uppercase font-bold block">HARDWARE HOMOLOGADO</span>
-                    <span className="text-xs text-white font-bold">Totem Bravus Core 21"</span>
+                    <span className="block text-[10px] font-bold uppercase text-gray-400">HARDWARE HOMOLOGADO</span>
+                    <span className="text-xs font-bold text-white">Totem Bravus Core 21"</span>
                   </div>
-                  <span className="rounded-full bg-emerald-500/20 text-emerald-400 px-3 py-1 text-[10px] font-extrabold border border-emerald-500/40">
+                  <span className="shrink-0 rounded-full border border-emerald-500/40 bg-emerald-500/20 px-3 py-1 text-[10px] font-extrabold text-emerald-400">
                     KDS CONECTADO
                   </span>
                 </div>
