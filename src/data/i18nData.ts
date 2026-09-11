@@ -1890,6 +1890,21 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Estamos tentando de novo automaticamente. Se persistir, fale com o suporte.':
     'We are retrying automatically. If it persists, contact support.',
   'última verificação': 'last checked',
+  // Estações e fluxos do KDS
+  'Estações e Fluxos da Cozinha': 'Kitchen Stations and Flows',
+  'Cada ilha tem a própria fila e as próprias etapas. Massas, sobremesas, chapa, bar — do jeito que a sua cozinha trabalha.':
+    'Each island has its own queue and its own steps. Pasta, desserts, grill, bar — the way your kitchen actually works.',
+  'Voltar ao KDS': 'Back to KDS',
+  'Nova estação': 'New station',
+  'Estações e fluxos': 'Stations and flows',
+  'Nenhuma estação ainda': 'No stations yet',
+  'Sem estação, tudo cai numa fila só. Com estações, cada praça enxerga apenas o que é dela e trabalha no próprio ritmo.':
+    'Without stations everything lands in a single queue. With them, each section sees only its own work and moves at its own pace.',
+  'Etapas — viram as colunas do KDS desta ilha': 'Steps — they become this island’s KDS columns',
+  'em andamento — terminam pelo fluxo antigo': 'in progress — they finish on the previous flow',
+  'Salvar esta estação': 'Save this station',
+  'Ativa': 'Active',
+  'Inativa': 'Inactive',
   'Painel na TV': 'TV display',
   'Abra um destes links no navegador da própria TV. Copie o link por aqui: ele leva a credencial no final.':
     'Open one of these links in the TV’s own browser. Copy the link from here: it carries the credential at the end.',

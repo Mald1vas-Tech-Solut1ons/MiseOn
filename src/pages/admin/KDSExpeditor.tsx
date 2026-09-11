@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import {
-  AlertTriangle, Check, ChefHat, Clock3, Expand, GlassWater, Loader2,
+  AlertTriangle, Check, ChefHat, Clock3, Expand, GlassWater, Loader2, Settings2,
   PackageCheck, RefreshCw, UtensilsCrossed, Wifi, WifiOff,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -271,6 +271,11 @@ export default function KDSExpeditor() {
               </span>
               <button type="button" onClick={carregar} disabled={atualizando} className="flex min-h-11 items-center gap-2 rounded-xl bg-white/10 px-3 text-xs font-black hover:bg-white/15 disabled:opacity-50"><RefreshCw size={16} className={atualizando ? 'animate-spin' : ''} /> Atualizar</button>
               <button type="button" onClick={alternarTelaCheia} className="flex min-h-11 items-center gap-2 rounded-xl bg-white/10 px-3 text-xs font-black hover:bg-white/15"><Expand size={16} /> Tela cheia</button>
+              {/* Ate 11/09/2026 nao havia NENHUM caminho para criar estacao ou
+                  fluxo: as 8 lojas em producao tinham as mesmas "Cozinha" e
+                  "Bar" vindas do seed. O acesso fica aqui, ao lado de quem
+                  usa — nao enterrado em Configuracoes. */}
+              <Link to="/admin/kds/estacoes" className="flex min-h-11 items-center gap-2 rounded-xl bg-white/10 px-3 text-xs font-black hover:bg-white/15"><Settings2 size={16} /> {tDynamic('Estações e fluxos')}</Link>
             </div>
           </div>
 
