@@ -1984,19 +1984,30 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
          * cartão e a validade continuam preenchidos — quem errou foi o
          * titular, não o cartão, e refazer o que estava certo é atrito à toa.
          */
+        /*
+         * REMOVIDA a limpeza automática de nome e CPF.
+         *
+         * Ela partia de uma causa que eu supus e que estava errada: a de que
+         * o 4600222 vinha do CPF. Não vinha. Bisseccionado na API da Efí em
+         * 11/09/2026, campo a campo, a recusa vinha do TELEFONE — o
+         * `telefone_contato` do pedido, que num pedido do próprio dono é o
+         * número cadastrado na conta que cobra.
+         *
+         * O preço dessa suposição caiu inteiro em cima de quem estava
+         * tentando pagar: a cada recusa o formulário apagava nome e CPF e a
+         * pessoa redigitava tudo, várias vezes seguidas, sem nunca ter
+         * errado nada. Apagar dado correto por palpite é pior do que não
+         * fazer nada.
+         *
+         * O caso já é tratado onde cabe — no servidor, que não manda mais o
+         * telefone do titular como se fosse o do pagador. Aqui fica só o
+         * aviso, com os campos intactos.
+         */
         const pagadorIgualRecebedor = /recebedor e cliente n[aã]o podem ser a mesma pessoa|mesma pessoa|4600222/i.test(sinal);
-        if (pagadorIgualRecebedor) {
-          setNome('');
-          setCpf('');
-          setSalvarDados(false);
-          setTocado((atual) => ({ ...atual, nome: false, cpf: false }));
-          try { localStorage.removeItem(TITULAR_KEY); } catch { /* armazenamento indisponível */ }
-          setTimeout(() => nomeRef.current?.focus(), 60);
-        }
 
         setErro(
           pagadorIgualRecebedor
-            ? 'Esse CPF é o do titular da conta que recebe, e a Efí não autoriza pagamento para si mesmo. Limpei o titular: informe o nome e o CPF de quem é o dono deste cartão. O número e a validade continuam preenchidos.'
+            ? 'A Efí identificou os dados do pagador como sendo os do titular da conta que recebe — pode ser o CPF, o e-mail ou o telefone de contato do pedido. Seus dados foram mantidos: confira o telefone do pedido. Com um cliente real isso não acontece.'
             : (texto || 'Pagamento não autorizado. Confira os dados ou tente outro cartão.'),
         );
       } else {
@@ -2027,14 +2038,15 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
    */
 
   const marcar = (k: string) => setTocado((t) => ({ ...t, [k]: true }));
-  const trocarTitular = () => {
-    setNome('');
-    setCpf('');
-    setSalvarDados(false);
-    setTocado((atual) => ({ ...atual, nome: false, cpf: false }));
-    try { localStorage.removeItem(TITULAR_KEY); } catch { /* armazenamento indisponível */ }
-    nomeRef.current?.focus();
-  };
+  /*
+   * REMOVIDO: "Trocar titular deste cartão".
+   *
+   * O botão só existia para contornar o 4600222, quando eu achava que a
+   * recusa vinha do CPF. Não vinha — vinha do telefone. Ele ficava embaixo
+   * dos campos oferecendo apagar nome e CPF corretos, que é o oposto do que
+   * o checkout tem de fazer: quem quiser trocar o titular simplesmente edita
+   * os dois campos, que estão logo ali.
+   */
   const invalido = (k: string, ok: boolean) => tocado[k] && !ok;
   const campoCls = (k: string, ok: boolean) =>
     `w-full rounded-lg border bg-white px-3 py-2.5 text-sm outline-none transition-colors dark:bg-gray-800 dark:text-gray-100 ${
@@ -2248,15 +2260,6 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
               <span className="block text-xs opacity-90 text-gray-400">{tDynamic('Nunca guardamos o número nem o CVV do cartão.')}</span>
             </span>
           </label>
-          {(nome || cpf) && (
-            <button
-              type="button"
-              onClick={trocarTitular}
-              className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-bold text-gray-600 transition hover:border-[var(--cor-primaria)] hover:text-[var(--cor-primaria-texto)] dark:border-gray-700 dark:text-gray-300"
-            >
-              {tDynamic('Trocar titular deste cartão')}
-            </button>
-          )}
           </>)}
 
           {/* Selos de confiança */}

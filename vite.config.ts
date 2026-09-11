@@ -35,6 +35,36 @@ export default defineConfig({
       forceBuildInstrument: process.env.CYPRESS_COVERAGE === 'true',
     }),
     VitePWA({
+      // ── O SERVICE WORKER SAI DE CENA ──────────────────────────────────────
+      //
+      // `selfDestroying` publica um service worker cuja única função é se
+      // desinstalar e apagar os caches que a versão anterior deixou. Quem já
+      // tem o antigo instalado se cura sozinho no próximo acesso; quem não
+      // tem, nunca mais instala.
+      //
+      // POR QUE CHEGAMOS AQUI. O SW anterior respondia toda navegação com um
+      // `index.html` de precache. A cada deploy os hashes dos bundles mudam, o
+      // HTML guardado passa a apontar para arquivos que não existem, e a
+      // página abre crua — sem CSS e sem JS. Trocar a estratégia para
+      // NetworkFirst corrigiu o comportamento NOVO, mas não alcançava quem já
+      // estava com o SW velho preso, por causa disto:
+      //
+      //     GET /sw.js -> Cache-Control: public, max-age=14400
+      //
+      // São 4 horas de cache de navegador no arquivo do próprio service
+      // worker. O `vercel.json` pede `max-age=0, must-revalidate`; quem
+      // sobrepõe é o Cloudflare que está na frente (Browser Cache TTL padrão
+      // de 4h). Ou seja: a correção existia e não chegava — e a página
+      // quebrada não executa o JS que pediria a atualização. Armadilha
+      // fechada dos dois lados.
+      //
+      // O que a PWA entregava aqui era instalabilidade e leitura offline do
+      // cardápio. O que ela custava era o site abrir quebrado a cada deploy,
+      // inclusive para cliente. Não é troca que se defenda antes do primeiro
+      // cliente pagante. Para voltar depois: remover esta linha, e ANTES
+      // ajustar o Cloudflare para "Respect Existing Headers", senão a mesma
+      // armadilha se arma de novo.
+      selfDestroying: true,
       registerType: 'autoUpdate',
       manifest: {
         name: 'MiseOn — Sistema Inteligente para sua Cozinha',
