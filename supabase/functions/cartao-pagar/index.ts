@@ -65,10 +65,36 @@ function envFirst(...names: string[]): string {
 function credenciaisCartao(sandbox: boolean | null | undefined) {
   const homologacao = ambienteCartao(sandbox);
   const ambiente = homologacao ? 'HOMOLOG' : 'PROD';
+
+  // A COBRANCA TEM QUE SAIR NA MESMA CONTA QUE EMITIU O TOKEN.
+  //
+  // O token do cartao e gerado no navegador com
+  // `EfiPay.CreditCard.setAccount(efi_payee_code)` — o identificador da conta
+  // PJ (CNPJ titular gravado em lojas.efi_titular_documento). A cobranca, no
+  // entanto, autenticava com EFI_CARTAO_PROD_*, que e a conta PESSOAL (o
+  // cartao ficou nela em carater temporario, ate a Efi liberar a PJ).
+  //
+  // Duas consequencias, e a segunda explica meses de recusa:
+  //   1. token emitido numa conta e cobrado em outra;
+  //   2. a conta que cobra passa a ser a PESSOA FISICA — e o dono, pagando na
+  //      propria loja, vira literalmente "recebedor e cliente a mesma pessoa"
+  //      (Efi 4600222). Medido em 11/09/2026: a mesma cobranca, com o mesmo
+  //      CPF, enviada com EFI_CLIENT_* passa da validacao de identidade e para
+  //      so no payment_token; com EFI_CARTAO_PROD_* volta 4600222.
+  //
+  // Em producao o cartao passa a usar EFI_CLIENT_*, que e a credencial da
+  // conta dona do `efi_payee_code`. Homologacao continua no par proprio.
+  const nomesId = homologacao
+    ? [`EFI_CARTAO_${ambiente}_CLIENT_ID`]
+    : ['EFI_CLIENT_ID', `EFI_CARTAO_${ambiente}_CLIENT_ID`];
+  const nomesSecret = homologacao
+    ? [`EFI_CARTAO_${ambiente}_CLIENT_SECRET`]
+    : ['EFI_CLIENT_SECRET', `EFI_CARTAO_${ambiente}_CLIENT_SECRET`];
+
   return {
     ambiente: homologacao ? 'homologacao' : 'producao',
-    clientId: envFirst(`EFI_CARTAO_${ambiente}_CLIENT_ID`),
-    clientSecret: envFirst(`EFI_CARTAO_${ambiente}_CLIENT_SECRET`),
+    clientId: envFirst(...nomesId),
+    clientSecret: envFirst(...nomesSecret),
   };
 }
 
@@ -243,6 +269,25 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
         // homologacao — foi o que escondeu a causa da recusa de 08/09.
         host_efi: efiCobUrl,
         ambiente: credenciaisPadrao.ambiente,
+        // QUAL CONTA EFI ESTA COBRANDO.
+        //
+        // Medido em 11/09/2026: a mesma cobranca, disparada direto na API da
+        // Efi com as credenciais EFI_CLIENT_ID do projeto, passou pela
+        // validacao de identidade com o CPF da compradora (erro devolvido foi
+        // so de payment_token inexistente). Pela funcao, com as credenciais
+        // EFI_CARTAO_PROD_*, a mesma identidade e recusada com 4600222.
+        //
+        // Se as duas credenciais apontam para contas diferentes, e a conta que
+        // muda o resultado — nao o documento de quem paga. O key_id vem dentro
+        // do proprio access_token e identifica a conta sem expor segredo.
+        conta_efi_key_id: (() => {
+          try {
+            const meio = token.split('.')[1];
+            const json = JSON.parse(atob(meio.replace(/-/g, '+').replace(/_/g, '/')));
+            return json?.data?.key_id ?? '(sem key_id)';
+          } catch { return '(token nao legivel)'; }
+        })(),
+        payee_code_usado: payeeCode ? `${payeeCode.slice(0, 8)}…` : '(nenhum)',
         // DOCUMENTO DO PAGADOR, MASCARADO.
         //
         // A recusa 4600222 diz "recebedor e cliente sao a mesma pessoa", mas o
@@ -342,12 +387,58 @@ const handler = async (_req: Request, ctx: { user: any, supabase: any }, body: z
             // do pedido, senao um endereco por pedido que nao pertence a
             // ninguem. Endereco da plataforma nao entra em nenhuma hipotese.
             email: emailDoComprador,
-            phone_number: (String(customer.phone ?? '').replace(/\D/g, '') || String(p.telefone_contato ?? '').replace(/\D/g, '')),
+            // TELEFONE DO PAGADOR — mesma regra do e-mail.
+            //
+            // Antes caia em `p.telefone_contato`, que e o contato DO PEDIDO.
+            // Quando quem lanca o pedido e a equipe da loja, esse telefone e
+            // do recebedor — e ia junto com o CPF de outra pessoa, dando a
+            // Efi mais um motivo para tratar pagador e recebedor como a mesma
+            // pessoa. Com comprador da loja, so vai o que o checkout informar.
+            phone_number: (
+              String(customer.phone ?? '').replace(/\D/g, '')
+              || (compradorEhDaLoja ? '' : String(p.telefone_contato ?? '').replace(/\D/g, ''))
+            ) || undefined,
             ...(customer.birth ? { birth: String(customer.birth) } : {}),
           },
         },
       },
     };
+
+    // ── O QUE EXATAMENTE SAI DAQUI ─────────────────────────────────────────
+    // Ate agora o log mostrava a RESPOSTA da Efi e nada do PEDIDO que ela
+    // recusou. Sem isso, cada recusa virava hipotese: "sera o e-mail?", "sera
+    // o telefone?" — e duas hipoteses erradas custaram duas rodadas. Com o
+    // payload registrado, a proxima recusa e conclusiva.
+    //
+    // Mascarado: CPF sai com tres primeiros e dois ultimos; o payment_token
+    // nao entra (e credencial de uso unico do cartao); numero e CVV nunca
+    // passam por esta funcao.
+    {
+      const c = bodyToSend.payment.credit_card.customer as Record<string, unknown>;
+      const doc = String(c.cpf ?? '');
+      reqLogger.info('Payload enviado a Efi', {
+        context: {
+          pedido_id,
+          item_nome: bodyToSend.items[0]?.name,
+          valor_centavos: bodyToSend.items[0]?.value,
+          installments: bodyToSend.payment.credit_card.installments,
+          tem_marketplace: 'marketplace' in (bodyToSend.items[0] ?? {}),
+          customer: {
+            name: String(c.name ?? '').slice(0, 30),
+            cpf: doc.length >= 5 ? `${doc.slice(0, 3)}***${doc.slice(-2)}` : `(${doc.length} digitos)`,
+            email: String(c.email ?? ''),
+            phone_number: c.phone_number ? `***${String(c.phone_number).slice(-4)}` : '(vazio)',
+            tem_birth: 'birth' in c,
+          },
+          billing_address: {
+            city: bodyToSend.payment.credit_card.billing_address.city,
+            state: bodyToSend.payment.credit_card.billing_address.state,
+            neighborhood: bodyToSend.payment.credit_card.billing_address.neighborhood,
+            zipcode: String(bodyToSend.payment.credit_card.billing_address.zipcode ?? '').slice(0, 5) + '***',
+          },
+        },
+      });
+    }
 
     const res = await fetch(`${efiCobUrl}/v1/charge/one-step`, {
       method: 'POST',
