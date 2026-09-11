@@ -692,18 +692,52 @@ function GestaoEntregadores({ lojaId }: { lojaId: string }) {
 
     await Promise.all(updates);
 
-    // Gera link para o entregador
+    /*
+     * AVISAR O ENTREGADOR — PELO CANAL OFICIAL QUANDO ELE EXISTE.
+     *
+     * Antes isto era só `window.open('https://wa.me/...')`, que ABRE o
+     * WhatsApp com o texto pronto e deixa o botão Enviar para o lojista. E a
+     * tela mesmo assim dizia "notificação enviada" — não estava. Em hora de
+     * pico, despachar cinco rotas virava cinco abas esperando um clique que
+     * ninguém deu, e o entregador não sabia que tinha corrida.
+     *
+     * Agora tenta primeiro a Cloud API pela edge function `whatsapp-send`.
+     * Ela devolve `simulado: true` quando a loja não tem conexão capaz de
+     * entregar de verdade (hoje é o caso: o número conectado é o de teste da
+     * Meta, +1 555…, que só alcança destinatários pré-cadastrados). Nesse
+     * caso, e em qualquer erro, cai no `wa.me` — e o aviso na tela diz o que
+     * de fato aconteceu, em vez de prometer envio.
+     */
     const ent = entregadores.find(e => e.id === entregadorSelecionado);
     const linkApp = `${window.location.origin}/entregador`;
     const msg = `Olá ${ent?.nome}! Você tem ${pedidosSelecionados.length} entrega(s) nova(s) no MiseOn Logistics. Acesse: ${linkApp}`;
+
+    let enviouSozinho = false;
     if (ent?.telefone) {
-      window.open(`https://wa.me/${ent.telefone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+      const fone = ent.telefone.replace(/\D/g, '');
+      try {
+        const { data, error } = await supabase.functions.invoke('whatsapp-send', {
+          body: { loja_id: lojaId, telefone: fone, texto: msg },
+        });
+        enviouSozinho = !error && !!data?.success && !data?.simulado;
+      } catch { /* canal indisponível: segue para o wa.me */ }
+
+      if (!enviouSozinho) {
+        window.open(`https://wa.me/${fone}?text=${encodeURIComponent(msg)}`, '_blank');
+      }
     }
 
     setPedidosSelecionados([]);
     setEntregadorSelecionado('');
-    setFeedback({ tipo: 'sucesso', msg: `Rota criada e notificação enviada para ${ent?.nome}!` });
-    setTimeout(() => setFeedback(null), 5000);
+    setFeedback({
+      tipo: 'sucesso',
+      msg: !ent?.telefone
+        ? `Rota criada para ${ent?.nome}. Cadastre o telefone dele para avisar pelo WhatsApp.`
+        : enviouSozinho
+          ? `Rota criada e WhatsApp enviado para ${ent?.nome}.`
+          : `Rota criada. Abri o WhatsApp com a mensagem para ${ent?.nome} — toque em Enviar.`,
+    });
+    setTimeout(() => setFeedback(null), 6000);
     setDespachando(false);
     carregar();
   };
