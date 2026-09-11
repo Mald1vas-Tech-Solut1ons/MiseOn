@@ -72,8 +72,31 @@ const FEATURE_COEXISTENCIA = 'whatsapp_business_app_onboarding';
 const FEATURE_CHIP_DEDICADO = '';
 const META_EXTRAS = extrasOnboarding(FEATURE_CHIP_DEDICADO);
 
-// Precisa estar em "URIs de redirecionamento OAuth válidos" no app da Meta.
-const redirectUri = () => `${window.location.origin}/admin/whatsapp`;
+/**
+ * URI de redirecionamento do OAuth da Meta.
+ *
+ * Precisa bater EXATAMENTE com uma das entradas em "URIs de redirecionamento
+ * OAuth válidos" no app da Meta — host incluído. Não pode sair de
+ * `window.location.origin`: o site responde tanto em `miseon.app.br` quanto em
+ * `www.miseon.app.br` (não há redirect de um para o outro), e abrir o painel
+ * pelo `www` mandava para a Meta um host que não está na lista. O resultado é
+ * a tela "URL bloqueado", que não diz qual URL foi recusada nem por quê — e
+ * parece que a integração quebrou, quando o que mudou foi só o endereço na
+ * barra.
+ *
+ * Agora qualquer host de produção converge para o canônico, que é o mesmo do
+ * `<link rel="canonical">` e do prerender. Localhost e previews da Vercel
+ * continuam usando a própria origem, senão não dá para testar fora do
+ * domínio final.
+ */
+const HOST_CANONICO = 'https://miseon.app.br';
+
+const origemParaOAuth = () => {
+  const { origin, hostname } = window.location;
+  return hostname.endsWith('miseon.app.br') ? HOST_CANONICO : origin;
+};
+
+const redirectUri = () => `${origemParaOAuth()}/admin/whatsapp`;
 
 declare global {
   interface Window { FB?: any }
