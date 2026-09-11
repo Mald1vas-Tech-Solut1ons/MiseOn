@@ -16,6 +16,15 @@ import type { CtxLoja } from './AdminLayout';
 import { useI18n } from '../../contexts/I18nContext';
 type Aba = 'conexao' | 'depara' | 'pedidos';
 
+/** Uma linha de `integracao_ifood_saude` — o estado medido do canal. */
+interface SaudeIfood {
+  estado: 'OK' | 'SEM_PERMISSAO' | 'CREDENCIAL' | 'ERRO' | 'DESCONHECIDO';
+  http_status: number | null;
+  mensagem: string | null;
+  verificado_em: string;
+  falhas_seguidas: number;
+}
+
 interface LojaIfood {
   plano_tipo?: string;
   ifood_merchant_id: string;
@@ -56,6 +65,7 @@ export default function Ifood() {
   // cardapio: sem codigo, sincronizar nao tem o que casar do outro lado.
   const [mapeados, setMapeados] = useState({ comCodigo: 0, total: 0 });
   const [sincronizando, setSincronizando] = useState(false);
+  const [saude, setSaude] = useState<SaudeIfood | null>(null);
 
   const carregarLoja = useCallback(async () => {
     const { data } = await supabase
@@ -83,6 +93,25 @@ export default function Ifood() {
     setCarregando(false);
   }, [lojaId]);
 
+  /**
+   * Estado MEDIDO do canal, escrito pelo polling a cada tentativa.
+   *
+   * Antes esta tela deduzia "Conectado" da existência de um merchant_id — ou
+   * seja, de alguém ter digitado um id. Em 11/09/2026 ela mostrou verde o dia
+   * inteiro enquanto TODAS as chamadas ao iFood voltavam
+   * 403 "No permissions granted to client", sem um único pedido poder entrar.
+   * Painel que mostra verde com o canal morto gasta a confiança de quem
+   * depende dele para decidir.
+   */
+  const carregarSaude = useCallback(async () => {
+    const { data } = await supabase
+      .from('integracao_ifood_saude')
+      .select('estado, http_status, mensagem, verificado_em, falhas_seguidas')
+      .eq('id', true)
+      .maybeSingle();
+    if (data) setSaude(data as SaudeIfood);
+  }, []);
+
   const carregarMapeamento = useCallback(async () => {
     const { data } = await supabase
       .from('produtos')
@@ -95,7 +124,7 @@ export default function Ifood() {
     });
   }, [lojaId]);
 
-  useEffect(() => { setTimeout(carregarLoja, 0); setTimeout(carregarMapeamento, 0); }, [carregarLoja, carregarMapeamento]);
+  useEffect(() => { setTimeout(carregarLoja, 0); setTimeout(carregarMapeamento, 0); setTimeout(carregarSaude, 0); }, [carregarLoja, carregarMapeamento, carregarSaude]);
 
   /**
    * Dispara a sincronizacao do cardapio.
@@ -168,7 +197,11 @@ export default function Ifood() {
     );
   }
 
-  const conectado = !!loja.ifood_merchant_id;
+  const vinculado = !!loja.ifood_merchant_id;
+  // "Conectado" passa a significar "o canal responde", não "alguém digitou um
+  // id". Ver o comentário do estado logo acima e a migração
+  // 20260911060000_saude_da_integracao_ifood.
+  const conectado = vinculado && saude?.estado === 'OK';
 
   return (
     <div className="px-4 py-6">
@@ -185,15 +218,55 @@ export default function Ifood() {
             </p>
           </div>
         </div>
-        <span className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-black uppercase tracking-wide ${
-          conectado
-            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-            : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400'
-        }`}>
-          <span className={`h-2 w-2 rounded-full ${conectado ? 'bg-emerald-500 shadow-[0_0_8px_#22c55e]' : 'bg-gray-400'}`} />
-          {conectado ? 'Conectado' : 'Não vinculado'}
-        </span>
+        {(() => {
+          // Três estados possíveis, e o do meio é o que não existia: vinculado
+          // porém sem conseguir falar com o iFood. Era ele que aparecia como
+          // "Conectado" em verde.
+          const rotulo = !vinculado ? 'Não vinculado' : conectado ? 'Conectado' : 'Vinculado, sem receber';
+          const cor = !vinculado
+            ? 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400'
+            : conectado
+              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+              : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+          const bolinha = !vinculado ? 'bg-gray-400' : conectado ? 'bg-emerald-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]';
+          return (
+            <span className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-black uppercase tracking-wide ${cor}`}>
+              <span className={`h-2 w-2 rounded-full ${bolinha}`} />
+              {tDynamic(rotulo)}
+            </span>
+          );
+        })()}
       </div>
+
+      {/* ── O canal está de pé? ────────────────────────────────────────────
+          Sem isto, a única pista de que nenhum pedido do iFood entra há dias
+          era um warning no log do servidor, que o lojista nunca lê. */}
+      {vinculado && saude && saude.estado !== 'OK' && saude.estado !== 'DESCONHECIDO' && (
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-800/60 dark:bg-red-900/20">
+          <p className="text-sm font-black text-red-700 dark:text-red-400">
+            {saude.estado === 'SEM_PERMISSAO'
+              ? tDynamic('Nenhum pedido do iFood está entrando.')
+              : saude.estado === 'CREDENCIAL'
+                ? tDynamic('O iFood recusou as credenciais da plataforma.')
+                : tDynamic('O iFood não está respondendo.')}
+          </p>
+          <p className="mt-1 text-[13px] leading-relaxed text-red-700/90 dark:text-red-300/90">
+            {saude.estado === 'SEM_PERMISSAO'
+              ? tDynamic('O aplicativo da MiseOn ainda não recebeu os módulos no Portal do Desenvolvedor do iFood. Enquanto isso, a conexão fica de pé mas nenhum pedido chega. É liberação no portal do iFood — não há nada a corrigir na sua loja.')
+              : saude.estado === 'CREDENCIAL'
+                ? tDynamic('As credenciais do aplicativo foram recusadas ou o aplicativo está desativado no portal do iFood.')
+                : tDynamic('Estamos tentando de novo automaticamente. Se persistir, fale com o suporte.')}
+          </p>
+          <p className="mt-2 text-xs text-red-600/80 dark:text-red-400/70">
+            {saude.falhas_seguidas > 1
+              ? `${saude.falhas_seguidas} tentativas seguidas sem sucesso · `
+              : ''}
+            {tDynamic('última verificação')}{' '}
+            {new Date(saude.verificado_em).toLocaleString('pt-BR')}
+            {saude.http_status ? ` · HTTP ${saude.http_status}` : ''}
+          </p>
+        </div>
+      )}
 
       {/* ── Abas ── */}
       <div className="mb-6 flex flex-wrap gap-2 pb-1">

@@ -100,6 +100,46 @@ Deno.serve(async (req) => {
     .not('ifood_merchant_id', 'is', null);
   if (!count) return json({ ok: true, motivo: 'nenhuma loja com iFood integrado' });
 
+  // ── FREIO: NÃO INSISTIR CONTRA O QUE SÓ AÇÃO HUMANA RESOLVE ─────────────
+  //
+  // O cron roda a cada minuto. Com o aplicativo sem módulos concedidos no
+  // portal do iFood, isso são ~1.440 chamadas por dia que não podem dar
+  // certo, todas registrando o mesmo warning — que é exatamente onde um erro
+  // de verdade se esconde depois.
+  //
+  // Medido em 11/09/2026: `POST /authentication/v1.0/oauth/token` devolvendo
+  // 403 "No permissions granted to client c448…" em todas as tentativas.
+  //
+  // Enquanto o estado for de configuração, tenta a cada 30 minutos. É rápido
+  // o bastante para o lojista ver o canal voltar sozinho pouco depois de
+  // liberar no portal, e silencioso o bastante para o log voltar a servir.
+  const { data: saude } = await supabase
+    .from('integracao_ifood_saude')
+    .select('estado, proxima_tentativa_em, falhas_seguidas')
+    .eq('id', true)
+    .maybeSingle();
+
+  const emEspera = saude?.proxima_tentativa_em
+    && new Date(saude.proxima_tentativa_em).getTime() > Date.now();
+  if (emEspera) {
+    return json({
+      ok: true,
+      motivo: 'aguardando liberacao no portal do iFood',
+      estado: saude!.estado,
+      proxima_tentativa_em: saude!.proxima_tentativa_em,
+    });
+  }
+
+  const registrarSaude = async (campos: Record<string, unknown>) => {
+    // Nunca derrubar o polling por causa do registro de saúde: ele é
+    // observabilidade, não a função do endpoint.
+    const { error } = await supabase
+      .from('integracao_ifood_saude')
+      .update({ ...campos, verificado_em: new Date().toISOString() })
+      .eq('id', true);
+    if (error) console.warn('Nao consegui registrar a saude da integracao iFood:', error.message);
+  };
+
   const auth = await getPlatformToken(clientId, clientSecret);
   if (!auth.ok) {
     // 401/403 sao condicao de CONFIGURACAO — credencial revogada ou
@@ -110,10 +150,34 @@ Deno.serve(async (req) => {
     const configuracao = auth.status === 401 || auth.status === 403;
     const linha = `iFood recusou a autenticacao da plataforma (${auth.status}): ${auth.motivo}`;
     if (configuracao) console.warn(linha); else console.error(linha);
+
+    // O painel passa a ler daqui em vez de deduzir "conectado" da existência
+    // de um merchant_id — que é o que fazia a tela mostrar verde o dia
+    // inteiro com o canal morto.
+    const espera = configuracao ? 30 : 5; // minutos
+    await registrarSaude({
+      estado: auth.status === 403 ? 'SEM_PERMISSAO' : auth.status === 401 ? 'CREDENCIAL' : 'ERRO',
+      http_status: auth.status,
+      mensagem: auth.motivo.slice(0, 500),
+      falhas_seguidas: (saude?.falhas_seguidas ?? 0) + 1,
+      proxima_tentativa_em: new Date(Date.now() + espera * 60_000).toISOString(),
+    });
+
     return json(
       { ok: false, motivo: auth.motivo, status: auth.status },
       configuracao ? 200 : 502,
     );
+  }
+
+  // Autenticou: o canal está de pé. Zera o freio para o minuto a minuto voltar.
+  if (saude?.estado !== 'OK') {
+    await registrarSaude({
+      estado: 'OK',
+      http_status: 200,
+      mensagem: null,
+      falhas_seguidas: 0,
+      proxima_tentativa_em: null,
+    });
   }
   const token = auth.token;
 

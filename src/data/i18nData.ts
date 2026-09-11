@@ -1878,6 +1878,18 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Olá! Seu pedido': 'Hello! Your order',
   'Os pagamentos online são processados pelo': 'Online payments are processed by',
   'Pedidos do iFood direto no seu PDV, com margem protegida.': 'iFood orders straight into your POS, with your margin protected.',
+  // Estado MEDIDO do canal iFood — ver integracao_ifood_saude.
+  'Vinculado, sem receber': 'Linked, not receiving',
+  'Nenhum pedido do iFood está entrando.': 'No iFood orders are coming in.',
+  'O aplicativo da MiseOn ainda não recebeu os módulos no Portal do Desenvolvedor do iFood. Enquanto isso, a conexão fica de pé mas nenhum pedido chega. É liberação no portal do iFood — não há nada a corrigir na sua loja.':
+    'MiseOn’s app has not been granted the modules in the iFood Developer Portal yet. Until then the connection stays up but no order arrives. This is a release on iFood’s side — there is nothing to fix in your store.',
+  'O iFood recusou as credenciais da plataforma.': 'iFood rejected the platform credentials.',
+  'As credenciais do aplicativo foram recusadas ou o aplicativo está desativado no portal do iFood.':
+    'The app credentials were rejected, or the app is deactivated in the iFood portal.',
+  'O iFood não está respondendo.': 'iFood is not responding.',
+  'Estamos tentando de novo automaticamente. Se persistir, fale com o suporte.':
+    'We are retrying automatically. If it persists, contact support.',
+  'última verificação': 'last checked',
   'Percentual de Cashback por Pedido': 'Cashback percentage per order',
   'Pix recebido na sua conta': 'Pix received in your account',
   'Política Zero-Trust para o seu Certificado': 'Zero-trust policy for your certificate',

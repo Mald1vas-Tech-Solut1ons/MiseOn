@@ -51,10 +51,46 @@ function incluir(caminhoNoDisco) {
 }
 incluir(entrada);
 
+/**
+ * `verify_jwt` é PRESERVADO, nunca assumido.
+ *
+ * Este script já fixava `true`. Em 11/09/2026 isso derrubou a `ifood-polling`:
+ * ela estava publicada com `false` de propósito, porque quem a chama é o
+ * pg_cron usando o `IFOOD_POLLING_TOKEN` do Vault — um token opaco, de menor
+ * privilégio, que NÃO é um JWT. Com `verify_jwt: true` a plataforma recusa a
+ * chamada com 401 antes da função rodar, e o coletor de pedidos do iFood
+ * simplesmente parou, sem erro nenhum dentro da função para explicar.
+ *
+ * Um flag de segurança que muda sozinho num deploy de rotina é a pior
+ * combinação possível: silencioso e grave. Aqui ele passa a vir do estado
+ * atual da função; só muda se alguém pedir explicitamente com --verify-jwt
+ * ou --no-verify-jwt.
+ */
+const pedido = process.argv.includes('--verify-jwt') ? true
+  : process.argv.includes('--no-verify-jwt') ? false
+  : null;
+
+let verifyJwt = pedido;
+if (verifyJwt === null) {
+  const atual = await fetch(`https://api.supabase.com/v1/projects/${REF}/functions/${slug}`, {
+    headers: { Authorization: `Bearer ${PAT}` },
+  });
+  if (atual.ok) {
+    verifyJwt = (await atual.json()).verify_jwt;
+  } else if (atual.status === 404) {
+    // Função nova: o padrão seguro é exigir JWT. Quem precisar de outro
+    // regime passa --no-verify-jwt e fica registrado no comando.
+    verifyJwt = true;
+  } else {
+    console.error(`nao consegui ler o verify_jwt atual (${atual.status}) — abortando em vez de adivinhar`);
+    process.exit(1);
+  }
+}
+
 const metadata = {
   name: slug,
   entrypoint_path: `functions/${slug}/index.ts`,
-  verify_jwt: true,
+  verify_jwt: verifyJwt,
   static_patterns: [],
 };
 
@@ -72,5 +108,5 @@ const r = await fetch(`https://api.supabase.com/v1/projects/${REF}/functions/dep
 const texto = await r.text();
 if (!r.ok) { console.error('deploy falhou', r.status, texto.slice(0, 500)); process.exit(1); }
 const j = JSON.parse(texto);
-console.log(`publicado: ${j.slug} v${j.version} (${j.status})`);
+console.log(`publicado: ${j.slug} v${j.version} (${j.status}) verify_jwt=${verifyJwt}`);
 console.log('arquivos:', [...arquivos.keys()].join(', '));
