@@ -1746,6 +1746,12 @@ function CartaoModal({ loja, info, onFechar, onAprovado }: {
   useEffect(() => {
     let vivo = true;
     (async () => {
+      // `meus_cartoes` é liberada só para `authenticated`. Sem esta checagem,
+      // todo visitante deslogado levaria um 403 na abertura do checkout —
+      // inofensivo no fluxo, mas é exatamente o tipo de erro de rotina que
+      // depois faz a gente ignorar o console quando o erro é de verdade.
+      const { data: sessao } = await supabase.auth.getSession();
+      if (!sessao?.session) return;
       const { data } = await supabase
         .from('meus_cartoes')
         .select('id, bandeira, ultimos_digitos, titular_nome, validade_mes, validade_ano, apelido')
