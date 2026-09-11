@@ -21,6 +21,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { gated } from './gate';
+import { criarLojaDescartavel, apagarLojaDescartavel, exigirDescartavel } from './loja-descartavel';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // ─── Setup do cliente de testes (usa service-role para bypass de RLS) ─────────
@@ -87,20 +88,22 @@ beforeAll(async () => {
     auth: { persistSession: false },
   });
 
-  // Recupera uma loja de teste existente (seed) ou lança erro claro
-  const { data: loja, error } = await db
-    .from('lojas')
-    .select('id')
-    .limit(1)
-    .single();
-  if (error || !loja) throw new Error('Nenhuma loja encontrada no banco de teste. Execute o seed.');
-  lojaId = loja.id;
+  // Loja EXCLUSIVA deste arquivo. Antes era `lojas.limit(1)` — "a primeira que
+  // vier" — e, com o .env.local apontando para producao, isso escrevia usuario,
+  // pedido e estoque dentro da loja de um cliente real.
+  const lojaQa = await criarLojaDescartavel(db, 'ledger');
+  lojaId = lojaQa.id;
+  exigirDescartavel(lojaId, 'ledger');
 });
 
 afterAll(async () => {
   if (!isConfigured || !pedidosCriados.length) return;
   // Lançamentos e pagamentos caem por cascata/FK do próprio pedido.
   await db.from('pedidos').delete().in('id', pedidosCriados);
+  // A loja descartavel sai por ultimo: apagar a loja leva junto tudo que
+  // pendurou nela, e e a garantia de que uma corrida interrompida nao deixe
+  // tenant orfao no banco.
+  if (lojaId) await apagarLojaDescartavel(db, lojaId);
 });
 
 // ─── Testes ──────────────────────────────────────────────────────────────────

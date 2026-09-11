@@ -2,6 +2,7 @@
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { gated } from './gate';
+import { criarLojaDescartavel, apagarLojaDescartavel, exigirDescartavel } from './loja-descartavel';
 
 const URL = process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
@@ -60,9 +61,12 @@ async function selecionar(itemId: string, id = opcaoId) {
 beforeAll(async () => {
   if (!configured) return;
   admin = createClient(URL, SERVICE_KEY, { auth: { persistSession: false } });
-  const { data: loja, error: lojaError } = await admin.from('lojas').select('id').limit(1).single();
-  if (lojaError || !loja) throw new Error('Banco local sem loja de seed.');
-  lojaId = loja.id;
+  // Loja EXCLUSIVA deste arquivo. Antes era `lojas.limit(1)` — "a primeira que
+  // vier" — e, com o .env.local apontando para producao, isso escrevia usuario,
+  // pedido e estoque dentro da loja de um cliente real.
+  const lojaQa = await criarLojaDescartavel(admin, 'kds-rodadas');
+  lojaId = lojaQa.id;
+  exigirDescartavel(lojaId, 'kds-rodadas');
 
   const suffix = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
   const email = `kds18-${suffix}@example.test`;
@@ -145,6 +149,10 @@ afterAll(async () => {
     await admin.from('usuarios_loja').delete().eq('user_id', userId);
     await admin.auth.admin.deleteUser(userId);
   }
+  // A loja descartavel sai por ultimo: apagar a loja leva junto tudo que
+  // pendurou nela, e e a garantia de que uma corrida interrompida nao deixe
+  // tenant orfao no banco.
+  if (lojaId) await apagarLojaDescartavel(admin, lojaId);
 });
 
 gated(configured, 'Sprint 18 — KDS por rodada e modificadores', () => {

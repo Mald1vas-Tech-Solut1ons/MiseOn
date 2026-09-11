@@ -2,6 +2,7 @@
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { gated } from './gate';
+import { criarLojaDescartavel, apagarLojaDescartavel, exigirDescartavel } from './loja-descartavel';
 
 const URL = process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
@@ -30,10 +31,12 @@ beforeAll(async () => {
   service = createClient(URL, SERVICE_KEY, { auth: { persistSession: false } });
   publico = createClient(URL, PUBLIC_KEY, { auth: { persistSession: false } });
 
-  const { data: loja, error: lojaError } = await service.from('lojas').select('id, slug').limit(1).single();
+  const lojaQa = await criarLojaDescartavel(service, 'tv-pareamento');
+  const { data: loja, error: lojaError } = await service.from('lojas').select('id, slug').eq('id', lojaQa.id).single();
   if (lojaError || !loja) throw new Error('Banco de teste sem loja disponível.');
   lojaId = loja.id;
   slug = loja.slug;
+  exigirDescartavel(lojaId, 'tv-pareamento');
 
   const email = `tv-pairing-${Date.now()}@example.test`;
   const { data: criado, error: userError } = await service.auth.admin.createUser({ email, password, email_confirm: true });
@@ -54,6 +57,10 @@ afterAll(async () => {
     await service.from('usuarios_loja').delete().eq('user_id', userId).eq('loja_id', lojaId);
     await service.auth.admin.deleteUser(userId);
   }
+  // A loja descartavel sai por ultimo: apagar a loja leva junto tudo que
+  // pendurou nela, e e a garantia de que uma corrida interrompida nao deixe
+  // tenant orfao no banco.
+  if (lojaId) await apagarLojaDescartavel(service, lojaId);
 });
 
 gated(configured, 'Pareamento seguro de TV', () => {

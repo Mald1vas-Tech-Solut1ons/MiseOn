@@ -17,6 +17,7 @@
 
 import { it, expect, beforeAll, afterAll } from 'vitest';
 import { gated } from './gate';
+import { criarLojaDescartavel, apagarLojaDescartavel, exigirDescartavel } from './loja-descartavel';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -55,10 +56,11 @@ beforeAll(async () => {
   const { data: loja, error } = await db
     .from('lojas')
     .select('id, painel_tv_tipos')
-    .limit(1)
+    .eq('id', (await criarLojaDescartavel(db, 'senha', { painel_tv_tipos: ['RETIRADA_BALCAO', 'SALAO'] })).id)
     .single();
-  if (error || !loja) throw new Error('Nenhuma loja encontrada no banco de teste.');
+  if (error || !loja) throw new Error('Nao consegui ler a loja descartavel recem-criada.');
   lojaId = loja.id;
+  exigirDescartavel(lojaId, 'senha');
   // Guarda a configuração da loja para devolver como estava — estes testes
   // rodam contra um banco compartilhado.
   tiposOriginais = loja.painel_tv_tipos;
@@ -76,6 +78,10 @@ afterAll(async () => {
   if (tiposOriginais) {
     await db.from('lojas').update({ painel_tv_tipos: tiposOriginais }).eq('id', lojaId);
   }
+  // A loja descartavel sai por ultimo: apagar a loja leva junto tudo que
+  // pendurou nela, e e a garantia de que uma corrida interrompida nao deixe
+  // tenant orfao no banco.
+  if (lojaId) await apagarLojaDescartavel(db, lojaId);
 });
 
 gated(isConfigured, 'Senha de balcão × número do pedido', () => {

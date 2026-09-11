@@ -21,6 +21,7 @@
 
 import { it, expect, beforeAll, afterAll } from 'vitest';
 import { gated } from './gate';
+import { criarLojaDescartavel, apagarLojaDescartavel, exigirDescartavel } from './loja-descartavel';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -55,9 +56,12 @@ beforeAll(async () => {
   if (!isConfigured) return;
   db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-  const { data: loja, error } = await db.from('lojas').select('id').limit(1).single();
-  if (error || !loja) throw new Error('Nenhuma loja encontrada no banco de teste. Execute o seed.');
-  lojaId = loja.id;
+  // Loja EXCLUSIVA deste arquivo. Antes era `lojas.limit(1)` — "a primeira que
+  // vier" — e, com o .env.local apontando para producao, isso escrevia usuario,
+  // pedido e estoque dentro da loja de um cliente real.
+  const lojaQa = await criarLojaDescartavel(db, 'pedido-mesa');
+  lojaId = lojaQa.id;
+  exigirDescartavel(lojaId, 'pedido-mesa');
 
   // Mesa com número fora do range operacional (evita colidir com mesas do seed).
   const { data: mesa, error: errMesa } = await db
@@ -86,6 +90,10 @@ afterAll(async () => {
   await db.from('comandas').delete().eq('mesa_id', mesaId);
   await db.from('mesas').delete().eq('id', mesaId);
   await db.from('produtos').delete().eq('id', produtoId);
+  // A loja descartavel sai por ultimo: apagar a loja leva junto tudo que
+  // pendurou nela, e e a garantia de que uma corrida interrompida nao deixe
+  // tenant orfao no banco.
+  if (lojaId) await apagarLojaDescartavel(db, lojaId);
 });
 
 gated(isConfigured, 'Pedido de mesa via QR → comanda (Sprint 1)', () => {
