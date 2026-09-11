@@ -403,10 +403,23 @@ export default function Totem() {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-40 -top-40 h-[42rem] w-[42rem] rounded-full bg-[#FC5B24]/12 blur-[160px]" />
         <div className="absolute -bottom-52 -right-40 h-[46rem] w-[46rem] rounded-full bg-sky-500/10 blur-[170px]" />
-        <img
-          src="/Mfavicon.png"
-          alt=""
-          className="absolute left-1/2 top-1/2 w-[130vw] max-w-[1200px] -translate-x-1/2 -translate-y-1/2 opacity-[0.055] mix-blend-screen"
+        {/* PADRÃO de marca, não um selo no meio da tela.
+            Um símbolo gigante centralizado compete com a foto do produto e
+            parece marca d'água de documento. Repetido pequeno e na diagonal
+            vira textura: lê como papel de parede de marca, preenche a tela
+            inteira e não disputa atenção com nada.
+
+            A diagonal é o que separa padrão de grade — alinhado ortogonal
+            fica com cara de fundo de planilha. `scale` cobre os cantos que a
+            rotação descobriria. */}
+        <div
+          className="absolute -inset-[25%] opacity-[0.05] mix-blend-screen"
+          style={{
+            backgroundImage: "url('/Mfavicon.png')",
+            backgroundSize: '132px',
+            backgroundRepeat: 'repeat',
+            transform: 'rotate(-14deg)',
+          }}
         />
       </div>
 
