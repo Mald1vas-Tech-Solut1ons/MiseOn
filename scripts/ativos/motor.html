@@ -11,14 +11,14 @@
 // Nada aqui usa animação de CSS nem requestAnimationFrame: o tempo é um
 // parâmetro, para que o mesmo frame saia idêntico em qualquer máquina.
 
-// Cores amostradas de public/icon.png — o simbolo que o app REALMENTE usa
+// Tokens do pacote oficial da marca: public/MiseOn brand identity/entrega.
 // (BrandLoader, MiseOnLoader, PedidoHeader, og:image, mascaras do index.css).
 // A raiz do repo tem um logo.png antigo que o app nao referencia em lugar
 // nenhum; nao use aquele arquivo.
-const NAVY   = '#0A325A';
-const CIANO  = '#0A96D2';
-const LARANJA= '#E6461E';
-const BRASA  = '#F0641E';
+const NAVY   = '#004198';
+const CIANO  = '#0A5CC4';
+const LARANJA= '#FC5B24';
+const BRASA  = '#FC5B24';
 const BRANCO = '#FFFFFF';
 
 const cv = document.getElementById('c');
@@ -71,7 +71,7 @@ function texto(str, y, tam, cor, peso, espaco) {
   cx.fillStyle = cor;
   cx.textAlign = 'center'; cx.textBaseline = 'middle';
   cx.letterSpacing = (espaco || 0) + 'px';
-  cx.font = `${peso || 700} ${tam}px Archivo, "Segoe UI", Arial, sans-serif`;
+  cx.font = `${peso || 700} ${tam}px Sora, "Segoe UI", Arial, sans-serif`;
   cx.fillText(str, W / 2, y);
   cx.restore();
 }
@@ -246,4 +246,4 @@ window.MISEON = {
   lista() { return Object.keys(ATIVOS); },
 };
 </script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap">

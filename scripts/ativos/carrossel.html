@@ -1,0 +1,176 @@
+<meta charset="utf-8">
+<title>carrossel MiseOn</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<style>
+  html,body{margin:0;padding:0;background:transparent}
+  #slide{width:1080px;height:1350px;position:relative;overflow:hidden;
+    font-family:Manrope,system-ui,sans-serif;background:#004198}
+  .pad{position:absolute;inset:0;padding:96px 88px 120px;display:flex;flex-direction:column}
+  /* rodapé de marca, igual em todos os slides */
+  .rodape{position:absolute;left:88px;right:88px;bottom:64px;display:flex;
+    align-items:center;justify-content:space-between}
+  .rodape img{height:52px}
+  .pag{font-family:"JetBrains Mono",monospace;font-size:24px;font-weight:700;
+    color:rgba(255,255,255,.45);letter-spacing:.08em}
+  .faixa{position:absolute;left:0;top:0;width:100%;height:14px;
+    background:linear-gradient(90deg,#0A96D2 0%,#0A96D2 45%,#E6461E 45%,#E6461E 100%)}
+</style>
+<div id="slide"></div>
+<script>
+// Tokens do pacote oficial da marca — public/MiseOn brand identity/entrega.
+// Nao inventar paleta: o kit do Instagram e a landing ja usam estes valores.
+const NAVY='#004198',      // --miseon-azul
+      CIANO='#0A5CC4',     // --miseon-azul-claro
+      LARANJA='#FC5B24',   // --miseon-laranja
+      TINTA='#070C18',     // --miseon-tinta
+      NEVOA='#EAF1FB',     // --miseon-nevoa
+      BRANCO='#FFFFFF';
+
+// Marca em versão clara para fundo navy: o lockup do sistema é escuro demais
+// sobre azul, então o símbolo entra sozinho e o nome vem em tipografia.
+function rodape(n, total, escuro){
+  const cor = escuro ? 'rgba(10,50,90,.5)' : 'rgba(255,255,255,.45)';
+  const nome = escuro ? NAVY : BRANCO;
+  return `<div class="rodape">
+    <div style="display:flex;align-items:center;gap:14px">
+      <img src="marca.png" alt="">
+      <span style="font-family:Sora;font-size:30px;font-weight:800;letter-spacing:-.01em;color:${nome}">MiseOn</span>
+    </div>
+    <span class="pag" style="color:${cor}">${n}/${total}</span>
+  </div>`;
+}
+
+const SLIDES = [
+  // 1 — capa: a pergunta, grande, sem enfeite
+  {fundo:NAVY, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center">
+      <p style="font-family:'JetBrains Mono';font-size:26px;letter-spacing:.18em;
+                color:${LARANJA};font-weight:700;margin:0 0 40px">A CONTA DO DELIVERY</p>
+      <h1 style="font-family:Sora;font-size:128px;line-height:.94;font-weight:900;color:${BRANCO};
+                 letter-spacing:-.035em;margin:0">Você vende<br>por 44.</h1>
+      <h1 style="font-family:Sora;font-size:128px;line-height:.94;font-weight:900;color:${LARANJA};
+                 letter-spacing:-.035em;margin:24px 0 0">Recebe 22.</h1>
+      <p style="font-size:40px;line-height:1.38;color:rgba(255,255,255,.8);
+                margin:56px 0 0;max-width:20ch;font-weight:500">
+         Isso não é a plataforma te roubando. É uma conta que ninguém fez.</p>
+    </div>`},
+
+  // 2 — a decomposição
+  {fundo:NAVY, html:`
+    <div class="pad" style="justify-content:center">
+      <h2 style="font-family:Sora;font-size:64px;line-height:1.08;font-weight:800;color:${BRANCO};
+                 letter-spacing:-.02em;margin:0 0 56px">Para onde vai<br>a outra metade</h2>
+      ${[['Comissão da plataforma','26% a 40%'],['Taxa de entrega','por pedido'],
+         ['Taxa de serviço','por pedido'],['Taxa de pagamento','por pedido']]
+        .map(([a,b])=>`<div style="display:flex;justify-content:space-between;align-items:baseline;
+           padding:30px 0;border-bottom:1px solid rgba(255,255,255,.14)">
+           <span style="font-size:40px;color:${BRANCO};font-weight:600">${a}</span>
+           <span style="font-family:'JetBrains Mono';font-size:34px;color:${NEVOA};font-weight:700">${b}</span>
+         </div>`).join('')}
+      <p style="font-size:36px;line-height:1.4;color:rgba(255,255,255,.66);margin:52px 0 0;font-weight:500">
+        Some tudo e some metade do preço.</p>
+    </div>`},
+
+  // 3 — o erro, nomeado
+  {fundo:LARANJA, html:`
+    <div class="pad" style="justify-content:center">
+      <p style="font-family:'JetBrains Mono';font-size:26px;letter-spacing:.18em;
+                color:rgba(255,255,255,.75);font-weight:700;margin:0 0 40px">O ERRO</p>
+      <h2 style="font-family:Sora;font-size:96px;line-height:1.02;font-weight:900;color:${BRANCO};
+                 letter-spacing:-.03em;margin:0">Anunciar<br>na plataforma<br>o preço<br>do balcão.</h2>
+      <p style="font-size:38px;line-height:1.4;color:rgba(255,255,255,.88);
+                margin:56px 0 0;font-weight:500;max-width:18ch">
+         No balcão você fica com os 44. Lá, não.</p>
+    </div>`},
+
+  // 4 — a conta certa
+  {fundo:'#FFFFFF', escuro:true, html:`
+    <div class="pad" style="justify-content:center">
+      <p style="font-family:'JetBrains Mono';font-size:26px;letter-spacing:.18em;
+                color:${LARANJA};font-weight:700;margin:0 0 40px">A CONTA CERTA</p>
+      <h2 style="font-family:Sora;font-size:60px;line-height:1.1;font-weight:800;color:${NAVY};
+                 letter-spacing:-.02em;margin:0 0 56px">Quanto anunciar<br>para sobrar a sua margem</h2>
+      <div style="background:var(--nevoa,#EAF1FB);border-radius:24px;padding:48px 44px">
+        <div style="display:flex;justify-content:space-between;padding-bottom:26px">
+          <span style="font-size:36px;color:#42566B;font-weight:600">Preço no seu balcão</span>
+          <span style="font-family:'JetBrains Mono';font-size:38px;font-weight:700;color:${NAVY}">R$ 22,00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:26px 0;
+                    border-top:1px solid #D5DEE7">
+          <span style="font-size:36px;color:#42566B;font-weight:600">Comissão informada</span>
+          <span style="font-family:'JetBrains Mono';font-size:38px;font-weight:700;color:${NAVY}">26%</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding-top:26px;
+                    border-top:3px solid ${LARANJA}">
+          <span style="font-size:36px;color:${NAVY};font-weight:800">Anuncie por</span>
+          <span style="font-family:'JetBrains Mono';font-size:46px;font-weight:700;color:${LARANJA}">R$ 29,73</span>
+        </div>
+      </div>
+      <p style="font-size:34px;line-height:1.42;color:#42566B;margin:44px 0 0;font-weight:500">
+        O sistema calcula isso para o cardápio inteiro, item por item.</p>
+    </div>`},
+
+  // 5 — o segundo movimento
+  {fundo:NAVY, html:`
+    <div class="pad" style="justify-content:center">
+      <h2 style="font-family:Sora;font-size:62px;line-height:1.08;font-weight:800;color:${BRANCO};
+                 letter-spacing:-.02em;margin:0 0 44px">E o dono que mais<br>vende delivery no país<br>faz o segundo:</h2>
+      <div style="border-left:8px solid ${LARANJA};padding-left:40px;margin:0 0 48px">
+        <p style="font-size:46px;line-height:1.32;color:${BRANCO};font-weight:600;margin:0;font-style:italic">
+          “Você tem que dar um jeito de trazer esse cliente para você.”</p>
+      </div>
+      <p style="font-size:36px;line-height:1.45;color:rgba(255,255,255,.72);margin:0;font-weight:500">
+        Um cupom de 20% no canal próprio custa menos que os 26% a 40% da
+        plataforma. E da segunda compra em diante, o cliente é seu.</p>
+    </div>`},
+
+  // 6 — o que o sistema entrega, sem adjetivo
+  {fundo:'#FFFFFF', escuro:true, html:`
+    <div class="pad" style="justify-content:center">
+      <h2 style="font-family:Sora;font-size:60px;line-height:1.1;font-weight:800;color:${NAVY};
+                 letter-spacing:-.02em;margin:0 0 52px">O que o MiseOn faz<br>nessa conta</h2>
+      ${[['Preço por canal','o sistema calcula quanto anunciar para sobrar a sua margem'],
+         ['Cardápio próprio','seu link, sua marca, zero comissão'],
+         ['Cupom e cashback','traz o cliente da plataforma para o seu canal'],
+         ['Custo real por prato','da nota fiscal até a margem, sem planilha']]
+        .map(([t,d])=>`<div style="margin-bottom:38px">
+          <p style="font-size:38px;font-weight:800;color:${NAVY};margin:0 0 8px">${t}</p>
+          <p style="font-size:30px;line-height:1.38;color:#42566B;margin:0;font-weight:500">${d}</p>
+        </div>`).join('')}
+    </div>`},
+
+  // 7 — chamada
+  {fundo:NAVY, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center;align-items:center;text-align:center">
+      <h2 style="font-family:Sora;font-size:82px;line-height:1.06;font-weight:900;color:${BRANCO};
+                 letter-spacing:-.03em;margin:0 0 36px">30 dias grátis</h2>
+      <p style="font-size:38px;color:${NEVOA};font-weight:600;margin:0 0 64px">
+        sem cartão · sem fidelidade</p>
+      <div style="background:${LARANJA};border-radius:999px;padding:30px 66px">
+        <span style="font-family:Sora;font-size:42px;font-weight:800;color:${BRANCO}">miseon.app.br</span>
+      </div>
+      <p style="font-size:30px;line-height:1.45;color:rgba(255,255,255,.6);
+                margin:64px 0 0;max-width:22ch;font-weight:500">
+        Sistema de gestão para food service que mostra o custo e a margem real
+        de cada item.</p>
+    </div>`},
+];
+
+window.CARROSSEL = {
+  total: SLIDES.length,
+  async montar(i){
+    const s = SLIDES[i];
+    const el = document.getElementById('slide');
+    el.style.background = s.fundo;
+    el.innerHTML = s.html + rodape(i+1, SLIDES.length, !!s.escuro);
+    // marca clara sobre navy: inverte só o símbolo, sem tocar no arquivo
+    const img = el.querySelector('.rodape img');
+    if (img && !s.escuro) img.style.filter = 'brightness(0) invert(1)';
+    await document.fonts.ready;
+    await new Promise(r => { if (img.complete) r(); else img.onload = r; });
+    return true;
+  }
+};
+</script>
