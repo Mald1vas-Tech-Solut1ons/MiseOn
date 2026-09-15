@@ -1362,7 +1362,7 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
             <button type="button" onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
           </div>
           {produto.descricao && <p className="mt-1 whitespace-pre-line text-sm text-gray-500 dark:text-gray-400">{produto.descricao}</p>}
-          {nutricao && (
+          {(nutricao || opcoesSelecionadas.some((o) => nutricaoOpcoes.has(o.id))) && (
             <TabelaNutricional
               dados={nutricao}
               catalogo={catalogoNutrientes}
@@ -1371,6 +1371,7 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
               extras={opcoesSelecionadas
                 .map((o) => nutricaoOpcoes.get(o.id))
                 .filter((n): n is NutricaoOpcao => !!n)}
+              totalExtrasSelecionados={opcoesSelecionadas.length}
               observacaoLoja={observacaoNutricional}
             />
           )}

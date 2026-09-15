@@ -39,7 +39,11 @@ const dicionario = readFileSync(join(RAIZ, 'data', 'i18nData.ts'), 'utf-8');
 /** Todas as chaves em português já cadastradas (mapa de texto e dicionário). */
 function chavesTraduzidas(): Set<string> {
   const chaves = new Set<string>();
-  for (const m of dicionario.matchAll(/^\s*'((?:[^'\\]|\\.)*)'\s*:\s*'/gm)) {
+  // O valor pode abrir com aspa simples OU dupla. Só reconhecer a simples era
+  // um ponto cego: toda tradução que contém apóstrofo precisa de aspas duplas
+  // ("the restaurant's own recipes"), e essas entradas ficavam invisíveis aqui
+  // — a chave existia no dicionário e o teste acusava falta de tradução.
+  for (const m of dicionario.matchAll(/^\s*'((?:[^'\\]|\\.)*)'\s*:\s*['"]/gm)) {
     chaves.add(m[1]);
   }
   return chaves;

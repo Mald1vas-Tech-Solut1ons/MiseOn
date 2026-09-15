@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Store, ShoppingBag, CreditCard, Clock, Share2,
   Link2, MessageSquare, CheckCircle2, ChevronDown, ChevronUp,
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useI18n } from '../../contexts/I18nContext';
+import { recebimentosConfigurados } from '../../lib/recebimentosOnboarding';
 
 interface WizardStep {
   id: string;
@@ -45,8 +46,8 @@ const PASSOS_WIZARD: WizardStep[] = [
     icon: <CreditCard size={16} />,
     titulo: 'Pagamento',
     tituloEn: 'Payment',
-    descricao: 'Configure Pix ou Efí Bank',
-    descricaoEn: 'Set up Pix or Efí Bank',
+    descricao: 'Configure os recebimentos da loja',
+    descricaoEn: 'Set up your store payments',
     rota: '/admin/loja#pagamentos',
     obrigatorio: true,
   },
@@ -65,8 +66,8 @@ const PASSOS_WIZARD: WizardStep[] = [
     icon: <Share2 size={16} />,
     titulo: 'Divulgar a loja',
     tituloEn: 'Share your store',
-    descricao: 'Copie o link ou QR Code para seus clientes',
-    descricaoEn: 'Copy the link or QR Code for your customers',
+    descricao: 'Copie o link do cardápio para seus clientes',
+    descricaoEn: 'Copy the menu link for your customers',
     rota: '/admin/loja',
     obrigatorio: true,
   },
@@ -115,32 +116,39 @@ const STATUS_INICIAL: StepStatus = {
 export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
   const { tDynamic, idioma } = useI18n();
   const nav = useNavigate();
+  const { pathname } = useLocation();
   const isEn = idioma === 'en-US';
 
   const [visible, setVisible] = useState(false);
   const [recolhido, setRecolhido] = useState(false);
-  const [dismissedKey] = useState(`miseon_wizard_dismissed_${lojaId}`);
+  const dismissedKey = `miseon_wizard_dismissed_${lojaId}`;
+  // A chave antiga também era gravada ao apenas navegar, sem copiar o link.
+  const linkCopiadoKey = `miseon_link_copiado_confirmado_${lojaId}`;
   const [status, setStatus] = useState<StepStatus>(STATUS_INICIAL);
   const [carregando, setCarregando] = useState(true);
+  const [slug, setSlug] = useState('');
+  const [erroCopia, setErroCopia] = useState(false);
+  const [copiando, setCopiando] = useState(false);
 
   const verificarStatus = useCallback(async () => {
     if (!lojaId) return;
     setCarregando(true);
 
     try {
-      const [{ data: loja }, { data: produtos }, { data: horarios }] = await Promise.all([
-        supabase.from('lojas').select('logo_url, nome, pix_chave, efi_payee_code, ifood_merchant_id, whatsapp').eq('id', lojaId).single(),
+      const [{ data: loja }, { count: qtdProdutos }, { count: qtdHorarios }] = await Promise.all([
+        supabase.from('lojas').select('logo_url, nome, slug, efi_payee_code, efi_titular_documento, efi_conta, aceita_online, cartao_online_bloqueado_em, ifood_merchant_id, whatsapp').eq('id', lojaId).single(),
         supabase.from('produtos').select('id', { count: 'exact', head: true }).eq('loja_id', lojaId),
         supabase.from('horarios_funcionamento').select('id', { count: 'exact', head: true }).eq('loja_id', lojaId),
       ]);
 
-      const divulgarFeito = localStorage.getItem(`miseon_link_copiado_${lojaId}`) === 'true';
+      const divulgarFeito = localStorage.getItem(linkCopiadoKey) === 'true';
+      setSlug(loja?.slug || '');
 
       setStatus({
         identidade: !!(loja?.logo_url && loja?.nome),
-        produto: (produtos?.length ?? 0) > 0,
-        pagamento: !!(loja?.pix_chave || loja?.efi_payee_code),
-        horarios: (horarios?.length ?? 0) > 0,
+        produto: (qtdProdutos ?? 0) > 0,
+        pagamento: recebimentosConfigurados(loja),
+        horarios: (qtdHorarios ?? 0) > 0,
         divulgar: divulgarFeito,
         ifood: !!loja?.ifood_merchant_id,
         whatsapp: !!loja?.whatsapp,
@@ -150,7 +158,7 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
     } finally {
       setCarregando(false);
     }
-  }, [lojaId]);
+  }, [lojaId, linkCopiadoKey]);
 
   useEffect(() => {
     // Verificar se o wizard foi dispensado permanentemente
@@ -160,22 +168,37 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
     }
     setVisible(true);
     verificarStatus();
-  }, [lojaId, dismissedKey, verificarStatus]);
+  }, [lojaId, dismissedKey, verificarStatus, pathname]);
 
   const dispensar = () => {
     localStorage.setItem(dismissedKey, 'true');
     setVisible(false);
   };
 
-  const concluidos = PASSOS_WIZARD.filter((p) => status[p.id as keyof StepStatus]).length;
-  const total = PASSOS_WIZARD.length;
+  const passosObrigatorios = PASSOS_WIZARD.filter((p) => p.obrigatorio);
+  const concluidos = passosObrigatorios.filter((p) => status[p.id as keyof StepStatus]).length;
+  const total = passosObrigatorios.length;
   const pct = Math.round((concluidos / total) * 100);
   const tudo_concluido = concluidos === total;
 
-  const navegar = (passo: WizardStep) => {
-    // Para passos de divulgação, registrar como feito
+  const navegar = async (passo: WizardStep) => {
     if (passo.id === 'divulgar') {
-      localStorage.setItem(`miseon_link_copiado_${lojaId}`, 'true');
+      setErroCopia(false);
+      if (!slug) {
+        nav(passo.rota);
+        return;
+      }
+      setCopiando(true);
+      try {
+        await navigator.clipboard.writeText(`${window.location.origin}/${slug}`);
+        localStorage.setItem(linkCopiadoKey, 'true');
+        setStatus((atual) => ({ ...atual, divulgar: true }));
+      } catch {
+        setErroCopia(true);
+      } finally {
+        setCopiando(false);
+      }
+      return;
     }
     if (passo.rota.includes('#')) {
       const [rota] = passo.rota.split('#');
@@ -212,7 +235,7 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
                 {tDynamic('Configurar sua loja')}
               </p>
               <p className="text-[10px] text-white/40">
-                {concluidos}/{total} {isEn ? 'steps done' : 'concluídos'}
+                {concluidos}/{total} {isEn ? 'essential steps done' : 'essenciais concluídos'}
               </p>
             </div>
           </div>
@@ -251,7 +274,7 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
           </div>
           <p className="mt-1.5 mb-3 text-[10px] text-white/30">
             {tudo_concluido
-              ? (isEn ? '🎉 All set! Your store is ready to go.' : '🎉 Tudo pronto! Sua loja está no ar.')
+              ? (isEn ? '🎉 Essential setup complete!' : '🎉 Configuração essencial concluída!')
               : tDynamic('Complete os passos para colocar sua loja no ar de forma independente.')}
           </p>
         </div>
@@ -265,6 +288,7 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
                 <button type="button"
                   key={passo.id}
                   onClick={() => navegar(passo)}
+                  disabled={passo.id === 'divulgar' && copiando}
                   className={`w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all duration-200 group ${
                     feito
                       ? 'bg-white/4 opacity-60 hover:opacity-80'
@@ -290,7 +314,9 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
                       {isEn ? passo.tituloEn : passo.titulo}
                     </p>
                     <p className="text-[10px] text-white/30 truncate">
-                      {feito ? tDynamic('Feito!') : (isEn ? passo.descricaoEn : passo.descricao)}
+                      {feito
+                        ? (passo.id === 'divulgar' ? (isEn ? 'Link copied!' : 'Link copiado!') : tDynamic('Feito!'))
+                        : (isEn ? passo.descricaoEn : passo.descricao)}
                     </p>
                   </div>
 
@@ -304,6 +330,11 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
                 </button>
               );
             })}
+            {erroCopia && (
+              <p role="alert" className="px-3 py-2 text-xs text-orange-200">
+                {isEn ? 'Could not copy the link. Allow clipboard access and try again.' : 'Não foi possível copiar o link. Permita o acesso à área de transferência e tente novamente.'}
+              </p>
+            )}
           </div>
         )}
 

@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 import { AlertTriangle, ChevronDown, Flame } from 'lucide-react';
 import type { ItemCarrinho } from '../../types';
 import {
+  avaliarCoberturaNutricao,
   formatarValor,
   percentualVD,
   somarNutrientes,
@@ -33,38 +35,44 @@ export default function ResumoNutricionalPedido({
   nutricaoOpcoes: Map<string, NutricaoOpcao>;
   catalogo: NutrienteCatalogo[];
 }) {
+  const { tDynamic } = useI18n();
   const [aberto, setAberto] = useState(false);
 
   const resumo = useMemo(() => {
     let comDado = 0;
     let semDado = 0;
+    let parciais = 0;
+    let adicionaisPendentes = 0;
     const parcelas: Array<Record<string, number>> = [];
     const alergenos: Array<{ contem: string[]; pode: string[] }> = [];
 
     for (const item of carrinho) {
       const n = nutricao.get(item.produto.id);
       const qtd = item.produto.tipo_venda === 'POR_PESO' ? 1 : item.quantidade;
+      const escolhas = item.opcoesSelecionadas ?? [];
+      const extras = escolhas.map((o) => nutricaoOpcoes.get(o.id))
+        .filter((x): x is NutricaoOpcao => !!x);
+      const cobertura = avaliarCoberturaNutricao(n, extras, escolhas.length);
+      adicionaisPendentes += cobertura.adicionaisPendentes;
+
+      // Alergênicos conhecidos são independentes da publicação de calorias.
+      // Um extra com leite não pode desaparecer porque a base está pendente.
+      if (n) alergenos.push({ contem: n.alergenos_contem ?? [], pode: n.alergenos_pode_conter ?? [] });
+      extras.forEach((e) =>
+        alergenos.push({ contem: e.alergenos_contem ?? [], pode: e.alergenos_pode_conter ?? [] }),
+      );
 
       if (!n || !n.publicavel) {
         semDado += 1;
-        // Alérgeno vale mesmo sem número: o item pode não ter caloria
-        // calculada e ainda assim conter leite.
-        if (n) alergenos.push({ contem: n.alergenos_contem ?? [], pode: n.alergenos_pode_conter ?? [] });
         continue;
       }
 
       comDado += 1;
-      const extras = (item.opcoesSelecionadas ?? [])
-        .map((o) => nutricaoOpcoes.get(o.id))
-        .filter((x): x is NutricaoOpcao => !!x);
+      if (!cobertura.baseCompleta) parciais += 1;
 
       const doItem = somarNutrientes(n.por_porcao ?? {}, extras.map((e) => e.nutrientes));
       parcelas.push(Object.fromEntries(Object.entries(doItem).map(([k, v]) => [k, v * qtd])));
 
-      alergenos.push({ contem: n.alergenos_contem ?? [], pode: n.alergenos_pode_conter ?? [] });
-      extras.forEach((e) =>
-        alergenos.push({ contem: e.alergenos_contem ?? [], pode: e.alergenos_pode_conter ?? [] }),
-      );
     }
 
     return {
@@ -72,11 +80,15 @@ export default function ResumoNutricionalPedido({
       alergenos: unirAlergenos(alergenos),
       comDado,
       semDado,
+      parciais,
+      adicionaisPendentes,
     };
   }, [carrinho, nutricao, nutricaoOpcoes]);
 
   const kcal = resumo.total.ENERGIA_KCAL;
-  const temAlgo = Number.isFinite(kcal) || resumo.alergenos.contem.length > 0;
+  const temAlergeno = resumo.alergenos.contem.length > 0 || resumo.alergenos.pode.length > 0;
+  const temAlgo = Object.values(resumo.total).some(Number.isFinite) || temAlergeno;
+  const parcial = resumo.semDado > 0 || resumo.parciais > 0 || resumo.adicionaisPendentes > 0;
   if (!carrinho.length || !temAlgo) return null;
 
   const principais = catalogo.filter(
@@ -105,10 +117,10 @@ export default function ResumoNutricionalPedido({
               {formatarValor(kcal, 'kcal')} kcal
             </span>
           )}
-          {resumo.alergenos.contem.length > 0 && (
+          {temAlergeno && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs opacity-90 font-bold text-amber-900 dark:bg-amber-950/50 dark:text-amber-300">
               <AlertTriangle size={10} strokeWidth={3} />
-              {resumo.alergenos.contem.length} alergênicos
+              {tDynamic('Alergênicos informados')}
             </span>
           )}
         </span>
@@ -118,6 +130,24 @@ export default function ResumoNutricionalPedido({
           style={{ color: 'var(--cor-texto-fraco)' }}
         />
       </button>
+
+      {parcial && (
+        <div role="status" className="mt-2 rounded-lg bg-amber-50 p-2 text-xs leading-relaxed text-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
+          <p className="flex items-center gap-1 font-bold"><AlertTriangle size={12} /> Resumo nutricional parcial</p>
+          {resumo.semDado > 0 && <p>{resumo.semDado} {resumo.semDado === 1 ? 'item sem valores disponíveis ficou' : 'itens sem valores disponíveis ficaram'} fora da soma.</p>}
+          {resumo.parciais > 0 && <p>{resumo.parciais} {resumo.parciais === 1 ? 'receita tem' : 'receitas têm'} cobertura nutricional parcial.</p>}
+          {resumo.adicionaisPendentes > 0 && <p>{resumo.adicionaisPendentes} {resumo.adicionaisPendentes === 1 ? 'adicional escolhido ainda não tem dados completos' : 'adicionais escolhidos ainda não têm dados completos'}.</p>}
+          <p>{tDynamic('Os valores somam somente os dados conhecidos.')}</p>
+        </div>
+      )}
+
+      {temAlergeno && (
+        <p className="mt-2 text-xs opacity-95 leading-relaxed" style={{ color: 'var(--cor-texto-suave)' }}>
+          {resumo.alergenos.contem.length > 0 && <><strong className="font-bold">Contém:</strong> {resumo.alergenos.contem.join(', ')}. </>}
+          {resumo.alergenos.pode.length > 0 && <><strong className="font-bold">Pode conter:</strong> {resumo.alergenos.pode.join(', ')}. </>}
+          A lista informa o que foi avaliado; ausência na lista não garante ausência no prato.
+        </p>
+      )}
 
       {aberto && (
         <div className="mt-2 space-y-2">
@@ -142,18 +172,8 @@ export default function ResumoNutricionalPedido({
             </dl>
           )}
 
-          {resumo.alergenos.contem.length > 0 && (
-            <p className="text-xs opacity-95 leading-relaxed" style={{ color: 'var(--cor-texto-suave)' }}>
-              <strong className="font-bold">Contém:</strong> {resumo.alergenos.contem.join(', ')}.
-              {resumo.alergenos.pode.length > 0 && ` Pode conter: ${resumo.alergenos.pode.join(', ')}.`}
-            </p>
-          )}
-
           <p className="text-xs opacity-90 leading-relaxed" style={{ color: 'var(--cor-texto-fraco)' }}>
-            {resumo.semDado > 0
-              ? `${resumo.semDado} ${resumo.semDado === 1 ? 'item ainda não tem' : 'itens ainda não têm'} valores calculados e ${resumo.semDado === 1 ? 'ficou' : 'ficaram'} de fora desta soma. `
-              : ''}
-            Percentuais sobre uma dieta de 2.000 kcal. Estimativa a partir das fichas técnicas da loja.
+            {tDynamic('Percentuais sobre uma dieta de 2.000 kcal. Estimativa a partir das fichas técnicas da loja.')}
           </p>
         </div>
       )}

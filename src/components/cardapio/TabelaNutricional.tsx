@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 import { AlertTriangle, ChevronDown, Flame, Info, ShieldCheck } from 'lucide-react';
 import {
   ATRIBUTOS,
   DISCLAIMER_CURTO,
   DISCLAIMER_LONGO,
+  avaliarCoberturaNutricao,
   descreverFontes,
   formatarValor,
   percentualVD,
@@ -17,11 +19,13 @@ import {
 export type { NutricaoProduto } from '../../lib/nutricao';
 
 interface Props {
-  dados: NutricaoProduto;
+  dados?: NutricaoProduto;
   /** Catálogo oficial: ordem, rótulo, indentação e VDR vêm do banco, não daqui. */
   catalogo: NutrienteCatalogo[];
   /** Adicionais que o cliente marcou — a tabela reage à escolha dele. */
   extras?: NutricaoOpcao[];
+  /** Inclui as escolhas sem cadastro nutricional, que não constam em extras. */
+  totalExtrasSelecionados?: number;
   /** Observação que o próprio lojista escreveu (Loja → Segmento & Módulos). */
   observacaoLoja?: string | null;
 }
@@ -40,32 +44,40 @@ interface Props {
  *  3. **Nunca só cor.** Alérgeno, atributo e aviso de parcial têm ícone e
  *     texto; a cor é reforço, não portadora do significado.
  */
-export default function TabelaNutricional({ dados, catalogo, extras = [], observacaoLoja }: Props) {
+export default function TabelaNutricional({ dados, catalogo, extras = [], totalExtrasSelecionados = extras.length, observacaoLoja }: Props) {
+  const { tDynamic } = useI18n();
   const [aberto, setAberto] = useState(false);
   const [base, setBase] = useState<'porcao' | '100g'>('porcao');
   const [metodoAberto, setMetodoAberto] = useState(false);
 
-  const temExtras = extras.length > 0;
+  const temExtras = totalExtrasSelecionados > 0;
+  const cobertura = avaliarCoberturaNutricao(dados, extras, totalExtrasSelecionados);
+  const porcoes = dados?.porcoes ?? 1;
+  const itensTotal = dados?.itens_total ?? 0;
+  const itensComDado = dados?.itens_com_dado ?? 0;
+  // A mesma base decide números, legenda e acessibilidade. Ao personalizar,
+  // não se pode manter a seleção anterior de 100 g escondida no estado.
+  const baseEfetiva = temExtras ? 'porcao' : base;
 
   // Com adicional escolhido, o "por 100 g" perderia o sentido (100 g de quê?),
   // então a tabela passa a falar só do prato como ele vai sair.
   const { porPorcao, por100g, pesoPorcao, alergenos } = useMemo(() => {
     const alerg = unirAlergenos([
-      { contem: dados.alergenos_contem ?? [], pode: dados.alergenos_pode_conter ?? [] },
+      { contem: dados?.alergenos_contem ?? [], pode: dados?.alergenos_pode_conter ?? [] },
       ...extras.map((e) => ({ contem: e.alergenos_contem ?? [], pode: e.alergenos_pode_conter ?? [] })),
     ]);
 
     const somaExtras = extras.map((e) => e.nutrientes);
-    const porcao = somarNutrientes(dados.por_porcao ?? {}, somaExtras);
-    const peso = (dados.peso_porcao_g ?? dados.massa_servida_g) + extras.reduce((s, e) => s + (e.massa_g ?? 0), 0);
+    const porcao = somarNutrientes(dados?.por_porcao ?? {}, somaExtras);
+    const peso = (dados?.peso_porcao_g ?? dados?.massa_servida_g ?? 0) + extras.reduce((s, e) => s + (e.massa_g ?? 0), 0);
     const cem = peso > 0
       ? Object.fromEntries(Object.entries(porcao).map(([k, v]) => [k, (v * 100) / peso]))
-      : (dados.por_100g ?? {});
+      : (dados?.por_100g ?? {});
 
     return { porPorcao: porcao, por100g: cem, pesoPorcao: peso, alergenos: alerg };
   }, [dados, extras]);
 
-  const valores = base === 'porcao' ? porPorcao : por100g;
+  const valores = baseEfetiva === 'porcao' ? porPorcao : por100g;
   const linhas = useMemo(
     () =>
       catalogo.filter(
@@ -81,14 +93,18 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
   );
 
   const kcal = porPorcao?.ENERGIA_KCAL;
-  const temNumero = dados.publicavel && linhas.length > 0;
+  const temNumero = !!dados?.publicavel && linhas.length > 0;
   const temAlergeno = alergenos.contem.length > 0 || alergenos.pode.length > 0;
 
   // Sem número e sem alérgeno não há nada de honesto a dizer.
   if (!temNumero && !temAlergeno) return null;
 
-  const atributos = (dados.atributos ?? []).filter((a) => ATRIBUTOS[a]);
-  const fontes = descreverFontes(dados.composicao_fontes ?? {});
+  // Os selos vêm do motor para a receita base. Não atestam uma composição
+  // personalizada nem uma tabela parcial; recalcular critérios aqui duplicaria
+  // a autoridade do banco.
+  const atributos = !temExtras && !cobertura.parcial
+    ? (dados?.atributos ?? []).filter((a) => ATRIBUTOS[a]) : [];
+  const fontes = descreverFontes(dados?.composicao_fontes ?? {});
 
   return (
     <section
@@ -97,12 +113,24 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
     >
       {/* ── Resumo: o que decide o pedido, sem clique ───────────────── */}
       <div className="space-y-2.5 p-3">
+        {temNumero && cobertura.parcial && (
+          <div role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-2.5 text-xs leading-relaxed text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+            <p className="flex items-center gap-1.5 font-bold"><AlertTriangle size={14} /> {tDynamic('Informação nutricional parcial')}</p>
+            {!cobertura.baseCompleta && (
+              <p>Receita base: {itensComDado} de {itensTotal} ingredientes com dados revisados{Number.isFinite(dados?.cobertura_pct) ? ` · cobertura de ${Math.round(dados!.cobertura_pct)}%` : ''}.</p>
+            )}
+            {cobertura.adicionaisPendentes > 0 && (
+              <p>{cobertura.adicionaisPendentes} {cobertura.adicionaisPendentes === 1 ? 'adicional escolhido ainda não tem dados completos' : 'adicionais escolhidos ainda não têm dados completos'}.</p>
+            )}
+            <p>{tDynamic('Os valores mostram somente a parte conhecida da composição.')}</p>
+          </div>
+        )}
         {temNumero && (
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="inline-flex items-center gap-1 rounded-full bg-gray-900 px-2.5 py-1 text-xs opacity-95 font-black text-white dark:bg-gray-100 dark:text-gray-900">
               <Flame size={12} strokeWidth={2.5} />
               {formatarValor(kcal, 'kcal')} kcal
-              {!temExtras && dados.porcoes > 1 && <span className="font-semibold opacity-70">/porção</span>}
+              {!temExtras && porcoes > 1 && <span className="font-semibold opacity-70">/porção</span>}
             </span>
 
             {atributos.map((a) => (
@@ -150,7 +178,7 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
         {!temNumero && temAlergeno && (
           <p className="text-xs opacity-95 leading-relaxed text-gray-500 dark:text-gray-400">
             Os valores nutricionais deste item ainda estão sendo levantados
-            {dados.itens_total > 0 && ` (${dados.itens_com_dado} de ${dados.itens_total} ingredientes prontos)`}.
+            {itensTotal > 0 && ` (${itensComDado} de ${itensTotal} ingredientes prontos)`}.
           </p>
         )}
       </div>
@@ -164,7 +192,7 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
             aria-expanded={aberto}
             className="flex w-full items-center justify-between gap-2 border-t border-gray-100 px-3 py-2.5 text-left text-xs font-bold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800/40"
           >
-            <span>Tabela nutricional completa</span>
+            <span>{cobertura.parcial ? 'Ver valores nutricionais disponíveis' : 'Tabela nutricional completa'}</span>
             <ChevronDown size={16} className={`shrink-0 text-gray-400 transition-transform ${aberto ? 'rotate-180' : ''}`} />
           </button>
 
@@ -172,21 +200,23 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
             <div className="border-t border-gray-100 px-3 pb-3 pt-2.5 dark:border-gray-800">
               {temExtras ? (
                 <p className="mb-2 rounded-lg bg-gray-50 px-2 py-1.5 text-xs opacity-95 font-medium text-gray-600 dark:bg-gray-800/60 dark:text-gray-300">
-                  Incluindo os adicionais que você escolheu · porção de {formatarValor(pesoPorcao, 'g')} g
+                  {cobertura.adicionaisPendentes > 0
+                    ? 'Composição com adicionais: valores e peso ainda incompletos.'
+                    : `Incluindo os adicionais que você escolheu · porção de ${formatarValor(pesoPorcao, 'g')} g`}
                 </p>
               ) : (
                 <div className="mb-2.5 flex items-center gap-1 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800">
                   {([
-                    ['porcao', dados.porcoes > 1 ? 'Por porção' : 'Porção inteira'],
+                    ['porcao', porcoes > 1 ? 'Por porção' : 'Porção inteira'],
                     ['100g', 'Por 100 g'],
                   ] as const).map(([valor, texto]) => (
                     <button
                       key={valor}
                       type="button"
                       onClick={() => setBase(valor)}
-                      aria-pressed={base === valor}
+                      aria-pressed={baseEfetiva === valor}
                       className={`flex-1 rounded-md px-2 py-1.5 text-xs opacity-95 font-bold transition-colors ${
-                        base === valor
+                        baseEfetiva === valor
                           ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-50'
                           : 'text-gray-500 dark:text-gray-400'
                       }`}
@@ -198,15 +228,16 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
               )}
 
               <p className="mb-2 text-xs opacity-95 text-gray-500 dark:text-gray-400">
-                {base === 'porcao' || temExtras
-                  ? `Porção de ${formatarValor(pesoPorcao, 'g')} g${dados.porcoes > 1 ? ` · o prato rende ${dados.porcoes} porções` : ''}`
+                {baseEfetiva === 'porcao'
+                  ? cobertura.adicionaisPendentes > 0 ? 'Valores conhecidos da porção com adicionais.'
+                    : `Porção de ${formatarValor(pesoPorcao, 'g')} g${porcoes > 1 ? ` · o prato rende ${porcoes} porções` : ''}`
                   : 'Valores por 100 g do produto como é servido'}
               </p>
 
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse text-xs">
                   <caption className="sr-only">
-                    Informação nutricional {base === 'porcao' ? 'por porção' : 'por 100 gramas'}
+                    Informação nutricional {baseEfetiva === 'porcao' ? 'por porção' : 'por 100 gramas'}{cobertura.parcial ? ' — valores parciais' : ''}
                   </caption>
                   <thead>
                     <tr className="border-b-2 border-gray-900 dark:border-gray-100">
@@ -266,9 +297,9 @@ export default function TabelaNutricional({ dados, catalogo, extras = [], observ
                 <p className="mt-2 flex items-start gap-1.5 text-xs opacity-95 leading-relaxed text-gray-600 dark:text-gray-400">
                   <Info size={12} className="mt-0.5 shrink-0" />
                   <span>
-                    Origem dos dados: {fontes}.{' '}
-                    {dados.itens_com_dado === dados.itens_total && dados.itens_total > 0 && (
-                      <>Todos os {dados.itens_total} ingredientes da ficha têm dado rastreável.</>
+                    Origem dos dados{temExtras ? ' da receita base' : ''}: {fontes}.{' '}
+                    {!temExtras && cobertura.baseCompleta && itensComDado === itensTotal && itensTotal > 0 && (
+                      <>Todos os {itensTotal} ingredientes da ficha têm dado rastreável.</>
                     )}
                   </span>
                 </p>

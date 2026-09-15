@@ -271,6 +271,27 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  'Alergênicos informados': 'Allergens declared',
+  'Os valores somam somente os dados conhecidos.': 'The totals add up only the known data.',
+  'Percentuais sobre uma dieta de 2.000 kcal. Estimativa a partir das fichas técnicas da loja.': "Percentages based on a 2,000 kcal diet. Estimated from the restaurant's own recipes.",
+  'Informação nutricional parcial': 'Partial nutrition information',
+  'Os valores mostram somente a parte conhecida da composição.': 'The values show only the known part of the composition.',
+  // ── Totem (estados de pagamento) e conferência da nota por foto ─────────
+  // Textos que nasceram com a correção do Pix do totem e da conferência de
+  // valores lidos por foto (15/09/2026).
+  'Pagamento pendente': 'Payment pending',
+  'Pagar com Pix': 'Pay with Pix',
+  'Tentar gerar Pix novamente': 'Try generating Pix again',
+  'Preparando pagamento…': 'Preparing payment…',
+  'O QR aparece aqui no totem para você pagar pelo celular.': 'The QR code appears here on the kiosk for you to pay with your phone.',
+  'Guarde sua senha. Se precisar do comprovante, peça ajuda no balcão.': 'Keep your ticket number. If you need the receipt, ask for help at the counter.',
+  'Esta tela reinicia automaticamente.': 'This screen restarts automatically.',
+  'Precisa de mais tempo? Toque aqui.': 'Need more time? Tap here.',
+  'Faltam escolhas': 'Choices missing',
+  'Selecionadas': 'Selected',
+  'Conferir valores lidos por foto': 'Check values read from the photo',
+  'Conferi no cupom: estes valores estão corretos, mesmo com a diferença indicada.': 'I checked the receipt: these values are correct, even with the difference shown.',
+  'item(ns) com valores pendentes. Confira no cupom ou desmarque para continuar.': 'item(s) with pending values. Check the receipt or uncheck to continue.',
   // ── Assinatura e landings: textos que passaram a existir quando o
   // parcelamento e as métricas viraram derivados (15/09/2026) ──────────────
   'Cartão de Crédito': 'Credit Card',

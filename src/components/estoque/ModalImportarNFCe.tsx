@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { ShoppingBag, ArrowRight, CheckCircle2, AlertTriangle, X, Loader2, Building2, Calendar, DollarSign, Sparkles, TrendingUp, TrendingDown, CalendarClock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, fmt } from '../../types';
@@ -20,17 +20,9 @@ import {
 } from '../../lib/cicloDeVida';
 
 import { useI18n } from '../../contexts/I18nContext';
-interface ItemLidoNFCe {
-  num_item: number;
-  descricao: string;
-  gtin?: string | null;
-  ncm?: string | null;
-  codigo_fornecedor?: string | null;
-  qtd: number;
-  unidade: string;
-  valor_unitario: number;
-  valor_total: number;
-}
+import type { ItemLidoNota, NotaLida } from '../../hooks/useImportacaoNota';
+import { avaliarConferenciaNota, conferirValoresNota } from '../../lib/conferenciaNota';
+type ItemLidoNFCe = ItemLidoNota;
 
 /**
  * Chave do De-Para. O código interno do mercado só é único dentro do CNPJ dele —
@@ -62,19 +54,7 @@ function casarInsumoPorNome(nome: string, insumos: Insumo[]): Insumo | undefined
   });
 }
 
-interface DadosNotaNFCe {
-  chave: string;
-  uf: string;
-  emitente: {
-    razao_social: string;
-    cnpj?: string | null;
-  };
-  data_emissao?: string | null;
-  valor_total: number;
-  valor_produtos?: number;
-  desconto?: number;
-  itens: ItemLidoNFCe[];
-}
+type DadosNotaNFCe = NotaLida;
 
 /**
  * Quanto cada item custou de verdade, com o desconto da nota abatido.
@@ -104,6 +84,7 @@ function custoComDesconto(item: ItemLidoNFCe, nota: DadosNotaNFCe): number {
 
 interface LinhaDePara {
   itemNota: ItemLidoNFCe;
+  conferenciaConfirmada?: boolean;
   /** Cupom de mercado mistura insumo com item pessoal. O lojista decide. */
   importar: boolean;
   insumoId: string; // '' se novo insumo
@@ -131,6 +112,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
   const [linhas, setLinhas] = useState<LinhaDePara[]>([]);
   const [carregandoMatch, setCarregandoMatch] = useState(true);
   const [salvando, setSalvando] = useState(false);
+  const importandoRef = useRef(false);
   const [erro, setErro] = useState<string | null>(null);
   // Nota já lançada antes: só repete com confirmação explícita do lojista.
   const [podeRepetir, setPodeRepetir] = useState(false);
@@ -351,6 +333,13 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
   const recomendacao = useMemo(() => recomendarModo(idade?.dias ?? null), [idade]);
 
   const marcados = useMemo(() => linhas.filter((l) => l.importar), [linhas]);
+  const notaConferida = useMemo(() => ({
+    ...dadosNota, itens: linhas.map(l => l.itemNota),
+  }), [dadosNota, linhas]);
+  const pendenciasConferencia = marcados.filter(l => {
+    const avaliacao = avaliarConferenciaNota(l.itemNota, dadosNota.origem);
+    return avaliacao.valoresInvalidos || (avaliacao.precisaConfirmacao && !l.conferenciaConfirmada);
+  }).length;
   const totalMarcado = useMemo(
     () => marcados.reduce((acc, l) => acc + (Number(l.itemNota.valor_total) || 0), 0),
     [marcados],
@@ -377,6 +366,15 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
     });
   };
 
+  const corrigirLeitura = (index: number, campo: 'qtd' | 'valor_unitario' | 'valor_total', valor: string) => {
+    setLinhas(prev => prev.map((linha, i) => {
+      if (i !== index || !avaliarConferenciaNota(linha.itemNota, dadosNota.origem).porFoto) return linha;
+      const itemNota = { ...linha.itemNota, [campo]: valor === '' ? 0 : Number(valor) };
+      itemNota.conferencia = conferirValoresNota(itemNota);
+      return { ...linha, itemNota, conferenciaConfirmada: false };
+    }));
+  };
+
   /**
    * Trocar a unidade obriga a refazer a conta do rendimento. Manter o fator
    * antigo transformaria "bandeja com 20 ovos" em "20 kg de ovo" — erro que só
@@ -398,7 +396,18 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
   };
 
   const confirmarImportacao = async () => {
+    if (importandoRef.current) return;
     setErro(null);
+    if (pendenciasConferencia > 0) {
+      setErro('Confira ou desmarque os itens sinalizados antes de importar.');
+      return;
+    }
+    if (marcados.some(l => !Number.isFinite(l.itemNota.qtd * l.fatorConversao)
+      || l.itemNota.qtd <= 0 || l.fatorConversao <= 0)) {
+      setErro('Informe quantidade e fator de conversão maiores que zero para todos os itens selecionados.');
+      return;
+    }
+    importandoRef.current = true;
     setSalvando(true);
 
     try {
@@ -432,7 +441,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
             trocar_unidade: !!insumoExistente && unidade !== porId.get(insumoExistente)?.unidade_medida,
             qtd_nota: Number(l.itemNota.qtd) || 0,
             fator: Number(l.fatorConversao) || 1,
-            custo_total: custoComDesconto(l.itemNota, dadosNota),
+            custo_total: custoComDesconto(l.itemNota, notaConferida),
             chave_depara: chaveDoItem(l.itemNota, dadosNota.emitente?.cnpj),
             descricao_nota: l.itemNota.descricao,
             gtin: l.itemNota.gtin || null,
@@ -510,6 +519,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         (typeof e === 'string' ? e : '');
       setErro(detalhe ? `Falha ao importar: ${detalhe}` : 'Falha ao processar importação da nota.');
     } finally {
+      importandoRef.current = false;
       setSalvando(false);
     }
   };
@@ -683,7 +693,8 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                 {linhas.map((l, i) => {
                   const insumoSelecionado = porId.get(l.insumoId);
                   const qtdFinal = l.itemNota.qtd * (l.fatorConversao || 1);
-                  const custoUnitFinal = qtdFinal > 0 ? custoComDesconto(l.itemNota, dadosNota) / qtdFinal : 0;
+                  const custoUnitFinal = qtdFinal > 0 ? custoComDesconto(l.itemNota, notaConferida) / qtdFinal : 0;
+                  const conferencia = avaliarConferenciaNota(l.itemNota, dadosNota.origem);
                   // A unidade de destino é escolha do lojista: ao criar insumo
                   // novo, a que ele selecionou; ao vincular, a do insumo dele.
                   const unidadeDestino = l.unidadeInsumo || insumoSelecionado?.unidade_medida || 'un';
@@ -752,6 +763,39 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               <p className="text-xs text-gray-500 dark:text-gray-400">
                                 Nota: <b>{l.itemNota.qtd} {l.itemNota.unidade}</b> · Total: <b>{fmt(l.itemNota.valor_total)}</b>
                               </p>
+                              {conferencia.porFoto && (
+                                <details className="mt-2 text-xs" open={conferencia.precisaConfirmacao ? true : undefined}>
+                                  <summary className="cursor-pointer font-bold text-amber-800 dark:text-amber-300">
+                                    {tDynamic('Conferir valores lidos por foto')}
+                                  </summary>
+                                  {conferencia.precisaConfirmacao && (
+                                    <p role="status" className="mt-2 text-amber-800 dark:text-amber-300">{tDynamic(conferencia.motivo)}</p>
+                                  )}
+                                  <div className="mt-2 grid grid-cols-3 gap-2">
+                                    {([
+                                      ['qtd', 'Quantidade'], ['valor_unitario', 'Valor unitário'], ['valor_total', 'Total da linha'],
+                                    ] as const).map(([campo, rotulo]) => (
+                                      <label key={campo} className="font-medium text-gray-700 dark:text-gray-300">
+                                        {tDynamic(rotulo)}
+                                        <input type="number" inputMode="decimal" step="any" min="0"
+                                          aria-label={`${rotulo}: ${l.itemNota.descricao}`}
+                                          value={l.itemNota[campo] || ''}
+                                          disabled={salvando}
+                                          onChange={e => corrigirLeitura(i, campo, e.target.value)}
+                                          className="mt-1 w-full rounded-lg border border-gray-300 bg-white p-2 text-gray-900 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                                        />
+                                      </label>
+                                    ))}
+                                  </div>
+                                  {conferencia.precisaConfirmacao && !conferencia.valoresInvalidos && (
+                                    <label className="mt-2 flex items-start gap-2 text-amber-900 dark:text-amber-200">
+                                      <input type="checkbox" className="mt-0.5" checked={!!l.conferenciaConfirmada} disabled={salvando}
+                                        onChange={e => atualizarLinha(i, { conferenciaConfirmada: e.target.checked })} />
+                                      {tDynamic('Conferi no cupom: estes valores estão corretos, mesmo com a diferença indicada.')}
+                                    </label>
+                                  )}
+                                </details>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -984,6 +1028,11 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
 
         {/* Rodapé com Ação */}
         <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 p-4 bg-white dark:bg-gray-900">
+          {pendenciasConferencia > 0 && (
+            <p role="status" className="mb-3 rounded-xl bg-amber-50 p-3 text-sm font-bold text-amber-900 dark:bg-amber-900/20 dark:text-amber-200">
+              {pendenciasConferencia} {tDynamic('item(ns) com valores pendentes. Confira no cupom ou desmarque para continuar.')}
+            </p>
+          )}
           {podeRepetir && (
             <label className="mb-3 flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs opacity-95 text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
               <input
@@ -1021,7 +1070,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
             </div>
             <button type="button"
               onClick={confirmarImportacao}
-              disabled={salvando || carregandoMatch || marcados.length === 0}
+              disabled={salvando || carregandoMatch || marcados.length === 0 || pendenciasConferencia > 0}
               className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg transition disabled:opacity-50"
             >
               {salvando

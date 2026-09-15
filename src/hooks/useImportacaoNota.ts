@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { interpretarEntradaNota } from '../lib/entradaNota';
 import { parseNFeXml } from '../lib/parseNFeXml';
+import type { ConferenciaLeitura } from '../lib/conferenciaNota';
 
 /** Item como as duas rotas entregam — o formato que a conferência consome. */
 export interface ItemLidoNota {
@@ -15,6 +16,7 @@ export interface ItemLidoNota {
   unidade: string;
   valor_unitario: number;
   valor_total: number;
+  conferencia?: ConferenciaLeitura;
 }
 
 /**

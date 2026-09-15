@@ -45,6 +45,7 @@ const SEGUNDOS_ATE_ESQUECER = 75;
 const SEGUNDOS_ATE_ESQUECER_NO_PIX = 180;
 /** Aviso antes de esquecer: quem só parou para pensar merece a chance de ficar. */
 const SEGUNDOS_DE_AVISO = 15;
+const SEGUNDOS_NA_CONCLUSAO = 20;
 
 type ProdutoComOpcoes = Produto & { grupos_opcoes?: (GrupoOpcoes & { opcoes: Opcao[] })[] };
 
@@ -92,6 +93,9 @@ export default function Totem() {
   const [resultado, setResultado] = useState<
     { pedidoId: string; senha: number | null; numero: number; total: number; identificado: boolean; cashbackPct: number } | null
   >(null);
+  const resultadoRef = useRef<typeof resultado>(null);
+  // O ref bloqueia também dois toques no mesmo ciclo, antes do React renderizar.
+  const finalizandoRef = useRef(false);
   const [segundosRestantes, setSegundosRestantes] = useState<number | null>(null);
   const [contato, setContato] = useState('');
   const [pix, setPix] = useState<{ pedidoId: string; qr: string; copiaECola: string } | null>(null);
@@ -139,10 +143,13 @@ export default function Totem() {
   }, [token]);
 
   const zerar = useCallback(() => {
+    // Não abandonar a tela enquanto ainda não sabemos qual pedido foi criado.
+    if (finalizandoRef.current) return;
     setCarrinho([]); setItemAberto(null); setEscolhas({}); setQtdItem(1);
     // Se havia pedido esperando pagamento, ele morre junto com a sessão.
     if (aguardandoPix) desistirDoPedido(resultado?.pedidoId);
     setErro(''); setResultado(null); setSegundosRestantes(null); setContato('');
+    resultadoRef.current = null;
     setPix(null); setAguardandoPix(false);
     setTela('repouso');
   }, [aguardandoPix, resultado, desistirDoPedido]);
@@ -155,14 +162,15 @@ export default function Totem() {
   }, []);
 
   useEffect(() => {
-    // Em repouso ou na tela final não há o que esquecer.
-    if (tela === 'repouso' || tela === 'pronto') return;
+    if (tela === 'repouso') return;
     const t = setInterval(() => {
+      if (finalizandoRef.current) return;
       const parado = Math.floor((Date.now() - ultimoToque.current) / 1000);
-      const limite = tela === 'pix' ? SEGUNDOS_ATE_ESQUECER_NO_PIX : SEGUNDOS_ATE_ESQUECER;
+      const limite = tela === 'pronto' ? SEGUNDOS_NA_CONCLUSAO
+        : tela === 'pix' ? SEGUNDOS_ATE_ESQUECER_NO_PIX : SEGUNDOS_ATE_ESQUECER;
       const falta = limite - parado;
       if (falta <= 0) { zerar(); return; }
-      setSegundosRestantes(falta <= SEGUNDOS_DE_AVISO ? falta : null);
+      setSegundosRestantes(tela === 'pronto' || falta <= SEGUNDOS_DE_AVISO ? falta : null);
     }, 1000);
     return () => clearInterval(t);
   }, [tela, zerar]);
@@ -245,69 +253,71 @@ export default function Totem() {
 
   // ── Fechamento ───────────────────────────────────────────────────────────
   const finalizar = async () => {
-    if (!carrinho.length) return;
+    if (!carrinho.length || finalizandoRef.current) return;
+    finalizandoRef.current = true;
     setEnviando(true); setErro('');
 
-    // SÓ TELEFONE, e é decisão de fila, não de simplicidade de código: e-mail
-    // obriga teclado alfabético, e digitar "@" e domínio em pé, com gente
-    // esperando atrás, é o que faz a pessoa desistir de se identificar — e aí
-    // o cashback não acontece para ninguém.
-    //
-    // Telefone é o que `clientes` já usa como chave (coluna obrigatória), então
-    // também é o que reconhece quem já comprou antes.
-    //
-    // CPF fica de fora: `clientes` não tem essa coluna, logo ele não
-    // identificaria ninguém nem acumularia saldo. O lugar dele é a nota
-    // fiscal — backlog.
-    const soDigitos = contato.replace(/\D/g, '');
-    const ehTelefone = soDigitos.length >= 10;
+    try {
+      // Uma falha da cobrança mantém este pedido: retentar não cria outro.
+      let fechado = resultadoRef.current;
+      if (!fechado) {
+        // O telefone é opcional e reconhece o cliente sem exigir teclado alfabético.
+        const soDigitos = contato.replace(/\D/g, '');
+        const ehTelefone = soDigitos.length >= 10;
 
-    const { data, error } = await supabase.rpc('fn_totem_criar_pedido', {
-      p_token: token,
-      p_payload: {
-        metodo: 'PIX',
-        telefone: ehTelefone ? soDigitos : undefined,
-        itens: carrinho.map((l) => ({
-          produto_id: l.produto.id,
-          quantidade: l.quantidade,
-          opcoes: l.opcoes.map((o) => ({ id: o.id })),
-        })),
-      },
-    });
-    setEnviando(false);
-    if (error) { setErro(error.message); return; }
+        const { data, error } = await supabase.rpc('fn_totem_criar_pedido', {
+          p_token: token,
+          p_payload: {
+            metodo: 'PIX',
+            telefone: ehTelefone ? soDigitos : undefined,
+            itens: carrinho.map((l) => ({
+              produto_id: l.produto.id,
+              quantidade: l.quantidade,
+              opcoes: l.opcoes.map((o) => ({ id: o.id })),
+            })),
+          },
+        });
+        if (error) { setErro(error.message); return; }
 
-    const r = data as {
-      pedido_id: string; senha: number | null; numero: number; valor_total: number;
-      identificado: boolean; cashback_pct: number;
-    };
-    const fechado = {
-      pedidoId: r.pedido_id,
-      senha: r.senha, numero: r.numero, total: Number(r.valor_total),
-      identificado: !!r.identificado, cashbackPct: Number(r.cashback_pct ?? 0),
-    };
-    setResultado(fechado);
+        const r = data as {
+          pedido_id: string; senha: number | null; numero: number; valor_total: number;
+          identificado: boolean; cashback_pct: number;
+        };
+        if (!r?.pedido_id) {
+          setErro('Não foi possível confirmar a criação do pedido. Procure ajuda no balcão.');
+          return;
+        }
+        fechado = {
+          pedidoId: r.pedido_id,
+          senha: r.senha, numero: r.numero, total: Number(r.valor_total),
+          identificado: !!r.identificado, cashbackPct: Number(r.cashback_pct ?? 0),
+        };
+        resultadoRef.current = fechado;
+        setResultado(fechado);
+      }
+      // Também permite cancelar o pedido pendente se a geração do QR falhar.
+      setAguardandoPix(true);
 
-    // ── O PIX, QUE É O QUE FALTAVA ─────────────────────────────────────────
-    // Sem esta etapa o pedido nascia AGUARDANDO_PAGAMENTO e ficava lá para
-    // sempre: nunca chegava na cozinha, e a tela ainda dizia que o QR
-    // apareceria "na tela ao lado" — coisa que não existe.
-    //
-    // A cobrança é criada AGORA, com o pedido já gravado, e o valor vem do
-    // servidor (a função recalcula a partir dos preços reais).
-    const { data: cob, error: erroPix } = await supabase.functions.invoke('pix-criar-cobranca', {
-      body: { pedido_id: fechado.pedidoId },
-    });
-    if (erroPix || !cob?.qr_imagem) {
-      // O pedido existe, mas sem cobrança não há como pagar: melhor mandar a
-      // pessoa ao balcão do que deixá-la olhando para um QR que não veio.
-      setErro('Não consegui gerar o Pix. Finalize no balcão informando o número do pedido.');
-      setTela('pronto');
-      return;
+      // O valor é recalculado no servidor; falha da cobrança nunca é sucesso.
+      const { data: cob, error: erroPix } = await supabase.functions.invoke('pix-criar-cobranca', {
+        body: { pedido_id: fechado.pedidoId },
+      });
+      if (erroPix || !cob?.qr_imagem) {
+        setErro('Não foi possível gerar o Pix. Tente novamente ou informe o número do pedido no balcão.');
+        return;
+      }
+      setPix({ pedidoId: fechado.pedidoId, qr: cob.qr_imagem, copiaECola: cob.copia_e_cola ?? '' });
+      setTela('pix');
+    } catch {
+      setErro(resultadoRef.current
+        ? 'Não foi possível gerar o Pix. Tente novamente ou informe o número do pedido no balcão.'
+        : 'Não foi possível confirmar a criação do pedido. Procure ajuda no balcão.');
+    } finally {
+      finalizandoRef.current = false;
+      setEnviando(false);
+      ultimoToque.current = Date.now();
+      setSegundosRestantes(null);
     }
-    setPix({ pedidoId: fechado.pedidoId, qr: cob.qr_imagem, copiaECola: cob.copia_e_cola ?? '' });
-    setAguardandoPix(true);
-    setTela('pix');
   };
 
   /** Imprime o recibo com a senha. Só depois do pagamento confirmado. */
@@ -342,6 +352,8 @@ export default function Totem() {
 
     setCarrinho([]);
     setAguardandoPix(false);
+    ultimoToque.current = Date.now();
+    setSegundosRestantes(SEGUNDOS_NA_CONCLUSAO);
     setTela('pronto');
   }, [loja]);
 
@@ -439,7 +451,8 @@ export default function Totem() {
         <button
           type="button"
           onClick={zerar}
-          className="fixed right-5 top-5 z-40 flex min-h-[64px] items-center gap-2 rounded-2xl border-2 border-white/25 bg-black/50 px-6 text-xl font-black text-white backdrop-blur-sm active:bg-white/15"
+          disabled={enviando}
+          className="fixed right-5 top-5 z-40 flex min-h-[64px] items-center gap-2 rounded-2xl border-2 border-white/25 bg-black/50 px-6 text-xl font-black text-white backdrop-blur-sm active:bg-white/15 disabled:opacity-40"
         >
           <X size={22} /> {tDynamic('Recomeçar')}
         </button>
@@ -541,18 +554,23 @@ export default function Totem() {
             {(itemAberto.grupos_opcoes ?? []).map((g) => {
               const obrigatorio = (g.min_escolhas ?? 0) > 0;
               const marcadas = escolhas[g.id] ?? [];
+              const faltantes = Math.max(0, (g.min_escolhas ?? 0) - marcadas.length);
               return (
                 <section key={g.id} className="mt-8">
                   <div className="mb-3 flex flex-wrap items-center gap-3">
                     <h3 className="text-3xl font-black">{g.nome}</h3>
                     <span className={`rounded-full px-4 py-1.5 text-lg font-black ${
-                      obrigatorio && marcadas.length === 0
+                      faltantes > 0
                         ? 'animate-pulse bg-red-500 text-white'
                         : obrigatorio ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-slate-400'
                     }`}>
                       {obrigatorio
-                        ? (marcadas.length === 0 ? tDynamic('Escolha uma opção') : tDynamic('Pronto'))
+                        ? (faltantes > 0 ? `${tDynamic('Faltam escolhas')}: ${faltantes}` : tDynamic('Pronto'))
                         : tDynamic('Opcional')}
+                    </span>
+                    <span className="text-lg text-slate-400">
+                      {tDynamic('Selecionadas')}: {marcadas.length}
+                      {g.max_escolhas > 0 && ` / ${g.max_escolhas}`}
                     </span>
                   </div>
                   <div className="space-y-3">
@@ -761,24 +779,22 @@ export default function Totem() {
       {tela === 'pagamento' && (
         <>
           <header className="flex items-center gap-4 border-b border-white/10 p-5">
-            <button type="button" onClick={() => setTela('identificacao')}
-              className="flex min-h-[72px] items-center gap-3 rounded-2xl bg-white/5 px-6 text-2xl font-black">
+            <button type="button" disabled={enviando || !!resultado} onClick={() => setTela('identificacao')}
+              className="flex min-h-[72px] items-center gap-3 rounded-2xl bg-white/5 px-6 text-2xl font-black disabled:opacity-40">
               <ArrowLeft size={28} />{tDynamic('Voltar')}</button>
           </header>
           <div className="flex flex-1 flex-col justify-center gap-6 p-6">
             <p className="text-center text-3xl font-bold text-slate-300">{tDynamic('Total a pagar')}</p>
-            <p className="text-center font-['Sora'] text-7xl font-black text-[#FC5B24]">{dinheiro(totalVisual)}</p>
-            {contato && (
-              <p className="text-center text-2xl font-bold text-emerald-400">
-                Cashback será creditado para {contato}
-              </p>
+            <p className="text-center font-['Sora'] text-7xl font-black text-[#FC5B24]">{dinheiro(resultado?.total ?? totalVisual)}</p>
+            {resultado && (
+              <p className="text-center text-2xl text-slate-300">{tDynamic('Pedido')} #{resultado.numero} · {tDynamic('Pagamento pendente')}</p>
             )}
-            {erro && <p className="text-center text-2xl font-black text-red-400">{erro}</p>}
+            {erro && <p role="alert" className="text-center text-2xl font-black text-red-400">{tDynamic(erro)}</p>}
             <button type="button" disabled={enviando} onClick={finalizar}
               className="flex min-h-[120px] items-center justify-center gap-4 rounded-3xl bg-[#FC5B24] text-4xl font-black disabled:opacity-50">
-              {enviando ? <Loader2 size={40} className="animate-spin" /> : 'Pagar com Pix'}
+              {enviando ? <><Loader2 size={40} className="animate-spin" />{tDynamic('Preparando pagamento…')}</> : resultado ? tDynamic('Tentar gerar Pix novamente') : tDynamic('Pagar com Pix')}
             </button>
-            <p className="text-center text-xl text-slate-500">{tDynamic('O QR aparece na tela ao lado do totem para você pagar pelo celular.')}</p>
+            <p className="text-center text-xl text-slate-500">{tDynamic('O QR aparece aqui no totem para você pagar pelo celular.')}</p>
           </div>
         </>
       )}
@@ -839,10 +855,15 @@ export default function Totem() {
           )}
           <p className="max-w-xl text-2xl text-slate-300">
             Acompanhe o painel e retire no balcão quando sua senha for chamada.
-            <span className="mt-2 block text-slate-400">{tDynamic('Seu comprovante está sendo impresso.')}</span>
+            <span className="mt-2 block text-slate-400">{tDynamic('Guarde sua senha. Se precisar do comprovante, peça ajuda no balcão.')}</span>
           </p>
           <button type="button" onClick={zerar}
             className="mt-4 min-h-[88px] rounded-2xl bg-[#FC5B24] px-16 text-3xl font-black">{tDynamic('Concluir')}</button>
+          <p className="text-lg text-slate-400">{tDynamic('Esta tela reinicia automaticamente.')} {segundosRestantes ?? SEGUNDOS_NA_CONCLUSAO}s</p>
+          <button type="button" onClick={() => { ultimoToque.current = Date.now(); setSegundosRestantes(SEGUNDOS_NA_CONCLUSAO); }}
+            className="min-h-[64px] rounded-2xl border border-white/25 px-6 text-xl font-bold">
+            {tDynamic('Precisa de mais tempo? Toque aqui.')}
+          </button>
         </div>
       )}
 

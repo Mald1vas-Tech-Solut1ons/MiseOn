@@ -10,6 +10,7 @@ import { fmt, type Pedido, type ProducaoPreparo } from '../../types';
 import type { CtxLoja } from './AdminLayout';
 import { useI18n } from '../../contexts/I18nContext';
 import { pedidoEstaNaOperacao } from '../../lib/pedidoOperacional';
+import { recebimentosConfigurados } from '../../lib/recebimentosOnboarding';
 
 interface DadosDia {
   pedidosHoje: Pedido[];
@@ -150,14 +151,11 @@ export default function Dashboard() {
 
     // Cadastro preenchido nao e o mesmo que conseguir cobrar: conta bloqueada
     // pelo provedor reprova o checklist, senao ele afirma o que nao e verdade.
-    const cartaoOk = !!loja?.efi_payee_code && !loja?.cartao_online_bloqueado_em;
-    const pixOk = !!(loja?.efi_titular_documento && loja?.efi_conta);
-    const pagamentosOk = !(loja?.aceita_online ?? true) || (cartaoOk && pixOk);
     setOnboarding({
       logo: !!loja?.logo_url,
       cardapio: (qtdProdutos ?? 0) > 0,
       horarios: (qtdHorarios ?? 0) > 0,
-      pagamentos: pagamentosOk,
+      pagamentos: recebimentosConfigurados(loja),
       primeiraVenda: (qtdPedidosTotal ?? 0) > 0,
     });
   }, [lojaId]);

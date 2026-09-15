@@ -41,6 +41,18 @@ export interface NutricaoOpcao {
   alergenos_pode_conter: string[];
 }
 
+/** Cobertura da composição escolhida, sem transformar cadastro ausente em zero. */
+export function avaliarCoberturaNutricao(
+  dados: NutricaoProduto | undefined,
+  extras: NutricaoOpcao[],
+  totalExtrasSelecionados = extras.length,
+) {
+  const baseCompleta = !!dados && dados.status === 'COMPLETO' && !dados.parcial && dados.cobertura_pct >= 100;
+  const adicionaisPendentes = Math.max(0, totalExtrasSelecionados - extras.length)
+    + extras.filter((extra) => !extra.completo).length;
+  return { baseCompleta, adicionaisPendentes, parcial: !baseCompleta || adicionaisPendentes > 0 };
+}
+
 /** Catálogo oficial de nutrientes (tabela `nutrientes`, leitura pública). */
 export interface NutrienteCatalogo {
   codigo: string;
