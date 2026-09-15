@@ -196,7 +196,11 @@ export default function Mesas() {
   /* ── QR da mesa ── */
   const abrirQr = async (mesa: Mesa) => {
     setMesaQr(mesa);
-    const url = `${window.location.origin}/${lojaSlug}?mesa=${mesa.numero}`;
+    // O `t` é o segredo da mesa. Sem ele o cardápio abre, mas o pedido é
+    // recusado: número de mesa sozinho é adivinhável, e era assim que qualquer
+    // um da internet mandava pedido para a cozinha (ver a migration
+    // 20260915180000_mesa_exige_segredo_do_qr).
+    const url = `${window.location.origin}/${lojaSlug}?mesa=${mesa.numero}&t=${mesa.token ?? ''}`;
     setQrDataUrl(await gerarQrDataUrl(url));
   };
 

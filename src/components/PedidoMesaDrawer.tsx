@@ -8,13 +8,15 @@ import { useI18n } from '../contexts/I18nContext';
 interface Props {
   loja: Loja;
   mesa: Mesa;
+  /** Segredo do QR daquela mesa (`?t=` na URL). Sem ele o servidor recusa. */
+  tokenMesa: string | null;
   carrinho: ItemCarrinho[];
   setCarrinho: (c: ItemCarrinho[]) => void;
   onClose: () => void;
   onSucesso: (numero: number) => void;
 }
 
-export default function PedidoMesaDrawer({ loja, mesa, carrinho, setCarrinho, onClose, onSucesso }: Props) {
+export default function PedidoMesaDrawer({ loja, mesa, tokenMesa, carrinho, setCarrinho, onClose, onSucesso }: Props) {
   const { tDynamic } = useI18n();
   const chaveNome = `miseon_nome_mesa_${loja.slug}`;
   const [nome, setNome] = useState(() => localStorage.getItem(chaveNome) ?? '');
@@ -36,6 +38,9 @@ export default function PedidoMesaDrawer({ loja, mesa, carrinho, setCarrinho, on
       const { data, error: erroPedido } = await supabase.rpc('fn_pedido_mesa_criar', {
         p_loja_id: loja.id,
         p_mesa_id: mesa.id,
+        // Sem este segredo o pedido é recusado no banco. É o que separa quem
+        // está sentado na mesa de quem só adivinhou o número dela.
+        p_token: tokenMesa,
         // Identificador vai GRAVADO no banco e o garçom lê na comanda: fica
         // sempre em pt-BR. Traduzido aqui, quem estivesse com o navegador em
         // inglês gravava "Table 7" e o salão via os dois formatos misturados.

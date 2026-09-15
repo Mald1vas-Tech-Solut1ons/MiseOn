@@ -102,6 +102,9 @@ export default function Cardapio() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const numeroMesaUrl = searchParams.get('mesa');
+  // Segredo do QR da mesa. Sem ele o cardápio abre normalmente, mas o pedido
+  // de mesa é recusado pelo servidor — número de mesa sozinho é adivinhável.
+  const tokenMesaUrl = searchParams.get('t');
   const waTokenUrl = searchParams.get('wa');
   const [mesaAtual, setMesaAtual] = useState<Mesa | null>(null);
   const [mesaErro, setMesaErro] = useState(false);
@@ -273,15 +276,17 @@ export default function Cardapio() {
       document.title = `${l.nome} — Peça online`;
 
       if (numeroMesaUrl) {
-        // A tabela `mesas` não tem mais SELECT público: o QR resolve a mesa
-        // pelo RPC fn_mesa_publica (slug + número exatos, não enumerável).
-        const { data: mesa } = await supabase
-          .rpc('fn_mesa_publica', { p_slug: slug, p_numero: Number(numeroMesaUrl) })
-          .maybeSingle();
+        // A tabela `mesas` não tem SELECT público. Com o segredo do QR a mesa
+        // é resolvida por ele; sem o segredo (QR antigo) ainda dá para abrir o
+        // cardápio pelo número, mas o servidor recusa fechar o pedido — o
+        // número da mesa é 1..N e era enumerável por qualquer um.
+        const { data: mesa } = tokenMesaUrl
+          ? await supabase.rpc('fn_mesa_do_qr', { p_slug: slug, p_token: tokenMesaUrl }).maybeSingle()
+          : await supabase.rpc('fn_mesa_publica', { p_slug: slug, p_numero: Number(numeroMesaUrl) }).maybeSingle();
         if (mesa) setMesaAtual(mesa as Mesa); else setMesaErro(true);
       }
     })();
-  }, [slug, numeroMesaUrl]);
+  }, [slug, numeroMesaUrl, tokenMesaUrl]);
 
   // JSON-LD do cardápio com a informação nutricional de cada prato (NUT-25).
   // Ver src/lib/jsonLdCardapio.ts sobre o alcance real disso hoje.
@@ -920,7 +925,7 @@ export default function Cardapio() {
       )}
       
       {checkoutAberto && mesaAtual && (
-        <PedidoMesaDrawer loja={loja} mesa={mesaAtual} carrinho={carrinho} setCarrinho={setCarrinho}
+        <PedidoMesaDrawer loja={loja} mesa={mesaAtual} tokenMesa={tokenMesaUrl} carrinho={carrinho} setCarrinho={setCarrinho}
           onClose={() => setCheckoutAberto(false)}
           onSucesso={(num) => { setCheckoutAberto(false); setPedidoMesaSucesso(num); }} />
       )}

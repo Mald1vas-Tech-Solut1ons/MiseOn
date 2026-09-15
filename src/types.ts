@@ -830,6 +830,12 @@ export interface Mesa {
   id: string;
   loja_id: string;
   numero: number;
+  /**
+   * Segredo impresso no QR da mesa. Só vem preenchido nas leituras do admin
+   * (`select *`): as funções públicas do cardápio devolvem a mesa SEM ele, de
+   * propósito — quem tem o token esteve na mesa.
+   */
+  token?: string;
   nome?: string | null;
   capacidade?: number | null;
   pos_x?: number | null;
