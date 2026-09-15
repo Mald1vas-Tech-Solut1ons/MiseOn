@@ -29,6 +29,25 @@ interface Regra {
 
 const REGRAS: Regra[] = [
   {
+    match: /tentativa já registrada/i,
+    titulo: 'Esta tentativa já foi registrada',
+    explicacao: 'A venda pode ter sido concluída antes de a conexão cair.',
+    acao: 'Confira o Painel de Pedidos antes de limpar o carrinho e iniciar outra venda.',
+    link: { para: '/admin/pedidos', rotulo: 'Conferir pedidos' },
+  },
+  {
+    match: /preço do catálogo mudou/i,
+    titulo: 'O preço mudou',
+    explicacao: 'O total do carrinho ficou diferente do catálogo atual.',
+    acao: 'Recarregue o PDV e confira o total com o cliente antes de receber.',
+  },
+  {
+    match: /opções obrigatórias|limites de escolha|opção repetida/i,
+    titulo: 'Confira as opções do produto',
+    explicacao: 'O pedido não foi registrado porque as escolhas precisam ser ajustadas.',
+    acao: 'Volte ao carrinho e escolha as opções obrigatórias de cada produto.',
+  },
+  {
     match: /estoque insuficiente/i,
     titulo: 'Estoque insuficiente',
     explicacao:

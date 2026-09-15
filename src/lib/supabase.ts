@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+import { registrarEventoAuth } from './authCallback';
+import { fetchComSessaoChat } from './sessaoChat';
 
 /** Remove trailing newlines / whitespace that Vercel sometimes injects into env vars.
  *  The SDK puts the key as-is into the WebSocket query string, so a stray \n
@@ -18,39 +20,15 @@ if (url.includes('placeholder')) {
 
 
 
-/** Sessão do chat anônimo da vitrine.
- *
- *  Vai como cabeçalho em toda requisição porque virou credencial: a RLS de
- *  `chat_conversations`/`chat_messages` liberava TODA conversa com
- *  `canal = 'VITRINE'`, de todas as lojas, para qualquer anônimo — o filtro
- *  por sessão existia só no front, que é escolha do cliente, não garantia.
- *  Agora o banco confere `session_id` contra este cabeçalho.
- *
- *  Lê o mesmo valor que o useChat grava, sem criá-lo: quem cria é o hook, na
- *  primeira vez que o chat abre. Ausente, o cabeçalho vai vazio e nenhuma
- *  conversa é liberada — que é o comportamento correto para quem nunca
- *  conversou. */
-const sessaoChat = (() => {
-  try {
-    return localStorage.getItem('miseon_chat_session') ?? '';
-  } catch {
-    return ''; // SSR/prerender e navegador com storage bloqueado
-  }
-})();
-
+/** A credencial do chat é lida no envio REST, compartilhada com useChat. */
 export const supabase = createClient(url, anon, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
   },
   global: {
-    // Cabecalho global vai em TODA requisicao do SDK — inclusive no
-    // functions.invoke(). Como e um header customizado, o navegador so deixa
-    // a chamada sair se o preflight da Edge Function devolver esse nome no
-    // Access-Control-Allow-Headers. Header novo aqui = incluir tambem no
-    // corsHeaders de supabase/functions/*, senao a function passa a falhar
-    // com "Failed to send a request to the Edge Function" (o POST nem sai).
-    headers: sessaoChat ? { 'x-chat-session': sessaoChat } : {},
+    // Não acrescenta headers ao OAuth nem às Edge Functions.
+    fetch: fetchComSessaoChat(url),
   },
   realtime: {
     params: {
@@ -58,3 +36,6 @@ export const supabase = createClient(url, anon, {
     },
   },
 });
+
+// O listener nasce com o cliente, antes das rotas lazy montarem.
+supabase.auth.onAuthStateChange((event) => registrarEventoAuth(event));

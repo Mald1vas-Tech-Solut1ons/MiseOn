@@ -3,6 +3,7 @@ import MiseOnLogo from '../../components/MiseOnLogo';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, KeyRound, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { callbackInicial } from '../../lib/authCallback';
 
 import { useI18n } from '../../contexts/I18nContext';
 export default function Login() {
@@ -10,7 +11,7 @@ export default function Login() {
   const nav = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState('');
+  const [erro, setErro] = useState(callbackInicial.erro ? 'Não foi possível concluir o acesso. Tente entrar novamente.' : '');
   const [sucesso, setSucesso] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [modo, setModo] = useState<'SENHA' | 'MAGIC_LINK' | 'REDEFINIR'>('SENHA');
@@ -72,11 +73,18 @@ export default function Login() {
   };
 
   const entrarComGoogle = async () => {
+    setErro('');
     setCarregando(true);
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/admin` },
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/admin` },
+      });
+      if (error) throw error;
+    } catch {
+      setErro('Não foi possível abrir o login do Google. Tente novamente.');
+      setCarregando(false);
+    }
   };
 
   return (

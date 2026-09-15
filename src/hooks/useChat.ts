@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { obterSessaoChat } from '../lib/sessaoChat';
 import type { ChatConversation, ChatMessage } from '../types';
 
 export function useChat(lojaId: string | null, clienteId?: string | null, modoAdmin = false) {
@@ -10,17 +11,7 @@ export function useChat(lojaId: string | null, clienteId?: string | null, modoAd
   // Recupera ou cria um session_id anônimo de forma síncrona se no navegador
   const [sessionId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
-      let stored = localStorage.getItem('miseon_chat_session');
-      // O session_id passou a ser a credencial da conversa anonima: a RLS
-      // exige que ele venha no cabecalho x-chat-session para liberar a
-      // leitura. Math.random com 11 chars de base36 nao serve para isso —
-      // e adivinhavel e nao tem entropia criptografica. UUID v4 resolve.
-      // Sessao antiga (formato 'sess_...') e migrada na primeira visita.
-      if (!stored || stored.startsWith('sess_')) {
-        stored = crypto.randomUUID();
-        localStorage.setItem('miseon_chat_session', stored);
-      }
-      return stored;
+      return obterSessaoChat();
     }
     return null;
   });
@@ -121,7 +112,7 @@ export function useChat(lojaId: string | null, clienteId?: string | null, modoAd
       let insertPayload = {
         loja_id: lojaId,
         cliente_id: clienteId || null,
-        session_id: clienteId ? null : sessionIdRef.current
+        session_id: sessionIdRef.current
       };
       
       let { data: convData, error: convError } = await supabase

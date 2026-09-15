@@ -5,3 +5,8 @@ cert_base64.txt
 CREDENCIAIS.md
 .trae-supabase-home/
 supabase/
+scratch/
+backups/
+credenciais_testes.md
+cert/
+output/

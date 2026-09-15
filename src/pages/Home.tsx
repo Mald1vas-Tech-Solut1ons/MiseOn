@@ -2078,7 +2078,7 @@ export default function Home() {
                     <span className="text-base font-medium text-slate-400">/mês</span>
                   </div>
                   <span className="mt-2 text-xs text-orange-300/90 font-medium transition-all">
-                    {planoAnual ? 'Parcele em 3x, 6x, 8x ou 12x de R$ 149,90 no cartão (ou R$ 1.708,86 à vista no Pix com 5% OFF)' : 'R$ 169,90 no cartão ou R$ 161,40 à vista no Pix (5% OFF)'}
+                    {planoAnual ? 'Total anual de R$ 1.798,80: 3x de R$ 599,60, 6x de R$ 299,80, 8x de R$ 224,85 ou 12x de R$ 149,90 no cartão. No Pix: R$ 1.708,86 à vista (5% OFF).' : 'R$ 169,90 no cartão ou R$ 161,40 à vista no Pix (5% OFF)'}
                   </span>
                 </div>
 

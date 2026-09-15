@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { sanitizarLog } from './sanitizarLog';
 
 /**
  * Captura de erro em produção.
@@ -47,10 +48,10 @@ export async function registrarErro(
 
     await supabase.rpc('fn_registrar_erro', {
       p_origem: opcoes.origem ?? 'browser',
-      p_mensagem: mensagem,
-      p_contexto: contexto,
-      p_stack: opcoes.stack ?? null,
-      p_url: window.location.href,
+      p_mensagem: sanitizarLog(mensagem),
+      p_contexto: sanitizarLog(contexto),
+      p_stack: opcoes.stack ? sanitizarLog(opcoes.stack) : null,
+      p_url: window.location.origin + window.location.pathname,
       p_user_agent: navigator.userAgent,
       p_loja_id: lojaAtual,
     });

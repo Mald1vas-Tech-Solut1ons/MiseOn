@@ -1,7 +1,10 @@
 import { supabase } from './supabase';
-import { ItemCarrinho } from '../types';
+import { ItemCarrinho, MetodoPgto } from '../types';
 
 export interface CreatePedidoParams {
+  chave: string;
+  metodo?: MetodoPgto;
+  cashback_usado?: number;
   lojaId: string;
   tipo_pedido: string;
   origem: string;
@@ -17,81 +20,22 @@ export interface CreatePedidoParams {
 }
 
 export async function createPedidoPedido(dados: CreatePedidoParams) {
-  const palavrasRevenda = ['guaraná', 'guarana', 'coca', 'pepsi', 'fanta', 'sprite', 'suco', 'refrigerante', 'lata', 'cerveja', 'água', 'agua', 'long neck', 'red bull', 'h2oh', 'buffet', 'quilo'];
-  
-  const temCozinha = dados.carrinho.some((i) => {
-    // estacao_preparo no banco admite só COZINHA | DIRETO (CHECK
-    // 20260720100000) — o antigo `=== 'BALCAO'` aqui era um ramo morto.
-    if (i.produto.estacao_preparo === 'DIRETO') return false;
-    if (i.produto.estacao_preparo === 'COZINHA') return true;
-    const nomeLower = (i.produto.nome || '').toLowerCase();
-    return !palavrasRevenda.some((p) => nomeLower.includes(p));
+  const { data, error } = await supabase.rpc('fn_pdv_registrar', {
+    p_chave: dados.chave,
+    p_payload: {
+      loja_id: dados.lojaId, tipo_pedido: dados.tipo_pedido,
+      identificador_cliente: dados.identificador_cliente, cliente_id: dados.cliente_id ?? null,
+      comanda_id: dados.comanda_id ?? null, mesa_numero: dados.mesa_numero ?? null,
+      desconto: dados.desconto, valor_total: Math.round(dados.valor_total * 100) / 100,
+      troco_para: dados.troco_para ?? null, metodo: dados.metodo ?? null,
+      cashback_usado: dados.cashback_usado ?? 0,
+      itens: dados.carrinho.map((item) => ({
+        produto_id: item.produto.id, quantidade: item.quantidade,
+        observacao: item.observacao ?? null, assento_numero: item.assento_numero ?? null,
+        opcoes: item.opcoesSelecionadas.map((opcao) => ({ id: opcao.id })),
+      })),
+    },
   });
-
-  const baseInsert = {
-    loja_id: dados.lojaId,
-    tipo_pedido: dados.tipo_pedido,
-    origem: dados.origem,
-    identificador_cliente: dados.identificador_cliente,
-    cliente_id: dados.cliente_id ?? null,
-    comanda_id: dados.comanda_id,
-    mesa_numero: dados.mesa_numero,
-    subtotal: dados.subtotal,
-    desconto: dados.desconto,
-    valor_total: dados.valor_total,
-    troco_para: dados.troco_para,
-    requer_cozinha: temCozinha,
-    estacao_atual: temCozinha ? 'COZINHA' : 'BALCAO',
-    enviado_cozinha_em: temCozinha ? new Date().toISOString() : null,
-    ...(dados.tipo_pedido === 'SALAO' ? { status: 'ACEITO' } : {}),
-  };
-
-  const { data: ped, error: e1 } = await supabase.from('pedidos').insert({
-    ...baseInsert,
-    etapa_kds_atual: 'etapa_fila',
-  }).select('id, numero, senha').single();
-
-  if (e1 || !ped) throw e1 ?? new Error('Falha ao criar o pedido');
-
-  for (const item of dados.carrinho) {
-    const precoItemFinal = Number(item.produto.preco) + item.opcoesSelecionadas.reduce((s, o) => s + Number(o.preco_adicional), 0);
-    
-    const { data: it, error: e2 } = await supabase.from('itens_pedido').insert({
-      pedido_id: ped.id,
-      produto_id: item.produto.id,
-      nome_produto: item.produto.nome,
-      preco_unitario: precoItemFinal,
-      quantidade: item.quantidade,
-      observacao: item.observacao ?? null,
-      assento_numero: item.assento_numero ?? null,
-    }).select('id').single();
-    
-    if (e2 || !it) throw e2 ?? new Error('Falha ao registrar item');
-    
-    if (item.opcoesSelecionadas.length > 0) {
-      const { error: e3 } = await supabase.from('itens_pedido_opcoes').insert(
-        item.opcoesSelecionadas.map((o) => ({
-          item_id: it.id, 
-          opcao_id: o.id, 
-          nome_opcao: o.nome, 
-          preco_adicional: Number(o.preco_adicional)
-        }))
-      );
-      if (e3) throw e3;
-    }
-  }
-
-  // Desconta os insumos da Ficha Técnica e Adicionais, gerando movimentação de estoque.
-  //
-  // A venda NÃO é desfeita se a baixa falhar: o cliente está no balcão e o
-  // pedido já existe. Mas o erro também não pode sumir — `fn_baixar_estoque`
-  // levanta exceção quando um insumo ficaria negativo, e essa exceção vinha
-  // sendo descartada aqui. O efeito era o pior possível: a venda concluía, o
-  // estoque não baixava e ninguém ficava sabendo. O inventário ia divergindo
-  // do real em silêncio — justamente o número que o lojista compra da gente.
-  //
-  // Agora a falha sobe junto com o pedido, para a tela avisar o operador.
-  const { error: erroEstoque } = await supabase.rpc('fn_baixar_estoque', { p_pedido_id: ped.id });
-
-  return { ...ped, avisoEstoque: erroEstoque?.message ?? null };
+  if (error || !data) throw error ?? new Error('Não foi possível confirmar a venda.');
+  return data as { id: string; numero: number; senha: number | null; valor_total: number; requer_cozinha: boolean };
 }

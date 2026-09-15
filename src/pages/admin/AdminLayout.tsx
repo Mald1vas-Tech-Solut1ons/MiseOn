@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useState, useRef, Suspense } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { ClipboardList, Boxes, Bike, Store, LogOut, UtensilsCrossed, MoreHorizontal, X, TrendingUp, Megaphone, Users, History, CreditCard, ShoppingCart, Flame, ChevronLeft, ChevronDown, Menu, UserCircle, LifeBuoy, LayoutDashboard, Calculator, ChefHat, LayoutGrid, MessageSquare, MessageCircle, Plug, FileText, Compass, Scale, Smartphone, Search } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { callbackInicial } from '../../lib/authCallback';
 import { avaliarAssinatura } from '../../lib/assinatura';
 import ThemeToggle from '../../components/ThemeToggle';
 import { NotificationCenter } from '../../components/notifications/NotificationCenter';
@@ -175,7 +176,7 @@ export default function AdminLayout() {
       try {
         const { data: { user }, error: userErr } = await supabase.auth.getUser();
         if (userErr || !user) {
-          if (!unmounted) nav('/acesso');
+          if (!unmounted) nav(callbackInicial.erro ? '/admin/login' : '/acesso');
           return;
         }
 

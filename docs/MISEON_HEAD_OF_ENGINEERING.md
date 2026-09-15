@@ -1,5 +1,23 @@
 # MISEON - Head of Engineering Document
 
+## Correções de 14/09/2026 — preparação de produção
+
+Implementados no código: separação entre callback OAuth e recuperação de senha, tratamento de erros de autenticação, sessão de chat inicializada antes das requisições, remoção de tokens dos logs e correção dos valores das parcelas anuais. PDV passou a registrar pedido, itens, pagamento e cashback numa transação idempotente com preços e vínculo da loja validados no servidor. Confirmação Pix não apresenta sucesso quando a consolidação falha; vendas por peso continuam pelo fluxo de balança/comanda.
+
+Migration `20260914203656_prontidao_piloto_seguranca_pdv.sql` aplicada em produção: restringe configuração de nicho, corrige privilégios da view de insumos e instala as operações atômicas do PDV. Configuração OAuth de produção atualizada para `https://miseon.app.br/`, preservando retornos anteriores e autorizando o domínio oficial.
+
+Validação: 471 testes aprovados, 17 pendentes e nenhuma falha; build e prerender de 40 páginas concluídos. Prova SQL transacional executada no banco real com rollback validou isolamento entre lojas, repetição, estoque, cancelamento, KDS, Pix e cashback. Quatro chamadas HTTP simultâneas com a mesma chave produziram um pedido e um pagamento. Callback com sessão real de QA alcançou o painel sem ir à recuperação. Consentimento Google com conta do proprietário e integrações fiscais/periféricos reais ainda exigem validação operacional; estes resultados não certificam todos os módulos do sistema. Publicação do frontend será confirmada pelo deployment associado ao commit desta alteração.
+
+## Diagnóstico solicitado em 13/09/2026 — acesso e prontidão comercial
+
+Relatório: [DIAGNOSTICO-E-CONSULTORIA-2026-09-13.md](DIAGNOSTICO-E-CONSULTORIA-2026-09-13.md). Auditoria por amostragem, código no commit `9878b45`, metadados de produção consultados somente para leitura. Sem alterações funcionais ou deploy nesta análise.
+
+Prioridades abertas: `AuthRecoveryRedirect` confunde `access_token` OAuth com recuperação; `fn_ajustar_operacao_nicho` em produção permite execução anônima sem checagem de vínculo; `vw_insumos_a_revisar` tem SELECT público com privilégios do criador (consulta agregada como anon retornou zero registros); PDV escreve pedido/itens/pagamento em chamadas separadas e pode mostrar sucesso após falha de envio à cozinha; credencial do chat nasce depois da captura dos cabeçalhos; monitor grava URL integral, com risco de incluir tokens; texto de parcelas anuais inconsistente.
+
+Validação atual: 460 testes aprovados, 17 não executados, nenhuma falha; TypeScript e ESLint aprovados. OAuth real, build completo, Cypress, carga e restauração não executados. Aprovação local não certifica jornadas externas nem elimina os achados de permissões.
+
+Recomendação comercial: estabilizar bloqueadores antes de abrir piloto acompanhado com 3–5 lojas de um mesmo perfil; validar controle de custo/produção como proposta de valor e medir implantação, suporte e conversão paga antes de ampliar módulos. Correções propostas permanecem no backlog; não foram implementadas nesta sessão de diagnóstico.
+
 ## 1. Visão do Produto
 O MiseOn é uma plataforma SaaS multi-tenant para FOOD SERVICE. A visão é atender diferentes modelos operacionais (à la carte, quilo, self-service, buffet, rodízio, pizzaria, hamburgueria, dark kitchen, múltiplas marcas, etc.) sem obrigar o sistema a virar um conjunto de condicionais específicas por segmento.
 

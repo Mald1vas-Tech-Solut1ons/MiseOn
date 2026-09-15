@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
-import { useOutletContext, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useOutletContext, useSearchParams, useNavigate } from 'react-router-dom';
 import { X, Check, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import {
@@ -27,6 +27,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { tocarSom } from '../../lib/som';
 import { traduzirErro } from '../../lib/erros';
 import { createPedidoPedido } from '../../lib/pedidos';
+import { chaveTentativaPdv } from '../../lib/tentativaPdv';
 import { getOptimizedImageUrl } from '../../lib/cdn';
 import { HorizontalScrollContainer } from '../../components/ui';
 
@@ -51,6 +52,10 @@ export default function PDV() {
   const { lojaId } = useOutletContext<CtxLoja>();
   const [searchParams] = useSearchParams();
   const toast = useToast();
+  const navegar = useNavigate();
+  const [chaveInicial] = useState(() => chaveTentativaPdv(lojaId));
+  const tentativa = useRef(chaveInicial);
+  const emEnvio = useRef(false);
 
   // catálogo
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -224,8 +229,9 @@ export default function PDV() {
   };
 
   const tocarProduto = (p: Produto) => {
+    if (p.tipo_venda === 'POR_PESO') { navegar('/admin/balanca'); return; }
     const temOpcoes = (p.grupos_opcoes ?? []).some((g) => (g.opcoes ?? []).filter((o) => o.disponivel).length > 0);
-    if (temOpcoes || p.tipo_venda === 'POR_PESO') setEscolhendo(p);
+    if (temOpcoes) setEscolhendo(p);
     else adicionarProduto(p);
   };
 
@@ -234,26 +240,22 @@ export default function PDV() {
   };
 
   const limparVenda = () => {
+    tentativa.current = chaveTentativaPdv(lojaId, true);
     setCarrinho([]); setNomeCliente(''); setClienteSelecionado(null); setDesconto(''); setEtapa('CARRINHO');
     setMetodo(null); setValorRecebido(''); setErro(''); setVenda(null); setPixInfo(null);
   };
 
   /* ── fechamento da venda ── */
 
-  // A venda vale; o estoque é que não desceu. Avisa sem derrubar a tela de
-  // sucesso: o operador precisa saber para acertar o inventário depois, mas o
-  // cliente já pagou e não pode ficar esperando.
-  const avisarEstoqueNaoBaixado = (motivo: string) => {
-    console.error('Baixa de estoque falhou:', motivo);
-    toast('Venda registrada, mas o estoque NÃO baixou. Confira o inventário.', 'alerta');
-  };
-
   const registrarVenda = async (met: MetodoPgto) => {
-    if (carrinho.length === 0) return;
+    if (carrinho.length === 0 || emEnvio.current) return;
     if (met === 'DINHEIRO' && recebidoNum < total) { setErro('Valor recebido menor que o total.'); return; }
+    emEnvio.current = true;
     setProcessando(true); setErro('');
     try {
       const ped = await createPedidoPedido({
+        chave: tentativa.current, metodo: met,
+        cashback_usado: Math.min(clienteSelecionado?.saldoCashback ?? 0, descontoNum),
         lojaId,
         tipo_pedido: 'RETIRADA_BALCAO',
         origem: 'balcao',
@@ -266,26 +268,7 @@ export default function PDV() {
         carrinho,
       });
 
-      // Baixa saldo de cashback do cliente se foi utilizado
-      if (clienteSelecionado?.id && descontoNum > 0 && (clienteSelecionado.saldoCashback ?? 0) > 0) {
-        const cashbackUsado = Math.min(clienteSelecionado.saldoCashback ?? 0, descontoNum);
-        if (cashbackUsado > 0) {
-          await supabase.rpc('fn_usar_cashback', {
-            p_cliente_id: clienteSelecionado.id, p_loja_id: lojaId, p_pedido_id: ped.id, p_valor: cashbackUsado,
-          });
-        }
-      }
-
-      // Se só tem revenda direta (latas de Coca-Cola, etc.), não vai pra cozinha.
-      const temCozinha = carrinho.some((i) => i.produto.estacao_preparo === 'COZINHA' || !i.produto.estacao_preparo);
-
-      const pagoAgora = met !== 'PIX'; // dinheiro/maquininha recebem na hora; Pix espera o QR
-      const { error: e4 } = await supabase.from('pagamentos').insert({
-        pedido_id: ped.id, metodo: met, valor_pago: total,
-        status: pagoAgora ? 'PAGO' : 'PENDENTE',
-        data_pagamento: pagoAgora ? new Date().toISOString() : null,
-      });
-      if (e4) throw e4;
+      const temCozinha = ped.requer_cozinha;
 
       if (met === 'PIX') {
         toast('Aguardando pagamento Pix...', 'info');
@@ -296,33 +279,9 @@ export default function PDV() {
         setVenda({ pedidoId: ped.id, numero: ped.numero, senha: ped.senha, total, metodo: met, troco: 0, itens: carrinho, temCozinha });
         setEtapa('PIX_AGUARDANDO');
       } else {
-        const atualizacaoCozinha = {
-          status: 'ACEITO',
-          requer_cozinha: temCozinha,
-          estacao_atual: temCozinha ? 'COZINHA' : 'BALCAO',
-          enviado_cozinha_em: temCozinha ? new Date().toISOString() : null,
-        };
-        const { error: eUpd } = await supabase.from('pedidos').update({
-          ...atualizacaoCozinha,
-          etapa_kds_atual: 'etapa_fila',
-        }).eq('id', ped.id);
-        if (eUpd) console.error('Falha ao enviar pedido à cozinha:', eUpd);
-        if (!temCozinha) {
-          // Bypass completo pra revenda direta de balcão: o cliente já pegou a Coca-Cola e pagou.
-          // Se a trigger de transição recusar, o pedido fica em aberto e some do
-          // fechamento do dia — então a recusa precisa aparecer, não sumir.
-          const r1 = await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: ped.id, p_novo_status: 'PRONTO' });
-          const r2 = r1.error ? null : await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: ped.id, p_novo_status: 'FINALIZADO' });
-          const falha = r1.error ?? r2?.error;
-          if (falha) {
-            console.error('Falha ao finalizar venda de balcão:', falha);
-            toast(`Venda registrada, mas o pedido #${ped.numero} ficou em aberto. Finalize pelo Painel de Pedidos.`, 'alerta');
-          }
-        }
         setVenda({ pedidoId: ped.id, numero: ped.numero, senha: ped.senha, total, metodo: met, troco, itens: carrinho, temCozinha });
         setEtapa('SUCESSO');
         toast(`Venda concluída! Pedido #${ped.numero}`, 'sucesso');
-        if (ped.avisoEstoque) avisarEstoqueNaoBaixado(ped.avisoEstoque);
         tocarSom();
         carregarCaixa();
       }
@@ -331,17 +290,20 @@ export default function PDV() {
       const t = traduzirErro(e);
       setErro(`${t.titulo} — ${t.acao}`);
     } finally {
+      emEnvio.current = false;
       setProcessando(false);
     }
   };
 
   /* ── modo mesa: envia a rodada pra comanda, sem cobrar agora ── */
   const enviarParaMesa = async () => {
-    if (!mesaSelecionada || carrinho.length === 0) return;
+    if (!mesaSelecionada || carrinho.length === 0 || emEnvio.current) return;
+    emEnvio.current = true;
     setEnviandoMesa(true); setErro('');
     try {
       const comandaId = await obterOuCriarComandaAberta(lojaId, mesaSelecionada.id);
       const ped = await createPedidoPedido({
+        chave: tentativa.current,
         lojaId,
         tipo_pedido: 'SALAO',
         origem: 'garcom',
@@ -357,13 +319,14 @@ export default function PDV() {
 
       setPedidoMesaOk({ numero: ped.numero, mesaNumero: mesaSelecionada.numero });
       toast(`Pedido #${ped.numero} enviado para mesa ${mesaSelecionada.numero}`, 'sucesso');
-      if (ped.avisoEstoque) avisarEstoqueNaoBaixado(ped.avisoEstoque);
       tocarSom();
+      tentativa.current = chaveTentativaPdv(lojaId, true);
       setCarrinho([]); setNomeCliente(''); setDesconto('');
     } catch (e) {
       console.error(e);
       setErro('Erro ao enviar para a mesa: ' + String((e as Error)?.message ?? e));
     }
+    emEnvio.current = false;
     setEnviandoMesa(false);
   };
 
@@ -377,18 +340,8 @@ export default function PDV() {
     if (!pixInfo) return;
     setProcessando(true);
     try {
-      const { error: ePgto } = await supabase.from('pagamentos')
-        .update({ status: 'PAGO', data_pagamento: new Date().toISOString() })
-        .eq('pedido_id', pixInfo.pedidoId).eq('metodo', 'PIX');
-      if (ePgto) throw ePgto;
-      const { error: eAceite } = await supabase.from('pedidos').update({ status: 'ACEITO' }).eq('id', pixInfo.pedidoId);
-      if (eAceite) throw eAceite;
-      if (venda && !venda.temCozinha) {
-        const r1 = await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: pixInfo.pedidoId, p_novo_status: 'PRONTO' });
-        if (r1.error) throw r1.error;
-        const r2 = await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: pixInfo.pedidoId, p_novo_status: 'FINALIZADO' });
-        if (r2.error) throw r2.error;
-      }
+      const { error } = await supabase.rpc('fn_pdv_concluir_pix', { p_pedido_id: pixInfo.pedidoId, p_confirmacao_manual: true });
+      if (error) throw error;
       setEtapa('SUCESSO');
       toast(`Venda concluída! Pedido #${venda?.numero ?? ''}`, 'sucesso');
       tocarSom();
@@ -416,10 +369,11 @@ export default function PDV() {
     const concluirPixPago = async () => {
       if (concluido) return;
       concluido = true;
-      await supabase.from('pedidos').update({ status: 'ACEITO' }).eq('id', pixInfo.pedidoId);
-      if (venda && !venda.temCozinha) {
-        await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: pixInfo.pedidoId, p_novo_status: 'PRONTO' });
-        await supabase.rpc('fn_avancar_status_pedido', { p_pedido_id: pixInfo.pedidoId, p_novo_status: 'FINALIZADO' });
+      const { error } = await supabase.rpc('fn_pdv_concluir_pix', { p_pedido_id: pixInfo.pedidoId });
+      if (error) {
+        concluido = false;
+        setErro('Pagamento recebido, mas a operação está pendente. Confira o pedido no Painel de Pedidos antes de cobrar novamente.');
+        return;
       }
       setEtapa('SUCESSO');
       toast(`Venda concluída!`, 'sucesso');
@@ -429,8 +383,7 @@ export default function PDV() {
 
     // Timeout de 5 minutos (300.000 ms) para liberar o PDV se não for pago
     const timeoutLimpeza = setTimeout(() => {
-      limparVenda();
-      setErro('Tempo limite de 5 minutos excedido para o pagamento do Pix.');
+      if (!concluido) setErro('O Pix continua pendente. Confira o pagamento antes de iniciar outra venda.');
     }, 5 * 60 * 1000);
 
     const reconciliacao = setInterval(async () => {
@@ -744,5 +697,3 @@ export default function PDV() {
     </div>
   );
 }
-
-

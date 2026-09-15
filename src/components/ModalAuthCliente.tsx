@@ -37,7 +37,7 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
       if (error) setErro(error.message);
       else setSucesso(tDynamic('Conta criada! Verifique seu e-mail para confirmar (se necessário) ou faça login.'));
     } else if (modo === 'MAGIC_LINK') {
-      const { error } = await supabase.auth.signInWithOtp({ email });
+      const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin + window.location.pathname + window.location.search } });
       if (error) setErro(error.message);
       else setSucesso(tDynamic('Enviamos um link de acesso mágico para o seu e-mail!'));
     } else {
@@ -49,10 +49,17 @@ export default function ModalAuthCliente({ isOpen, onClose }: { isOpen: boolean;
   };
 
   const entrarComGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.href },
-    });
+    setErro(''); setCarregando(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + window.location.pathname + window.location.search },
+      });
+      if (error) throw error;
+    } catch {
+      setErro('Não foi possível abrir o login do Google. Tente novamente.');
+      setCarregando(false);
+    }
   };
 
   // Portal no body: fixed dentro de ancestral com transform seria posicionado errado.

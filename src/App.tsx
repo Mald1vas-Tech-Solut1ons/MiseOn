@@ -1,12 +1,12 @@
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ScreenTransition } from './components/ScreenTransition';
 import { ToastProvider } from './components/ui/Toast';
 import { I18nProvider } from './contexts/I18nContext';
 import CookieBanner from './components/CookieBanner';
 import { AcessibilidadeProvider } from './contexts/AcessibilidadeProvider';
 import { BrandLoader } from './components/BrandLoader';
-import { supabase } from './lib/supabase';
+import AuthRecoveryRedirect from './components/AuthRecoveryRedirect';
 
 // ── Chunk: PUBLIC (carrega imediatamente — rotas do cliente final) ─────────────
 import Home from './pages/Home';
@@ -92,48 +92,6 @@ const Auditoria        = lazy(() => import('./pages/superadmin/Auditoria'));
 const FiscalPlataforma = lazy(() => import('./pages/superadmin/FiscalPlataforma'));
 const WhatsAppPlataforma = lazy(() => import('./pages/superadmin/WhatsAppPlataforma'));
 const SuperErros       = lazy(() => import('./pages/superadmin/Erros'));
-
-function AuthRecoveryRedirect() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  React.useEffect(() => {
-    const hash = window.location.hash;
-    const search = window.location.search;
-
-    // 1. Redirecionar se a URL contiver tokens de recuperação ou erro no hash/search
-    if (hash.includes('type=recovery') || hash.includes('access_token')) {
-      if (location.pathname !== '/redefinir-senha') {
-        navigate('/redefinir-senha' + hash, { replace: true });
-        return;
-      }
-    } else if (hash.includes('error') || search.includes('error')) {
-      if (
-        location.pathname !== '/redefinir-senha' &&
-        location.pathname !== '/admin/login' &&
-        location.pathname !== '/superadmin/login'
-      ) {
-        navigate('/redefinir-senha?erro=expirado', { replace: true });
-        return;
-      }
-    }
-
-    // 2. Escutar evento de redefinição de senha do Supabase Auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        if (location.pathname !== '/redefinir-senha') {
-          navigate('/redefinir-senha', { replace: true });
-        }
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate, location]);
-
-  return null;
-}
 
 function CookieBannerForaDoReceiver() {
   const location = useLocation();

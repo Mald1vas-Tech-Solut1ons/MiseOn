@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { KeyRound, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
 import MiseOnLogo from '../components/MiseOnLogo';
 import { supabase } from '../lib/supabase';
+import { callbackInicial, emRecuperacao, interpretarCallback } from '../lib/authCallback';
 import LanguageToggle from '../components/LanguageToggle';
 import { useI18n } from '../contexts/I18nContext';
 
@@ -37,19 +38,17 @@ export default function RedefinirSenha() {
   // era — expirado, usado, ou adulterado.
   useEffect(() => {
     // 1. Detectar erro de token de e-mail expirado ou invalido na URL (hash/search)
-    const hash = window.location.hash;
-    const search = window.location.search;
-    if (hash.includes('error') || search.includes('error') || params.get('erro') === 'expirado') {
+    if (interpretarCallback(new URL(window.location.href)).erro || callbackInicial.erro || params.get('erro') === 'expirado') {
       setEstado('invalido');
       return;
     }
 
     const { data: assinatura } = supabase.auth.onAuthStateChange((evento) => {
-      if (evento === 'PASSWORD_RECOVERY' || evento === 'SIGNED_IN') setEstado('formulario');
+      if (evento === 'PASSWORD_RECOVERY') setEstado('formulario');
     });
 
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setEstado('formulario');
+      if (data.session && emRecuperacao()) setEstado('formulario');
     });
 
     const espera = setTimeout(() => {
@@ -65,6 +64,7 @@ export default function RedefinirSenha() {
   const redefinir = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro('');
+    if (!emRecuperacao()) { setEstado('invalido'); return; }
 
     if (senha.length < 8) return setErro('A senha precisa ter pelo menos 8 caracteres.');
     if (senha !== confirmarSenha) return setErro('As senhas não coincidem.');
