@@ -1,0 +1,285 @@
+<title>O que fazer agora</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --papel:#F6F8FB; --alto:#FFFFFF; --linha:#DCE5F0;
+  --tinta:#070C18; --tinta2:#475569; --tinta3:#7B8CA3;
+  --azul:#004198; --azul2:#0A5CC4; --laranja:#FC5B24; --nevoa:#EAF1FB;
+  --alerta:#B3300F; --alerta-bg:#FDEBE4;
+  --ok:#0F7A4A; --ok-bg:#E3F3EB;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --papel:#070C18; --alto:#101725; --linha:#22304A;
+  --tinta:#EAF1FB; --tinta2:#A8B8CC; --tinta3:#7B8CA3;
+  --azul:#7FB2F0; --azul2:#5B9BE8; --laranja:#FF7A4D; --nevoa:#16233A;
+  --alerta:#FF8F6B; --alerta-bg:#2A1410;
+  --ok:#5FD39B; --ok-bg:#0E2419;
+}}
+:root[data-theme="dark"]{
+  --papel:#070C18; --alto:#101725; --linha:#22304A;
+  --tinta:#EAF1FB; --tinta2:#A8B8CC; --tinta3:#7B8CA3;
+  --azul:#7FB2F0; --azul2:#5B9BE8; --laranja:#FF7A4D; --nevoa:#16233A;
+  --alerta:#FF8F6B; --alerta-bg:#2A1410;
+  --ok:#5FD39B; --ok-bg:#0E2419;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--tinta);
+  font-family:Manrope,system-ui,sans-serif;font-size:17px;line-height:1.6}
+h1,h2,h3{font-family:Sora,sans-serif;letter-spacing:-.02em}
+.mono{font-family:"JetBrains Mono",monospace}
+.wrap{max-width:860px;margin:0 auto;padding-inline:20px;padding-block:0}
+
+header{padding-block:40px 26px;border-bottom:3px solid var(--azul)}
+h1{font-size:clamp(30px,5.4vw,46px);line-height:1.05;font-weight:800;margin:0 0 12px}
+.sub{font-size:19px;color:var(--tinta2);margin:0;max-width:56ch}
+
+section{padding-block:36px;border-bottom:1px solid var(--linha)}
+section:last-of-type{border-bottom:0}
+h2{font-size:clamp(21px,3.2vw,27px);font-weight:700;margin:0 0 6px}
+h3{font-size:18px;font-weight:700;margin:26px 0 8px}
+p{margin:0 0 14px;max-width:66ch}
+.et{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--laranja);font-weight:600;margin:0 0 8px}
+
+.alerta{background:var(--alerta-bg);border-left:5px solid var(--alerta);
+  border-radius:0 10px 10px 0;padding:20px 22px;margin:22px 0}
+.alerta p:last-child{margin-bottom:0}
+.alerta b{color:var(--alerta)}
+
+.passo{background:var(--alto);border:1px solid var(--linha);border-radius:12px;
+  padding:20px 22px;margin:14px 0;display:grid;grid-template-columns:44px 1fr;gap:0 16px}
+.passo .n{font-family:Sora,sans-serif;font-size:26px;font-weight:800;color:var(--laranja);
+  line-height:1;padding-top:2px}
+.passo h3{margin:0 0 6px;font-size:18px}
+.passo p{margin:0 0 10px;font-size:16px;color:var(--tinta2)}
+.passo p:last-child{margin-bottom:0}
+.passo .tempo{font-family:"JetBrains Mono",monospace;font-size:11.5px;
+  color:var(--tinta3);letter-spacing:.06em}
+
+pre{background:var(--nevoa);border:1px solid var(--linha);border-radius:9px;
+  padding:14px 16px;overflow-x:auto;margin:10px 0;font-size:13.5px;line-height:1.55}
+code{font-family:"JetBrains Mono",monospace}
+p code,li code{background:var(--nevoa);border:1px solid var(--linha);
+  padding:1px 6px;border-radius:5px;font-size:.85em;white-space:nowrap}
+
+ul,ol{max-width:66ch;padding-left:22px;margin:0 0 14px}
+li{margin-bottom:7px}
+
+.tab{overflow-x:auto;margin:18px 0;border:1px solid var(--linha);
+  border-radius:11px;background:var(--alto)}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:520px}
+th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--linha);vertical-align:top}
+th{font-family:Sora,sans-serif;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--tinta3);font-weight:700;background:var(--nevoa)}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+
+footer{padding-block:30px 52px;color:var(--tinta3);font-size:14px;border-top:3px solid var(--azul)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:focus-visible{outline:2px solid var(--azul2);outline-offset:2px}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="et">Manual de instruções · 15/09/2026</p>
+  <h1>O que fazer agora</h1>
+  <p class="sub">Sem estratégia, sem teoria. O que abrir, o que rodar e em que
+  ordem — de hoje até publicar o primeiro conteúdo.</p>
+</header>
+
+<section>
+  <p class="et">Antes de tudo</p>
+  <h2>O seu cliente não está usando o sistema</h2>
+
+  <div class="alerta">
+    <p><b>Natureba: 50 produtos cadastrados, 1 mesa, 5% de cashback ligado — e zero pedidos.</b>
+    Nunca passou um pedido pelo MiseOn.</p>
+    <p>Nada que eu mexi hoje afetou ele, porque não havia o que afetar. Mas isso
+    é mais urgente que qualquer post: você tem um cliente que contratou e não
+    ativou. Se ele não usar, ele não renova — e você perde o único caso real que
+    tem antes mesmo de começar a divulgar.</p>
+  </div>
+
+  <p><strong>Antes de gravar o primeiro vídeo, ligue para ele.</strong> Não para
+  vender nada: para descobrir onde travou. Cadastro pronto e uso zero quase
+  sempre significa uma coisa só — ninguém sentou junto no primeiro dia de
+  operação.</p>
+</section>
+
+<section>
+  <p class="et">Hoje · 1 hora</p>
+  <h2>Quatro coisas, nesta ordem</h2>
+
+  <div class="passo">
+    <span class="n">1</span>
+    <div>
+      <h3>Ligue para o Natureba</h3>
+      <p class="tempo">20 min · só telefone</p>
+      <p>Pergunta única: <em>“o que te impediu de usar até agora?”</em> Anote a
+      resposta literal. Ela vale mais que qualquer pesquisa de mercado que você
+      possa pagar.</p>
+    </div>
+  </div>
+
+  <div class="passo">
+    <span class="n">2</span>
+    <div>
+      <h3>Reimprima o QR da mesa das duas lojas</h3>
+      <p class="tempo">10 min · no sistema</p>
+      <p>O QR antigo não fecha mais pedido — agora ele carrega um segredo, senão
+      qualquer pessoa da internet conseguia mandar pedido para a sua cozinha.</p>
+      <p>Entre em <code>/admin/mesas</code> → botão <strong>QR Code</strong> na
+      mesa → <strong>Imprimir</strong>. Pronto.</p>
+    </div>
+  </div>
+
+  <div class="passo">
+    <span class="n">3</span>
+    <div>
+      <h3>Confira a tela de margem</h3>
+      <p class="tempo">10 min · no sistema</p>
+      <p>Entre no Lanche do Paulista, vá em <code>/admin/financeiro</code> e
+      veja a margem por produto. Sete produtos devem aparecer entre 50% e 87%.
+      <strong>Se algum número parecer errado para você, me diga qual</strong> —
+      é você que conhece o custo real.</p>
+    </div>
+  </div>
+
+  <div class="passo">
+    <span class="n">4</span>
+    <div>
+      <h3>Publique o carrossel</h3>
+      <p class="tempo">15 min · no celular</p>
+      <p>Mande as 7 imagens de
+      <code>output/marketing/instagram/carrossel-delivery/</code> para o celular
+      (WhatsApp para você mesmo resolve). No Instagram: novo post → selecionar
+      várias → escolha <strong>01 a 07 em ordem</strong> → legenda pronta logo
+      abaixo nesta página.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="et">Copie e cole</p>
+  <h2>A legenda do carrossel</h2>
+  <pre><code>Você vende por 44 e recebe 22.
+
+Isso não é a plataforma te roubando. É uma conta que quase
+ninguém faz: anunciar no delivery o mesmo preço do balcão.
+
+No balcão você fica com os 44. Lá, depois da comissão, da taxa
+de entrega, da taxa de serviço e da taxa de pagamento, some
+metade.
+
+A conta certa é ao contrário: você informa quanto a plataforma
+cobra e calcula quanto precisa anunciar para sobrar a SUA
+margem. O MiseOn faz isso para o cardápio inteiro, item por item.
+
+E tem o segundo movimento, que é o que o dono que mais vende
+delivery no país faz: trazer o cliente da plataforma para o
+canal próprio. Um cupom de 20% no seu link custa menos que os
+26% a 40% da plataforma — e da segunda compra em diante o
+cliente é seu.
+
+30 dias grátis, sem cartão. Link na bio.
+
+#delivery #ifood #gestaoderestaurante #cmv #foodservice
+#margemdelucro #donoderestaurante #hamburgueria #marmitaria</code></pre>
+  <p>No TikTok, publique as mesmas imagens como carrossel e corte a legenda
+  pela metade — lá a paciência é menor.</p>
+</section>
+
+<section>
+  <p class="et">Esta semana</p>
+  <h2>O vídeo do YouTube</h2>
+
+  <p>O roteiro completo está em
+  <code>output/marketing/roteiro-youtube-conta-do-prato.md</code>. Ele é feito
+  para você <strong>não aparecer</strong>: é gravação de tela com a sua voz por
+  cima.</p>
+
+  <h3>Como gravar</h3>
+  <ol>
+    <li><strong>Áudio primeiro.</strong> Gravador de voz do celular, num cômodo
+    com cortina ou guarda-roupa aberto. Leia em pé. Grave bloco por bloco, não
+    tudo de uma vez — errou uma palavra, repete só aquele bloco.</li>
+    <li><strong>Tela depois.</strong> <code>Win</code> + <code>G</code> abre a
+    gravação do Windows, sem instalar nada. Zoom do navegador em 125%
+    (<code>Ctrl</code> + <code>+</code>) — o texto do admin é pequeno demais
+    para vídeo.</li>
+    <li><strong>Junte no CapCut</strong> (grátis). Áudio na trilha de baixo,
+    telas por cima seguindo o que a voz está dizendo.</li>
+    <li><strong>Encaixe os ativos</strong> de
+    <code>output/marketing/ativos/video/</code>: a vinheta aos ~0:55 (depois do
+    gancho, nunca no segundo zero), as transições entre blocos, a assinatura no
+    fim.</li>
+  </ol>
+
+  <div class="alerta">
+    <p><b>Grave sempre o Lanche do Paulista.</b> Nunca o Natureba — é cliente
+    pagante real e os dados são dele.</p>
+  </div>
+</section>
+
+<section>
+  <p class="et">Referência</p>
+  <h2>Onde fica cada coisa</h2>
+
+  <div class="tab">
+  <table>
+    <thead><tr><th>Quero…</th><th>Abro…</th></tr></thead>
+    <tbody>
+      <tr><td>Publicar no Instagram hoje</td><td><code>output/marketing/instagram/carrossel-delivery/</code> · imagens 01 a 07</td></tr>
+      <tr><td>O kit anterior (Kiosk, ficha, nutricional)</td><td><code>output/marketing/instagram/</code> · posts, stories e legendas prontas</td></tr>
+      <tr><td>Gravar o vídeo do YouTube</td><td><code>output/marketing/roteiro-youtube-conta-do-prato.md</code></td></tr>
+      <tr><td>Vinheta, transições, assinatura</td><td><code>output/marketing/ativos/video/</code> · use os <code>.mov</code> no CapCut do PC</td></tr>
+      <tr><td>Roteiros de Reels (8 prontos)</td><td>Manual de conteúdo, Parte 08</td></tr>
+      <tr><td>Saber o que POSSO afirmar</td><td>Manual de conteúdo, Parte 03</td></tr>
+      <tr><td>Saber o que o sistema atende</td><td>Laudo realidade × sistema</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Os comandos, se precisar</h3>
+  <p>Você não precisa rodar nada disso para publicar — já rodei tudo e o
+  resultado está nos arquivos. Fica aqui para quando quiser refazer:</p>
+  <pre><code># refazer o carrossel depois de mudar um texto
+node scripts/gerar-carrossel.mjs
+
+# refazer vinheta e transições
+node scripts/gerar-ativos-marca.mjs
+
+# capturar prints das telas públicas
+node scripts/capturar-prints-marketing.mjs</code></pre>
+  <p>As provas do sistema (cupom, leitura de nota) rodam no <strong>SQL Editor
+  do Supabase</strong>: abra o arquivo em <code>supabase/tests/</code>, copie e
+  cole. Elas não gravam nada — montam o cenário, conferem e desfazem.</p>
+</section>
+
+<section>
+  <p class="et">Regra única</p>
+  <h2>O que não pode ser dito</h2>
+  <p>Você não tem cliente medido ainda. Então, em qualquer post, vídeo ou
+  conversa:</p>
+  <ul>
+    <li><strong>Nada de percentual de ganho.</strong> Nem “reduz 30% do
+    desperdício”, nem “aumenta X% as vendas”.</li>
+    <li><strong>Nada de depoimento ou número de clientes.</strong></li>
+    <li><strong>Nada de “o melhor” ou “o único que tem”.</strong></li>
+    <li>Loja de demonstração se identifica como demonstração, uma vez, em texto
+    na tela.</li>
+  </ul>
+  <p>O que você <strong>pode</strong> dizer é mais forte e ninguém contesta:
+  o preço (R$&nbsp;169,90), o teste (30 dias, sem cartão), e <strong>o que a tela
+  faz acontecer na sua frente</strong> — o cupom virando estoque, a margem
+  mudando quando o preço do insumo muda.</p>
+</section>
+
+<footer>
+  <p>Se algum número da tela de margem parecer errado para você, me diga qual —
+  é você que conhece o custo real da sua cozinha, e o sistema está montado para
+  a sua correção vencer a dele.</p>
+</footer>
+
+</div>

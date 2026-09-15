@@ -32,18 +32,24 @@ const isConfigured = Boolean(SERVICE_KEY);
 let db: SupabaseClient;
 let lojaId: string;
 let mesaId: string;
+/** Segredo impresso no QR daquela mesa. Sem ele o servidor recusa o pedido. */
+let mesaToken: string;
 let produtoId: string;
 const pedidosCriados: string[] = [];
 
 /** Nome que NÃO bate na heurística de revenda da RPC (coca/suco/água/...). */
 const NOME_PRODUTO = 'Burger Regressao Comanda';
 
-async function chamarRpcMesa(itens: unknown[]) {
+async function chamarRpcMesa(itens: unknown[], token: string | null = mesaToken) {
   const { data, error } = await db.rpc('fn_pedido_mesa_criar', {
     p_loja_id: lojaId,
     p_mesa_id: mesaId,
     p_identificador: 'Cliente QR Teste',
     p_itens: itens,
+    // O QR da mesa carrega um segredo desde 20260915180000: numero de mesa
+    // sozinho e adivinhavel, e era assim que qualquer visitante da internet
+    // mandava pedido para a cozinha de qualquer loja.
+    p_token: token,
   });
   if (error) throw new Error(`fn_pedido_mesa_criar falhou: ${error.message}`);
   if (!data || data.length === 0) throw new Error('fn_pedido_mesa_criar não retornou pedido');
@@ -67,10 +73,18 @@ beforeAll(async () => {
   const { data: mesa, error: errMesa } = await db
     .from('mesas')
     .insert({ loja_id: lojaId, numero: 9100 + Math.floor(Math.random() * 800), ativo: true })
-    .select('id')
+    .select('id, token')
     .single();
   if (errMesa) throw new Error(`Erro ao criar mesa: ${errMesa.message}`);
   mesaId = mesa.id;
+  mesaToken = mesa.token;
+
+  // Cliente so pede na mesa com a loja ABERTA — regra que entrou junto com o
+  // token. A loja descartavel nasce sem horario cadastrado, entao a chave
+  // manual e o que a deixa operante para este teste.
+  const { error: errAberta } = await db
+    .from('lojas').update({ aberto_manual: true }).eq('id', lojaId);
+  if (errAberta) throw new Error(`Erro ao abrir a loja: ${errAberta.message}`);
 
   // controla_estoque: false — este teste trata de comanda, não de baixa de insumo.
   const { data: produto, error: errProduto } = await db
@@ -161,5 +175,27 @@ gated(isConfigured, 'Pedido de mesa via QR → comanda (Sprint 1)', () => {
     expect(pedidosDaComanda).toHaveLength(2);
     const total = pedidosDaComanda!.reduce((s, p) => s + Number(p.valor_total), 0);
     expect(total).toBe(42.00 * 2 + 42.00);
+  });
+  /**
+   * Guarda da correcao de 20260915180000.
+   *
+   * Ate aquela data a RPC tinha EXECUTE para `anon` e nao verificava NADA
+   * sobre quem chamava. A cadeia inteira era alcancavel so com a chave publica
+   * do cardapio: lojas_publicas devolve o loja_id, fn_mesa_publica devolve o
+   * mesa_id pelo NUMERO — que e 1..N, adivinhavel em segundos — e a RPC criava
+   * o pedido. Qualquer pessoa, de qualquer lugar, enchia o KDS de qualquer
+   * restaurante. Numa sexta a noite isso e a cozinha parada.
+   *
+   * Se algum dia este teste passar a criar pedido, o buraco voltou.
+   */
+  it('sem o segredo do QR o servidor recusa — numero de mesa nao basta', async () => {
+    await expect(chamarRpcMesa([{ produto_id: produtoId, quantidade: 1 }], null))
+      .rejects.toThrow(/QR n[aã]o vale mais|Chame o gar/i);
+  });
+
+  it('token chutado tambem e recusado', async () => {
+    const chute = '00000000-0000-0000-0000-000000000000';
+    await expect(chamarRpcMesa([{ produto_id: produtoId, quantidade: 1 }], chute))
+      .rejects.toThrow(/QR n[aã]o vale mais|Chame o gar/i);
   });
 });
