@@ -1,0 +1,223 @@
+<meta charset="utf-8">
+<title>motor de ativos MiseOn</title>
+<style>
+  html,body{margin:0;padding:0;background:transparent;overflow:hidden}
+  canvas{display:block}
+</style>
+<canvas id="c"></canvas>
+<script>
+// Motor de render quadro a quadro dos ativos de marca do MiseOn.
+// O puppeteer chama MISEON.montar(...) uma vez e MISEON.quadro(t) por frame.
+// Nada aqui usa animação de CSS nem requestAnimationFrame: o tempo é um
+// parâmetro, para que o mesmo frame saia idêntico em qualquer máquina.
+
+const AZUL   = '#004098';   // amostrado do logo.png
+const LARANJA= '#F85020';
+const BRANCO = '#FFFFFF';
+
+const cv = document.getElementById('c');
+const cx = cv.getContext('2d');
+let L = null, W = 0, H = 0, VERT = true;
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const norm  = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+const outCubic = x => 1 - Math.pow(1 - x, 3);
+const inOutCubic = x => x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2;
+const outBack = x => { const c1 = 1.70158, c3 = c1 + 1;
+  return 1 + c3*Math.pow(x-1, 3) + c1*Math.pow(x-1, 2); };
+
+// A varredura corre na diagonal da seta do logo: sobe da esquerda para a
+// direita. `u` é a coordenada ao longo dessa diagonal, de 0 a 1.
+const AX = 0.55, AY = 0.45;
+function bordaU(u) {                       // reta de u constante: (x0,0)→(x1,H)
+  return [ W * (u - AY) / AX, W * u / AX ];
+}
+function pintarAlem(u, cor) {               // tudo que ainda não foi varrido
+  const [x0, x1] = bordaU(u);
+  cx.fillStyle = cor;
+  cx.beginPath();
+  cx.moveTo(x0, 0); cx.lineTo(W * 3, 0); cx.lineTo(W * 3, H); cx.lineTo(x1, H);
+  cx.closePath(); cx.fill();
+}
+function pintarFaixa(uIni, uFim, cor) {     // a barra que varre
+  const [a0, a1] = bordaU(uIni), [b0, b1] = bordaU(uFim);
+  cx.fillStyle = cor;
+  cx.beginPath();
+  cx.moveTo(a0, 0); cx.lineTo(b0, 0); cx.lineTo(b1, H); cx.lineTo(a1, H);
+  cx.closePath(); cx.fill();
+}
+
+function desenharLogo(escala, alfa, deslocY) {
+  if (!L || !alfa) return;
+  const larguraAlvo = (VERT ? W * 0.74 : W * 0.34) * escala;
+  const w = larguraAlvo, h = larguraAlvo * (L.naturalHeight / L.naturalWidth);
+  cx.save(); cx.globalAlpha = alfa;
+  cx.drawImage(L, (W - w) / 2, (H - h) / 2 + deslocY, w, h);
+  cx.restore();
+}
+
+function texto(str, y, tam, cor, peso, espaco) {
+  cx.save();
+  cx.fillStyle = cor;
+  cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  cx.letterSpacing = (espaco || 0) + 'px';
+  cx.font = `${peso || 700} ${tam}px Archivo, "Segoe UI", Arial, sans-serif`;
+  cx.fillText(str, W / 2, y);
+  cx.restore();
+}
+
+// ── Os ativos ──────────────────────────────────────────────────────────────
+const ATIVOS = {
+  // 1,2s. Barra laranja sobe na diagonal sobre o azul e revela a marca no branco.
+  'vinheta-abertura': { dur: 1.2, alfa: false, frame(t) {
+    cx.fillStyle = BRANCO; cx.fillRect(0, 0, W, H);
+    const p = 0.18 + (1.45 - 0.18) * inOutCubic(norm(t, 0, 0.52));
+    const faixa = 0.26;
+    pintarAlem(p, AZUL);
+    pintarFaixa(p - faixa, p, LARANJA);
+
+    const lt = norm(t, 0.30, 0.74);
+    if (lt > 0) desenharLogo(0.88 + 0.12 * outBack(lt), clamp(lt * 1.8, 0, 1),
+                             (1 - outCubic(lt)) * H * 0.045);
+
+    const st = norm(t, 0.66, 0.98);           // risco laranja sob a marca
+    if (st > 0) {
+      const larg = (VERT ? W * 0.26 : W * 0.12) * outCubic(st);
+      const y = H / 2 + (VERT ? W * 0.30 : W * 0.14);
+      cx.fillStyle = LARANJA;
+      cx.fillRect(W / 2 - larg / 2, y, larg, VERT ? 9 : 7);
+    }
+  }},
+
+  // 2,5s. Cartão de encerramento com a oferta. Entra depois do CTA falado.
+  'assinatura-final': { dur: 2.5, alfa: false, frame(t) {
+    cx.fillStyle = BRANCO; cx.fillRect(0, 0, W, H);
+    const p = 0.10 + (1.45 - 0.10) * inOutCubic(norm(t, 0, 0.40));
+    pintarAlem(p, AZUL);
+    pintarFaixa(p - 0.22, p, LARANJA);
+
+    const lt = norm(t, 0.22, 0.62);
+    const desloc = VERT ? -H * 0.10 : -H * 0.12;
+    if (lt > 0) {
+      cx.save(); cx.globalAlpha = clamp(lt * 1.8, 0, 1);
+      const w = (VERT ? W * 0.70 : W * 0.30) * (0.9 + 0.1 * outBack(lt));
+      const h = w * (L.naturalHeight / L.naturalWidth);
+      cx.drawImage(L, (W - w) / 2, (H - h) / 2 + desloc, w, h);
+      cx.restore();
+    }
+
+    const base = H / 2 + (VERT ? H * 0.055 : H * 0.10);
+    const t1 = norm(t, 0.52, 0.86), t2 = norm(t, 0.76, 1.10), t3 = norm(t, 0.98, 1.32);
+    const tam = VERT ? W * 0.055 : W * 0.026;
+
+    if (t1 > 0) { cx.save(); cx.globalAlpha = outCubic(t1);
+      texto('30 DIAS GRÁTIS', base - tam * 0.9 + (1 - outCubic(t1)) * 24,
+            tam, AZUL, 800, tam * 0.06); cx.restore(); }
+    if (t2 > 0) { cx.save(); cx.globalAlpha = outCubic(t2);
+      texto('sem cartão · sem fidelidade', base + tam * 0.5 + (1 - outCubic(t2)) * 20,
+            tam * 0.62, '#5A6472', 600, 0); cx.restore(); }
+    if (t3 > 0) { cx.save(); cx.globalAlpha = outCubic(t3);
+      const y = base + tam * 2.1;
+      const larg = (VERT ? W * 0.34 : W * 0.16) * outCubic(t3);
+      cx.fillStyle = LARANJA; cx.fillRect(W / 2 - larg / 2, y - tam * 0.72, larg, VERT ? 8 : 6);
+      texto('miseon.app.br', y + tam * 0.35, tam * 0.86, AZUL, 800, tam * 0.02);
+      cx.restore(); }
+  }},
+
+  // 0,5s. Corte de marca: cobre a tela por inteiro no meio do caminho.
+  // Entre dois clipes, com o corte no quadro central.
+  'transicao-corte': { dur: 0.5, alfa: true, frame(t) {
+    cx.clearRect(0, 0, W, H);
+    const x = t / 0.5;
+    if (x <= 0.5) {                       // entra: laranja cobre tudo
+      const p = -0.30 + (1.0 + 0.30) * inOutCubic(x / 0.5);
+      cx.save(); cx.beginPath();
+      const [a0, a1] = bordaU(p);
+      cx.moveTo(-W, 0); cx.lineTo(a0, 0); cx.lineTo(a1, H); cx.lineTo(-W, H);
+      cx.closePath(); cx.clip();
+      cx.fillStyle = LARANJA; cx.fillRect(-W, 0, W * 4, H);
+      cx.restore();
+    } else {                              // sai: azul empurra e some
+      const p = -0.30 + (1.0 + 0.30) * inOutCubic((x - 0.5) / 0.5);
+      cx.fillStyle = LARANJA; cx.fillRect(0, 0, W, H);
+      pintarFaixa(p - 0.30, p, AZUL);
+      cx.save(); cx.beginPath();
+      const [a0, a1] = bordaU(p - 0.30);
+      cx.moveTo(-W, 0); cx.lineTo(a0, 0); cx.lineTo(a1, H); cx.lineTo(-W, H);
+      cx.closePath(); cx.clip();
+      cx.clearRect(-W, 0, W * 4, H);
+      cx.restore();
+    }
+  }},
+
+  // 0,45s. Barras que varrem em sequência — transição mais seca, para cortes
+  // rápidos dentro de uma mesma cena.
+  'transicao-barras': { dur: 0.45, alfa: true, frame(t) {
+    cx.clearRect(0, 0, W, H);
+    const x = t / 0.45, n = 5, alturaBarra = H / n;
+    for (let i = 0; i < n; i++) {
+      const atraso = (i / n) * 0.22;
+      const ent = inOutCubic(clamp((x - atraso) / 0.30, 0, 1));
+      const sai = inOutCubic(clamp((x - 0.55 - atraso) / 0.30, 0, 1));
+      const esq = i % 2 === 0;
+      const larg = W * (ent - sai);
+      if (larg <= 0) continue;
+      cx.fillStyle = i % 2 === 0 ? LARANJA : AZUL;
+      const xIni = esq ? W * sai : W - W * ent;
+      cx.fillRect(xIni, i * alturaBarra, larg, alturaBarra + 1);
+    }
+  }},
+
+  // 0,6s. A seta do logo atravessa a tela e leva o corte junto.
+  'transicao-seta': { dur: 0.6, alfa: true, frame(t) {
+    cx.clearRect(0, 0, W, H);
+    // A entrada TEM que terminar na metade: uma transição que nunca cobre a
+    // tela inteira não serve de corte — deixa os dois clipes aparecendo juntos.
+    const x = t / 0.6;
+    const p = -0.45 + (1.45 + 0.45) * inOutCubic(clamp(x / 0.5, 0, 1));
+    // corpo
+    cx.save(); cx.beginPath();
+    const [a0, a1] = bordaU(p);
+    cx.moveTo(-W, 0); cx.lineTo(a0, 0); cx.lineTo(a1, H); cx.lineTo(-W, H);
+    cx.closePath(); cx.clip();
+    cx.fillStyle = AZUL; cx.fillRect(-W, 0, W * 4, H);
+    cx.restore();
+    // a crista laranja, que é onde mora a energia do corte
+    pintarFaixa(p - 0.13, p, LARANJA);
+    // rastro: linhas de velocidade atrás da crista
+    cx.save(); cx.globalAlpha = 0.5;
+    for (let i = 1; i <= 4; i++) {
+      pintarFaixa(p - 0.13 - i * 0.055, p - 0.13 - i * 0.055 + 0.012, LARANJA);
+    }
+    cx.restore();
+    // saída: a partir da metade o azul se retira pela mesma diagonal
+    if (x > 0.5) {
+      const q = -0.45 + (1.45 + 0.45) * inOutCubic((x - 0.5) / 0.5);
+      cx.save(); cx.beginPath();
+      const [b0, b1] = bordaU(q);
+      cx.moveTo(-W, 0); cx.lineTo(b0, 0); cx.lineTo(b1, H); cx.lineTo(-W, H);
+      cx.closePath(); cx.clip();
+      cx.clearRect(-W, 0, W * 4, H);
+      cx.restore();
+    }
+  }},
+};
+
+window.MISEON = {
+  async montar(nome, largura, altura) {
+    W = cv.width = largura; H = cv.height = altura;
+    cv.style.width = largura + 'px'; cv.style.height = altura + 'px';
+    VERT = altura > largura;
+    if (!L) {
+      L = new Image(); L.src = '../../logo.png';
+      await new Promise((ok, erro) => { L.onload = ok; L.onerror = erro; });
+    }
+    await document.fonts.ready;
+    return ATIVOS[nome].dur;
+  },
+  quadro(nome, t) { cx.clearRect(0, 0, W, H); ATIVOS[nome].frame(t); },
+  temAlfa(nome) { return ATIVOS[nome].alfa; },
+  lista() { return Object.keys(ATIVOS); },
+};
+</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&display=swap">
