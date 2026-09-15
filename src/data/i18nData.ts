@@ -271,6 +271,26 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // ── Assinatura e landings: textos que passaram a existir quando o
+  // parcelamento e as métricas viraram derivados (15/09/2026) ──────────────
+  'Cartão de Crédito': 'Credit Card',
+  'Plano Mensal: R$ 169,90/mês. Cancele quando quiser.': 'Monthly Plan: R$ 169.90/month. Cancel anytime.',
+  'Sem fidelidade contratual': 'No contractual lock-in',
+  'Tempo por etapa, cronometrado': 'Time per stage, clocked',
+  'No KDS': 'On the KDS',
+  'Baixa de insumo e CMV': 'Ingredient draw-down and COGS',
+  'Por ficha': 'From the recipe',
+  'Pedido do canal direto na cozinha': 'Channel order straight to the kitchen',
+  'Sem redigitar': 'No retyping',
+  'Emissão a partir da própria venda': 'Issued from the sale itself',
+  'Sem número pessoal no atendimento': 'No personal number in support',
+  'API Oficial': 'Official API',
+  'Perda de cocção dentro do custo': 'Cooking loss inside the cost',
+  'Rendimento real': 'Measured yield',
+  'Baixa proporcional ao peso servido': 'Draw-down proportional to weight served',
+  'Por grama': 'Per gram',
+  'O sistema para restaurante por quilo com': 'The system for pay-by-weight restaurants with',
+  'Veja o custo de cada grama que sai da travessa. Calcule pratos por peso (R$/kg) ou por unidade a partir da sua ficha técnica, com o rendimento que a sua cozinha mediu — e cada grama servida baixa o estoque na proporção da receita.': "See the cost of every gram that leaves the tray. Price dishes by weight (R$/kg) or per unit from your own recipe, using the yield your kitchen measured — and every gram served draws stock down in the recipe's proportion.",
   'A TV recebe apenas o link público protegido do painel; seu login do MiseOn não é compartilhado.': 'The TV only receives the protected public display link; your MiseOn login is never shared.',
   'Abrir no navegador': 'Open in browser',
   'Aguardando autorização do administrador…': 'Waiting for administrator approval…',

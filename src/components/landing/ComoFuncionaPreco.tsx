@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, Check, Landmark, ShieldCheck } from 'lucide-react';
-import { EFI_TARIFAS, EFI_LINKS, SAAS_PRICING } from '../../lib/efiInfo';
+import { EFI_TARIFAS, EFI_LINKS, SAAS_PRICING, parcelamentoAnualCurto } from '../../lib/efiInfo';
 import { zap } from './zap';
 
 import { useI18n } from '../../contexts/I18nContext';
@@ -113,7 +113,7 @@ export function ComoFuncionaPreco() {
                   <span style={{ color: 'rgba(234,241,251,0.4)' }} className="text-xl font-medium">/mês</span>
                 </div>
                 <p style={{ color: 'rgba(234,241,251,0.4)' }} className="mt-3 text-sm">
-                  {anual ? `Faturado em até 12x no cartão (R$ ${totalAnualStr}) ou Pix 5% OFF. Economia de R$ ${economiaAnoStr} por ano!` : 'Assinatura mensal sem fidelidade. Cancele quando quiser.'}
+                  {anual ? `Faturado ${parcelamentoAnualCurto()} (R$ ${totalAnualStr}) ou Pix 5% OFF. Economia de R$ ${economiaAnoStr} por ano!` : 'Assinatura mensal sem fidelidade. Cancele quando quiser.'}
                 </p>
 
                 <ul className="mt-8 grid gap-3 sm:grid-cols-2">

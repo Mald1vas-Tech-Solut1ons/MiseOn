@@ -19,6 +19,7 @@ import TabelaComparativaRealidade from '../components/home/TabelaComparativaReal
 import ShowcaseTelasReais from '../components/home/ShowcaseTelasReais';
 import { KioskHomeSection } from '../components/home/KioskHomeSection';
 import { useI18n } from '../contexts/I18nContext';
+import { parcelamentoAnualCurto, fraseOfertaAnual } from '../lib/efiInfo';
 
 const WHATSAPP_CONTATO = '5511919889233';
 const zap = (msg: string) => `https://wa.me/${WHATSAPP_CONTATO}?text=${encodeURIComponent(msg)}`;
@@ -2007,7 +2008,7 @@ export default function Home() {
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-slate-300">
               Cadastre sua loja em menos de 3 minutos, use 30 dias sem custos e escolha a melhor opção para a sua operação. 
-              Pagamentos via Pix têm 5% de desconto à vista e o plano anual pode ser parcelado no cartão em até 12x pelo Efí Bank.
+              Pagamentos via Pix têm 5% de desconto à vista e o plano anual pode ser parcelado no cartão {parcelamentoAnualCurto()} pelo Efí Bank.
             </p>
           </div>
 
@@ -2056,7 +2057,7 @@ export default function Home() {
                   </div>
                   <h3 className="font-['Sora'] text-3xl font-extrabold text-white">Plano Profissional</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-300">
-                    {planoAnual ? 'A escolha inteligente: R$ 149,90/mês no plano anual. Parcele em até 12x no cartão ou ganhe 5% OFF à vista no Pix.' : 'Flexibilidade mensal: R$ 169,90/mês com acesso completo a todos os módulos, sem fidelidade forçada.'}
+                    {planoAnual ? `A escolha inteligente: R$ 149,90/mês no plano anual. Parcele ${parcelamentoAnualCurto()} ou ganhe 5% OFF à vista no Pix.` : 'Flexibilidade mensal: R$ 169,90/mês com acesso completo a todos os módulos, sem fidelidade forçada.'}
                   </p>
                 </div>
 
@@ -2078,7 +2079,7 @@ export default function Home() {
                     <span className="text-base font-medium text-slate-400">/mês</span>
                   </div>
                   <span className="mt-2 text-xs text-orange-300/90 font-medium transition-all">
-                    {planoAnual ? 'Total anual de R$ 1.798,80: 3x de R$ 599,60, 6x de R$ 299,80, 8x de R$ 224,85 ou 12x de R$ 149,90 no cartão. No Pix: R$ 1.708,86 à vista (5% OFF).' : 'R$ 169,90 no cartão ou R$ 161,40 à vista no Pix (5% OFF)'}
+                    {planoAnual ? fraseOfertaAnual() : 'R$ 169,90 no cartão ou R$ 161,40 à vista no Pix (5% OFF)'}
                   </span>
                 </div>
 

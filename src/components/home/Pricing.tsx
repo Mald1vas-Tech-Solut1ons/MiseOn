@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, ShieldCheck } from 'lucide-react';
-import { SAAS_PRICING } from '../../lib/efiInfo';
+import { SAAS_PRICING, parcelamentoAnualCurto } from '../../lib/efiInfo';
 
 import { useI18n } from '../../contexts/I18nContext';
 const CHECKLIST = [
@@ -71,7 +71,7 @@ export default function Pricing() {
             <div className="mt-4 flex flex-col items-center justify-center text-sm font-medium h-12">
               {anual ? (
                 <>
-                  <span className="text-gray-400">{tDynamic(`Faturamento anual em até 12x no cartão (R$ ${totalAnualStr}) ou Pix 5% OFF.`)}</span>
+                  <span className="text-gray-400">{tDynamic(`Faturamento anual ${parcelamentoAnualCurto()} (R$ ${totalAnualStr}) ou Pix 5% OFF.`)}</span>
                   <span className="text-blue-400 font-bold mt-1">{tDynamic(`Sua economia: R$ ${economiaAnoStr}/ano`)}</span>
                 </>
               ) : (

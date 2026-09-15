@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { CreditCard, CheckCircle, AlertCircle, Calendar, Lock, ShieldCheck, QrCode, Copy, Sparkles, Clock, FileText, Download, Loader2, XCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { avaliarAssinatura } from '../../lib/assinatura';
-import { SAAS_PRICING } from '../../lib/efiInfo';
+import { SAAS_PRICING, maxParcelasAnual, parcelamentoAnualCurto, rotuloParcelaAnual } from '../../lib/efiInfo';
 import { BandeiraMark } from '../../components/ui';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
@@ -20,7 +20,9 @@ export default function Assinatura() {
   const [carregando, setCarregando] = useState(true);
   const [metodo, setMetodo] = useState<'cartao' | 'pix'>('cartao');
   const [ciclo, setCiclo] = useState<'mensal' | 'anual'>('anual');
-  const [parcelas, setParcelas] = useState<number>(3);
+  // Começa no maior parcelamento que o checkout aceita — que sai da lista de
+  // SAAS_PRICING.anual.cartao, nunca de um número escrito aqui.
+  const [parcelas, setParcelas] = useState<number>(maxParcelasAnual());
   
   // Estados para o Cartão de Crédito
   const [numero, setNumero] = useState('');
@@ -351,7 +353,9 @@ export default function Assinatura() {
                 <div>
                   <span className="text-sm font-bold text-gray-900 dark:text-gray-100 block">MiseOn SaaS Pro</span>
                   <span className="text-xs opacity-95 text-gray-400">
-                    {tDynamic(ciclo === 'anual' ? 'R$ 1.798,80 no ano (em até 12x no cartão)' : 'Sem fidelidade contratual')}
+                    {ciclo === 'anual'
+                      ? `${emReais(SAAS_PRICING.anual.totalBruto)} no ano (${parcelamentoAnualCurto()})`
+                      : tDynamic('Sem fidelidade contratual')}
                   </span>
                 </div>
                 <div className="text-right">
@@ -396,7 +400,7 @@ export default function Assinatura() {
             {/* Tabs */}
             <div className="flex p-1 bg-gray-100 dark:bg-gray-950 rounded-2xl mb-6">
               <button type="button" onClick={() => setMetodo('cartao')} className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${metodo === 'cartao' ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
-                <CreditCard size={18} /> {tDynamic('Cartão de Crédito (até 12x)')}
+                <CreditCard size={18} /> {ciclo === 'anual' ? `Cartão de Crédito (até ${maxParcelasAnual()}x)` : tDynamic('Cartão de Crédito')}
               </button>
               <button type="button" onClick={() => setMetodo('pix')} className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${metodo === 'pix' ? 'bg-white dark:bg-gray-900 shadow-sm text-teal-600 dark:text-teal-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
                 <QrCode size={18} /> Pix (5% OFF)
@@ -418,7 +422,9 @@ export default function Assinatura() {
               {metodo === 'cartao' ? (
                 <div className="space-y-4 animate-in slide-in-from-right-4">
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-2">
-                    {tDynamic(ciclo === 'anual' ? 'Plano Anual: R$ 1.798,80 (equivalente a R$ 149,90/mês). Parcele abaixo em até 3x.' : 'Plano Mensal: R$ 169,90/mês. Cancele quando quiser.')}
+                    {ciclo === 'anual'
+                      ? `Plano Anual: ${emReais(SAAS_PRICING.anual.totalBruto)} (equivalente a ${emReais(SAAS_PRICING.anual.mensalEquivalente)}/mês). Parcele abaixo ${parcelamentoAnualCurto()}.`
+                      : tDynamic('Plano Mensal: R$ 169,90/mês. Cancele quando quiser.')}
                   </p>
                   
                   <label className="block">
@@ -470,9 +476,11 @@ export default function Assinatura() {
                          onChange={(e) => setParcelas(Number(e.target.value))}
                          className="mt-1 w-full rounded-xl border border-gray-300 p-3.5 text-sm font-bold focus:border-[var(--cor-primaria)] focus:ring-4 focus:ring-[var(--cor-primaria)]/10 focus:outline-none dark:bg-gray-950 dark:border-gray-700 dark:text-gray-100 transition-all"
                        >
-                         <option value={3}>{tDynamic('3x de R$ 599,60 / mês (Total R$ 1.798,80)')}</option>
-                         <option value={2}>{tDynamic('2x de R$ 899,40 / mês (Total R$ 1.798,80)')}</option>
-                         <option value={1}>{tDynamic('1x de R$ 1.798,80 à vista')}</option>
+                         {/* As opções saem de SAAS_PRICING.anual.cartao: o que o site
+                             anuncia e o que este seletor cobra vêm do mesmo lugar. */}
+                         {[...SAAS_PRICING.anual.cartao].sort((a, b) => b.qtd - a.qtd).map((p) => (
+                           <option key={p.qtd} value={p.qtd}>{rotuloParcelaAnual(p)}</option>
+                         ))}
                        </select>
                     </label>
                   )}
@@ -482,7 +490,7 @@ export default function Assinatura() {
                     {processando ? (
                       <><div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-500 border-t-white dark:border-t-gray-900"></div> {tDynamic('Autenticando no Banco...')}</>
                     ) : (
-                      <><Lock size={18} /> {tDynamic('Pagar Assinatura')} ({ciclo === 'anual' ? 'R$ 1.798,80' : 'R$ 169,90'})</>
+                      <><Lock size={18} /> {tDynamic('Pagar Assinatura')} ({emReais(ciclo === 'anual' ? SAAS_PRICING.anual.totalBruto : SAAS_PRICING.mensal.bruto)})</>
                     )}
                   </button>
                 </div>

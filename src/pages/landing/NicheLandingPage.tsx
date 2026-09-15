@@ -44,6 +44,7 @@ const ICON_MAP: Record<string, any> = {
 };
 
 import { useI18n } from '../../contexts/I18nContext';
+import { parcelamentoAnualCurto } from '../../lib/efiInfo';
 
 interface NicheLandingPageProps {
   forcedSlug?: string;
@@ -537,7 +538,7 @@ export default function NicheLandingPage({ forcedSlug }: NicheLandingPageProps) 
               {tDynamic('Comece agora sem custos e transforme a gestão da sua loja')}
             </h2>
             <p className="mt-3 text-sm text-slate-300 max-w-2xl mx-auto">
-              {tDynamic('Teste todos os recursos liberados por 30 dias. Plano Mensal por')} <b>{tDynamic("R$ 169,90/mês")}</b> {tDynamic("ou Anual por")} <b>{tDynamic("R$ 149,90/mês")}</b> {tDynamic("(em até 12x no cartão via Efí Bank). Pagamentos no Pix têm")} <b>5% de desconto à vista</b>!
+              {tDynamic('Teste todos os recursos liberados por 30 dias. Plano Mensal por')} <b>{tDynamic("R$ 169,90/mês")}</b> {tDynamic("ou Anual por")} <b>{tDynamic("R$ 149,90/mês")}</b> {`(${parcelamentoAnualCurto()} via Efí Bank). Pagamentos no Pix têm`} <b>5% de desconto à vista</b>!
             </p>
             <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
               <Link
