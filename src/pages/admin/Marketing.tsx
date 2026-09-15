@@ -591,7 +591,7 @@ function CashbackTab({ lojaId }: { lojaId: string }) {
       <div className="rounded-3xl border border-[var(--cor-primaria)]/30 bg-[var(--cor-primaria)]/5 p-5">
         <p className="mb-1 flex items-center gap-2 text-sm font-black text-[var(--cor-primaria)]"><Wallet size={16} /> {tDynamic('Como Funciona o Programa de Fidelidade')}</p>
         <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-          A cada pedido <b>finalizado</b> feito pelo cardápio online, o cliente ganha automaticamente um % do valor pago em saldo. Na compra seguinte, o saldo acumulado aparece como opção de desconto no checkout, gerando uma taxa de retenção até 4x superior a concorrentes sem programa de pontos.
+          A cada pedido <b>finalizado</b> feito pelo cardápio online, o cliente ganha automaticamente um % do valor pago em saldo. Na compra seguinte, o saldo aparece como desconto no checkout. Diferente do cartão de carimbo, não exige cartão, app nem que o cliente lembre de pedir — e o desconto não fica anunciado na vitrine para quem ainda não comprou.
         </p>
       </div>
 
