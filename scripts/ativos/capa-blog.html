@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<!--
+  Capa de artigo do blog — 1280x720 (16:9).
+
+  POR QUE 16:9: o card do hub (/blog) recorta em `aspect-video`. Capa em
+  quadrado ou 1.91:1 perdia justamente o título. O Open Graph aceita 16:9 sem
+  reclamar, então uma medida serve para os dois lugares.
+
+  As capas antigas eram fotos de banco/IA sem nenhuma marca — bonitas e
+  intercambiáveis com as de qualquer concorrente. Esta é tipografia e marca:
+  o leitor reconhece de onde veio antes de ler a primeira palavra.
+
+  Uso: window.CAPA.montar({ rotulo, titulo, destaque, apoio, assinatura }).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #004198;
+    --azul-claro: #0A5CC4;
+    --laranja: #FC5B24;
+    --tinta: #070C18;
+    --nevoa: #EAF1FB;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #222; }
+
+  #capa {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    background: var(--tinta);
+    font-family: 'Manrope', system-ui, sans-serif;
+    color: var(--nevoa);
+  }
+
+  /* Luz de fundo: azul da marca no alto, brasa laranja embaixo à direita. */
+  .brilho {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+  }
+  .brilho-azul   { width: 760px; height: 760px; top: -340px; left: -180px; background: rgba(10, 92, 196, 0.42); }
+  .brilho-laranja{ width: 620px; height: 620px; bottom: -300px; right: -120px; background: rgba(252, 91, 36, 0.30); }
+
+  /* Malha técnica: dá textura sem competir com o texto. */
+  .malha {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(234, 241, 251, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(234, 241, 251, 0.055) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at 30% 40%, #000 25%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse at 30% 40%, #000 25%, transparent 78%);
+  }
+
+  /* A barra é o corte laranja da marca, o mesmo do lockup. */
+  .barra {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 14px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--laranja), #E34A1B 60%, var(--azul-claro));
+  }
+
+  .conteudo {
+    position: absolute;
+    inset: 0;
+    padding: 58px 68px 52px 86px;
+    display: grid;
+    grid-template-columns: 1fr 440px;
+    grid-template-rows: auto 1fr auto;
+    column-gap: 48px;
+  }
+
+  .rotulo {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(234, 241, 251, 0.62);
+  }
+  .rotulo .pastilha {
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(252, 91, 36, 0.45);
+    background: rgba(252, 91, 36, 0.12);
+    color: #FFB59A;
+    letter-spacing: 0.16em;
+  }
+  .rotulo .fio { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(234,241,251,0.25), transparent); }
+
+  .texto { align-self: center; padding-right: 8px; }
+
+  h1 {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 82px;
+    line-height: 0.98;
+    letter-spacing: -0.028em;
+    text-wrap: balance;
+  }
+  h1 .destaque {
+    display: block;
+    background: linear-gradient(100deg, #FF8A5C 8%, var(--laranja) 52%, #FF7A45 92%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .apoio {
+    margin-top: 30px;
+    max-width: 660px;
+    font-size: 24px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: rgba(234, 241, 251, 0.74);
+  }
+  .apoio strong { color: var(--nevoa); font-weight: 700; }
+
+  .grafico { align-self: center; justify-self: end; }
+
+  .rodape {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-top: 1px solid rgba(234, 241, 251, 0.12);
+    padding-top: 26px;
+  }
+  .rodape img { height: 52px; display: block; }
+  .rodape .dominio {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    letter-spacing: 0.12em;
+    color: rgba(234, 241, 251, 0.5);
+  }
+  .rodape .assinatura {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(234, 241, 251, 0.42);
+  }
+</style>
+</head>
+<body>
+<div id="capa">
+  <div class="brilho brilho-azul"></div>
+  <div class="brilho brilho-laranja"></div>
+  <div class="malha"></div>
+  <div class="barra"></div>
+
+  <div class="conteudo">
+    <div class="rotulo">
+      <span class="pastilha" id="rotulo">GESTÃO FINANCEIRA</span>
+      <span>BLOG MISEON</span>
+      <span class="fio"></span>
+    </div>
+
+    <div class="texto">
+      <h1><span id="titulo">Loja lotada,</span><span class="destaque" id="destaque">dívida enorme</span></h1>
+      <p class="apoio" id="apoio"></p>
+    </div>
+
+    <!--
+      O desenho conta a tese antes do texto: as barras (movimento) sobem
+      enquanto a linha (margem) desce e cruza o zero. É o artigo inteiro em
+      um gesto.
+    -->
+    <svg class="grafico" width="440" height="374" viewBox="0 0 400 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="barra" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2E7BE0" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="#0A5CC4" stop-opacity="0.35"/>
+        </linearGradient>
+        <linearGradient id="linha" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#FF8A5C"/>
+          <stop offset="100%" stop-color="#FC5B24"/>
+        </linearGradient>
+      </defs>
+
+      <!-- eixo zero da margem -->
+      <line x1="16" y1="214" x2="384" y2="214" stroke="#EAF1FB" stroke-opacity="0.18" stroke-dasharray="5 7"/>
+      <text x="384" y="206" text-anchor="end" fill="#EAF1FB" fill-opacity="0.38"
+            font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="1.5">ZERO</text>
+
+      <!-- movimento: sobe sempre -->
+      <g>
+        <rect x="26"  y="196" width="44" height="88"  rx="7" fill="url(#barra)"/>
+        <rect x="90"  y="170" width="44" height="114" rx="7" fill="url(#barra)"/>
+        <rect x="154" y="140" width="44" height="144" rx="7" fill="url(#barra)"/>
+        <rect x="218" y="106" width="44" height="178" rx="7" fill="url(#barra)"/>
+        <rect x="282" y="66"  width="44" height="218" rx="7" fill="url(#barra)"/>
+      </g>
+      <line x1="16" y1="284" x2="384" y2="284" stroke="#EAF1FB" stroke-opacity="0.22"/>
+
+      <!-- margem: desce e cruza o zero -->
+      <path d="M40 128 C 104 142, 148 166, 178 194 S 252 246, 318 286"
+            stroke="url(#linha)" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <circle cx="318" cy="286" r="11" fill="#FC5B24"/>
+      <circle cx="318" cy="286" r="20" fill="#FC5B24" fill-opacity="0.22"/>
+
+      <text x="26" y="312" fill="#7FB0F2" font-family="JetBrains Mono, monospace"
+            font-size="13" letter-spacing="2.2">MOVIMENTO</text>
+      <text x="384" y="312" text-anchor="end" fill="#FC5B24" font-family="JetBrains Mono, monospace"
+            font-size="13" letter-spacing="2.2">MARGEM</text>
+    </svg>
+
+    <div class="rodape">
+      <img src="lockup.png" alt="MiseOn" />
+      <div style="text-align: right">
+        <div class="assinatura" id="assinatura"></div>
+        <div class="dominio">miseon.app.br/blog</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.CAPA = {
+    montar(dados) {
+      document.getElementById('rotulo').textContent = dados.rotulo;
+      document.getElementById('titulo').textContent = dados.titulo;
+      document.getElementById('destaque').textContent = dados.destaque;
+      document.getElementById('apoio').innerHTML = dados.apoio;
+      document.getElementById('assinatura').textContent = dados.assinatura || '';
+      return document.fonts.ready;
+    },
+  };
+</script>
+</body>
+</html>

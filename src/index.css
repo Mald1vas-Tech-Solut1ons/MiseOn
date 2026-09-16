@@ -524,3 +524,12 @@ select option {
     transition: opacity 400ms ease;
   }
 }
+
+/* ── Anúncio que voltou vazio não deixa buraco ──────────────────────────────
+   O AdSense marca o bloco com data-ad-status="unfilled" quando não tinha
+   anúncio para servir. Sem esta regra sobra a altura reservada — um vão
+   branco no meio do artigo, que é pior do que não ter anúncio nenhum.
+   A altura existe para o anúncio não empurrar o texto quando chega (CLS). */
+ins.adsbygoogle[data-ad-status='unfilled'] {
+  display: none !important;
+}

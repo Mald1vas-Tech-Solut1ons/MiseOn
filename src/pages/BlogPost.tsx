@@ -4,6 +4,8 @@ import { ArrowLeft, Clock, ArrowRight, Check, Bookmark } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blogData';
 import SEO from '../components/SEO';
 import AdSenseBlog from '../components/AdSenseBlog';
+import AdSlot from '../components/AdSlot';
+import AvisoBloqueadorAnuncios from '../components/AvisoBloqueadorAnuncios';
 import FooterSEO from '../components/FooterSEO';
 import MiseOnLogo from '../components/MiseOnLogo';
 import LanguageToggle from '../components/LanguageToggle';
@@ -78,6 +80,9 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
     const lines = content.split('\n');
     const elements: React.ReactNode[] = [];
     let listBuffer: string[] = [];
+    // O anúncio do meio entra na virada do segundo tema do artigo: o leitor
+    // já passou da abertura, e a quebra é dele, não do anúncio.
+    let secoes = 0;
 
     const flushList = () => {
       if (listBuffer.length > 0) {
@@ -116,6 +121,10 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
           </h1>
         );
       } else if (trimmed.startsWith('## ')) {
+        secoes += 1;
+        if (secoes === 2) {
+          elements.push(<AdSlot key="anuncio-meio" posicao="artigoMeio" />);
+        }
         elements.push(
           <h2 key={index} className="mt-8 mb-4 font-['Sora'] text-xl font-bold text-gray-900 sm:text-2xl dark:text-white border-b border-gray-200/60 pb-2 dark:border-white/10">
             {trimmed.replace('## ', '')}
@@ -244,6 +253,11 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
               ))}
             </div>
           </article>
+
+          {/* O pedido só aparece para quem está com bloqueador; o anúncio de
+              fecho, só para quem não está. Nunca os dois juntos. */}
+          <AvisoBloqueadorAnuncios />
+          <AdSlot posicao="artigoFim" />
 
           {/* CTA DENTRO DO ARTIGO */}
           <div className="mt-10 rounded-3xl border border-orange-500/30 bg-gradient-to-br from-[#0B1120] via-[#0C1730] to-[#111a33] p-8 text-white shadow-2xl">

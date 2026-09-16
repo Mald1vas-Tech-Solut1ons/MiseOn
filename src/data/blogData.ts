@@ -24,6 +24,159 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'loja-lotada-divida-enorme-por-que-fila-na-porta-nao-e-lucro',
+    title: 'Loja Lotada, Dívida Enorme: Por Que Fila na Porta Não Significa Dinheiro no Caixa',
+    description: 'Movimento mede quantas vezes a operação rodou; margem mede quanto sobrou de cada vez. Os cinco mecanismos que fazem uma loja cheia acumular dívida — e a conta que revela o buraco em uma tarde.',
+    category: 'Gestão Financeira',
+    publishedAt: '2026-09-16',
+    readTime: '9 min de leitura',
+    coverImage: '/blog-covers/loja-lotada-divida-enorme-cover.jpg',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Capital de Giro', 'CMV Real', 'Ficha Técnica', 'Precificação', 'Gestão Financeira'],
+    seo: {
+      title: 'Loja Lotada e Dívida Enorme: Fila na Porta Não é Lucro — MiseOn',
+      description: 'Por que restaurante cheio acumula dívida: margem unitária negativa, capital de giro e preço copiado do vizinho. A conta que mostra o vazamento em uma tarde.',
+      keywords: 'restaurante cheio sem lucro, capital de giro restaurante, margem negativa food service, precificacao ficha tecnica, por que restaurante quebra, cmv real restaurante',
+      canonicalUrl: 'https://miseon.app.br/blog/loja-lotada-divida-enorme-por-que-fila-na-porta-nao-e-lucro',
+    },
+    summary: 'Movimento e margem são números diferentes, e não existe lei que obrigue o segundo a crescer junto com o primeiro. Quando a margem por item está negativa, o volume não salva: ele multiplica. Este artigo abre os cinco mecanismos por trás da loja cheia com o caixa vazio e entrega, passo a passo, a conta que encontra o vazamento nos dez itens que mais saem.',
+    content: `
+# Loja Lotada, Dívida Enorme: Por Que Fila na Porta Não Significa Dinheiro no Caixa
+
+Existe uma cena que todo mundo do food service já viu, e quase ninguém explica direito: a loja vive cheia, a fila dobra a esquina, o movimento é inveja do bairro — e o dono não dorme, porque deve.
+
+Não é contradição. É contabilidade.
+
+Movimento é uma medida de **quantas vezes a operação rodou**. Margem é uma medida de **quanto sobrou de cada vez que ela rodou**. São dois números diferentes, e não existe nenhuma lei que obrigue o segundo a crescer junto com o primeiro. Quando a margem por item está negativa, o movimento não salva: ele acelera a queda.
+
+Este artigo destrincha os cinco mecanismos que produzem essa cena e mostra a conta que revela o buraco — a mesma conta, feita à mão, que um sistema de gestão faz todo dia.
+
+---
+
+## O paradoxo: quanto mais vende, mais afunda
+
+Imagine um combo vendido a R$ 32,00. O dono acredita que ele custa R$ 12,00 de insumo. Então acredita que sobram R$ 20,00 por venda.
+
+Só que a ficha técnica nunca foi medida de verdade. O pão subiu na última compra, o queijo veio em embalagem de 2,5 kg e o rendimento foi estimado no olho, a carne perde peso na chapa, e a embalagem do delivery entrou depois — sem ninguém recalcular o preço.
+
+O custo real é R$ 21,40. Sobram R$ 10,60, não R$ 20,00.
+
+Agora multiplique pelos dois cenários:
+
+- **150 combos por dia**: a distância entre o que ele acha que ganha e o que ganha é de R$ 1.410,00 por dia
+- **300 combos por dia**: a distância dobra, para R$ 2.820,00 por dia
+
+O erro não é de R$ 9,40. O erro é de R$ 9,40 **vezes o movimento**. É por isso que dobrar a fila pode dobrar o rombo: volume é um multiplicador, e ele não pergunta se o número que está multiplicando é positivo ou negativo.
+
+Os valores acima são um exemplo aritmético, não a medição de uma loja específica. O que importa aqui é a estrutura da conta — e ela vale para qualquer cardápio.
+
+---
+
+## 1. O preço veio do vizinho, não da ficha técnica
+
+A forma mais comum de precificar no Brasil é olhar quanto o concorrente cobra e ficar um pouco abaixo. Isso não é estratégia: é uma aposta de que o custo dele é igual ao seu.
+
+Quase nunca é. Ele compra em outro volume, negocia outro prazo, paga outro aluguel, tem outra perda e talvez outro rendimento na mesma receita. Copiar o preço do vizinho é copiar a resposta de uma conta cujos números você nunca viu.
+
+Preço honesto nasce de baixo para cima: custo do insumo na embalagem que você comprou, rendimento medido na sua cozinha, perda real do seu processo, e só então a margem que você decidiu praticar.
+
+---
+
+## 2. O prazo do dinheiro não bate com o prazo da conta
+
+Este é o mecanismo mais cruel, porque derruba operações que **são** lucrativas.
+
+Olhe o calendário de uma venda no cartão:
+
+- O cliente come hoje
+- O fornecedor de proteína vence em 7 dias
+- A folha vence no dia 5
+- A maquininha credita em 30 dias
+
+A operação pode ter margem positiva e mesmo assim faltar dinheiro no dia 5 — porque o lucro existe, só que ainda não chegou. Quando isso vira rotina, entram o cheque especial, a antecipação de recebíveis e o empréstimo curto. Cada um resolve a semana e piora o ano.
+
+Lucro é uma opinião sobre o mês. Caixa é um fato sobre o dia.
+
+---
+
+## 3. O que o volume faz com um erro pequeno
+
+Um erro de R$ 0,80 por prato parece desprezível. Ninguém briga por oitenta centavos.
+
+Some assim: 200 pratos por dia, 26 dias por mês.
+
+**R$ 0,80 × 200 × 26 = R$ 4.160,00 por mês.**
+
+É um salário evaporando dentro de um arredondamento que ninguém enxerga — porque ele nunca aparece numa linha só. Ele aparece diluído em 5.200 vendas.
+
+É também por isso que vender mais é o conselho errado para quem está nessa situação. Vender mais multiplica o que já existe. Se o que existe é um vazamento, o conselho certo é medir primeiro.
+
+---
+
+## 4. A dívida cara vira sócia majoritária
+
+Quando o capital de giro falta com frequência, a loja passa a operar com dinheiro de terceiro caro — e o custo financeiro deixa de ser um evento para virar despesa fixa.
+
+O efeito é perverso: a partir de certo ponto, uma parte do faturamento já está comprometida antes de o primeiro cliente sentar. A loja continua cheia, continua vendendo, e a dívida continua lá — porque dívida não é paga com movimento. É paga com **margem**.
+
+---
+
+## 5. O que não é medido vira sensação
+
+Sem ficha técnica, sem CMV apurado e sem custo por item, o dono administra por sensação: esse prato deve dar dinheiro, acho que o desperdício aumentou, parece que a carne subiu.
+
+Sensação erra numa direção previsível: ela subestima o custo e superestima a margem, porque ninguém tem memória afetiva do que perdeu na aparação, no cozimento, na embalagem e na troca de pedido errado.
+
+Um número honesto é sempre melhor que uma certeza confortável. E quando não dá para medir, a resposta certa é **não sei** — nunca um percentual inventado.
+
+---
+
+## A conta que revela o buraco em uma tarde
+
+Você não precisa de sistema nenhum para começar. Precisa de disciplina e de uma tarde:
+
+- **Escolha os 10 itens que mais saem.** Em quase todo cardápio, poucos itens respondem pela maior parte do faturamento
+- **Abra a nota fiscal da última compra de cada insumo.** Não o preço que você lembra: o preço da nota, na embalagem que chegou
+- **Meça o rendimento na sua cozinha.** Quanto sai de carne limpa de uma peça inteira? Quanto o arroz ganha ao cozinhar? Isso muda o custo por porção mais do que qualquer negociação
+- **Some a embalagem, o descartável e o molho de cortesia.** Não estão na receita, mas estão na conta
+- **Subtraia tudo do preço de venda.** O que sobrou é a margem real daquele item
+- **Multiplique pela quantidade vendida no mês.** Agora você tem a contribuição real de cada item — e talvez descubra que alguns campeões de venda são os que menos deixam dinheiro
+
+Se algum item der margem negativa, você encontrou o motivo da loja cheia com o caixa vazio.
+
+---
+
+## O que dá para fazer nesta semana
+
+- **Corrija o preço dos itens negativos, ou tire-os do cardápio.** Item que dá prejuízo não se conserta no volume
+- **Renegocie prazo antes de renegociar preço.** Trinta dias a mais no fornecedor costumam valer mais que 3% de desconto
+- **Separe o dinheiro do dia do dinheiro do mês.** O caixa do dia paga a operação; o resto já tem dono e data
+- **Pare de antecipar recebível por hábito.** Antecipação é remédio de emergência, não regime alimentar
+- **Refaça a ficha técnica quando o insumo subir.** Reajuste de fornecedor não repassado é o vazamento mais silencioso do setor
+
+---
+
+## Onde o MiseOn entra
+
+O MiseOn existe para que essa conta deixe de ser uma tarde de trabalho e vire a tela que você abre de manhã:
+
+- **Ficha técnica com custo real**, puxando o preço da nota de compra que entrou no estoque
+- **Rendimento medido pela loja vence a tabela de referência** — o que a sua cozinha mediu vale mais do que qualquer média de mercado
+- **Custo por item e margem por produto**, com um detalhe que faz diferença: quando o dado não é confiável, o sistema mostra **o motivo** em vez de exibir um percentual inventado
+- **Entrada de estoque pelo QR Code do cupom fiscal**, para que o preço que entra na conta seja o preço que você pagou de verdade
+
+Movimento é bom. Movimento com margem medida é negócio.
+
+---
+
+**A fila na porta é a prova de que a sua comida presta. A margem na tela é a prova de que o negócio presta.** As duas provas são necessárias — e só uma delas aparece sozinha.
+`,
+  },
+  {
     slug: 'calculadora-vazamento-de-caixa-diagnostico-operacional-restaurantes',
     title: 'Calculadora de Vazamento de Caixa: Como Identificar e Estancar Perdas Invisíveis no seu Restaurante',
     description: 'Saiba como pequenos desvios de CMV, faltas de estoque no rush e reajustes de fornecedores não repassados consomem até R$ 5.500/mês da margem do seu estabelecimento.',

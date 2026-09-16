@@ -4,6 +4,7 @@ import { BookOpen, Search, ArrowRight, Clock, User } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blogData';
 import SEO from '../components/SEO';
 import AdSenseBlog from '../components/AdSenseBlog';
+import AdSlot from '../components/AdSlot';
 import FooterSEO from '../components/FooterSEO';
 import MiseOnLogo from '../components/MiseOnLogo';
 import LanguageToggle from '../components/LanguageToggle';
@@ -245,6 +246,10 @@ export default function Blog() {
               ))}
             </div>
           )}
+
+          {/* Depois da grade, antes do convite para virar cliente: o anúncio
+              fica na borda da leitura, nunca cortando a lista de artigos. */}
+          <AdSlot posicao="hub" className="mx-auto max-w-4xl" />
         </div>
       </section>
 

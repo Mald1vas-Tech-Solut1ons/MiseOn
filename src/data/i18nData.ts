@@ -271,6 +271,15 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // ── Anúncio no blog (16/09/2026) ────────────────────────────────────────
+  // O rótulo é exigência do AdSense: só "Publicidade" ou "Anúncio" valem.
+  'Publicidade': 'Advertisement',
+  'Espaço de anúncio': 'Ad space',
+  'Cole o ID da unidade em ADSENSE_SLOTS (src/lib/adsense.ts) para ligar.': 'Paste the unit ID into ADSENSE_SLOTS (src/lib/adsense.ts) to turn it on.',
+  'Seu bloqueador está ligado por aqui': 'Your ad blocker is on for this page',
+  'O conteúdo deste blog é aberto: sem cadastro, sem assinatura, sem paywall. Quem paga a conta é o anúncio. Se este texto te serviu, liberar o miseon.app.br na sua lista ajuda o próximo a sair.': 'Everything on this blog is open: no sign-up, no subscription, no paywall. Ads are what pay for it. If this piece helped you, allowlisting miseon.app.br helps the next one get written.',
+  'Já liberei, recarregar': 'Done — reload the page',
+  'Agora não': 'Not now',
   // ── Cupom com janela de horário (16/09/2026) ────────────────────────────
   // O desconto que move gente do pico para a borda do serviço.
   'Janela de horário': 'Time window',

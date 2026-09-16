@@ -11,6 +11,7 @@ import {
 } from '../lib/cookieConsent';
 
 import { useI18n } from '../contexts/I18nContext';
+import { existeCmpTcf, escutarCmpTcf } from '../lib/cmpTcf';
 
 export function CookieBanner() {
   const { tDynamic } = useI18n();
@@ -31,6 +32,22 @@ export function CookieBanner() {
     // Nada e ligado por omissao: sem escolha registrada, analiticos e
     // marketing seguem desligados, que e o padrao mais conservador.
     if (window.location.pathname.startsWith('/tv/')) return;
+
+    // No EEE, Reino Unido e Suica quem pergunta e a CMP certificada do
+    // Google, publicada no painel do AdSense. Ela chega pelo script do
+    // AdSense e vale como base legal la; nosso banner nasceu para a LGPD.
+    // Mostrar os dois faria o visitante europeu responder a mesma pergunta
+    // duas vezes, entao aqui so escutamos a decisao dele e a traduzimos para
+    // o consentimento interno. Ver src/lib/cmpTcf.ts.
+    if (existeCmpTcf()) {
+      return escutarCmpTcf(({ analiticos: an, marketing: mk, respondido }) => {
+        if (!respondido) return;
+        salvarConsentimento('personalizado', { analiticos: an, marketing: mk });
+        setAnaliticos(an);
+        setMarketing(mk);
+        setVisivel(false);
+      });
+    }
 
     const estado = obterConsentimento();
     if (estado.tipo === 'indefinido') {
