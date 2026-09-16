@@ -131,17 +131,20 @@ export function KioskHomeSection() {
                     `muted` + `playsInline` são obrigatórios para o autoplay
                     não ser bloqueado em iOS e Chrome, e o `poster` é o que
                     aparece enquanto carrega (ou fica, se o aparelho bloquear).
-                    Servido do Storage: 790 KB não têm por que entrar no bundle
-                    e atrasar o deploy de todo mundo. */}
+                    Servido de /public, não do Storage: ver a justificativa em
+                    AutoatendimentoPage.tsx. Em resumo, /public não passa pelo
+                    bundler, e servir ativo de marketing do mesmo projeto que
+                    guarda os dados do cliente derrubou a home quando a cota
+                    de egress estourou. */}
                 <video
-                  src="https://zzuxklwhaoisuuvndtfw.supabase.co/storage/v1/object/public/loja-assets/marketing/totem-miseon.mp4"
-                  poster="https://zzuxklwhaoisuuvndtfw.supabase.co/storage/v1/object/public/loja-assets/marketing/totem-poster.jpg"
+                  src="/totem-miseon.mp4"
+                  poster="/totem-poster.jpg"
                   autoPlay
                   muted
                   loop
                   playsInline
                   preload="metadata"
-                  aria-label="Cliente fazendo o próprio pedido no totem de autoatendimento MiseOn e pagando na tela"
+                  aria-label="Cena ilustrativa de um cliente fazendo o próprio pedido num totem de autoatendimento e pagando na tela"
                   className="w-full h-auto object-cover transition transform group-hover:scale-105 duration-500"
                 />
                 
@@ -155,6 +158,10 @@ export function KioskHomeSection() {
                   <div>
                     <span className="block text-[10px] font-bold uppercase text-gray-400">HARDWARE HOMOLOGADO</span>
                     <span className="text-xs font-bold text-white">Totem Bravus Core 21"</span>
+                    {/* A cena do vídeo é recriada, não é gravação de loja em
+                        operação. O kit do Instagram já marcava este mesmo
+                        ativo como ilustrativo; a home não pode dizer menos. */}
+                    <span className="mt-0.5 block text-[10px] text-gray-500">Cena ilustrativa</span>
                   </div>
                   <span className="shrink-0 rounded-full border border-emerald-500/40 bg-emerald-500/20 px-3 py-1 text-[10px] font-extrabold text-emerald-400">
                     KDS CONECTADO

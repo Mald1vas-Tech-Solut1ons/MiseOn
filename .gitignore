@@ -30,6 +30,17 @@ capture.js
 *.mp4
 *.mov
 
+# Excecao: o que a landing serve estatico PRECISA estar no repo — quem
+# publica /public e a Vercel, a partir daqui. Foi este `*.mp4` que empurrou
+# o video do totem para o Supabase Storage, e em 16/09/2026 a landing caiu
+# junto com a cota de egress do banco. Entram aqui so os ja otimizados para
+# web; material bruto de edicao continua fora, em output/marketing/.
+!public/splash.mp4
+!public/videoIntro.mp4
+!public/videoMarketing.mp4
+!public/videomarketing2.mp4
+!public/totem-miseon.mp4
+
 # Credenciais operacionais e documentos de credencial
 credenciais_testes.md
 CREDENCIAIS.md

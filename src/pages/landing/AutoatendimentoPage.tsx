@@ -185,20 +185,32 @@ export default function AutoatendimentoPage() {
                 enquanto o arquivo carrega — e é o que fica se o autoplay for
                 bloqueado por configuração do aparelho.
 
-                Vem do Storage e não de /public de propósito: 790 KB no bundle
-                atrasariam o build e o deploy de todo mundo, e o arquivo não
-                muda junto com o código. */}
+                Estava no Supabase Storage e voltou para /public em 16/09/2026.
+                O argumento de origem ("790 KB atrasariam o build") não se
+                sustenta: /public não passa pelo bundler — o Vite copia o
+                arquivo verbatim, sem custo de build. O que a escolha custou
+                foi pior: a landing de marketing passou a depender da cota do
+                banco transacional, e quando o projeto estourou o egress e
+                ficou restrito (402), o vídeo sumiu do site e sobrou o poster.
+                Ativo de marketing não se serve do mesmo lugar que os dados
+                do cliente. */}
             <video
-              src="https://zzuxklwhaoisuuvndtfw.supabase.co/storage/v1/object/public/loja-assets/marketing/totem-miseon.mp4"
-              poster="https://zzuxklwhaoisuuvndtfw.supabase.co/storage/v1/object/public/loja-assets/marketing/totem-poster.jpg"
+              src="/totem-miseon.mp4"
+              poster="/totem-poster.jpg"
               autoPlay
               muted
               loop
               playsInline
               preload="metadata"
-              aria-label="Cliente fazendo o pedido sozinha no totem de autoatendimento MiseOn e pagando na própria tela"
+              aria-label="Cena ilustrativa de uma cliente fazendo o próprio pedido num totem de autoatendimento e pagando na tela"
               className="w-full h-auto rounded-2xl object-cover"
             />
+            {/* A cena é uma recriação, não uma gravação de loja em operação:
+                dizer isso é a mesma regra que proíbe passar loja de
+                demonstração por cliente. */}
+            <p className="mt-2 text-[11px] text-gray-500 text-right">
+              Cena ilustrativa
+            </p>
             
             {/* Benefícios Rápidos em Chips */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-left">
