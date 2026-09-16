@@ -111,7 +111,7 @@ function faqJsonLd(data) {
 }
 
 /** Aplica meta + conteúdo de uma rota sobre o shell gerado pelo Vite. */
-function renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd }) {
+function renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd, headExtra }) {
   let html = template;
 
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(title)}</title>`);
@@ -152,6 +152,12 @@ function renderPage(template, { title, description, canonicalUrl, bodyHtml, json
     html = html.replace('</head>', `  ${jsonLd}\n  </head>`);
   }
 
+  // Scripts que valem para UMA rota (hoje: o loader do AdSense, só no
+  // blog). Ver src/lib/adsense.ts para o porquê de não morar no template.
+  if (headExtra) {
+    html = html.replace('</head>', `  ${headExtra}\n  </head>`);
+  }
+
   return html;
 }
 
@@ -161,6 +167,7 @@ async function main() {
   const { PAGE_META } = await loadTsModule('src/data/pageMeta.ts');
   const { LANDING_PAGES_DATA } = await loadTsModule('src/data/landingPagesData.ts');
   const { BLOG_POSTS } = await loadTsModule('src/data/blogData.ts');
+  const { snippetAdSense } = await loadTsModule('src/lib/adsense.ts');
 
   // dist/app.html — shell da SPA para as rotas que NÃO dá para gerar
   // estaticamente: /admin, /superadmin, /entregador, /pedido/:id e o cardápio
@@ -267,7 +274,12 @@ async function main() {
       seenTitles.set(title, routePath);
     }
 
-    const html = renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd });
+    // O AdSense entra apenas no blog — nem na home, nem nas landings, nem
+    // (sobretudo) no app.html, que é o shell das telas do lojista.
+    const ehBlog = routePath === '/blog' || routePath.startsWith('/blog/');
+    const headExtra = ehBlog ? snippetAdSense() : '';
+
+    const html = renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd, headExtra });
 
     // Verificação do produto final, não da intenção: se o HTML gravado não
     // tiver exatamente um H1 e o título certo, algo no template mudou e os
@@ -278,6 +290,17 @@ async function main() {
     }
     if (!html.includes(`<title>${escapeHtml(title)}</title>`)) {
       throw new Error(`${routePath}: o <title> não foi aplicado — o template do index.html mudou?`);
+    }
+
+    // O loader do AdSense é do blog e de mais nada. Se ele aparecer numa
+    // rota comercial é porque alguém o colou no index.html — falha o build
+    // em vez de publicar anúncio na página de venda.
+    if (html.includes('adsbygoogle.js') !== ehBlog) {
+      throw new Error(
+        ehBlog
+          ? `${routePath}: o snippet do AdSense não foi aplicado ao HTML do blog.`
+          : `${routePath}: o snippet do AdSense vazou para fora do blog (veja src/lib/adsense.ts).`
+      );
     }
 
     // A home vai para dist/index.html (é o que a Vercel serve em "/");

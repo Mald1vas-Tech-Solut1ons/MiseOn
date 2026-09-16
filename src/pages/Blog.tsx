@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { BookOpen, Search, ArrowRight, Clock, User } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blogData';
 import SEO from '../components/SEO';
+import AdSenseBlog from '../components/AdSenseBlog';
 import FooterSEO from '../components/FooterSEO';
 import MiseOnLogo from '../components/MiseOnLogo';
 import LanguageToggle from '../components/LanguageToggle';
@@ -54,6 +55,9 @@ export default function Blog() {
         canonicalUrl="https://miseon.app.br/blog"
         schemaJson={schemaJson}
       />
+
+      {/* AdSense: o script sobe só aqui no blog — ver src/lib/adsense.ts */}
+      <AdSenseBlog />
 
       {/* ══════════ 1. NAVBAR ══════════ */}
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-gray-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#070C18]/90">

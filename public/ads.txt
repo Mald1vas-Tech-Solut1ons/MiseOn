@@ -1,0 +1,5 @@
+# Authorized Digital Sellers — https://miseon.app.br/ads.txt
+# Declara quem pode vender o inventario de anuncio deste dominio.
+# Sem este arquivo o AdSense marca "ganhos em risco" e segura a receita.
+# O ultimo campo e o TAG-ID publico do Google, igual para toda conta.
+google.com, pub-4617008756367381, DIRECT, f08c47fec0942fa0
