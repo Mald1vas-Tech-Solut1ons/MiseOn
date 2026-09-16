@@ -54,6 +54,99 @@ export interface CupomParaArte {
   limite_usos?: number | null;
   usos?: number | null;
   ativo?: boolean | null;
+  hora_inicio?: string | null;
+  hora_fim?: string | null;
+  dias_semana?: number[] | null;
+}
+
+const DIAS_CURTOS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+
+/**
+ * Hora e dia da semana NA LOJA, não no navegador.
+ *
+ * O banco decide a janela em `fn_cupom_na_janela`, que converte para
+ * 'America/Sao_Paulo' antes de comparar. Se a tela usasse a hora local do
+ * navegador, um lojista viajando — ou o runner de E2E, que roda em en-US —
+ * veria "fora do horário" num cupom que o servidor está aceitando. Quem
+ * mostra e quem decide têm de ler o mesmo relógio.
+ */
+function relogioDaLoja(agora: Date): { segundos: number; dow: number } {
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).formatToParts(agora);
+  const p: Record<string, string> = {};
+  for (const parte of partes) p[parte.type] = parte.value;
+  // hour12:false devolve "24" para a meia-noite em alguns motores.
+  const h = Number(p.hour) % 24;
+  return {
+    segundos: h * 3600 + Number(p.minute) * 60 + Number(p.second),
+    dow: new Date(Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day))).getUTCDay(),
+  };
+}
+
+/** 'HH:MM' ou 'HH:MM:SS' do Postgres vira segundos desde a meia-noite. */
+function horaEmSegundos(hora: string | null | undefined): number | null {
+  if (!hora) return null;
+  const m = /^(\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(hora.trim());
+  if (!m) return null;
+  return Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3] ?? 0);
+}
+
+/** 'HH:MM:SS' vira '14h' ou '13h40', que é como o lojista fala. */
+function horaCurta(hora: string): string {
+  const m = /^(\d{1,2}):(\d{2})/.exec(hora.trim());
+  if (!m) return hora;
+  return m[2] === '00' ? `${Number(m[1])}h` : `${Number(m[1])}h${m[2]}`;
+}
+
+/**
+ * A janela do cupom em uma frase: "Das 11h às 14h", "A partir das 13h40",
+ * "Quinta, das 18h às 20h". `null` quando o cupom vale o tempo todo.
+ */
+export function janelaDoCupom(cupom: CupomParaArte): string | null {
+  const ini = cupom.hora_inicio ? horaCurta(cupom.hora_inicio) : null;
+  const fim = cupom.hora_fim ? horaCurta(cupom.hora_fim) : null;
+  const dias = cupom.dias_semana?.length
+    ? [...cupom.dias_semana].sort((a, b) => a - b).map((d) => DIAS_CURTOS[d]).filter(Boolean).join(', ')
+    : null;
+
+  let horario: string | null = null;
+  if (ini && fim) horario = `das ${ini} às ${fim}`;
+  else if (ini) horario = `a partir das ${ini}`;
+  else if (fim) horario = `até as ${fim}`;
+
+  if (horario && dias) return `${dias[0].toUpperCase()}${dias.slice(1)}, ${horario}`;
+  if (horario) return `${horario[0].toUpperCase()}${horario.slice(1)}`;
+  if (dias) return `Só ${dias}`;
+  return null;
+}
+
+/**
+ * Espelho exato de `fn_cupom_na_janela`. `true` quando o cupom tem janela e o
+ * momento está FORA dela.
+ *
+ * Não é o mesmo que inválido: o cupom do almoço às 9h da manhã está saudável,
+ * só não é agora. Quem mistura os dois pinta de vermelho um cupom que está
+ * funcionando e faz o lojista "consertar" o que não está quebrado.
+ */
+export function cupomForaDaJanelaAgora(cupom: CupomParaArte, agora = new Date()): boolean {
+  const ini = horaEmSegundos(cupom.hora_inicio);
+  const fim = horaEmSegundos(cupom.hora_fim);
+  const dias = cupom.dias_semana?.length ? cupom.dias_semana : null;
+  if (ini === null && fim === null && !dias) return false;
+
+  const { segundos: hm, dow } = relogioDaLoja(agora);
+  const ontem = (dow + 6) % 7;
+  const diaOk = (d: number) => !dias || dias.includes(d);
+
+  if (ini === null && fim === null) return !diaOk(dow);
+  if (ini === null) return !(hm <= fim! && diaOk(dow));
+  if (fim === null) return !(hm >= ini && diaOk(dow));
+  if (fim > ini) return !(hm >= ini && hm <= fim && diaOk(dow));
+  // Cruza a meia-noite: a madrugada pertence ao dia anterior.
+  return !((hm >= ini && diaOk(dow)) || (hm <= fim && diaOk(ontem)));
 }
 
 function numero(v: number | string | null | undefined): number {
@@ -117,6 +210,11 @@ export function condicoesDoCupom(cupom: CupomParaArte, hoje = new Date()): strin
   }
 
   if (cupom.apenas_primeiro_pedido) frases.push('Só no primeiro pedido');
+
+  // A janela entra antes da validade de propósito: é a condição que o cliente
+  // esbarra hoje, enquanto a validade só morde no fim do mês.
+  const janela = janelaDoCupom(cupom);
+  if (janela) frases.push(janela);
 
   if (cupom.validade) {
     const fim = paraDataLocal(cupom.validade);

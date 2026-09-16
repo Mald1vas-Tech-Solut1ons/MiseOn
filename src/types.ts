@@ -383,6 +383,16 @@ export interface Cupom {
   ativo?: boolean;
   frete_gratis?: boolean;
   cliente_id?: string | null;
+  /**
+   * Janela de horário, na hora da LOJA (America/Sao_Paulo) — é assim que o
+   * banco compara, em `fn_cupom_na_janela`. Formato 'HH:MM' ou 'HH:MM:SS'.
+   * Nulo dos dois lados = vale o dia inteiro. `hora_fim` menor que
+   * `hora_inicio` é janela que cruza a meia-noite (22h às 02h).
+   */
+  hora_inicio?: string | null;
+  hora_fim?: string | null;
+  /** Dias em que vale, convenção EXTRACT(DOW): 0=domingo .. 6=sábado. Nulo = todos. */
+  dias_semana?: number[] | null;
 }
 
 export interface TaxaEntrega {

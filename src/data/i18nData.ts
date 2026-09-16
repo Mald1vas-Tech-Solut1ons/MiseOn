@@ -271,6 +271,17 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // ── Cupom com janela de horário (16/09/2026) ────────────────────────────
+  // O desconto que move gente do pico para a borda do serviço.
+  'Janela de horário': 'Time window',
+  'Em branco, vale o dia inteiro. A hora é a da loja.': "Leave blank for all day. The time is the restaurant's local time.",
+  'A partir das': 'From',
+  'Até as': 'Until',
+  'Dias da semana': 'Days of the week',
+  'Nenhum dia marcado: vale todos os dias.': 'No day selected: valid every day.',
+  'Só nos dias marcados.': 'Only on the selected days.',
+  'Essa janela atravessa a meia-noite — vale da noite até a madrugada do dia seguinte.': 'This window crosses midnight — it runs from the evening into the early hours of the next day.',
+  'FORA DO HORÁRIO AGORA': 'OUTSIDE ITS HOURS RIGHT NOW',
   'Alergênicos informados': 'Allergens declared',
   'Os valores somam somente os dados conhecidos.': 'The totals add up only the known data.',
   'Percentuais sobre uma dieta de 2.000 kcal. Estimativa a partir das fichas técnicas da loja.': "Percentages based on a 2,000 kcal diet. Estimated from the restaurant's own recipes.",

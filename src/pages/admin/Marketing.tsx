@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Cupom, Banner, Cliente, CarrinhoAbandonado, MetodoPgto, fmt, type TipoAcaoBanner } from '../../types';
-import { condicoesDoCupom, cupomInvalidoHoje } from '../../lib/arteBanner';
+import { condicoesDoCupom, cupomForaDaJanelaAgora, cupomInvalidoHoje } from '../../lib/arteBanner';
 import ImageUpload from '../../components/ImageUpload';
 import CrmClientes from '../../components/admin/CrmClientes';
 import type { CtxLoja } from './AdminLayout';
@@ -152,6 +152,14 @@ function CuponsTab({ lojaId }: { lojaId: string }) {
                     {tDynamic('NÃO VALE HOJE')}
                   </span>
                 )}
+                {/* Amarelo, nao vermelho: cupom de almoco as 9h da manha esta
+                    saudavel, so nao e a hora dele. Pintar de vermelho faria o
+                    lojista "consertar" o que esta funcionando. */}
+                {!cupomInvalidoHoje(c as never) && cupomForaDaJanelaAgora(c as never) && (
+                  <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                    {tDynamic('FORA DO HORÁRIO AGORA')}
+                  </span>
+                )}
               </div>
               <span className="text-lg font-black text-[var(--cor-primaria)]">
                 {c.frete_gratis ? 'Frete grátis' : c.tipo === 'FIXO' ? fmt(Number(c.valor)) : `${c.valor}% OFF`}
@@ -261,7 +269,14 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
   const [validade, setValidade] = useState(cupom?.validade ?? '');
   const [limiteUsos, setLimiteUsos] = useState(cupom?.limite_usos != null ? String(cupom.limite_usos) : '');
   const [freteGratis, setFreteGratis] = useState(cupom?.frete_gratis ?? false);
+  // O input type="time" só aceita HH:MM; o banco devolve HH:MM:SS.
+  const [horaInicio, setHoraInicio] = useState((cupom?.hora_inicio ?? '').slice(0, 5));
+  const [horaFim, setHoraFim] = useState((cupom?.hora_fim ?? '').slice(0, 5));
+  const [dias, setDias] = useState<number[]>(cupom?.dias_semana ?? []);
   const [erro, setErro] = useState('');
+
+  const alternarDia = (d: number) =>
+    setDias((atual) => (atual.includes(d) ? atual.filter((x) => x !== d) : [...atual, d].sort((a, b) => a - b)));
 
   const salvar = async () => {
     if (!codigo.trim() || !valor) return setErro('Preencha código e valor.');
@@ -276,6 +291,11 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
       validade: validade || null,
       limite_usos: limiteUsos ? Number(limiteUsos) : null,
       frete_gratis: freteGratis,
+      hora_inicio: horaInicio || null,
+      hora_fim: horaFim || null,
+      // Array vazio a CHECK do banco recusa, e com razao: "nenhum dia" nao e
+      // uma promocao, e um cupom que nunca vale. Todos os dias se diz com NULL.
+      dias_semana: dias.length && dias.length < 7 ? dias : null,
     };
     const { error } = cupom
       ? await supabase.from('cupons').update(payload).eq('id', cupom.id)
@@ -340,6 +360,54 @@ function CupomModal({ lojaId, cupom, onClose, onSalvo }: { lojaId: string; cupom
               <input value={validade} onChange={(e) => setValidade(e.target.value)} type="date" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none" />
             </div>
           </div>
+          {/* Janela de horario: e com ela que o restaurante tira gente do pico
+              — "desconto para quem almoca depois da 1h40". Deixar em branco e
+              o normal; quem preenche esta escolhendo a hora de propósito. */}
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-3 space-y-3">
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase">{tDynamic('Janela de horário')}</p>
+              <p className="mt-0.5 text-[11px] font-normal text-gray-400">
+                {tDynamic('Em branco, vale o dia inteiro. A hora é a da loja.')}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-bold text-gray-500 uppercase">{tDynamic('A partir das')}</label>
+                <input value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} type="time" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold text-gray-500 uppercase">{tDynamic('Até as')}</label>
+                <input value={horaFim} onChange={(e) => setHoraFim(e.target.value)} type="time" className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" />
+              </div>
+            </div>
+            {horaInicio && horaFim && horaFim <= horaInicio && (
+              <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                {tDynamic('Essa janela atravessa a meia-noite — vale da noite até a madrugada do dia seguinte.')}
+              </p>
+            )}
+            <div>
+              <label className="text-[11px] font-bold text-gray-500 uppercase">{tDynamic('Dias da semana')}</label>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((nome, d) => (
+                  <button key={nome} type="button" onClick={() => alternarDia(d)}
+                    aria-pressed={dias.includes(d)}
+                    className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition ${
+                      dias.includes(d)
+                        ? 'bg-[var(--cor-primaria)] text-white'
+                        : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:brightness-95'
+                    }`}>
+                    {nome}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1.5 text-[11px] font-normal text-gray-400">
+                {dias.length === 0 || dias.length === 7
+                  ? tDynamic('Nenhum dia marcado: vale todos os dias.')
+                  : tDynamic('Só nos dias marcados.')}
+              </p>
+            </div>
+          </div>
+
           <label className="flex items-center gap-2 pt-1 text-xs font-semibold text-gray-700 dark:text-gray-300">
             <input type="checkbox" checked={primeiraCompra} onChange={(e) => setPrimeiraCompra(e.target.checked)} className="h-4 w-4 rounded accent-[var(--cor-primaria)]" />
             {tDynamic('Válido exclusivamente no 1º pedido do cliente')}
