@@ -31,6 +31,14 @@ da loja. O loader entra por `src/lib/adsense.ts` — prerender no HTML
 estático de `/blog*` e `<AdSenseBlog />` na navegação da SPA. O build
 falha se ele vazar para outra rota.
 
+As áreas já estão posicionadas (`<AdSlot />` no meio do artigo, no fecho e
+no hub). Para ligá-las, cole o `data-ad-slot` em `ADSENSE_SLOTS` — campo
+vazio é área desligada, e o Auto Ads segue preenchendo sozinho. Sem
+consentimento de marketing o anúncio vai não personalizado, nos dois sinais
+que o Google lê (`requestNonPersonalizedAds` e Consent Mode v2). No EEE,
+Reino Unido e Suíça quem pergunta é a CMP do Google: nosso banner se cala e
+escuta (`src/lib/cmpTcf.ts`).
+
 **Leia a função em produção antes de reescrever.** `pg_get_functiondef` é a
 verdade; a migration versionada pode estar defasada nos dois sentidos. Isso já
 mordeu mais de uma vez.
