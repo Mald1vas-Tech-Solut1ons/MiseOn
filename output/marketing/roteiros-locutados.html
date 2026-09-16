@@ -1,0 +1,1196 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roteiros locutados MiseOn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --papel:#F4F5F0; --alto:#FFFFFF; --fundo:#E9EBE3;
+  --tinta:#15180F; --tinta2:#4A5245; --tinta3:#79816F;
+  --linha:#D8DBD0; --linha-forte:#BCC2B3;
+  --verde:#1B5E3F; --verde-vivo:#15803D; --verde-fundo:#E3EFE7;
+  --brasa:#B23E0C; --brasa-fundo:#FBE9DE;
+  --azul:#1E4A6B; --azul-fundo:#E2ECF3;
+  --sombra:0 1px 2px rgba(21,24,15,.05), 0 8px 24px -12px rgba(21,24,15,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+    --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+    --linha:#2B3127; --linha-forte:#3D4538;
+    --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+    --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+    --azul:#8FC4E8; --azul-fundo:#12212C;
+    --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+  --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+  --linha:#2B3127; --linha-forte:#3D4538;
+  --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+  --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+  --azul:#8FC4E8; --azul-fundo:#12212C;
+  --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--tinta);
+  font-family:"Source Serif 4","Iowan Old Style",Georgia,serif;font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5,.ui{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+code,.mono,.tc{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px}
+.layout{display:grid;grid-template-columns:1fr;gap:48px}
+@media(min-width:1040px){.layout{grid-template-columns:230px minmax(0,1fr);gap:56px}}
+.indice{font-family:Archivo,sans-serif;font-size:13px;line-height:1.45}
+@media(min-width:1040px){.indice{position:sticky;top:64px;align-self:start;max-height:calc(100vh - 88px);overflow-y:auto;padding-block:8px}}
+.indice ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.indice a{display:block;padding:6px 10px;color:var(--tinta2);text-decoration:none;border-radius:6px;border-left:2px solid transparent}
+.indice a:hover{background:var(--alto);color:var(--tinta);border-left-color:var(--verde-vivo)}
+.indice .ix{color:var(--tinta3);margin-right:8px;font-variant-numeric:tabular-nums;font-weight:600}
+.indice-topo{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta3);font-weight:700;padding:0 10px 10px;border-bottom:1px solid var(--linha);margin-bottom:10px}
+.capa{padding-block:40px 32px;border-bottom:2px solid var(--tinta)}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brasa);font-weight:700;margin:0 0 14px}
+h1{font-size:clamp(34px,6.4vw,58px);line-height:1.02;letter-spacing:-.022em;font-weight:800;margin:0 0 18px;text-wrap:balance;max-width:17ch}
+.lede{font-size:clamp(17px,2.1vw,20px);line-height:1.55;color:var(--tinta2);max-width:62ch;margin:0}
+.meta-capa{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:26px;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--tinta3)}
+.meta-capa b{color:var(--tinta2);font-weight:500}
+section{padding-block:52px;border-bottom:1px solid var(--linha)}
+section:last-of-type{border-bottom:0}
+.numsec{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--brasa);text-transform:uppercase;margin:0 0 10px}
+h2{font-size:clamp(25px,3.6vw,34px);line-height:1.12;letter-spacing:-.017em;font-weight:700;margin:0 0 8px;text-wrap:balance}
+.sub{color:var(--tinta2);font-size:18px;margin:0 0 30px;max-width:64ch}
+h3{font-size:20px;line-height:1.24;font-weight:700;margin:38px 0 12px;text-wrap:balance}
+h4{font-size:15px;font-weight:700;margin:26px 0 8px}
+p{margin:0 0 16px;max-width:68ch}
+ul,ol{max-width:68ch;padding-left:22px;margin:0 0 16px}
+li{margin-bottom:7px}
+li::marker{color:var(--tinta3)}
+strong{font-weight:600;color:var(--tinta)}
+a{color:var(--verde-vivo)}
+hr{border:0;border-top:1px solid var(--linha);margin:34px 0}
+.rota{font-family:"JetBrains Mono",monospace;font-size:.83em;background:var(--fundo);border:1px solid var(--linha);padding:1px 6px;border-radius:4px;white-space:nowrap;color:var(--tinta2)}
+.regra{border-left:3px solid var(--brasa);padding:4px 0 4px 20px;margin:26px 0;max-width:68ch}
+.regra .rot{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brasa);display:block;margin-bottom:6px}
+.regra p:last-child{margin-bottom:0}
+.nota{background:var(--azul-fundo);border-radius:8px;padding:18px 20px;margin:26px 0;max-width:68ch;font-size:16px}
+.nota .rot{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--azul);display:block;margin-bottom:7px}
+.nota p:last-child{margin-bottom:0}
+
+.comanda{background:var(--alto);border:1px solid var(--linha);border-radius:10px;box-shadow:var(--sombra);margin:26px 0 44px;overflow:hidden}
+.comanda-topo{background:var(--fundo);border-bottom:1px solid var(--linha);padding:13px 20px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.comanda-id{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--brasa);letter-spacing:.04em}
+.comanda-nome{font-family:Archivo,sans-serif;font-weight:700;font-size:16.5px;flex:1 1 240px;min-width:0}
+.comanda-especs{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--tinta3);white-space:nowrap}
+.comanda-corpo{padding:20px}
+.ancora{font-size:14.5px;color:var(--tinta2);background:var(--verde-fundo);border-radius:6px;padding:9px 13px;margin:0 0 4px;max-width:none}
+.ancora b{color:var(--verde);font-family:Archivo,sans-serif;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:3px}
+.faixa-bloco{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta3);border-bottom:1px solid var(--linha);padding-bottom:6px;margin:30px 0 14px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.faixa-bloco span{font-family:"JetBrains Mono",monospace;letter-spacing:.02em;text-transform:none;font-weight:500;color:var(--tinta3)}
+
+.tomada{display:grid;grid-template-columns:62px minmax(0,1fr);gap:0 16px;padding:12px 0;border-top:1px dashed var(--linha)}
+.tomada:first-of-type{border-top:0;padding-top:0}
+.tomada-id{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--brasa);padding-top:5px}
+.tomada-id small{display:block;font-weight:400;color:var(--tinta3);font-size:10.5px}
+.tomada-txt{font-size:18px;line-height:1.55;color:var(--tinta);border-left:2px solid var(--linha-forte);padding-left:13px;max-width:none;margin:0}
+.tomada-obs{font-family:Archivo,sans-serif;font-size:13px;color:var(--tinta3);margin:7px 0 0;padding-left:15px;max-width:none}
+.tomada-obs b{color:var(--tinta2);font-weight:600}
+
+.trilha{width:100%;border-collapse:collapse;font-size:14.5px;margin:0}
+.trilha th{font-family:Archivo,sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);text-align:left;padding:0 10px 7px 0;border-bottom:1px solid var(--linha-forte)}
+.trilha td{padding:9px 10px 9px 0;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.45}
+.trilha tr:last-child td{border-bottom:0}
+.trilha .t{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--tinta3);white-space:nowrap;width:56px}
+.trilha .v{width:104px}
+.et{font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;letter-spacing:.02em;display:inline-block}
+.et-cart{background:var(--brasa-fundo);color:var(--brasa)}
+.et-tela{background:var(--azul-fundo);color:var(--azul)}
+.et-ativo{background:var(--verde-fundo);color:var(--verde)}
+.et-voz{background:var(--fundo);color:var(--tinta2);border:1px solid var(--linha-forte)}
+.acoes{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;padding-top:16px;border-top:1px solid var(--linha)}
+button.bt{font-family:Archivo,sans-serif;font-size:12.5px;font-weight:600;color:var(--tinta2);background:var(--fundo);
+  border:1px solid var(--linha-forte);border-radius:6px;padding:7px 13px;cursor:pointer}
+button.bt:hover{background:var(--alto);color:var(--tinta)}
+button.bt.ok{color:var(--verde);border-color:var(--verde-vivo)}
+.tabela{width:100%;border-collapse:collapse;font-size:15px;margin:22px 0}
+.tabela th{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);text-align:left;padding:0 14px 8px 0;border-bottom:1px solid var(--linha-forte)}
+.tabela td{padding:11px 14px 11px 0;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.45}
+.tabela td.cod{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--brasa);font-weight:700;white-space:nowrap}
+.rodape-doc{padding-block:38px 60px;color:var(--tinta3);font-size:14px}
+
+body.prompter .indice,body.prompter .bloco-trilha,body.prompter .ancora,
+body.prompter .comanda-especs,body.prompter .tomada-obs,body.prompter .acoes,
+body.prompter .so-tela{display:none}
+body.prompter .layout{grid-template-columns:1fr}
+body.prompter .tomada-txt{font-size:clamp(23px,3.2vw,33px);line-height:1.44}
+body.prompter .tomada{grid-template-columns:70px minmax(0,1fr);padding:20px 0}
+body.prompter section{padding-block:26px}
+.barra{position:sticky;top:0;z-index:9;background:var(--papel);border-bottom:1px solid var(--linha);
+  padding:10px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+</style>
+<div class="wrap">
+<div class="barra">
+  <button class="bt" onclick="document.body.classList.toggle('prompter')">Modo leitura &mdash; texto grande</button>
+  <button class="bt" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">Claro / escuro</button>
+  <button class="bt" onclick="window.print()">Imprimir</button>
+</div>
+
+<header class="capa">
+  <p class="eyebrow">MiseOn &middot; conte&uacute;do &middot; 15 de setembro de 2026</p>
+  <h1>Roteiros locutados</h1>
+  <p class="lede">Os oito roteiros da Cozinha de Conte&uacute;do reescritos para quem n&atilde;o vai filmar.
+  Nenhuma cena aqui precisa de c&acirc;mera: tudo &eacute; voz gravada no celular, grava&ccedil;&atilde;o de tela e
+  cartela pronta. Cada fala est&aacute; quebrada em tomadas curtas &mdash; errou uma palavra, voc&ecirc; repete
+  s&oacute; aquele peda&ccedil;o.</p>
+  <div class="meta-capa">
+    <span><b>Base:</b> cozinha-de-conteudo.html, Parte 08</span>
+    <span><b>Tenant:</b> Lanche do Paulista</span>
+    <span><b>Cartelas:</b> output/marketing/cartelas/</span>
+    <span><b>Ativos:</b> ativos/video/</span>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="indice">
+  <div class="indice-topo">Nesta p&aacute;gina</div>
+  <ol>
+    <li><a href="#como"><span class="ix">00</span>Como gravar a voz</a></li>
+    <li><a href="#L01"><span class="ix">L01</span>Vende 44, recebe 22</a></li>
+    <li><a href="#L02"><span class="ix">L02</span>Cinquenta gramas de alho</a></li>
+    <li><a href="#L03"><span class="ix">L03</span>A fila decide o lucro</a></li>
+    <li><a href="#L04"><span class="ix">L04</span>O mito da salada barata</a></li>
+    <li><a href="#L05"><span class="ix">L05</span>Comida sem foto n&atilde;o vende</a></li>
+    <li><a href="#L06"><span class="ix">L06</span>Seu card&aacute;pio &eacute; um labirinto</a></li>
+    <li><a href="#L07"><span class="ix">L07</span>Traga o cliente de volta</a></li>
+    <li><a href="#L08"><span class="ix">L08</span>O cupom vira estoque</a></li>
+    <li><a href="#L09"><span class="ix">L09</span>O longo do YouTube</a></li>
+    <li><a href="#cartelas"><span class="ix">10</span>As cartelas</a></li>
+    <li><a href="#perdas"><span class="ix">11</span>O que se perde sem c&acirc;mera</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="como">
+  <p class="numsec">Parte 00</p>
+  <h2>Como gravar a voz</h2>
+  <p class="sub">O manual j&aacute; tem a parte de sala, microfone e postura, em
+  <span class="rota">ativos/LEIA-ME.md</span>. N&atilde;o vou repetir. O que muda aqui &eacute; o
+  formato: voc&ecirc; grava <strong>por tomada</strong>, n&atilde;o o roteiro inteiro.</p>
+
+  <h3>A regra das tomadas</h3>
+  <p>Cada tomada &eacute; uma ideia s&oacute;, entre 5 e 15 segundos. Errou, repete s&oacute; ela. Isso
+  transforma a grava&ccedil;&atilde;o em algo que voc&ecirc; faz em quinze minutos com o celular na m&atilde;o,
+  e n&atilde;o numa performance que precisa sair redonda do come&ccedil;o ao fim.</p>
+  <ul>
+    <li><strong>Um arquivo por tomada.</strong> Nome: <span class="rota">L01-T1.m4a</span>,
+    <span class="rota">L01-T2.m4a</span>. O gravador do celular permite renomear depois de salvar.</li>
+    <li><strong>Tr&ecirc;s segundos de sil&ecirc;ncio</strong> antes de come&ccedil;ar a falar e depois de
+    terminar. Isso te d&aacute; onde cortar.</li>
+    <li><strong>Grave cada tomada duas vezes seguidas</strong>, no mesmo arquivo. Na edi&ccedil;&atilde;o
+    voc&ecirc; escolhe a melhor. Custa cinco segundos e evita regravar tudo no dia seguinte.</li>
+    <li><strong>Leia em p&eacute;.</strong> Muda a respira&ccedil;&atilde;o.</li>
+    <li><strong>N&uacute;mero se fala devagar.</strong> &ldquo;Sete mil e duzentos&rdquo; precisa de mais
+    tempo que o resto da frase. &Eacute; o que a pessoa vai lembrar.</li>
+  </ul>
+
+  <div class="nota">
+    <span class="rot">Grave uma vez, use sempre</span>
+    <p>O CTA &eacute; o mesmo em todos os v&iacute;deos, de prop&oacute;sito &mdash; &eacute; assinatura, n&atilde;o
+    texto novo. Grave <span class="rota">CTA-padrao.m4a</span> uma &uacute;nica vez, bem feito, e
+    cole nos oito. O mesmo vale para o gancho de encerramento longo de L07.</p>
+  </div>
+
+  <h3>Modo leitura</h3>
+  <p>O bot&atilde;o <strong>Modo leitura</strong> no topo esconde tudo que n&atilde;o &eacute; fala e aumenta
+  o texto. Deixe esta p&aacute;gina aberta no computador nesse modo e grave lendo da tela, com o
+  celular a um palmo da boca. &Eacute; para isso que ele existe.</p>
+
+  <h3>Como ler a trilha de imagem</h3>
+  <p>Cada roteiro tem duas listas. A de cima &eacute; o que voc&ecirc; fala; a de baixo &eacute; o que
+  entra na imagem, em ordem. As etiquetas:</p>
+  <p>
+    <span class="et et-cart">CARTELA</span> &mdash; PNG pronto em
+    <span class="rota">output/marketing/cartelas/</span>, s&oacute; arrastar.
+    <span class="et et-tela">TELA</span> &mdash; grava&ccedil;&atilde;o de tela que voc&ecirc; precisa fazer;
+    o c&oacute;digo F0x &eacute; o fluxo da Parte 07 do manual.
+    <span class="et et-ativo">ATIVO</span> &mdash; v&iacute;deo pronto em
+    <span class="rota">ativos/video/</span>.
+    <span class="et et-voz">SIL&Ecirc;NCIO</span> &mdash; trecho sem fala. N&atilde;o tenha medo deles.
+  </p>
+
+  <div class="regra">
+    <span class="rot">Antes de gravar qualquer tela</span>
+    <p>Lanche do Paulista, sempre. Nunca o Natureba &mdash; &eacute; o cadastro preparado para a
+    visita comercial que ainda n&atilde;o aconteceu, e n&atilde;o &eacute; seu para mostrar. Navegador
+    em 150%, barra de favoritos fechada, notifica&ccedil;&otilde;es desligadas. E nada de
+    <span class="rota">/demo-por-quilo</span> at&eacute; as fotos repetidas serem trocadas: &eacute;
+    exatamente o erro que o V&iacute;deo A aponta.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ L01 ══════════════════════════ -->
+<section id="L01">
+  <p class="numsec">L01</p>
+  <h2>Vende 44, recebe 22</h2>
+  <p class="sub">O primeiro a gravar. &Eacute; o mais forte que voc&ecirc; tem, e depois que as
+  cartelas est&atilde;o prontas ele s&oacute; depende de uma grava&ccedil;&atilde;o de tela.</p>
+
+  <div class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">L01</span>
+      <span class="comanda-nome">Vende 44, recebe 22</span>
+      <span class="comanda-especs">Reels 1:03 &middot; pilar: a conta &middot; nasce do R01</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>&ldquo;Por quanto voc&ecirc; vende? R$ 44. Quanto voc&ecirc; recebe?
+      R$ 22.&rdquo; &mdash; v&iacute;deo <i>Como ganhar dinheiro com delivery</i>, canal Marcelo Baccarini.
+      O n&uacute;mero &eacute; dele, e a cartela de cr&eacute;dito entra na tela dizendo isso.</p>
+
+      <div class="faixa-bloco">A narra&ccedil;&atilde;o <span>6 tomadas &middot; ~55 s de fala</span></div>
+      <div class="tomada">
+        <div class="tomada-id">T1<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">Voc&ecirc; vende uma batata por quarenta e quatro reais e recebe
+          vinte e dois. Isso n&atilde;o &eacute; a plataforma te roubando. &Eacute; uma conta que ningu&eacute;m fez.</p>
+          <p class="tomada-obs"><b>Fale plano.</b> Sem indigna&ccedil;&atilde;o. A frase j&aacute; &eacute; forte; se
+          voc&ecirc; atuar por cima dela vira propaganda.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T2<small>~8 s</small></div>
+        <div>
+          <p class="tomada-txt">Comiss&atilde;o, taxa de entrega, taxa de servi&ccedil;o, taxa de
+          pagamento. Some tudo e some metade do pre&ccedil;o.</p>
+          <p class="tomada-obs">Liste as quatro no mesmo ritmo, uma pausa curta entre cada uma. A
+          cartela revela uma por vez, acompanhando.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T3<small>~10 s</small></div>
+        <div>
+          <p class="tomada-txt">O erro n&atilde;o &eacute; vender no delivery. &Eacute; anunciar l&aacute; o mesmo
+          pre&ccedil;o do balc&atilde;o. No balc&atilde;o voc&ecirc; fica com os quarenta e quatro. L&aacute;, n&atilde;o.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T4<small>~13 s</small></div>
+        <div>
+          <p class="tomada-txt">Aqui eu digito quanto a plataforma cobra. E a coluna do lado
+          recalcula o pre&ccedil;o que eu tenho que anunciar pra que, depois da taxa, sobre o pre&ccedil;o
+          do meu balc&atilde;o.</p>
+          <p class="tomada-obs"><b>Esta &eacute; a tomada da venda.</b> Grave tr&ecirc;s vezes e escolha.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T5<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">E se voc&ecirc; n&atilde;o preencher isso, o sistema avisa: hoje a
+          comiss&atilde;o inteira est&aacute; saindo da sua margem.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T6<small>~6 s</small></div>
+        <div>
+          <p class="tomada-txt">MiseOn. Trinta dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p>
+          <p class="tomada-obs">&Eacute; o <span class="rota">CTA-padrao.m4a</span>. Grave uma vez e
+          reaproveite nos oito.</p>
+        </div>
+      </div>
+
+      <div class="bloco-trilha">
+      <div class="faixa-bloco">A trilha de imagem <span>1 grava&ccedil;&atilde;o de tela &middot; 4 cartelas</span></div>
+      <table class="trilha">
+        <tr><th class="t">Tempo</th><th class="v">Entra</th><th>O qu&ecirc;</th></tr>
+        <tr><td class="t">0:00</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L01-01</b> &mdash; VENDE 44. RECEBE 22. Punch-in lento de 5% ao longo dos 9 s.
+            A tira <b>credito-video-c</b> entra por cima em 0:02 e sai em 0:07.</td></tr>
+        <tr><td class="t">0:09</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">vinheta-abertura-9x16.mp4</span> &mdash; 1,2 s. Aqui, nunca no zero.</td></tr>
+        <tr><td class="t">0:10</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L01-02</b> &mdash; as quatro taxas. No CapCut, corte a cartela em quatro e
+            deixe cada linha aparecer junto com a palavra falada.</td></tr>
+        <tr><td class="t">0:18</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L01-03</b> &mdash; MESMO PRE&Ccedil;O &ne; MESMA MARGEM.</td></tr>
+        <tr><td class="t">0:28</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">transicao-seta-9x16</span> &mdash; a virada. O MiseOn entra agora.</td></tr>
+        <tr><td class="t">0:29</td><td class="v"><span class="et et-tela">TELA F07</span></td>
+            <td><span class="rota">/admin/ifood</span>: digitar a comiss&atilde;o, salvar, a coluna
+            <i>Pre&ccedil;o iFood (sugerido)</i> mudando inteira. <b>N&atilde;o corte</b> o momento em que a
+            coluna recalcula.</td></tr>
+        <tr><td class="t">0:42</td><td class="v"><span class="et et-voz">SIL&Ecirc;NCIO</span></td>
+            <td>3 s sem fala, com zoom em duas linhas da coluna. O sil&ecirc;ncio &eacute; o que faz o
+            n&uacute;mero ser lido.</td></tr>
+        <tr><td class="t">0:45</td><td class="v"><span class="et et-tela">TELA F07</span></td>
+            <td>O aviso amarelo da tela sem markup configurado, em plano fechado.</td></tr>
+        <tr><td class="t">0:50</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L01-04</b> &mdash; a conta fechada: balc&atilde;o R$ 22,00 &middot; comiss&atilde;o 26% &middot;
+            anuncie R$ 29,73.</td></tr>
+        <tr><td class="t">0:54</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">assinatura-final-9x16.mp4</span> por baixo do CTA.</td></tr>
+      </table>
+      </div>
+
+      <div class="acoes">
+        <button class="bt" data-copiar="L01">Copiar narra&ccedil;&atilde;o</button>
+      </div>
+    </div>
+  </div>
+
+  <p><strong>Legenda do post:</strong> use a do R01, na Parte 08 do manual. N&atilde;o mudou.</p>
+</section>
+
+
+<!-- ══════════════════════════ L02 ══════════════════════════ -->
+<section id="L02">
+  <p class="numsec">L02</p>
+  <h2>Cinquenta gramas de alho</h2>
+  <p class="sub">O R02 original abria com a m&atilde;o colocando alho na balan&ccedil;a. Sem c&acirc;mera, o
+  n&uacute;mero passa a carregar o v&iacute;deo sozinho &mdash; e ele aguenta, porque &eacute; um n&uacute;mero que
+  d&oacute;i.</p>
+
+  <div class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">L02</span>
+      <span class="comanda-nome">Cinquenta gramas de alho</span>
+      <span class="comanda-especs">Reels 0:56 &middot; pilar: a conta &middot; nasce do R02</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>&ldquo;Se ela usar 50 g de alho a mais por quilo, s&atilde;o
+      R$ 600 de preju&iacute;zo por m&ecirc;s.&rdquo; &mdash; canal Marcelo Baccarini. O n&uacute;mero &eacute; dele; o
+      cr&eacute;dito entra na tela.</p>
+
+      <div class="faixa-bloco">A narra&ccedil;&atilde;o <span>6 tomadas &middot; ~52 s de fala</span></div>
+      <div class="tomada">
+        <div class="tomada-id">T1<small>~8 s</small></div>
+        <div>
+          <p class="tomada-txt">Cinquenta gramas de alho a mais. Por quilo. &Eacute; isso que separa
+          o restaurante que d&aacute; lucro do que n&atilde;o d&aacute;.</p>
+          <p class="tomada-obs"><b>Pausa depois de &ldquo;por quilo&rdquo;.</b> A frase quebrada em tr&ecirc;s
+          pedacinhos &eacute; o que segura os tr&ecirc;s primeiros segundos.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T2<small>~8 s</small></div>
+        <div>
+          <p class="tomada-txt">S&atilde;o seiscentos reais por m&ecirc;s. Sete mil e duzentos no ano.
+          De alho.</p>
+          <p class="tomada-obs">&ldquo;De alho&rdquo; sai baixo, quase comentado. &Eacute; o remate.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T3<small>~11 s</small></div>
+        <div>
+          <p class="tomada-txt">E ningu&eacute;m enxerga, porque o alho n&atilde;o sai do caixa. Sai da
+          panela. S&oacute; aparece quando o m&ecirc;s fecha diferente do que voc&ecirc; esperava.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T4<small>~12 s</small></div>
+        <div>
+          <p class="tomada-txt">Aqui a receita tem a quantidade exata. Quando a venda acontece,
+          o estoque baixa essa quantidade &mdash; n&atilde;o a que o cozinheiro achou que usou.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T5<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">O desperd&iacute;cio n&atilde;o &eacute; o que voc&ecirc; joga fora. &Eacute; o que voc&ecirc;
+          usa a mais sem contar.</p>
+          <p class="tomada-obs">Devagar. Esta frase &eacute; a que vai ser recortada e citada.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T6<small>~5 s</small></div>
+        <div><p class="tomada-txt">Trinta dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p></div>
+      </div>
+
+      <div class="bloco-trilha">
+      <div class="faixa-bloco">A trilha de imagem <span>2 grava&ccedil;&otilde;es de tela &middot; 4 cartelas</span></div>
+      <table class="trilha">
+        <tr><th class="t">Tempo</th><th class="v">Entra</th><th>O qu&ecirc;</th></tr>
+        <tr><td class="t">0:00</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L02-01</b> &mdash; 50 G A MAIS. POR QUILO. Tira <b>credito-video-c</b> de 0:02 a 0:07.</td></tr>
+        <tr><td class="t">0:08</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">vinheta-abertura-9x16.mp4</span></td></tr>
+        <tr><td class="t">0:09</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L02-02</b> (R$ 600 / M&Ecirc;S) e, em corte seco aos 0:13, <b>L02-03</b>
+            (R$ 7.200 / ANO). O corte seco entre os dois n&uacute;meros &eacute; o efeito.</td></tr>
+        <tr><td class="t">0:17</td><td class="v"><span class="et et-tela">TELA F14</span></td>
+            <td><span class="rota">/admin/financeiro</span>: o resultado do m&ecirc;s. Entra sob
+            &ldquo;s&oacute; aparece quando o m&ecirc;s fecha&rdquo;. <b>Confira os n&uacute;meros antes</b> &mdash; n&atilde;o mostre
+            tela com dado incoerente.</td></tr>
+        <tr><td class="t">0:27</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">transicao-seta-9x16</span></td></tr>
+        <tr><td class="t">0:28</td><td class="v"><span class="et et-tela">TELA F06</span></td>
+            <td>Ficha t&eacute;cnica aberta com o insumo e a quantidade. Corta para a movimenta&ccedil;&atilde;o
+            de estoque saindo sozinha depois da venda.</td></tr>
+        <tr><td class="t">0:40</td><td class="v"><span class="et et-voz">SIL&Ecirc;NCIO</span></td>
+            <td>2 s de zoom na linha da movimenta&ccedil;&atilde;o.</td></tr>
+        <tr><td class="t">0:42</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L02-04</b> &mdash; O QUE VOC&Ecirc; USA A MAIS SEM CONTAR.</td></tr>
+        <tr><td class="t">0:51</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">assinatura-final-9x16.mp4</span></td></tr>
+      </table>
+      </div>
+
+      <div class="acoes"><button class="bt" data-copiar="L02">Copiar narra&ccedil;&atilde;o</button></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ L03 ══════════════════════════ -->
+<section id="L03">
+  <p class="numsec">L03</p>
+  <h2>A fila decide o lucro</h2>
+  <p class="sub">Aqui a cartela ganha da c&acirc;mera. A panor&acirc;mica do buffet mostrava a fila; o
+  diagrama <b>mostra por que ela &eacute; naquela ordem</b>, que &eacute; a tese do v&iacute;deo.</p>
+
+  <div class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">L03</span>
+      <span class="comanda-nome">A fila decide o lucro</span>
+      <span class="comanda-especs">Reels 1:10 &middot; pilar: a conta &middot; nicho por quilo &middot; nasce do R03</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>&ldquo;A balan&ccedil;a fica no final, mas o lucro &eacute; decidido no
+      come&ccedil;o da fila.&rdquo; &mdash; v&iacute;deo <i>Voc&ecirc; nunca olhou para um buffet desse jeito</i>,
+      canal Marcelo Baccarini.</p>
+
+      <div class="faixa-bloco">A narra&ccedil;&atilde;o <span>6 tomadas &middot; ~58 s de fala</span></div>
+      <div class="tomada">
+        <div class="tomada-id">T1<small>~7 s</small></div>
+        <div>
+          <p class="tomada-txt">Sabe por que a carne fica sempre no fim da fila do restaurante
+          por quilo?</p>
+          <p class="tomada-obs"><b>Pergunta de verdade.</b> Suba um pouco no fim da frase e pare.
+          A pausa antes da resposta vale mais que a resposta.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T2<small>~6 s</small></div>
+        <div><p class="tomada-txt">Porque se todo mundo come&ccedil;asse pela prote&iacute;na, o quilo quebrava.</p></div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T3<small>~10 s</small></div>
+        <div>
+          <p class="tomada-txt">Arroz, legume, massa: barato e pesado. A prote&iacute;na s&oacute; aparece
+          quando o prato j&aacute; est&aacute; cheio. Isso &eacute; layout, n&atilde;o acaso.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T4<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">S&oacute; que o layout sozinho n&atilde;o te diz quanto custa cada grama
+          que sai daquela travessa.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T5<small>~15 s</small></div>
+        <div>
+          <p class="tomada-txt">Quando o cliente serve trezentos e cinquenta gramas, a ficha
+          t&eacute;cnica baixa a propor&ccedil;&atilde;o exata de cada insumo. N&atilde;o &eacute; uma venda de zero v&iacute;rgula
+          trinta e cinco. &Eacute; uma por&ccedil;&atilde;o real, com custo real.</p>
+          <p class="tomada-obs">Tomada longa. Quebre em duas se travar: corte depois de
+          &ldquo;cada insumo&rdquo;.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T6<small>~8 s</small></div>
+        <div>
+          <p class="tomada-txt">Se voc&ecirc; tem buffet e ainda fecha o m&ecirc;s no feeling, o link t&aacute;
+          na bio. Trinta dias, sem cart&atilde;o.</p>
+        </div>
+      </div>
+
+      <div class="bloco-trilha">
+      <div class="faixa-bloco">A trilha de imagem <span>2 grava&ccedil;&otilde;es de tela &middot; 4 cartelas</span></div>
+      <table class="trilha">
+        <tr><th class="t">Tempo</th><th class="v">Entra</th><th>O qu&ecirc;</th></tr>
+        <tr><td class="t">0:00</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L03-01</b> &mdash; A BALAN&Ccedil;A &Eacute; NO FIM. O LUCRO &Eacute; NO COME&Ccedil;O.
+            Tira <b>credito-video-b</b> de 0:02 a 0:07.</td></tr>
+        <tr><td class="t">0:07</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">vinheta-abertura-9x16.mp4</span></td></tr>
+        <tr><td class="t">0:08</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L03-02</b> &mdash; o diagrama da fila. Corte em seis e revele um degrau por
+            vez, acompanhando T3. O &uacute;ltimo degrau (BALAN&Ccedil;A) entra em laranja.</td></tr>
+        <tr><td class="t">0:24</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">transicao-barras-9x16</span></td></tr>
+        <tr><td class="t">0:24</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L03-03</b> &mdash; 350 G NO PRATO.</td></tr>
+        <tr><td class="t">0:31</td><td class="v"><span class="et et-tela">TELA F09</span></td>
+            <td><span class="rota">/admin/balanca</span>: peso lido, comanda aberta, item lan&ccedil;ado
+            em 0,350 kg. Se n&atilde;o houver balan&ccedil;a ligada, use o modo manual <b>e escreva na tela
+            que o peso est&aacute; sendo digitado</b>.</td></tr>
+        <tr><td class="t">0:45</td><td class="v"><span class="et et-tela">TELA F06</span></td>
+            <td>A movimenta&ccedil;&atilde;o de estoque com a baixa proporcional de cada insumo.</td></tr>
+        <tr><td class="t">0:55</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L03-04</b> &mdash; UMA POR&Ccedil;&Atilde;O REAL, COM CUSTO REAL.</td></tr>
+        <tr><td class="t">1:02</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">assinatura-final-9x16.mp4</span></td></tr>
+      </table>
+      </div>
+
+      <div class="acoes"><button class="bt" data-copiar="L03">Copiar narra&ccedil;&atilde;o</button></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ L04 ══════════════════════════ -->
+<section id="L04">
+  <p class="numsec">L04</p>
+  <h2>O mito da salada barata</h2>
+  <p class="sub">Este &eacute; o que mais sofre sem c&acirc;mera, e n&atilde;o vou fingir o contr&aacute;rio &mdash;
+  veja a Parte 11. A vers&atilde;o locutada funciona; a filmada funcionaria melhor.</p>
+
+  <div class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">L04</span>
+      <span class="comanda-nome">O mito da salada barata</span>
+      <span class="comanda-especs">Reels 1:02 &middot; pilar: a conta &middot; nicho por quilo &middot; nasce do R04</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>&ldquo;Voc&ecirc; tira de 30 a 40% do buqu&ecirc;. Quase a metade &eacute;
+      perda.&rdquo; e os 60 litros de &aacute;gua por leva &mdash; canal Marcelo Baccarini.</p>
+
+      <div class="faixa-bloco">A narra&ccedil;&atilde;o <span>6 tomadas &middot; ~58 s de fala</span></div>
+      <div class="tomada">
+        <div class="tomada-id">T1<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">Voc&ecirc; acha que salada &eacute; o item mais barato do seu buffet. Por
+          grama servida, &eacute; o mais caro.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T2<small>~13 s</small></div>
+        <div>
+          <p class="tomada-txt">Voc&ecirc; compra um quilo. Desfolha, tira o feio, tira o queimado
+          &mdash; e chega no miolo com quase metade a menos. De trinta a quarenta por cento do
+          buqu&ecirc; vai fora.</p>
+          <p class="tomada-obs"><b>&ldquo;Desfolha, tira o feio, tira o queimado&rdquo; em ritmo de lista</b>,
+          com pausa curta entre cada verbo. &Eacute; a parte da fala que substitui a cena: quem ouve
+          v&ecirc; a bancada.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T3<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">E isso antes da &aacute;gua. S&atilde;o sessenta litros pra higienizar uma
+          leva.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T4<small>~12 s</small></div>
+        <div>
+          <p class="tomada-txt">Se voc&ecirc; lan&ccedil;ou o custo pelo quilo da nota, voc&ecirc; errou o custo
+          do prato. O custo &eacute; sobre o que sobrou, n&atilde;o sobre o que voc&ecirc; comprou.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T5<small>~12 s</small></div>
+        <div>
+          <p class="tomada-txt">Aqui eu declaro o rendimento que a minha cozinha teve de
+          verdade. O sistema tem uma refer&ecirc;ncia, mas o seu n&uacute;mero ganha do dele. Sempre.</p>
+          <p class="tomada-obs">&ldquo;Sempre&rdquo; isolado, depois de uma pausa. &Eacute; uma promessa de
+          produto e voc&ecirc; pode cumpri-la: a corre&ccedil;&atilde;o do lojista nunca &eacute; sobrescrita.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T6<small>~5 s</small></div>
+        <div><p class="tomada-txt">Trinta dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p></div>
+      </div>
+
+      <div class="bloco-trilha">
+      <div class="faixa-bloco">A trilha de imagem <span>1 grava&ccedil;&atilde;o de tela &middot; 4 cartelas</span></div>
+      <table class="trilha">
+        <tr><th class="t">Tempo</th><th class="v">Entra</th><th>O qu&ecirc;</th></tr>
+        <tr><td class="t">0:00</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L04-01</b> &mdash; O ITEM MAIS BARATO DO SEU BUFFET? Tira <b>credito-video-b</b>
+            de 0:02 a 0:07.</td></tr>
+        <tr><td class="t">0:09</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">vinheta-abertura-9x16.mp4</span></td></tr>
+        <tr><td class="t">0:10</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L04-02</b> &mdash; a subtra&ccedil;&atilde;o: 1 KG COMPRADO &rarr; ~600 G APROVEITADO.
+            Anime o n&uacute;mero descendo com quadro-chave, 1,5 s. &Eacute; o plano principal do v&iacute;deo.</td></tr>
+        <tr><td class="t">0:23</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L04-04</b> &mdash; 60 LITROS DE &Aacute;GUA POR LEVA.</td></tr>
+        <tr><td class="t">0:32</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L04-03</b> &mdash; O CUSTO &Eacute; DO QUE SOBROU.</td></tr>
+        <tr><td class="t">0:44</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">transicao-seta-9x16</span></td></tr>
+        <tr><td class="t">0:45</td><td class="v"><span class="et et-tela">TELA F06</span></td>
+            <td>Campo de rendimento sendo preenchido e o custo por por&ccedil;&atilde;o se ajustando.
+            Zoom de 15% no custo no momento em que ele muda.</td></tr>
+        <tr><td class="t">0:57</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">assinatura-final-9x16.mp4</span></td></tr>
+      </table>
+      </div>
+
+      <div class="acoes"><button class="bt" data-copiar="L04">Copiar narra&ccedil;&atilde;o</button></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ L05 ══════════════════════════ -->
+<section id="L05">
+  <p class="numsec">L05</p>
+  <h2>Comida sem foto n&atilde;o vende</h2>
+  <p class="sub">Nunca precisou de c&acirc;mera. As duas cenas s&atilde;o telas: um card&aacute;pio ruim e o
+  seu. Grave as duas no celular.</p>
+
+  <div class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">L05</span>
+      <span class="comanda-nome">Comida sem foto n&atilde;o vende</span>
+      <span class="comanda-especs">Reels 0:49 &middot; pilar: a vitrine &middot; nasce do R05</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>&ldquo;Voc&ecirc; n&atilde;o v&ecirc; cupcakes, s&oacute; as caixas&rdquo; e
+      &ldquo;Quatro marmitas em destaque. Nenhuma tem foto.&rdquo; &mdash; canal Marcelo Baccarini.</p>
+
+      <div class="faixa-bloco">A narra&ccedil;&atilde;o <span>6 tomadas &middot; ~45 s de fala</span></div>
+      <div class="tomada">
+        <div class="tomada-id">T1<small>~8 s</small></div>
+        <div>
+          <p class="tomada-txt">Quando voc&ecirc; vende comida, a primeira pergunta &eacute; uma s&oacute;: d&aacute;
+          vontade de comer?</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T2<small>~8 s</small></div>
+        <div>
+          <p class="tomada-txt">Quatro pratos em destaque. Nenhuma foto. O cliente est&aacute;
+          comprando no escuro.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T3<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">E n&atilde;o &eacute; pregui&ccedil;a do dono. &Eacute; que ningu&eacute;m tem tempo de
+          fotografar trinta pratos antes de abrir.</p>
+          <p class="tomada-obs"><b>Esta tomada &eacute; a que ganha o comentarista.</b> Voc&ecirc; defende
+          o dono antes de vender pra ele.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T4<small>~13 s</small></div>
+        <div>
+          <p class="tomada-txt">Por isso aqui nenhum prato entra sem imagem. Se voc&ecirc; ainda n&atilde;o
+          fotografou o seu, o card&aacute;pio usa uma imagem da fam&iacute;lia do produto at&eacute; voc&ecirc; trocar.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T5<small>~6 s</small></div>
+        <div><p class="tomada-txt">Foto gen&eacute;rica &eacute; ruim. Card vazio &eacute; pior.</p></div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T6<small>~5 s</small></div>
+        <div><p class="tomada-txt">Trinta dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p></div>
+      </div>
+
+      <div class="bloco-trilha">
+      <div class="faixa-bloco">A trilha de imagem <span>2 grava&ccedil;&otilde;es de tela &middot; 3 cartelas</span></div>
+      <table class="trilha">
+        <tr><th class="t">Tempo</th><th class="v">Entra</th><th>O qu&ecirc;</th></tr>
+        <tr><td class="t">0:00</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L05-01</b> &mdash; D&Aacute; VONTADE DE COMER?</td></tr>
+        <tr><td class="t">0:08</td><td class="v"><span class="et et-tela">TELA</span></td>
+            <td>Grava&ccedil;&atilde;o de tela do celular rolando um card&aacute;pio de delivery real com cards
+            sem foto. <b>Borre a marca da loja na edi&ccedil;&atilde;o.</b> Tira <b>credito-video-a</b> nos
+            primeiros 4 s.</td></tr>
+        <tr><td class="t">0:16</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L05-02</b> &mdash; COMPRANDO NO ESCURO.</td></tr>
+        <tr><td class="t">0:24</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">transicao-corte-9x16</span></td></tr>
+        <tr><td class="t">0:25</td><td class="v"><span class="et et-tela">TELA F01</span></td>
+            <td><span class="rota">/lanchepaulista</span> no celular, rolando: todos os cards com
+            foto. Grave com o tema escuro da loja &mdash; rende muito mais no feed.</td></tr>
+        <tr><td class="t">0:38</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L05-03</b> &mdash; CARD VAZIO &Eacute; PIOR.</td></tr>
+        <tr><td class="t">0:44</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">assinatura-final-9x16.mp4</span></td></tr>
+      </table>
+      </div>
+
+      <div class="acoes"><button class="bt" data-copiar="L05">Copiar narra&ccedil;&atilde;o</button></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ L06 ══════════════════════════ -->
+<section id="L06">
+  <p class="numsec">L06</p>
+  <h2>Seu card&aacute;pio &eacute; um labirinto</h2>
+  <p class="sub">Tamb&eacute;m 100% tela. E &eacute; o roteiro em que voc&ecirc; pode citar a fonte de
+  usabilidade sem inventar n&uacute;mero nenhum.</p>
+
+  <div class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">L06</span>
+      <span class="comanda-nome">Seu card&aacute;pio &eacute; um labirinto</span>
+      <span class="comanda-especs">Reels 0:52 &middot; pilar: a vitrine &middot; nasce do R06</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>&ldquo;N&atilde;o &eacute; um site, &eacute; um labirinto. N&atilde;o force o cliente
+      a ca&ccedil;ar o que ele quer comprar.&rdquo; &mdash; canal Marcelo Baccarini.</p>
+
+      <div class="faixa-bloco">A narra&ccedil;&atilde;o <span>6 tomadas &middot; ~48 s de fala</span></div>
+      <div class="tomada">
+        <div class="tomada-id">T1<small>~5 s</small></div>
+        <div>
+          <p class="tomada-txt">Se o cliente precisa procurar, ele j&aacute; desistiu.</p>
+          <p class="tomada-obs"><b>O gancho mais curto dos oito.</b> Cinco segundos e nenhuma
+          palavra sobrando. N&atilde;o acrescente nada na frente.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T2<small>~8 s</small></div>
+        <div><p class="tomada-txt">Oitenta itens numa lista s&oacute;. Sem busca, sem categoria, sem
+        destaque.</p></div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T3<small>~12 s</small></div>
+        <div>
+          <p class="tomada-txt">Na internet a pessoa quer primeiro ver, depois se interessar, e
+          s&oacute; a&iacute; ler. Um card&aacute;pio que come&ccedil;a pela leitura perde antes de mostrar o produto.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T4<small>~14 s</small></div>
+        <div>
+          <p class="tomada-txt">Busca no topo. Categorias que ficam fixas enquanto voc&ecirc; rola. E
+          uma faixa de mais pedidos que sai da venda real, n&atilde;o de um chute.</p>
+          <p class="tomada-obs">Tr&ecirc;s frases, tr&ecirc;s cortes. Corte a tela exatamente na v&iacute;rgula.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T5<small>~7 s</small></div>
+        <div><p class="tomada-txt">Tr&ecirc;s decis&otilde;es de layout. Nenhuma linha de c&oacute;digo do seu
+        lado.</p></div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T6<small>~5 s</small></div>
+        <div><p class="tomada-txt">Trinta dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p></div>
+      </div>
+
+      <div class="bloco-trilha">
+      <div class="faixa-bloco">A trilha de imagem <span>2 grava&ccedil;&otilde;es de tela &middot; 3 cartelas</span></div>
+      <table class="trilha">
+        <tr><th class="t">Tempo</th><th class="v">Entra</th><th>O qu&ecirc;</th></tr>
+        <tr><td class="t">0:00</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L06-01</b> &mdash; SE O CLIENTE PRECISA PROCURAR, ELE J&Aacute; DESISTIU.</td></tr>
+        <tr><td class="t">0:05</td><td class="v"><span class="et et-tela">TELA</span></td>
+            <td>Rolagem r&aacute;pida e frustrada num card&aacute;pio longo sem categoria, no celular. Marca
+            borrada. Tira <b>credito-video-a</b> nos primeiros 4 s.</td></tr>
+        <tr><td class="t">0:13</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L06-02</b> &mdash; N&Atilde;O &Eacute; CARD&Aacute;PIO. &Eacute; LABIRINTO.</td></tr>
+        <tr><td class="t">0:17</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L06-03</b> &mdash; VER &rarr; SE INTERESSAR &rarr; LER. A formula&ccedil;&atilde;o &eacute; do
+            v&iacute;deo da vitrine, n&atilde;o sua: a cartela traz a fonte no rodap&eacute;. Deixe leg&iacute;vel &mdash;
+            &eacute; o que autoriza a frase.</td></tr>
+        <tr><td class="t">0:24</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">transicao-barras-9x16</span></td></tr>
+        <tr><td class="t">0:25</td><td class="v"><span class="et et-tela">TELA F01</span></td>
+            <td>Tr&ecirc;s cortes r&aacute;pidos no <span class="rota">/lanchepaulista</span>: digitar na
+            busca &middot; trocar de categoria com a barra fixa &middot; a faixa &ldquo;Os mais pedidos&rdquo;.</td></tr>
+        <tr><td class="t">0:39</td><td class="v"><span class="et et-tela">TELA F01</span></td>
+            <td>Plano parado na faixa de mais pedidos, 3 s.</td></tr>
+        <tr><td class="t">0:47</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">assinatura-final-9x16.mp4</span></td></tr>
+      </table>
+      </div>
+
+      <div class="acoes"><button class="bt" data-copiar="L06">Copiar narra&ccedil;&atilde;o</button></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ L07 ══════════════════════════ -->
+<section id="L07">
+  <p class="numsec">L07</p>
+  <h2>Traga o cliente de volta</h2>
+  <p class="sub">O mais longo e o que mais converte. A &uacute;nica cena f&iacute;sica do R07 era a m&atilde;o
+  colando o QR na embalagem &mdash; virou cartela, usando o
+  <span class="rota">qr-demo.svg</span> que j&aacute; existe na pasta.</p>
+
+  <div class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">L07</span>
+      <span class="comanda-nome">Traga o cliente de volta</span>
+      <span class="comanda-especs">Reels 1:20 &middot; pilar: a conta + vitrine &middot; nasce do R07</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>O dono da loja que mais vende delivery no pa&iacute;s:
+      &ldquo;Voc&ecirc; tem que dar um jeito de trazer esse cliente para voc&ecirc;.&rdquo; &mdash; canal
+      Marcelo Baccarini.</p>
+
+      <div class="faixa-bloco">A narra&ccedil;&atilde;o <span>7 tomadas &middot; ~71 s de fala</span></div>
+      <div class="tomada">
+        <div class="tomada-id">T1<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">A loja que mais vende no delivery do Brasil usa a plataforma
+          como vitrine &mdash; e tira o cliente de l&aacute;.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T2<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">Porque l&aacute; ele paga vinte e seis, trinta, &agrave;s vezes quarenta por
+          cento. No canal dele, paga zero.</p>
+          <p class="tomada-obs">Os tr&ecirc;s n&uacute;meros com pausa entre eles, subindo. A cartela pisca
+          um por vez.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T3<small>~12 s</small></div>
+        <div>
+          <p class="tomada-txt">Um cupom de vinte por cento junto com o pedido. Ou um QR code na
+          embalagem. Ele desconta vinte pra n&atilde;o pagar trinta.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T4<small>~11 s</small></div>
+        <div>
+          <p class="tomada-txt">Crio o cupom aqui, com regra de primeira compra, e escolho se
+          ele aparece sozinho no card&aacute;pio.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T5<small>~13 s</small></div>
+        <div>
+          <p class="tomada-txt">Ele j&aacute; aparece no meu card&aacute;pio, pronto pra copiar. E o cliente
+          ainda ganha cashback pra voltar uma terceira vez.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T6<small>~10 s</small></div>
+        <div>
+          <p class="tomada-txt">E quem abriu o carrinho e n&atilde;o terminou fica registrado. Esse &eacute;
+          o cliente mais f&aacute;cil de recuperar que existe.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T7<small>~7 s</small></div>
+        <div>
+          <p class="tomada-txt">A plataforma traz o cliente uma vez. O canal pr&oacute;prio traz as
+          outras dez.</p>
+          <p class="tomada-obs"><b>Este fechamento substitui o CTA padr&atilde;o.</b> Grave separado e
+          guarde: ele serve de gancho para outros v&iacute;deos do pilar.</p>
+        </div>
+      </div>
+
+      <div class="bloco-trilha">
+      <div class="faixa-bloco">A trilha de imagem <span>3 grava&ccedil;&otilde;es de tela &middot; 4 cartelas</span></div>
+      <table class="trilha">
+        <tr><th class="t">Tempo</th><th class="v">Entra</th><th>O qu&ecirc;</th></tr>
+        <tr><td class="t">0:00</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L07-01</b> &mdash; 26% &middot; 30% &middot; 40%. Tira <b>credito-video-c</b> de 0:02 a 0:07.</td></tr>
+        <tr><td class="t">0:09</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">vinheta-abertura-9x16.mp4</span></td></tr>
+        <tr><td class="t">0:10</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L07-02</b> &mdash; a cita&ccedil;&atilde;o, com a fonte no rodap&eacute; da cartela.</td></tr>
+        <tr><td class="t">0:19</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L07-03</b> &mdash; o QR na embalagem. Punch-in de 12% no c&oacute;digo.</td></tr>
+        <tr><td class="t">0:31</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">transicao-seta-9x16</span></td></tr>
+        <tr><td class="t">0:32</td><td class="v"><span class="et et-tela">TELA F13</span></td>
+            <td><span class="rota">/admin/marketing</span>: cria&ccedil;&atilde;o do cupom de primeira compra.</td></tr>
+        <tr><td class="t">0:43</td><td class="v"><span class="et et-tela">TELA F01</span></td>
+            <td>Corte para o card&aacute;pio p&uacute;blico com o cupom vis&iacute;vel e o selo de cashback.
+            <b>&Eacute; o corte mais importante do v&iacute;deo</b>: o que foi criado no admin aparecendo
+            para o cliente.</td></tr>
+        <tr><td class="t">0:56</td><td class="v"><span class="et et-tela">TELA F13</span></td>
+            <td>Lista de carrinhos abandonados.</td></tr>
+        <tr><td class="t">1:06</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L07-04</b> &mdash; A PLATAFORMA TRAZ UMA VEZ. O CANAL PR&Oacute;PRIO TRAZ AS OUTRAS DEZ.</td></tr>
+        <tr><td class="t">1:13</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">assinatura-final-9x16.mp4</span></td></tr>
+      </table>
+      </div>
+
+      <div class="acoes"><button class="bt" data-copiar="L07">Copiar narra&ccedil;&atilde;o</button></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ L08 ══════════════════════════ -->
+<section id="L08">
+  <p class="numsec">L08</p>
+  <h2>O cupom do mercado vira estoque</h2>
+  <p class="sub">Este n&atilde;o perdeu nada. A cena do R08 era a c&acirc;mera do celular lendo o QR &mdash;
+  e isso &eacute; grava&ccedil;&atilde;o de tela, n&atilde;o filmagem. Grave a tela do celular enquanto escaneia.</p>
+
+  <div class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">L08</span>
+      <span class="comanda-nome">O cupom do mercado vira estoque</span>
+      <span class="comanda-especs">Reels 0:48 &middot; pilar: a opera&ccedil;&atilde;o &middot; nasce do R08</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>A pergunta do question&aacute;rio de vendas: &ldquo;No estoque,
+      voc&ecirc; lan&ccedil;a as notas manualmente ou tem importa&ccedil;&atilde;o autom&aacute;tica?&rdquo;</p>
+
+      <div class="faixa-bloco">A narra&ccedil;&atilde;o <span>4 tomadas &middot; ~31 s de fala</span></div>
+      <div class="tomada">
+        <div class="tomada-id">T1<small>~9 s</small></div>
+        <div>
+          <p class="tomada-txt">Voltei do mercado com trinta e dois itens. Vou lan&ccedil;ar todos no
+          estoque sem digitar nenhum.</p>
+          <p class="tomada-obs"><b>Confira o n&uacute;mero antes de gravar.</b> Se o seu cupom tiver 27
+          itens, fale 27. O n&uacute;mero tem que bater com a tela.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T2<small>~10 s</small></div>
+        <div>
+          <p class="tomada-txt">Quantidade, custo e fornecedor v&ecirc;m da pr&oacute;pria nota. O custo do
+          seu prato atualiza junto.</p>
+        </div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T3<small>~7 s</small></div>
+        <div><p class="tomada-txt">Nota de fornecedor em XML entra do mesmo jeito.</p></div>
+      </div>
+      <div class="tomada">
+        <div class="tomada-id">T4<small>~5 s</small></div>
+        <div><p class="tomada-txt">Trinta dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p></div>
+      </div>
+
+      <div class="bloco-trilha">
+      <div class="faixa-bloco">A trilha de imagem <span>1 grava&ccedil;&atilde;o de tela &middot; 3 cartelas</span></div>
+      <table class="trilha">
+        <tr><th class="t">Tempo</th><th class="v">Entra</th><th>O qu&ecirc;</th></tr>
+        <tr><td class="t">0:00</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L08-01</b> &mdash; 32 ITENS. ZERO DIGITA&Ccedil;&Atilde;O.</td></tr>
+        <tr><td class="t">0:09</td><td class="v"><span class="et et-tela">TELA F05</span></td>
+            <td>Grava&ccedil;&atilde;o da tela <b>do celular</b>: <span class="rota">/admin/estoque</span> &rarr;
+            Escanear Cupom (NFC-e), a c&acirc;mera lendo o QR e a lista preenchendo.</td></tr>
+        <tr><td class="t">0:09</td><td class="v"><span class="et et-voz">SIL&Ecirc;NCIO</span></td>
+            <td><b>15 segundos sem fala e sem corte.</b> Este &eacute; o plano mais forte do sistema
+            inteiro e a &uacute;nica coisa que o v&iacute;deo precisa provar. N&atilde;o acelere, n&atilde;o corte, n&atilde;o
+            ponha m&uacute;sica por cima.</td></tr>
+        <tr><td class="t">0:24</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L08-02</b> &mdash; o que vem da nota: quantidade &middot; custo &middot; fornecedor.</td></tr>
+        <tr><td class="t">0:28</td><td class="v"><span class="et et-tela">TELA F05</span></td>
+            <td>Zoom nas colunas de quantidade e custo j&aacute; preenchidas.</td></tr>
+        <tr><td class="t">0:36</td><td class="v"><span class="et et-cart">CARTELA</span></td>
+            <td><b>L08-03</b> &mdash; XML DE FORNECEDOR TAMB&Eacute;M.</td></tr>
+        <tr><td class="t">0:43</td><td class="v"><span class="et et-ativo">ATIVO</span></td>
+            <td><span class="rota">assinatura-final-9x16.mp4</span></td></tr>
+      </table>
+      </div>
+
+      <div class="acoes"><button class="bt" data-copiar="L08">Copiar narra&ccedil;&atilde;o</button></div>
+    </div>
+  </div>
+
+  <div class="regra">
+    <span class="rot">Sem cupom de verdade, sem v&iacute;deo</span>
+    <p>Leve um cupom fiscal real na m&atilde;o e tenha um XML de fornecedor de reserva, caso a SEFAZ
+    demore a responder. Um escaneamento que falha na grava&ccedil;&atilde;o custa a tarde inteira.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ L09 ══════════════════════════ -->
+<section id="L09">
+  <p class="numsec">L09</p>
+  <h2>O longo do YouTube, sem c&acirc;mera</h2>
+  <p class="sub">O roteiro de dez minutos j&aacute; existe inteiro em
+  <span class="rota">roteiro-youtube-conta-do-prato.md</span> e continua valendo. Dele, s&oacute;
+  dois blocos pediam rosto. S&atilde;o esses dois que est&atilde;o aqui.</p>
+
+  <p>Os blocos 2 a 6 s&atilde;o tela com voz por cima &mdash; nasceram locutados e n&atilde;o mudam. Grave a
+  narra&ccedil;&atilde;o deles em tomadas de um par&aacute;grafo, com o mesmo crit&eacute;rio da Parte 00.</p>
+
+  <h3>Bloco 1 &mdash; a abertura, sem plano m&eacute;dio</h3>
+  <p>O roteiro pedia voc&ecirc; em plano m&eacute;dio, sem vinheta. Substitua por: a tabela de margem
+  do Lanche do Paulista <strong>desfocada</strong> em tela cheia, que vai entrando em foco
+  durante a fala, e o t&iacute;tulo do v&iacute;deo em tipografia por cima. A narra&ccedil;&atilde;o &eacute; a mesma:</p>
+  <div class="comanda"><div class="comanda-corpo">
+    <div class="tomada">
+      <div class="tomada-id">Y1<small>~18 s</small></div>
+      <div><p class="tomada-txt">Se eu te perguntar quanto custa o seu lanche mais vendido,
+      voc&ecirc; tem duas respostas poss&iacute;veis. Ou voc&ecirc; sabe, e a&iacute; esse v&iacute;deo n&atilde;o &eacute; pra voc&ecirc;.
+      Ou voc&ecirc; tem uma ideia &mdash; e &eacute; a&iacute; que mora o problema.</p></div>
+    </div>
+    <div class="tomada">
+      <div class="tomada-id">Y2<small>~20 s</small></div>
+      <div><p class="tomada-txt">Eu vou montar essa conta agora, do zero. Do cupom do mercado
+      at&eacute; a margem. E no meio do caminho eu vou te mostrar um erro que estava escondido no meu
+      pr&oacute;prio sistema e que fazia uma por&ccedil;&atilde;o de batata custar oitenta e sete reais.</p></div>
+    </div>
+  </div></div>
+  <p>A tabela entra em foco exatamente em &ldquo;oitenta e sete reais&rdquo;, e a
+  <span class="rota">vinheta-abertura-16x9.mp4</span> segue logo depois, como j&aacute; estava
+  previsto.</p>
+
+  <h3>Bloco 7 &mdash; a chamada</h3>
+  <p>Mesma fala do roteiro original, sobre a tabela de margem parada em tela cheia, seguida
+  da <span class="rota">assinatura-final-16x9.mp4</span>. Nada mais.</p>
+
+  <div class="nota">
+    <span class="rot">O que voc&ecirc; perde e o que ganha</span>
+    <p>Perde o rosto, que &eacute; o que d&aacute; credibilidade de fundador num v&iacute;deo de dez minutos.
+    Ganha a possibilidade de gravar hoje. Se em algum momento voc&ecirc; decidir aparecer em
+    exatamente um v&iacute;deo do m&ecirc;s, <strong>que seja este</strong>: &eacute; o que fecha venda, e os
+    Reels continuam funcionando sem voc&ecirc; na tela.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ cartelas ══════════════════════════ -->
+<section id="cartelas">
+  <p class="numsec">Parte 10</p>
+  <h2>As cartelas</h2>
+  <p class="sub">Vinte e nove telas cheias e quatro tiras de cr&eacute;dito, 1080&times;1920, na marca
+  oficial. S&atilde;o elas que substituem a c&acirc;mera. Ficam em
+  <span class="rota">output/marketing/cartelas/</span>.</p>
+
+  <h3>Como entram no CapCut</h3>
+  <ul>
+    <li><strong>Cartela cheia:</strong> arraste para a trilha principal, no tempo indicado.
+    D&ecirc; um punch-in de 5 a 8% ao longo da dura&ccedil;&atilde;o &mdash; uma cartela absolutamente parada
+    parece erro de exporta&ccedil;&atilde;o.</li>
+    <li><strong>Tira de cr&eacute;dito:</strong> fundo transparente, PNG do mesmo tamanho do
+    v&iacute;deo. Arraste para a trilha <em>acima</em> e n&atilde;o mexa na posi&ccedil;&atilde;o &mdash; ela j&aacute; est&aacute; na
+    &aacute;rea segura. Entra com fade de 0,3 s, fica 4 a 5 s, sai com fade.</li>
+    <li><strong>Nunca por cima da legenda queimada.</strong> As cartelas j&aacute; respeitam
+    250 px no topo e 350 px na base; a sua legenda tamb&eacute;m tem que respeitar.</li>
+  </ul>
+
+  <h3>Para regerar</h3>
+  <p>Mexeu no texto de alguma cartela? O desenho vive em
+  <span class="rota">scripts/ativos/cartelas.html</span>:</p>
+  <pre class="rota" style="display:block;padding:12px 14px;white-space:pre-wrap">node scripts/gerar-cartelas.mjs</pre>
+
+  <h3>Invent&aacute;rio</h3>
+  <table class="tabela">
+    <tr><th>C&oacute;digo</th><th>O que diz</th><th>Onde entra</th></tr>
+    <tr><td class="cod">L01-01</td><td>VENDE 44. RECEBE 22.</td><td>L01 0:00 &middot; capa do Reels</td></tr>
+    <tr><td class="cod">L01-02</td><td>As quatro taxas que somam metade</td><td>L01 0:10</td></tr>
+    <tr><td class="cod">L01-03</td><td>MESMO PRE&Ccedil;O &ne; MESMA MARGEM</td><td>L01 0:18</td></tr>
+    <tr><td class="cod">L01-04</td><td>A conta: balc&atilde;o 22 &middot; comiss&atilde;o 26% &middot; anuncie 29,73</td><td>L01 0:50</td></tr>
+    <tr><td class="cod">L02-01</td><td>50 G A MAIS. POR QUILO.</td><td>L02 0:00 &middot; capa</td></tr>
+    <tr><td class="cod">L02-02</td><td>R$ 600 / M&Ecirc;S</td><td>L02 0:09</td></tr>
+    <tr><td class="cod">L02-03</td><td>R$ 7.200 / ANO</td><td>L02 0:13</td></tr>
+    <tr><td class="cod">L02-04</td><td>O QUE VOC&Ecirc; USA A MAIS SEM CONTAR</td><td>L02 0:42</td></tr>
+    <tr><td class="cod">L03-01</td><td>A balan&ccedil;a &eacute; no fim. O lucro &eacute; no come&ccedil;o.</td><td>L03 0:00 &middot; capa</td></tr>
+    <tr><td class="cod">L03-02</td><td>O diagrama da fila, seis degraus</td><td>L03 0:08</td></tr>
+    <tr><td class="cod">L03-03</td><td>350 G NO PRATO</td><td>L03 0:24</td></tr>
+    <tr><td class="cod">L03-04</td><td>Uma por&ccedil;&atilde;o real, com custo real</td><td>L03 0:55</td></tr>
+    <tr><td class="cod">L04-01</td><td>O item mais barato do seu buffet?</td><td>L04 0:00 &middot; capa</td></tr>
+    <tr><td class="cod">L04-02</td><td>1 kg comprado &rarr; ~600 g aproveitado</td><td>L04 0:10</td></tr>
+    <tr><td class="cod">L04-03</td><td>O CUSTO &Eacute; DO QUE SOBROU</td><td>L04 0:32</td></tr>
+    <tr><td class="cod">L04-04</td><td>60 litros de &aacute;gua por leva</td><td>L04 0:23</td></tr>
+    <tr><td class="cod">L05-01</td><td>D&Aacute; VONTADE DE COMER?</td><td>L05 0:00 &middot; capa</td></tr>
+    <tr><td class="cod">L05-02</td><td>COMPRANDO NO ESCURO</td><td>L05 0:16</td></tr>
+    <tr><td class="cod">L05-03</td><td>CARD VAZIO &Eacute; PIOR</td><td>L05 0:38</td></tr>
+    <tr><td class="cod">L06-01</td><td>Se o cliente precisa procurar, ele j&aacute; desistiu</td><td>L06 0:00 &middot; capa</td></tr>
+    <tr><td class="cod">L06-02</td><td>N&Atilde;O &Eacute; CARD&Aacute;PIO. &Eacute; LABIRINTO.</td><td>L06 0:13</td></tr>
+    <tr><td class="cod">L06-03</td><td>Ver &rarr; se interessar &rarr; ler (com a fonte)</td><td>L06 0:17</td></tr>
+    <tr><td class="cod">L07-01</td><td>26% &middot; 30% &middot; 40%</td><td>L07 0:00 &middot; capa</td></tr>
+    <tr><td class="cod">L07-02</td><td>A cita&ccedil;&atilde;o do dono, com fonte</td><td>L07 0:10</td></tr>
+    <tr><td class="cod">L07-03</td><td>O QR na embalagem</td><td>L07 0:19</td></tr>
+    <tr><td class="cod">L07-04</td><td>A plataforma traz uma vez. O canal pr&oacute;prio, dez.</td><td>L07 1:06</td></tr>
+    <tr><td class="cod">L08-01</td><td>32 ITENS. ZERO DIGITA&Ccedil;&Atilde;O.</td><td>L08 0:00 &middot; capa</td></tr>
+    <tr><td class="cod">L08-02</td><td>Quantidade &middot; custo &middot; fornecedor</td><td>L08 0:24</td></tr>
+    <tr><td class="cod">L08-03</td><td>XML de fornecedor tamb&eacute;m</td><td>L08 0:36</td></tr>
+    <tr><td class="cod">credito-video-a</td><td>Tira: fonte do v&iacute;deo da vitrine</td><td>L05, L06</td></tr>
+    <tr><td class="cod">credito-video-b</td><td>Tira: fonte do v&iacute;deo do buffet</td><td>L03, L04</td></tr>
+    <tr><td class="cod">credito-video-c</td><td>Tira: fonte do v&iacute;deo do delivery</td><td>L01, L02, L07</td></tr>
+    <tr><td class="cod">aviso-demo</td><td>Tira: LOJA DE DEMONSTRA&Ccedil;&Atilde;O</td><td>Qualquer tela de /demo-*</td></tr>
+  </table>
+
+  <div class="regra">
+    <span class="rot">A tira de cr&eacute;dito n&atilde;o &eacute; opcional</span>
+    <p>Os n&uacute;meros de 44/22, dos 50 g de alho, dos 30 a 40% do buqu&ecirc; e dos 26 a 40% de
+    comiss&atilde;o <strong>n&atilde;o s&atilde;o seus</strong>. Com o cr&eacute;dito na tela eles s&atilde;o reportagem, e
+    voc&ecirc; fica coberto. Sem o cr&eacute;dito eles viram afirma&ccedil;&atilde;o sua sem medi&ccedil;&atilde;o &mdash; que &eacute;
+    exatamente o que a Parte 03 do manual pro&iacute;be.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════ perdas ══════════════════════════ -->
+<section id="perdas">
+  <p class="numsec">Parte 11</p>
+  <h2>O que se perde sem c&acirc;mera</h2>
+  <p class="sub">Contabilidade honesta, para voc&ecirc; decidir com o n&uacute;mero na m&atilde;o e n&atilde;o por
+  impress&atilde;o.</p>
+
+  <table class="tabela">
+    <tr><th>Roteiro</th><th>O que sai</th><th>O que entra no lugar</th><th>Saldo</th></tr>
+    <tr><td class="cod">L04</td><td>O p&eacute; de alface sendo desfolhado, com as duas pilhas
+      crescendo na bancada</td><td>A cartela da subtra&ccedil;&atilde;o e a fala em ritmo de lista</td>
+      <td><strong>Perda grande.</strong> A cena era o argumento inteiro.</td></tr>
+    <tr><td class="cod">L02</td><td>A m&atilde;o colocando alho na balan&ccedil;a</td>
+      <td>Corte seco entre R$ 600 e R$ 7.200</td>
+      <td>Perda m&eacute;dia. O n&uacute;mero sustenta.</td></tr>
+    <tr><td class="cod">L03</td><td>A panor&acirc;mica da fila do buffet</td>
+      <td>O diagrama dos seis degraus</td>
+      <td><strong>Ganho.</strong> O diagrama explica; a panor&acirc;mica s&oacute; mostrava.</td></tr>
+    <tr><td class="cod">L07</td><td>A m&atilde;o colando o QR na embalagem</td>
+      <td>Cartela com o QR de demonstra&ccedil;&atilde;o</td>
+      <td>Perda pequena.</td></tr>
+    <tr><td class="cod">L01 L05 L06 L08</td><td>Nada</td><td>&mdash;</td>
+      <td>Estes quatro j&aacute; eram tela. Comece por eles.</td></tr>
+  </table>
+
+  <h3>A &uacute;nica exce&ccedil;&atilde;o que eu abriria</h3>
+  <p>Se um dia voc&ecirc; resolver apontar o celular para alguma coisa &mdash; sem rosto, sem voz,
+  sem enquadramento pensado &mdash; que seja <strong>o desfolhe do alface do L04</strong>. S&atilde;o
+  vinte segundos em cima de uma bancada com o celular apoiado num copo. N&atilde;o precisa de luz,
+  n&atilde;o precisa de &aacute;udio e n&atilde;o precisa de voc&ecirc;. &Eacute; a &uacute;nica cena f&iacute;sica do conjunto que a
+  cartela n&atilde;o consegue igualar.</p>
+  <p>N&atilde;o &eacute; requisito. O L04 locutado est&aacute; pronto para gravar do jeito que est&aacute;.</p>
+
+  <h3>E o pilar do bastidor?</h3>
+  <p>O manual reserva 1 de cada 10 v&iacute;deos para bastidor de fundador, que normalmente &eacute;
+  rosto falando. Sem c&acirc;mera, bastidor vira <strong>voz sobre a tela do que voc&ecirc; est&aacute;
+  construindo</strong>: a migra&ccedil;&atilde;o rodando, o bug que voc&ecirc; corrigiu, o print do commit.
+  Funciona, e no seu caso funciona melhor &mdash; o argumento &eacute; t&eacute;cnico, e a tela prova o que o
+  rosto s&oacute; afirmaria.</p>
+</section>
+
+<footer class="rodape-doc">
+  <p>Escrito sobre a Parte 08 do <span class="rota">cozinha-de-conteudo.html</span>, que
+  continua sendo a fonte das legendas, das hashtags e das regras do que pode ser dito. As
+  falas foram reescritas para locu&ccedil;&atilde;o; os n&uacute;meros n&atilde;o mudaram e nenhum novo foi
+  introduzido. Tudo que &eacute; afirma&ccedil;&atilde;o de terceiro carrega a fonte na tela.</p>
+</footer>
+
+</main>
+</div>
+</div>
+
+<script>
+document.querySelectorAll('[data-copiar]').forEach(function(bt){
+  bt.addEventListener('click', function(){
+    var sec = document.getElementById(bt.dataset.copiar);
+    var linhas = [];
+    sec.querySelectorAll('.tomada').forEach(function(t){
+      var id = t.querySelector('.tomada-id');
+      var tx = t.querySelector('.tomada-txt');
+      if(!id || !tx) return;
+      linhas.push(id.childNodes[0].textContent.trim() + ' — ' + tx.textContent.replace(/\s+/g,' ').trim());
+    });
+    navigator.clipboard.writeText(linhas.join('\n\n')).then(function(){
+      bt.textContent = 'Copiado';
+      bt.classList.add('ok');
+      setTimeout(function(){ bt.textContent = 'Copiar narração'; bt.classList.remove('ok'); }, 1800);
+    });
+  });
+});
+</script>
+</html>

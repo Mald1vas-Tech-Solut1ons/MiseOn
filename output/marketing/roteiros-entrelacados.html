@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roteiros entrelaçados MiseOn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --papel:#F4F5F0; --alto:#FFFFFF; --fundo:#E9EBE3;
+  --tinta:#15180F; --tinta2:#4A5245; --tinta3:#79816F;
+  --linha:#D8DBD0; --linha-forte:#BCC2B3;
+  --verde:#1B5E3F; --verde-vivo:#15803D; --verde-fundo:#E3EFE7;
+  --brasa:#B23E0C; --brasa-fundo:#FBE9DE;
+  --azul:#1E4A6B; --azul-fundo:#E2ECF3;
+  --roxo:#5B3A8E; --roxo-fundo:#EDE6F7;
+  --sombra:0 1px 2px rgba(21,24,15,.05), 0 8px 24px -12px rgba(21,24,15,.14);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+  --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+  --linha:#2B3127; --linha-forte:#3D4538;
+  --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+  --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+  --azul:#8FC4E8; --azul-fundo:#12212C;
+  --roxo:#C4A9F0; --roxo-fundo:#201733;
+  --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);}}
+:root[data-theme="dark"]{
+  --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+  --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+  --linha:#2B3127; --linha-forte:#3D4538;
+  --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+  --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+  --azul:#8FC4E8; --azul-fundo:#12212C;
+  --roxo:#C4A9F0; --roxo-fundo:#201733;
+  --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--tinta);
+  font-family:"Source Serif 4","Iowan Old Style",Georgia,serif;font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,.ui{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.wrap{max-width:1320px;margin:0 auto;padding-inline:20px}
+.layout{display:grid;grid-template-columns:1fr;gap:44px}
+@media(min-width:1140px){.layout{grid-template-columns:215px minmax(0,1fr);gap:50px}}
+.indice{font-family:Archivo,sans-serif;font-size:13px;line-height:1.45}
+@media(min-width:1140px){.indice{position:sticky;top:60px;align-self:start;max-height:calc(100vh - 84px);overflow-y:auto;padding-block:8px}}
+.indice ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.indice a{display:block;padding:6px 10px;color:var(--tinta2);text-decoration:none;border-radius:6px;border-left:2px solid transparent}
+.indice a:hover{background:var(--alto);color:var(--tinta);border-left-color:var(--verde-vivo)}
+.indice .ix{color:var(--tinta3);margin-right:8px;font-weight:600}
+.indice-topo{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta3);font-weight:700;padding:0 10px 10px;border-bottom:1px solid var(--linha);margin-bottom:10px}
+.capa{padding-block:40px 30px;border-bottom:2px solid var(--tinta)}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brasa);font-weight:700;margin:0 0 14px}
+h1{font-size:clamp(34px,6.2vw,56px);line-height:1.02;letter-spacing:-.022em;font-weight:800;margin:0 0 18px;text-wrap:balance;max-width:17ch}
+.lede{font-size:clamp(17px,2vw,20px);line-height:1.55;color:var(--tinta2);max-width:64ch;margin:0}
+.meta-capa{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:24px;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--tinta3)}
+.meta-capa b{color:var(--tinta2);font-weight:500}
+section{padding-block:48px;border-bottom:1px solid var(--linha)}
+section:last-of-type{border-bottom:0}
+.numsec{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--brasa);text-transform:uppercase;margin:0 0 10px}
+h2{font-size:clamp(25px,3.4vw,33px);line-height:1.12;letter-spacing:-.017em;font-weight:700;margin:0 0 8px;text-wrap:balance}
+.sub{color:var(--tinta2);font-size:18px;margin:0 0 26px;max-width:66ch}
+h3{font-size:19px;font-weight:700;margin:34px 0 12px}
+p{margin:0 0 16px;max-width:70ch}
+ul,ol{max-width:70ch;padding-left:22px;margin:0 0 16px}
+li{margin-bottom:7px}
+li::marker{color:var(--tinta3)}
+strong{font-weight:600;color:var(--tinta)}
+a{color:var(--verde-vivo)}
+.rota{font-family:"JetBrains Mono",monospace;font-size:.83em;background:var(--fundo);border:1px solid var(--linha);padding:1px 6px;border-radius:4px;white-space:nowrap;color:var(--tinta2)}
+.regra{border-left:3px solid var(--brasa);padding:4px 0 4px 20px;margin:24px 0;max-width:70ch}
+.regra .rot{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brasa);display:block;margin-bottom:6px}
+.regra p:last-child{margin-bottom:0}
+.nota{background:var(--azul-fundo);border-radius:8px;padding:18px 20px;margin:24px 0;max-width:70ch;font-size:16px}
+.nota .rot{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--azul);display:block;margin-bottom:7px}
+.nota p:last-child{margin-bottom:0}
+
+/* ── roteiro ─────────────────────────────────── */
+.rot{background:var(--alto);border:1px solid var(--linha);border-radius:10px;box-shadow:var(--sombra);margin:24px 0 42px;overflow:hidden}
+.rot-topo{background:var(--fundo);border-bottom:1px solid var(--linha);padding:14px 20px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.rot-id{font-family:"JetBrains Mono",monospace;font-size:12.5px;font-weight:700;color:var(--brasa);letter-spacing:.04em}
+.rot-nome{font-family:Archivo,sans-serif;font-weight:700;font-size:17px;flex:1 1 220px}
+.rot-esp{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--tinta3)}
+.rot-ficha{padding:14px 20px;border-bottom:1px solid var(--linha);font-size:14.5px;display:grid;gap:5px}
+.rot-ficha span{display:block}
+.rot-ficha b{font-family:Archivo,sans-serif;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);margin-right:8px}
+.tl{width:100%;border-collapse:collapse;font-size:14px}
+.tl th{font-family:Archivo,sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--tinta3);text-align:left;padding:11px 10px 7px;border-bottom:1px solid var(--linha-forte);vertical-align:bottom;background:var(--fundo)}
+.tl td{padding:12px 10px;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.42}
+.tl tr:last-child td{border-bottom:0}
+.tt{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--tinta2);white-space:nowrap;width:64px}
+.tl .img{width:31%}
+.tl .aud{width:28%}
+.tl .tri{width:15%}
+.tl .leg{width:15%}
+.src{background:var(--roxo-fundo)}
+.src .img b{color:var(--roxo)}
+.sis{background:var(--verde-fundo)}
+.sis .img b{color:var(--verde)}
+.img b{display:block;font-family:Archivo,sans-serif;font-size:13px;margin-bottom:3px}
+.fala{color:var(--tinta);border-left:2px solid var(--linha-forte);padding-left:9px;display:block;font-style:normal}
+.dele{color:var(--tinta2);font-style:italic}
+.trilha{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;display:inline-block;white-space:nowrap}
+.tr-sus{background:#2B1A0F;color:#FB923C}
+.tr-pul{background:var(--fundo);color:var(--tinta2);border:1px solid var(--linha-forte)}
+.tr-roc{background:var(--brasa);color:#fff}
+.tr-mud{background:var(--tinta);color:var(--papel)}
+.tr-res{background:var(--verde-fundo);color:var(--verde)}
+.qm{font-family:Archivo,sans-serif;font-weight:800;font-size:13px;color:var(--brasa);letter-spacing:-.01em;text-transform:uppercase;line-height:1.25}
+.rot-pe{padding:16px 20px;background:var(--fundo);border-top:1px solid var(--linha);font-size:14.5px}
+.rot-pe p{margin:0 0 8px;max-width:none}
+.rot-pe p:last-child{margin-bottom:0}
+.rot-pe b{font-family:Archivo,sans-serif;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);margin-right:8px}
+.tabela{width:100%;border-collapse:collapse;font-size:15px;margin:22px 0}
+.tabela th{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);text-align:left;padding:0 14px 8px 0;border-bottom:1px solid var(--linha-forte)}
+.tabela td{padding:11px 14px 11px 0;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.45}
+.tabela td.cod{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--brasa);font-weight:700;white-space:nowrap}
+.rodape-doc{padding-block:36px 60px;color:var(--tinta3);font-size:14px}
+.barra{position:sticky;top:0;z-index:9;background:var(--papel);border-bottom:1px solid var(--linha);padding:10px 0;display:flex;gap:8px;flex-wrap:wrap}
+button.bt{font-family:Archivo,sans-serif;font-size:12.5px;font-weight:600;color:var(--tinta2);background:var(--fundo);
+  border:1px solid var(--linha-forte);border-radius:6px;padding:7px 13px;cursor:pointer}
+button.bt:hover{background:var(--alto);color:var(--tinta)}
+</style>
+<div class="wrap">
+<div class="barra">
+  <button class="bt" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">Claro / escuro</button>
+  <button class="bt" onclick="window.print()">Imprimir</button>
+</div>
+
+<header class="capa">
+  <p class="eyebrow">MiseOn &middot; conte&uacute;do &middot; 15 de setembro de 2026</p>
+  <h1>Roteiros entrela&ccedil;ados</h1>
+  <p class="lede">Oito Reels montados quadro a quadro: o corte do v&iacute;deo de terceiro com
+  minuto exato de entrada e sa&iacute;da, a transi&ccedil;&atilde;o nomeada, a tela do sistema que responde, a
+  trilha por trecho e a legenda queimada. N&atilde;o &eacute; plano &mdash; &eacute; a linha do tempo pronta para
+  montar no CapCut.</p>
+  <div class="meta-capa">
+    <span><b>Roteiros:</b> 8 completos</span>
+    <span><b>Cortes-fonte:</b> 11, com timecode</span>
+    <span><b>Telas:</b> 9 grava&ccedil;&otilde;es</span>
+    <span><b>Base:</b> mapa-de-cortes.html</span>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="indice">
+  <div class="indice-topo">Nesta p&aacute;gina</div>
+  <ol>
+    <li><a href="#gramatica"><span class="ix">00</span>A gram&aacute;tica</a></li>
+    <li><a href="#E01"><span class="ix">E01</span>Tr&ecirc;s por cento</a></li>
+    <li><a href="#E02"><span class="ix">E02</span>O aluguel no X-Bacon</a></li>
+    <li><a href="#E03"><span class="ix">E03</span>Vende 44, recebe 22</a></li>
+    <li><a href="#E04"><span class="ix">E04</span>Subiu o frango</a></li>
+    <li><a href="#E05"><span class="ix">E05</span>O bife pesado</a></li>
+    <li><a href="#E06"><span class="ix">E06</span>Vinte segundos</a></li>
+    <li><a href="#E07"><span class="ix">E07</span>Pelas palavras</a></li>
+    <li><a href="#E08"><span class="ix">E08</span>2.300 numa noite</a></li>
+    <li><a href="#trilhas"><span class="ix">09</span>As trilhas</a></li>
+    <li><a href="#antes"><span class="ix">10</span>Antes de montar</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="gramatica">
+  <p class="numsec">Parte 00</p>
+  <h2>A gram&aacute;tica destes oito</h2>
+  <p class="sub">Todos seguem a mesma estrutura de quatro tempos. Depois do terceiro v&iacute;deo
+  voc&ecirc; monta sem reler.</p>
+
+  <table class="tabela">
+    <tr><th>Tempo</th><th>O que acontece</th><th>Trilha</th><th>Dura&ccedil;&atilde;o</th></tr>
+    <tr><td class="cod">1 &middot; A DOR</td>
+      <td>O corte do v&iacute;deo de terceiro, na moldura de cita&ccedil;&atilde;o, com a tira de cr&eacute;dito. Ele
+        fala, voc&ecirc; cala.</td><td><span class="trilha tr-sus">SUSPENSE</span></td><td>8 a 14 s</td></tr>
+    <tr><td class="cod">2 &middot; A FACADA</td>
+      <td>Corte seco para cartela ou plano fechado com o n&uacute;mero. <b>Sem trilha.</b> O sil&ecirc;ncio
+        &eacute; o que faz o n&uacute;mero ser lido.</td><td><span class="trilha tr-mud">MUDO</span></td><td>2 a 4 s</td></tr>
+    <tr><td class="cod">3 &middot; A VIRADA</td>
+      <td><span class="rota">transicao-seta-9x16</span> e a tela do MiseOn resolvendo. A guitarra
+        entra <b>no mesmo quadro</b> da seta.</td><td><span class="trilha tr-roc">ROCK</span></td><td>18 a 28 s</td></tr>
+    <tr><td class="cod">4 &middot; O FECHO</td>
+      <td>Uma frase e a assinatura. A m&uacute;sica j&aacute; caiu antes do CTA.</td>
+      <td><span class="trilha tr-res">RESOLVE</span></td><td>6 a 8 s</td></tr>
+  </table>
+
+  <h3>A moldura de cita&ccedil;&atilde;o</h3>
+  <p>Todo corte de terceiro entra visualmente marcado, para ningu&eacute;m confundir o v&iacute;deo dele com
+  o seu: <strong>reduza o clipe a 88% da altura</strong>, fundo
+  <span class="rota">#070C18</span> atr&aacute;s, cantos de 18 px e a tira de cr&eacute;dito por cima
+  durante o trecho inteiro. Quando volta para a sua tela, o quadro volta a sangrar at&eacute; a borda.
+  Essa mudan&ccedil;a de moldura sozinha j&aacute; comunica &ldquo;agora sou eu falando&rdquo;.</p>
+
+  <h3>As tiras de cr&eacute;dito, por fonte</h3>
+  <table class="tabela">
+    <tr><th>Fonte</th><th>Tira</th></tr>
+    <tr><td class="cod">V1</td><td>Como ganhar dinheiro com delivery &mdash;
+      <span class="rota">cartelas/credito-video-c.png</span></td></tr>
+    <tr><td class="cod">V2</td><td>A estrat&eacute;gia da loja que mais vende delivery no Brasil &mdash;
+      <span class="rota">cartelas/credito-video-esfiha.png</span></td></tr>
+    <tr><td class="cod">V3</td><td>Como Ter Lucro no Seu Restaurante &mdash;
+      <span class="rota">cartelas/credito-video-lucro.png</span></td></tr>
+  </table>
+
+  <div class="regra">
+    <span class="rot">Precis&atilde;o dos timecodes</span>
+    <p>Os cortes do <b>V1</b> saíram da legenda do player e est&atilde;o exatos. Os do <b>V3</b> vieram
+    de uma captura mais grossa: trate como <b>&plusmn;5 s</b> e confirme o ponto de entrada antes de
+    cortar. Os do <b>V2</b> s&atilde;o in&iacute;cios de cap&iacute;tulo publicados pelo autor &mdash; exatos na entrada,
+    mas voc&ecirc; escolhe a sa&iacute;da.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════ E01 ══════════════════ -->
+<section id="E01">
+  <p class="numsec">E01</p>
+  <h2>Tr&ecirc;s por cento</h2>
+  <p class="sub">O melhor n&uacute;mero de abertura de toda a pesquisa, e n&atilde;o &eacute; seu &mdash; o que &eacute;
+  uma vantagem. Comece por este.</p>
+
+  <div class="rot">
+    <div class="rot-topo">
+      <span class="rot-id">E01</span>
+      <span class="rot-nome">Tr&ecirc;s por cento</span>
+      <span class="rot-esp">Reels 0:54 &middot; pilar: a conta</span>
+    </div>
+    <div class="rot-ficha">
+      <span><b>Corte-fonte</b>V3 &ldquo;Como Ter Lucro no Seu Restaurante&rdquo; &middot;
+        <span class="rota">&asymp;2:30 &rarr; &asymp;2:47</span></span>
+      <span><b>Telas</b>F14 <span class="rota">/admin/financeiro</span> &rarr; aba Margens e aba DRE</span>
+      <span><b>Cartelas</b>L01-03 n&atilde;o serve aqui; use texto vivo no CapCut</span>
+    </div>
+    <table class="tl">
+      <tr><th class="tt">Tempo</th><th class="img">Imagem</th><th class="aud">&Aacute;udio</th>
+          <th class="tri">Trilha</th><th class="leg">Legenda queimada</th></tr>
+
+      <tr class="src"><td class="tt">0:00</td>
+        <td class="img"><b>CORTE V3 &asymp;2:30</b>Moldura de cita&ccedil;&atilde;o. Tira
+          <span class="rota">credito-video-lucro</span> entra em 0:01.</td>
+        <td class="aud"><span class="dele">&ldquo;A maioria dos restaurantes, a margem de lucro
+          fica apenas entre tr&ecirc;s e cinco por cento. E alguns t&ecirc;m mais de vinte.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-sus">SUSPENSE</span> entra em 0:00, bem baixa</td>
+        <td class="leg"><span class="qm">3 a 5%</span></td></tr>
+
+      <tr class="src"><td class="tt">0:09</td>
+        <td class="img"><b>CORTE V3 segue</b>Punch-in de 10% no rosto dele.</td>
+        <td class="aud"><span class="dele">&ldquo;Quer dizer, a maioria parece que vende o almo&ccedil;o
+          mesmo para pagar o jantar.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-sus">SUSPENSE</span> sobe 3 dB</td>
+        <td class="leg"><span class="qm">O almo&ccedil;o paga o jantar</span></td></tr>
+
+      <tr><td class="tt">0:15</td>
+        <td class="img"><b>PRETO</b>Quadro preto puro, 1 s. Depois: n&uacute;mero grande em
+          branco sobre <span class="rota">#070C18</span>.</td>
+        <td class="aud"><span class="fala">Em qual dos dois grupos voc&ecirc; est&aacute;?</span></td>
+        <td class="tri"><span class="trilha tr-mud">MUDO</span> corta tudo</td>
+        <td class="leg"><span class="qm">3% ou 20%?</span></td></tr>
+
+      <tr><td class="tt">0:20</td>
+        <td class="img"><b>ATIVO</b><span class="rota">transicao-seta-9x16</span></td>
+        <td class="aud">&mdash;</td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> <b>entra no quadro da seta</b></td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr class="sis"><td class="tt">0:21</td>
+        <td class="img"><b>TELA F14 &mdash; Margens</b>A lista ordenada por margem, subindo.
+          Deixe rolar devagar, sem corte, 6 s.</td>
+        <td class="aud"><span class="fala">Essa resposta n&atilde;o est&aacute; no seu faturamento. Est&aacute;
+          item por item.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">Margem por item</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:29</td>
+        <td class="img"><b>TELA F14 &mdash; zoom</b>Punch-in de 15% numa linha de margem alta e,
+          em corte seco, numa de margem baixa.</td>
+        <td class="aud"><span class="fala">O item que mais vende quase nunca &eacute; o que mais
+          deixa. E enquanto voc&ecirc; n&atilde;o v&ecirc; os dois lado a lado, voc&ecirc; empurra o errado.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">O mais vendido &ne; o mais lucrativo</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:39</td>
+        <td class="img"><b>TELA F14 &mdash; margem em branco</b>A linha com
+          <i>Sem margem</i> e o motivo escrito ao lado.</td>
+        <td class="aud"><span class="fala">E quando o custo n&atilde;o fecha, ele n&atilde;o inventa
+          n&uacute;mero: deixa em branco e escreve o porqu&ecirc;.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> cai 6 dB</td>
+        <td class="leg"><span class="qm">Em branco &gt; errado</span></td></tr>
+
+      <tr><td class="tt">0:48</td>
+        <td class="img"><b>ASSINATURA</b><span class="rota">assinatura-final-9x16.mp4</span></td>
+        <td class="aud"><span class="fala">MiseOn. Trinta dias gr&aacute;tis, sem cart&atilde;o.</span></td>
+        <td class="tri"><span class="trilha tr-res">RESOLVE</span></td>
+        <td class="leg">&mdash;</td></tr>
+    </table>
+    <div class="rot-pe">
+      <p><b>Por que funciona</b>O espectador tenta responder &ldquo;3 ou 20?&rdquo; e descobre que n&atilde;o
+      sabe. O desconforto vem antes do produto, e o produto entra como a ferramenta de
+      descobrir &mdash; nunca como promessa de melhorar.</p>
+      <p><b>Cuidado</b>N&atilde;o diga nem sugira que o MiseOn leva ningu&eacute;m de 3% para 20%. Voc&ecirc; n&atilde;o
+      mediu isso. O v&iacute;deo entrega a <i>pergunta</i>; a tela entrega a <i>resposta do seu
+      cardápio</i>.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ E02 ══════════════════ -->
+<section id="E02">
+  <p class="numsec">E02</p>
+  <h2>O aluguel dentro do X-Bacon</h2>
+  <p class="sub">O casamento mais direto de todo o material: Molinari descreve o c&aacute;lculo do
+  ponto de equil&iacute;brio e a aba Custos Operacionais faz exatamente aquilo.</p>
+
+  <div class="rot">
+    <div class="rot-topo">
+      <span class="rot-id">E02</span>
+      <span class="rot-nome">O aluguel dentro do X-Bacon</span>
+      <span class="rot-esp">Reels 1:02 &middot; pilar: a conta</span>
+    </div>
+    <div class="rot-ficha">
+      <span><b>Corte-fonte</b>V3 &middot; <span class="rota">&asymp;27:10 &rarr; &asymp;27:35</span></span>
+      <span><b>Telas</b><span class="rota">/admin/financeiro</span> &rarr; aba Custos Operacionais &rarr; aba Margens</span>
+    </div>
+    <table class="tl">
+      <tr><th class="tt">Tempo</th><th class="img">Imagem</th><th class="aud">&Aacute;udio</th>
+          <th class="tri">Trilha</th><th class="leg">Legenda queimada</th></tr>
+
+      <tr><td class="tt">0:00</td>
+        <td class="img"><b>SUA TELA, PARADA</b>A aba Custos Operacionais desfocada,
+          entrando em foco ao longo de 4 s.</td>
+        <td class="aud"><span class="fala">Voc&ecirc; sabe quanto do seu aluguel est&aacute; dentro de um
+          &uacute;nico lanche?</span></td>
+        <td class="tri"><span class="trilha tr-sus">SUSPENSE</span></td>
+        <td class="leg"><span class="qm">Quanto do aluguel tem num lanche?</span></td></tr>
+
+      <tr class="src"><td class="tt">0:07</td>
+        <td class="img"><b>CORTE V3 &asymp;27:10</b>Moldura de cita&ccedil;&atilde;o + tira
+          <span class="rota">credito-video-lucro</span>.</td>
+        <td class="aud"><span class="dele">&ldquo;Qual estrutura de custo eu posso ter para ser
+          lucrativo… eu tenho que ter uma refer&ecirc;ncia de qual &eacute; o tamanho poss&iacute;vel do
+          faturamento… o aluguel…&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-sus">SUSPENSE</span></td>
+        <td class="leg"><span class="qm">Ponto de equil&iacute;brio</span></td></tr>
+
+      <tr><td class="tt">0:20</td>
+        <td class="img"><b>PRETO</b>1 s, seco.</td>
+        <td class="aud"><span class="fala">Quase ningu&eacute;m faz essa conta. E quem faz, faz uma
+          vez por ano numa planilha.</span></td>
+        <td class="tri"><span class="trilha tr-mud">MUDO</span></td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr><td class="tt">0:26</td>
+        <td class="img"><b>ATIVO</b><span class="rota">transicao-seta-9x16</span></td>
+        <td class="aud">&mdash;</td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> entra na seta</td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr class="sis"><td class="tt">0:27</td>
+        <td class="img"><b>TELA &mdash; Custos Operacionais</b>Preenchendo aluguel, energia,
+          internet, outros. Deixe os n&uacute;meros entrando, sem acelerar.</td>
+        <td class="aud"><span class="fala">Aluguel, energia, internet, o resto. Tudo que sai
+          todo m&ecirc;s independente de quanto voc&ecirc; vendeu.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">O que sai todo m&ecirc;s</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:38</td>
+        <td class="img"><b>TELA &mdash; o rateio</b>Plano fechado no texto da tela:
+          <i>&ldquo;pega o total dos seus gastos mensais e divide pela expectativa de vendas&rdquo;</i>.</td>
+        <td class="aud"><span class="fala">O sistema divide isso pela sua expectativa de vendas
+          e cobra a parte de cada item no custo dele.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">Rateado por item</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:48</td>
+        <td class="img"><b>TELA &mdash; Margens</b>Corte para a lista de margens j&aacute; com o custo
+          operacional dentro. Punch-in num item.</td>
+        <td class="aud"><span class="fala">A&iacute; a margem que aparece aqui n&atilde;o &eacute; s&oacute; sobre
+          insumo. &Eacute; sobre a sua opera&ccedil;&atilde;o inteira.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> cai</td>
+        <td class="leg"><span class="qm">Margem de verdade</span></td></tr>
+
+      <tr><td class="tt">0:56</td>
+        <td class="img"><b>ASSINATURA</b></td>
+        <td class="aud"><span class="fala">Trinta dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</span></td>
+        <td class="tri"><span class="trilha tr-res">RESOLVE</span></td>
+        <td class="leg">&mdash;</td></tr>
+    </table>
+    <div class="rot-pe">
+      <p><b>Confira antes</b>Abra a aba e veja se a sua loja de provas tem gasto fixo
+      cadastrado. Tela de rateio com tudo zerado n&atilde;o prova nada &mdash; preencha valores
+      plaus&iacute;veis no Lanche do Paulista antes de gravar.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ E03 ══════════════════ -->
+<section id="E03">
+  <p class="numsec">E03</p>
+  <h2>Vende 44, recebe 22</h2>
+  <p class="sub">Aqui o corte-fonte &eacute; melhor que qualquer cartela: &eacute; a dona da loja dizendo
+  o n&uacute;mero na pr&oacute;pria cozinha. Oito segundos que valem o Reels inteiro.</p>
+
+  <div class="rot">
+    <div class="rot-topo">
+      <span class="rot-id">E03</span>
+      <span class="rot-nome">Vende 44, recebe 22</span>
+      <span class="rot-esp">Reels 0:58 &middot; pilar: a conta</span>
+    </div>
+    <div class="rot-ficha">
+      <span><b>Cortes-fonte</b>V1 <span class="rota">1:12 &rarr; 1:20</span> e
+        <span class="rota">1:20 &rarr; 1:36</span> &mdash; timecodes exatos</span>
+      <span><b>Telas</b>F07 <span class="rota">/admin/ifood</span></span>
+      <span><b>Cartela</b>L01-04 (a conta fechada)</span>
+    </div>
+    <table class="tl">
+      <tr><th class="tt">Tempo</th><th class="img">Imagem</th><th class="aud">&Aacute;udio</th>
+          <th class="tri">Trilha</th><th class="leg">Legenda queimada</th></tr>
+
+      <tr class="src"><td class="tt">0:00</td>
+        <td class="img"><b>CORTE V1 1:12&ndash;1:20</b>Moldura de cita&ccedil;&atilde;o. Tira
+          <span class="rota">credito-video-c</span> a partir de 0:01.</td>
+        <td class="aud"><span class="dele">&ldquo;Essa batata aqui, voc&ecirc; vende por quanto?&rdquo; /
+          &ldquo;De quarenta e quatro eu recebo vinte e dois.&rdquo; / &ldquo;A metade.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-sus">SUSPENSE</span></td>
+        <td class="leg"><span class="qm">44 &rarr; 22</span></td></tr>
+
+      <tr class="src"><td class="tt">0:08</td>
+        <td class="img"><b>CORTE V1 1:20&ndash;1:36</b>Segue na moldura.</td>
+        <td class="aud"><span class="dele">&ldquo;Taxa de entrega, custos log&iacute;sticos, taxa de
+          pagamento, taxa de servi&ccedil;o… A grande maioria das pessoas que est&atilde;o no delivery est&atilde;o
+          perdendo dinheiro.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-pul">PULSO</span> entra junto com a primeira taxa</td>
+        <td class="leg"><span class="qm">4 taxas</span></td></tr>
+
+      <tr><td class="tt">0:24</td>
+        <td class="img"><b>PRETO</b>1,5 s.</td>
+        <td class="aud"><span class="fala">Isso n&atilde;o &eacute; a plataforma te roubando. &Eacute; uma conta
+          que ningu&eacute;m fez.</span></td>
+        <td class="tri"><span class="trilha tr-mud">MUDO</span></td>
+        <td class="leg"><span class="qm">Uma conta que ningu&eacute;m fez</span></td></tr>
+
+      <tr><td class="tt">0:31</td>
+        <td class="img"><b>ATIVO</b><span class="rota">transicao-seta-9x16</span></td>
+        <td class="aud">&mdash;</td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr class="sis"><td class="tt">0:32</td>
+        <td class="img"><b>TELA F07</b><span class="rota">/admin/ifood</span>: digitar a
+          comiss&atilde;o e salvar. <b>N&atilde;o corte</b> o instante em que a coluna recalcula.</td>
+        <td class="aud"><span class="fala">Aqui eu digito quanto a plataforma cobra. E a coluna
+          do lado recalcula o pre&ccedil;o que eu preciso anunciar pra que, depois da taxa, sobre o
+          pre&ccedil;o do meu balc&atilde;o.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">A coluna recalcula</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:45</td>
+        <td class="img"><b>CARTELA L01-04</b>Balc&atilde;o R$ 22 &middot; comiss&atilde;o 26% &middot; anuncie
+          R$ 29,73.</td>
+        <td class="aud">&mdash; 2 s de sil&ecirc;ncio para ler.</td>
+        <td class="tri"><span class="trilha tr-mud">MUDO</span></td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr class="sis"><td class="tt">0:48</td>
+        <td class="img"><b>TELA F07</b>O aviso amarelo de markup n&atilde;o configurado.</td>
+        <td class="aud"><span class="fala">E se voc&ecirc; n&atilde;o preencher, ele avisa: hoje a comiss&atilde;o
+          inteira est&aacute; saindo da sua margem.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> cai</td>
+        <td class="leg"><span class="qm">Saindo da sua margem</span></td></tr>
+
+      <tr><td class="tt">0:54</td>
+        <td class="img"><b>ASSINATURA</b></td>
+        <td class="aud"><span class="fala">Trinta dias gr&aacute;tis, sem cart&atilde;o.</span></td>
+        <td class="tri"><span class="trilha tr-res">RESOLVE</span></td>
+        <td class="leg">&mdash;</td></tr>
+    </table>
+    <div class="rot-pe">
+      <p><b>Substitui</b>Este roteiro substitui a abertura do L01 em
+      <span class="rota">roteiros-locutados.html</span>. Publique os dois com quinze dias de
+      distância e compare reten&ccedil;&atilde;o nos 3 s: cartela contra corte real.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ E04 ══════════════════ -->
+<section id="E04">
+  <p class="numsec">E04</p>
+  <h2>Subiu o frango</h2>
+  <p class="sub">Ele mostra oito pratos com o mesmo frango como estrat&eacute;gia de compra. Voc&ecirc;
+  mostra a outra metade da moeda, que ningu&eacute;m mostra: o que acontece com os oito quando o
+  pre&ccedil;o sobe.</p>
+
+  <div class="rot">
+    <div class="rot-topo">
+      <span class="rot-id">E04</span>
+      <span class="rot-nome">Subiu o frango</span>
+      <span class="rot-esp">Reels 1:04 &middot; pilar: a conta</span>
+    </div>
+    <div class="rot-ficha">
+      <span><b>Corte-fonte</b>V1 <span class="rota">10:35 &rarr; 11:02</span> &mdash; exato</span>
+      <span><b>Telas</b>F15 <span class="rota">/admin/compras</span> &middot; F06 ficha t&eacute;cnica &middot;
+        F14 Margens</span>
+    </div>
+    <table class="tl">
+      <tr><th class="tt">Tempo</th><th class="img">Imagem</th><th class="aud">&Aacute;udio</th>
+          <th class="tri">Trilha</th><th class="leg">Legenda queimada</th></tr>
+
+      <tr class="src"><td class="tt">0:00</td>
+        <td class="img"><b>CORTE V1 10:35&ndash;10:52</b>Moldura + tira
+          <span class="rota">credito-video-c</span>. Ele enumera os pratos.</td>
+        <td class="aud"><span class="dele">&ldquo;Frango ao molho, strogonoff, isca, milanesa,
+          grelhado, assado, sobrecoxa… sete, oito variedades com frango.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-pul">PULSO</span> &mdash; um golpe por prato citado</td>
+        <td class="leg"><span class="qm">8 pratos, 1 frango</span></td></tr>
+
+      <tr class="src"><td class="tt">0:17</td>
+        <td class="img"><b>CORTE V1 segue</b></td>
+        <td class="aud"><span class="dele">&ldquo;Negocio na quantidade. Um fornecedor, um boleto
+          s&oacute;, eu consigo barganhar.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-pul">PULSO</span></td>
+        <td class="leg"><span class="qm">Um fornecedor</span></td></tr>
+
+      <tr><td class="tt">0:27</td>
+        <td class="img"><b>PRETO</b>1,5 s.</td>
+        <td class="aud"><span class="fala">Estrat&eacute;gia boa. Agora a pergunta que ningu&eacute;m faz:
+          e quando o frango sobe?</span></td>
+        <td class="tri"><span class="trilha tr-mud">MUDO</span></td>
+        <td class="leg"><span class="qm">E quando ele sobe?</span></td></tr>
+
+      <tr><td class="tt">0:34</td>
+        <td class="img"><b>ATIVO</b><span class="rota">transicao-seta-9x16</span></td>
+        <td class="aud">&mdash;</td><td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr class="sis"><td class="tt">0:35</td>
+        <td class="img"><b>TELA F15</b><span class="rota">/admin/compras</span>: hist&oacute;rico de
+          pre&ccedil;o do mesmo insumo por fornecedor. A curva subindo.</td>
+        <td class="aud"><span class="fala">O pre&ccedil;o do insumo tem hist&oacute;rico aqui, por
+          fornecedor.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">Hist&oacute;rico por fornecedor</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:44</td>
+        <td class="img"><b>TELA F06</b>A ficha t&eacute;cnica do insumo, mostrando os produtos que
+          usam ele.</td>
+        <td class="aud"><span class="fala">E o sistema sabe quais pratos usam esse insumo.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">Quem usa o insumo</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:52</td>
+        <td class="img"><b>TELA F14</b>Margens, com os itens afetados. Punch-in de 15% em dois
+          que ca&iacute;ram.</td>
+        <td class="aud"><span class="fala">Ent&atilde;o quando ele sobe, os oito mudam de margem
+          juntos, na hora. Sem refazer planilha.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> cai</td>
+        <td class="leg"><span class="qm">Os 8 mudam juntos</span></td></tr>
+
+      <tr><td class="tt">1:00</td>
+        <td class="img"><b>ASSINATURA</b></td>
+        <td class="aud"><span class="fala">Trinta dias gr&aacute;tis, sem cart&atilde;o.</span></td>
+        <td class="tri"><span class="trilha tr-res">RESOLVE</span></td><td class="leg">&mdash;</td></tr>
+    </table>
+    <div class="rot-pe">
+      <p><b>Ensaie</b>Este &eacute; o roteiro com mais telas (tr&ecirc;s) e o que mais exige navega&ccedil;&atilde;o
+      limpa. Grave as tr&ecirc;s na mesma sess&atilde;o, na ordem, para o encadeamento parecer um
+      movimento s&oacute;.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ E05 ══════════════════ -->
+<section id="E05">
+  <p class="numsec">E05</p>
+  <h2>O bife tem que estar pesado</h2>
+  <p class="sub">A frase dele pede a balan&ccedil;a. Voc&ecirc; tem leitura de balan&ccedil;a comercial direto
+  no navegador e nunca usou isso em nada.</p>
+
+  <div class="rot">
+    <div class="rot-topo">
+      <span class="rot-id">E05</span>
+      <span class="rot-nome">O bife tem que estar pesado</span>
+      <span class="rot-esp">Reels 0:56 &middot; pilar: a conta + opera&ccedil;&atilde;o</span>
+    </div>
+    <div class="rot-ficha">
+      <span><b>Corte-fonte</b>V1 <span class="rota">8:50 &rarr; 9:09</span> &mdash; exato</span>
+      <span><b>Telas</b>F09 <span class="rota">/admin/balanca</span> &middot; F06 ficha t&eacute;cnica</span>
+      <span><b>Prova t&eacute;cnica</b><span class="rota">lib/balancaWebHID.ts</span> &mdash; Toledo,
+        Filizola, Prix 3</span>
+    </div>
+    <table class="tl">
+      <tr><th class="tt">Tempo</th><th class="img">Imagem</th><th class="aud">&Aacute;udio</th>
+          <th class="tri">Trilha</th><th class="leg">Legenda queimada</th></tr>
+
+      <tr class="src"><td class="tt">0:00</td>
+        <td class="img"><b>CORTE V1 8:50&ndash;9:09</b>Moldura + tira
+          <span class="rota">credito-video-c</span>.</td>
+        <td class="aud"><span class="dele">&ldquo;Esse bife pesa aproximadamente de noventa a cento
+          e dez gramas. &Eacute; a parte mais cara do prato… tem que estar precificado e tem que estar
+          pesado.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-sus">SUSPENSE</span></td>
+        <td class="leg"><span class="qm">90 a 110 g</span></td></tr>
+
+      <tr><td class="tt">0:19</td>
+        <td class="img"><b>PRETO</b>1 s.</td>
+        <td class="aud"><span class="fala">Vinte gramas de diferen&ccedil;a no item mais caro do
+          prato. Multiplica por trezentos pratos por dia.</span></td>
+        <td class="tri"><span class="trilha tr-mud">MUDO</span></td>
+        <td class="leg"><span class="qm">&times; 300 pratos/dia</span></td></tr>
+
+      <tr><td class="tt">0:27</td>
+        <td class="img"><b>ATIVO</b><span class="rota">transicao-seta-9x16</span></td>
+        <td class="aud">&mdash;</td><td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr class="sis"><td class="tt">0:28</td>
+        <td class="img"><b>TELA F09</b>A balan&ccedil;a conectada e o peso aparecendo sozinho no
+          campo. <b>Plano &uacute;nico, sem corte.</b></td>
+        <td class="aud"><span class="fala">Isto &eacute; a balan&ccedil;a do balc&atilde;o falando direto com o
+          navegador. Ningu&eacute;m digitou esse peso.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">Ningu&eacute;m digitou</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:40</td>
+        <td class="img"><b>TELA F06</b>O peso lan&ccedil;ado virando custo na ficha.</td>
+        <td class="aud"><span class="fala">O peso real entra na ficha, e o custo do prato sai
+          do que foi pesado &mdash; n&atilde;o do que estava escrito na receita.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> cai</td>
+        <td class="leg"><span class="qm">Custo do que foi pesado</span></td></tr>
+
+      <tr><td class="tt">0:50</td>
+        <td class="img"><b>ASSINATURA</b></td>
+        <td class="aud"><span class="fala">Trinta dias gr&aacute;tis, sem cart&atilde;o.</span></td>
+        <td class="tri"><span class="trilha tr-res">RESOLVE</span></td><td class="leg">&mdash;</td></tr>
+    </table>
+    <div class="rot-pe">
+      <p><b>Se n&atilde;o houver balan&ccedil;a conectada</b>Grave no modo manual e <b>escreva na tela</b>
+      que o peso est&aacute; sendo digitado. Sem isso o Reels vira promessa n&atilde;o cumprida, e este &eacute;
+      justamente o v&iacute;deo em que a prova &eacute; tudo. Se poss&iacute;vel, adie e grave com a balan&ccedil;a.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ E06 ══════════════════ -->
+<section id="E06">
+  <p class="numsec">E06</p>
+  <h2>Vinte segundos</h2>
+  <p class="sub">O dono da loja que mais vende delivery do pa&iacute;s separa pedido em par e &iacute;mpar
+  num varal de papel para ganhar vinte segundos. O respeito por esse m&eacute;todo &eacute; o que te d&aacute;
+  licen&ccedil;a para mostrar a tela.</p>
+
+  <div class="rot">
+    <div class="rot-topo">
+      <span class="rot-id">E06</span>
+      <span class="rot-nome">Vinte segundos</span>
+      <span class="rot-esp">Reels 1:06 &middot; pilar: a opera&ccedil;&atilde;o</span>
+    </div>
+    <div class="rot-ficha">
+      <span><b>Cortes-fonte</b>V1 <span class="rota">13:18 &rarr; 13:44</span> e
+        <span class="rota">13:57 &rarr; 14:22</span> &mdash; exatos</span>
+      <span><b>Telas</b>F10 <span class="rota">/admin/kds</span> &middot;
+        <span class="rota">/admin/kds/expeditor</span></span>
+    </div>
+    <table class="tl">
+      <tr><th class="tt">Tempo</th><th class="img">Imagem</th><th class="aud">&Aacute;udio</th>
+          <th class="tri">Trilha</th><th class="leg">Legenda queimada</th></tr>
+
+      <tr class="src"><td class="tt">0:00</td>
+        <td class="img"><b>CORTE V1 13:18&ndash;13:44</b>Moldura + tira
+          <span class="rota">credito-video-c</span>.</td>
+        <td class="aud"><span class="dele">&ldquo;Separar pedidos par e &iacute;mpar ali no varal…
+          voc&ecirc; j&aacute; ganha mais uns quinze, vinte segundos do cara n&atilde;o ter que ficar desesperado
+          procurando pedido.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-pul">PULSO</span> &mdash; ritmo de rel&oacute;gio</td>
+        <td class="leg"><span class="qm">+20 segundos</span></td></tr>
+
+      <tr><td class="tt">0:26</td>
+        <td class="img"><b>PRETO</b>1 s.</td>
+        <td class="aud"><span class="fala">Ele est&aacute; certo. E ainda est&aacute; procurando papel.</span></td>
+        <td class="tri"><span class="trilha tr-mud">MUDO</span></td>
+        <td class="leg"><span class="qm">Ainda &eacute; papel</span></td></tr>
+
+      <tr><td class="tt">0:32</td>
+        <td class="img"><b>ATIVO</b><span class="rota">transicao-seta-9x16</span></td>
+        <td class="aud">&mdash;</td><td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr class="sis"><td class="tt">0:33</td>
+        <td class="img"><b>TELA expeditor</b>O quadro de expedi&ccedil;&atilde;o com tickets agrupados por
+          n&uacute;mero de pedido e senha.</td>
+        <td class="aud"><span class="fala">Aqui o varal &eacute; a tela. Cada pedido tem n&uacute;mero,
+          senha ou mesa, e os itens dele ficam juntos.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">O varal virou tela</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:45</td>
+        <td class="img"><b>TELA KDS</b>Duas esta&ccedil;&otilde;es lado a lado (cozinha e bar), o mesmo
+          pedido em etapas diferentes.</td>
+        <td class="aud"><span class="fala">Cozinha e bar t&ecirc;m tela pr&oacute;pria, cada uma com a sua
+          fila. Ningu&eacute;m procura pedido de ningu&eacute;m.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">Uma tela por esta&ccedil;&atilde;o</span></td></tr>
+
+      <tr class="src"><td class="tt">0:55</td>
+        <td class="img"><b>CORTE V1 13:57&ndash;14:10</b>Volta &agrave; moldura, curto.</td>
+        <td class="aud"><span class="dele">&ldquo;Quando voc&ecirc; entrega r&aacute;pido, ele entende que voc&ecirc;
+          aguenta mais pedido… te destaca mais.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> abaixa sob a fala dele</td>
+        <td class="leg"><span class="qm">Velocidade gera visibilidade</span></td></tr>
+
+      <tr class="sis"><td class="tt">1:00</td>
+        <td class="img"><b>TELA KDS</b>Plano fechado no tempo do card mudando de cor.</td>
+        <td class="aud"><span class="fala">Por isso o tempo fica na tela e muda de cor quando
+          atrasa.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> cai</td>
+        <td class="leg"><span class="qm">O tempo muda de cor</span></td></tr>
+
+      <tr><td class="tt">1:06</td>
+        <td class="img"><b>ASSINATURA</b></td>
+        <td class="aud"><span class="fala">Trinta dias gr&aacute;tis, sem cart&atilde;o.</span></td>
+        <td class="tri"><span class="trilha tr-res">RESOLVE</span></td><td class="leg">&mdash;</td></tr>
+    </table>
+    <div class="rot-pe">
+      <p><b>O &uacute;nico com dois retornos ao v&iacute;deo</b>Sai da fonte, vai pra tela, volta pra fonte,
+      volta pra tela. &Eacute; o formato mais dif&iacute;cil de montar e o mais dif&iacute;cil de parar de
+      assistir. Monte este por &uacute;ltimo, quando os outros j&aacute; estiverem prontos.</p>
+      <p><b>N&atilde;o prometa</b>Nada de &ldquo;apare&ccedil;a mais no iFood&rdquo;. Voc&ecirc; mostra o mecanismo do tempo;
+      o algoritmo &eacute; dele, n&atilde;o seu.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ E07 ══════════════════ -->
+<section id="E07">
+  <p class="numsec">E07</p>
+  <h2>Pelas palavras</h2>
+  <p class="sub">O &uacute;nico roteiro do conjunto que termina com uma prova ao vivo: uma busca no
+  Google achando um prato. Ningu&eacute;m no nicho fala de dado estruturado.</p>
+
+  <div class="rot">
+    <div class="rot-topo">
+      <span class="rot-id">E07</span>
+      <span class="rot-nome">Pelas palavras</span>
+      <span class="rot-esp">Reels 0:58 &middot; pilar: a vitrine</span>
+    </div>
+    <div class="rot-ficha">
+      <span><b>Corte-fonte</b>V1 <span class="rota">7:57 &rarr; 8:20</span> &mdash; exato</span>
+      <span><b>Telas</b>F01 card&aacute;pio &middot; busca do Google no celular &middot; descri&ccedil;&atilde;o do produto</span>
+      <span><b>Prova t&eacute;cnica</b><span class="rota">lib/jsonLdCardapio.ts</span></span>
+    </div>
+    <table class="tl">
+      <tr><th class="tt">Tempo</th><th class="img">Imagem</th><th class="aud">&Aacute;udio</th>
+          <th class="tri">Trilha</th><th class="leg">Legenda queimada</th></tr>
+
+      <tr class="src"><td class="tt">0:00</td>
+        <td class="img"><b>CORTE V1 7:57&ndash;8:20</b>Moldura + tira
+          <span class="rota">credito-video-c</span>.</td>
+        <td class="aud"><span class="dele">&ldquo;Na rua o cliente encontra a loja pelo endere&ccedil;o.
+          No delivery encontra pelas palavras. S&oacute; colocar coxinha n&atilde;o vai aparecer.&rdquo;</span></td>
+        <td class="tri"><span class="trilha tr-sus">SUSPENSE</span></td>
+        <td class="leg"><span class="qm">Pelas palavras</span></td></tr>
+
+      <tr><td class="tt">0:23</td>
+        <td class="img"><b>PRETO</b>1 s.</td>
+        <td class="aud"><span class="fala">E fora da plataforma &eacute; pior: o Google nem sabe que
+          voc&ecirc; vende coxinha.</span></td>
+        <td class="tri"><span class="trilha tr-mud">MUDO</span></td>
+        <td class="leg"><span class="qm">O Google n&atilde;o sabe</span></td></tr>
+
+      <tr><td class="tt">0:30</td>
+        <td class="img"><b>ATIVO</b><span class="rota">transicao-seta-9x16</span></td>
+        <td class="aud">&mdash;</td><td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr class="sis"><td class="tt">0:31</td>
+        <td class="img"><b>TELA F01</b>Card&aacute;pio do Lanche do Paulista; abrir um produto e
+          mostrar a descri&ccedil;&atilde;o livre.</td>
+        <td class="aud"><span class="fala">Cada prato tem descri&ccedil;&atilde;o pr&oacute;pria &mdash; e o card&aacute;pio
+          publica os pratos num formato que o Google l&ecirc;.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">Prato a prato</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:42</td>
+        <td class="img"><b>PROVA AO VIVO</b>Busca no celular pelo nome de um prato do Lanche do
+          Paulista, e o card&aacute;pio aparecendo no resultado. <b>Sem corte.</b></td>
+        <td class="aud"><span class="fala">N&atilde;o &eacute; a p&aacute;gina da loja que aparece. &Eacute; o
+          prato.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> cai no momento do resultado</td>
+        <td class="leg"><span class="qm">O prato aparece</span></td></tr>
+
+      <tr><td class="tt">0:52</td>
+        <td class="img"><b>ASSINATURA</b></td>
+        <td class="aud"><span class="fala">Trinta dias gr&aacute;tis, sem cart&atilde;o.</span></td>
+        <td class="tri"><span class="trilha tr-res">RESOLVE</span></td><td class="leg">&mdash;</td></tr>
+    </table>
+    <div class="rot-pe">
+      <p><b>Teste antes de prometer</b>Fa&ccedil;a a busca no celular <b>antes</b> de montar o roteiro.
+      Indexa&ccedil;&atilde;o leva tempo e depende de muita coisa fora do seu controle. Se o prato n&atilde;o
+      aparecer na busca hoje, troque o fecho por um teste de dado estruturado na tela e n&atilde;o
+      afirme posi&ccedil;&atilde;o no Google.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ E08 ══════════════════ -->
+<section id="E08">
+  <p class="numsec">E08</p>
+  <h2>Duas mil e trezentas numa noite</h2>
+  <p class="sub">Abre com o recorde dele e termina na sua tela de expedi&ccedil;&atilde;o. &Eacute; o roteiro
+  que apresenta o KDS para quem nunca ouviu a sigla.</p>
+
+  <div class="rot">
+    <div class="rot-topo">
+      <span class="rot-id">E08</span>
+      <span class="rot-nome">Duas mil e trezentas numa noite</span>
+      <span class="rot-esp">Reels 1:00 &middot; pilar: a opera&ccedil;&atilde;o</span>
+    </div>
+    <div class="rot-ficha">
+      <span><b>Cortes-fonte</b>V2 <span class="rota">00:00 &rarr; &asymp;00:40</span> (abertura) e
+        <span class="rota">07:17 &rarr; &asymp;07:50</span> (expedi&ccedil;&atilde;o)</span>
+      <span><b>Telas</b><span class="rota">/admin/kds/expeditor</span> &middot;
+        <span class="rota">/admin/kds/estacoes</span> &middot; Painel de senhas na TV</span>
+    </div>
+    <table class="tl">
+      <tr><th class="tt">Tempo</th><th class="img">Imagem</th><th class="aud">&Aacute;udio</th>
+          <th class="tri">Trilha</th><th class="leg">Legenda queimada</th></tr>
+
+      <tr class="src"><td class="tt">0:00</td>
+        <td class="img"><b>CORTE V2 00:00</b>Moldura + tira
+          <span class="rota">credito-video-esfiha</span>. O trecho do recorde.</td>
+        <td class="aud"><span class="dele">O recorde de 2.300 pedidos numa noite, dito na
+          abertura do epis&oacute;dio.</span></td>
+        <td class="tri"><span class="trilha tr-sus">SUSPENSE</span></td>
+        <td class="leg"><span class="qm">2.300 numa noite</span></td></tr>
+
+      <tr><td class="tt">0:12</td>
+        <td class="img"><b>PRETO</b>1 s.</td>
+        <td class="aud"><span class="fala">Quantos pedidos a sua cozinha aguenta antes de
+          come&ccedil;ar a perder um?</span></td>
+        <td class="tri"><span class="trilha tr-mud">MUDO</span></td>
+        <td class="leg"><span class="qm">Antes de perder um</span></td></tr>
+
+      <tr class="src"><td class="tt">0:19</td>
+        <td class="img"><b>CORTE V2 07:17</b>O cap&iacute;tulo da expedi&ccedil;&atilde;o: organiza&ccedil;&atilde;o por
+          n&uacute;meros e pratos.</td>
+        <td class="aud"><span class="dele">O m&eacute;todo de expedi&ccedil;&atilde;o dele, por n&uacute;mero.</span></td>
+        <td class="tri"><span class="trilha tr-pul">PULSO</span></td>
+        <td class="leg"><span class="qm">Expedi&ccedil;&atilde;o por n&uacute;mero</span></td></tr>
+
+      <tr><td class="tt">0:30</td>
+        <td class="img"><b>ATIVO</b><span class="rota">transicao-seta-9x16</span></td>
+        <td class="aud">&mdash;</td><td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg">&mdash;</td></tr>
+
+      <tr class="sis"><td class="tt">0:31</td>
+        <td class="img"><b>TELA expeditor</b>Tickets entrando sozinhos, agrupados por pedido.</td>
+        <td class="aud"><span class="fala">Isso aqui &eacute; o mesmo m&eacute;todo, sem papel. O pedido cai
+          sozinho e j&aacute; vem separado por esta&ccedil;&atilde;o.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">Cai sozinho</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:42</td>
+        <td class="img"><b>TELA estacoes</b>A configura&ccedil;&atilde;o: Fila de Entrada, Em Preparo,
+          Expedi&ccedil;&atilde;o.</td>
+        <td class="aud"><span class="fala">E as etapas s&atilde;o suas. Se voc&ecirc; mudar a bancada de
+          lugar, muda aqui tamb&eacute;m.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span></td>
+        <td class="leg"><span class="qm">As etapas s&atilde;o suas</span></td></tr>
+
+      <tr class="sis"><td class="tt">0:52</td>
+        <td class="img"><b>TELA painel de senhas</b>O painel na TV chamando a senha.</td>
+        <td class="aud"><span class="fala">E o cliente v&ecirc; a senha na TV, sem ningu&eacute;m
+          gritar.</span></td>
+        <td class="tri"><span class="trilha tr-roc">ROCK</span> cai</td>
+        <td class="leg"><span class="qm">Sem gritar nome</span></td></tr>
+
+      <tr><td class="tt">0:58</td>
+        <td class="img"><b>ASSINATURA</b></td>
+        <td class="aud"><span class="fala">Trinta dias gr&aacute;tis, sem cart&atilde;o.</span></td>
+        <td class="tri"><span class="trilha tr-res">RESOLVE</span></td><td class="leg">&mdash;</td></tr>
+    </table>
+    <div class="rot-pe">
+      <p><b>Fonte diferente</b>Este &eacute; o &uacute;nico que usa o canal Receitas de Neg&oacute;cio. Use a tira
+      <span class="rota">credito-video-esfiha</span>, n&atilde;o a do Baccarini.</p>
+    </div>
+  </div>
+</section>
+
+
+<section id="trilhas">
+  <p class="numsec">Parte 09</p>
+  <h2>As trilhas</h2>
+  <p class="sub">Cinco estados, sempre os mesmos. A consist&ecirc;ncia entre v&iacute;deos &eacute; o que faz o
+  perfil soar como um canal e n&atilde;o como uma pasta de arquivos.</p>
+
+  <table class="tabela">
+    <tr><th>Estado</th><th>O que &eacute;</th><th>Onde entra</th><th>Volume</th></tr>
+    <tr><td class="cod">SUSPENSE</td>
+      <td>Drone grave, sem batida e sem melodia. Tens&atilde;o parada.</td>
+      <td>Sob o corte-fonte, enquanto a dor &eacute; dita.</td><td>&minus;24 dB</td></tr>
+    <tr><td class="cod">PULSO</td>
+      <td>Percuss&atilde;o seca, tipo rel&oacute;gio ou batida de caixa. Sem harmonia.</td>
+      <td>Quando o v&iacute;deo enumera (taxas, pratos, segundos). Um golpe por item.</td>
+      <td>&minus;20 dB</td></tr>
+    <tr><td class="cod">MUDO</td>
+      <td>Nada. Corte total da trilha.</td>
+      <td>No n&uacute;mero e na sua primeira frase. <b>&Eacute; o recurso mais forte da lista</b> &mdash; o
+        sil&ecirc;ncio depois de trilha faz o espectador subir o volume.</td><td>&mdash;</td></tr>
+    <tr><td class="cod">ROCK</td>
+      <td>Guitarra suja ou sintetizador com ataque, entrando no tempo forte.</td>
+      <td>Entra <b>no mesmo quadro</b> da transi&ccedil;&atilde;o-seta e segura durante a tela do sistema.</td>
+      <td>&minus;18 dB, abaixando 6 dB sob narra&ccedil;&atilde;o</td></tr>
+    <tr><td class="cod">RESOLVE</td>
+      <td>A mesma faixa do ROCK, deixada terminar, ou um acorde limpo sustentado.</td>
+      <td>Sob a assinatura final. <b>Corte a m&uacute;sica antes do CTA falado</b>, nunca depois.</td>
+      <td>&minus;22 dB</td></tr>
+  </table>
+
+  <div class="nota">
+    <span class="rot">De onde tirar as faixas</span>
+    <p>Use o pr&oacute;prio acervo do CapCut ou som em alta do Reels/TikTok &mdash; faixa em alta ajuda
+    a distribui&ccedil;&atilde;o. O que n&atilde;o pode &eacute; misturar estilos entre v&iacute;deos: escolha <b>uma</b>
+    faixa por estado e use as mesmas cinco nos oito Reels. Depois de tr&ecirc;s v&iacute;deos o espectador
+    reconhece o seu corte antes de ver a marca.</p>
+  </div>
+
+  <div class="regra">
+    <span class="rot">O erro que estraga tudo</span>
+    <p>Trilha por cima da fala do corte-fonte alto demais. O &aacute;udio dele j&aacute; vem com ru&iacute;do de
+    cozinha e microfone de campo; se voc&ecirc; puser m&uacute;sica em &minus;12 dB por baixo, ningu&eacute;m entende a
+    frase &mdash; e a frase &eacute; o motivo do v&iacute;deo existir. Na d&uacute;vida, deixe mudo sob o corte.</p>
+  </div>
+</section>
+
+
+<section id="antes">
+  <p class="numsec">Parte 10</p>
+  <h2>Antes de montar</h2>
+  <p class="sub">Nove grava&ccedil;&otilde;es de tela cobrem os oito roteiros. Fa&ccedil;a todas numa sess&atilde;o.</p>
+
+  <table class="tabela">
+    <tr><th>Tela</th><th>Onde</th><th>Usada em</th></tr>
+    <tr><td class="cod">F14a</td><td><span class="rota">/admin/financeiro</span> &rarr; Margens,
+      ordenada, com uma linha &ldquo;Sem margem&rdquo; vis&iacute;vel</td><td>E01, E02, E04</td></tr>
+    <tr><td class="cod">F14b</td><td><span class="rota">/admin/financeiro</span> &rarr; Custos
+      Operacionais, preenchendo os gastos</td><td>E02</td></tr>
+    <tr><td class="cod">F07</td><td><span class="rota">/admin/ifood</span>, digitando a comiss&atilde;o
+      e salvando</td><td>E03</td></tr>
+    <tr><td class="cod">F15</td><td><span class="rota">/admin/compras</span>, hist&oacute;rico de pre&ccedil;o
+      por fornecedor</td><td>E04</td></tr>
+    <tr><td class="cod">F06</td><td>Ficha t&eacute;cnica: insumo, quantidade e os produtos que o
+      usam</td><td>E04, E05</td></tr>
+    <tr><td class="cod">F09</td><td><span class="rota">/admin/balanca</span>, peso entrando
+      sozinho</td><td>E05</td></tr>
+    <tr><td class="cod">F10</td><td><span class="rota">/admin/kds</span> e
+      <span class="rota">/admin/kds/expeditor</span>, com duas esta&ccedil;&otilde;es e o tempo em cor</td>
+      <td>E06, E08</td></tr>
+    <tr><td class="cod">F10b</td><td><span class="rota">/admin/kds/estacoes</span> e o painel de
+      senhas na TV</td><td>E08</td></tr>
+    <tr><td class="cod">F01</td><td>Card&aacute;pio no celular + busca do Google</td><td>E07</td></tr>
+  </table>
+
+  <div class="regra">
+    <span class="rot">Baixar os cortes-fonte</span>
+    <p>Voc&ecirc; precisa dos tr&ecirc;s v&iacute;deos em arquivo para cortar no CapCut. Baixe pelos meios que
+    voc&ecirc; j&aacute; usa, corte <b>somente</b> os trechos listados nas fichas &mdash; nenhum passa de 26
+    segundos &mdash; e mantenha a tira de cr&eacute;dito na tela durante todo o trecho. Trecho curto,
+    cr&eacute;dito vis&iacute;vel e valor acrescentado &eacute; o que separa cita&ccedil;&atilde;o de rep&oacute;stagem.</p>
+  </div>
+
+  <h3>Ordem de montagem sugerida</h3>
+  <ol>
+    <li><strong>E03</strong> &mdash; o mais pronto: a tela j&aacute; estava no plano e o corte &eacute; curto.</li>
+    <li><strong>E01</strong> &mdash; o de melhor gancho. Duas telas s&oacute;.</li>
+    <li><strong>E05</strong> &mdash; depende da balan&ccedil;a; se ela n&atilde;o estiver &agrave; m&atilde;o, pule para o E07.</li>
+    <li><strong>E02</strong> &mdash; precisa dos custos fixos cadastrados antes.</li>
+    <li><strong>E04</strong>, <strong>E07</strong>, <strong>E08</strong>, e o <strong>E06</strong>
+      por &uacute;ltimo, que &eacute; o de montagem mais dif&iacute;cil.</li>
+  </ol>
+</section>
+
+<footer class="rodape-doc">
+  <p>Os timecodes do V1 saíram da legenda do player, capturada nesta data, e est&atilde;o exatos.
+  Os do V3 vieram de captura mais grossa (&plusmn;5 s). Os do V2 s&atilde;o in&iacute;cios de cap&iacute;tulo
+  publicados pelo autor. As telas citadas foram conferidas em <span class="rota">src/</span>,
+  n&atilde;o no material de marketing anterior. Nenhuma afirma&ccedil;&atilde;o de resultado foi inclu&iacute;da:
+  o v&iacute;deo do terceiro traz o n&uacute;mero, com cr&eacute;dito; a sua tela traz o mecanismo.</p>
+</footer>
+
+</main>
+</div>
+</div>
+</html>

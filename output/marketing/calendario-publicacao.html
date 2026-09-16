@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calendário de publicação MiseOn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --papel:#F4F5F0; --alto:#FFFFFF; --fundo:#E9EBE3;
+  --tinta:#15180F; --tinta2:#4A5245; --tinta3:#79816F;
+  --linha:#D8DBD0; --linha-forte:#BCC2B3;
+  --verde:#1B5E3F; --verde-vivo:#15803D; --verde-fundo:#E3EFE7;
+  --brasa:#B23E0C; --brasa-fundo:#FBE9DE;
+  --azul:#1E4A6B; --azul-fundo:#E2ECF3;
+  --sombra:0 1px 2px rgba(21,24,15,.05), 0 8px 24px -12px rgba(21,24,15,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+    --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+    --linha:#2B3127; --linha-forte:#3D4538;
+    --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+    --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+    --azul:#8FC4E8; --azul-fundo:#12212C;
+    --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+  --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+  --linha:#2B3127; --linha-forte:#3D4538;
+  --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+  --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+  --azul:#8FC4E8; --azul-fundo:#12212C;
+  --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--tinta);
+  font-family:"Source Serif 4","Iowan Old Style",Georgia,serif;font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,.ui{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px}
+.layout{display:grid;grid-template-columns:1fr;gap:48px}
+@media(min-width:1040px){.layout{grid-template-columns:230px minmax(0,1fr);gap:56px}}
+.indice{font-family:Archivo,sans-serif;font-size:13px;line-height:1.45}
+@media(min-width:1040px){.indice{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow-y:auto;padding-block:8px}}
+.indice ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.indice a{display:block;padding:6px 10px;color:var(--tinta2);text-decoration:none;border-radius:6px;border-left:2px solid transparent}
+.indice a:hover{background:var(--alto);color:var(--tinta);border-left-color:var(--verde-vivo)}
+.indice .ix{color:var(--tinta3);margin-right:8px;font-variant-numeric:tabular-nums;font-weight:600}
+.indice-topo{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta3);font-weight:700;padding:0 10px 10px;border-bottom:1px solid var(--linha);margin-bottom:10px}
+.capa{padding-block:44px 32px;border-bottom:2px solid var(--tinta)}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brasa);font-weight:700;margin:0 0 14px}
+h1{font-size:clamp(34px,6.4vw,58px);line-height:1.02;letter-spacing:-.022em;font-weight:800;margin:0 0 18px;text-wrap:balance;max-width:16ch}
+.lede{font-size:clamp(17px,2.1vw,20px);line-height:1.55;color:var(--tinta2);max-width:62ch;margin:0}
+.meta-capa{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:26px;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--tinta3)}
+.meta-capa b{color:var(--tinta2);font-weight:500}
+section{padding-block:52px;border-bottom:1px solid var(--linha)}
+section:last-of-type{border-bottom:0}
+.numsec{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--brasa);text-transform:uppercase;margin:0 0 10px}
+h2{font-size:clamp(25px,3.6vw,34px);line-height:1.12;letter-spacing:-.017em;font-weight:700;margin:0 0 8px;text-wrap:balance}
+.sub{color:var(--tinta2);font-size:18px;margin:0 0 30px;max-width:64ch}
+h3{font-size:20px;line-height:1.24;font-weight:700;margin:38px 0 12px}
+p{margin:0 0 16px;max-width:68ch}
+ul,ol{max-width:68ch;padding-left:22px;margin:0 0 16px}
+li{margin-bottom:7px}
+li::marker{color:var(--tinta3)}
+strong{font-weight:600;color:var(--tinta)}
+a{color:var(--verde-vivo)}
+.rota{font-family:"JetBrains Mono",monospace;font-size:.83em;background:var(--fundo);border:1px solid var(--linha);padding:1px 6px;border-radius:4px;white-space:nowrap;color:var(--tinta2)}
+.regra{border-left:3px solid var(--brasa);padding:4px 0 4px 20px;margin:26px 0;max-width:68ch}
+.regra .rot{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brasa);display:block;margin-bottom:6px}
+.regra p:last-child{margin-bottom:0}
+.nota{background:var(--azul-fundo);border-radius:8px;padding:18px 20px;margin:26px 0;max-width:68ch;font-size:16px}
+.nota .rot{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--azul);display:block;margin-bottom:7px}
+.nota p:last-child{margin-bottom:0}
+
+/* ── semana ─────────────────────────────────────── */
+.semana{background:var(--alto);border:1px solid var(--linha);border-radius:10px;box-shadow:var(--sombra);margin:26px 0 34px;overflow:hidden}
+.semana-topo{background:var(--fundo);border-bottom:1px solid var(--linha);padding:13px 20px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.semana-id{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--brasa);letter-spacing:.04em}
+.semana-nome{font-family:Archivo,sans-serif;font-weight:700;font-size:16.5px;flex:1 1 200px}
+.semana-data{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--tinta3);white-space:nowrap}
+.dias{width:100%;border-collapse:collapse;font-size:15px}
+.dias th{font-family:Archivo,sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);text-align:left;padding:12px 14px 8px;border-bottom:1px solid var(--linha-forte)}
+.dias td{padding:13px 14px;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.45}
+.dias tr:last-child td{border-bottom:0}
+.dias tr.vazio td{color:var(--tinta3);font-style:italic}
+.dia{font-family:"JetBrains Mono",monospace;font-size:12.5px;font-weight:700;color:var(--tinta2);white-space:nowrap;width:104px}
+.dia small{display:block;font-weight:400;color:var(--tinta3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.peca{font-weight:600;color:var(--tinta)}
+.peca .cod{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--brasa);font-weight:700;margin-right:7px}
+.peca small{display:block;font-family:Archivo,sans-serif;font-weight:400;font-size:13px;color:var(--tinta3);margin-top:3px}
+.canais{width:150px}
+.cn{font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:4px;display:inline-block;margin:0 4px 4px 0;white-space:nowrap}
+.cn-ig{background:var(--brasa-fundo);color:var(--brasa)}
+.cn-tt{background:var(--fundo);color:var(--tinta2);border:1px solid var(--linha-forte)}
+.cn-yt{background:var(--azul-fundo);color:var(--azul)}
+.cn-prod{background:var(--verde-fundo);color:var(--verde)}
+.tabela{width:100%;border-collapse:collapse;font-size:15px;margin:22px 0}
+.tabela th{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);text-align:left;padding:0 14px 8px 0;border-bottom:1px solid var(--linha-forte)}
+.tabela td{padding:11px 14px 11px 0;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.45}
+.tabela td.cod{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--brasa);font-weight:700;white-space:nowrap}
+.legenda{background:var(--alto);border:1px solid var(--linha);border-radius:10px;margin:22px 0;overflow:hidden}
+.legenda-topo{background:var(--fundo);border-bottom:1px solid var(--linha);padding:11px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.legenda-topo b{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--brasa);letter-spacing:.04em}
+.legenda-corpo{padding:18px}
+.legenda-corpo p{font-size:15.5px;margin:0 0 12px;max-width:none}
+.legenda-corpo p:last-child{margin-bottom:0}
+.hash{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--tinta3);line-height:1.6}
+button.bt{font-family:Archivo,sans-serif;font-size:12px;font-weight:600;color:var(--tinta2);background:var(--fundo);
+  border:1px solid var(--linha-forte);border-radius:6px;padding:5px 11px;cursor:pointer}
+button.bt:hover{background:var(--alto);color:var(--tinta)}
+button.bt.ok{color:var(--verde);border-color:var(--verde-vivo)}
+.rodape-doc{padding-block:38px 60px;color:var(--tinta3);font-size:14px}
+.barra{position:sticky;top:0;z-index:9;background:var(--papel);border-bottom:1px solid var(--linha);padding:10px 0;display:flex;gap:8px;flex-wrap:wrap}
+</style>
+<div class="wrap">
+<div class="barra">
+  <button class="bt" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">Claro / escuro</button>
+  <button class="bt" onclick="window.print()">Imprimir</button>
+</div>
+
+<header class="capa">
+  <p class="eyebrow">MiseOn &middot; conte&uacute;do &middot; ciclo de 21/09 a 18/10 de 2026</p>
+  <h1>Calend&aacute;rio de publica&ccedil;&atilde;o</h1>
+  <p class="lede">A Parte 10 do manual diz o que fazer por semana. Isto diz o que fazer
+  <strong>em cada dia</strong>, com o arquivo na m&atilde;o e o canal definido. Trinta e quatro
+  publica&ccedil;&otilde;es, incluindo o v&iacute;deo longo e os tr&ecirc;s Shorts que saem dele.</p>
+  <div class="meta-capa">
+    <span><b>Reels/Shorts:</b> roteiros-locutados.html</span>
+    <span><b>Carross&eacute;is:</b> instagram/carrossel-*/</span>
+    <span><b>Cartelas:</b> cartelas/</span>
+    <span><b>Regras do que pode dizer:</b> cozinha-de-conteudo.html, Parte 03</span>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="indice">
+  <div class="indice-topo">Nesta p&aacute;gina</div>
+  <ol>
+    <li><a href="#antes"><span class="ix">00</span>Antes de come&ccedil;ar</a></li>
+    <li><a href="#producao"><span class="ix">S0</span>Semana de produ&ccedil;&atilde;o</a></li>
+    <li><a href="#s1"><span class="ix">S1</span>21 a 27/09</a></li>
+    <li><a href="#s2"><span class="ix">S2</span>28/09 a 04/10</a></li>
+    <li><a href="#s3"><span class="ix">S3</span>05 a 11/10</a></li>
+    <li><a href="#s4"><span class="ix">S4</span>12 a 18/10</a></li>
+    <li><a href="#legendas"><span class="ix">07</span>Legendas dos carross&eacute;is</a></li>
+    <li><a href="#todo-dia"><span class="ix">08</span>O que vai todo dia</a></li>
+    <li><a href="#decisao"><span class="ix">09</span>A decis&atilde;o do dia 18</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="antes">
+  <p class="numsec">Parte 00</p>
+  <h2>Antes de come&ccedil;ar</h2>
+  <p class="sub">Cinco coisas que precisam estar resolvidas antes da primeira publica&ccedil;&atilde;o.
+  Nenhuma leva mais de meia hora, e todas j&aacute; estavam listadas no manual &mdash; s&oacute; nunca
+  tiveram data.</p>
+
+  <table class="tabela">
+    <tr><th>Quando</th><th>O qu&ecirc;</th><th>Por qu&ecirc;</th></tr>
+    <tr><td class="cod">16/09</td>
+      <td>Trocar as fotos repetidas da loja <span class="rota">/demo-por-quilo</span></td>
+      <td>Tr&ecirc;s produtos com a mesma imagem &eacute; literalmente o erro que o v&iacute;deo da vitrine
+      aponta. N&atilde;o grave nessa loja antes.</td></tr>
+    <tr><td class="cod">16/09</td>
+      <td>Trocar a logo do Lanche do Paulista</td>
+      <td>&Eacute; uma foto de pizza em baixa resolu&ccedil;&atilde;o numa hamburgueria, e aparece em todo
+      print e em toda grava&ccedil;&atilde;o de tela.</td></tr>
+    <tr><td class="cod">17/09</td>
+      <td>Reescrever &ldquo;-30% de desperd&iacute;cio&rdquo; e &ldquo;100% de precis&atilde;o&rdquo; na landing de por quilo</td>
+      <td>N&atilde;o t&ecirc;m medi&ccedil;&atilde;o. Se o conte&uacute;do manda tr&aacute;fego para uma p&aacute;gina que promete o
+      que n&atilde;o mede, o problema volta pelo coment&aacute;rio.</td></tr>
+    <tr><td class="cod">17/09</td>
+      <td>Arrumar o parcelamento anual da home (<span class="rota">Home.tsx:2081</span>)</td>
+      <td>&ldquo;3x, 6x, 8x ou 12x de R$ 149,90&rdquo; n&atilde;o soma o mesmo total. Algu&eacute;m faz essa conta
+      num coment&aacute;rio e a credibilidade do v&iacute;deo cai junto.</td></tr>
+    <tr><td class="cod">18/09</td>
+      <td>Conferir o perfil: bio, link, avatar, destaques</td>
+      <td>O primeiro Reels vai trazer visita ao perfil. Se o perfil estiver vazio, o alcance
+      n&atilde;o vira seguidor. O kit em <span class="rota">instagram/LEIA-ME-e-legendas.md</span>
+      j&aacute; tem tudo pronto.</td></tr>
+  </table>
+
+  <div class="regra">
+    <span class="rot">O que n&atilde;o pode aparecer, agora com mais raz&atilde;o</span>
+    <p>N&atilde;o existe cliente pagante &mdash; nem o Natureba, que &eacute; cadastro preparado para uma
+    visita comercial que ainda n&atilde;o aconteceu. Zero depoimento, zero print de cliente, zero
+    logotipo de loja, zero &ldquo;+X restaurantes&rdquo;. Grave sempre o Lanche do Paulista.</p>
+  </div>
+</section>
+
+
+<section id="producao">
+  <p class="numsec">Semana 0</p>
+  <h2>Semana de produ&ccedil;&atilde;o</h2>
+  <p class="sub">16 a 20 de setembro. Voc&ecirc; n&atilde;o publica nada nesta semana. Grava tudo em
+  bloco e sai dela com onze pe&ccedil;as prontas &mdash; &eacute; o que faz o m&ecirc;s inteiro caber na agenda
+  de quem tamb&eacute;m programa.</p>
+
+  <div class="semana">
+    <div class="semana-topo">
+      <span class="semana-id">S0</span>
+      <span class="semana-nome">Gravar tudo de uma vez</span>
+      <span class="semana-data">16 a 20 de setembro</span>
+    </div>
+    <table class="dias">
+      <tr><th class="dia">Dia</th><th>O qu&ecirc;</th><th class="canais">Tipo</th></tr>
+      <tr><td class="dia">16/09<small>qua</small></td>
+        <td><span class="peca">Sess&atilde;o &uacute;nica de grava&ccedil;&atilde;o de tela
+          <small>F07 iFood &middot; F05 cupom NFC-e &middot; F06 ficha e rendimento &middot; F01 card&aacute;pio &middot;
+          F13 cupom e cashback &middot; F14 DRE. Navegador em 150%, Lanche do Paulista, janela inteira
+          em 1920&times;1080.</small></span></td>
+        <td><span class="cn cn-prod">PRODU&Ccedil;&Atilde;O</span></td></tr>
+      <tr><td class="dia">17/09<small>qui</small></td>
+        <td><span class="peca">Narra&ccedil;&atilde;o dos oito roteiros
+          <small>L01 a L08, tomada por tomada, mais o <span class="rota">CTA-padrao.m4a</span>
+          que serve nos oito. Umas duas horas, com pausa.</small></span></td>
+        <td><span class="cn cn-prod">PRODU&Ccedil;&Atilde;O</span></td></tr>
+      <tr><td class="dia">18/09<small>sex</small></td>
+        <td><span class="peca">Editar L01, L08 e L05
+          <small>Os tr&ecirc;s que n&atilde;o perderam nada por n&atilde;o ter c&acirc;mera. S&atilde;o tamb&eacute;m os tr&ecirc;s da
+          primeira semana.</small></span></td>
+        <td><span class="cn cn-prod">PRODU&Ccedil;&Atilde;O</span></td></tr>
+      <tr><td class="dia">19/09<small>s&aacute;b</small></td>
+        <td><span class="peca">Editar L06 e L02
+          <small>Depois do terceiro v&iacute;deo a edi&ccedil;&atilde;o come&ccedil;a a sair em 40 minutos.</small></span></td>
+        <td><span class="cn cn-prod">PRODU&Ccedil;&Atilde;O</span></td></tr>
+      <tr class="vazio"><td class="dia">20/09<small>dom</small></td>
+        <td>Folga, ou reserva para o que atrasou.</td><td></td></tr>
+    </table>
+  </div>
+
+  <div class="nota">
+    <span class="rot">A ordem importa</span>
+    <p>Grave a tela <strong>antes</strong> da voz. Assistindo a grava&ccedil;&atilde;o de tela voc&ecirc; descobre
+    quanto tempo cada trecho realmente leva, e a&iacute; l&ecirc; a tomada no ritmo certo. O contr&aacute;rio
+    obriga a acelerar a tela para caber na fala, e isso sempre parece press&eacute;.</p>
+  </div>
+</section>
+
+
+<section id="s1">
+  <p class="numsec">Semana 1</p>
+  <h2>A conta do delivery e o estoque</h2>
+  <p class="sub">Come&ccedil;a pelo mais forte. O L01 &eacute; o v&iacute;deo com maior chance de sair do seu
+  c&iacute;rculo, e o carrossel do delivery entra dois dias depois para converter quem chegou por
+  ele.</p>
+
+  <div class="semana">
+    <div class="semana-topo">
+      <span class="semana-id">S1</span>
+      <span class="semana-nome">Vende 44 &middot; cupom vira estoque &middot; comida sem foto</span>
+      <span class="semana-data">21 a 27 de setembro</span>
+    </div>
+    <table class="dias">
+      <tr><th class="dia">Dia</th><th>Pe&ccedil;a</th><th class="canais">Canais</th></tr>
+      <tr><td class="dia">21/09<small>seg</small></td>
+        <td><span class="peca"><span class="cod">L01</span>Vende 44, recebe 22
+          <small>Reels 1:03. Legenda do R01, Parte 08 do manual. IG 18h30 &middot; TikTok 20h30.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span><span class="cn cn-yt">SHORTS</span></td></tr>
+      <tr><td class="dia">22/09<small>ter</small></td>
+        <td><span class="peca"><span class="cod">C1</span>Carrossel <b>delivery</b>, 7 l&acirc;minas
+          <small>Feed, 12h. Legenda na Parte 07 desta p&aacute;gina.</small></span></td>
+        <td><span class="cn cn-ig">FEED</span></td></tr>
+      <tr><td class="dia">23/09<small>qua</small></td>
+        <td><span class="peca"><span class="cod">L08</span>O cupom do mercado vira estoque
+          <small>Reels 0:48. O bloco de 15 s sem corte &eacute; o v&iacute;deo &mdash; n&atilde;o acelere.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span><span class="cn cn-yt">SHORTS</span></td></tr>
+      <tr><td class="dia">24/09<small>qui</small></td>
+        <td><span class="peca"><span class="cod">C2</span>Carrossel <b>nfce</b>, 6 l&acirc;minas
+          <small>Feed, 12h.</small></span></td>
+        <td><span class="cn cn-ig">FEED</span></td></tr>
+      <tr><td class="dia">25/09<small>sex</small></td>
+        <td><span class="peca"><span class="cod">L05</span>Comida sem foto n&atilde;o vende
+          <small>Reels 0:49. Confira que a marca da loja alheia est&aacute; borrada antes de subir.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span><span class="cn cn-yt">SHORTS</span></td></tr>
+      <tr class="vazio"><td class="dia">26 e 27/09<small>fim de semana</small></td>
+        <td>S&oacute; stories. Responda todo coment&aacute;rio da semana em at&eacute; duas horas.</td><td></td></tr>
+    </table>
+  </div>
+</section>
+
+
+<section id="s2">
+  <p class="numsec">Semana 2</p>
+  <h2>A vitrine e a ficha t&eacute;cnica</h2>
+  <p class="sub">O carrossel de fotos abre a semana reforçando o Reels de sexta. Depois o
+  conte&uacute;do vira para o pilar da conta, que &eacute; o que faz dono de restaurante seguir.</p>
+
+  <div class="semana">
+    <div class="semana-topo">
+      <span class="semana-id">S2</span>
+      <span class="semana-nome">Labirinto &middot; 50 g de alho &middot; o mito da salada</span>
+      <span class="semana-data">28 de setembro a 4 de outubro</span>
+    </div>
+    <table class="dias">
+      <tr><th class="dia">Dia</th><th>Pe&ccedil;a</th><th class="canais">Canais</th></tr>
+      <tr><td class="dia">28/09<small>seg</small></td>
+        <td><span class="peca"><span class="cod">C3</span>Carrossel <b>fotos</b>, 6 l&acirc;minas
+          <small>Feed, 12h. Continua a conversa do L05.</small></span></td>
+        <td><span class="cn cn-ig">FEED</span></td></tr>
+      <tr><td class="dia">29/09<small>ter</small></td>
+        <td><span class="peca"><span class="cod">L06</span>Seu card&aacute;pio &eacute; um labirinto
+          <small>Reels 0:52. O gancho tem cinco segundos e nenhuma palavra sobrando.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span><span class="cn cn-yt">SHORTS</span></td></tr>
+      <tr><td class="dia">01/10<small>qui</small></td>
+        <td><span class="peca"><span class="cod">L02</span>Cinquenta gramas de alho
+          <small>Reels 0:56. Primeiro do m&ecirc;s &mdash; bom dia para falar de fechamento.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span><span class="cn cn-yt">SHORTS</span></td></tr>
+      <tr><td class="dia">02/10<small>sex</small></td>
+        <td><span class="peca"><span class="cod">C4</span>Carrossel <b>labirinto</b>, 6 l&acirc;minas
+          <small>Feed, 12h.</small></span></td>
+        <td><span class="cn cn-ig">FEED</span></td></tr>
+      <tr><td class="dia">03/10<small>s&aacute;b</small></td>
+        <td><span class="peca"><span class="cod">L04</span>O mito da salada barata
+          <small>Reels 1:02. S&aacute;bado de manh&atilde;, 11h: p&uacute;blico de buffet est&aacute; no celular.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span><span class="cn cn-yt">SHORTS</span></td></tr>
+      <tr class="vazio"><td class="dia">04/10<small>dom</small></td>
+        <td>S&oacute; stories.</td><td></td></tr>
+    </table>
+  </div>
+</section>
+
+
+<section id="s3">
+  <p class="numsec">Semana 3</p>
+  <h2>Por quilo, e o v&iacute;deo que fecha venda</h2>
+  <p class="sub">A semana do v&iacute;deo longo. Ele vale mais que os tr&ecirc;s Reels juntos em inten&ccedil;&atilde;o
+  de compra, e rende os Shorts da semana seguinte sem regravar nada.</p>
+
+  <div class="semana">
+    <div class="semana-topo">
+      <span class="semana-id">S3</span>
+      <span class="semana-nome">A fila &middot; o longo do YouTube &middot; traga o cliente</span>
+      <span class="semana-data">5 a 11 de outubro</span>
+    </div>
+    <table class="dias">
+      <tr><th class="dia">Dia</th><th>Pe&ccedil;a</th><th class="canais">Canais</th></tr>
+      <tr><td class="dia">05/10<small>seg</small></td>
+        <td><span class="peca"><span class="cod">C5</span>Carrossel <b>ficha-tecnica</b>, 6 l&acirc;minas
+          <small>Feed, 12h. Fecha o assunto do L02.</small></span></td>
+        <td><span class="cn cn-ig">FEED</span></td></tr>
+      <tr><td class="dia">06/10<small>ter</small></td>
+        <td><span class="peca"><span class="cod">L03</span>A fila decide o lucro
+          <small>Reels 1:10. O diagrama da fila &eacute; o plano principal.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span><span class="cn cn-yt">SHORTS</span></td></tr>
+      <tr><td class="dia">07/10<small>qua</small></td>
+        <td><span class="peca"><span class="cod">C6</span>Carrossel <b>salada</b>, 6 l&acirc;minas
+          <small>Feed, 12h.</small></span></td>
+        <td><span class="cn cn-ig">FEED</span></td></tr>
+      <tr><td class="dia">08/10<small>qui</small></td>
+        <td><span class="peca"><span class="cod">L09</span>Montei o custo real de um prato do zero
+          <small>YouTube, 10 a 12 min, 1920&times;1080. Publique &agrave;s 19h. Roteiro em
+          <span class="rota">roteiro-youtube-conta-do-prato.md</span>, com a abertura sem c&acirc;mera
+          na Parte L09 dos roteiros locutados.</small></span></td>
+        <td><span class="cn cn-yt">YOUTUBE</span></td></tr>
+      <tr><td class="dia">09/10<small>sex</small></td>
+        <td><span class="peca"><span class="cod">L07</span>Traga o cliente de volta
+          <small>Reels 1:20. O mais longo e o que mais converte.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span><span class="cn cn-yt">SHORTS</span></td></tr>
+      <tr><td class="dia">10/10<small>s&aacute;b</small></td>
+        <td><span class="peca">Short 1 do longo
+          <small>&ldquo;32 itens do mercado no estoque. Zero digita&ccedil;&atilde;o.&rdquo; Corte do bloco 2.</small></span></td>
+        <td><span class="cn cn-yt">SHORTS</span><span class="cn cn-ig">REELS</span></td></tr>
+      <tr class="vazio"><td class="dia">11/10<small>dom</small></td>
+        <td>S&oacute; stories. Leia os coment&aacute;rios do longo com aten&ccedil;&atilde;o &mdash; quem comenta em v&iacute;deo
+        de dez minutos &eacute; comprador.</td><td></td></tr>
+    </table>
+  </div>
+</section>
+
+
+<section id="s4">
+  <p class="numsec">Semana 4</p>
+  <h2>Colher o que o longo rendeu</h2>
+  <p class="sub">Quase nada novo &eacute; gravado nesta semana. Ela existe para extrair tudo do
+  v&iacute;deo longo e para voc&ecirc; olhar a m&eacute;trica com material suficiente para decidir.</p>
+
+  <div class="semana">
+    <div class="semana-topo">
+      <span class="semana-id">S4</span>
+      <span class="semana-nome">Shorts do longo &middot; primeiro gancho do banco &middot; bastidor</span>
+      <span class="semana-data">12 a 18 de outubro</span>
+    </div>
+    <table class="dias">
+      <tr><th class="dia">Dia</th><th>Pe&ccedil;a</th><th class="canais">Canais</th></tr>
+      <tr><td class="dia">12/10<small>seg</small></td>
+        <td><span class="peca"><span class="cod">C7</span>Carrossel <b>fila-do-quilo</b>, 6 l&acirc;minas
+          <small>Feed, 12h. &Uacute;ltimo dos sete.</small></span></td>
+        <td><span class="cn cn-ig">FEED</span></td></tr>
+      <tr><td class="dia">13/10<small>ter</small></td>
+        <td><span class="peca">Short 2 do longo
+          <small>&ldquo;Meu sistema dizia que uma batata custava R$ 87.&rdquo; &Eacute; o corte mais forte que
+          voc&ecirc; tem, porque mostra defeito seu.</small></span></td>
+        <td><span class="cn cn-yt">SHORTS</span><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span></td></tr>
+      <tr><td class="dia">14/10<small>qua</small></td>
+        <td><span class="peca">Reels novo, gancho 21 do banco
+          <small>&ldquo;Quando o insumo sobe de preço, quanto tempo voc&ecirc; leva pra saber qual prato
+          ficou no preju&iacute;zo?&rdquo; Tela: F15, hist&oacute;rico de preço por fornecedor.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span><span class="cn cn-tt">TIKTOK</span><span class="cn cn-yt">SHORTS</span></td></tr>
+      <tr><td class="dia">16/10<small>sex</small></td>
+        <td><span class="peca">Short 3 do longo
+          <small>&ldquo;400 g de arroz cru viram 1 kg. Seu custo sabe disso?&rdquo;</small></span></td>
+        <td><span class="cn cn-yt">SHORTS</span><span class="cn cn-ig">REELS</span></td></tr>
+      <tr><td class="dia">17/10<small>s&aacute;b</small></td>
+        <td><span class="peca">Reels de bastidor
+          <small>Voz sobre a tela do que voc&ecirc; corrigiu esta semana. Sem rosto: o argumento &eacute;
+          t&eacute;cnico e a tela prova o que o rosto s&oacute; afirmaria.</small></span></td>
+        <td><span class="cn cn-ig">REELS</span></td></tr>
+      <tr><td class="dia">18/10<small>dom</small></td>
+        <td><span class="peca">Leitura das m&eacute;tricas e decis&atilde;o do ciclo seguinte
+          <small>Parte 09 desta p&aacute;gina.</small></span></td>
+        <td><span class="cn cn-prod">DECIS&Atilde;O</span></td></tr>
+    </table>
+  </div>
+</section>
+
+
+<section id="legendas">
+  <p class="numsec">Parte 07</p>
+  <h2>Legendas dos carross&eacute;is</h2>
+  <p class="sub">As legendas dos Reels est&atilde;o na Parte 08 do manual, uma por roteiro. Estas
+  s&atilde;o as dos sete carross&eacute;is, que n&atilde;o existiam. Toda afirma&ccedil;&atilde;o de terceiro leva a fonte,
+  na legenda e na l&acirc;mina.</p>
+
+  <div class="legenda">
+    <div class="legenda-topo"><b>C1 &middot; carrossel-delivery</b>
+      <button class="bt" data-cap="c1">Copiar</button></div>
+    <div class="legenda-corpo" id="c1">
+      <p>Vende por 44, recebe 22.</p>
+      <p>Comiss&atilde;o, entrega, servi&ccedil;o, pagamento: some tudo e some metade do pre&ccedil;o. O erro
+      n&atilde;o &eacute; vender no delivery &mdash; &eacute; anunciar l&aacute; o mesmo pre&ccedil;o do balc&atilde;o.</p>
+      <p>Deslize para ver a conta que resolve isso, e o segundo movimento: trazer o cliente
+      para o seu canal.</p>
+      <p>N&uacute;meros citados de &ldquo;Como ganhar dinheiro com delivery&rdquo;, do canal Marcelo Baccarini.</p>
+      <p>30 dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p>
+      <p class="hash">#delivery #ifood #gestaoderestaurante #cmv #foodservice #margemdelucro #donoderestaurante</p>
+    </div>
+  </div>
+
+  <div class="legenda">
+    <div class="legenda-topo"><b>C2 &middot; carrossel-nfce</b>
+      <button class="bt" data-cap="c2">Copiar</button></div>
+    <div class="legenda-corpo" id="c2">
+      <p>32 itens do mercado no estoque. Zero digita&ccedil;&atilde;o.</p>
+      <p>Aponta a c&acirc;mera no QR do cupom fiscal e pronto: quantidade, custo e fornecedor entram
+      direto &mdash; e o custo dos seus pratos atualiza junto. Nota de fornecedor em XML tamb&eacute;m.</p>
+      <p>E quando o dado fica duvidoso, o sistema diz que est&aacute; duvidoso: margem em branco e o
+      motivo escrito, em vez de um n&uacute;mero errado com cara de certo.</p>
+      <p>30 dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p>
+      <p class="hash">#estoque #nfce #gestaoderestaurante #cmv #foodservice #automacao</p>
+    </div>
+  </div>
+
+  <div class="legenda">
+    <div class="legenda-topo"><b>C3 &middot; carrossel-fotos</b>
+      <button class="bt" data-cap="c3">Copiar</button></div>
+    <div class="legenda-corpo" id="c3">
+      <p>&ldquo;D&aacute; vontade de comer?&rdquo; &eacute; a &uacute;nica pergunta que importa num card&aacute;pio digital.</p>
+      <p>Card sem foto &eacute; cliente comprando no escuro. E n&atilde;o &eacute; pregui&ccedil;a do dono: ningu&eacute;m tem
+      tempo de fotografar trinta pratos antes de abrir.</p>
+      <p>No card&aacute;pio do MiseOn nenhum prato fica sem imagem &mdash; enquanto voc&ecirc; n&atilde;o sobe a sua,
+      entra uma da fam&iacute;lia do produto. Depois voc&ecirc; troca por uma foto de verdade. E deve trocar.</p>
+      <p>30 dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p>
+      <p class="hash">#cardapiodigital #delivery #marketinggastronomico #foodservice #restaurante</p>
+    </div>
+  </div>
+
+  <div class="legenda">
+    <div class="legenda-topo"><b>C4 &middot; carrossel-labirinto</b>
+      <button class="bt" data-cap="c4">Copiar</button></div>
+    <div class="legenda-corpo" id="c4">
+      <p>Card&aacute;pio digital n&atilde;o &eacute; lista de pre&ccedil;o. &Eacute; vitrine.</p>
+      <p>Se o cliente precisa ca&ccedil;ar o que quer, ele fecha e vai pro concorrente que est&aacute; a um
+      toque de dist&acirc;ncia.</p>
+      <p>Busca no topo, categorias que ficam fixas enquanto ele rola, e uma faixa de mais
+      pedidos alimentada pela venda real &mdash; n&atilde;o por chute. Tr&ecirc;s decis&otilde;es de layout, nenhuma
+      linha de c&oacute;digo do seu lado.</p>
+      <p>30 dias gr&aacute;tis, sem cart&atilde;o.</p>
+      <p class="hash">#cardapiodigital #ux #delivery #restaurante #qrcode #foodservice</p>
+    </div>
+  </div>
+
+  <div class="legenda">
+    <div class="legenda-topo"><b>C5 &middot; carrossel-ficha-tecnica</b>
+      <button class="bt" data-cap="c5">Copiar</button></div>
+    <div class="legenda-corpo" id="c5">
+      <p>50 g de alho a mais por quilo = R$ 600 no m&ecirc;s. R$ 7.200 no ano.</p>
+      <p>E ningu&eacute;m enxerga, porque o alho n&atilde;o sai do caixa. Sai da panela. S&oacute; aparece quando
+      o m&ecirc;s fecha diferente do que voc&ecirc; esperava.</p>
+      <p>Ficha t&eacute;cnica n&atilde;o &eacute; burocracia: &eacute; a &uacute;nica forma de saber se a receita que sai da
+      cozinha &eacute; a receita que voc&ecirc; precificou.</p>
+      <p>N&uacute;meros citados do canal Marcelo Baccarini.</p>
+      <p>30 dias gr&aacute;tis, sem cart&atilde;o.</p>
+      <p class="hash">#fichatecnica #cmv #gestaoderestaurante #custos #cozinhaprofissional #foodservice</p>
+    </div>
+  </div>
+
+  <div class="legenda">
+    <div class="legenda-topo"><b>C6 &middot; carrossel-salada</b>
+      <button class="bt" data-cap="c6">Copiar</button></div>
+    <div class="legenda-corpo" id="c6">
+      <p>&ldquo;Salada n&atilde;o custa nada.&rdquo; Custa.</p>
+      <p>Voc&ecirc; compra 1 kg. Desfolha, tira o feio, tira o queimado &mdash; e chega no miolo com quase
+      metade a menos. Se o custo do prato foi lan&ccedil;ado pelo pre&ccedil;o da nota, ele est&aacute; errado: o
+      custo real &eacute; sobre o que sobrou.</p>
+      <p>No MiseOn o rendimento &eacute; voc&ecirc; quem declara, com o n&uacute;mero que a sua cozinha mediu. O
+      sistema n&atilde;o presume &mdash; e quando n&atilde;o sabe, ele diz que n&atilde;o sabe.</p>
+      <p>N&uacute;meros citados de &ldquo;Voc&ecirc; nunca olhou para um buffet desse jeito&rdquo;, canal Marcelo Baccarini.</p>
+      <p class="hash">#buffet #restauranteporquilo #fichatecnica #cmv #desperdicio #cozinhaprofissional</p>
+    </div>
+  </div>
+
+  <div class="legenda">
+    <div class="legenda-topo"><b>C7 &middot; carrossel-fila-do-quilo</b>
+      <button class="bt" data-cap="c7">Copiar</button></div>
+    <div class="legenda-corpo" id="c7">
+      <p>A balan&ccedil;a fica no fim da fila. O lucro &eacute; decidido no come&ccedil;o.</p>
+      <p>Arroz, legume e massa primeiro &mdash; barato e pesado. A prote&iacute;na s&oacute; quando o prato j&aacute;
+      est&aacute; cheio. Todo dono de quilo sabe disso.</p>
+      <p>O que quase ningu&eacute;m sabe &eacute; quanto custa cada grama que sai da travessa, porque isso
+      depende do rendimento real do preparo &mdash; n&atilde;o do pre&ccedil;o da nota.</p>
+      <p>N&uacute;meros citados de &ldquo;Voc&ecirc; nunca olhou para um buffet desse jeito&rdquo;, canal Marcelo Baccarini.</p>
+      <p>30 dias gr&aacute;tis, sem cart&atilde;o. Link na bio.</p>
+      <p class="hash">#restauranteporquilo #selfservice #buffet #cmv #gestaoderestaurante #foodservice</p>
+    </div>
+  </div>
+
+  <div class="regra">
+    <span class="rot">Uma frase do manual que eu n&atilde;o reaproveitei</span>
+    <p>A legenda do R08, na Parte 08, diz que lan&ccedil;ar nota &agrave; m&atilde;o &eacute; &ldquo;o motivo n&uacute;mero 1&rdquo; de o
+    estoque morrer no segundo m&ecirc;s. &Eacute; um ranking sem medi&ccedil;&atilde;o, do mesmo tipo que a Parte 03
+    pro&iacute;be. Troquei pelo mecanismo, que &eacute; mais forte e &eacute; verific&aacute;vel. Vale corrigir a
+    legenda l&aacute; tamb&eacute;m.</p>
+  </div>
+</section>
+
+
+<section id="todo-dia">
+  <p class="numsec">Parte 08</p>
+  <h2>O que vai todo dia</h2>
+  <p class="sub">Isto n&atilde;o entra na tabela porque n&atilde;o muda: &eacute; a mesma coisa todo dia
+  &uacute;til, inclusive nos dias sem publica&ccedil;&atilde;o.</p>
+  <ul>
+    <li><strong>Dois stories.</strong> Um bastidor do que voc&ecirc; est&aacute; construindo hoje e uma
+    enquete. A enquete gera resposta na DM, DM vira conversa, conversa vira trial.</li>
+    <li><strong>Cinco a oito abordagens</strong> pelos scripts de venda. O conte&uacute;do aquece; a
+    abordagem fecha. Um n&atilde;o substitui o outro, e neste est&aacute;gio a abordagem pesa mais.</li>
+    <li><strong>Um coment&aacute;rio &uacute;til</strong> num v&iacute;deo de food service com audi&ecirc;ncia. N&atilde;o
+    propaganda: resposta espec&iacute;fica &agrave; d&uacute;vida de algu&eacute;m. Rende mais que um Reels seu nesta
+    fase.</li>
+    <li><strong>Responder todo coment&aacute;rio</strong> em at&eacute; duas horas nas primeiras semanas.</li>
+  </ul>
+  <div class="nota">
+    <span class="rot">TikTok n&atilde;o &eacute; c&oacute;pia</span>
+    <p>Reexporte do editor, nunca baixe do Instagram &mdash; a marca d&rsquo;&aacute;gua derruba o alcance.
+    Corte 2 a 3 segundos do gancho, legenda bem mais curta, 3 a 5 hashtags, e publique num
+    hor&aacute;rio diferente do Instagram. Para o Shorts, o mesmo arquivo serve, com o t&iacute;tulo sendo
+    a pergunta do gancho.</p>
+  </div>
+</section>
+
+
+<section id="decisao">
+  <p class="numsec">Parte 09</p>
+  <h2>A decis&atilde;o do dia 18</h2>
+  <p class="sub">No domingo 18/10 voc&ecirc; ter&aacute; 16 publica&ccedil;&otilde;es no ar. &Eacute; material suficiente
+  para decidir, e cedo demais para desanimar.</p>
+
+  <table class="tabela">
+    <tr><th>Olhe</th><th>Onde</th><th>A decis&atilde;o que isso toma</th></tr>
+    <tr><td class="cod">3 s</td><td>Reten&ccedil;&atilde;o nos tr&ecirc;s primeiros segundos, nos Insights</td>
+      <td>Abaixo de 50%, o problema &eacute; o gancho e n&atilde;o o v&iacute;deo. Regrave <strong>s&oacute; a tomada T1</strong>
+      &mdash; &eacute; a vantagem de ter gravado por tomada &mdash; e republique em duas semanas.</td></tr>
+    <tr><td class="cod">n&atilde;o&nbsp;seg.</td><td>Visualiza&ccedil;&otilde;es de quem n&atilde;o te segue</td>
+      <td>&Eacute; o &uacute;nico sinal real de alcance. Alto, com seguidor parado: o problema est&aacute; no
+      perfil, n&atilde;o no conte&uacute;do.</td></tr>
+    <tr><td class="cod">DMs</td><td>Contagem manual, num caderno</td>
+      <td>&Eacute; o n&uacute;mero que vira assinante. Um Reels com 300 visualiza&ccedil;&otilde;es e 4 DMs vale mais
+      que um com 40 mil e nenhuma.</td></tr>
+    <tr><td class="cod">pilar</td><td>Qual dos quatro rendeu</td>
+      <td>Se &ldquo;a conta&rdquo; superar o resto &mdash; e provavelmente vai &mdash; suba a propor&ccedil;&atilde;o dele no
+      ciclo seguinte e fa&ccedil;a tr&ecirc;s varia&ccedil;&otilde;es do gancho que funcionou.</td></tr>
+  </table>
+
+  <div class="nota">
+    <span class="rot">A expectativa realista</span>
+    <p>Quatro semanas de conte&uacute;do n&atilde;o trazem assinante sozinhas. O que elas trazem &eacute;
+    conversa &mdash; e &eacute; a conversa, somada &agrave;s abordagens di&aacute;rias, que fecha os primeiros dois ou
+    tr&ecirc;s pagantes em 45 a 60 dias. Se em 18/10 voc&ecirc; tiver 16 pe&ccedil;as publicadas e 20 conversas
+    iniciadas, o ciclo foi um sucesso mesmo com zero venda.</p>
+  </div>
+
+  <h3>O que j&aacute; est&aacute; pronto para o ciclo seguinte</h3>
+  <p>Voc&ecirc; termina o dia 18 com o banco de 24 ganchos praticamente intacto (usou um), com as
+  33 cartelas reaproveit&aacute;veis e com as grava&ccedil;&otilde;es de tela F01 a F15 j&aacute; feitas. O segundo
+  ciclo custa metade do trabalho do primeiro &mdash; contanto que voc&ecirc; tenha guardado os
+  arquivos brutos na pasta de cada v&iacute;deo.</p>
+</section>
+
+<footer class="rodape-doc">
+  <p>Datas calculadas a partir de 15/09/2026. O manual
+  <span class="rota">cozinha-de-conteudo.html</span> continua sendo a fonte das regras do que
+  pode ser dito (Parte 03), das legendas dos Reels (Parte 08) e dos fluxos de grava&ccedil;&atilde;o
+  (Parte 07). Esta p&aacute;gina detalha a Parte 10 dele em dias e canais, e n&atilde;o a substitui.</p>
+</footer>
+
+</main>
+</div>
+</div>
+
+<script>
+document.querySelectorAll('[data-cap]').forEach(function(bt){
+  bt.addEventListener('click', function(){
+    var el = document.getElementById(bt.dataset.cap);
+    var txt = [].map.call(el.querySelectorAll('p'), function(p){
+      return p.textContent.replace(/\s+/g,' ').trim();
+    }).join('\n\n');
+    navigator.clipboard.writeText(txt).then(function(){
+      bt.textContent = 'Copiado'; bt.classList.add('ok');
+      setTimeout(function(){ bt.textContent = 'Copiar'; bt.classList.remove('ok'); }, 1600);
+    });
+  });
+});
+</script>
+</html>

@@ -1,0 +1,1259 @@
+<title>Cozinha de Conteúdo MiseOn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+:root{
+  --papel:#F4F5F0; --alto:#FFFFFF; --fundo:#E9EBE3;
+  --tinta:#15180F; --tinta2:#4A5245; --tinta3:#79816F;
+  --linha:#D8DBD0; --linha-forte:#BCC2B3;
+  --verde:#1B5E3F; --verde-vivo:#15803D; --verde-fundo:#E3EFE7;
+  --brasa:#B23E0C; --brasa-fundo:#FBE9DE;
+  --azul:#1E4A6B; --azul-fundo:#E2ECF3;
+  --sombra:0 1px 2px rgba(21,24,15,.05), 0 8px 24px -12px rgba(21,24,15,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+    --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+    --linha:#2B3127; --linha-forte:#3D4538;
+    --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+    --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+    --azul:#8FC4E8; --azul-fundo:#12212C;
+    --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+  --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+  --linha:#2B3127; --linha-forte:#3D4538;
+  --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+  --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+  --azul:#8FC4E8; --azul-fundo:#12212C;
+  --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--papel); color:var(--tinta);
+  font-family:"Source Serif 4","Iowan Old Style",Georgia,serif;
+  font-size:17px; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.ui{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+code,.mono,.tc{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+.wrap{max-width:1180px; margin:0 auto; padding-inline:20px; padding-block:0}
+.layout{display:grid; grid-template-columns:1fr; gap:48px}
+@media(min-width:1040px){ .layout{grid-template-columns:230px minmax(0,1fr); gap:56px} }
+
+/* ── índice lateral ─────────────────────────────── */
+.indice{font-family:Archivo,sans-serif; font-size:13px; line-height:1.45}
+@media(min-width:1040px){ .indice{position:sticky; top:24px; align-self:start; max-height:calc(100vh - 48px); overflow-y:auto; padding-block:8px} }
+.indice ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px}
+.indice a{display:block; padding:6px 10px; color:var(--tinta2); text-decoration:none; border-radius:6px; border-left:2px solid transparent}
+.indice a:hover{background:var(--alto); color:var(--tinta); border-left-color:var(--verde-vivo)}
+.indice .ix{color:var(--tinta3); margin-right:8px; font-variant-numeric:tabular-nums; font-weight:600}
+.indice-topo{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--tinta3); font-weight:700; padding:0 10px 10px; border-bottom:1px solid var(--linha); margin-bottom:10px}
+
+/* ── capa ───────────────────────────────────────── */
+.capa{padding-block:44px 32px; border-bottom:2px solid var(--tinta)}
+.eyebrow{font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--brasa); font-weight:700; margin:0 0 14px}
+h1{font-size:clamp(34px,6.4vw,58px); line-height:1.02; letter-spacing:-.022em; font-weight:800; margin:0 0 18px; text-wrap:balance; max-width:16ch}
+.lede{font-size:clamp(17px,2.1vw,20px); line-height:1.55; color:var(--tinta2); max-width:60ch; margin:0}
+.meta-capa{display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:26px; font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--tinta3); letter-spacing:.02em}
+.meta-capa b{color:var(--tinta2); font-weight:500}
+
+/* ── seções ─────────────────────────────────────── */
+section{padding-block:52px; border-bottom:1px solid var(--linha)}
+section:last-of-type{border-bottom:0}
+.numsec{font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--brasa); text-transform:uppercase; margin:0 0 10px}
+h2{font-size:clamp(25px,3.6vw,34px); line-height:1.12; letter-spacing:-.017em; font-weight:700; margin:0 0 8px; text-wrap:balance}
+.sub{color:var(--tinta2); font-size:18px; margin:0 0 30px; max-width:64ch}
+h3{font-size:20px; line-height:1.24; letter-spacing:-.008em; font-weight:700; margin:38px 0 12px; text-wrap:balance}
+h4{font-size:15px; font-weight:700; letter-spacing:.005em; margin:26px 0 8px}
+p{margin:0 0 16px; max-width:68ch}
+ul,ol{max-width:68ch; padding-left:22px; margin:0 0 16px}
+li{margin-bottom:7px}
+li::marker{color:var(--tinta3)}
+strong{font-weight:600; color:var(--tinta)}
+a{color:var(--verde-vivo)}
+hr{border:0; border-top:1px solid var(--linha); margin:34px 0}
+
+/* ── utilitários ────────────────────────────────── */
+.rota{font-family:"JetBrains Mono",monospace; font-size:.83em; background:var(--fundo); border:1px solid var(--linha); padding:1px 6px; border-radius:4px; white-space:nowrap; color:var(--tinta2)}
+.kbd{font-family:"JetBrains Mono",monospace; font-size:.8em; background:var(--alto); border:1px solid var(--linha-forte); border-bottom-width:2px; padding:1px 6px; border-radius:4px}
+.tc{font-size:12px; font-weight:700; color:var(--brasa); font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+
+/* ── quadro de regra (o que não pode afirmar) ───── */
+.regra{border-left:3px solid var(--brasa); padding:4px 0 4px 20px; margin:26px 0; max-width:68ch}
+.regra .rot{font-family:Archivo,sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--brasa); display:block; margin-bottom:6px}
+.regra p:last-child{margin-bottom:0}
+
+.nota{background:var(--azul-fundo); border-radius:8px; padding:18px 20px; margin:26px 0; max-width:68ch; font-size:16px}
+.nota .rot{font-family:Archivo,sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--azul); display:block; margin-bottom:7px}
+.nota p:last-child{margin-bottom:0}
+
+/* ── comanda (roteiro) ──────────────────────────── */
+.comanda{background:var(--alto); border:1px solid var(--linha); border-radius:10px; box-shadow:var(--sombra); margin:26px 0 38px; overflow:hidden}
+.comanda-topo{background:var(--fundo); border-bottom:1px solid var(--linha); padding:13px 20px; display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 16px}
+.comanda-id{font-family:"JetBrains Mono",monospace; font-size:12px; font-weight:700; color:var(--brasa); letter-spacing:.04em}
+.comanda-nome{font-family:Archivo,sans-serif; font-weight:700; font-size:16.5px; letter-spacing:-.008em; flex:1 1 240px; min-width:0}
+.comanda-especs{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--tinta3); letter-spacing:.01em; white-space:nowrap}
+.comanda-corpo{padding:20px}
+.comanda-corpo > p:first-child{margin-top:0}
+.ancora{font-size:14.5px; color:var(--tinta2); background:var(--verde-fundo); border-radius:6px; padding:9px 13px; margin:0 0 18px; max-width:none}
+.ancora b{color:var(--verde); font-family:Archivo,sans-serif; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; display:block; margin-bottom:3px}
+
+.cenas{display:flex; flex-direction:column; gap:0; margin:0 0 4px; list-style:none; padding:0}
+.cena{display:grid; grid-template-columns:52px minmax(0,1fr); gap:0 16px; padding:14px 0; border-top:1px dashed var(--linha)}
+.cena:first-child{border-top:0; padding-top:0}
+.cena-t{padding-top:2px}
+.cena h5{font-family:Archivo,sans-serif; font-size:13px; font-weight:700; margin:0 0 6px; letter-spacing:.005em; color:var(--tinta)}
+.cena p{margin:0 0 7px; font-size:15.5px; line-height:1.55; max-width:none}
+.cena p:last-child{margin-bottom:0}
+.rot-cena{font-family:Archivo,sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--tinta3); margin-right:7px}
+.fala{color:var(--tinta); border-left:2px solid var(--linha-forte); padding-left:11px}
+.na-tela{color:var(--tinta2)}
+.overlay{font-family:Archivo,sans-serif; font-weight:700; font-size:14.5px; color:var(--brasa); letter-spacing:-.01em}
+
+.legenda-post{border-top:1px solid var(--linha); margin-top:18px; padding-top:16px; font-size:15px}
+.legenda-post .rot{font-family:Archivo,sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--tinta3); display:block; margin-bottom:8px}
+.legenda-post .txt{background:var(--fundo); border-radius:6px; padding:13px 15px; white-space:pre-wrap; font-size:14.5px; line-height:1.6}
+.tags{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--tinta3); margin-top:9px; word-spacing:.2em}
+
+/* ── fluxos de gravação ─────────────────────────── */
+.fluxos{display:grid; grid-template-columns:1fr; gap:14px; margin:24px 0}
+@media(min-width:760px){ .fluxos{grid-template-columns:1fr 1fr} }
+.fluxo{background:var(--alto); border:1px solid var(--linha); border-radius:9px; padding:17px 19px; display:flex; flex-direction:column; gap:9px}
+.fluxo-topo{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap}
+.fluxo-id{font-family:"JetBrains Mono",monospace; font-size:11.5px; font-weight:700; color:var(--verde-vivo)}
+.fluxo h4{margin:0; font-size:15.5px; flex:1 1 auto}
+.fluxo dl{margin:0; display:grid; grid-template-columns:auto minmax(0,1fr); gap:5px 12px; font-size:14px; line-height:1.48}
+.fluxo dt{font-family:Archivo,sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--tinta3); padding-top:3px}
+.fluxo dd{margin:0; color:var(--tinta2)}
+.fluxo dd b{color:var(--tinta)}
+
+/* ── tabelas ────────────────────────────────────── */
+.tabela-scroll{overflow-x:auto; margin:22px 0; border:1px solid var(--linha); border-radius:9px; background:var(--alto)}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:520px}
+th,td{text-align:left; padding:11px 15px; border-bottom:1px solid var(--linha); vertical-align:top}
+th{font-family:Archivo,sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--tinta3); background:var(--fundo); white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:"JetBrains Mono",monospace; font-variant-numeric:tabular-nums; white-space:nowrap}
+.sim{color:var(--verde-vivo); font-weight:600}
+.nao{color:var(--brasa); font-weight:600}
+
+/* ── comparativo de prints ──────────────────────── */
+.par{display:grid; grid-template-columns:1fr; gap:22px; margin:26px 0}
+@media(min-width:680px){ .par{grid-template-columns:1fr 1fr} }
+.par figure{margin:0; display:flex; flex-direction:column; gap:10px}
+.par img{width:100%; max-width:100%; height:auto; border-radius:9px; border:1px solid var(--linha); display:block}
+.par figcaption{font-size:14px; color:var(--tinta2); line-height:1.5}
+.par figcaption b{display:block; font-family:Archivo,sans-serif; font-size:11px; letter-spacing:.11em; text-transform:uppercase; margin-bottom:4px}
+.par .ok b{color:var(--verde-vivo)}
+.par .ruim b{color:var(--brasa)}
+
+/* ── banco de ganchos ───────────────────────────── */
+.ganchos{list-style:none; padding:0; margin:20px 0; display:grid; grid-template-columns:1fr; gap:0; max-width:none; border:1px solid var(--linha); border-radius:9px; overflow:hidden; background:var(--alto)}
+.ganchos li{margin:0; padding:11px 16px; border-bottom:1px solid var(--linha); display:grid; grid-template-columns:30px minmax(0,1fr); gap:12px; font-size:15px; line-height:1.5}
+.ganchos li:last-child{border-bottom:0}
+.ganchos .n{font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--tinta3); font-weight:700; padding-top:3px}
+
+footer{padding-block:40px 60px; color:var(--tinta3); font-size:14px; border-top:2px solid var(--tinta)}
+footer p{max-width:68ch}
+
+@media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important} }
+:focus-visible{outline:2px solid var(--verde-vivo); outline-offset:2px; border-radius:3px}
+</style>
+
+<div class="wrap">
+
+<header class="capa">
+  <p class="eyebrow">Manual de gravação · 15 de setembro de 2026</p>
+  <h1>Cozinha de Conteúdo MiseOn</h1>
+  <p class="lede">O produto está pronto e não tem assinante. O que falta não é funcionalidade — é alguém saber que ele existe. Este é o manual para você, que nunca gravou nada, começar a publicar três vezes por semana com roteiro, print e plano de edição já prontos.</p>
+  <div class="meta-capa">
+    <span><b>Para:</b> Rafael · fundador solo</span>
+    <span><b>Canais:</b> Instagram → TikTok → YouTube</span>
+    <span><b>Base:</b> 3 vídeos-âncora + código do MiseOn</span>
+    <span><b>Prints:</b> 20 capturados em produção</span>
+  </div>
+</header>
+
+<div class="layout">
+
+<nav class="indice" aria-label="Índice">
+  <p class="indice-topo">Neste manual</p>
+  <ol>
+    <li><a href="#p1"><span class="ix">01</span>A régua: os 3 vídeos</a></li>
+    <li><a href="#p2"><span class="ix">02</span>A fórmula destilada</a></li>
+    <li><a href="#p3"><span class="ix">03</span>O que não pode dizer</a></li>
+    <li><a href="#p4"><span class="ix">04</span>Por que o cardápio vende</a></li>
+    <li><a href="#p5"><span class="ix">05</span>Posicionamento e pilares</a></li>
+    <li><a href="#p6"><span class="ix">06</span>Setup de gravação</a></li>
+    <li><a href="#p7"><span class="ix">07</span>Fluxos para gravar</a></li>
+    <li><a href="#p8"><span class="ix">08</span>Os roteiros</a></li>
+    <li><a href="#p9"><span class="ix">09</span>Plano de edição</a></li>
+    <li><a href="#p10"><span class="ix">10</span>Calendário de 30 dias</a></li>
+    <li><a href="#p11"><span class="ix">11</span>Prints e pendências</a></li>
+    <li><a href="#p12"><span class="ix">12</span>O que medir</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════ 01 ══════════════════════════ -->
+<section id="p1">
+  <p class="numsec">Parte 01</p>
+  <h2>A régua: os três vídeos que você mandou</h2>
+  <p class="sub">Assisti os três inteiros e transcrevi. Todos são do mesmo canal — Marcelo Baccarini, 506 mil inscritos — e todos usam a mesma estrutura. Não é coincidência: é uma fórmula que funciona no nicho food service. É ela que você vai copiar.</p>
+
+  <h3>Vídeo A — “O que faz um site parecer amador e perder as vendas na internet”</h3>
+  <p class="mono" style="font-size:12.5px;color:var(--tinta3)">4:27 · 36 mil visualizações · 7 meses</p>
+  <p>Ele abre sites reais na tela e vai apontando erro por erro, sem teoria nenhuma. Na prática é uma <strong>checklist de UX de vitrine</strong> — e quase todos os itens têm resposta direta dentro do cardápio do MiseOn.</p>
+  <p>Os erros que ele nomeia, na ordem:</p>
+  <ol>
+    <li>“Uma bagunça visual. O site é um festival de cores que brigam entre si.” — e ele vende vestido de noiva. <strong>“Se o site parece amador, o cliente acha que o produto também é.”</strong></li>
+    <li>Fontes e tamanhos misturados: “ler aqui vira um esforço”.</li>
+    <li><strong>“Não é um site, é um labirinto.”</strong> Não force o cliente a caçar o que ele quer comprar.</li>
+    <li>Vazio mal usado: “branco, branco, branco até chegar”.</li>
+    <li>Sem categorias que conduzem o olhar — “aqui dá para criar três pilares de navegação”.</li>
+    <li>Sem oferta complementar: “tô tentando comprar um anel, é hora de aumentar o valor da compra… mas nada, para por aqui mesmo”.</li>
+    <li><strong>“A joia pode ser linda, mas se o caminho até o carrinho é feio, a venda não acontece.”</strong></li>
+    <li>Site de cupcake que <strong>não mostra cupcake</strong>, só as caixas. “Quando você vende comida, a primeira pergunta é: dá vontade de comer? Aqui não dá.”</li>
+    <li>Cards sem padrão de altura: “aqui tá numa altura, aqui desce, aqui sobe de novo”.</li>
+    <li>“Nenhuma avaliação.”</li>
+    <li>Texto demais: <strong>“na internet as pessoas querem primeiro ver, depois se interessar e aí sim ler”</strong>.</li>
+    <li>Não adaptado ao celular e lento. “Tem que mostrar rápido o que interessa: o produto, o preço e como comprar.”</li>
+    <li>“Tem estímulo demais e clareza de menos.”</li>
+    <li>A mesma foto repetida seis vezes no fundo.</li>
+    <li>Sem botão de compra — “tem telefone e fax”.</li>
+  </ol>
+
+  <h3>Vídeo B — “Você nunca olhou para um buffet desse jeito”</h3>
+  <p class="mono" style="font-size:12.5px;color:var(--tinta3)">12:48 · restaurante do Guilherme, por quilo em Pinheiros, 28 anos de casa</p>
+  <p>Este é o melhor material de <strong>engenharia de custo</strong> que existe em vídeo no Brasil, e ele nem usa essa palavra. Tudo que o Guilherme faz na mão, o MiseOn faz na conta.</p>
+  <ul>
+    <li><strong>A ordem da fila decide o lucro.</strong> “A balança fica no final, mas o lucro é decidido no começo da fila.” Arroz, legumes e massa primeiro — barato e pesado. Proteína só quando o prato já está quase cheio.</li>
+    <li>“Cliente que vem aqui e só pega proteína dá prejuízo. Total.”</li>
+    <li><strong>Prato oval e maior:</strong> “as pessoas comem até 30% mais”, porque parece que cabe mais e o formato ocupa mais área.</li>
+    <li><strong>Água é peso.</strong> “Legumes cozidos aumentam até 40% de peso.” Molhos, caldos, feijão com caldo.</li>
+    <li>Técnica de chapa: aço grosso e temperatura alta para o grelhado <strong>perder menos água</strong>.</li>
+    <li>“O buffet é uma vitrine comestível colorida, porque as pessoas decidem pelos olhos.”</li>
+    <li><strong>Canibalização:</strong> três proteínas baratas ao lado das caras baixam a média do custo. “Costelinha canibaliza o contrafilé — isso aqui é o dobro do preço disso aqui.”</li>
+    <li>O salgadinho no fim da fila: “é o mais impulso do cliente. Como ele pegou a salada antes, pega o salgadinho sem culpa.”</li>
+    <li>“Suco é muito mais lucrativo que refrigerante. Então você deixa ele aqui na frente.”</li>
+    <li><strong>O mito da salada barata.</strong> 60 litros de água para higienizar uma leva; conta de água de R$ 6.500 no mês; e no desfolhe “você tira de 30 a 40% do buquê — quase a metade é perda”. E ainda por cima é leve, então não pesa na balança.</li>
+    <li>O trajeto até o caixa: lanchinho da tarde é <strong>12% do faturamento</strong>. Sorvete, brigadeiro, trufa, cocada, brownie, e o jantar pronto para levar.</li>
+    <li>“10% a mais se pegar o suco, 10% a mais na sobremesa, 12% a mais aqui.”</li>
+    <li><strong>Ele vende tempo.</strong> Região de escritórios, pico das 12h às 13h40, desconto para quem almoça depois. “Quanto mais rápido rodar a mesa, mais você lucra” — 4 a 5 giros por refeição, contra 1 giro de um à la carte noturno.</li>
+    <li>Recusa promoção de carimbo: “esse tipo de promoção atrai o cliente que quer desconto… ele é mesquinho, não valoriza a qualidade”.</li>
+    <li><strong>A regra que não se quebra:</strong> “a estratégia de lucro nunca pode comprometer a qualidade. Não adianta fazer um produto aguado, que ele só vem a primeira vez.”</li>
+  </ul>
+
+  <h3>Vídeo C — “Como ganhar dinheiro com delivery”</h3>
+  <p class="mono" style="font-size:12.5px;color:var(--tinta3)">15:40 · 603 mil visualizações · 3 semanas</p>
+  <p>Você disse que este é o mais importante e concordo — e mais: <strong>é o que tem a maior sobreposição com o MiseOn</strong>. Quase toda dor citada aqui tem um módulo do sistema do outro lado. É por ele que a sua série de estreia deve começar.</p>
+  <ul>
+    <li><strong>A comissão come metade.</strong> “Vendo por 44, recebo 22.” Caldo verde a R$ 29,90 na plataforma, recebe de R$ 9 a R$ 12. Taxa de entrega, taxa de serviço, taxa de pagamento, custo logístico.</li>
+    <li>“A grande maioria das pessoas que estão dentro do delivery hoje são pessoas que estão perdendo dinheiro.”</li>
+    <li>Golpe de cancelamento com <strong>foto gerada por IA</strong>: o robô da plataforma analisa a imagem, aceita o cancelamento, e o lojista não recebe.</li>
+    <li>Falta de motoboy: a plataforma fecha a loja sem avisar e direciona os entregadores para as grandes. “A gente assume o prejuízo.”</li>
+    <li><strong>Felipe, a loja que mais vende delivery no país</strong> — 70 mil pedidos/mês. Usa a plataforma como vitrine e <strong>tira o cliente de lá</strong>: “manda um cupom de 20% para esse cliente vir no seu salão ou pedir no seu canal próprio — você já tá gastando menos do que gastaria com iFood, que é 26%, 30%, 40%.” Ou QR code na embalagem, que custa ainda menos.</li>
+    <li><strong>Preço duplo:</strong> “tem que cobrar mais caro para poder dar o desconto”. O mesmo macarrão sai a R$ 25 no canal próprio e mais caro na plataforma. A plataforma subsidia parte do desconto.</li>
+    <li>Embalagem ruim → molho vaza, arroz grudado, chega frio → cliente irritado avalia mal → <strong>a loja despenca no ranking</strong>. “Nota abaixo de 4.6 vai ficar lá embaixo. Não aparece, é por isso que não vende.”</li>
+    <li><strong>Marmita sem foto.</strong> “Em destaque tem uma, duas, três, quatro marmitas. Nenhuma tem foto.” E a logo preta some no fundo branco da plataforma.</li>
+    <li>Descrição fria (“acompanha arroz, feijão, salada”) contra descrição que vende (“nosso arroz soltinho, frango xadrez preparado com muito amor”).</li>
+    <li><strong>Palavras-chave:</strong> “na rua o cliente encontra a loja pelo endereço; no delivery encontra pelas palavras. Só colocar ‘coxinha’ não vai aparecer.”</li>
+    <li><strong>Planilha de desperdício:</strong> o granulado que caiu no chão é varrido, pesado e anotado. “Se ela usar 50 g de alho a mais por quilo, são R$ 600 de prejuízo por mês” — e no ano, milhares. “E aí as pessoas falam que não ganham dinheiro.”</li>
+    <li>Ficha técnica pesada: “esse bife pesa de 90 a 110 g. É a parte mais cara do prato. Tem que estar precificado e tem que estar pesado.” Bolo: 594 g por forma.</li>
+    <li>Proporção da marmita: 150 g de arroz, 100 g de feijão, 150 g de proteína. “O problema é que a galera manda 700 g de proteína e cobra como se fosse 100 g.”</li>
+    <li>Oito pratos com o mesmo frango: menos ingredientes, um fornecedor, um boleto, mais poder de barganha.</li>
+    <li><strong>Velocidade gera visibilidade.</strong> Separar pedidos par/ímpar no varal ganha 15–20 segundos. “Quando você entrega rápido, o iFood entende que você aguenta mais pedido e te destaca. Se não entregar em 10 minutos, ele entende que sua operação é ruim e te rebaixa.”</li>
+    <li><strong>A conta final do Felipe:</strong> custo 59–60%, plataforma ~26%, lucro ~15%.</li>
+    <li>Primeiros seis meses de loja nova: lucro zero. “A meta não é ganhar dinheiro, é ganhar cliente.”</li>
+  </ul>
+
+  <div class="nota">
+    <span class="rot">Por que isso importa para você</span>
+    <p>Esses três vídeos somam mais de 670 mil visualizações falando <em>exatamente</em> das dores que o MiseOn resolve — e nenhum deles menciona um sistema. Existe uma audiência formada e sem resposta. Seu conteúdo não precisa criar a dor: ela já está criada. Ele só precisa aparecer no lugar onde a dor termina.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════ 02 ══════════════════════════ -->
+<section id="p2">
+  <p class="numsec">Parte 02</p>
+  <h2>A fórmula destilada</h2>
+  <p class="sub">Os três vídeos usam a mesma estrutura de seis tempos. Decore isto: é o esqueleto de todo roteiro da Parte 08.</p>
+
+  <div class="tabela-scroll">
+  <table>
+    <thead><tr><th>Tempo</th><th>O que é</th><th>Exemplo real dos vídeos</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1 · Gancho</td><td>Uma <b>pergunta</b> que o espectador não sabe responder, nos 3 primeiros segundos. Nunca uma saudação.</td><td>“Sabe por que a carne fica sempre no final da fila do restaurante por quilo?”</td></tr>
+      <tr><td class="num">2 · Cena</td><td>Mostra o problema <b>físico e concreto</b>. Mão, comida, tela, travessa. Nada de gráfico.</td><td>A folha sendo desfolhada e o descarte crescendo na bancada.</td></tr>
+      <tr><td class="num">3 · Número</td><td>Quantifica a dor. <b>Um número só</b>, dito em voz alta e escrito grande na tela.</td><td>“De 30 a 40% do buquê é perda.” / “Vendo por 44, recebo 22.”</td></tr>
+      <tr><td class="num">4 · Causa</td><td>Explica por que acontece. É aqui que você vira autoridade.</td><td>“Você comprou 1 kg, mas só 600 g viraram comida. O custo verdadeiro é sobre os 600.”</td></tr>
+      <tr><td class="num">5 · Saída</td><td>O MiseOn aparece <b>como consequência</b> da explicação, nunca como anúncio. Tela real, 4 a 8 segundos.</td><td>A tela da ficha técnica com o fator de correção preenchido e o custo mudando.</td></tr>
+      <tr><td class="num">6 · CTA</td><td>Uma frase. Sempre a mesma, para virar assinatura.</td><td>“Se você quer ver essa conta na sua operação, o link tá na bio.”</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>As cinco regras de forma</h3>
+  <ol>
+    <li><strong>Corte a cada 2–3 segundos.</strong> Nenhum plano dos vídeos do Baccarini dura mais que isso. Se a fala continua, o enquadramento muda.</li>
+    <li><strong>Legenda queimada sempre.</strong> A maioria assiste sem som. A palavra-chave da frase entra em cor de destaque, como ele faz com “É UM LABIRINTO!”.</li>
+    <li><strong>Você fala com alguém, não para a câmera.</strong> Quando puder, grave o dono do restaurante respondendo. Quando não puder, use a pergunta em texto na tela e responda você.</li>
+    <li><strong>Nunca comece explicando o que é o MiseOn.</strong> Em 15 minutos de vídeo sobre delivery, nenhum sistema é citado. A marca entra no minuto da solução, não no segundo zero.</li>
+    <li><strong>Um vídeo, uma ideia.</strong> Se você tem duas, são dois vídeos.</li>
+  </ol>
+</section>
+
+<!-- ══════════════════════════ 03 ══════════════════════════ -->
+<section id="p3">
+  <p class="numsec">Parte 03</p>
+  <h2>O que você não pode dizer</h2>
+  <p class="sub">Leia esta parte antes de gravar qualquer coisa. Você tem zero assinantes — a única coisa pior que não ser conhecido é ser conhecido por ter exagerado.</p>
+
+  <div class="regra">
+    <span class="rot">Regra de ouro</span>
+    <p>Só afirme o que a tela mostra acontecendo. Se o número não aparece na tela do sistema durante o vídeo, ele não entra no roteiro.</p>
+  </div>
+
+  <h3>Proibido até haver medição</h3>
+  <ul>
+    <li><strong>“Reduz 30% do desperdício”</strong> e <strong>“100% de precisão”</strong> — esses números estão hoje na landing de restaurante por quilo (<span class="rota">/sistema-para-restaurante-por-quilo</span>) como métricas de herói. Eles não têm medição por trás. Não use em vídeo, e considere reescrevê-los no site como objetivo, não como resultado.</li>
+    <li><strong>“Aumenta suas vendas em X%”</strong> — nenhum teste de conversão foi feito no cardápio. Você pode dizer o que o mecanismo faz; não pode dizer quanto ele rende.</li>
+    <li><strong>“O melhor sistema do mercado”</strong> / <strong>“o único que tem”</strong> — a auditoria de concorrência não encontrou base para dizer que Consumer, Saipos ou Anota AI não têm controle de CMV, estoque ou ficha técnica. Diga o que o <em>seu</em> faz e como se faz; deixe a comparação para quem testou os dois.</li>
+    <li><strong>Depoimento, print de cliente ou “+X restaurantes”</strong> — <strong>corrigido em 15/09:</strong> você não tem cliente pagante nenhum. O Natureba é cadastro preparado para uma visita comercial que ainda não aconteceu, e tem zero pedidos processados. Nada de prova social até existir um caso, com autorização escrita e dado real.</li>
+    <li><strong>Loja de demonstração passando por cliente.</strong> Se a tela é <span class="rota">/demo-por-quilo</span>, o vídeo diz “esta é uma loja de demonstração”. Uma vez, em texto na tela, basta.</li>
+  </ul>
+
+  <h3>Permitido e forte</h3>
+  <ul>
+    <li>Descrever o mecanismo: “quando o cliente serve 350 g, a ficha técnica baixa 0,105 kg de feijão do estoque”. Isso é verificável na tela.</li>
+    <li>Citar o preço e as condições: <strong>R$ 169,90/mês</strong>, R$ 161,40 no Pix, <strong>30 dias grátis sem cartão</strong>, sem fidelidade, tolerância de 7 dias.</li>
+    <li>Citar princípios de usabilidade com a fonte na tela — as heurísticas de Nielsen e o princípio de revelação progressiva do NN/g são referências públicas e legítimas.</li>
+    <li>Usar os números <strong>dos vídeos-âncora</strong> creditando a fonte: “segundo a reportagem do Marcelo Baccarini…”. Aí o número não é seu, é dele.</li>
+    <li>Mostrar erro do seu próprio produto e o conserto. Isso constrói mais confiança do que qualquer alegação.</li>
+  </ul>
+
+  <div class="nota">
+    <span class="rot">Corrija antes de gravar</span>
+    <p>O texto de parcelamento anual na home (<span class="rota">Home.tsx:2081</span>) anuncia “3x, 6x, 8x ou 12x de R$ 149,90”, e essas modalidades não somam o mesmo total. Se alguém do público fizer essa conta num comentário, a credibilidade do vídeo cai junto. Arrume o site antes de mandar tráfego para ele.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════ 04 ══════════════════════════ -->
+<section id="p4">
+  <p class="numsec">Parte 04</p>
+  <h2>Por que o cardápio do MiseOn vende melhor</h2>
+  <p class="sub">Você pediu os fatores de UX que sustentam o argumento. Levantei cada um direto no código do cardápio e confrontei com a lista de erros do Vídeo A. Todos são mecanismos que existem hoje, em produção.</p>
+
+  <div class="par">
+    <figure class="ok">
+      <img src="prints/mini-07-cardapio-paulista-mobile.jpg" alt="Cardápio do Lanche do Paulista no celular: tema escuro próprio, fotos reais dos lanches, selo de cashback, secao Os mais pedidos, calorias e selo Alto em proteina">
+      <figcaption><b>Como deve ficar</b>Tema próprio da loja, foto real, “Os mais pedidos” por venda, cashback anunciado, calorias e alérgeno no card. Cinco dos quinze erros do Vídeo A já resolvidos só de abrir a página.</figcaption>
+    </figure>
+    <figure class="ruim">
+      <img src="prints/mini-01-cardapio-quilo-topo-mobile.jpg" alt="Cardápio da loja Demo Por Quilo: tres produtos diferentes exibindo exatamente a mesma foto de bowl">
+      <figcaption><b>O que precisa ser arrumado antes</b>A loja <span class="rota">/demo-por-quilo</span> usa a <em>mesma foto</em> em Buffet por Quilo, Marmita P e Marmita M. É literalmente o erro que o Vídeo A aponta: “a mesma foto repetida”. Não grave nessa loja sem trocar as fotos.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Os treze fatores, confrontados com o vídeo</h3>
+  <div class="tabela-scroll">
+  <table>
+    <thead><tr><th>Erro apontado no vídeo</th><th>Mecanismo no MiseOn</th><th>Onde ver</th></tr></thead>
+    <tbody>
+      <tr><td>“Você não vê cupcakes, só as caixas”; marmitas em destaque sem nenhuma foto</td><td><b>Nenhum produto fica sem imagem.</b> Há um catálogo curado por nome e, quando não há correspondência exata, um fallback por família — hambúrguer, pizza, bebida, sobremesa, salada, porção. O prato aparece mesmo se o lojista ainda não subiu a foto dele.</td><td><span class="rota">lib/fotoProdutoUtils.ts</span></td></tr>
+      <tr><td>“Não é um site, é um labirinto”</td><td>Busca no cardápio e categorias que ficam fixas enquanto a pessoa navega — ela troca de seção sem voltar ao topo.</td><td><span class="rota">Cardapio.tsx:158, 352, 773</span></td></tr>
+      <tr><td>“Aqui dá para criar três pilares de navegação”</td><td>Categorias do lojista + faixa “Os mais pedidos”, ordenada pelo contador real de vendas, limitada a seis e só com quem vendeu.</td><td><span class="rota">Cardapio.tsx:346, 800</span></td></tr>
+      <tr><td>“Nenhuma avaliação” / nada conduz a escolha</td><td>Selo “Selecionados pela casa” (escolha editorial da loja) e comparação De/Por com a economia calculada quando existe preço original.</td><td><span class="rota">Cardapio.tsx:258, 1337, 1539</span></td></tr>
+      <tr><td>“É hora de aumentar o valor da compra… mas para por aqui mesmo”</td><td>Adicionais com mínimo e máximo, e o total reage a cada opção marcada. No totem, oferta de sobremesa quando o carrinho não tem nenhuma — com botão de pular.</td><td><span class="rota">Cardapio.tsx:1234–1375</span> · <span class="rota">Totem.tsx:232–707</span></td></tr>
+      <tr><td>“Muito texto, só texto. Na internet as pessoas querem primeiro ver”</td><td>Foto grande no card, galeria com setas no modal do produto, preço e botão sempre visíveis.</td><td><span class="rota">Cardapio.tsx:1250–1299</span></td></tr>
+      <tr><td>“Olha só o que acontece se você tenta comprar pelo celular”</td><td>O cardápio nasceu mobile-first e é PWA. O print ao lado é a tela real num aparelho de 430 px.</td><td>Qualquer loja em <span class="rota">/lojas</span></td></tr>
+      <tr><td>“A mesma foto repetida seis vezes no fundo”</td><td>White-label por loja: cor, fonte, banner e tema claro/escuro configuráveis, com correção automática de contraste para o texto continuar legível sobre a cor da marca.</td><td><span class="rota">lib/personalizacao.ts</span></td></tr>
+      <tr><td>“Sumiu até a marca da loja” <span class="mono" style="font-size:11px">(Vídeo C)</span></td><td>No cardápio próprio a marca é a página inteira, não um logotipo de 40 px dentro do app de outra empresa.</td><td><span class="rota">/lanchepaulista</span></td></tr>
+      <tr><td>“Descrição fria” <span class="mono" style="font-size:11px">(Vídeo C)</span></td><td>Descrição livre por produto + JSON-LD do cardápio para o Google ler os pratos, não só a página.</td><td><span class="rota">lib/jsonLdCardapio.ts</span></td></tr>
+      <tr><td>Não há como perguntar nada</td><td><b>Pedido por voz.</b> O cliente fala o pedido e o sistema casa com os produtos do cardápio (Web Speech API em pt-BR). É raro no mercado e rende vídeo sozinho.</td><td><span class="rota">components/VoiceOrderModal.tsx</span></td></tr>
+      <tr><td>—</td><td><b>Informação nutricional que reage à escolha.</b> A tabela recalcula quando o cliente marca um adicional, junta os alérgenos, mostra a fonte do dado e abre o detalhamento sob demanda. Há ainda o resumo nutricional do carrinho inteiro.</td><td><span class="rota">cardapio/TabelaNutricional.tsx</span></td></tr>
+      <tr><td>“Se o caminho até o carrinho é feio, a venda não acontece”</td><td>Pix e cartão no próprio cardápio, cupom de primeira compra copiável, saldo de cashback aplicável no checkout, e registro de quem abriu o checkout e não terminou — que vira alvo de recuperação.</td><td><span class="rota">CheckoutDrawer.tsx</span> · <span class="rota">Cardapio.tsx:47</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="regra">
+    <span class="rot">O limite deste argumento</span>
+    <p>Tudo acima é <strong>mecanismo implementado</strong> — dá para filmar funcionando. Nada disso é prova de que o cardápio converte mais que o do concorrente: não houve teste A/B, nem medição de funil, nem comparação lado a lado. A frase honesta e ainda assim forte é: <em>“fotos, adicionais e informação nutricional para apresentar melhor o seu cardápio”</em>. A frase proibida é “vende X% mais”.</p>
+  </div>
+
+  <h3>Três defeitos conhecidos — não filme por cima deles</h3>
+  <ul>
+    <li><strong>Totem, falha de Pix.</strong> Se a cobrança falhar, a tela ainda pode mostrar “Pedido enviado!”. Não grave o fluxo de pagamento do totem até isso estar corrigido.</li>
+    <li><strong>Grupo de adicionais com mínimo 2.</strong> O selo vira “Pronto” com apenas uma opção marcada. Evite esse caso no roteiro.</li>
+    <li><strong>Loja inexistente ou queda de rede</strong> no cardápio aparece como carregamento infinito. Grave com conexão estável.</li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════ 05 ══════════════════════════ -->
+<section id="p5">
+  <p class="numsec">Parte 05</p>
+  <h2>Posicionamento e os quatro pilares</h2>
+
+  <p><strong>A frase-mãe</strong>, que deve aparecer na bio dos três perfis e fechar os vídeos longos:</p>
+  <p style="font-size:20px; line-height:1.4; border-left:3px solid var(--verde-vivo); padding-left:18px; color:var(--tinta); max-width:56ch">Sistema de gestão para food service que mostra o custo e a margem real de cada item — estoque via nota fiscal, rendimento definido por você e KDS configurável.</p>
+
+  <p>Você não compete por ser o mais barato nem o mais conhecido. Compete por <strong>profundidade de custo, estoque e produção</strong>. O público certo é quem sofre com CMV, desperdício e margem — não quem só quer um sistema que “funciona”.</p>
+
+  <h3>Os quatro pilares e a proporção</h3>
+  <div class="tabela-scroll">
+  <table>
+    <thead><tr><th>Pilar</th><th>O que é</th><th>Serve para</th><th>Frequência</th></tr></thead>
+    <tbody>
+      <tr><td><b>A conta que você não faz</b></td><td>CMV, fator de correção, rendimento, perda de cocção, margem por canal. O território do Vídeo B e do Vídeo C.</td><td>Autoridade. É o que faz um dono te seguir.</td><td class="num">4 de 10</td></tr>
+      <tr><td><b>A vitrine</b></td><td>Cardápio, foto, descrição, palavra-chave, caminho até o carrinho. O território do Vídeo A.</td><td>Alcance. É o que viraliza para fora do nicho.</td><td class="num">3 de 10</td></tr>
+      <tr><td><b>A operação</b></td><td>PDV, KDS, balança, mesa, tempo de entrega. Tela real, pouco texto.</td><td>Prova. É o que converte quem já te segue.</td><td class="num">2 de 10</td></tr>
+      <tr><td><b>O bastidor</b></td><td>Fundador solo construindo, erro que você corrigiu, decisão de produto.</td><td>Vínculo. É o que faz comentarem.</td><td class="num">1 de 10</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>A divisão por canal</h3>
+  <ul>
+    <li><strong>Instagram Reels</strong> — canal principal. Tudo nasce aqui, vertical, 45 a 90 segundos.</li>
+    <li><strong>TikTok</strong> — o mesmo arquivo reaproveitado. Reexporte do editor (não baixe do Instagram: a marca d’água derruba o alcance). Legenda mais curta, gancho ainda mais rápido.</li>
+    <li><strong>YouTube</strong> — dois usos. <em>Shorts:</em> o mesmo vertical. <em>Longo:</em> um vídeo de 8 a 12 minutos por mês, no formato “a conta completa”, que é onde você fecha venda — quem assiste 10 minutos sobre CMV é comprador.</li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════ 06 ══════════════════════════ -->
+<section id="p6">
+  <p class="numsec">Parte 06</p>
+  <h2>Setup de gravação</h2>
+  <p class="sub">Você disse que é iniciante. Esta parte é o mínimo para não travar — nada aqui exige compra.</p>
+
+  <h3>Quem grava o quê</h3>
+  <ul>
+    <li><strong>Celular na horizontal travada</strong> para cena física: cozinha, balcão, balança, embalagem, folha sendo desfolhada. Sempre limpe a lente antes.</li>
+    <li><strong>Gravação de tela do computador</strong> para o sistema. No Windows, <span class="kbd">Win</span> + <span class="kbd">G</span> abre a Xbox Game Bar e grava a janela ativa sem instalar nada. Se quiser controle de cena, instale o OBS Studio (grátis).</li>
+    <li><strong>Gravação de tela do celular</strong> para o cardápio do cliente. É o melhor material que você tem: já é vertical, já está no formato certo.</li>
+  </ul>
+
+  <h3>Ajustes que mudam o resultado</h3>
+  <ol>
+    <li><strong>Zoom do navegador em 150%</strong> antes de gravar qualquer tela de admin. O texto do sistema é pequeno demais para o vertical. <span class="kbd">Ctrl</span> + <span class="kbd">+</span>.</li>
+    <li><strong>Esconda o que não é do vídeo</strong>: feche abas, desligue notificações, saia de qualquer tela com dado de cliente real. Use o tenant <span class="rota">Lanche do Paulista</span> para gravar operação — é o tenant de provas. <strong>Nunca grave o tenant Natureba:</strong> é o cadastro que o dono vai ver na visita comercial, e não é seu para mostrar.</li>
+    <li><strong>Áudio</strong>: fone com microfone de cabo ganha do microfone do celular por uma distância enorme. Grave num cômodo com cortina, sofá ou roupa pendurada — eco é o que mais denuncia amador.</li>
+    <li><strong>Luz</strong>: janela na sua frente, nunca atrás. Se for à noite, uma luminária a 45° do rosto.</li>
+    <li><strong>Grave 3 segundos a mais</strong> no começo e no fim de cada tomada. Você vai agradecer na edição.</li>
+  </ol>
+
+  <h3>Edição</h3>
+  <p><strong>CapCut</strong> (grátis, roda no PC e no celular) é o suficiente para tudo neste manual. Os três recursos que você vai usar: legenda automática, corte por seleção e zoom por quadro-chave. Não instale nada além disso agora.</p>
+
+  <h3>Organização dos arquivos</h3>
+  <p>Uma pasta por vídeo, nomeada <span class="mono">R09-vende44-recebe22</span>, com quatro subpastas: <span class="mono">bruto</span>, <span class="mono">tela</span>, <span class="mono">audio</span>, <span class="mono">final</span>. Sem isso, no oitavo vídeo você perde meia hora procurando um arquivo.</p>
+</section>
+
+<!-- ══════════════════════════ 07 ══════════════════════════ -->
+<section id="p7">
+  <p class="numsec">Parte 07</p>
+  <h2>Os fluxos do sistema para gravar</h2>
+  <p class="sub">Quinze gravações de tela. Faça todas numa sessão só, de uma vez, e você terá material para dois meses de conteúdo. Cada uma leva de 2 a 5 minutos de gravação bruta.</p>
+
+  <div class="nota">
+    <span class="rot">Antes de começar</span>
+    <p>Logue como administrador do <strong>Lanche do Paulista</strong>, deixe o navegador em 150%, feche a barra de favoritos e grave a janela inteira em 1920×1080. Você recorta para vertical depois — é melhor ter sobra do que faltar.</p>
+  </div>
+
+  <div class="fluxos">
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F01</span><h4>Cardápio pelo olhar do cliente</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/lanchepaulista</span> · celular</dd>
+        <dt>Provar</dt><dd>Abrir, buscar, tocar num produto, marcar adicional, ver o total mudar, adicionar ao carrinho.</dd>
+        <dt>Corte</dt><dd><b>O dedo tocando o produto</b> e o preço total subindo. Esses dois quadros valem o vídeo inteiro.</dd>
+        <dt>Cuidado</dt><dd>Grave com o tema escuro da loja — fica muito melhor no feed.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F02</span><h4>Pedido por voz</h4></div>
+      <dl>
+        <dt>Onde</dt><dd>Botão “Pedir por voz” no topo do cardápio</dd>
+        <dt>Provar</dt><dd>Falar “dois x-bacon e uma coca” e os itens aparecerem reconhecidos.</dd>
+        <dt>Corte</dt><dd>O momento exato em que o texto transcrito vira produto na lista.</dd>
+        <dt>Cuidado</dt><dd>Ambiente silencioso. Teste 3 vezes antes de valer.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F03</span><h4>Nutricional que reage ao adicional</h4></div>
+      <dl>
+        <dt>Onde</dt><dd>Modal do produto → aba nutricional</dd>
+        <dt>Provar</dt><dd>Marcar bacon extra e a caloria/proteína subir na hora; alérgenos agrupados; fonte do dado.</dd>
+        <dt>Corte</dt><dd>Zoom fechado no número mudando.</dd>
+        <dt>Cuidado</dt><dd>Use X-BACON, que tem dado. Muitos produtos ainda estão sem ficha.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F04</span><h4>Checkout com Pix</h4></div>
+      <dl>
+        <dt>Onde</dt><dd>Carrinho → Finalizar → Pix</dd>
+        <dt>Provar</dt><dd>Cupom aplicado, saldo de cashback usado, QR gerado, confirmação.</dd>
+        <dt>Corte</dt><dd>O desconto entrando na linha do total.</dd>
+        <dt>Cuidado</dt><dd>Borre o QR na edição. E <b>não grave o fluxo de Pix do totem</b> — a tela de sucesso ainda pode aparecer com a cobrança falhada.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F05</span><h4>Estoque pelo cupom do mercado</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/estoque</span> → “Escanear Cupom (NFC-e)”</dd>
+        <dt>Provar</dt><dd>Apontar a câmera para o QR da nota e os itens entrarem com quantidade e custo, sem digitação.</dd>
+        <dt>Corte</dt><dd><b>A lista de insumos preenchendo sozinha.</b> Este é o plano mais forte do sistema inteiro.</dd>
+        <dt>Cuidado</dt><dd>Leve um cupom fiscal de verdade. Tenha um XML de fornecedor de reserva, caso a SEFAZ demore.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F06</span><h4>Ficha técnica e rendimento real</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/estoque</span> (preparos) e <span class="rota">/admin/producao</span></dd>
+        <dt>Provar</dt><dd>Declarar quanto o lote rende de verdade e o custo por porção se ajustar. O rendimento é <b>seu</b>, não presumido pelo sistema.</dd>
+        <dt>Corte</dt><dd>Digitar “7” onde estava “10” e o custo por quilo subir.</dd>
+        <dt>Cuidado</dt><dd>É o argumento central do Vídeo B. Ensaie a fala antes.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F07</span><h4>Markup e margem do iFood</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/ifood</span> → taxas</dd>
+        <dt>Provar</dt><dd>Preencher a comissão e a coluna “Preço iFood (sugerido)” recalcular para que, depois da taxa, sobre o preço do balcão.</dd>
+        <dt>Corte</dt><dd>A coluna inteira mudando de valor ao salvar a taxa.</dd>
+        <dt>Cuidado</dt><dd>É a resposta direta ao “vendo por 44 e recebo 22”. Prioridade máxima.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F08</span><h4>PDV de balcão</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/pdv</span></dd>
+        <dt>Provar</dt><dd>Uma venda completa em menos de 30 segundos, cronômetro na tela.</dd>
+        <dt>Corte</dt><dd>Sem corte. Este vale em plano único, com o tempo correndo.</dd>
+        <dt>Cuidado</dt><dd>Ensaie até sair limpo. Um erro de clique estraga a premissa.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F09</span><h4>Balança e venda por peso</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/balanca</span></dd>
+        <dt>Provar</dt><dd>Peso lido, comanda aberta, item lançado em 0,350 kg, fechamento e recebimento.</dd>
+        <dt>Corte</dt><dd>A leitura do peso aparecendo na tela.</dd>
+        <dt>Cuidado</dt><dd>Se não houver balança conectada, use o modo manual — e diga na tela que está digitando o peso.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F10</span><h4>KDS da cozinha</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/kds</span> · configuração em <span class="rota">/admin/kds/estacoes</span></dd>
+        <dt>Provar</dt><dd>Um pedido caindo sozinho na tela e andando pelas etapas. O tempo em cor quando atrasa.</dd>
+        <dt>Corte</dt><dd>Duas telas lado a lado: o pedido saindo do cardápio e entrando na cozinha.</dd>
+        <dt>Cuidado</dt><dd>É a prova do “velocidade gera visibilidade” do Vídeo C.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F11</span><h4>Mesas e garçom</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/mesas</span> e <span class="rota">/admin/garcom-mobile</span></dd>
+        <dt>Provar</dt><dd>Mapa do salão com status e saldo não pago; divisão de conta por cadeira.</dd>
+        <dt>Corte</dt><dd>A conta sendo dividida.</dd>
+        <dt>Cuidado</dt><dd>O mapa 3D é bonito, mas não é o argumento. Use como abertura, não como tese.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F12</span><h4>Totem de autoatendimento</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/autoatendimento</span> · demo em <span class="rota">/demo-kiosk</span></dd>
+        <dt>Provar</dt><dd>Escolha do prato, sugestão de sobremesa com opção de pular, identificação opcional.</dd>
+        <dt>Corte</dt><dd>A sugestão aparecendo e sendo aceita.</dd>
+        <dt>Cuidado</dt><dd>Pare o roteiro antes do pagamento. Veja F04.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F13</span><h4>Cupom, cashback e recuperação</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/marketing</span></dd>
+        <dt>Provar</dt><dd>Criar cupom de primeira compra, ligar cashback, ver a lista de carrinhos abandonados.</dd>
+        <dt>Corte</dt><dd>O cupom criado aparecendo no cardápio público, na sequência.</dd>
+        <dt>Cuidado</dt><dd>É a ferramenta do “traga o cliente da plataforma para o seu canal”.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F14</span><h4>DRE e margem</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/financeiro</span></dd>
+        <dt>Provar</dt><dd>Resultado do mês e margem por produto, com o custo vindo da ficha.</dd>
+        <dt>Corte</dt><dd>A linha do produto com margem negativa. Se existir uma, é ouro.</dd>
+        <dt>Cuidado</dt><dd>Confira os números antes. Não mostre tela com dado incoerente.</dd>
+      </dl>
+    </div>
+
+    <div class="fluxo">
+      <div class="fluxo-topo"><span class="fluxo-id">F15</span><h4>Compras e histórico de preço</h4></div>
+      <dl>
+        <dt>Onde</dt><dd><span class="rota">/admin/compras</span></dd>
+        <dt>Provar</dt><dd>Preço do mesmo insumo por fornecedor ao longo do tempo.</dd>
+        <dt>Corte</dt><dd>A curva de preço subindo.</dd>
+        <dt>Cuidado</dt><dd>Responde ao “quando sobe o preço de um insumo, você recalcula a margem rápido?”.</dd>
+      </dl>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════ 08 ══════════════════════════ -->
+<section id="p8">
+  <p class="numsec">Parte 08</p>
+  <h2>Os roteiros</h2>
+  <p class="sub">Oito roteiros completos, cena a cena, prontos para gravar. Cada cena traz o que aparece na tela, o que você fala e o texto que entra queimado. Comece pelo R01 — é o mais forte e o mais fácil.</p>
+
+  <!-- ─────────── R01 ─────────── -->
+  <article class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">R01</span>
+      <span class="comanda-nome">Vende 44, recebe 22</span>
+      <span class="comanda-especs">Reels · 0:75 · pilar: a conta</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>Vídeo C — “Por quanto você vende? R$ 44. Quanto você recebe? R$ 22.”</p>
+      <ul class="cenas">
+        <li class="cena"><div class="cena-t"><span class="tc">0:00</span></div><div>
+          <h5>Gancho</h5>
+          <p class="fala">“Você vende uma batata por quarenta e quatro reais e recebe vinte e dois. Isso não é a plataforma te roubando. É você não ter feito uma conta.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Você falando, plano fechado. Sem intro, sem logo.</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">VENDE 44. RECEBE 22.</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:06</span></div><div>
+          <h5>A cena</h5>
+          <p class="fala">“Comissão, taxa de serviço, taxa de pagamento, entrega. Some tudo e some metade do preço.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Trecho do app de delivery com o prato anunciado. Ou papel e caneta riscando: 44 → 22.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:14</span></div><div>
+          <h5>A causa</h5>
+          <p class="fala">“O erro é anunciar na plataforma o mesmo preço do balcão. No balcão você fica com os quarenta e quatro. Lá, não.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">MESMO PREÇO ≠ MESMA MARGEM</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:24</span></div><div>
+          <h5>A saída · <span class="mono" style="font-size:11px">F07</span></h5>
+          <p class="fala">“Aqui eu digito quanto a plataforma cobra. A coluna do lado recalcula o preço que eu tenho que anunciar pra que, depois da taxa, sobre o preço do meu balcão.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Gravação de <span class="rota">/admin/ifood</span>. Digita a taxa, salva, a coluna “Preço iFood (sugerido)” muda inteira. Zoom em duas linhas.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:52</span></div><div>
+          <h5>A virada</h5>
+          <p class="fala">“E se você não preencher isso, o sistema te avisa: hoje a comissão inteira tá saindo da sua margem.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>O aviso amarelo da tela sem markup configurado.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">1:05</span></div><div>
+          <h5>CTA</h5>
+          <p class="fala">“MiseOn. Trinta dias grátis, sem cartão. Link na bio.”</p>
+        </div></li>
+      </ul>
+      <div class="legenda-post">
+        <span class="rot">Legenda do post</span>
+        <div class="txt">Vende por 44, recebe 22.
+
+A maioria anuncia no delivery o mesmo preço do balcão — e descobre no fim do mês que trabalhou de graça.
+
+A conta que resolve isso leva 30 segundos: você informa quanto a plataforma cobra e o sistema calcula o preço que precisa ser anunciado para sobrar a sua margem.
+
+Testa 30 dias, sem cartão. Link na bio.</div>
+        <p class="tags">#delivery #ifood #gestaoderestaurante #cmv #foodservice #margemdelucro #donoderestaurante</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ─────────── R02 ─────────── -->
+  <article class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">R02</span>
+      <span class="comanda-nome">Cinquenta gramas de alho</span>
+      <span class="comanda-especs">Reels · 0:60 · pilar: a conta</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>Vídeo C — “Se ela usar 50 g de alho a mais por quilo, são R$ 600 de prejuízo por mês.”</p>
+      <ul class="cenas">
+        <li class="cena"><div class="cena-t"><span class="tc">0:00</span></div><div>
+          <h5>Gancho</h5>
+          <p class="fala">“Cinquenta gramas de alho a mais. Por quilo. É isso que separa o restaurante que dá lucro do que não dá.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Mão colocando alho na balança. Plano fechadíssimo.</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">50 G A MAIS</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:05</span></div><div>
+          <h5>O número</h5>
+          <p class="fala">“São seiscentos reais por mês. Sete mil e duzentos no ano. De alho.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">R$ 7.200 / ANO</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:12</span></div><div>
+          <h5>A causa</h5>
+          <p class="fala">“E ninguém enxerga, porque o alho não sai do caixa. Sai da panela. Só aparece quando o mês fecha diferente do que você esperava.”</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:22</span></div><div>
+          <h5>A saída · <span class="mono" style="font-size:11px">F06</span></h5>
+          <p class="fala">“Aqui a receita tem a quantidade exata. Quando a venda acontece, o estoque baixa essa quantidade — não a que o cozinheiro achou que usou.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Ficha técnica aberta, com o insumo e a quantidade. Depois, a movimentação de estoque saindo sozinha.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:45</span></div><div>
+          <h5>Fechamento</h5>
+          <p class="fala">“O desperdício não é o que você joga fora. É o que você usa a mais sem contar.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">O QUE VOCÊ USA A MAIS SEM CONTAR</span></p>
+        </div></li>
+      </ul>
+      <div class="legenda-post">
+        <span class="rot">Legenda do post</span>
+        <div class="txt">O desperdício que quebra restaurante não é o que vai pro lixo. É o que vai pra panela sem ninguém contar.
+
+50 g de alho a mais por quilo = R$ 600 no mês.
+
+Ficha técnica não é burocracia. É a única forma de saber se a receita que sai da cozinha é a receita que você precificou.
+
+30 dias grátis, sem cartão. Link na bio.</div>
+        <p class="tags">#fichatecnica #cmv #gestaoderestaurante #custos #cozinhaprofissional #foodservice</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ─────────── R03 ─────────── -->
+  <article class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">R03</span>
+      <span class="comanda-nome">A fila decide o lucro</span>
+      <span class="comanda-especs">Reels · 0:80 · pilar: a conta · nicho por quilo</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>Vídeo B — “A balança fica no final, mas o lucro é decidido no começo da fila.”</p>
+      <ul class="cenas">
+        <li class="cena"><div class="cena-t"><span class="tc">0:00</span></div><div>
+          <h5>Gancho</h5>
+          <p class="fala">“Sabe por que a carne fica sempre no fim da fila do restaurante por quilo?”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Travessa de arroz em primeiro plano, buffet desfocado ao fundo.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:04</span></div><div>
+          <h5>A resposta</h5>
+          <p class="fala">“Porque se todo mundo começasse pela proteína, o quilo quebrava.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">A BALANÇA É NO FIM. O LUCRO É NO COMEÇO.</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:10</span></div><div>
+          <h5>A cena</h5>
+          <p class="fala">“Arroz, legume, massa: barato e pesado. A proteína só aparece quando o prato já está cheio.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Percurso da fila, panorâmica lenta da esquerda para a direita.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:20</span></div><div>
+          <h5>A virada</h5>
+          <p class="fala">“Só que o layout sozinho não te diz quanto custa cada grama que sai daquela travessa.”</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:28</span></div><div>
+          <h5>A saída · <span class="mono" style="font-size:11px">F09 + F06</span></h5>
+          <p class="fala">“Quando o cliente serve trezentos e cinquenta gramas, a ficha técnica baixa a proporção exata de cada insumo. Não é ‘uma venda de 0,35’. É uma porção real, com custo real.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span><span class="rota">/admin/balanca</span>: peso lançado, item na comanda. Corta para a movimentação de estoque.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">1:05</span></div><div>
+          <h5>CTA</h5>
+          <p class="fala">“Se você tem buffet e ainda fecha o mês no feeling, o link tá na bio. Trinta dias, sem cartão.”</p>
+        </div></li>
+      </ul>
+      <div class="legenda-post">
+        <span class="rot">Legenda do post</span>
+        <div class="txt">A balança fica no fim da fila. O lucro é decidido no começo.
+
+Arroz e legume primeiro porque são baratos e pesados. A proteína só quando o prato já está cheio. Todo dono de quilo sabe disso.
+
+O que quase ninguém sabe é quanto custa cada grama que sai da travessa — porque isso depende do rendimento real do preparo, não do preço da nota.
+
+30 dias grátis, sem cartão. Link na bio.</div>
+        <p class="tags">#restaurantporquilo #selfservice #buffet #cmv #gestaoderestaurante #foodservice</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ─────────── R04 ─────────── -->
+  <article class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">R04</span>
+      <span class="comanda-nome">O mito da salada barata</span>
+      <span class="comanda-especs">Reels · 0:70 · pilar: a conta · nicho por quilo</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>Vídeo B — “Quantos litros de água para limpar isso? Sessenta. Você tira de 30 a 40% do buquê. Quase a metade é perda.”</p>
+      <ul class="cenas">
+        <li class="cena"><div class="cena-t"><span class="tc">0:00</span></div><div>
+          <h5>Gancho</h5>
+          <p class="fala">“Você acha que salada é o item mais barato do seu buffet. É o mais caro por grama servida.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Pé de alface inteiro na bancada.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:06</span></div><div>
+          <h5>A cena</h5>
+          <p class="fala">“Você compra um quilo. Desfolha, tira o feio, tira o queimado…”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Desfolhando. Duas pilhas crescendo: o que serve e o que vai fora. <b>Isto é o vídeo.</b> Grave dois minutos e escolha os melhores oito segundos.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:16</span></div><div>
+          <h5>O número</h5>
+          <p class="fala">“Sobrou o miolo. Quase metade virou perda. E isso antes da água.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">30 A 40% DO BUQUÊ VAI FORA</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:26</span></div><div>
+          <h5>A causa</h5>
+          <p class="fala">“Se você lançou o custo pelo quilo da nota, você errou o custo do prato. O custo é sobre o que sobrou, não sobre o que você comprou.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">O CUSTO É DO QUE SOBROU</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:38</span></div><div>
+          <h5>A saída · <span class="mono" style="font-size:11px">F06</span></h5>
+          <p class="fala">“Aqui eu declaro o rendimento que a minha cozinha teve de verdade. O sistema não inventa esse número: ele é seu.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Campo de rendimento sendo preenchido; o custo por porção se ajustando.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">1:02</span></div><div>
+          <h5>Fechamento</h5>
+          <p class="fala">“E ainda tem a conta de água. Mas essa fica pro próximo.”</p>
+        </div></li>
+      </ul>
+      <div class="legenda-post">
+        <span class="rot">Legenda do post</span>
+        <div class="txt">“Salada não custa nada.” Custa.
+
+Você compra 1 kg. Desfolha, tira o feio, tira o queimado — e chega no miolo com quase metade a menos.
+
+Se o custo do prato foi lançado pelo preço da nota, ele está errado. O custo real é sobre o que sobrou depois da limpeza.
+
+No MiseOn o rendimento é você quem declara, com o número que a sua cozinha mediu. O sistema não presume.
+
+30 dias grátis, sem cartão.</div>
+        <p class="tags">#buffet #restaurantporquilo #fichatecnica #cmv #desperdicio #cozinhaprofissional</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ─────────── R05 ─────────── -->
+  <article class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">R05</span>
+      <span class="comanda-nome">Comida sem foto não vende</span>
+      <span class="comanda-especs">Reels · 0:50 · pilar: a vitrine</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>Vídeo A — “Você não vê cupcakes, só as caixas.” · Vídeo C — “Quatro marmitas em destaque. Nenhuma tem foto.”</p>
+      <ul class="cenas">
+        <li class="cena"><div class="cena-t"><span class="tc">0:00</span></div><div>
+          <h5>Gancho</h5>
+          <p class="fala">“Quando você vende comida, a primeira pergunta é uma só: dá vontade de comer?”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Rolagem por um cardápio de delivery real, com cards sem foto. Borre a marca da loja.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:05</span></div><div>
+          <h5>A cena</h5>
+          <p class="fala">“Quatro pratos em destaque. Nenhuma foto. O cliente está comprando no escuro.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">COMPRANDO NO ESCURO</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:13</span></div><div>
+          <h5>A causa</h5>
+          <p class="fala">“E não é preguiça do dono. É que ninguém tem tempo de fotografar trinta pratos antes de abrir.”</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:20</span></div><div>
+          <h5>A saída · <span class="mono" style="font-size:11px">F01</span></h5>
+          <p class="fala">“Por isso aqui nenhum prato entra sem imagem. Se você ainda não fotografou o seu, o cardápio usa uma imagem da família do produto até você trocar.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Cardápio do Lanche do Paulista rolando no celular — todos os cards com foto.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:38</span></div><div>
+          <h5>Fechamento</h5>
+          <p class="fala">“Foto genérica é ruim. Card vazio é pior.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">CARD VAZIO É PIOR</span></p>
+        </div></li>
+      </ul>
+      <div class="legenda-post">
+        <span class="rot">Legenda do post</span>
+        <div class="txt">“Dá vontade de comer?” é a única pergunta que importa num cardápio digital.
+
+Card sem foto = cliente comprando no escuro = pedido que não acontece.
+
+No cardápio do MiseOn nenhum prato fica sem imagem: enquanto você não sobe a sua, entra uma da família do produto. Depois você troca por uma foto de verdade — e deve trocar.
+
+30 dias grátis, sem cartão. Link na bio.</div>
+        <p class="tags">#cardapiodigital #delivery #marketinggastronomico #foodservice #restaurante</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ─────────── R06 ─────────── -->
+  <article class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">R06</span>
+      <span class="comanda-nome">Seu cardápio é um labirinto</span>
+      <span class="comanda-especs">Reels · 0:55 · pilar: a vitrine</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>Vídeo A — “Não é um site, é um labirinto. Não force o cliente a caçar o que ele quer comprar.”</p>
+      <ul class="cenas">
+        <li class="cena"><div class="cena-t"><span class="tc">0:00</span></div><div>
+          <h5>Gancho</h5>
+          <p class="fala">“Se o cliente precisa procurar, ele já desistiu.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Rolagem rápida e frustrada num cardápio longo, sem categoria.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:05</span></div><div>
+          <h5>A cena</h5>
+          <p class="fala">“Oitenta itens numa lista só. Sem busca, sem categoria, sem destaque.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">NÃO É CARDÁPIO. É LABIRINTO.</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:14</span></div><div>
+          <h5>A causa</h5>
+          <p class="fala">“Na internet a pessoa quer primeiro ver, depois se interessar, e só aí ler. Um cardápio que começa pela leitura perde antes de mostrar o produto.”</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:24</span></div><div>
+          <h5>A saída · <span class="mono" style="font-size:11px">F01</span></h5>
+          <p class="fala">“Busca no topo. Categorias que ficam fixas enquanto você rola. E uma faixa de mais pedidos que sai da venda real, não de um chute.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Três cortes rápidos: digitar na busca; trocar de categoria; a faixa “Os mais pedidos”.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:44</span></div><div>
+          <h5>Fechamento</h5>
+          <p class="fala">“Três decisões de layout. Nenhuma linha de código do seu lado.”</p>
+        </div></li>
+      </ul>
+      <div class="legenda-post">
+        <span class="rot">Legenda do post</span>
+        <div class="txt">Cardápio digital não é lista de preço. É vitrine.
+
+Se o cliente precisa caçar o que quer, ele fecha e vai pro concorrente que está a um toque de distância.
+
+Busca, categorias fixas e uma faixa de mais pedidos alimentada pela venda real — não por chute.
+
+30 dias grátis, sem cartão.</div>
+        <p class="tags">#cardapiodigital #ux #delivery #restaurante #qrcode #foodservice</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ─────────── R07 ─────────── -->
+  <article class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">R07</span>
+      <span class="comanda-nome">Traga o cliente de volta</span>
+      <span class="comanda-especs">Reels · 0:90 · pilar: a conta + vitrine</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>Vídeo C — o dono da loja que mais vende delivery no país: “Você tem que dar um jeito de trazer esse cliente para você.”</p>
+      <ul class="cenas">
+        <li class="cena"><div class="cena-t"><span class="tc">0:00</span></div><div>
+          <h5>Gancho</h5>
+          <p class="fala">“A loja que mais vende no delivery do Brasil usa a plataforma como vitrine — e tira o cliente de lá.”</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:06</span></div><div>
+          <h5>O número</h5>
+          <p class="fala">“Porque lá ele paga vinte e seis, trinta, às vezes quarenta por cento. No canal dele, paga zero.”</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">26% · 30% · 40%</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:15</span></div><div>
+          <h5>Como se faz</h5>
+          <p class="fala">“Um cupom de vinte por cento junto com o pedido. Ou um QR code na embalagem. Ele desconta vinte pra não pagar trinta.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Embalagem com adesivo de QR. Filme com a mão colando.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:28</span></div><div>
+          <h5>A saída, parte 1 · <span class="mono" style="font-size:11px">F13</span></h5>
+          <p class="fala">“Crio o cupom aqui, com regra de primeira compra…”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span><span class="rota">/admin/marketing</span>, criação do cupom.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:42</span></div><div>
+          <h5>A saída, parte 2</h5>
+          <p class="fala">“…e ele já aparece no meu cardápio, pronto pra copiar. O cliente ainda ganha cashback pra voltar uma terceira vez.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Corta para o cardápio público com o cupom e o selo de cashback visíveis.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">1:05</span></div><div>
+          <h5>A virada</h5>
+          <p class="fala">“E quem abriu o carrinho e não terminou fica registrado. Esse é o cliente mais fácil de recuperar que existe.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Lista de carrinhos abandonados.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">1:22</span></div><div>
+          <h5>CTA</h5>
+          <p class="fala">“A plataforma traz o cliente uma vez. O canal próprio traz as outras dez.”</p>
+        </div></li>
+      </ul>
+      <div class="legenda-post">
+        <span class="rot">Legenda do post</span>
+        <div class="txt">Use a plataforma como vitrine. Não como dono do seu cliente.
+
+Ela cobra 26%, 30%, às vezes 40%. Um cupom de 20% no seu canal próprio ainda sai mais barato — e a partir da segunda compra o cliente é seu.
+
+Cupom de primeira compra, cashback e recuperação de carrinho: tudo dentro do mesmo cardápio.
+
+30 dias grátis, sem cartão.</div>
+        <p class="tags">#delivery #ifood #cardapiodigital #marketing #fidelizacao #restaurante</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ─────────── R08 ─────────── -->
+  <article class="comanda">
+    <div class="comanda-topo">
+      <span class="comanda-id">R08</span>
+      <span class="comanda-nome">O cupom do mercado vira estoque</span>
+      <span class="comanda-especs">Reels · 0:45 · pilar: a operação</span>
+    </div>
+    <div class="comanda-corpo">
+      <p class="ancora"><b>Confronta</b>Questionário de vendas — “No estoque, você lança as notas manualmente ou tem importação automática?”</p>
+      <ul class="cenas">
+        <li class="cena"><div class="cena-t"><span class="tc">0:00</span></div><div>
+          <h5>Gancho</h5>
+          <p class="fala">“Voltei do mercado com trinta e dois itens. Vou lançar todos no estoque sem digitar nenhum.”</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Você segurando o cupom fiscal longo. Plano vertical, cupom ocupando a tela toda.</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:07</span></div><div>
+          <h5>A cena · <span class="mono" style="font-size:11px">F05</span></h5>
+          <p class="fala">Silêncio. Só o som ambiente.</p>
+          <p class="na-tela"><span class="rot-cena">na tela</span>Câmera apontando para o QR do cupom. <b>Corte para a lista preenchendo sozinha.</b> Deixe correr sem corte — o preenchimento é o espetáculo.</p>
+          <p><span class="rot-cena">texto</span><span class="overlay">32 ITENS · ZERO DIGITAÇÃO</span></p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:26</span></div><div>
+          <h5>A explicação</h5>
+          <p class="fala">“Quantidade, custo e fornecedor vêm da própria nota. O custo do seu prato atualiza junto.”</p>
+        </div></li>
+        <li class="cena"><div class="cena-t"><span class="tc">0:36</span></div><div>
+          <h5>Fechamento</h5>
+          <p class="fala">“Nota de fornecedor em XML também entra do mesmo jeito.”</p>
+        </div></li>
+      </ul>
+      <div class="legenda-post">
+        <span class="rot">Legenda do post</span>
+        <div class="txt">32 itens do mercado no estoque. Zero digitação.
+
+Aponta a câmera pro QR Code do cupom fiscal e pronto: quantidade, custo e fornecedor entram direto — e o custo dos seus pratos atualiza junto.
+
+Nota de fornecedor em XML também.
+
+Lançar nota à mão é o motivo número 1 pelo qual o estoque morre no segundo mês.
+
+30 dias grátis, sem cartão.</div>
+        <p class="tags">#estoque #nfce #gestaoderestaurante #cmv #foodservice #automacao</p>
+      </div>
+    </div>
+  </article>
+
+  <h3>O vídeo longo do mês — YouTube, 10 a 12 minutos</h3>
+  <p>Um por mês. É onde você fecha venda, porque quem assiste dez minutos sobre CMV é comprador, não curioso. Estrutura:</p>
+  <ol>
+    <li><strong>0:00–0:40 — A promessa.</strong> “Vou montar o custo de um prato do zero, do cupom do mercado até a margem, em tempo real.”</li>
+    <li><strong>0:40–2:00 — A dor, com os números dos vídeos-âncora</strong>, creditados.</li>
+    <li><strong>2:00–4:00 — A compra.</strong> Cupom escaneado, insumos entrando (F05).</li>
+    <li><strong>4:00–6:30 — O preparo.</strong> Ficha técnica, rendimento declarado, custo por porção (F06).</li>
+    <li><strong>6:30–8:30 — A venda.</strong> PDV ou balança, e a baixa acontecendo (F08/F09).</li>
+    <li><strong>8:30–10:30 — A conta.</strong> Margem por produto e por canal, DRE (F14/F07).</li>
+    <li><strong>10:30–11:30 — O limite.</strong> Diga o que o sistema <em>não</em> faz. É o que separa o seu vídeo de um comercial.</li>
+    <li><strong>11:30 — CTA.</strong></li>
+  </ol>
+  <p>Título sugerido: <strong>“Montei o custo real de um prato do zero — do cupom do mercado até a margem”</strong>. Capa: o cupom fiscal na mão esquerda, o prato na direita, e o número da margem em cima.</p>
+
+  <h3>Banco de ganchos para os próximos 24 vídeos</h3>
+  <p>Todos saíram das transcrições ou do produto. Cada um vira um Reels de 45 a 60 segundos usando a fórmula da Parte 02.</p>
+  <ol class="ganchos">
+    <li><span class="n">01</span><span>“Cliente que vem no quilo e só pega proteína dá prejuízo. E não é culpa dele.”</span></li>
+    <li><span class="n">02</span><span>“Prato oval faz a pessoa comer até 30% mais. Isso é layout, não fome.”</span></li>
+    <li><span class="n">03</span><span>“Legume cozido ganha até 40% de peso. Sua carne perde. Adivinha qual dos dois você precifica errado.”</span></li>
+    <li><span class="n">04</span><span>“Por que a costelinha existe no seu buffet: ela canibaliza o contrafilé.”</span></li>
+    <li><span class="n">05</span><span>“O salgadinho no fim da fila é o item mais lucrativo do restaurante.”</span></li>
+    <li><span class="n">06</span><span>“Suco é mais lucrativo que refrigerante. Por isso ele fica na frente.”</span></li>
+    <li><span class="n">07</span><span>“O lanchinho da tarde é 12% do faturamento de um quilo. Você tem essa linha no seu relatório?”</span></li>
+    <li><span class="n">08</span><span>“Restaurante por quilo gira a mesa 5 vezes. À la carte noturno gira 1. Adivinha qual precisa de KDS.”</span></li>
+    <li><span class="n">09</span><span>“Nota abaixo de 4.6 no delivery: você não aparece. E se não aparece, não vende.”</span></li>
+    <li><span class="n">10</span><span>“Se você demora pra entregar o pedido ao motoboy, o algoritmo te rebaixa. Isso é operação, não sorte.”</span></li>
+    <li><span class="n">11</span><span>“Descrição fria: ‘acompanha arroz e feijão’. Descrição que vende: e aí você ganha o pedido.”</span></li>
+    <li><span class="n">12</span><span>“No delivery o cliente não te acha pelo endereço. Te acha pelas palavras.”</span></li>
+    <li><span class="n">13</span><span>“Existe gente cancelando pedido com foto de mofo gerada por IA. E o robô aceita.”</span></li>
+    <li><span class="n">14</span><span>“Custo 60%, plataforma 26%, lucro 15%. Essa é a conta de quem mais vende delivery no país.”</span></li>
+    <li><span class="n">15</span><span>“Marmita econômica: 150 g de arroz, 100 de feijão, 150 de proteína. Quem manda 700 de carne está pagando pra trabalhar.”</span></li>
+    <li><span class="n">16</span><span>“Oito pratos com o mesmo frango. Menos ingrediente, mais barganha, menos perda.”</span></li>
+    <li><span class="n">17</span><span>“Bolo que quebrou na hora de desenformar não é perda. É brinde.”</span></li>
+    <li><span class="n">18</span><span>“Nos primeiros seis meses, lucro zero. A meta não é ganhar dinheiro, é ganhar cliente.”</span></li>
+    <li><span class="n">19</span><span>“Promoção de carimbo atrai o cliente que você não quer.”</span></li>
+    <li><span class="n">20</span><span>“Seu logotipo é preto. O fundo da plataforma é branco. Sua marca sumiu.”</span></li>
+    <li><span class="n">21</span><span>“Quando o insumo sobe de preço, quanto tempo você leva pra saber qual prato ficou no prejuízo?”</span></li>
+    <li><span class="n">22</span><span>“O pedido do iFood cai direto na cozinha ou alguém ainda redigita?”</span></li>
+    <li><span class="n">23</span><span>“Seu cliente pode pedir falando. Literalmente.” <em>(pedido por voz — F02)</em></span></li>
+    <li><span class="n">24</span><span>“Caloria e alérgeno que mudam quando o cliente marca o bacon extra.” <em>(F03)</em></span></li>
+  </ol>
+</section>
+
+<!-- ══════════════════════════ 09 ══════════════════════════ -->
+<section id="p9">
+  <p class="numsec">Parte 09</p>
+  <h2>Plano de edição</h2>
+  <p class="sub">A mesma receita para todo Reels. Depois de três vídeos você faz em 40 minutos.</p>
+
+  <h3>A sequência no CapCut</h3>
+  <ol>
+    <li><strong>Jogue tudo na linha do tempo</strong> na ordem do roteiro, sem cortar nada ainda.</li>
+    <li><strong>Corte o silêncio primeiro.</strong> Todo “ééé”, toda respiração longa, todo começo de frase repetido. Só isso já tira 30% da duração.</li>
+    <li><strong>Agora corte por ideia.</strong> A cada 2 ou 3 segundos alguma coisa muda: enquadramento, tela, escala. Se nada muda por 5 segundos, o espectador sai.</li>
+    <li><strong>Legenda automática</strong> → revise (ela erra “MiseOn”, “NFC-e”, “CMV”) → fonte grossa, branca com contorno preto, centralizada, <strong>duas linhas no máximo</strong>.</li>
+    <li><strong>Destaque a palavra-chave</strong> de cada frase em laranja. Uma por frase, não mais.</li>
+    <li><strong>Zoom nos números.</strong> Todo valor que aparece na tela do sistema recebe um punch-in de 10 a 15%, entrando em 0,3 s. É o que faz a tela pequena funcionar no celular.</li>
+    <li><strong>Trilha</strong> em volume baixo, por volta de -18 dB. Escolha uma faixa em alta do próprio TikTok/Reels — isso ajuda a distribuição. Corte a música antes do CTA.</li>
+    <li><strong>Exporte</strong> em 1080×1920, 30 fps, qualidade alta.</li>
+  </ol>
+
+  <h3>As quatro regras que não se quebram</h3>
+  <div class="tabela-scroll">
+  <table>
+    <thead><tr><th>Regra</th><th>Por quê</th></tr></thead>
+    <tbody>
+      <tr><td><b>O primeiro quadro tem que valer sozinho</b></td><td>É a capa no feed e no perfil. Nunca comece com tela preta, logo ou você respirando.</td></tr>
+      <tr><td><b>Área segura: 250 px no topo, 350 px na base</b></td><td>É onde entram o nome do perfil, a legenda do app e os botões. Nenhum texto seu pode cair ali.</td></tr>
+      <tr><td><b>Legenda sempre queimada</b></td><td>A maior parte da audiência assiste sem som. Legenda do app não aparece no reaproveitamento.</td></tr>
+      <tr><td><b>Nada de logo animado na abertura</b></td><td>Três segundos de vinheta é o vídeo inteiro perdido. A marca entra no fim.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Reaproveitamento Instagram → TikTok</h3>
+  <p>Exporte do editor duas vezes, nunca baixe do Instagram — a marca d’água reduz o alcance no TikTok. Diferenças a aplicar na versão do TikTok:</p>
+  <ul>
+    <li>Corte 2 a 3 segundos do gancho: lá a paciência é menor.</li>
+    <li>Legenda do post bem mais curta, com 3 a 5 hashtags.</li>
+    <li>Publique em horário diferente do Instagram.</li>
+  </ul>
+  <p>Para o <strong>YouTube Shorts</strong>, o mesmo arquivo serve. Título com a pergunta do gancho e <span class="mono">#Shorts</span> no fim.</p>
+</section>
+
+<!-- ══════════════════════════ 10 ══════════════════════════ -->
+<section id="p10">
+  <p class="numsec">Parte 10</p>
+  <h2>Calendário de 30 dias</h2>
+  <p class="sub">Três Reels por semana. Grave em bloco, publique espaçado. A regra é publicar imperfeito no prazo, nunca perfeito atrasado.</p>
+
+  <div class="tabela-scroll">
+  <table>
+    <thead><tr><th>Semana</th><th>Gravar</th><th>Publicar</th><th>Meta</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="num"><b>1</b></td>
+        <td>Sessão única de tela: <b>F05, F06, F07, F01</b>. Corrija as fotos da loja demo antes.</td>
+        <td><b>R01</b> (vende 44, recebe 22) · <b>R05</b> (comida sem foto) · <b>R08</b> (cupom vira estoque)</td>
+        <td>Publicar três vezes. Só isso.</td>
+      </tr>
+      <tr>
+        <td class="num"><b>2</b></td>
+        <td>Cena física: desfolhar alface, balança, embalagem. <b>F09, F13</b>.</td>
+        <td><b>R04</b> (mito da salada) · <b>R02</b> (50 g de alho) · <b>R06</b> (labirinto)</td>
+        <td>Responder todo comentário em até 2 h.</td>
+      </tr>
+      <tr>
+        <td class="num"><b>3</b></td>
+        <td><b>F08, F10, F03, F02</b>. E o vídeo longo do YouTube.</td>
+        <td><b>R03</b> (a fila) · <b>R07</b> (traga o cliente) · 1 gancho do banco</td>
+        <td>Publicar o vídeo longo. Cortar 3 Shorts dele.</td>
+      </tr>
+      <tr>
+        <td class="num"><b>4</b></td>
+        <td>Refazer, com produção melhor, os dois que tiveram mais retenção.</td>
+        <td>2 do banco de ganchos + 1 bastidor</td>
+        <td>Olhar a métrica e decidir o pilar do mês seguinte.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>O que vai junto todo dia</h3>
+  <ul>
+    <li><strong>Stories, 2 por dia.</strong> Um bastidor (o que você está construindo hoje) e uma enquete (“você sabe o CMV do seu prato mais vendido?”). Enquete gera resposta na DM, e DM vira conversa, e conversa vira trial.</li>
+    <li><strong>Cinco a oito abordagens por dia</strong> pelos scripts de venda. O conteúdo aquece; a abordagem fecha. Um não substitui o outro.</li>
+    <li><strong>Comente nos vídeos-âncora.</strong> Os três têm audiência exatamente sua. Um comentário útil e específico — não propaganda — no vídeo do delivery pode render mais que um Reels.</li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════ 11 ══════════════════════════ -->
+<section id="p11">
+  <p class="numsec">Parte 11</p>
+  <h2>Prints e pendências</h2>
+
+  <h3>Já capturados, em produção, hoje</h3>
+  <p>Vinte prints em <span class="rota">output/marketing/prints/</span>, tirados do site no ar. Os de cardápio estão em 430×932 (celular), os demais em 1440×900.</p>
+  <div class="tabela-scroll">
+  <table>
+    <thead><tr><th>Arquivo</th><th>Serve para</th></tr></thead>
+    <tbody>
+      <tr><td class="num">01–03 · demo-por-quilo</td><td>Nicho buffet. <b>Trocar as fotos antes de usar.</b></td></tr>
+      <tr><td class="num">04–05 · demo-hamburgueria</td><td>Nicho lanche.</td></tr>
+      <tr><td class="num">06 · natureba</td><td>Cliente real. Só com autorização por escrito.</td></tr>
+      <tr><td class="num">07–08 · lanchepaulista</td><td><b>O melhor material.</b> Fotos reais, tema próprio, cashback, mais pedidos, nutricional. Use este nos R05 e R06.</td></tr>
+      <tr><td class="num">09–11 · restaurante, pizzaria, desktop</td><td>Variedade de nicho para carrossel.</td></tr>
+      <tr><td class="num">12–13 · totem e autoatendimento</td><td>Kiosk. Sem o trecho de pagamento.</td></tr>
+      <tr><td class="num">14–15 · home</td><td>Prints do site para o post de bastidor.</td></tr>
+      <tr><td class="num">16–20 · landings</td><td>Por quilo, QR code, iFood, estoque 3D.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Faltam — precisam de login de administrador</h3>
+  <p>Não consegui capturar estes porque não havia senha de admin disponível. São os prints que mais importam para o pilar “a conta”. Capture você, logado no Lanche do Paulista, com o navegador em 150%:</p>
+  <ul>
+    <li><span class="rota">/admin/ifood</span> — a coluna de preço sugerido, com e sem markup configurado</li>
+    <li><span class="rota">/admin/estoque</span> — o botão de escanear cupom e a lista depois da importação</li>
+    <li><span class="rota">/admin/estoque</span> (preparos) — ficha técnica com o rendimento preenchido</li>
+    <li><span class="rota">/admin/balanca</span> — leitura de peso e comanda aberta</li>
+    <li><span class="rota">/admin/kds</span> — quadro com pedidos em etapas diferentes</li>
+    <li><span class="rota">/admin/pdv</span> — carrinho montado antes de finalizar</li>
+    <li><span class="rota">/admin/financeiro</span> — DRE do mês e margem por produto</li>
+    <li><span class="rota">/admin/marketing</span> — cupom criado e lista de carrinhos abandonados</li>
+  </ul>
+
+  <div class="regra">
+    <span class="rot">Arrume antes de gravar</span>
+    <p><strong>1.</strong> As fotos da loja <span class="rota">/demo-por-quilo</span> — três produtos com a mesma imagem é exatamente o erro do Vídeo A.<br>
+    <strong>2.</strong> A logo do Lanche do Paulista é uma foto de pizza em baixa resolução numa hamburgueria. Aparece em todo print.<br>
+    <strong>3.</strong> As métricas “-30%” e “100%” da landing de por quilo, e o parcelamento anual da home.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════ 12 ══════════════════════════ -->
+<section id="p12">
+  <p class="numsec">Parte 12</p>
+  <h2>O que medir</h2>
+  <p class="sub">Você vai querer olhar curtida. Não olhe. Nos primeiros 90 dias só três números importam.</p>
+
+  <div class="tabela-scroll">
+  <table>
+    <thead><tr><th>Número</th><th>Onde</th><th>O que fazer com ele</th></tr></thead>
+    <tbody>
+      <tr><td><b>Retenção nos 3 primeiros segundos</b></td><td>Insights do Reels</td><td>Abaixo de 50%: o problema é o gancho, não o vídeo. Regrave só os 3 segundos e republique em duas semanas.</td></tr>
+      <tr><td><b>Visualizações de quem não te segue</b></td><td>Insights → contas alcançadas</td><td>É o único sinal real de alcance. Se for alto e o seguidor não subir, o problema está no perfil, não no conteúdo.</td></tr>
+      <tr><td><b>Conversas iniciadas na DM</b></td><td>Contagem manual, num caderno</td><td>Este é o número que vira assinante. Um Reels com 300 visualizações e 4 DMs vale mais que um com 40 mil e nenhuma.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>As decisões que esses números tomam</h3>
+  <ul>
+    <li><strong>Se um gancho funcionar, faça três variações dele</strong> no mês seguinte. Não parta para um tema novo por tédio — seu público ainda não viu.</li>
+    <li><strong>Se um pilar não render em 8 vídeos</strong>, mude a proporção. Provavelmente o pilar “a conta” vai superar o resto: é o que menos gente faz e mais dono precisa.</li>
+    <li><strong>Se a DM encher e o trial não</strong>, o problema é o site e não o conteúdo. Volte para a Parte 03.</li>
+  </ul>
+
+  <div class="nota">
+    <span class="rot">A expectativa realista</span>
+    <p>Trinta dias de conteúdo não trazem assinante sozinhos. O que eles trazem é <strong>conversa</strong> — e é a conversa, somada às cinco a oito abordagens por dia, que fecha os primeiros dois ou três pagantes em 45 a 60 dias. Se em quatro semanas você tiver 12 vídeos publicados e 20 conversas iniciadas, o mês foi um sucesso, mesmo com zero venda. Não espere perfeição; espere conversas.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Manual montado a partir das transcrições completas dos três vídeos indicados, do <em>Documento Master</em> de 15/09/2026, do diagnóstico técnico de 13/09, do parecer de UX e CX de 15/09 e da leitura do código do cardápio, do totem e do checkout. Os vinte prints foram capturados em <span class="mono">miseon.app.br</span> nesta data.</p>
+</footer>
+
+</main>
+</div>
+</div>

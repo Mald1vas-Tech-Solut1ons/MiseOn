@@ -12,8 +12,11 @@
   .rodape img{height:52px}
   .pag{font-family:"JetBrains Mono",monospace;font-size:24px;font-weight:700;
     color:rgba(255,255,255,.45);letter-spacing:.08em}
+  /* faixa nos tokens oficiais: --miseon-azul-claro e --miseon-laranja */
   .faixa{position:absolute;left:0;top:0;width:100%;height:14px;
-    background:linear-gradient(90deg,#0A96D2 0%,#0A96D2 45%,#E6461E 45%,#E6461E 100%)}
+    background:linear-gradient(90deg,#0A5CC4 0%,#0A5CC4 45%,#FC5B24 45%,#FC5B24 100%)}
+  .fonte{position:absolute;left:88px;right:88px;bottom:150px;
+    font-family:"JetBrains Mono",monospace;font-size:19px;line-height:1.45}
 </style>
 <div id="slide"></div>
 <script>
@@ -39,8 +42,171 @@ function rodape(n, total, escuro){
     <span class="pag" style="color:${cor}">${n}/${total}</span>
   </div>`;
 }
+function creditoFonte(txt, claro){
+  const cor = claro ? 'rgba(7,12,24,.40)' : 'rgba(255,255,255,.40)';
+  return `<p class="fonte" style="color:${cor}">${txt}</p>`;
+}
 
-const SLIDES = [
+// ── moldes reutilizáveis ────────────────────────────────────────
+// capa: a pergunta ou a afirmação grande, sem enfeite
+function capa({olho, linhas, apoio, fundo=NAVY, escuro, tam=104, fonte}){
+  const tinta = escuro ? NAVY : BRANCO;
+  return {fundo, escuro, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center">
+      ${olho?`<p style="font-family:'JetBrains Mono';font-size:26px;letter-spacing:.18em;
+                color:${LARANJA};font-weight:700;margin:0 0 40px">${olho}</p>`:''}
+      ${linhas.map(l=>`<h1 style="font-family:Sora;font-size:${tam}px;line-height:.96;font-weight:800;
+         color:${l.d?LARANJA:tinta};letter-spacing:-.035em;margin:${l.m||0}px 0 0">${l.t}</h1>`).join('')}
+      ${apoio?`<p style="font-size:38px;line-height:1.38;color:${escuro?'#42566B':'rgba(255,255,255,.78)'};
+         margin:52px 0 0;max-width:21ch;font-weight:500">${apoio}</p>`:''}
+    </div>
+    ${fonte?creditoFonte(fonte,escuro):''}`};
+}
+// declaracao: uma frase só, ocupando a lâmina. Normalmente em laranja.
+function declaracao({olho, linhas, apoio, fundo=LARANJA, escuro, tam=92, fonte}){
+  const tinta = escuro ? NAVY : BRANCO;
+  const dest = fundo===LARANJA ? 'rgba(255,255,255,.72)' : LARANJA;
+  return {fundo, escuro, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center">
+      ${olho?`<p style="font-family:'JetBrains Mono';font-size:26px;letter-spacing:.18em;
+                color:${fundo===LARANJA?'rgba(255,255,255,.75)':LARANJA};font-weight:700;margin:0 0 40px">${olho}</p>`:''}
+      ${linhas.map(l=>`<h2 style="font-family:Sora;font-size:${tam}px;line-height:1.02;font-weight:800;
+         color:${l.d?dest:tinta};letter-spacing:-.03em;margin:${l.m||0}px 0 0">${l.t}</h2>`).join('')}
+      ${apoio?`<p style="font-size:36px;line-height:1.4;color:${fundo===LARANJA?'rgba(255,255,255,.88)':(escuro?'#42566B':'rgba(255,255,255,.72)')};
+         margin:52px 0 0;max-width:20ch;font-weight:500">${apoio}</p>`:''}
+    </div>
+    ${fonte?creditoFonte(fonte,escuro):''}`};
+}
+// lista: decomposição de uma soma ou de uma causa
+function lista({titulo, itens, pe, fundo=NAVY, escuro, fonte}){
+  const tinta = escuro ? NAVY : BRANCO;
+  const div = escuro ? '#D5DEE7' : 'rgba(255,255,255,.14)';
+  const val = escuro ? LARANJA : NEVOA;
+  return {fundo, escuro, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center">
+      <h2 style="font-family:Sora;font-size:64px;line-height:1.08;font-weight:800;color:${tinta};
+                 letter-spacing:-.02em;margin:0 0 56px">${titulo}</h2>
+      ${itens.map(([a,b])=>`<div style="display:flex;justify-content:space-between;align-items:baseline;
+         gap:24px;padding:30px 0;border-bottom:1px solid ${div}">
+         <span style="font-size:40px;color:${tinta};font-weight:600">${a}</span>
+         <span style="font-family:'JetBrains Mono';font-size:30px;color:${val};font-weight:700;
+               text-align:right;flex:none;max-width:44%">${b}</span>
+       </div>`).join('')}
+      ${pe?`<p style="font-size:36px;line-height:1.4;color:${escuro?'#42566B':'rgba(255,255,255,.66)'};
+         margin:52px 0 0;font-weight:500">${pe}</p>`:''}
+    </div>
+    ${fonte?creditoFonte(fonte,escuro):''}`};
+}
+// conta: painel de cálculo com linha de resultado
+function conta({olho, titulo, linhas, resultado, pe, fundo=BRANCO, escuro=true, fonte}){
+  const tinta = escuro ? NAVY : BRANCO;
+  const painel = escuro ? NEVOA : 'rgba(255,255,255,.07)';
+  const div = escuro ? '#D5DEE7' : 'rgba(255,255,255,.14)';
+  const rot = escuro ? '#42566B' : 'rgba(255,255,255,.72)';
+  return {fundo, escuro, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center">
+      ${olho?`<p style="font-family:'JetBrains Mono';font-size:26px;letter-spacing:.18em;
+                color:${LARANJA};font-weight:700;margin:0 0 40px">${olho}</p>`:''}
+      <h2 style="font-family:Sora;font-size:58px;line-height:1.1;font-weight:800;color:${tinta};
+                 letter-spacing:-.02em;margin:0 0 52px">${titulo}</h2>
+      <div style="background:${painel};border-radius:24px;padding:48px 44px">
+        ${linhas.map(([a,b],i)=>`<div style="display:flex;justify-content:space-between;align-items:baseline;
+           padding:${i?'26px 0':'0 0 26px'};${i?`border-top:1px solid ${div}`:''}">
+           <span style="font-size:36px;color:${rot};font-weight:600">${a}</span>
+           <span style="font-family:'JetBrains Mono';font-size:38px;font-weight:700;color:${tinta}">${b}</span>
+         </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;align-items:baseline;
+             padding-top:26px;border-top:3px solid ${LARANJA}">
+          <span style="font-size:36px;color:${tinta};font-weight:800">${resultado[0]}</span>
+          <span style="font-family:'JetBrains Mono';font-size:46px;font-weight:700;color:${LARANJA}">${resultado[1]}</span>
+        </div>
+      </div>
+      ${pe?`<p style="font-size:34px;line-height:1.42;color:${rot};margin:44px 0 0;font-weight:500">${pe}</p>`:''}
+    </div>
+    ${fonte?creditoFonte(fonte,escuro):''}`};
+}
+// escada: sequência ordenada — a fila do buffet, um fluxo, um passo a passo
+function escada({olho, titulo, degraus, pe, fundo=BRANCO, escuro=true, fonte}){
+  const tinta = escuro ? NAVY : BRANCO;
+  const rot = escuro ? '#42566B' : 'rgba(255,255,255,.7)';
+  return {fundo, escuro, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center">
+      ${olho?`<p style="font-family:'JetBrains Mono';font-size:26px;letter-spacing:.18em;
+                color:${LARANJA};font-weight:700;margin:0 0 40px">${olho}</p>`:''}
+      ${titulo?`<h2 style="font-family:Sora;font-size:56px;line-height:1.1;font-weight:800;color:${tinta};
+                 letter-spacing:-.02em;margin:0 0 44px">${titulo}</h2>`:''}
+      ${degraus.map(([nome,tag,forte],i)=>`<div style="display:flex;align-items:center;gap:24px;padding:20px 0">
+         <span style="font-family:'JetBrains Mono';font-size:24px;font-weight:700;
+               color:${forte?LARANJA:rot};width:48px">${String(i+1).padStart(2,'0')}</span>
+         <span style="font-family:Sora;font-size:${forte?46:42}px;font-weight:${forte?800:700};
+               letter-spacing:-.02em;color:${forte?LARANJA:tinta};flex:none">${nome}</span>
+         <span style="font-family:'JetBrains Mono';font-size:22px;font-weight:600;color:${rot};
+               text-align:right;flex:1">${tag}</span>
+       </div>`).join('')}
+      ${pe?`<p style="font-size:34px;line-height:1.4;color:${rot};margin:44px 0 0;font-weight:500">${pe}</p>`:''}
+    </div>
+    ${fonte?creditoFonte(fonte,escuro):''}`};
+}
+// citacao: fala de terceiro. Sempre com a fonte visível — é o que autoriza usar.
+function citacao({texto, fundo=NAVY, escuro, fonte}){
+  const tinta = escuro ? NAVY : BRANCO;
+  return {fundo, escuro, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center">
+      <div style="border-left:8px solid ${LARANJA};padding-left:40px">
+        <p style="font-size:52px;line-height:1.3;color:${tinta};font-weight:600;margin:0;font-style:italic">
+          &ldquo;${texto}&rdquo;</p>
+      </div>
+    </div>
+    ${creditoFonte(fonte,escuro)}`};
+}
+// recursos: o que o sistema faz, sem adjetivo. Título + descrição por item.
+function recursos({titulo, itens, fundo=BRANCO, escuro=true}){
+  const tinta = escuro ? NAVY : BRANCO;
+  const rot = escuro ? '#42566B' : 'rgba(255,255,255,.72)';
+  return {fundo, escuro, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center">
+      <h2 style="font-family:Sora;font-size:58px;line-height:1.1;font-weight:800;color:${tinta};
+                 letter-spacing:-.02em;margin:0 0 48px">${titulo}</h2>
+      ${itens.map(([t,d])=>`<div style="margin-bottom:36px">
+        <p style="font-size:38px;font-weight:800;color:${tinta};margin:0 0 8px">${t}</p>
+        <p style="font-size:30px;line-height:1.38;color:${rot};margin:0;font-weight:500">${d}</p>
+      </div>`).join('')}
+    </div>`};
+}
+// chamada: a lâmina final. Idêntica em todos os carrosséis, de propósito.
+function chamada(){
+  return {fundo:NAVY, html:`
+    <div class="faixa"></div>
+    <div class="pad" style="justify-content:center;align-items:center;text-align:center">
+      <h2 style="font-family:Sora;font-size:82px;line-height:1.06;font-weight:900;color:${BRANCO};
+                 letter-spacing:-.03em;margin:0 0 36px">30 dias grátis</h2>
+      <p style="font-size:38px;color:${NEVOA};font-weight:600;margin:0 0 64px">
+        sem cartão &middot; sem fidelidade</p>
+      <div style="background:${LARANJA};border-radius:999px;padding:30px 66px">
+        <span style="font-family:Sora;font-size:42px;font-weight:800;color:${BRANCO}">miseon.app.br</span>
+      </div>
+      <p style="font-size:30px;line-height:1.45;color:rgba(255,255,255,.6);
+                margin:64px 0 0;max-width:22ch;font-weight:500">
+        Sistema de gestão para food service que mostra o custo e a margem real
+        de cada item.</p>
+    </div>`};
+}
+
+const FONTE_A = 'Erros de vitrine apontados em “O que faz um site parecer amador<br>e perder as vendas na internet” — canal Marcelo Baccarini.';
+const FONTE_B = 'Números do restaurante do Guilherme em “Você nunca olhou<br>para um buffet desse jeito” — canal Marcelo Baccarini.';
+const FONTE_C = 'Números de “Como ganhar dinheiro com delivery”<br>— canal Marcelo Baccarini.';
+
+const CARROSSEIS = {
+
+// ══ delivery ══ nasce do R01 + R07. Publicado em 15/09; lâminas preservadas.
+'delivery': [
   // 1 — capa: a pergunta, grande, sem enfeite
   {fundo:NAVY, html:`
     <div class="faixa"></div>
@@ -54,7 +220,8 @@ const SLIDES = [
       <p style="font-size:40px;line-height:1.38;color:rgba(255,255,255,.8);
                 margin:56px 0 0;max-width:20ch;font-weight:500">
          Isso não é a plataforma te roubando. É uma conta que ninguém fez.</p>
-    </div>`},
+    </div>
+    ${creditoFonte(FONTE_C,false)}`},
 
   // 2 — a decomposição
   {fundo:NAVY, html:`
@@ -91,7 +258,7 @@ const SLIDES = [
                 color:${LARANJA};font-weight:700;margin:0 0 40px">A CONTA CERTA</p>
       <h2 style="font-family:Sora;font-size:60px;line-height:1.1;font-weight:800;color:${NAVY};
                  letter-spacing:-.02em;margin:0 0 56px">Quanto anunciar<br>para sobrar a sua margem</h2>
-      <div style="background:var(--nevoa,#EAF1FB);border-radius:24px;padding:48px 44px">
+      <div style="background:${NEVOA};border-radius:24px;padding:48px 44px">
         <div style="display:flex;justify-content:space-between;padding-bottom:26px">
           <span style="font-size:36px;color:#42566B;font-weight:600">Preço no seu balcão</span>
           <span style="font-family:'JetBrains Mono';font-size:38px;font-weight:700;color:${NAVY}">R$ 22,00</span>
@@ -123,7 +290,8 @@ const SLIDES = [
       <p style="font-size:36px;line-height:1.45;color:rgba(255,255,255,.72);margin:0;font-weight:500">
         Um cupom de 20% no canal próprio custa menos que os 26% a 40% da
         plataforma. E da segunda compra em diante, o cliente é seu.</p>
-    </div>`},
+    </div>
+    ${creditoFonte(FONTE_C,false)}`},
 
   // 6 — o que o sistema entrega, sem adjetivo
   {fundo:'#FFFFFF', escuro:true, html:`
@@ -141,30 +309,159 @@ const SLIDES = [
     </div>`},
 
   // 7 — chamada
-  {fundo:NAVY, html:`
-    <div class="faixa"></div>
-    <div class="pad" style="justify-content:center;align-items:center;text-align:center">
-      <h2 style="font-family:Sora;font-size:82px;line-height:1.06;font-weight:900;color:${BRANCO};
-                 letter-spacing:-.03em;margin:0 0 36px">30 dias grátis</h2>
-      <p style="font-size:38px;color:${NEVOA};font-weight:600;margin:0 0 64px">
-        sem cartão · sem fidelidade</p>
-      <div style="background:${LARANJA};border-radius:999px;padding:30px 66px">
-        <span style="font-family:Sora;font-size:42px;font-weight:800;color:${BRANCO}">miseon.app.br</span>
-      </div>
-      <p style="font-size:30px;line-height:1.45;color:rgba(255,255,255,.6);
-                margin:64px 0 0;max-width:22ch;font-weight:500">
-        Sistema de gestão para food service que mostra o custo e a margem real
-        de cada item.</p>
-    </div>`},
-];
+  chamada(),
+],
+
+// ══ ficha-tecnica ══ nasce do R02
+'ficha-tecnica': [
+  capa({olho:'O DESPERDÍCIO INVISÍVEL', tam:112,
+    linhas:[{t:'50 g de alho'},{t:'a mais.'},{t:'Por quilo.',d:1,m:26}],
+    apoio:'É isso que separa o restaurante que dá lucro do que não dá.',
+    fonte:FONTE_C}),
+  conta({olho:'A CONTA DO ANO', titulo:'O que 50 gramas viram<br>quando ninguém conta',
+    linhas:[['A mais, por quilo','50 g'],['No mês','R$ 600']],
+    resultado:['No ano','R$ 7.200'],
+    pe:'De alho. Um ingrediente que você nem lembra de olhar.',
+    fonte:FONTE_C}),
+  declaracao({olho:'POR QUE NINGUÉM VÊ', tam:96,
+    linhas:[{t:'O alho não'},{t:'sai do caixa.'},{t:'Sai da panela.',d:1,m:28}]}),
+  lista({titulo:'Onde o dinheiro<br>escapa sem aviso',
+    itens:[['Não aparece no caixa','sai da panela'],
+           ['Não aparece na nota','você comprou certo'],
+           ['Não aparece no estoque','se ninguém baixou a receita'],
+           ['Aparece no fechamento','quando já foi']],
+    pe:'O mês fecha diferente do que você esperava e ninguém sabe dizer por quê.'}),
+  recursos({titulo:'O que a ficha técnica<br>resolve disso',
+    itens:[['Quantidade exata por receita','o que a receita pede, não o que o cozinheiro achou'],
+           ['Baixa no momento da venda','o insumo sai do estoque quando o pedido fecha'],
+           ['Rendimento declarado por você','o número que a sua cozinha mediu vence a referência'],
+           ['Custo que se atualiza sozinho','subiu o preço na nota, a margem muda junto']]}),
+  chamada(),
+],
+
+// ══ fila-do-quilo ══ nasce do R03
+'fila-do-quilo': [
+  capa({olho:'RESTAURANTE POR QUILO', tam:110,
+    linhas:[{t:'A balança'},{t:'é no fim.'},{t:'O lucro é',d:1,m:26},{t:'no começo.',d:1}],
+    apoio:'Por que a carne fica sempre no fim da fila?',
+    fonte:FONTE_B}),
+  escada({olho:'A ORDEM DA FILA', titulo:'Barato e pesado primeiro.<br>Proteína por último.',
+    degraus:[['Arroz','barato · pesado'],['Legume','barato · pesado'],['Massa','barato · pesado'],
+             ['Salada','leve · não pesa'],['Proteína','caro',1],['Balança','o fim',1]],
+    pe:'O prato já está cheio quando chega na parte cara.'}),
+  declaracao({tam:88,
+    linhas:[{t:'Se todo mundo'},{t:'começasse pela'},{t:'proteína, o quilo'},{t:'quebrava.'}]}),
+  citacao({texto:'A balança fica no final, mas o lucro é decidido no começo da fila.',
+    fonte:FONTE_B}),
+  recursos({titulo:'O que acontece quando<br>a balança lê 350 g',
+    itens:[['Entra uma porção real','não uma venda genérica de 0,35'],
+           ['A ficha técnica baixa cada insumo','na proporção exata do peso servido'],
+           ['O custo vem do rendimento medido','não do preço bruto da nota'],
+           ['O preço praticado do quilo é preservado','o item da balança não é reprecificado por trás']]}),
+  chamada(),
+],
+
+// ══ salada ══ nasce do R04
+'salada': [
+  capa({olho:'O MITO DA SALADA', tam:100,
+    linhas:[{t:'Salada é o item'},{t:'mais barato'},{t:'do seu buffet?'}],
+    apoio:'Por grama servida, é o mais caro.',
+    fonte:FONTE_B}),
+  conta({olho:'O DESFOLHE', titulo:'O que você compra não é<br>o que você serve',
+    linhas:[['Você compra','1 kg'],['Vai fora no desfolhe','30 a 40%']],
+    resultado:['Sobra para o prato','≈ 600 g'],
+    pe:'Se o custo foi lançado pelo quilo da nota, o custo do prato está errado.',
+    fonte:FONTE_B}),
+  declaracao({tam:104,
+    linhas:[{t:'O custo é'},{t:'do que sobrou.'}],
+    apoio:'Não do que você comprou.'}),
+  lista({titulo:'E isso antes<br>da água',
+    itens:[['Higienizar uma leva','60 litros'],['A conta de água do mês','R$ 6.500'],
+           ['O peso da salada no prato','quase nada']],
+    pe:'Leve na balança, cara na cozinha. É o pior dos dois mundos.',
+    fonte:FONTE_B}),
+  recursos({titulo:'Onde o rendimento<br>entra no MiseOn',
+    itens:[['Você declara o que a sua cozinha mediu','e o seu número vence a referência da tabela'],
+           ['Sem medição, o sistema diz que não sabe','margem incerta vem em branco, com o motivo'],
+           ['Ganho também conta','arroz cozido rende 2,5× — rendimento não é só perda'],
+           ['O custo por porção recalcula na hora','no momento em que você declara']]}),
+  chamada(),
+],
+
+// ══ fotos ══ nasce do R05
+'fotos': [
+  capa({olho:'CARDÁPIO DIGITAL', tam:116,
+    linhas:[{t:'Dá vontade'},{t:'de comer?',d:1,m:26}],
+    apoio:'É a única pergunta que importa quando você vende comida.'}),
+  declaracao({fundo:TINTA, tam:92, olho:'O QUE O CLIENTE VÊ',
+    linhas:[{t:'Quatro pratos'},{t:'em destaque.'},{t:'Nenhuma foto.',d:1,m:28}],
+    apoio:'Ele está comprando no escuro.',
+    fonte:FONTE_A}),
+  declaracao({fundo:BRANCO, escuro:true, tam:70,
+    linhas:[{t:'Não é preguiça'},{t:'do dono.'},{t:'Ninguém tem tempo',d:1,m:30},{t:'de fotografar trinta',d:1},{t:'pratos antes de abrir.',d:1}]}),
+  recursos({fundo:NAVY, escuro:false, titulo:'O que o cardápio<br>faz com isso',
+    itens:[['Nenhum prato fica sem imagem','há um catálogo curado por nome de produto'],
+           ['Sem correspondência exata, entra a família','hambúrguer, pizza, bebida, sobremesa, salada, porção'],
+           ['Você troca quando fotografar','e deve trocar — foto real vende melhor que genérica']]}),
+  declaracao({tam:104, linhas:[{t:'Foto genérica'},{t:'é ruim.'},{t:'Card vazio'},{t:'é pior.'}]}),
+  chamada(),
+],
+
+// ══ labirinto ══ nasce do R06
+'labirinto': [
+  capa({olho:'A VITRINE', tam:104,
+    linhas:[{t:'Se o cliente'},{t:'precisa procurar,'},{t:'ele já desistiu.',d:1,m:28}]}),
+  declaracao({tam:116, linhas:[{t:'Não é'},{t:'cardápio.'},{t:'É labirinto.'}],
+    apoio:'80 itens numa lista só, sem busca e sem categoria.',
+    fonte:FONTE_A}),
+  escada({olho:'A ORDEM QUE FUNCIONA', titulo:'Na internet a pessoa<br>compra nesta ordem',
+    degraus:[['Ver','a foto primeiro',1],['Se interessar','o preço, o destaque'],['Ler','só então a descrição']],
+    pe:'Um cardápio que começa pela leitura perde antes de mostrar o produto.',
+    fonte:FONTE_A}),
+  recursos({titulo:'O que muda<br>no seu cardápio',
+    itens:[['Busca no topo','o cliente digita o que quer comer'],
+           ['Categorias fixas enquanto rola','trocar de seção sem voltar ao topo'],
+           ['Faixa “Os mais pedidos”','ordenada pelo contador real de vendas, não por chute'],
+           ['Tema da sua loja','cor, fonte e banner seus, com contraste corrigido automaticamente']]}),
+  declaracao({fundo:BRANCO, escuro:true, tam:76,
+    linhas:[{t:'Três decisões'},{t:'de layout.'},{t:'Nenhuma linha de',d:1,m:30},{t:'código do seu lado.',d:1}]}),
+  chamada(),
+],
+
+// ══ nfce ══ nasce do R08
+'nfce': [
+  capa({olho:'ESTOQUE POR NFC-e', tam:120,
+    linhas:[{t:'32 itens.'},{t:'Zero',d:1,m:26},{t:'digitação.',d:1}],
+    apoio:'Voltei do mercado e não digitei nenhum.'}),
+  escada({olho:'COMO FUNCIONA', titulo:'Três passos,<br>nenhuma planilha',
+    degraus:[['Apontar','a câmera no QR do cupom',1],['Conferir','a lista que preencheu sozinha'],
+             ['Pronto','o custo dos pratos já mudou',1]],
+    pe:'Nota de fornecedor em XML entra do mesmo jeito.'}),
+  declaracao({tam:100, linhas:[{t:'Nada disso'},{t:'foi digitado.'}],
+    apoio:'Quantidade, custo e fornecedor vêm da própria nota.'}),
+  lista({titulo:'O que entra<br>e por onde',
+    itens:[['Cupom fiscal do mercado','pelo QR (NFC-e)'],['Nota de fornecedor','por XML'],
+           ['Correção sua, na mão','e ela nunca é sobrescrita depois']],
+    pe:'A leitura automática propõe. Quem decide o número final é você.'}),
+  recursos({titulo:'E o que acontece<br>depois da importação',
+    itens:[['O custo do insumo atualiza','na hora, com o valor da nota'],
+           ['A ficha técnica recalcula','o custo de todo prato que usa aquele insumo'],
+           ['A margem muda sozinha','sem refazer planilha nenhuma'],
+           ['Quando o dado é duvidoso, ele avisa','margem em branco e o motivo escrito, em vez de um número errado']]}),
+  chamada(),
+],
+
+};
 
 window.CARROSSEL = {
-  total: SLIDES.length,
-  async montar(i){
-    const s = SLIDES[i];
+  lista: Object.keys(CARROSSEIS),
+  total(nome){ return CARROSSEIS[nome].length; },
+  async montar(nome, i){
+    const s = CARROSSEIS[nome][i];
+    const total = CARROSSEIS[nome].length;
     const el = document.getElementById('slide');
     el.style.background = s.fundo;
-    el.innerHTML = s.html + rodape(i+1, SLIDES.length, !!s.escuro);
+    el.innerHTML = s.html + rodape(i+1, total, !!s.escuro);
     // marca clara sobre navy: inverte só o símbolo, sem tocar no arquivo
     const img = el.querySelector('.rodape img');
     if (img && !s.escuro) img.style.filter = 'brightness(0) invert(1)';

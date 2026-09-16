@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mapa de cortes MiseOn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --papel:#F4F5F0; --alto:#FFFFFF; --fundo:#E9EBE3;
+  --tinta:#15180F; --tinta2:#4A5245; --tinta3:#79816F;
+  --linha:#D8DBD0; --linha-forte:#BCC2B3;
+  --verde:#1B5E3F; --verde-vivo:#15803D; --verde-fundo:#E3EFE7;
+  --brasa:#B23E0C; --brasa-fundo:#FBE9DE;
+  --azul:#1E4A6B; --azul-fundo:#E2ECF3;
+  --sombra:0 1px 2px rgba(21,24,15,.05), 0 8px 24px -12px rgba(21,24,15,.14);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+  --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+  --linha:#2B3127; --linha-forte:#3D4538;
+  --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+  --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+  --azul:#8FC4E8; --azul-fundo:#12212C;
+  --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);}}
+:root[data-theme="dark"]{
+  --papel:#121510; --alto:#1B1F18; --fundo:#0C0E09;
+  --tinta:#E9EDE2; --tinta2:#A9B2A3; --tinta3:#7D8779;
+  --linha:#2B3127; --linha-forte:#3D4538;
+  --verde:#7BE0A6; --verde-vivo:#4ADE80; --verde-fundo:#14241A;
+  --brasa:#FB923C; --brasa-fundo:#2B1A0F;
+  --azul:#8FC4E8; --azul-fundo:#12212C;
+  --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--tinta);
+  font-family:"Source Serif 4","Iowan Old Style",Georgia,serif;font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,.ui{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:20px}
+.layout{display:grid;grid-template-columns:1fr;gap:48px}
+@media(min-width:1100px){.layout{grid-template-columns:225px minmax(0,1fr);gap:52px}}
+.indice{font-family:Archivo,sans-serif;font-size:13px;line-height:1.45}
+@media(min-width:1100px){.indice{position:sticky;top:60px;align-self:start;max-height:calc(100vh - 84px);overflow-y:auto;padding-block:8px}}
+.indice ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.indice a{display:block;padding:6px 10px;color:var(--tinta2);text-decoration:none;border-radius:6px;border-left:2px solid transparent}
+.indice a:hover{background:var(--alto);color:var(--tinta);border-left-color:var(--verde-vivo)}
+.indice .ix{color:var(--tinta3);margin-right:8px;font-weight:600}
+.indice-topo{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta3);font-weight:700;padding:0 10px 10px;border-bottom:1px solid var(--linha);margin-bottom:10px}
+.capa{padding-block:40px 30px;border-bottom:2px solid var(--tinta)}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brasa);font-weight:700;margin:0 0 14px}
+h1{font-size:clamp(34px,6.2vw,56px);line-height:1.02;letter-spacing:-.022em;font-weight:800;margin:0 0 18px;text-wrap:balance;max-width:17ch}
+.lede{font-size:clamp(17px,2vw,20px);line-height:1.55;color:var(--tinta2);max-width:64ch;margin:0}
+.meta-capa{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:24px;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--tinta3)}
+.meta-capa b{color:var(--tinta2);font-weight:500}
+section{padding-block:50px;border-bottom:1px solid var(--linha)}
+section:last-of-type{border-bottom:0}
+.numsec{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--brasa);text-transform:uppercase;margin:0 0 10px}
+h2{font-size:clamp(25px,3.4vw,33px);line-height:1.12;letter-spacing:-.017em;font-weight:700;margin:0 0 8px;text-wrap:balance}
+.sub{color:var(--tinta2);font-size:18px;margin:0 0 26px;max-width:66ch}
+h3{font-size:19px;line-height:1.25;font-weight:700;margin:36px 0 12px}
+p{margin:0 0 16px;max-width:70ch}
+ul,ol{max-width:70ch;padding-left:22px;margin:0 0 16px}
+li{margin-bottom:7px}
+li::marker{color:var(--tinta3)}
+strong{font-weight:600;color:var(--tinta)}
+a{color:var(--verde-vivo)}
+.rota{font-family:"JetBrains Mono",monospace;font-size:.83em;background:var(--fundo);border:1px solid var(--linha);padding:1px 6px;border-radius:4px;white-space:nowrap;color:var(--tinta2)}
+.regra{border-left:3px solid var(--brasa);padding:4px 0 4px 20px;margin:24px 0;max-width:70ch}
+.regra .rot{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brasa);display:block;margin-bottom:6px}
+.regra p:last-child{margin-bottom:0}
+.nota{background:var(--azul-fundo);border-radius:8px;padding:18px 20px;margin:24px 0;max-width:70ch;font-size:16px}
+.nota .rot{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--azul);display:block;margin-bottom:7px}
+.nota p:last-child{margin-bottom:0}
+.fichavid{background:var(--alto);border:1px solid var(--linha);border-radius:10px;box-shadow:var(--sombra);padding:16px 20px;margin:0 0 24px;font-size:15px}
+.fichavid p{margin:0 0 6px;max-width:none}
+.fichavid p:last-child{margin-bottom:0}
+.fichavid b{font-family:Archivo,sans-serif;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);margin-right:8px}
+
+/* tabela de cortes */
+.cortes{width:100%;border-collapse:collapse;font-size:14.5px;margin:18px 0 0}
+.cortes th{font-family:Archivo,sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);text-align:left;padding:0 12px 8px 0;border-bottom:1px solid var(--linha-forte);vertical-align:bottom}
+.cortes td{padding:13px 12px 13px 0;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.45}
+.cortes tr:last-child td{border-bottom:0}
+.tc{font-family:"JetBrains Mono",monospace;font-size:12.5px;font-weight:700;color:var(--brasa);white-space:nowrap;width:82px}
+.ideia{width:31%}
+.ideia b{display:block;font-family:Archivo,sans-serif;font-size:14.5px;margin-bottom:3px}
+.ideia i{color:var(--tinta2);font-style:italic}
+.func{width:33%}
+.func b{display:block;font-family:Archivo,sans-serif;font-size:14px;color:var(--verde);margin-bottom:3px}
+.saida{color:var(--tinta2)}
+.saida b{display:block;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--tinta3);letter-spacing:.04em;margin-bottom:3px}
+tr.forte td{background:var(--brasa-fundo)}
+tr.forte .ideia b{color:var(--brasa)}
+tr.lacuna td{background:var(--fundo)}
+tr.lacuna .func b{color:var(--tinta3)}
+.tabela{width:100%;border-collapse:collapse;font-size:15px;margin:22px 0}
+.tabela th{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);text-align:left;padding:0 14px 8px 0;border-bottom:1px solid var(--linha-forte)}
+.tabela td{padding:11px 14px 11px 0;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.45}
+.tabela td.cod{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--brasa);font-weight:700;white-space:nowrap}
+.gancho{background:var(--alto);border:1px solid var(--linha);border-left:3px solid var(--brasa);border-radius:8px;padding:16px 18px;margin:0 0 14px;box-shadow:var(--sombra)}
+.gancho .g{font-family:Archivo,sans-serif;font-size:20px;font-weight:700;line-height:1.28;letter-spacing:-.01em;margin:0 0 8px;max-width:none}
+.gancho .por{font-size:15px;color:var(--tinta2);margin:0 0 8px;max-width:none}
+.gancho .fon{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--tinta3);margin:0;max-width:none}
+.rodape-doc{padding-block:36px 60px;color:var(--tinta3);font-size:14px}
+.barra{position:sticky;top:0;z-index:9;background:var(--papel);border-bottom:1px solid var(--linha);padding:10px 0;display:flex;gap:8px;flex-wrap:wrap}
+button.bt{font-family:Archivo,sans-serif;font-size:12.5px;font-weight:600;color:var(--tinta2);background:var(--fundo);
+  border:1px solid var(--linha-forte);border-radius:6px;padding:7px 13px;cursor:pointer}
+button.bt:hover{background:var(--alto);color:var(--tinta)}
+</style>
+<div class="wrap">
+<div class="barra">
+  <button class="bt" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">Claro / escuro</button>
+  <button class="bt" onclick="window.print()">Imprimir</button>
+</div>
+
+<header class="capa">
+  <p class="eyebrow">MiseOn &middot; conte&uacute;do &middot; 15 de setembro de 2026</p>
+  <h1>Mapa de cortes</h1>
+  <p class="lede">Os tr&ecirc;s v&iacute;deos assistidos com a transcri&ccedil;&atilde;o na m&atilde;o, corte a corte, com o
+  minuto exato de cada ideia &mdash; e, ao lado de cada uma, a tela do MiseOn que responde
+  &agrave;quilo. &Eacute; daqui que sai roteiro, n&atilde;o do contr&aacute;rio.</p>
+  <div class="meta-capa">
+    <span><b>Cortes mapeados:</b> 58</span>
+    <span><b>Com funcionalidade no sistema:</b> 41</span>
+    <span><b>Lacunas assumidas:</b> 9</span>
+    <span><b>Ganchos novos:</b> 14</span>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="indice">
+  <div class="indice-topo">Nesta p&aacute;gina</div>
+  <ol>
+    <li><a href="#metodo"><span class="ix">00</span>Como usar corte alheio</a></li>
+    <li><a href="#v1"><span class="ix">V1</span>Ganhar dinheiro com delivery</a></li>
+    <li><a href="#v2"><span class="ix">V2</span>A loja que mais vende</a></li>
+    <li><a href="#v3"><span class="ix">V3</span>Como ter lucro</a></li>
+    <li><a href="#ganchos"><span class="ix">04</span>Os 14 ganchos</a></li>
+    <li><a href="#po"><span class="ix">05</span>Corre&ccedil;&otilde;es de produto</a></li>
+    <li><a href="#lacunas"><span class="ix">06</span>O que n&atilde;o temos</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="metodo">
+  <p class="numsec">Parte 00</p>
+  <h2>Como usar corte alheio sem se queimar</h2>
+  <p class="sub">Tr&ecirc;s v&iacute;deos de terceiro, nenhum seu. Isso &eacute; uma vantagem &mdash; a dor j&aacute; est&aacute;
+  criada e a audi&ecirc;ncia j&aacute; est&aacute; formada &mdash; desde que o uso seja o certo.</p>
+  <ul>
+    <li><strong>O corte &eacute; a pergunta; voc&ecirc; &eacute; a resposta.</strong> O formato que funciona &eacute;:
+    5 a 12 segundos do v&iacute;deo original com o problema, corte seco para a sua tela mostrando
+    a conta resolvida. Nunca o contr&aacute;rio, e nunca corte longo.</li>
+    <li><strong>Cr&eacute;dito na tela durante o trecho inteiro</strong>, com t&iacute;tulo do v&iacute;deo e canal.
+    As tiras j&aacute; est&atilde;o prontas em <span class="rota">cartelas/credito-video-*.png</span>.</li>
+    <li><strong>N&uacute;mero de terceiro continua sendo de terceiro.</strong> &ldquo;Vende 44, recebe 22&rdquo; n&atilde;o
+    &eacute; uma medi&ccedil;&atilde;o sua &mdash; &eacute; reportagem, e com cr&eacute;dito voc&ecirc; pode us&aacute;-la &agrave; vontade.</li>
+    <li><strong>N&atilde;o reposte o v&iacute;deo inteiro</strong>, n&atilde;o tire a marca d&rsquo;&aacute;gua e n&atilde;o fa&ccedil;a
+    &ldquo;react&rdquo; de 10 minutos. Trecho curto, finalidade clara, valor acrescentado.</li>
+  </ul>
+  <div class="nota">
+    <span class="rot">Como ler as tabelas</span>
+    <p>Linha destacada em laranja = corte de alto potencial, onde a dor do v&iacute;deo casa
+    exatamente com uma tela que voc&ecirc; tem. Linha cinza = o v&iacute;deo levanta algo que o MiseOn
+    <strong>n&atilde;o</strong> resolve; est&aacute; aqui para voc&ecirc; n&atilde;o prometer o que n&atilde;o entrega.</p>
+  </div>
+</section>
+
+
+<section id="v1">
+  <p class="numsec">V&iacute;deo 1</p>
+  <h2>Como ganhar dinheiro com delivery</h2>
+  <div class="fichavid">
+    <p><b>Canal</b>Marcelo Baccarini &middot; 603 mil visualiza&ccedil;&otilde;es &middot; 15:41</p>
+    <p><b>Formato</b>Reportagem de campo com quatro personagens: Patr&iacute;cia (caldo verde),
+    a dona do PF que pesa tudo, o Rafael que perdeu pedido por falta de motoboy, e o Felipe
+    da loja que mais vende delivery do pa&iacute;s.</p>
+    <p><b>Por que importa</b>&Eacute; o v&iacute;deo com maior sobreposi&ccedil;&atilde;o com o MiseOn. De 22 cortes
+    mapeados, <strong>17 t&ecirc;m tela correspondente</strong> no sistema.</p>
+  </div>
+
+  <table class="cortes">
+    <tr><th class="tc">Corte</th><th class="ideia">A ideia do trecho</th>
+        <th class="func">A tela do MiseOn que responde</th><th class="saida">O que sai disso</th></tr>
+
+    <tr class="lacuna"><td class="tc">0:22&ndash;0:49</td>
+      <td class="ideia"><b>Golpe do cancelamento com foto de IA</b>
+        <i>&ldquo;O robô recebe a imagem, analisa e aceita o cancelamento.&rdquo;</i></td>
+      <td class="func"><b>Nada direto</b>O m&oacute;dulo de disputa existe
+        (<span class="rota">lib/ifoodDisputa.ts</span>), mas contestar cancelamento fraudulento
+        n&atilde;o &eacute; algo que voc&ecirc; possa prometer resolver.</td>
+      <td class="saida"><b>N&Atilde;O USAR</b>Tentador e perigoso. Fica de fora.</td></tr>
+
+    <tr class="forte"><td class="tc">1:12&ndash;1:20</td>
+      <td class="ideia"><b>&ldquo;De 44 eu recebo 22. A metade.&rdquo;</b>
+        <i>O corte mais forte dos tr&ecirc;s v&iacute;deos. Oito segundos.</i></td>
+      <td class="func"><b>/admin/ifood &mdash; markup por canal</b>Voc&ecirc; informa a comiss&atilde;o e a
+        coluna <i>Pre&ccedil;o iFood (sugerido)</i> recalcula o cardápio inteiro para que, depois da
+        taxa, sobre o pre&ccedil;o do balc&atilde;o.</td>
+      <td class="saida"><b>REELS L01</b>J&aacute; roteirizado. Este corte entra no lugar da cartela
+        L01-01 como abertura alternativa &mdash; teste os dois.</td></tr>
+
+    <tr><td class="tc">1:20&ndash;1:36</td>
+      <td class="ideia"><b>As quatro taxas</b>
+        <i>Entrega, custos log&iacute;sticos, pagamento e servi&ccedil;o. &ldquo;A grande maioria das pessoas
+        que est&atilde;o no delivery est&atilde;o perdendo dinheiro.&rdquo;</i></td>
+      <td class="func"><b>/admin/ifood + /admin/financeiro</b>Margem por canal, com o pre&ccedil;o do
+        iFood j&aacute; chegando com markup &mdash; o sistema n&atilde;o reprecifica por cima.</td>
+      <td class="saida"><b>CARROSSEL</b>L&acirc;mina 2 do carrossel-delivery, que j&aacute; existe.</td></tr>
+
+    <tr class="forte"><td class="tc">1:58&ndash;2:16</td>
+      <td class="ideia"><b>Usa a plataforma como vitrine e tira o cliente de l&aacute;</b>
+        <i>&ldquo;Manda um cupom de 20%… voc&ecirc; j&aacute; t&aacute; gastando menos do que gastaria com iFood,
+        que &eacute; 26%, &eacute; 30%, &eacute; 40%.&rdquo;</i></td>
+      <td class="func"><b>/admin/marketing &mdash; Cupons + Cashback</b>Cupom de primeira compra
+        que aparece copi&aacute;vel no pr&oacute;prio card&aacute;pio, e cashback para a terceira compra.</td>
+      <td class="saida"><b>REELS L07</b>Roteirizado. O corte substitui a cartela L07-02.</td></tr>
+
+    <tr><td class="tc">2:57&ndash;3:12</td>
+      <td class="ideia"><b>Pre&ccedil;o duplo</b>
+        <i>&ldquo;O mesmo macarr&atilde;o sai por R$ 25 no meu card&aacute;pio digital.&rdquo;</i></td>
+      <td class="func"><b>Pre&ccedil;o por canal</b>O card&aacute;pio pr&oacute;prio tem o pre&ccedil;o de balc&atilde;o; o
+        canal iFood carrega o markup. S&atilde;o dois pre&ccedil;os no mesmo cadastro, sem planilha
+        paralela.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 03 da Parte 04.</td></tr>
+
+    <tr class="lacuna"><td class="tc">3:12&ndash;3:56</td>
+      <td class="ideia"><b>A falsa promo&ccedil;&atilde;o e o subs&iacute;dio da plataforma</b>
+        <i>&ldquo;Voc&ecirc; tem que cobrar mais caro para poder dar o desconto.&rdquo;</i></td>
+      <td class="func"><b>Fora de posi&ccedil;&atilde;o</b>O sistema permite o pre&ccedil;o por canal, mas
+        ensinar a inflar pre&ccedil;o para simular desconto n&atilde;o &eacute; postura de marca.</td>
+      <td class="saida"><b>N&Atilde;O USAR</b>Deixe o assunto para o v&iacute;deo dele.</td></tr>
+
+    <tr class="lacuna"><td class="tc">4:22&ndash;5:38</td>
+      <td class="ideia"><b>Falta de motoboy; a plataforma fecha a loja sem avisar</b>
+        <i>Entrega custa R$ 15 e o motoboy recebe R$ 8.</i></td>
+      <td class="func"><b>Parcial</b>H&aacute; entregas com GPS e entregador pr&oacute;prio
+        (<span class="rota">/admin/entregas</span>), o que reduz a depend&ecirc;ncia &mdash; mas n&atilde;o
+        resolve a pra&ccedil;a vazia da plataforma.</td>
+      <td class="saida"><b>STORY</b>Assunto de enquete, n&atilde;o de Reels com promessa.</td></tr>
+
+    <tr><td class="tc">5:41&ndash;6:58</td>
+      <td class="ideia"><b>Embalagem ruim &rarr; avalia&ccedil;&atilde;o ruim &rarr; some do ranking</b>
+        <i>&ldquo;Quem tem nota abaixo de 4.6 vai ficar l&aacute; embaixo. N&atilde;o aparece, &eacute; por isso que
+        n&atilde;o vende.&rdquo;</i></td>
+      <td class="func"><b>/admin/kds &mdash; tempo por etapa</b>O MiseOn n&atilde;o melhora embalagem,
+        melhora <i>tempo</i>: o card muda de cor quando atrasa, e comida que sai r&aacute;pido chega
+        quente.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 05. Cuidado: n&atilde;o prometa nota.</td></tr>
+
+    <tr class="forte"><td class="tc">7:06&ndash;7:24</td>
+      <td class="ideia"><b>Quatro marmitas em destaque, nenhuma com foto</b>
+        <i>&ldquo;O cliente precisa comprar no escuro.&rdquo;</i></td>
+      <td class="func"><b>Card&aacute;pio &mdash; fallback de foto por fam&iacute;lia</b>Nenhum prato fica sem
+        imagem: cat&aacute;logo curado por nome e, sem correspond&ecirc;ncia exata, uma imagem da fam&iacute;lia
+        do produto (<span class="rota">lib/fotoProdutoUtils.ts</span>).</td>
+      <td class="saida"><b>REELS L05 + CARROSSEL</b>J&aacute; prontos.</td></tr>
+
+    <tr><td class="tc">7:28&ndash;7:43</td>
+      <td class="ideia"><b>&ldquo;Sumiu at&eacute; a marca da loja&rdquo;</b>
+        <i>Logotipo preto no fundo branco da plataforma.</i></td>
+      <td class="func"><b>White-label do card&aacute;pio</b>No card&aacute;pio pr&oacute;prio a marca &eacute; a p&aacute;gina
+        inteira: cor, fonte, banner e tema, com <strong>corre&ccedil;&atilde;o autom&aacute;tica de contraste</strong>
+        para o texto continuar leg&iacute;vel sobre a cor da loja
+        (<span class="rota">lib/personalizacao.ts</span>).</td>
+      <td class="saida"><b>REELS novo</b>Gancho 07. Corte bonito: a mesma loja nos dois
+        contextos.</td></tr>
+
+    <tr class="forte"><td class="tc">7:57&ndash;8:20</td>
+      <td class="ideia"><b>&ldquo;Na rua o cliente encontra a loja pelo endere&ccedil;o. No delivery
+        encontra pelas palavras.&rdquo;</b>
+        <i>&ldquo;S&oacute; colocar coxinha n&atilde;o vai aparecer.&rdquo;</i></td>
+      <td class="func"><b>JSON-LD do card&aacute;pio</b>O card&aacute;pio publica os pratos em dado
+        estruturado para o Google ler <i>os pratos</i>, n&atilde;o s&oacute; a p&aacute;gina
+        (<span class="rota">lib/jsonLdCardapio.ts</span>) &mdash; mais descri&ccedil;&atilde;o livre por
+        produto.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 02. Ningu&eacute;m no nicho fala disso e &eacute;
+        demonstr&aacute;vel numa busca ao vivo.</td></tr>
+
+    <tr class="forte"><td class="tc">8:28&ndash;8:50</td>
+      <td class="ideia"><b>A planilha de desperd&iacute;cio e os 50 g de alho</b>
+        <i>&ldquo;R$ 600 de preju&iacute;zo por m&ecirc;s. E a&iacute; as pessoas falam que n&atilde;o ganham dinheiro.&rdquo;</i></td>
+      <td class="func"><b>Ficha t&eacute;cnica com baixa na venda</b>A quantidade da receita sai do
+        estoque quando o pedido fecha &mdash; n&atilde;o a que o cozinheiro achou que usou.</td>
+      <td class="saida"><b>REELS L02 + CARROSSEL</b>J&aacute; prontos. O corte da cozinha-sala-de-aula
+        vale mais que qualquer cartela.</td></tr>
+
+    <tr class="forte"><td class="tc">8:50&ndash;9:09</td>
+      <td class="ideia"><b>&ldquo;Esse bife pesa de 90 a 110 g. &Eacute; a parte mais cara do prato. Tem
+        que estar precificado e tem que estar pesado.&rdquo;</b></td>
+      <td class="func"><b>Ficha t&eacute;cnica + balan&ccedil;a por WebHID</b>O MiseOn l&ecirc; balan&ccedil;a comercial
+        direto do navegador (Toledo, Filizola, Prix 3 &mdash;
+        <span class="rota">lib/balancaWebHID.ts</span>), sem digitar peso.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 01. <strong>&Eacute; o melhor material n&atilde;o usado do
+        sistema inteiro</strong> e responde literalmente &agrave; frase dele.</td></tr>
+
+    <tr><td class="tc">9:09&ndash;9:30</td>
+      <td class="ideia"><b>594 g por forma; m&eacute;tricas da semana passada guiam a semana</b></td>
+      <td class="func"><b>/admin/producao + Hist&oacute;rico</b>Ficha de preparo com rendimento
+        declarado por lote e hist&oacute;rico de produ&ccedil;&atilde;o.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 09.</td></tr>
+
+    <tr class="lacuna"><td class="tc">9:30&ndash;9:49</td>
+      <td class="ideia"><b>Bolo que quebrou vira brinde, n&atilde;o perda</b></td>
+      <td class="func"><b>N&atilde;o existe</b>N&atilde;o h&aacute; tratamento de subproduto/reaproveitamento na
+        ficha.</td>
+      <td class="saida"><b>BACKLOG</b>Ideia de produto boa. Anotar, n&atilde;o anunciar.</td></tr>
+
+    <tr><td class="tc">9:49&ndash;10:35</td>
+      <td class="ideia"><b>A propor&ccedil;&atilde;o da marmita</b>
+        <i>150 g de arroz, 100 de feij&atilde;o, 150 de prote&iacute;na. &ldquo;A galera manda 700 g de prote&iacute;na
+        e cobra como se fosse 100.&rdquo;</i></td>
+      <td class="func"><b>Ficha t&eacute;cnica com custo por componente</b>Mudou a gramagem, mudou o
+        custo e a margem, item a item.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 06.</td></tr>
+
+    <tr class="forte"><td class="tc">10:35&ndash;11:14</td>
+      <td class="ideia"><b>Oito pratos com o mesmo frango</b>
+        <i>&ldquo;Menos ingrediente, um fornecedor, um boleto s&oacute;, eu consigo barganhar.&rdquo;</i></td>
+      <td class="func"><b>/admin/compras &mdash; hist&oacute;rico de pre&ccedil;o por fornecedor</b>E a ficha
+        t&eacute;cnica mostra quais produtos compartilham o insumo: quando o frango sobe, voc&ecirc; v&ecirc; os
+        oito pratos que mudaram de margem <i>de uma vez</i>.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 04. &Eacute; a demonstra&ccedil;&atilde;o mais &ldquo;uau&rdquo; da ficha
+        t&eacute;cnica e n&atilde;o estava em nenhum roteiro.</td></tr>
+
+    <tr><td class="tc">11:59&ndash;12:12</td>
+      <td class="ideia"><b>QR code na embalagem</b>
+        <i>&ldquo;Voc&ecirc; gasta ainda menos… deixa de pagar os 26, 30, 40% pras plataformas.&rdquo;</i></td>
+      <td class="func"><b>Card&aacute;pio pr&oacute;prio + cupom</b>Link e QR da loja, com o cupom
+        aparecendo no card&aacute;pio pronto para copiar.</td>
+      <td class="saida"><b>REELS L07</b>Cartela L07-03 j&aacute; usa o QR.</td></tr>
+
+    <tr class="lacuna"><td class="tc">12:17&ndash;13:15</td>
+      <td class="ideia"><b>Esfiha doce de brinde nos primeiros seis meses; lucro zero</b>
+        <i>&ldquo;A meta n&atilde;o &eacute; ganhar dinheiro, &eacute; ganhar cliente.&rdquo;</i></td>
+      <td class="func"><b>Parcial</b>Cupom e cashback ajudam, mas a tese &eacute; de estrat&eacute;gia, n&atilde;o
+        de software.</td>
+      <td class="saida"><b>STORY / BASTIDOR</b>Boa para o pilar do bastidor &mdash; &eacute; a sua
+        situa&ccedil;&atilde;o tamb&eacute;m.</td></tr>
+
+    <tr class="forte"><td class="tc">13:18&ndash;13:44</td>
+      <td class="ideia"><b>Pedidos separados por par e &iacute;mpar no varal</b>
+        <i>&ldquo;Voc&ecirc; j&aacute; ganha mais uns 15, 20 segundos do cara n&atilde;o ter que ficar desesperado
+        procurando pedido.&rdquo;</i></td>
+      <td class="func"><b>/admin/kds/expeditor</b>A expedi&ccedil;&atilde;o por n&uacute;mero, senha ou mesa, com
+        ticket por esta&ccedil;&atilde;o e rodada. O varal de papel virou tela &mdash; e ningu&eacute;m procura pedido
+        nenhum.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 08. Casa com o V2, que &eacute; um v&iacute;deo inteiro
+        sobre expedi&ccedil;&atilde;o.</td></tr>
+
+    <tr class="forte"><td class="tc">13:44&ndash;14:22</td>
+      <td class="ideia"><b>&ldquo;Velocidade gera visibilidade&rdquo;</b>
+        <i>Entregar ao motoboy em 10 minutos ou o algoritmo entende que a opera&ccedil;&atilde;o &eacute; ruim e
+        rebaixa.</i></td>
+      <td class="func"><b>KDS multiesta&ccedil;&atilde;o + tempo em cor</b>Cozinha e bar em telas
+        separadas, etapa por esta&ccedil;&atilde;o, e o tempo mudando de cor quando passa do limite.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 10.</td></tr>
+
+    <tr class="forte"><td class="tc">14:29&ndash;15:29</td>
+      <td class="ideia"><b>A conta final do Felipe</b>
+        <i>Custo 59&ndash;60%, plataforma ~26%, lucro ~15%. 70 mil pedidos por m&ecirc;s.</i></td>
+      <td class="func"><b>/admin/financeiro &mdash; DRE + Custos Operacionais</b>A aba de custos
+        operacionais <strong>rateia o gasto fixo mensal pela expectativa de vendas e cobra no
+        custo de cada item</strong>. &Eacute; exatamente esta conta, na sua loja.</td>
+      <td class="saida"><b>REELS novo + YOUTUBE</b>Gancho 11. Vira bloco do v&iacute;deo longo.</td></tr>
+  </table>
+</section>
+
+
+<section id="v2">
+  <p class="numsec">V&iacute;deo 2</p>
+  <h2>A estrat&eacute;gia da loja que mais vende delivery no Brasil</h2>
+  <div class="fichavid">
+    <p><b>Canal</b>Receitas de Neg&oacute;cio &middot; 15,3 mil visualiza&ccedil;&otilde;es &middot; 1h01</p>
+    <p><b>Quem</b>Filipe Mello, Esfiha Imigrantes &mdash; a mesma loja do Felipe que aparece no
+    V&iacute;deo 1, agora com uma hora inteira de bastidor.</p>
+    <p><b>Por que importa</b>Este &eacute; o v&iacute;deo de <strong>processo</strong>. Metade dos cap&iacute;tulos
+    &eacute; opera&ccedil;&atilde;o pura: layout de cozinha, expedi&ccedil;&atilde;o, comanda visual. &Eacute; onde o KDS do MiseOn
+    tem resposta e onde nenhum concorrente de PDV consegue conversar.</p>
+    <p><b>Aviso de m&eacute;todo</b>O YouTube bloqueou a legenda deste v&iacute;deo; o mapa abaixo sai dos
+    <strong>cap&iacute;tulos oficiais do autor</strong> e da descri&ccedil;&atilde;o. Os minutos s&atilde;o exatos; as
+    falas dentro de cada bloco voc&ecirc; confere ao assistir o trecho.</p>
+  </div>
+
+  <table class="cortes">
+    <tr><th class="tc">Corte</th><th class="ideia">O cap&iacute;tulo</th>
+        <th class="func">A tela do MiseOn que responde</th><th class="saida">O que sai disso</th></tr>
+
+    <tr class="forte"><td class="tc">00:00</td>
+      <td class="ideia"><b>2.300 pedidos em uma noite</b>
+        <i>O recorde, dito logo na abertura.</i></td>
+      <td class="func"><b>KDS multiesta&ccedil;&atilde;o + expedi&ccedil;&atilde;o</b>O n&uacute;mero &eacute; o gancho; a pergunta
+        &eacute; &ldquo;como uma cozinha aguenta isso sem perder pedido?&rdquo;.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 12. Abre com o n&uacute;mero dele e responde com
+        a sua tela.</td></tr>
+
+    <tr><td class="tc">01:43</td>
+      <td class="ideia"><b>Tour pela produ&ccedil;&atilde;o artesanal</b></td>
+      <td class="func"><b>/admin/producao</b>Ficha de preparo, lote e rendimento declarado.</td>
+      <td class="saida"><b>CARROSSEL</b>Refor&ccedil;a o carrossel-ficha-tecnica.</td></tr>
+
+    <tr><td class="tc">03:03</td>
+      <td class="ideia"><b>Expans&atilde;o na pandemia com dark kitchens</b></td>
+      <td class="func"><b>Multiloja no mesmo painel</b>E a landing de dark kitchen
+        (<span class="rota">/sistema-para-dark-kitchen</span>) j&aacute; existe.</td>
+      <td class="saida"><b>STORY</b>Trilha para a landing.</td></tr>
+
+    <tr class="forte"><td class="tc">04:56</td>
+      <td class="ideia"><b>Ajustes de layout na cozinha para otimizar o tempo de entrega</b>
+        <i>Mover bancada muda minuto de entrega.</i></td>
+      <td class="func"><b>/admin/kds/estacoes</b>Voc&ecirc; configura as esta&ccedil;&otilde;es e o workflow de
+        cada uma. O layout f&iacute;sico dele vira <i>configura&ccedil;&atilde;o</i> aqui: cada bancada &eacute; uma
+        esta&ccedil;&atilde;o com a sua fila.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 13. O paralelo f&iacute;sico&rarr;digital &eacute; forte e
+        original.</td></tr>
+
+    <tr class="forte"><td class="tc">07:17</td>
+      <td class="ideia"><b>O segredo da expedi&ccedil;&atilde;o: organiza&ccedil;&atilde;o por n&uacute;meros e pratos</b>
+        <i>&Eacute; o cap&iacute;tulo mais alinhado com o MiseOn de todo o material.</i></td>
+      <td class="func"><b>/admin/kds/expeditor</b>Tickets identificados por n&uacute;mero, senha ou
+        mesa, agrupados por pedido, com <span class="rota">expedido_em</span> e
+        <span class="rota">expedido_por</span> &mdash; quem expediu e quando.</td>
+      <td class="saida"><b>REELS novo + YOUTUBE</b>Gancho 08 e 13 se juntam num bloco.</td></tr>
+
+    <tr><td class="tc">20:13</td>
+      <td class="ideia"><b>Planejamento tribut&aacute;rio e o boom do delivery</b></td>
+      <td class="func"><b>/admin/fiscal &mdash; NF-e e NFC-e</b>Emiss&atilde;o e cancelamento pelo
+        pr&oacute;prio sistema.</td>
+      <td class="saida"><b>CARROSSEL</b>Nicho: assunto de dono, n&atilde;o de curioso.</td></tr>
+
+    <tr class="forte"><td class="tc">23:22</td>
+      <td class="ideia"><b>Margens e por que focar em bebidas pr&oacute;prias</b>
+        <i>A bebida &eacute; onde a margem est&aacute;.</i></td>
+      <td class="func"><b>/admin/financeiro &mdash; aba Margens</b>Ordena por
+        <span class="rota">margem_pct</span> e mostra qual item sustenta a loja. Foi assim que
+        se descobriu que a batata doce tem a melhor margem do Lanche do Paulista.</td>
+      <td class="saida"><b>REELS novo</b>Gancho 14.</td></tr>
+
+    <tr class="forte"><td class="tc">29:20</td>
+      <td class="ideia"><b>A guerra dos apps: migrando do iFood para o aplicativo pr&oacute;prio</b></td>
+      <td class="func"><b>Card&aacute;pio pr&oacute;prio + CRM &amp; RFM + Recupera&ccedil;&atilde;o de Vendas</b>Aqui o
+        MiseOn tem mais do que o material antigo contava: al&eacute;m de cupom e cashback, h&aacute;
+        segmenta&ccedil;&atilde;o RFM e recupera&ccedil;&atilde;o de carrinho e de Pix pendente.</td>
+      <td class="saida"><b>CARROSSEL + REELS L07</b>O CRM &amp; RFM nunca apareceu em nenhum
+        roteiro. Deveria.</td></tr>
+
+    <tr class="forte"><td class="tc">32:44</td>
+      <td class="ideia"><b>O sistema visual de comandas</b>
+        <i>Comanda que se l&ecirc; de longe, na correria.</i></td>
+      <td class="func"><b>KDS por esta&ccedil;&atilde;o + Painel de senhas na TV</b>E o painel espelha em
+        TV por Chromecast (<span class="rota">lib/googleCast.ts</span>), com modo card&aacute;pio ou
+        senhas.</td>
+      <td class="saida"><b>REELS novo</b>O Cast &eacute; ativo de demonstra&ccedil;&atilde;o e nunca foi usado.</td></tr>
+
+    <tr><td class="tc">37:31</td>
+      <td class="ideia"><b>Dicas de SEO e fotos para vender mais no iFood</b></td>
+      <td class="func"><b>JSON-LD + fallback de foto + descri&ccedil;&atilde;o livre</b>Mesma resposta do
+        corte 7:57 do V&iacute;deo 1, agora com uma hora de autoridade por tr&aacute;s.</td>
+      <td class="saida"><b>REELS L05 / L06</b>Refor&ccedil;o.</td></tr>
+
+    <tr><td class="tc">50:37</td>
+      <td class="ideia"><b>Esfiha de pistache e ancoragem de pre&ccedil;os</b>
+        <i>Um item caro no card&aacute;pio faz os outros parecerem baratos.</i></td>
+      <td class="func"><b>Card&aacute;pio: De/Por e &ldquo;Selecionados pela casa&rdquo;</b>Compara&ccedil;&atilde;o de pre&ccedil;o
+        com a economia calculada, e escolha editorial da loja.</td>
+      <td class="saida"><b>CARROSSEL novo</b>Tema de vitrine que ainda n&atilde;o tem pe&ccedil;a.</td></tr>
+
+    <tr class="lacuna"><td class="tc">09:47 &middot; 13:21 &middot; 43:00 &middot; 54:04</td>
+      <td class="ideia"><b>Hist&oacute;ria do av&ocirc;, sucess&atilde;o familiar, por que n&atilde;o virar franquia</b></td>
+      <td class="func"><b>Nada</b>&Eacute; conte&uacute;do humano, e &eacute; o que faz o v&iacute;deo dele ser bom.</td>
+      <td class="saida"><b>N&Atilde;O USAR</b>N&atilde;o force sistema onde n&atilde;o cabe.</td></tr>
+  </table>
+</section>
+
+
+<section id="v3">
+  <p class="numsec">V&iacute;deo 3</p>
+  <h2>Como ter lucro no seu restaurante</h2>
+  <div class="fichavid">
+    <p><b>Canal</b>Marcelo Baccarini com Sergio Molinari &middot; 1h12 &middot; live</p>
+    <p><b>Quem</b>Sergio Molinari: fundador da Food Consulting, professor da ESPM, curador do
+    Foodservice Panel, consultor de mais de 100 empresas do setor em 5 anos. E Larissa,
+    franqueada de cafeteria.</p>
+    <p><b>Por que importa</b>&Eacute; o &uacute;nico dos tr&ecirc;s que ataca <strong>lucro</strong>, n&atilde;o
+    faturamento &mdash; e &eacute; onde est&aacute; o melhor n&uacute;mero de abertura de toda a pesquisa.</p>
+    <p><b>Aviso de m&eacute;todo</b>Capturei a legenda at&eacute; os 31 minutos; depois disso o YouTube
+    cortou a captura. O mapa cobre o primeiro tempo, que &eacute; o de tese.</p>
+  </div>
+
+  <table class="cortes">
+    <tr><th class="tc">Corte</th><th class="ideia">A ideia do trecho</th>
+        <th class="func">A tela do MiseOn que responde</th><th class="saida">O que sai disso</th></tr>
+
+    <tr class="forte"><td class="tc">0:00&ndash;0:20</td>
+      <td class="ideia"><b>&ldquo;Qual &eacute; a f&oacute;rmula do lucro? Repare que eu n&atilde;o disse venda, eu disse
+        lucro &mdash; muita gente at&eacute; vende bastante, mas n&atilde;o v&ecirc; a cor do dinheiro.&rdquo;</b></td>
+      <td class="func"><b>A tese da marca inteira</b>&Eacute; a frase que justifica o pilar &ldquo;a conta&rdquo;.
+        Serve de abertura do v&iacute;deo longo.</td>
+      <td class="saida"><b>YOUTUBE</b>Abertura do longo de outubro.</td></tr>
+
+    <tr class="forte"><td class="tc">2:30&ndash;3:10</td>
+      <td class="ideia"><b>A maioria dos restaurantes tem margem de 3 a 5%. Alguns passam de
+        20%.</b>
+        <i>&ldquo;A maioria parece que vende o almo&ccedil;o mesmo para pagar o jantar.&rdquo;</i></td>
+      <td class="func"><b>/admin/financeiro &mdash; Margens e DRE</b>A pergunta &ldquo;voc&ecirc; est&aacute; nos 3
+        ou nos 20?&rdquo; s&oacute; tem resposta com custo por item fechado.</td>
+      <td class="saida"><b>REELS novo</b><strong>Gancho 1 da lista.</strong> &Eacute; o melhor n&uacute;mero
+        de abertura que existe nos tr&ecirc;s v&iacute;deos.</td></tr>
+
+    <tr class="forte"><td class="tc">5:40&ndash;7:00</td>
+      <td class="ideia"><b>&ldquo;Dois grandes elementos sequestram parte do teu faturamento: o CMV
+        &mdash; em alguns casos 40% &mdash; e m&atilde;o de obra.&rdquo;</b></td>
+      <td class="func"><b>DRE + Custos Operacionais</b>CMV por item vem da ficha; o gasto fixo
+        mensal (incluindo folha) &eacute; rateado pela expectativa de vendas e entra no custo de cada
+        item.</td>
+      <td class="saida"><b>REELS + YOUTUBE</b>Gancho 3.</td></tr>
+
+    <tr><td class="tc">7:00&ndash;8:00</td>
+      <td class="ideia"><b>&ldquo;Proposta de valor mal gerida pode demorar mais para quebrar, ou
+        quebrar maior. Mas vai quebrar.&rdquo;</b></td>
+      <td class="func"><b>Posicionamento</b>Encantamento sem gest&atilde;o quebra. &Eacute; a ponte entre o
+        pilar da vitrine e o pilar da conta.</td>
+      <td class="saida"><b>CARROSSEL novo</b>Tema de autoridade.</td></tr>
+
+    <tr class="lacuna"><td class="tc">16:00&ndash;17:30</td>
+      <td class="ideia"><b>Restaurante sem gar&ccedil;om, autosservi&ccedil;o, mesa comunit&aacute;ria</b>
+        <i>&ldquo;Aumenta o retorno por metro quadrado.&rdquo;</i></td>
+      <td class="func"><b>Totem e autoatendimento</b>Existe e est&aacute; pronto
+        (<span class="rota">/autoatendimento</span>, <span class="rota">/totem</span>) &mdash; mas
+        o v&iacute;deo fala de layout de sal&atilde;o, n&atilde;o de software.</td>
+      <td class="saida"><b>REELS de totem</b>Use o corte como abertura e responda com o totem.
+        Veja a Parte 05: <strong>o fluxo de Pix do totem est&aacute; liberado para filmar</strong>.</td></tr>
+
+    <tr><td class="tc">22:00&ndash;23:00</td>
+      <td class="ideia"><b>A fila como oportunidade de venda incremental</b>
+        <i>&ldquo;Upselling para o cara que est&aacute; esperando.&rdquo;</i></td>
+      <td class="func"><b>Adicionais e sugest&atilde;o no totem</b>Grupos de adicionais com m&iacute;nimo e
+        m&aacute;ximo, total reagindo a cada op&ccedil;&atilde;o, e sugest&atilde;o de sobremesa quando o carrinho n&atilde;o
+        tem nenhuma &mdash; com bot&atilde;o de pular.</td>
+      <td class="saida"><b>REELS novo</b>Cuidado com o defeito de grupo com m&iacute;nimo 2 (Parte 06).</td></tr>
+
+    <tr class="forte"><td class="tc">27:00&ndash;29:20</td>
+      <td class="ideia"><b>Ponto de equil&iacute;brio</b>
+        <i>&ldquo;Qual estrutura de custo eu posso ter para ser lucrativo… eu tenho que ter uma
+        refer&ecirc;ncia de qual &eacute; o tamanho poss&iacute;vel do faturamento&rdquo;, contando o aluguel.</i></td>
+      <td class="func"><b>Custos Operacionais</b>&Eacute; literalmente o c&aacute;lculo da aba: total de
+        gastos mensais &divide; expectativa de vendas = quanto cada item precisa carregar.</td>
+      <td class="saida"><b>REELS novo + YOUTUBE</b>Gancho 2. <strong>O casamento mais direto
+        entre um v&iacute;deo e uma tela em todo o material.</strong></td></tr>
+
+    <tr><td class="tc">28:30&ndash;29:20</td>
+      <td class="ideia"><b>Cliente recorrente empurra a loja para al&eacute;m do ponto de
+        equil&iacute;brio</b></td>
+      <td class="func"><b>CRM &amp; RFM + Cashback</b>Segmenta&ccedil;&atilde;o por rec&ecirc;ncia, frequ&ecirc;ncia e
+        valor, e cashback para trazer de volta.</td>
+      <td class="saida"><b>CARROSSEL novo</b>Tema que n&atilde;o tem pe&ccedil;a nenhuma hoje.</td></tr>
+  </table>
+</section>
+
+
+<section id="ganchos">
+  <p class="numsec">Parte 04</p>
+  <h2>Os 14 ganchos que sa&iacute;ram da an&aacute;lise</h2>
+  <p class="sub">Ordenados por for&ccedil;a de abertura, n&atilde;o por facilidade de grava&ccedil;&atilde;o. Todos
+  nascem de um corte real e t&ecirc;m uma tela real do outro lado &mdash; nenhum &eacute; slogan.</p>
+
+  <div class="gancho">
+    <p class="g">&ldquo;A maioria dos restaurantes trabalha o m&ecirc;s inteiro para uma margem de tr&ecirc;s
+    por cento. Alguns fazem vinte. A diferen&ccedil;a entre os dois n&atilde;o &eacute; o movimento.&rdquo;</p>
+    <p class="por">Responde com a aba Margens, ordenada. O espectador pergunta sozinho em qual
+    grupo ele est&aacute; &mdash; e n&atilde;o sabe responder. Esse desconforto &eacute; o melhor CTA que existe.</p>
+    <p class="fon">V3 2:30 &middot; tela: /admin/financeiro &rarr; Margens</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Voc&ecirc; sabe quanto do seu aluguel est&aacute; dentro de um &uacute;nico X-Bacon?&rdquo;</p>
+    <p class="por">A aba Custos Operacionais divide o gasto fixo mensal pela expectativa de
+    vendas e cobra isso no custo de cada item. Quase nenhum sistema de PDV faz e quase nenhum
+    dono sabe o n&uacute;mero.</p>
+    <p class="fon">V3 27:00 &middot; tela: /admin/financeiro &rarr; Custos Operacionais</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;O CMV come at&eacute; quarenta por cento do seu faturamento. E voc&ecirc; s&oacute; descobre
+    qual prato foi o culpado no m&ecirc;s seguinte.&rdquo;</p>
+    <p class="por">Corte para a ficha t&eacute;cnica recalculando quando a nota entra.</p>
+    <p class="fon">V3 5:40 &middot; tela: /admin/estoque &rarr; ficha t&eacute;cnica</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Subiu o pre&ccedil;o do frango. Oito pratos do seu card&aacute;pio mudaram de margem
+    agora. Voc&ecirc; consegue dizer quais?&rdquo;</p>
+    <p class="por">Ele mostra oito pratos com o mesmo frango como estrat&eacute;gia de compra. Voc&ecirc;
+    mostra a outra metade: o que acontece com os oito quando o insumo sobe.</p>
+    <p class="fon">V1 10:35 &middot; tela: /admin/compras + margens</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Esse bife tem que estar pesado e precificado. A&iacute; est&aacute; a parte mais cara do
+    prato.&rdquo; &mdash; e a balan&ccedil;a manda o peso direto para o sistema.</p>
+    <p class="por">Leitura de balan&ccedil;a comercial pelo navegador, sem digitar. &Eacute; o ativo mais
+    subaproveitado do produto e casa palavra por palavra com a fala dele.</p>
+    <p class="fon">V1 8:50 &middot; tela: /admin/balanca &middot; lib/balancaWebHID.ts</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Na rua o cliente acha a loja pelo endere&ccedil;o. Na internet, pelas palavras. E o
+    Google nem sabe que voc&ecirc; vende coxinha.&rdquo;</p>
+    <p class="por">O card&aacute;pio publica os pratos em dado estruturado. D&aacute; para mostrar a busca
+    encontrando um prato espec&iacute;fico &mdash; prova ao vivo, sem afirmar n&uacute;mero de convers&atilde;o.</p>
+    <p class="fon">V1 7:57 &middot; lib/jsonLdCardapio.ts</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Duas mil e trezentas esfihas numa noite. Quantos pedidos a sua cozinha
+    aguenta antes de come&ccedil;ar a perder um?&rdquo;</p>
+    <p class="por">Corte para o KDS com tickets por esta&ccedil;&atilde;o e o tempo mudando de cor.</p>
+    <p class="fon">V2 00:00 &middot; tela: /admin/kds e /admin/kds/expeditor</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Ele separa os pedidos em par e &iacute;mpar no varal para ganhar vinte segundos.
+    Vinte segundos.&rdquo;</p>
+    <p class="por">E a&iacute; voc&ecirc; mostra a expedi&ccedil;&atilde;o por n&uacute;mero na tela, onde ningu&eacute;m procura
+    pedido nenhum. O respeito pelo m&eacute;todo dele &eacute; o que d&aacute; licen&ccedil;a para mostrar o seu.</p>
+    <p class="fon">V1 13:18 &middot; tela: /admin/kds/expeditor</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Se voc&ecirc; n&atilde;o entregar o pedido ao motoboy em dez minutos, o algoritmo
+    entende que a sua opera&ccedil;&atilde;o &eacute; ruim e te rebaixa.&rdquo;</p>
+    <p class="por">Tempo por etapa, em cor, por esta&ccedil;&atilde;o. Aqui voc&ecirc; fala de mecanismo &mdash; nunca
+    prometa posi&ccedil;&atilde;o no ranking.</p>
+    <p class="fon">V1 13:44 &middot; tela: /admin/kds</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Ele mudou a bancada de lugar para ganhar minutos. Voc&ecirc; pode mudar a fila da
+    cozinha sem mover um m&oacute;vel.&rdquo;</p>
+    <p class="por">Esta&ccedil;&otilde;es configur&aacute;veis com workflow pr&oacute;prio: o layout f&iacute;sico dele vira
+    configura&ccedil;&atilde;o na sua tela. Paralelo original, ningu&eacute;m no nicho faz.</p>
+    <p class="fon">V2 04:56 &middot; tela: /admin/kds/estacoes</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Custo 60, plataforma 26, lucro 15. Essa &eacute; a conta de quem mais vende delivery
+    no pa&iacute;s. Qual &eacute; a sua?&rdquo;</p>
+    <p class="por">DRE gerencial na tela, com o custo vindo da ficha. Fecha com a pergunta,
+    n&atilde;o com a promessa.</p>
+    <p class="fon">V1 14:29 &middot; tela: /admin/financeiro &rarr; DRE</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;O logotipo dele &eacute; preto. O fundo da plataforma &eacute; branco. A marca sumiu.&rdquo;</p>
+    <p class="por">No card&aacute;pio pr&oacute;prio a marca &eacute; a p&aacute;gina inteira &mdash; e o contraste do texto se
+    corrige sozinho sobre a cor da loja.</p>
+    <p class="fon">V1 7:28 &middot; lib/personalizacao.ts</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;Ele manda 700 gramas de prote&iacute;na e cobra como se fossem 100.&rdquo;</p>
+    <p class="por">Mudou a gramagem na ficha, mudou o custo e a margem na frente da c&acirc;mera.</p>
+    <p class="fon">V1 9:49 &middot; tela: ficha t&eacute;cnica</p>
+  </div>
+
+  <div class="gancho">
+    <p class="g">&ldquo;A bebida &eacute; onde est&aacute; a margem. E provavelmente n&atilde;o &eacute; o seu carro-chefe que
+    paga a conta.&rdquo;</p>
+    <p class="por">Aba Margens ordenada: o item mais vendido quase nunca &eacute; o de melhor margem.
+    No Lanche do Paulista, a batata doce ganha do X-Bacon.</p>
+    <p class="fon">V2 23:22 &middot; tela: /admin/financeiro &rarr; Margens</p>
+  </div>
+</section>
+
+
+<section id="po">
+  <p class="numsec">Parte 05</p>
+  <h2>Corre&ccedil;&otilde;es de produto</h2>
+  <p class="sub">Fui ler o c&oacute;digo em vez de acreditar no material antigo. Quatro coisas que o
+  manual e os roteiros afirmam sobre o pr&oacute;prio MiseOn e que <strong>n&atilde;o batem com o que est&aacute;
+  em produ&ccedil;&atilde;o</strong>. Duas s&atilde;o a favor do produto.</p>
+
+  <table class="tabela">
+    <tr><th>O que o material diz</th><th>O que o c&oacute;digo diz</th><th>Consequ&ecirc;ncia</th></tr>
+    <tr>
+      <td>&ldquo;O custo fixo &mdash; aluguel, luz, a conta de &aacute;gua &mdash; ainda n&atilde;o &eacute; rateado por prato.&rdquo;
+        <br><span class="rota">roteiro-youtube, bloco 6</span></td>
+      <td><strong>Falso.</strong> Existe a aba <b>Custos Operacionais</b> em
+        <span class="rota">/admin/financeiro</span>: pega o total dos gastos mensais, divide
+        pela expectativa de vendas e cobra no custo de cada item.</td>
+      <td>Voc&ecirc; estava <strong>pedindo desculpa por algo que o sistema faz</strong> &mdash; e que
+        &eacute; exatamente o assunto do V&iacute;deo 3. Vira gancho, n&atilde;o limita&ccedil;&atilde;o.</td>
+    </tr>
+    <tr>
+      <td>&ldquo;Totem, falha de Pix: a tela ainda pode mostrar Pedido enviado. N&atilde;o grave o fluxo
+        de pagamento do totem.&rdquo; <br><span class="rota">cozinha-de-conteudo, Parte 04</span></td>
+      <td><strong>Corrigido.</strong> Em <span class="rota">Totem.tsx</span> a falha de cobran&ccedil;a
+        retorna com erro e nunca chega &agrave; tela de sucesso; a conclus&atilde;o s&oacute; roda
+        &ldquo;depois do pagamento confirmado&rdquo;, com webhook <i>e</i> confer&ecirc;ncia pr&oacute;pria.</td>
+      <td><strong>O v&iacute;deo de totem e autoatendimento est&aacute; liberado.</strong> Confirme uma vez na
+        tela e grave.</td>
+    </tr>
+    <tr>
+      <td>O m&oacute;dulo de marketing &eacute; &ldquo;cupom, cashback e recupera&ccedil;&atilde;o&rdquo;.</td>
+      <td><strong>Subestimado.</strong> S&atilde;o oito blocos: Cupons, Banners de Vitrine, Cashback,
+        Recupera&ccedil;&atilde;o de Vendas, Meta Pixel &amp; GA4, Disparos WhatsApp, E-mails Transacionais
+        e <b>CRM &amp; RFM</b>.</td>
+      <td>CRM &amp; RFM nunca apareceu em pe&ccedil;a nenhuma, e &eacute; a resposta ao cap&iacute;tulo 29:20 do
+        V&iacute;deo 2.</td>
+    </tr>
+    <tr>
+      <td>&mdash; (nunca citado)</td>
+      <td><strong>Balan&ccedil;a por WebHID/WebSerial</strong> (Toledo, Filizola, Prix 3), lendo peso
+        direto no navegador. E <strong>Google Cast</strong> espelhando card&aacute;pio ou painel de
+        senhas na TV.</td>
+      <td>Dois ativos de demonstra&ccedil;&atilde;o fortes, prontos, que nenhum roteiro usava.</td>
+    </tr>
+  </table>
+
+  <div class="regra">
+    <span class="rot">E uma corre&ccedil;&atilde;o contra o produto</span>
+    <p>Existe <span class="rota">src/lib/localOfflineQueue.ts</span> &mdash; &ldquo;se a internet cair no
+    pico de s&aacute;bado, o caixa continua registrando vendas&rdquo;. Seria um gancho excelente.
+    <strong>N&atilde;o use.</strong> O m&oacute;dulo n&atilde;o &eacute; importado em lugar nenhum do app: &eacute; c&oacute;digo
+    morto. Enquanto n&atilde;o estiver ligado ao PDV, contingência offline n&atilde;o &eacute; funcionalidade e
+    n&atilde;o entra em v&iacute;deo.</p>
+  </div>
+</section>
+
+
+<section id="lacunas">
+  <p class="numsec">Parte 06</p>
+  <h2>O que os v&iacute;deos pedem e n&oacute;s n&atilde;o temos</h2>
+  <p class="sub">Isto &eacute; backlog de produto, n&atilde;o de conte&uacute;do. Mas &eacute; tamb&eacute;m a lista do que
+  n&atilde;o pode ser prometido em v&iacute;deo nenhum.</p>
+  <ul>
+    <li><strong>Contesta&ccedil;&atilde;o de cancelamento fraudulento</strong> (V1 0:22). O golpe da foto
+    gerada por IA &eacute; a dor mais citada e n&atilde;o temos resposta.</li>
+    <li><strong>Reaproveitamento de subproduto</strong> (V1 9:30) &mdash; o doce que quebrou e vira
+    brinde em vez de perda.</li>
+    <li><strong>Relat&oacute;rio por faixa de hor&aacute;rio</strong> &mdash; o &ldquo;lanche da tarde &eacute; 12% do
+    faturamento&rdquo; n&atilde;o tem onde ser visto.</li>
+    <li><strong>Cupom com janela de hora</strong> &mdash; desconto s&oacute; depois das duas da tarde.</li>
+    <li><strong>Reserva de mesa</strong> (V3 21:00) &mdash; Molinari aponta que o Brasil &eacute; ruim nisso;
+    quem resolver, ganha o assunto.</li>
+    <li><strong>Grupo de adicionais com m&iacute;nimo 2</strong> &mdash; o selo vira &ldquo;Pronto&rdquo; com uma op&ccedil;&atilde;o
+    marcada. Defeito conhecido: evite esse caso em qualquer grava&ccedil;&atilde;o.</li>
+  </ul>
+</section>
+
+<footer class="rodape-doc">
+  <p>V&iacute;deo 1 e V&iacute;deo 3 foram transcritos pela legenda do pr&oacute;prio YouTube nesta data; os
+  minutos s&atilde;o os do player. O V&iacute;deo 2 teve a legenda bloqueada e foi mapeado pelos cap&iacute;tulos
+  publicados pelo autor. As telas citadas foram conferidas no c&oacute;digo em
+  <span class="rota">src/</span>, n&atilde;o no material de marketing anterior &mdash; foi assim que as
+  quatro diverg&ecirc;ncias da Parte 05 apareceram.</p>
+</footer>
+
+</main>
+</div>
+</div>
+</html>
