@@ -16,9 +16,14 @@ Se você gastou tempo procurando algo que deveria estar aqui, acrescente.
 segura nada. Rode `npm run build` e `npx vitest run` ANTES de empurrar, não
 depois.
 
-**Nunca grave nem mexa no tenant `natureba`.** É cliente pagante real
-(implantado 02/09/2026). O tenant de provas é `lanchepaulista` — é nele que se
-testa, se grava vídeo e se tira print.
+**Nunca grave nem mexa no tenant `natureba`.** Não é cliente pagante — ainda.
+É o cadastro preparado para a visita comercial que ainda não aconteceu (zero
+pedidos processados, medido em 15/09/2026), e é essa tela que o dono vai ver.
+Mexer nela queima a primeira impressão. O tenant de provas é `lanchepaulista`
+— é nele que se testa, se grava vídeo e se tira print.
+
+**Não existe cliente pagante.** Nenhum depoimento, print de cliente, logotipo
+de loja ou "+X restaurantes" pode aparecer em material de marketing.
 
 **Leia a função em produção antes de reescrever.** `pg_get_functiondef` é a
 verdade; a migration versionada pode estar defasada nos dois sentidos. Isso já
@@ -96,6 +101,21 @@ e nada casa — em silêncio. Use classes POSIX: `[0-9]`, `[[:space:]]`.
   valor. Gatilho que grava na própria tabela precisa de guarda de recursão.
 - `revoke ... from anon` não basta: se `PUBLIC` tem o grant, `anon` herda.
   Confira `proacl` — um `=X` inicial é o PUBLIC.
+- E o contrário também: `revoke ... from public` **não** tira o `anon`. Este
+  projeto tem `DEFAULT PRIVILEGES` (`pg_default_acl`) dando ALL/EXECUTE a
+  `anon` e `authenticated` **diretamente** em toda tabela, view e função nova
+  de `public`. Ou seja: **view criada é view publicada**, e função criada é
+  função exposta em `/rest/v1/rpc/`. Para fechar de verdade é preciso revogar
+  dos três — `public`, `anon`, `authenticated` — e reconceder a quem precisa.
+  Já mordeu duas vezes em 16/09/2026, nas duas direções.
+- View de dado sensível pendurada em tabela pública não se protege com
+  `security_invoker`. `pub_produtos` libera produto disponível para o mundo
+  (é o cardápio, está certo), então qualquer view de custo/margem sobre
+  `produtos` herda isso. Carregue o predicado de acesso (`fn_meu_acesso`)
+  dentro da própria view.
+- Função `SECURITY DEFINER` que recebe `loja_id` por parâmetro precisa
+  perguntar `fn_meu_acesso(p_loja_id)` no corpo. DEFINER ignora RLS: sem a
+  guarda, troca-se o uuid e lê-se a loja do concorrente.
 - `CREATE OR REPLACE VIEW` não muda o tipo de uma coluna existente. Derrube e
   recrie.
 
