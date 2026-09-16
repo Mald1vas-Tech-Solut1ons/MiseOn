@@ -579,7 +579,14 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'DRE gerencial automático mostrando CMV, faturamento e margem real.': 'Automatic P&L management showing COGS, revenue, and real margin.',
   'Interface rápida e moderna para autoatendimento no celular do cliente.': 'Fast, modern self-service interface on customer\'s phone.',
   'Aplicação de cupons, desconto de cashback e Pix direto na conta.': 'Coupon application, cashback discount, and instant Pix to account.',
-  'Links de acesso sem login para chamada de senhas por voz e menu board 4K.': 'Login-free access links for voice order callouts and 4K menu board.',
+    'Links de acesso sem login para chamada de senhas por voz e menu board 4K.': 'Login-free access links for voice order callouts and 4K menu board.',
+
+  // ── Aba Margens do Financeiro: rótulo honesto quando o rateio não fecha ──
+  // "Sem margem" substitui o antigo "R$ NaN": margem desconhecida não é margem
+  // zero. O título perde o "(Após rateio)" quando o rateio não se aplica.
+  'Sem margem': 'No margin',
+  'Lucro Líquido por Produto': 'Net Profit per Product',
+  'Lucro Líquido por Produto (Após rateio)': 'Net Profit per Product (After overhead)',
 
   // Módulo Fiscal & landing de recursos
   'Emissão de Nota Fiscal (NFC-e / NF-e) simplificada para restaurantes e deliveries': 'Simplified Tax Invoice Emission (NFC-e / NF-e) for restaurants and deliveries',
@@ -1628,7 +1635,6 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Isenta a taxa se o subtotal atingir este valor (0 = sem frete grátis).': 'Waives the fee when the subtotal reaches this amount (0 = no free delivery).',
   'Já está com o seu pedido?': 'Already got your order?',
   'Ligue ou desligue qualquer recurso individualmente para atender exatamente a rotina da sua casa (ex: buffet no almoço + pizzaria à noite).': 'Turn any feature on or off individually to match your own routine (e.g. buffet at lunch + pizzeria at night).',
-  'Lucro Líquido por Produto (Após rateio)': 'Net Profit per Product (after allocation)',
   'Mais Recomendado': 'Most Recommended',
   'Manter a confidencialidade das suas credenciais de acesso e das contas dos membros da sua equipe.': 'Keep your access credentials and those of your team members confidential.',
   'Métricas & Indicadores de Tempo por Etapa': 'Metrics & Time Indicators per Stage',

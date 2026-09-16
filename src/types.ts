@@ -298,15 +298,30 @@ export interface GrupoOpcoes {
   opcoes: Opcao[];
 }
 
+/**
+ * Uma linha de `vw_custo_produto`.
+ *
+ * Os quatro números derivados vêm NULOS quando o sistema não sabe — produto
+ * sem ficha técnica, insumo com embalagem suspeita, loja sem base para ratear
+ * custo fixo. Nulo aqui é resposta, não ausência de resposta: custo
+ * desconhecido não é custo zero, e margem desconhecida não é 100%. Quem
+ * renderiza tem de mostrar `motivo_incerteza` em vez de imprimir um número.
+ */
 export interface ProdutoCusto {
   produto_id: string;
   nome: string;
   preco_venda: number;
-  custo_insumos: number;
-  taxa_rateio: number;
-  lucro_bruto: number;
-  lucro_liquido: number;
-  margem_pct: number;
+  custo_insumos: number | null;
+  taxa_rateio: number | null;
+  lucro_bruto: number | null;
+  lucro_liquido: number | null;
+  margem_pct: number | null;
+  custo_confiavel: boolean;
+  motivo_incerteza: string | null;
+  rateio_confiavel: boolean;
+  /** VENDA_MEDIDA · EXPECTATIVA · SEM_BASE */
+  rateio_base: string | null;
+  rateio_motivo: string | null;
 }
 
 export interface InsumoRendimentoJSON {

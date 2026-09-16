@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   TrendingUp, TrendingDown, DollarSign, Calculator, Save, Receipt,
-  ShoppingBag, Ticket, Bike, Store, XCircle, Banknote, CreditCard, QrCode,
+    ShoppingBag, Ticket, Bike, Store, XCircle, Banknote, CreditCard, QrCode, HelpCircle,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { supabase } from '../../lib/supabase';
@@ -374,21 +374,50 @@ export default function Financeiro() {
         </div>
       )}
 
-      {aba === 'MARGENS' && (
+            {aba === 'MARGENS' && (() => {
+        // O rateio de custo fixo pode não se aplicar a um produto: a view
+        // devolve `taxa_rateio` NULA quando não há custo fixo cadastrado ou
+        // expectativa de vendas. Nesse caso a lista inteira deixa de ser "após
+        // rateio", e o título não pode prometer o que o sistema não calculou.
+        const algumSemRateio = produtos.some((p) => p.taxa_rateio === null);
+        return (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <p className="mb-2 text-sm font-semibold dark:text-gray-200">{tDynamic('Lucro Líquido por Produto (Após rateio)')}</p>
+          <p className="mb-2 text-sm font-semibold dark:text-gray-200">
+            {tDynamic(algumSemRateio ? 'Lucro Líquido por Produto' : 'Lucro Líquido por Produto (Após rateio)')}
+          </p>
           <div className="space-y-3">
             {produtos.map((p) => {
-              const margemBaixa = p.margem_pct !== null && p.margem_pct < 30;
-              const prejuizo = Number(p.lucro_liquido) < 0;
+              // Margem NULA não é margem zero. Enquanto o custo não fecha, a
+              // tela diz o que falta em vez de estampar um percentual que o
+              // lojista levaria para uma decisão de preço.
+                            const semNumero = p.margem_pct === null;
+              const margemBaixa = !semNumero && Number(p.margem_pct) < 30;
+              const prejuizo = p.lucro_liquido !== null && Number(p.lucro_liquido) < 0;
+              // Rateio indefinido não é rateio zero: "R$ 0,00" sob o rótulo
+              // "Custos Fixos" inventaria um custo que o rateio não conseguiu
+              // dividir. Mostra "—" e a razão, como já se faz com a margem.
+              const rateioIndefinido = p.taxa_rateio === null;
+              const lucroIndefinido = p.lucro_liquido === null;
               return (
                 <div key={p.produto_id} className={`rounded-2xl bg-white dark:bg-gray-900 p-4 shadow-sm border ${prejuizo ? 'border-red-300 dark:border-red-900' : 'border-gray-100 dark:border-gray-800'}`}>
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-base font-bold dark:text-gray-100">{p.nome}</p>
-                    <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${prejuizo ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : (margemBaixa ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400')}`}>
-                      {prejuizo || margemBaixa ? <TrendingDown size={12} /> : <TrendingUp size={12} />} {p.margem_pct ?? '0'}%
-                    </span>
+                    {semNumero ? (
+                      <span className="flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                        <HelpCircle size={12} /> {tDynamic('Sem margem')}
+                      </span>
+                    ) : (
+                      <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${prejuizo ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : (margemBaixa ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400')}`}>
+                        {prejuizo || margemBaixa ? <TrendingDown size={12} /> : <TrendingUp size={12} />} {p.margem_pct}%
+                      </span>
+                    )}
                   </div>
+
+                  {(p.motivo_incerteza || (!p.rateio_confiavel && p.rateio_motivo)) && (
+                    <p className="mb-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+                      {p.motivo_incerteza || p.rateio_motivo}
+                    </p>
+                  )}
                   <div className="grid grid-cols-4 gap-2 text-center text-xs">
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
                       <p className="text-xs opacity-80 uppercase tracking-wide text-gray-400 mb-1">Venda</p>
@@ -399,25 +428,30 @@ export default function Financeiro() {
                       <p className="font-semibold text-orange-600 dark:text-orange-400">-{fmt(Number(p.custo_insumos))}</p>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
-                      <p className="text-xs opacity-80 uppercase tracking-wide text-gray-400 mb-1">Custos Fixos</p>
-                      <p className="font-semibold text-orange-600 dark:text-orange-400">-{fmt(Number(p.taxa_rateio))}</p>
+                                            <p className="text-xs opacity-80 uppercase tracking-wide text-gray-400 mb-1">Custos Fixos</p>
+                      <p className="font-semibold text-orange-600 dark:text-orange-400">
+                        {rateioIndefinido ? '—' : `-${fmt(Number(p.taxa_rateio))}`}
+                      </p>
                     </div>
                     <div className={`${prejuizo ? 'bg-red-50 dark:bg-red-900/10' : 'bg-green-50 dark:bg-green-900/10'} rounded-lg p-2`}>
-                      <p className="text-xs opacity-80 uppercase tracking-wide text-gray-400 mb-1">Líq. Real</p>
-                      <p className={`font-bold ${prejuizo ? 'text-red-600 dark:text-red-400' : 'text-green-700 dark:text-green-400'}`}>{fmt(Number(p.lucro_liquido))}</p>
+                                            <p className="text-xs opacity-80 uppercase tracking-wide text-gray-400 mb-1">Líq. Real</p>
+                      <p className={`font-bold ${prejuizo ? 'text-red-600 dark:text-red-400' : 'text-green-700 dark:text-green-400'}`}>
+                        {lucroIndefinido ? '—' : fmt(Number(p.lucro_liquido))}
+                      </p>
                     </div>
                   </div>
                 </div>
               );
             })}
-            {produtos.length === 0 && (
+                        {produtos.length === 0 && (
               <p className="py-10 text-center text-sm text-gray-400">
                 {tDynamic('Nenhum produto com ficha técnica ainda.')}
               </p>
             )}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {aba === 'CUSTOS_FIXOS' && (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4">
