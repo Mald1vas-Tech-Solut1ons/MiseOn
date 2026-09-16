@@ -124,6 +124,22 @@ if (!chaves.length) {
   process.exit(1);
 }
 
+// Sem cota na chave? --prompts imprime o texto de cada capa para colar no
+// app do Gemini (ou no AI Studio) e salvar o arquivo com o nome indicado.
+if (args.includes('--prompts')) {
+  for (const nome of chaves) {
+    const { arquivo, cena } = CAPAS[nome];
+    console.log(`
+===== ${arquivo}.jpg =====`);
+    console.log(`${cena}
+
+${ESTILO}`);
+  }
+  console.log(`
+Salve cada imagem em public/blog-covers/ com o nome do cabeçalho.`);
+  process.exit(0);
+}
+
 const chave = lerChave();
 console.log(`Gerando com ${MODELO}...`);
 
