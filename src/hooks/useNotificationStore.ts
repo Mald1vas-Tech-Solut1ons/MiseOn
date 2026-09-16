@@ -32,6 +32,11 @@ export interface AppNotification {
 
 const MAX_NOTIFICACOES = 100;
 
+/** Intervalo minimo entre duas idas ao banco na checagem automatica. */
+const JANELA_CHECAGEM_MS = 60_000;
+/** Piso quando o proprio lojista abre o sino e espera dado fresco. */
+const JANELA_CHECAGEM_FORCADA_MS = 10_000;
+
 export function useNotificationStore(lojaId?: string) {
   const toast = useToast();
   const [notificacoes, setNotificacoes] = useState<AppNotification[]>([]);
@@ -48,6 +53,16 @@ export function useNotificationStore(lojaId?: string) {
   useEffect(() => { excluidosRef.current = excluidos; }, [excluidos]);
   const toastRef = useRef(toast);
   useEffect(() => { toastRef.current = toast; });
+
+  // Trava de custo da checagem de itens criticos. A correcao acima depende de
+  // TODA a cadeia de callbacks continuar estavel; um unico `useCallback` com
+  // dependencia volatil reabre o laco, e o painel parado volta a martelar o
+  // banco. Isso ja aconteceu e custou caro: em 2026-09 o projeto estourou a
+  // cota de egress do plano gratuito (6,07 GB de 5,5 GB) e ficou restrito,
+  // com 6,3 milhoes de requisicoes acumuladas — 99% delas estas tres
+  // consultas. A trava limita o dano a uma passada por janela, nao importa
+  // quem chame nem quantas vezes.
+  const ultimaChecagemRef = useRef(0);
 
   // Carregar notificações salvas e lista de excluídos do LocalStorage
   useEffect(() => {
@@ -221,8 +236,18 @@ export function useNotificationStore(lojaId?: string) {
   const naoLidas = notificacoes.filter((n) => !n.lida).length;
 
   // Verificação ativa de estoque crítico e produtos indisponíveis no banco de dados (Modo Silencioso no Mount)
-  const verificarItensCriticos = useCallback(async () => {
+  const verificarItensCriticos = useCallback(async (forcar = false) => {
     if (!lojaId) return;
+
+    // Aba escondida nao precisa de alerta fresco: o KDS numa TV e o painel
+    // aberto num monitor secundario sao justamente os que ficam dias no ar.
+    if (!forcar && typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+
+    const agora = Date.now();
+    const janela = forcar ? JANELA_CHECAGEM_FORCADA_MS : JANELA_CHECAGEM_MS;
+    if (agora - ultimaChecagemRef.current < janela) return;
+    ultimaChecagemRef.current = agora;
+
     try {
       // 1. Insumos brutos em estoque crítico
       const { data: insumos } = await supabase

@@ -69,7 +69,9 @@ export function NotificationCenter({ lojaId }: NotificationCenterProps) {
   // Ao abrir a central de notificações, realizar uma checagem ativa de insumos e produtos críticos
   useEffect(() => {
     if (aberto) {
-      verificarItensCriticos();
+      // Abertura do sino e acao do lojista: pede dado fresco, sujeito ao piso
+      // curto da trava em useNotificationStore.
+      verificarItensCriticos(true);
     }
   }, [aberto, verificarItensCriticos]);
 
