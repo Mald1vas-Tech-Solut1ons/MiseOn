@@ -42,6 +42,37 @@ async function loadTsModule(relPath) {
   return import(`data:text/javascript;base64,${b64}`);
 }
 
+/**
+ * Largura e altura de um PNG ou JPEG, lidas do cabeçalho do arquivo.
+ *
+ * O WhatsApp precisa das dimensões declaradas na meta para decidir se baixa a
+ * imagem — sem elas ele desiste e manda o link sem miniatura (é o que está
+ * escrito no index.html, e já custou caro uma vez). Declarar um número chutado
+ * seria o mesmo problema com outra roupa, então aqui se mede.
+ */
+function dimensoesImagem(buffer) {
+  // PNG: assinatura de 8 bytes, depois o IHDR com largura e altura.
+  if (buffer.length > 24 && buffer.readUInt32BE(0) === 0x89504e47) {
+    return { largura: buffer.readUInt32BE(16), altura: buffer.readUInt32BE(20) };
+  }
+
+  // JPEG: percorre os marcadores até um SOF, que carrega as dimensões.
+  if (buffer.length > 4 && buffer.readUInt16BE(0) === 0xffd8) {
+    let i = 2;
+    while (i < buffer.length - 9) {
+      if (buffer[i] !== 0xff) { i++; continue; }
+      const marcador = buffer[i + 1];
+      // SOF0..SOF15, menos DHT (c4), JPG (c8) e DAC (cc), que não são frames.
+      if (marcador >= 0xc0 && marcador <= 0xcf && marcador !== 0xc4 && marcador !== 0xc8 && marcador !== 0xcc) {
+        return { altura: buffer.readUInt16BE(i + 5), largura: buffer.readUInt16BE(i + 7) };
+      }
+      i += 2 + buffer.readUInt16BE(i + 2);
+    }
+  }
+
+  return null;
+}
+
 const escapeHtml = (s) =>
   String(s)
     .replace(/&/g, '&amp;')
@@ -111,7 +142,7 @@ function faqJsonLd(data) {
 }
 
 /** Aplica meta + conteúdo de uma rota sobre o shell gerado pelo Vite. */
-function renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd, headExtra }) {
+function renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd, headExtra, imagem }) {
   let html = template;
 
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(title)}</title>`);
@@ -135,6 +166,42 @@ function renderPage(template, { title, description, canonicalUrl, bodyHtml, json
     /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/,
     `<meta property="og:url" content="${canonicalUrl}" />`
   );
+
+  // A prévia do link: sem isto todo artigo do blog era compartilhado com o
+  // ícone de 512x512 do app — a mesma figura para trinta textos diferentes.
+  // Com a capa, o card de cada matéria mostra o título dela.
+  if (imagem) {
+    html = html.replace(
+      /<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/,
+      `<meta property="og:image" content="${imagem.url}" />`
+    );
+    html = html.replace(
+      /<meta\s+property="og:image:width"\s+content="[^"]*"\s*\/?>/,
+      `<meta property="og:image:width" content="${imagem.largura}" />`
+    );
+    html = html.replace(
+      /<meta\s+property="og:image:height"\s+content="[^"]*"\s*\/?>/,
+      `<meta property="og:image:height" content="${imagem.altura}" />`
+    );
+    html = html.replace(
+      /<meta\s+property="og:image:type"\s+content="[^"]*"\s*\/?>/,
+      `<meta property="og:image:type" content="${imagem.tipo}" />`
+    );
+    html = html.replace(
+      /<meta\s+property="og:image:alt"\s+content="[^"]*"\s*\/?>/,
+      `<meta property="og:image:alt" content="${escapeHtml(title)}" />`
+    );
+    html = html.replace(
+      /<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/,
+      `<meta name="twitter:image" content="${imagem.url}" />`
+    );
+    // Capa larga pede card grande; com "summary" o X corta a imagem num
+    // quadradinho ao lado do texto.
+    html = html.replace(
+      /<meta\s+name="twitter:card"\s+content="[^"]*"\s*\/?>/,
+      '<meta name="twitter:card" content="summary_large_image" />'
+    );
+  }
 
   // Substitui o H1 genérico de fallback pelo conteúdo real da rota. O React
   // troca tudo dentro de #root ao montar, então isto some para o usuário e
@@ -279,7 +346,32 @@ async function main() {
     const ehBlog = routePath === '/blog' || routePath.startsWith('/blog/');
     const headExtra = ehBlog ? snippetAdSense() : '';
 
-    const html = renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd, headExtra });
+    // Cada matéria compartilha a própria capa. As dimensões saem do arquivo,
+    // não de um palpite — ver dimensoesImagem().
+    let imagem = null;
+    if (blogPost?.coverImage) {
+      const arquivo = path.join(ROOT, 'public', blogPost.coverImage.replace(/^\//, ''));
+      try {
+        const medidas = dimensoesImagem(await readFile(arquivo));
+        if (medidas) {
+          imagem = {
+            url: `${BASE}${blogPost.coverImage}`,
+            largura: medidas.largura,
+            altura: medidas.altura,
+            tipo: blogPost.coverImage.endsWith('.png') ? 'image/png' : 'image/jpeg',
+          };
+        } else {
+          console.warn(`  ! capa de ${routePath} em formato não reconhecido — prévia fica com o ícone`);
+        }
+      } catch {
+        throw new Error(
+          `${routePath}: a capa ${blogPost.coverImage} não existe em public/. ` +
+          `Gere com "node scripts/gerar-capa-blog.mjs" ou corrija o coverImage em blogData.ts.`
+        );
+      }
+    }
+
+    const html = renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd, headExtra, imagem });
 
     // Verificação do produto final, não da intenção: se o HTML gravado não
     // tiver exatamente um H1 e o título certo, algo no template mudou e os

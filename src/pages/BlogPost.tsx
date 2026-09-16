@@ -151,6 +151,8 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
         description={post.seo.description}
         keywords={post.seo.keywords}
         canonicalUrl={post.seo.canonicalUrl}
+        ogImage={`https://miseon.app.br${post.coverImage}`}
+        ogType="article"
         schemaJson={schemaJson}
       />
 

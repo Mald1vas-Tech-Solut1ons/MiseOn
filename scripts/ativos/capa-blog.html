@@ -5,15 +5,17 @@
 <!--
   Capa de artigo do blog — 1280x720 (16:9).
 
-  POR QUE 16:9: o card do hub (/blog) recorta em `aspect-video`. Capa em
-  quadrado ou 1.91:1 perdia justamente o título. O Open Graph aceita 16:9 sem
-  reclamar, então uma medida serve para os dois lugares.
+  POR QUE 16:9: o card do hub (/blog) recorta em `aspect-video`. Capa quadrada
+  ou 1.91:1 perdia justamente o título. O Open Graph aceita 16:9 sem reclamar,
+  então uma medida serve para os dois lugares.
 
-  As capas antigas eram fotos de banco/IA sem nenhuma marca — bonitas e
-  intercambiáveis com as de qualquer concorrente. Esta é tipografia e marca:
-  o leitor reconhece de onde veio antes de ler a primeira palavra.
+  ESTA CAPA É PROVISÓRIA POR NATUREZA. O padrão do blog é fotografia de cena
+  real, gerada em scripts/gerar-capas-ia.mjs. Este arquivo existe para o
+  artigo nunca ir ao ar sem capa própria — e cada matéria ganha um MOTIVO
+  gráfico diferente, porque capa repetida entre artigos faz o hub parecer
+  conteúdo reciclado.
 
-  Uso: window.CAPA.montar({ rotulo, titulo, destaque, apoio, assinatura }).
+  Uso: window.CAPA.montar({ rotulo, titulo, destaque, apoio, assinatura, motivo }).
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,17 +41,10 @@
     color: var(--nevoa);
   }
 
-  /* Luz de fundo: azul da marca no alto, brasa laranja embaixo à direita. */
-  .brilho {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(90px);
-    pointer-events: none;
-  }
-  .brilho-azul   { width: 760px; height: 760px; top: -340px; left: -180px; background: rgba(10, 92, 196, 0.42); }
-  .brilho-laranja{ width: 620px; height: 620px; bottom: -300px; right: -120px; background: rgba(252, 91, 36, 0.30); }
+  .brilho { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .brilho-azul    { width: 760px; height: 760px; top: -340px; left: -180px; background: rgba(10, 92, 196, 0.42); }
+  .brilho-laranja { width: 620px; height: 620px; bottom: -300px; right: -120px; background: rgba(252, 91, 36, 0.30); }
 
-  /* Malha técnica: dá textura sem competir com o texto. */
   .malha {
     position: absolute;
     inset: 0;
@@ -61,19 +56,13 @@
     -webkit-mask-image: radial-gradient(ellipse at 30% 40%, #000 25%, transparent 78%);
   }
 
-  /* A barra é o corte laranja da marca, o mesmo do lockup. */
   .barra {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 14px;
-    height: 100%;
+    position: absolute; top: 0; left: 0; width: 14px; height: 100%;
     background: linear-gradient(180deg, var(--laranja), #E34A1B 60%, var(--azul-claro));
   }
 
   .conteudo {
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     padding: 58px 68px 52px 86px;
     display: grid;
     grid-template-columns: 1fr 440px;
@@ -83,23 +72,17 @@
 
   .rotulo {
     grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    gap: 14px;
+    display: flex; align-items: center; gap: 14px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    font-size: 15px; font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase;
     color: rgba(234, 241, 251, 0.62);
   }
   .rotulo .pastilha {
-    padding: 7px 14px;
-    border-radius: 999px;
+    padding: 7px 14px; border-radius: 999px;
     border: 1px solid rgba(252, 91, 36, 0.45);
     background: rgba(252, 91, 36, 0.12);
-    color: #FFB59A;
-    letter-spacing: 0.16em;
+    color: #FFB59A; letter-spacing: 0.16em;
   }
   .rotulo .fio { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(234,241,251,0.25), transparent); }
 
@@ -107,51 +90,47 @@
 
   h1 {
     font-family: 'Sora', sans-serif;
-    font-weight: 800;
-    font-size: 82px;
-    line-height: 0.98;
-    letter-spacing: -0.028em;
-    text-wrap: balance;
+    font-weight: 800; font-size: 74px;
+    line-height: 1.0; letter-spacing: -0.028em;
   }
   h1 .destaque {
     display: block;
     background: linear-gradient(100deg, #FF8A5C 8%, var(--laranja) 52%, #FF7A45 92%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
   }
 
   .apoio {
-    margin-top: 30px;
-    max-width: 660px;
-    font-size: 24px;
-    line-height: 1.45;
-    font-weight: 500;
+    margin-top: 28px; max-width: 640px;
+    font-size: 23px; line-height: 1.45; font-weight: 500;
     color: rgba(234, 241, 251, 0.74);
   }
   .apoio strong { color: var(--nevoa); font-weight: 700; }
 
-  .grafico { align-self: center; justify-self: end; }
+  #grafico { align-self: center; justify-self: end; }
 
   .rodape {
     grid-column: 1 / -1;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
+    display: flex; align-items: flex-end; justify-content: space-between;
     border-top: 1px solid rgba(234, 241, 251, 0.12);
     padding-top: 26px;
   }
-  .rodape img { height: 52px; display: block; }
+  /* O lockup oficial tem o "ON" em vermelho escuro e o M em azul-marinho:
+     sobre a tinta da marca ele simplesmente some. O chip claro devolve o
+     contraste sem retocar a marca, que é o que não se faz. */
+  .rodape .marca {
+    display: inline-flex; align-items: center;
+    padding: 13px 24px; border-radius: 18px;
+    background: #FFFFFF;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  .rodape .marca img { height: 46px; display: block; }
   .rodape .dominio {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 16px;
-    letter-spacing: 0.12em;
+    font-size: 16px; letter-spacing: 0.12em;
     color: rgba(234, 241, 251, 0.5);
   }
   .rodape .assinatura {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-size: 15px; font-weight: 600; letter-spacing: 0.02em;
     color: rgba(234, 241, 251, 0.42);
   }
 </style>
@@ -165,62 +144,23 @@
 
   <div class="conteudo">
     <div class="rotulo">
-      <span class="pastilha" id="rotulo">GESTÃO FINANCEIRA</span>
+      <span class="pastilha" id="rotulo"></span>
       <span>BLOG MISEON</span>
       <span class="fio"></span>
     </div>
 
     <div class="texto">
-      <h1><span id="titulo">Loja lotada,</span><span class="destaque" id="destaque">dívida enorme</span></h1>
+      <h1><span id="titulo"></span><span class="destaque" id="destaque"></span></h1>
       <p class="apoio" id="apoio"></p>
     </div>
 
-    <!--
-      O desenho conta a tese antes do texto: as barras (movimento) sobem
-      enquanto a linha (margem) desce e cruza o zero. É o artigo inteiro em
-      um gesto.
-    -->
-    <svg class="grafico" width="440" height="374" viewBox="0 0 400 340" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="barra" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#2E7BE0" stop-opacity="0.95"/>
-          <stop offset="100%" stop-color="#0A5CC4" stop-opacity="0.35"/>
-        </linearGradient>
-        <linearGradient id="linha" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#FF8A5C"/>
-          <stop offset="100%" stop-color="#FC5B24"/>
-        </linearGradient>
-      </defs>
-
-      <!-- eixo zero da margem -->
-      <line x1="16" y1="214" x2="384" y2="214" stroke="#EAF1FB" stroke-opacity="0.18" stroke-dasharray="5 7"/>
-      <text x="384" y="206" text-anchor="end" fill="#EAF1FB" fill-opacity="0.38"
-            font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="1.5">ZERO</text>
-
-      <!-- movimento: sobe sempre -->
-      <g>
-        <rect x="26"  y="196" width="44" height="88"  rx="7" fill="url(#barra)"/>
-        <rect x="90"  y="170" width="44" height="114" rx="7" fill="url(#barra)"/>
-        <rect x="154" y="140" width="44" height="144" rx="7" fill="url(#barra)"/>
-        <rect x="218" y="106" width="44" height="178" rx="7" fill="url(#barra)"/>
-        <rect x="282" y="66"  width="44" height="218" rx="7" fill="url(#barra)"/>
-      </g>
-      <line x1="16" y1="284" x2="384" y2="284" stroke="#EAF1FB" stroke-opacity="0.22"/>
-
-      <!-- margem: desce e cruza o zero -->
-      <path d="M40 128 C 104 142, 148 166, 178 194 S 252 246, 318 286"
-            stroke="url(#linha)" stroke-width="6" stroke-linecap="round" fill="none"/>
-      <circle cx="318" cy="286" r="11" fill="#FC5B24"/>
-      <circle cx="318" cy="286" r="20" fill="#FC5B24" fill-opacity="0.22"/>
-
-      <text x="26" y="312" fill="#7FB0F2" font-family="JetBrains Mono, monospace"
-            font-size="13" letter-spacing="2.2">MOVIMENTO</text>
-      <text x="384" y="312" text-anchor="end" fill="#FC5B24" font-family="JetBrains Mono, monospace"
-            font-size="13" letter-spacing="2.2">MARGEM</text>
-    </svg>
+    <div id="grafico"></div>
 
     <div class="rodape">
-      <img src="lockup.png" alt="MiseOn" />
+      <!-- lockup.png é o recorte do logo oficial, mantido por
+           scripts/gerar-recortes-marca.mjs. Trocou o logo em public/? rode
+           aquele script antes de gerar capa, cartela ou vinheta. -->
+      <span class="marca"><img src="lockup.png" alt="MiseOn" /></span>
       <div style="text-align: right">
         <div class="assinatura" id="assinatura"></div>
         <div class="dominio">miseon.app.br/blog</div>
@@ -230,6 +170,158 @@
 </div>
 
 <script>
+  // Cada artigo tem o seu desenho: o motivo conta a tese antes da primeira
+  // palavra ser lida, e evita que duas capas pareçam a mesma capa.
+  const AZUL = '#2E7BE0', AZUL_FUNDO = '#0A5CC4', LARANJA = '#FC5B24';
+  const MONO = 'JetBrains Mono, monospace';
+
+  const abre = (w, h, vb) =>
+    `<svg width="${w}" height="${h}" viewBox="${vb}" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g-barra" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${AZUL}" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="${AZUL_FUNDO}" stop-opacity="0.35"/>
+        </linearGradient>
+        <linearGradient id="g-linha" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#FF8A5C"/><stop offset="100%" stop-color="${LARANJA}"/>
+        </linearGradient>
+      </defs>`;
+
+  const rotulo = (x, y, texto, cor, ancora) =>
+    `<text x="${x}" y="${y}" ${ancora ? `text-anchor="${ancora}"` : ''} fill="${cor}"
+       font-family="${MONO}" font-size="13" letter-spacing="2.2">${texto}</text>`;
+
+  const MOTIVOS = {
+    // Movimento sobe, margem desce e cruza o zero.
+    margem: () => abre(440, 374, '0 0 400 340') + `
+      <line x1="16" y1="214" x2="384" y2="214" stroke="#EAF1FB" stroke-opacity="0.18" stroke-dasharray="5 7"/>
+      ${rotulo(384, 206, 'ZERO', '#EAF1FB', 'end')}
+      <rect x="26"  y="196" width="44" height="88"  rx="7" fill="url(#g-barra)"/>
+      <rect x="90"  y="170" width="44" height="114" rx="7" fill="url(#g-barra)"/>
+      <rect x="154" y="140" width="44" height="144" rx="7" fill="url(#g-barra)"/>
+      <rect x="218" y="106" width="44" height="178" rx="7" fill="url(#g-barra)"/>
+      <rect x="282" y="66"  width="44" height="218" rx="7" fill="url(#g-barra)"/>
+      <line x1="16" y1="284" x2="384" y2="284" stroke="#EAF1FB" stroke-opacity="0.22"/>
+      <path d="M40 128 C 104 142, 148 166, 178 194 S 252 246, 318 286"
+            stroke="url(#g-linha)" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <circle cx="318" cy="286" r="11" fill="${LARANJA}"/>
+      <circle cx="318" cy="286" r="20" fill="${LARANJA}" fill-opacity="0.22"/>
+      ${rotulo(26, 312, 'MOVIMENTO', '#7FB0F2')}
+      ${rotulo(384, 312, 'MARGEM', LARANJA, 'end')}
+    </svg>`,
+
+    // O mesmo prato em três canais: o que sobra encolhe a cada um.
+    canais: () => {
+      const canais = [
+        { nome: 'BALCÃO', sobra: 176, tira: 0 },
+        { nome: 'PRÓPRIO', sobra: 124, tira: 52 },
+        { nome: 'APP', sobra: 72, tira: 104 },
+      ];
+      const base = 276, larg = 92, esq = 34, passo = 120;
+      return abre(440, 374, '0 0 400 340') + canais.map((c, i) => {
+        const x = esq + i * passo;
+        const yTira = base - c.sobra - c.tira;
+        return `
+          ${c.tira ? `<rect x="${x}" y="${yTira}" width="${larg}" height="${c.tira}" rx="7"
+              fill="${LARANJA}" fill-opacity="0.22" stroke="${LARANJA}" stroke-opacity="0.55"
+              stroke-width="2" stroke-dasharray="6 5"/>` : ''}
+          <rect x="${x}" y="${base - c.sobra}" width="${larg}" height="${c.sobra}" rx="7" fill="url(#g-barra)"/>
+          ${rotulo(x + larg / 2, 302, c.nome, i === 2 ? LARANJA : '#7FB0F2', 'middle')}`;
+      }).join('') + `
+      <line x1="20" y1="${base}" x2="380" y2="${base}" stroke="#EAF1FB" stroke-opacity="0.22"/>
+      ${rotulo(20, 40, 'O QUE SOBRA DO MESMO PRATO', '#EAF1FB')}
+    </svg>`;
+    },
+
+    // Funil: cada passo a mais antes do pedido derruba gente.
+    funil: () => {
+      const passos = [330, 250, 178, 96];
+      return abre(440, 374, '0 0 400 340') + passos.map((larg, i) => {
+        const y = 52 + i * 62;
+        const x = (400 - larg) / 2;
+        const ultimo = i === passos.length - 1;
+        return `<rect x="${x}" y="${y}" width="${larg}" height="44" rx="10"
+            fill="${ultimo ? LARANJA : 'url(#g-barra)'}" fill-opacity="${ultimo ? 0.9 : 1}"/>` +
+          (i < passos.length - 1
+            ? `<path d="M200 ${y + 46} l0 12 m-7 -7 l7 7 l7 -7" stroke="#EAF1FB" stroke-opacity="0.35"
+                 stroke-width="2" stroke-linecap="round" fill="none"/>`
+            : '');
+      }).join('') + `
+      ${rotulo(200, 34, 'ABRIU', '#7FB0F2', 'middle')}
+      ${rotulo(200, 330, 'PEDIU', LARANJA, 'middle')}
+    </svg>`;
+    },
+
+    // Quatro negócios dentro do mesmo negócio: a fatia que dá margem é
+    // pequena e não é a que leva o nome da loja.
+    mix: () => {
+      const fatias = [
+        { pct: 0.42, cor: 'rgba(46,123,224,0.85)' },
+        { pct: 0.24, cor: 'rgba(46,123,224,0.5)' },
+        { pct: 0.20, cor: 'rgba(252,91,36,0.9)' },
+        { pct: 0.14, cor: 'rgba(252,91,36,0.45)' },
+      ];
+      const cx = 200, cy = 170, r = 118, esp = 42;
+      let angulo = -Math.PI / 2;
+      const arcos = fatias.map((f) => {
+        const fim = angulo + f.pct * Math.PI * 2;
+        const grande = f.pct > 0.5 ? 1 : 0;
+        const p = (a, raio) => `${cx + raio * Math.cos(a)} ${cy + raio * Math.sin(a)}`;
+        const d = `M ${p(angulo, r)} A ${r} ${r} 0 ${grande} 1 ${p(fim, r)}
+                   L ${p(fim, r - esp)} A ${r - esp} ${r - esp} 0 ${grande} 0 ${p(angulo, r - esp)} Z`;
+        angulo = fim;
+        return `<path d="${d}" fill="${f.cor}"/>`;
+      }).join('');
+      return abre(440, 374, '0 0 400 340') + arcos + `
+      ${rotulo(200, 178, 'MIX', '#EAF1FB', 'middle')}
+      ${rotulo(20, 316, 'REVENDA', '#7FB0F2')}
+      ${rotulo(380, 316, 'PRODUÇÃO PRÓPRIA', LARANJA, 'end')}
+    </svg>`;
+    },
+
+    // O balcão visto de frente: cubas cheias, e a sobra do fim do serviço
+    // marcada por cima.
+    balcao: () => {
+      const cubas = [
+        { alt: 132, sobra: 18 },
+        { alt: 132, sobra: 46 },
+        { alt: 132, sobra: 8 },
+        { alt: 132, sobra: 62 },
+      ];
+      const larg = 82, esq = 30, passo = 94, base = 250;
+      return abre(440, 374, '0 0 400 340') + cubas.map((c, i) => {
+        const x = esq + i * passo;
+        const topo = base - c.alt;
+        return `
+          <rect x="${x}" y="${topo}" width="${larg}" height="${c.alt}" rx="8" fill="url(#g-barra)"/>
+          <rect x="${x}" y="${topo}" width="${larg}" height="${c.sobra}" rx="8"
+                fill="${LARANJA}" fill-opacity="0.85"/>
+          <line x1="${x - 6}" y1="${topo - 16}" x2="${x + larg + 6}" y2="${topo - 16}"
+                stroke="#EAF1FB" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round"/>`;
+      }).join('') + `
+      <rect x="18" y="${base}" width="364" height="14" rx="5" fill="#EAF1FB" fill-opacity="0.16"/>
+      ${rotulo(20, 300, 'CUBA', '#7FB0F2')}
+      ${rotulo(380, 300, 'SOBRA DO FIM DO SERVIÇO', LARANJA, 'end')}
+    </svg>`;
+    },
+
+    // Vazamento: o caixa do dia perdendo por frestas que ninguém vê.
+    vazamento: () => {
+      const gotas = [70, 140, 210, 280];
+      return abre(440, 374, '0 0 400 340') + `
+      <rect x="40" y="56" width="320" height="150" rx="16" fill="url(#g-barra)"/>
+      <rect x="40" y="56" width="320" height="150" rx="16" stroke="#EAF1FB" stroke-opacity="0.18"/>
+      ${rotulo(200, 140, 'CAIXA DO DIA', '#EAF1FB', 'middle')}
+      ` + gotas.map((x, i) => `
+        <path d="M${x} 206 l0 ${40 + i * 14}" stroke="${LARANJA}" stroke-opacity="0.55"
+              stroke-width="3" stroke-linecap="round" stroke-dasharray="4 8"/>
+        <circle cx="${x}" cy="${252 + i * 14}" r="${7 - i * 0.6}" fill="${LARANJA}"/>
+      `).join('') + `
+      ${rotulo(20, 322, 'PERDAS DILUÍDAS EM MILHARES DE VENDAS', '#EAF1FB')}
+    </svg>`;
+    },
+  };
+
   window.CAPA = {
     montar(dados) {
       document.getElementById('rotulo').textContent = dados.rotulo;
@@ -237,6 +329,8 @@
       document.getElementById('destaque').textContent = dados.destaque;
       document.getElementById('apoio').innerHTML = dados.apoio;
       document.getElementById('assinatura').textContent = dados.assinatura || '';
+      const motivo = MOTIVOS[dados.motivo] || MOTIVOS.margem;
+      document.getElementById('grafico').innerHTML = motivo();
       return document.fonts.ready;
     },
   };
