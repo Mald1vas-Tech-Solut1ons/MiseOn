@@ -25,6 +25,12 @@ Mexer nela queima a primeira impressão. O tenant de provas é `lanchepaulista`
 **Não existe cliente pagante.** Nenhum depoimento, print de cliente, logotipo
 de loja ou "+X restaurantes" pode aparecer em material de marketing.
 
+**Anúncio (AdSense) só no blog.** O snippet não vai no `index.html`: de lá
+ele desce para o `app.html`, que é o shell do /admin, do KDS e do cardápio
+da loja. O loader entra por `src/lib/adsense.ts` — prerender no HTML
+estático de `/blog*` e `<AdSenseBlog />` na navegação da SPA. O build
+falha se ele vazar para outra rota.
+
 **Leia a função em produção antes de reescrever.** `pg_get_functiondef` é a
 verdade; a migration versionada pode estar defasada nos dois sentidos. Isso já
 mordeu mais de uma vez.
