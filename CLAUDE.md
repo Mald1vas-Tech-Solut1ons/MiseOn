@@ -39,6 +39,17 @@ que o Google lê (`requestNonPersonalizedAds` e Consent Mode v2). No EEE,
 Reino Unido e Suíça quem pergunta é a CMP do Google: nosso banner se cala e
 escuta (`src/lib/cmpTcf.ts`).
 
+**Lead só entra por `registrarLead` (`src/lib/leads.ts`).** Até 17/09/2026 a
+tabela `leads` tinha zero linhas: o `/contato` gravava colunas que não existem e
+o formulário do Kiosk mandava segmento que o CHECK recusa e mostrava sucesso
+assim mesmo. Formulário novo chama a função e, se ela devolver `false`, mostra
+o WhatsApp com `whatsappDoLead`.
+
+**Ferramentas grátis (`/ferramentas`) não dependem do banco.** Conta em
+`src/lib/ferramentas.ts`, texto bilíngue em `src/data/ferramentasData.ts`. Nova
+ferramenta = dado + calculadora em `FerramentaPage.tsx` + rota em `App.tsx` +
+entrada em `scripts/public-routes.mjs`. Nada de número de mercado sem fonte.
+
 **Leia a função em produção antes de reescrever.** `pg_get_functiondef` é a
 verdade; a migration versionada pode estar defasada nos dois sentidos. Isso já
 mordeu mais de uma vez.

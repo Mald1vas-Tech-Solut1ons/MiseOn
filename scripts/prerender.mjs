@@ -234,6 +234,7 @@ async function main() {
   const { PAGE_META } = await loadTsModule('src/data/pageMeta.ts');
   const { LANDING_PAGES_DATA } = await loadTsModule('src/data/landingPagesData.ts');
   const { BLOG_POSTS } = await loadTsModule('src/data/blogData.ts');
+  const { FERRAMENTAS, HUB_FERRAMENTAS } = await loadTsModule('src/data/ferramentasData.ts');
   const { snippetAdSense } = await loadTsModule('src/lib/adsense.ts');
 
   // dist/app.html — shell da SPA para as rotas que NÃO dá para gerar
@@ -292,6 +293,7 @@ async function main() {
     const landing = LANDING_PAGES_DATA[slug];
     const meta = PAGE_META[routePath];
     const blogPost = routePath.startsWith('/blog/') ? BLOG_POSTS.find((p) => `/blog/${p.slug}` === routePath) : null;
+    const ferramenta = FERRAMENTAS.find((f) => f.path === routePath);
 
     let title, description, canonicalUrl, bodyHtml, jsonLd;
 
@@ -310,6 +312,30 @@ async function main() {
         datePublished: blogPost.publishedAt,
         mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl }
       })}</script>`;
+    } else if (routePath === HUB_FERRAMENTAS.path) {
+      title = HUB_FERRAMENTAS.seo.title;
+      description = HUB_FERRAMENTAS.seo.description;
+      canonicalUrl = HUB_FERRAMENTAS.seo.canonicalUrl;
+      bodyHtml = [
+        `<h1>${escapeHtml(HUB_FERRAMENTAS.h1.pt)}</h1>`,
+        `<p>${escapeHtml(HUB_FERRAMENTAS.resumo.pt)}</p>`,
+        `<ul>${FERRAMENTAS.map((f) => `<li><a href="${f.path}">${escapeHtml(f.nome.pt)}</a>: ${escapeHtml(f.resumo.pt)}</li>`).join('')}</ul>`,
+      ].join('\n      ');
+      jsonLd = '';
+    } else if (ferramenta) {
+      title = ferramenta.seo.title;
+      description = ferramenta.seo.description;
+      canonicalUrl = `${BASE}${ferramenta.path}`;
+      bodyHtml = [
+        `<h1>${escapeHtml(ferramenta.h1.pt)}</h1>`,
+        `<p>${escapeHtml(ferramenta.resumo.pt)}</p>`,
+        ...ferramenta.explicacao.map(
+          (b) => `<h2>${escapeHtml(b.titulo.pt)}</h2>${b.paragrafos.map((p) => `<p>${escapeHtml(p.pt)}</p>`).join('')}`
+        ),
+        '<h2>Perguntas frequentes</h2>',
+        ferramenta.faqs.map((q) => `<h3>${escapeHtml(q.pergunta.pt)}</h3><p>${escapeHtml(q.resposta.pt)}</p>`).join(''),
+      ].join('\n      ');
+      jsonLd = faqJsonLd({ faqs: ferramenta.faqs.map((q) => ({ pergunta: q.pergunta.pt, resposta: q.resposta.pt })) });
     } else if (landing) {
       title = landing.seo.title;
       description = landing.seo.description;

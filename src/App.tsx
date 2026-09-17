@@ -29,6 +29,8 @@ const Videos           = lazy(() => import('./pages/Videos'));
 const NicheLandingPage = lazy(() => import('./pages/landing/NicheLandingPage'));
 const EstoquePage      = lazy(() => import('./pages/landing/EstoquePage'));
 const Blog             = lazy(() => import('./pages/Blog'));
+const FerramentasHub   = lazy(() => import('./pages/ferramentas/FerramentasHub'));
+const FerramentaPage   = lazy(() => import('./pages/ferramentas/FerramentaPage'));
 const BlogPost         = lazy(() => import('./pages/BlogPost'));
 const PainelTV         = lazy(() => import('./pages/PainelTV'));
 const TvPareamento     = lazy(() => import('./pages/TvPareamento'));
@@ -205,6 +207,10 @@ export default function App() {
                 <Route path="/estrategia-de-marketing-para-restaurantes" element={<MarketingStrategyPage />} />
                 <Route path="/ajuda/estoque"             element={<EstoquePage />} />
                 <Route path="/blog"                      element={<Blog />} />
+                <Route path="/ferramentas"               element={<FerramentasHub />} />
+                <Route path="/ferramentas/calculadora-cmv"       element={<FerramentaPage slug="calculadora-cmv" />} />
+                <Route path="/ferramentas/preco-ifood"           element={<FerramentaPage slug="preco-ifood" />} />
+                <Route path="/ferramentas/markup-preco-de-venda" element={<FerramentaPage slug="markup-preco-de-venda" />} />
                 <Route path="/blog/:slug"                element={<BlogPost />} />
 
                 <Route path="/tv"            element={<TvPareamento />} />

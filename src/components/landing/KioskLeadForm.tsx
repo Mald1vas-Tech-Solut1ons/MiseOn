@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { ArrowRight, MessageCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { registrarLead, whatsappDoLead } from '../../lib/leads';
 import { Button, SuccessCelebration } from '../ui';
 import { zap } from './zap';
 import { useI18n } from '../../contexts/I18nContext';
@@ -58,10 +58,12 @@ export function KioskLeadForm({
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState('');
+  const [linkSocorro, setLinkSocorro] = useState('');
 
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
     setErro('');
+    setLinkSocorro('');
     if (!nome.trim() || !whatsapp.trim()) return setErro('Preencha seu nome e seu WhatsApp.');
     if (!segmento) return setErro('Selecione o segmento do seu negócio.');
 
@@ -69,21 +71,18 @@ export function KioskLeadForm({
     try {
       const mensagemDetalhada = `[MiseOn Kiosk Lead] Empresa: ${empresa.trim() || 'Não informada'} | Unidades: ${unidades} | Pedidos/dia: ${pedidosDia || 'Não informado'} | Interesse: ${interesse}`;
 
-      const { error } = await supabase.from('leads').insert({
-        nome: nome.trim(),
-        whatsapp: whatsapp.trim(),
-        email: email.trim() || null,
-        segmento,
-        cidade: cidade.trim() || null,
-        mensagem: mensagemDetalhada,
-        origem,
-      });
+      const dados = { nome, whatsapp, email, segmento, cidade, mensagem: mensagemDetalhada, origem };
+      const gravou = await registrarLead(dados);
 
       setEnviando(false);
 
-      if (error) {
-        // Se houver erro de Supabase, ainda oferece fallback pro WhatsApp
-        console.warn('Erro ao inserir lead:', error);
+      // Antes o erro caía num console.warn e a tela dizia "Solicitação
+      // Recebida!" do mesmo jeito: o lead sumia. Agora a falha fica visível e
+      // o WhatsApp já sai com os dados escritos.
+      if (!gravou) {
+        setLinkSocorro(whatsappDoLead(dados));
+        setErro('Não conseguimos enviar agora. Chame a gente no WhatsApp — seus dados já vão na mensagem.');
+        return;
       }
 
       setEnviado(true);
@@ -100,7 +99,8 @@ export function KioskLeadForm({
       if (onSuccess) onSuccess();
     } catch {
       setEnviando(false);
-      setEnviado(true);
+      setLinkSocorro(whatsappDoLead({ nome, whatsapp, email, segmento, cidade, origem }));
+      setErro('Não conseguimos enviar agora. Chame a gente no WhatsApp — seus dados já vão na mensagem.');
     }
   };
 
@@ -242,6 +242,16 @@ export function KioskLeadForm({
 
       {erro && (
         <p className={`text-sm font-medium text-red-400 ${compact ? '' : 'sm:col-span-2'}`}>{erro}</p>
+      )}
+      {linkSocorro && (
+        <a
+          href={linkSocorro}
+          target="_blank"
+          rel="noreferrer"
+          className={`inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-emerald-400 ${compact ? '' : 'sm:col-span-2'}`}
+        >
+          <MessageCircle size={16} /> {tDynamic('Chamar no WhatsApp')}
+        </a>
       )}
 
       <div className={compact ? '' : 'sm:col-span-2'}>

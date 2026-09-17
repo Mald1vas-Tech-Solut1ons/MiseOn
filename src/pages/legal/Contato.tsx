@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Building2, CheckCircle2, Mail, MapPin, MessageCircle, Send } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { registrarLead, whatsappDoLead } from '../../lib/leads';
 import { SEO } from '../../components/SEO';
 import FooterSEO from '../../components/FooterSEO';
 import MiseOnLogo from '../../components/MiseOnLogo';
@@ -16,6 +16,7 @@ export default function Contato() {
   const [enviando, setEnviando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState('');
+  const [linkSocorro, setLinkSocorro] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,18 +27,23 @@ export default function Contato() {
 
     setEnviando(true);
     setErro('');
+    setLinkSocorro('');
+
+    // Gravava nome_responsavel/nome_loja/observacao, colunas que public.leads
+    // não tem, e deixava de fora `nome` (NOT NULL): nenhum envio chegava.
+    const dados = {
+      nome,
+      whatsapp,
+      email,
+      mensagem: mensagem.trim() || 'Contato comercial/suporte enviado via formulário do site.',
+      origem: 'contato',
+    };
 
     try {
-      const { error } = await supabase.from('leads').insert({
-        nome_responsavel: nome.trim(),
-        nome_loja: 'Contato via Site',
-        whatsapp: whatsapp.trim(),
-        email: email.trim() || null,
-        observacao: mensagem.trim() || 'Contato comercial/suporte enviado via formulário do site.',
-        status: 'novo',
-      });
+      const gravou = await registrarLead(dados);
 
-      if (error) {
+      if (!gravou) {
+        setLinkSocorro(whatsappDoLead(dados));
         setErro('Ocorreu um erro ao enviar a mensagem. Tente pelo WhatsApp.');
       } else {
         setSucesso(true);
@@ -130,6 +136,16 @@ export default function Contato() {
             {erro && (
               <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/15 p-4 text-red-300 text-xs font-bold">
                 {erro}
+                {linkSocorro && (
+                  <a
+                    href={linkSocorro}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-emerald-400"
+                  >
+                    <MessageCircle size={16} /> {tDynamic('Chamar no WhatsApp')}
+                  </a>
+                )}
               </div>
             )}
 

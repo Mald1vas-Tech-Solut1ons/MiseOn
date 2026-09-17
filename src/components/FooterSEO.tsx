@@ -30,6 +30,7 @@ export function FooterSEO() {
 
   const legal = [
     { title: t('nav.blog'), href: '/blog' },
+    { title: tDynamic('Ferramentas grátis'), href: '/ferramentas' },
     { title: tDynamic('Sobre Nós'), href: '/sobre' },
     { title: t('nav.videos'), href: '/videos' },
     { title: tDynamic('Contato & Suporte'), href: '/contato' },
