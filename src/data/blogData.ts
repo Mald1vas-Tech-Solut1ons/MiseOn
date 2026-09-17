@@ -38,7 +38,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: 'Gestão Financeira',
     publishedAt: '2026-09-16',
     readTime: '10 min de leitura',
-    coverImage: '/blog-covers/loja-lotada-divida-enorme-cover.jpg',
+    coverImage: '/blog-covers/doceria-kleber.jfif',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -157,7 +157,7 @@ A fila do Kléber prova que o produto dele presta. O que falta é a segunda prov
     category: 'Gestão Financeira',
     publishedAt: '2026-09-16',
     readTime: '12 min de leitura',
-    coverImage: '/blog-covers/delivery-margem-por-canal-cover.jpg',
+    coverImage: '/blog-covers/matemática-delivery.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -289,7 +289,7 @@ Vale registrar também o detalhe operacional que parece bobagem e mexe no algori
     category: 'Tecnologia & IA',
     publishedAt: '2026-09-16',
     readTime: '9 min de leitura',
-    coverImage: '/blog-covers/presenca-digital-restaurante-cover.jpg',
+    coverImage: '/blog-covers/expectativa-vs-realidade.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -395,7 +395,7 @@ Lentidão tem o mesmo efeito de uma fila desorganizada na porta: quem não está
     category: 'Engenharia de Cardápio',
     publishedAt: '2026-09-16',
     readTime: '10 min de leitura',
-    coverImage: '/blog-covers/padaria-onde-esta-o-lucro-cover.jpg',
+    coverImage: '/blog-covers/padaria-sucesso.jfif',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
@@ -507,7 +507,7 @@ Custo fixo baixo, cardápio curto, fila que cabe na calçada. Não é a padaria 
     category: 'Engenharia de Cardápio',
     publishedAt: '2026-09-16',
     readTime: '11 min de leitura',
-    coverImage: '/blog-covers/buffet-engenharia-do-balcao-cover.jpg',
+    coverImage: '/blog-covers/buffet-estrategia.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
