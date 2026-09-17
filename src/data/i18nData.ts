@@ -19,6 +19,8 @@ export const DICIONARIO = {
     'nav.videosDesc': 'Demonstrações em ação',
     'nav.depoimentos': 'Depoimentos',
     'nav.depoimentosDesc': 'Cases reais de clientes',
+    'nav.ferramentas': 'Ferramentas grátis',
+    'nav.ferramentasDesc': 'Calculadoras de CMV, iFood e markup',
     'nav.navegacao': 'Navegação',
     'nav.home': 'Início',
 
@@ -151,6 +153,8 @@ export const DICIONARIO = {
     'nav.videosDesc': 'Demos in action',
     'nav.depoimentos': 'Testimonials',
     'nav.depoimentosDesc': 'Real customer cases',
+    'nav.ferramentas': 'Free tools',
+    'nav.ferramentasDesc': 'COGS, iFood & markup calculators',
     'nav.navegacao': 'Navigation',
     'nav.home': 'Home',
 
@@ -271,6 +275,14 @@ export type ChaveDicionario = keyof typeof DICIONARIO['pt-BR'];
 
 // Tabela de Tradução Dinâmica de Frases & Categorias do Sistema
 const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
+  // ── Ferramentas Gratuitas Home (17/09/2026) ─────────────────────────────
+  'Abrir calculadora': 'Open calculator',
+  'Calculadoras gratuitas para donos de restaurante, hamburgueria e pizzaria. Sem cadastro e sem pegadinha: digite seus números e proteja a sua margem.': 'Free calculators for restaurant, burger joint, and pizzeria owners. No sign-up, no catches: enter your numbers and protect your margin.',
+  'Decida o lucro com seus próprios números': 'Decide the profit with your own numbers',
+  'Ferramentas Gratuitas': 'Free Tools',
+  'Usar Agora': 'Use Now',
+  'Ver todas as ferramentas': 'View all tools',
+  
   // ── Anúncio no blog (16/09/2026) ────────────────────────────────────────
   // O rótulo é exigência do AdSense: só "Publicidade" ou "Anúncio" valem.
   'Publicidade': 'Advertisement',

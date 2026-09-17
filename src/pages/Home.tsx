@@ -18,6 +18,7 @@ import DemonstracaoFluxo from '../components/home/DemonstracaoFluxo';
 import TabelaComparativaRealidade from '../components/home/TabelaComparativaRealidade';
 import ShowcaseTelasReais from '../components/home/ShowcaseTelasReais';
 import { KioskHomeSection } from '../components/home/KioskHomeSection';
+import FerramentasSection from '../components/home/FerramentasSection';
 import { useI18n } from '../contexts/I18nContext';
 import { parcelamentoAnualCurto, fraseOfertaAnual } from '../lib/efiInfo';
 
@@ -715,6 +716,7 @@ export default function Home() {
                     {[
                       { to: '/#como-funciona', ancora: true, icone: <Compass size={18} />, titulo: t('nav.comoFunciona'), desc: t('nav.comoFuncionaDesc') },
                       { to: '/blog', icone: <BookOpen size={18} />, titulo: t('nav.blog'), desc: t('nav.blogDesc') },
+                      { to: '/ferramentas', icone: <FlaskConical size={18} />, titulo: t('nav.ferramentas'), desc: t('nav.ferramentasDesc') },
                       { to: '/videos', icone: <PlayCircle size={18} />, titulo: t('nav.videos'), desc: t('nav.videosDesc') },
                       { to: '/depoimentos', icone: <Quote size={18} />, titulo: t('nav.depoimentos'), desc: t('nav.depoimentosDesc') },
                     ].map((item) =>
@@ -847,6 +849,9 @@ export default function Home() {
               </a>
               <Link to="/blog" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
                 <span className="text-gray-400 dark:text-slate-400"><BookOpen size={16} /></span> {t('nav.blog')}
+              </Link>
+              <Link to="/ferramentas" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
+                <span className="text-gray-400 dark:text-slate-400"><FlaskConical size={16} /></span> {t('nav.ferramentas')}
               </Link>
               <Link to="/videos" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
                 <span className="text-gray-400 dark:text-slate-400"><PlayCircle size={16} /></span> {t('nav.videos')}
@@ -1011,7 +1016,10 @@ export default function Home() {
       {/* ══════════ 3.5 TABELA COMPARATIVA DE REALIDADE OPERACIONAL ══════════ */}
       <TabelaComparativaRealidade />
 
-      {/* ══════════ 3.5 SEÇÃO VISUAL DE NICHOS E FUNCIONALIDADES ══════════ */}
+      {/* ══════════ 3.6 FERRAMENTAS GRATUITAS (CALCULADORAS) ══════════ */}
+      <FerramentasSection />
+
+      {/* ══════════ 3.7 SEÇÃO VISUAL DE NICHOS E FUNCIONALIDADES ══════════ */}
       <section id="nichos" className="scroll-mt-24 bg-slate-900/40 py-20 backdrop-blur-sm border-b border-white/10">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-3xl text-center">
