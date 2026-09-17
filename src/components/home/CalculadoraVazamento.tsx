@@ -4,19 +4,29 @@ import { Link } from 'react-router-dom';
 import { SAAS_PRICING } from '../../lib/efiInfo';
 import { useI18n } from '../../contexts/I18nContext';
 
+/**
+ * Esta calculadora já supôs, escondido no código, CMV de 35% e ticket de R$ 35
+ * para TODO mundo — e ainda anunciava "você economiza Nx o valor do plano".
+ * Número que o lojista não informou não entra na conta dele, e o MiseOn não tem
+ * cliente medido para prometer economia (ver CLAUDE.md). Agora CMV e ticket são
+ * controles, os presets são declarados como exemplo, e o resultado diz o que é:
+ * a soma dos valores que a própria pessoa colocou.
+ */
 interface Preset {
   nome: string;
   fat: number;
   desp: number;
   aum: number;
   erros: number;
+  cmv: number;
+  ticket: number;
 }
 
 const PRESETS: Preset[] = [
-  { nome: '☕ Lanchonete / Cafeteria (R$ 25k)', fat: 25000, desp: 3, aum: 4, erros: 2 },
-  { nome: '🍔 Hamburgueria / Delivery (R$ 50k)', fat: 50000, desp: 4, aum: 5, erros: 4 },
-  { nome: '🍕 Pizzaria / Salão (R$ 100k)', fat: 100000, desp: 5, aum: 6, erros: 5 },
-  { nome: '🍱 Buffet / Quilo (R$ 150k)', fat: 150000, desp: 6, aum: 7, erros: 6 },
+  { nome: '☕ Lanchonete / Cafeteria (R$ 25k)', fat: 25000, desp: 3, aum: 4, erros: 2, cmv: 32, ticket: 22 },
+  { nome: '🍔 Hamburgueria / Delivery (R$ 50k)', fat: 50000, desp: 4, aum: 5, erros: 4, cmv: 35, ticket: 42 },
+  { nome: '🍕 Pizzaria / Salão (R$ 100k)', fat: 100000, desp: 5, aum: 6, erros: 5, cmv: 33, ticket: 75 },
+  { nome: '🍱 Buffet / Quilo (R$ 150k)', fat: 150000, desp: 6, aum: 7, erros: 6, cmv: 38, ticket: 48 },
 ];
 
 export default function CalculadoraVazamento() {
@@ -25,24 +35,27 @@ export default function CalculadoraVazamento() {
   const [pctDesperdicio, setPctDesperdicio] = useState<number>(3);
   const [pctAumentoInsumos, setPctAumentoInsumos] = useState<number>(4);
   const [errosComandaSemana, setErrosComandaSemana] = useState<number>(3);
+  const [pctCmv, setPctCmv] = useState<number>(35);
+  const [ticketMedio, setTicketMedio] = useState<number>(42);
 
   const aplicarPreset = (p: Preset) => {
     setFaturamento(p.fat);
     setPctDesperdicio(p.desp);
     setPctAumentoInsumos(p.aum);
     setErrosComandaSemana(p.erros);
+    setPctCmv(p.cmv);
+    setTicketMedio(p.ticket);
   };
 
-  // Cálculo do Vazamento Estimado
+  // Cada parcela usa um número que a pessoa informou nos controles acima.
   const perdaDesperdicio = faturamento * (pctDesperdicio / 100);
-  const perdaInsumosNaoRepassados = (faturamento * 0.35) * (pctAumentoInsumos / 100); // 35% CMV médio
-  const perdaErrosComanda = errosComandaSemana * 35 * 4; // R$ 35 ticket médio x 4 semanas
+  const perdaInsumosNaoRepassados = faturamento * (pctCmv / 100) * (pctAumentoInsumos / 100);
+  const perdaErrosComanda = errosComandaSemana * ticketMedio * 4;
 
   const vazamentoMensalTotal = Math.round(perdaDesperdicio + perdaInsumosNaoRepassados + perdaErrosComanda);
   const vazamentoAnualTotal = vazamentoMensalTotal * 12;
 
   const precoMensalSaaS = SAAS_PRICING.anual.mensalEquivalente;
-  const multiplicadorRetorno = Math.max(1, Math.round(vazamentoMensalTotal / precoMensalSaaS));
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-[#0B1120] via-[#0C1730] to-[#070C18] py-20 text-white border-b border-white/10">
@@ -68,7 +81,7 @@ export default function CalculadoraVazamento() {
         {/* Atalhos Rápidos por Perfil de Estabelecimento */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
           <span className="text-xs font-bold text-slate-400 flex items-center gap-1 mr-2">
-            <Store size={14} /> {tDynamic('Simulação Rápida:')}
+            <Store size={14} /> {tDynamic('Exemplos (ajuste depois com os seus números):')}
           </span>
           {PRESETS.map((p, idx) => (
             <button type="button"
@@ -157,7 +170,48 @@ export default function CalculadoraVazamento() {
                 />
               </div>
 
-              {/* 4. Erros de Comanda */}
+              {/* 4. CMV informado pela própria loja */}
+              <div className="rounded-2xl border border-white/10 bg-black/40 p-4 transition hover:border-white/20">
+                <div className="flex justify-between items-center text-sm mb-2">
+                  <label className="font-bold text-slate-200">{tDynamic('CMV da sua loja (quanto do faturamento vira insumo):')}</label>
+                  <span className="font-mono font-bold text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded-lg border border-sky-500/20">
+                    {pctCmv}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={15}
+                  max={60}
+                  step={1}
+                  value={pctCmv}
+                  onChange={(e) => setPctCmv(Number(e.target.value))}
+                  className="w-full h-2.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#FC5B24]"
+                />
+                <p className="mt-1.5 text-[11px] text-slate-400">
+                  {tDynamic('Não sabe o seu? Calcule grátis na nossa calculadora de CMV.')}
+                </p>
+              </div>
+
+              {/* 5. Ticket médio informado pela própria loja */}
+              <div className="rounded-2xl border border-white/10 bg-black/40 p-4 transition hover:border-white/20">
+                <div className="flex justify-between items-center text-sm mb-2">
+                  <label className="font-bold text-slate-200">{tDynamic('Ticket médio do seu pedido:')}</label>
+                  <span className="font-mono font-bold text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded-lg border border-sky-500/20">
+                    R$ {ticketMedio.toLocaleString('pt-BR')}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={10}
+                  max={200}
+                  step={1}
+                  value={ticketMedio}
+                  onChange={(e) => setTicketMedio(Number(e.target.value))}
+                  className="w-full h-2.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#FC5B24]"
+                />
+              </div>
+
+              {/* 6. Erros de Comanda */}
               <div className="rounded-2xl border border-white/10 bg-black/40 p-4 transition hover:border-white/20">
                 <div className="flex justify-between items-center text-sm mb-2">
                   <label className="font-bold text-slate-200">{tDynamic('Pedidos Refeitos / Erros de Comanda por Semana:')}</label>
@@ -196,10 +250,10 @@ export default function CalculadoraVazamento() {
 
               <div className="mt-6 border-t border-white/10 pt-4 text-xs text-slate-300 leading-relaxed text-left space-y-2">
                 <p>
-                  💡 {tDynamic('O plano anual do MiseOn custa')} <strong>R$ {precoMensalSaaS.toFixed(2).replace('.', ',')}/mês</strong>.
+                  {tDynamic('Esta é a soma dos valores que você informou acima: desperdício, aumento de insumo não repassado e pedidos refeitos. Não é promessa de economia, é o tamanho do problema que você mesmo estimou.')}
                 </p>
-                <p className="text-emerald-400 font-bold">
-                  ➔ {tDynamic('Você economiza cerca de')} <strong>{multiplicadorRetorno}x {tDynamic('o valor do plano todo mês')}</strong> {tDynamic('mantendo esse dinheiro no seu bolso.')}
+                <p>
+                  💡 {tDynamic('O plano anual do MiseOn custa')} <strong>R$ {precoMensalSaaS.toFixed(2).replace('.', ',')}/mês</strong>. {tDynamic('Quanto disso o sistema evita depende da sua operação, e quem mede é você.')}
                 </p>
               </div>
 
