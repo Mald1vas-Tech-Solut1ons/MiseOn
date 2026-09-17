@@ -1,0 +1,41 @@
+# Fim de linha, decidido uma vez só.
+#
+# O repositório guarda texto em LF; o Windows continua gravando CRLF no disco
+# quando quiser. Sem isto, todo arquivo que passava pelo editor voltava para o
+# `git status` inteiro como "modificado" — em 17/09/2026 eram mais de 400
+# arquivos com zero linha de diferença real, e uma mudança de verdade
+# desaparecia no meio deles.
+#
+# Ao adotar este arquivo, rode uma vez: git add --renormalize .
+
+* text=auto eol=lf
+
+# Scripts que o Windows executa esperam CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binários: nunca converter, nunca tentar "consertar" o conteúdo.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.jfif binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.svg text eol=lf
+*.mp4 binary
+*.mov binary
+*.webm binary
+*.mp3 binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.zip binary
+*.p12 binary
+*.pfx binary
+
+# Lockfiles: texto, mas fora do diff de revisão.
+package-lock.json -diff
+deno.lock -diff
