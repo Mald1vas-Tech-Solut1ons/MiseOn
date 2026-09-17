@@ -75,23 +75,16 @@ scripts/emitir-nfse-*.mjs
 *.diff
 .claude/
 
-# Material de marketing local — fica no disco, nunca sobe pro GitHub
-# (subir encheria o egress do Supabase e polui o repo)
+# Material de marketing local — bulk ignorado; apenas os ja commitados entram
+# (o resto vive em C:\Users\rafae\Dev\MiseOn-marketing\)
 output/
+!output/documents/
+!output/documents/**
+!output/marketing/calendario-publicacao.html
+!output/marketing/cozinha-de-conteudo.html
+!output/marketing/mapa-de-cortes.html
+!output/marketing/o-que-fazer-agora.html
+!output/marketing/roteiro-youtube-conta-do-prato.md
+!output/marketing/roteiros-entrelacados.html
+!output/marketing/roteiros-locutados.html
 AGENTS.md
-
-# Assets de marca gerados localmente (nao versionados)
-public/brand/BANNER-MISEON.jfif
-public/brand/Mfavicon.png
-public/brand/MiseOn-repagina-removebg-preview.png
-public/brand/NewLogo-removebg-preview.png
-public/brand/NewLogo.png
-public/brand/NewMarca.png
-public/brand/banner2.jpg
-public/brand/favicon.png
-public/brand/icon-192.png
-public/brand/icon-512.png
-public/brand/miseon_banner-oficial.jpg
-scripts/ativos/marca-oficial.png
-scripts/ativos/simbolo-oficial.png
-scripts/gerar-redes-sociais-v2.mjs
