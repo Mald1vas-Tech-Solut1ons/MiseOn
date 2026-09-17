@@ -122,6 +122,13 @@ export const PUBLIC_ROUTES = [
   { path: '/autoatendimento', changefreq: 'weekly', priority: 1.0 },
   { path: '/demo-kiosk', changefreq: 'weekly', priority: 0.9 },
   { path: '/blog', changefreq: 'daily', priority: 0.9 },
+  // Ferramentas grátis — conteúdo em src/data/ferramentasData.ts. Ao criar
+  // uma nova, cadastre aqui, a rota em App.tsx e a calculadora em
+  // FerramentaPage.tsx; o prerender falha se faltar o dado.
+  { path: '/ferramentas', changefreq: 'monthly', priority: 0.9 },
+  { path: '/ferramentas/calculadora-cmv', changefreq: 'monthly', priority: 0.9 },
+  { path: '/ferramentas/preco-ifood', changefreq: 'monthly', priority: 0.9 },
+  { path: '/ferramentas/markup-preco-de-venda', changefreq: 'monthly', priority: 0.9 },
   // Os posts entram automaticamente logo abaixo — ver ROTAS_DO_BLOG.
   ...rotasDoBlog(),
 ];

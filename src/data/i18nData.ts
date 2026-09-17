@@ -2149,6 +2149,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Certificado já configurado. Só preencha acima se precisar renovar/atualizar.': 'Certificate already set up. Only fill in above if you need to renew or update it.',
   'Chama no WhatsApp': 'Message on WhatsApp',
   'Chamar no WhatsApp': 'Message on WhatsApp',
+  'Ferramentas grátis': 'Free tools',
   'Chamar no WhatsApp agora': 'Message on WhatsApp now',
   'Carregando estação...': 'Loading station...',
   'Carregando expeditor...': 'Loading expeditor...',

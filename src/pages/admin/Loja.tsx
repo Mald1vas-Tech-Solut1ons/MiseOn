@@ -21,6 +21,7 @@ import { useI18n } from '../../contexts/I18nContext';
 import { useToast } from '../../contexts/ToastContext';
 import { CastTvControl } from '../../components/admin/CastTvControl';
 import { TvPairingControl } from '../../components/admin/TvPairingControl';
+import { normalizarSegmento } from '../../lib/leads';
 
 const PRESETS_SEGMENTOS: Record<SegmentoNegocio, { rotulo: string; descricao: string; modulos: ModulosAtivos }> = {
   HAMBURGUERIA: {
@@ -265,7 +266,7 @@ export default function Loja() {
       nome: form.nome || slug,
       whatsapp: form.whatsapp || form.telefone || '',
       email: null,
-      segmento: form.segmento_negocio || null,
+      segmento: normalizarSegmento(form.segmento_negocio),
       cidade: form.endereco || null,
       mensagem: `[MiseOn Kiosk] Cliente ATIVO pedindo upgrade pelo painel. Loja: ${form.nome} (/${slug}).`,
       origem: 'kiosk_painel',

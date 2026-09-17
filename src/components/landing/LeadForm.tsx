@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, MessageCircle } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { registrarLead, whatsappDoLead } from '../../lib/leads';
 import { Button, SuccessCelebration } from '../ui';
 import { zap } from './zap';
 
@@ -32,26 +32,22 @@ export function LeadForm({ compact = false, origem = 'landing' }: { compact?: bo
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState('');
+  const [linkSocorro, setLinkSocorro] = useState('');
 
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro('');
+    setLinkSocorro('');
     if (!nome.trim() || !whatsapp.trim()) return setErro('Preencha seu nome e seu WhatsApp.');
     if (!segmento) return setErro('Selecione o segmento do seu negócio.');
 
     setEnviando(true);
-    const { error } = await supabase.from('leads').insert({
-      nome: nome.trim(),
-      whatsapp: whatsapp.trim(),
-      email: email.trim() || null,
-      segmento,
-      cidade: cidade.trim() || null,
-      mensagem: mensagem.trim() || null,
-      origem,
-    });
+    const dados = { nome, whatsapp, email, segmento, cidade, mensagem, origem };
+    const gravou = await registrarLead(dados);
     setEnviando(false);
 
-    if (error) {
+    if (!gravou) {
+      setLinkSocorro(whatsappDoLead(dados));
       return setErro('Não conseguimos enviar agora. Tente de novo em instantes ou chame a gente no WhatsApp.');
     }
     setEnviado(true);
@@ -104,6 +100,16 @@ export function LeadForm({ compact = false, origem = 'landing' }: { compact?: bo
       )}
 
       {erro && <p className={`text-sm font-medium text-red-400 ${compact ? '' : 'sm:col-span-2'}`}>{erro}</p>}
+      {linkSocorro && (
+        <a
+          href={linkSocorro}
+          target="_blank"
+          rel="noreferrer"
+          className={`inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-emerald-400 ${compact ? '' : 'sm:col-span-2'}`}
+        >
+          <MessageCircle size={16} /> {tDynamic('Chamar no WhatsApp')}
+        </a>
+      )}
 
       <div className={compact ? '' : 'sm:col-span-2'}>
         <Button type="submit" size="lg" carregando={enviando} icone={<ArrowRight size={18} />} className="w-full">
