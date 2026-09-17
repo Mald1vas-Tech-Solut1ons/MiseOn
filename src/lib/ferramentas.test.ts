@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularCmvPeriodo, calcularCmvPrato, calcularMarkup, calcularPrecoCanal, lerNumero } from './ferramentas';
+import { calcularCmvPeriodo, calcularCmvPrato, calcularMarkup, calcularPrecoCanal, cenariosDoCanal, composicaoDoPreco, lerNumero, pontoDeCmv } from './ferramentas';
 
 const valor = <T,>(r: { ok: true; valor: T } | { ok: false; motivo: string }): T => {
   if (!r.ok) throw new Error(r.motivo);
@@ -70,5 +70,41 @@ describe('lerNumero', () => {
     expect(lerNumero('12%')).toBe(12);
     expect(lerNumero('3.5')).toBe(3.5);
     expect(Number.isNaN(lerNumero(''))).toBe(true);
+  });
+});
+
+describe('leituras práticas', () => {
+  it('um ponto de CMV é 1% do faturamento do mês', () => {
+    expect(pontoDeCmv(60000)).toBe(600);
+  });
+
+  it('os três cenários do canal fecham a conta do mês', () => {
+    const e = { precoBalcao: 30, comissaoPct: 23, taxaPagamentoPct: 3.5, taxaFixa: 0 };
+    const c = valor(cenariosDoCanal(e, 400));
+    const manter = c.find((x) => x.chave === 'manter')!;
+    const repassar = c.find((x) => x.chave === 'repassar')!;
+    const meio = c.find((x) => x.chave === 'meio')!;
+
+    expect(manter.recebePorPedido).toBeCloseTo(22.05, 2);
+    expect(manter.diferencaNoMes).toBeCloseTo(-3180, 2);
+    // repassando tudo, o que sobra é exatamente o preço do balcão
+    expect(repassar.diferencaPorPedido).toBeCloseTo(0, 6);
+    expect(repassar.diferencaNoMes).toBeCloseTo(0, 6);
+    // o meio-termo fica entre os dois
+    expect(meio.precoApp).toBeGreaterThan(manter.precoApp);
+    expect(meio.precoApp).toBeLessThan(repassar.precoApp);
+  });
+
+  it('recusa volume mensal inválido em vez de projetar o mês no escuro', () => {
+    expect(cenariosDoCanal({ precoBalcao: 30, comissaoPct: 23, taxaPagamentoPct: 3.5, taxaFixa: 0 }, Number.NaN).ok).toBe(false);
+  });
+
+  it('as fatias do preço somam o preço inteiro', () => {
+    const e = { custo: 10, despesasFixasPct: 20, despesasVariaveisPct: 10, lucroPct: 20 };
+    const preco = valor(calcularMarkup(e)).precoVenda;
+    const fatias = composicaoDoPreco(e, preco);
+    const soma = fatias.reduce((a, f) => a + f.valor, 0);
+    expect(soma).toBeCloseTo(preco, 6);
+    expect(fatias.reduce((a, f) => a + f.pctDoPreco, 0)).toBeCloseTo(100, 6);
   });
 });

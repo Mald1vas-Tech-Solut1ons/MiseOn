@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { MessageCircle, Share2, Lock } from 'lucide-react';
 import { ROTULOS } from '../../data/ferramentasData';
 import { useTxt } from './useTxt';
+import type { Segmento as SegmentoTipo } from './cores';
 import { zap } from '../landing/zap';
 import MiseOnLogo from '../MiseOnLogo';
 import LanguageToggle from '../LanguageToggle';
@@ -108,6 +109,55 @@ export function BotaoCompartilhar({ texto, path }: { texto: string; path: string
     </a>
   );
 }
+
+/**
+ * Barra de composição: mostra de onde vem cada pedaço do número.
+ * Percentual pequeno ainda precisa ser visível, então cada fatia tem largura
+ * mínima; a legenda embaixo carrega o valor exato, que é o que o dono anota.
+ */
+export function BarraSegmentos({ segmentos, marcador }: { segmentos: SegmentoTipo[]; marcador?: { pct: number; rotulo: string } }) {
+  return (
+    <div>
+      <div className="relative flex h-7 w-full overflow-hidden rounded-xl border border-black/10 dark:border-white/10">
+        {segmentos.map((s) => (
+          <div
+            key={s.rotulo}
+            style={{ width: `${Math.max(s.pct, 2)}%`, background: s.cor }}
+            className="h-full"
+            title={`${s.rotulo}: ${s.valor}`}
+          />
+        ))}
+        {marcador && marcador.pct > 0 && marcador.pct <= 100 && (
+          <div
+            style={{ left: `${Math.min(marcador.pct, 100)}%` }}
+            className="pointer-events-none absolute top-0 h-full w-0.5 bg-gray-900 dark:bg-white"
+            title={marcador.rotulo}
+          />
+        )}
+      </div>
+      <ul className="mt-2 grid gap-1 sm:grid-cols-2">
+        {segmentos.map((s) => (
+          <li key={s.rotulo} className="flex items-center gap-2 text-xs">
+            <span style={{ background: s.cor }} className="h-2.5 w-2.5 flex-none rounded-sm" />
+            <span className="flex-1 text-gray-600 dark:text-slate-300">{s.rotulo}</span>
+            <b style={{ fontVariantNumeric: 'tabular-nums' }} className="text-gray-900 dark:text-white">{s.valor}</b>
+          </li>
+        ))}
+      </ul>
+      {marcador && <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">{marcador.rotulo}</p>}
+    </div>
+  );
+}
+
+/** Uma frase em língua de dono, lendo o resultado em voz alta. */
+export function Leitura({ texto }: { texto: string }) {
+  return (
+    <p className="rounded-xl border border-[#0A5CC4]/30 bg-[#0A5CC4]/10 p-3 text-sm font-semibold text-[#004198] dark:text-[#9CC3FF]">
+      {texto}
+    </p>
+  );
+}
+
 
 export function CtaMiseOn({ mensagemWhatsapp }: { mensagemWhatsapp: string }) {
   const tx = useTxt();

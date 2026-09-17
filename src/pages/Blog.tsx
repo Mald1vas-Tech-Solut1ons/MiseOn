@@ -70,6 +70,7 @@ export default function Blog() {
           </Link>
           <div className="flex items-center gap-4 text-sm font-semibold">
             <Link to="/" className="text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white">{t('nav.home')}</Link>
+            <Link to="/ferramentas" className="hidden text-gray-600 hover:text-gray-900 sm:inline dark:text-slate-300 dark:hover:text-white">{tDynamic('Ferramentas grátis')}</Link>
             <LanguageToggle variant="pill" />
             <Link to="/cadastre-se" className="rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-5 py-2 text-xs font-bold text-white shadow-md">
               {t('nav.testar30d')}

@@ -14,6 +14,9 @@ export function NavBar() {
           <a href="/autoatendimento" className="text-sm font-bold text-[#FC5B24] transition hover:brightness-110 flex items-center gap-1">
             Totem Kiosk <span className="rounded-full bg-[#FC5B24]/20 px-1.5 py-0.5 text-[10px] uppercase font-black text-[#FC5B24]">NOVO</span>
           </a>
+          <a href="/ferramentas" className="text-sm font-bold text-[#6FA3F0] transition hover:brightness-110 flex items-center gap-1">
+            Ferramentas <span className="rounded-full bg-[#6FA3F0]/20 px-1.5 py-0.5 text-[10px] uppercase font-black text-[#6FA3F0]">GRÁTIS</span>
+          </a>
           <a href="#recursos" className="text-sm font-semibold text-gray-400 transition hover:text-white">Recursos</a>
           <a href="#ia" className="text-sm font-semibold text-gray-400 transition hover:text-white">IA Atendente</a>
           <a href="#taxas" className="text-sm font-semibold text-gray-400 transition hover:text-white">Taxas</a>

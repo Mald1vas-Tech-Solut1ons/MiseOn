@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ROTULOS } from '../../data/ferramentasData';
-import { brl, calcularCmvPeriodo, calcularCmvPrato, lerNumero, pct } from '../../lib/ferramentas';
-import { BotaoCompartilhar, Campo, Numero, PainelResultado } from './ui';
+import { brl, calcularCmvPeriodo, calcularCmvPrato, lerNumero, pct, pontoDeCmv } from '../../lib/ferramentas';
+import { BarraSegmentos, BotaoCompartilhar, Campo, Leitura, Numero, PainelResultado } from './ui';
+import { CORES_FATIA } from './cores';
 import { useTxt } from './useTxt';
 
 const PATH = '/ferramentas/calculadora-cmv';
@@ -27,11 +28,12 @@ export default function CalculadoraCmv() {
     faturamento: lerNumero(fat),
   });
   const metaNum = lerNumero(meta);
+  const temMeta = Number.isFinite(metaNum) && metaNum > 0;
 
   const vazioPrato = [custo, preco].some((v) => !v.trim());
   const prato = calcularCmvPrato(lerNumero(custo), lerNumero(preco));
 
-  const aba_ = (id: 'mes' | 'prato', rotulo: string) => (
+  const botaoAba = (id: 'mes' | 'prato', rotulo: string) => (
     <button
       type="button"
       onClick={() => setAba(id)}
@@ -47,19 +49,20 @@ export default function CalculadoraCmv() {
   return (
     <div>
       <div className="mb-5 flex gap-2 rounded-2xl border border-gray-200 bg-white p-1.5 dark:border-white/10 dark:bg-white/5">
-        {aba_('mes', tx(ROTULOS.abaMes))}
-        {aba_('prato', tx(ROTULOS.abaPrato))}
+        {botaoAba('mes', tx(ROTULOS.abaMes))}
+        {botaoAba('prato', tx(ROTULOS.abaPrato))}
       </div>
 
       {aba === 'mes' ? (
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="grid gap-4">
+          <div className="grid content-start gap-4">
             <Campo rotulo={tx(ROTULOS.estoqueInicial)} valor={ei} onChange={setEi} />
             <Campo rotulo={tx(ROTULOS.compras)} valor={compras} onChange={setCompras} />
             <Campo rotulo={tx(ROTULOS.estoqueFinal)} valor={ef} onChange={setEf} />
             <Campo rotulo={tx(ROTULOS.faturamento)} valor={fat} onChange={setFat} />
             <Campo rotulo={tx(ROTULOS.metaCmv)} valor={meta} onChange={setMeta} sufixo="%" />
           </div>
+
           <PainelResultado vazio={vazioMes} motivo={mes.ok ? undefined : mes.motivo}>
             {mes.ok && (
               <>
@@ -68,20 +71,42 @@ export default function CalculadoraCmv() {
                   rotulo={tx(ROTULOS.cmvPct)}
                   valor={pct(mes.valor.cmvPct)}
                   nota={
-                    Number.isFinite(metaNum) && metaNum > 0
+                    temMeta
                       ? `${pct(Math.abs(mes.valor.cmvPct - metaNum))} ${
                           mes.valor.cmvPct > metaNum ? tx(ROTULOS.acimaMeta) : tx(ROTULOS.dentroMeta)
                         }`
                       : undefined
                   }
                 />
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Numero rotulo={tx(ROTULOS.cmvReais)} valor={brl(mes.valor.cmv)} />
-                  <Numero rotulo={tx(ROTULOS.margemBruta)} valor={brl(mes.valor.margemBruta)} />
-                </div>
+
+                <BarraSegmentos
+                  segmentos={[
+                    { rotulo: tx(ROTULOS.cmvReais), valor: brl(mes.valor.cmv), pct: mes.valor.cmvPct, cor: CORES_FATIA.custo },
+                    {
+                      rotulo: tx(ROTULOS.restanteFaturamento),
+                      valor: brl(mes.valor.margemBruta),
+                      pct: Math.max(0, 100 - mes.valor.cmvPct),
+                      cor: CORES_FATIA.sobra,
+                    },
+                  ]}
+                  marcador={temMeta ? { pct: metaNum, rotulo: tx(ROTULOS.marcadorMeta) } : undefined}
+                />
+
+                <Numero rotulo={tx(ROTULOS.pontoDeCmv)} valor={brl(pontoDeCmv(lerNumero(fat)))} />
+
+                <Leitura
+                  texto={
+                    temMeta && mes.valor.cmvPct > metaNum
+                      ? `${pct(mes.valor.cmvPct - metaNum)} acima da sua meta equivalem a ${brl(
+                          (mes.valor.cmvPct - metaNum) * pontoDeCmv(lerNumero(fat)),
+                        )} neste mês.`
+                      : `Cada ponto de CMV vale ${brl(pontoDeCmv(lerNumero(fat)))} no seu faturamento atual.`
+                  }
+                />
+
                 <BotaoCompartilhar
                   path={PATH}
-                  texto={`${tx(ROTULOS.cmvPct)}: ${pct(mes.valor.cmvPct)} (${brl(mes.valor.cmv)} / ${brl(lerNumero(fat))})`}
+                  texto={`CMV: ${pct(mes.valor.cmvPct)} — ${brl(mes.valor.cmv)} sobre ${brl(lerNumero(fat))}`}
                 />
               </>
             )}
@@ -97,10 +122,23 @@ export default function CalculadoraCmv() {
             {prato.ok && (
               <>
                 <Numero destaque rotulo={tx(ROTULOS.cmvPct)} valor={pct(prato.valor.cmvPct)} />
-                <Numero rotulo={tx(ROTULOS.sobraUnidade)} valor={brl(prato.valor.sobraPorUnidade)} />
+                <BarraSegmentos
+                  segmentos={[
+                    { rotulo: tx(ROTULOS.custoParte), valor: brl(lerNumero(custo)), pct: prato.valor.cmvPct, cor: CORES_FATIA.custo },
+                    {
+                      rotulo: tx(ROTULOS.sobraUnidade),
+                      valor: brl(prato.valor.sobraPorUnidade),
+                      pct: Math.max(0, 100 - prato.valor.cmvPct),
+                      cor: CORES_FATIA.sobra,
+                    },
+                  ]}
+                />
+                <Leitura
+                  texto={`De cada ${brl(lerNumero(preco))} vendidos, ${brl(lerNumero(custo))} já estavam no prato antes de pagar aluguel, equipe e taxas.`}
+                />
                 <BotaoCompartilhar
                   path={PATH}
-                  texto={`${tx(ROTULOS.abaPrato)}: ${pct(prato.valor.cmvPct)} (${brl(lerNumero(custo))} / ${brl(lerNumero(preco))})`}
+                  texto={`CMV do prato: ${pct(prato.valor.cmvPct)} — ${brl(lerNumero(custo))} de ${brl(lerNumero(preco))}`}
                 />
               </>
             )}

@@ -278,6 +278,26 @@ export const ROTULOS = {
     en: 'Calculated in your browser. Nothing you type is sent to MiseOn.',
   },
 
+  // Leituras visuais
+  composicao: { pt: 'De onde vem cada parte', en: 'Where each part comes from' },
+  custoParte: { pt: 'Custo do produto', en: 'Product cost' },
+  fixasParte: { pt: 'Despesas fixas', en: 'Fixed expenses' },
+  variaveisParte: { pt: 'Despesas variáveis', en: 'Variable expenses' },
+  lucroParte: { pt: 'Lucro', en: 'Profit' },
+  ficaComVoce: { pt: 'Fica com você', en: 'You keep' },
+  pontoDeCmv: { pt: 'Cada 1% de CMV no mês', en: 'Each 1% of COGS per month' },
+  restanteFaturamento: { pt: 'Sobra para despesas e lucro', en: 'Left for expenses and profit' },
+  marcadorMeta: { pt: 'A linha preta é a sua meta', en: 'The black line is your target' },
+  pedidosMes: { pt: 'Pedidos por mês nesse canal', en: 'Orders per month on this channel' },
+  cenarios: { pt: 'Seus três caminhos', en: 'Your three options' },
+  cenarioManter: { pt: 'Manter o preço do balcão', en: 'Keep the counter price' },
+  cenarioMeio: { pt: 'Repassar metade da taxa', en: 'Pass on half the fee' },
+  cenarioRepassar: { pt: 'Repassar a taxa inteira', en: 'Pass on the whole fee' },
+  colPreco: { pt: 'Preço no app', en: 'App price' },
+  colPedido: { pt: 'Por pedido', en: 'Per order' },
+  colMes: { pt: 'No mês', en: 'Per month' },
+  leituraCmv: { pt: 'Leitura', en: 'Reading' },
+
   // CMV
   abaMes: { pt: 'CMV do mês', en: 'Monthly COGS' },
   abaPrato: { pt: 'CMV de um prato', en: 'Dish COGS' },

@@ -176,6 +176,90 @@ export function calcularMarkup(e: EntradaMarkup): Resultado<SaidaMarkup> {
   };
 }
 
+// ───────────────── Leituras que o dono usa de verdade ─────────────────
+
+/**
+ * Quanto vale UM ponto percentual de CMV, em reais do mês.
+ * É o número que transforma "meu CMV é 38%" em "cada ponto que eu baixar
+ * devolve R$ X ao caixa" — sem prometer que o sistema baixa esse ponto.
+ */
+export function pontoDeCmv(faturamento: number): number {
+  return faturamento / 100;
+}
+
+export interface Cenario {
+  /** Nome curto do cenário. */
+  chave: 'manter' | 'repassar' | 'meio';
+  /** Preço cobrado no aplicativo. */
+  precoApp: number;
+  /** Quanto sobra por pedido depois das taxas. */
+  recebePorPedido: number;
+  /** Diferença por pedido contra o preço do balcão. */
+  diferencaPorPedido: number;
+  /** Diferença no mês, dado o volume informado. */
+  diferencaNoMes: number;
+}
+
+/**
+ * Três caminhos que o lojista realmente tem no canal: manter o preço do
+ * balcão, repassar a taxa inteira, ou repassar metade. O volume mensal é o
+ * que tira a conta do abstrato — R$ 7,95 por pedido não assusta ninguém;
+ * 400 pedidos por mês, sim.
+ */
+export function cenariosDoCanal(e: EntradaPrecoCanal, pedidosMes: number): Resultado<Cenario[]> {
+  const base = calcularPrecoCanal(e);
+  if (!base.ok) return base;
+  if (!finito(pedidosMes) || pedidosMes < 0) {
+    return { ok: false, motivo: 'Informe quantos pedidos por mês você faz nesse canal.' };
+  }
+
+  const pct = (e.comissaoPct + e.taxaPagamentoPct) / 100;
+  const recebe = (precoApp: number) => precoApp * (1 - pct) - e.taxaFixa;
+  const precoMeio = (e.precoBalcao + base.valor.precoSugerido) / 2;
+
+  const monta = (chave: Cenario['chave'], precoApp: number): Cenario => {
+    const recebePorPedido = recebe(precoApp);
+    const diferencaPorPedido = recebePorPedido - e.precoBalcao;
+    return {
+      chave,
+      precoApp,
+      recebePorPedido,
+      diferencaPorPedido,
+      diferencaNoMes: diferencaPorPedido * pedidosMes,
+    };
+  };
+
+  return {
+    ok: true,
+    valor: [
+      monta('manter', e.precoBalcao),
+      monta('meio', precoMeio),
+      monta('repassar', base.valor.precoSugerido),
+    ],
+  };
+}
+
+export interface FatiaPreco {
+  chave: 'custo' | 'fixas' | 'variaveis' | 'lucro';
+  valor: number;
+  pctDoPreco: number;
+}
+
+/** Abre o preço calculado em quatro fatias, para desenhar a barra. */
+export function composicaoDoPreco(e: EntradaMarkup, precoVenda: number): FatiaPreco[] {
+  const fatia = (chave: FatiaPreco['chave'], valor: number): FatiaPreco => ({
+    chave,
+    valor,
+    pctDoPreco: precoVenda > 0 ? (valor / precoVenda) * 100 : 0,
+  });
+  return [
+    fatia('custo', e.custo),
+    fatia('fixas', precoVenda * (e.despesasFixasPct / 100)),
+    fatia('variaveis', precoVenda * (e.despesasVariaveisPct / 100)),
+    fatia('lucro', precoVenda * (e.lucroPct / 100)),
+  ];
+}
+
 // ─────────────────────────── Formatação ─────────────────────────────
 
 /** Lê número digitado em português: "1.234,56", "1234,56" ou "1234.56". */

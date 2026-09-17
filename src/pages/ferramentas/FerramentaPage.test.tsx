@@ -51,3 +51,25 @@ it('markup explica quando a conta não fecha em vez de inventar preço', () => {
   preencher('Lucro desejado (%)', '20');
   expect(screen.getByText(/não existe preço que feche essa conta/)).toBeTruthy();
 });
+
+it('o canal projeta o mês quando o volume é informado', () => {
+  render(<MemoryRouter><FerramentaPage slug="preco-ifood" /></MemoryRouter>);
+  preencher('Preço no balcão (R$)', '30');
+  preencher('Pedidos por mês nesse canal', '400');
+  // 30 x 0,735 = 22,05 por pedido; 400 pedidos = -3.180,00 contra o balcão
+  // aparece na tabela e na frase de leitura — por isso getAllByText
+  expect(screen.getAllByText(/3\.180,00/).length).toBeGreaterThan(0);
+  expect(screen.getAllByText(/Repassar a taxa inteira/).length).toBeGreaterThan(0);
+});
+
+it('o markup abre o preço em quatro fatias e leva ao preço do canal', () => {
+  render(<MemoryRouter><FerramentaPage slug="markup-preco-de-venda" /></MemoryRouter>);
+  preencher('Custo do produto (R$)', '10');
+  preencher('Despesas fixas (% do faturamento)', '20');
+  preencher('Despesas variáveis (% da venda)', '10');
+  preencher('Lucro desejado (%)', '20');
+  expect(screen.getByText('Custo do produto')).toBeTruthy();
+  expect(screen.getByText('Lucro')).toBeTruthy();
+  // preço 20,00 no balcão → 27,21 no canal com 23% + 3,5%
+  expect(screen.getByText(/27,21/)).toBeTruthy();
+});
