@@ -21,11 +21,14 @@ export default function BlogPost({ forcedSlug }: BlogPostProps) {
   const slug = forcedSlug || params.slug || '';
   const post = BLOG_POSTS.find((p) => p.slug === slug);
 
-  if (!post) {
+  // Rascunho (texto sem a capa definitiva) não abre por URL: o link existiria
+  // sem estar em lugar nenhum do site, e é isso que o Google chama de página
+  // órfã. Ver `rascunho` em blogData.ts.
+  if (!post || post.rascunho) {
     return <Navigate to="/blog" replace />;
   }
 
-  const postsRelacionados = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const postsRelacionados = BLOG_POSTS.filter((p) => p.slug !== post.slug && !p.rascunho).slice(0, 3);
 
   const schemaJson = [
     {

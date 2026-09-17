@@ -27,7 +27,12 @@ function rotasDoBlog() {
     return [];
   }
 
-  const slugs = [...conteudo.matchAll(/^\s{4}slug:\s*'([^']+)'/gm)].map((m) => m[1]);
+  // `rascunho: true` vem na linha seguinte ao slug (ver blogData.ts): é texto
+  // pronto esperando a capa fotográfica, e não pode entrar no sitemap nem
+  // virar página estática — link indexado sem lugar no site é página órfã.
+  const slugs = [...conteudo.matchAll(/^\s{4}slug:\s*'([^']+)',\r?\n(\s{4}rascunho:\s*true)?/gm)]
+    .filter((m) => !m[2])
+    .map((m) => m[1]);
   const unicos = [...new Set(slugs)];
 
   if (unicos.length === 0) {

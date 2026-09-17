@@ -29,8 +29,8 @@ const CAPAS = {
   'loja-lotada': {
     arquivo: 'loja-lotada-divida-enorme-cover',
     rotulo: 'GESTÃO FINANCEIRA',
-    titulo: 'Loja lotada,',
-    destaque: 'dívida enorme',
+    titulo: 'Fila na porta,',
+    destaque: 'dívida de R$ 3 milhões',
     motivo: 'margem',
     apoio:
       'Movimento mede <strong>quantas vezes</strong> a operação rodou. Margem mede <strong>quanto sobrou</strong> de cada vez.',
@@ -54,8 +54,8 @@ const CAPAS = {
   'delivery': {
     arquivo: 'delivery-margem-por-canal-cover',
     rotulo: 'GESTÃO FINANCEIRA',
-    titulo: 'Delivery dá',
-    destaque: 'dinheiro?',
+    titulo: 'R$ 31,49 na tela,',
+    destaque: 'R$ 12 na conta',
     motivo: 'canais',
     apoio:
       'Comissão, embalagem e taxa saem <strong>do mesmo prato</strong>. Cada canal come uma fatia diferente.',
@@ -65,8 +65,8 @@ const CAPAS = {
   'presenca-digital': {
     arquivo: 'presenca-digital-restaurante-cover',
     rotulo: 'TECNOLOGIA & IA',
-    titulo: 'Parecer amador',
-    destaque: 'custa a venda',
+    titulo: 'O cliente compra a foto',
+    destaque: 'e recebe o produto',
     motivo: 'funil',
     apoio:
       'O cliente não avalia a sua comida pela internet. Ele avalia <strong>o risco de pedir</strong>.',
@@ -76,8 +76,8 @@ const CAPAS = {
   'padaria': {
     arquivo: 'padaria-onde-esta-o-lucro-cover',
     rotulo: 'ENGENHARIA DE CARDÁPIO',
-    titulo: 'Padaria dá dinheiro:',
-    destaque: 'onde está o lucro',
+    titulo: 'O pão é menos de',
+    destaque: '10% do faturamento',
     motivo: 'mix',
     apoio:
       'O pão traz a cidade para dentro da loja. <strong>A margem está no que entra na sacola junto.</strong>',

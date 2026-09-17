@@ -17,7 +17,9 @@ export default function Blog() {
   const [busca, setBusca] = useState('');
   const [categoriaSel, setCategoriaSel] = useState<string>('Todas');
 
-  const postsOrdenados = [...BLOG_POSTS].sort(
+  // Rascunho é texto pronto esperando a capa fotográfica — ver `rascunho`
+  // em blogData.ts. Não entra no hub nem no sitemap.
+  const postsOrdenados = [...BLOG_POSTS].filter((p) => !p.rascunho).sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
 

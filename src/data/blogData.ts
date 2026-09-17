@@ -20,611 +20,608 @@ export interface BlogPost {
   };
   summary: string;
   content: string;
+  /**
+   * Texto pronto esperando a capa fotográfica (ver scripts/gerar-capas-ia.mjs).
+   *
+   * Rascunho some do hub, do sitemap e do prerender — publicar artigo com capa
+   * provisória enche o blog de cartão que destoa das fotos e estraga a página
+   * inteira. Gerou a foto? apague esta linha do artigo e publique.
+   */
+  rascunho?: boolean;
 }
 
 export const BLOG_POSTS: BlogPost[] = [
   {
-    slug: 'delivery-da-dinheiro-a-conta-por-canal-que-quase-ninguem-faz',
-    title: 'Delivery Dá Dinheiro? A Conta por Canal que Quase Ninguém Faz',
-    description: 'Comissão, embalagem, taxa de entrega e cupom saem do mesmo prato. Como montar a margem por canal e descobrir qual venda está pagando a conta e qual está cobrando por ela.',
+    slug: 'loja-lotada-divida-enorme-por-que-fila-na-porta-nao-e-lucro',
+    title: 'Fila na Porta, Dívida de R$ 3 Milhões: o Que a Doceria do Kléber Ensina',
+    description: 'Duas docerias na mesma rua: uma vazia, a outra com fila dobrando a esquina. A que tem fila deve R$ 3 milhões. A história mostra, passo a passo, como se aprende a vender antes de aprender a administrar.',
     category: 'Gestão Financeira',
     publishedAt: '2026-09-16',
     readTime: '10 min de leitura',
-    coverImage: '/blog-covers/delivery-margem-por-canal-cover.jpg',
-    author: {
-      name: 'Rafael Maldivas',
-      role: 'Head de Engenharia e Arquitetura do MiseOn',
-      avatar: '/icon-192.png',
-    },
-    tags: ['Delivery', 'Margem por Canal', 'iFood', 'Embalagem', 'Precificação'],
-    seo: {
-      title: 'Delivery Dá Dinheiro? A Margem por Canal na Prática — MiseOn',
-      description: 'Comissão, embalagem e taxa saem do mesmo prato. Monte a margem por canal do seu delivery e veja qual venda paga a conta e qual cobra por ela.',
-      keywords: 'margem delivery restaurante, comissao ifood calculo, custo embalagem delivery, precificacao por canal, delivery da lucro',
-      canonicalUrl: 'https://miseon.app.br/blog/delivery-da-dinheiro-a-conta-por-canal-que-quase-ninguem-faz',
-    },
-    summary: 'Faturamento de delivery é fácil de ver e margem de delivery é fácil de ignorar. Comissão de marketplace, embalagem, taxa de entrega e cupom saem todos do mesmo prato — e cada canal come uma fatia diferente. Este artigo monta a conta por canal e mostra por que o mesmo prato pode ser lucrativo no balcão e prejuízo no aplicativo.',
-    content: `
-# Delivery Dá Dinheiro? A Conta por Canal que Quase Ninguém Faz
-
-Delivery cresceu e virou obrigação. A pergunta que quase nunca é respondida com número é outra: **delivery dá dinheiro?**
-
-A resposta honesta é: depende do canal. E como quase ninguém separa a margem por canal, a loja soma tudo num caixa só e acha que está tudo bem — ou acha que está tudo mal — sem saber qual venda pagou a conta e qual cobrou por ela.
-
----
-
-## O mesmo prato, três preços de custo
-
-Pegue um prato de R$ 45,00 no balcão, com R$ 15,00 de insumo. Margem bruta de R$ 30,00.
-
-Agora mande o mesmo prato pelos três caminhos:
-
-- **Balcão**: R$ 45,00 menos R$ 15,00 de insumo. Sobram R$ 30,00
-- **Delivery próprio**: acrescente embalagem, sacola e talher (digamos R$ 3,50) e o custo de entrega. Se você paga R$ 8,00 ao entregador e cobra R$ 6,00 do cliente, faltam R$ 2,00. Sobram R$ 24,50
-- **Marketplace**: acrescente a embalagem (R$ 3,50) e a comissão do canal sobre o valor total. A comissão não incide sobre o seu lucro: incide sobre a venda inteira
-
-Três números diferentes para o mesmo prato saindo da mesma chapa. Um cardápio que tem um preço só está financiando o canal mais caro com o dinheiro do canal mais barato.
-
-Os valores são um exemplo aritmético para mostrar a estrutura da conta, não a medição de uma loja.
-
----
-
-## 1. A comissão não é desconto: é sócio no faturamento
-
-Desconto sai uma vez. Comissão sai em toda venda, para sempre, sobre o valor cheio — incluindo a taxa de entrega que o cliente pagou e, em muitos contratos, incluindo o que você bancou de promoção.
-
-Isso muda a natureza da conta. Um canal com comissão alta só se justifica se ele **trouxer cliente que você não teria** — e se o preço praticado ali comportar a comissão. Se você usa o marketplace para vender ao mesmo cliente que já compraria no seu WhatsApp, está pagando pedágio numa estrada que já era sua.
-
----
-
-## 2. Embalagem é ingrediente
-
-Marmita, tampa, sacola, lacre, talher, guardanapo, molho em sachê, etiqueta. Nada disso aparece na receita, tudo isso sai do mesmo prato.
-
-Em cardápio de ticket baixo, a embalagem chega a pesar mais que um ingrediente inteiro da ficha. E ela tem uma característica cruel: **é a mesma para o prato barato e para o caro**. Ou seja, ela morde proporcionalmente muito mais a margem do item de entrada — justamente o que mais sai.
-
-Se a sua ficha técnica não tem uma linha de embalagem por canal, ela não descreve o que sai pela porta.
-
----
-
-## 3. A taxa de entrega quase nunca fecha
-
-Cobrar R$ 6,00 e pagar R$ 9,00 ao entregador é uma decisão legítima de marketing — desde que seja uma decisão, com o rombo medido e coberto pela margem do pedido.
-
-O problema é quando ninguém fez essa conta e a diferença some no caixa do dia. Aí a loja tem a sensação de que o delivery "não rende", sem saber que o buraco está numa linha só, fácil de corrigir: raio de entrega, pedido mínimo por faixa de distância, ou preço de entrega por bairro.
-
----
-
-## 4. Cupom bom e cupom que só transfere dinheiro
-
-Existe cupom que traz cliente novo e existe cupom que dá desconto para quem já ia comprar.
-
-O primeiro é investimento: tem custo de aquisição e retorno esperado. O segundo é só margem indo embora, com a agravante de treinar o cliente a nunca mais comprar pelo preço cheio.
-
-A diferença entre os dois não está no cupom — está na regra. Cupom de primeira compra, cupom por janela de horário para mover gente do pico para a borda do serviço, cupom para reativar quem não compra há sessenta dias: tudo isso é investimento com alvo. Cupom permanente na home é desconto com outro nome.
-
----
-
-## 5. O pico não escala como você imagina
-
-No balcão, o limite é a cadeira. No delivery, o limite é a cozinha — e ele aparece em forma de atraso, não de fila visível.
-
-Quando o tempo de preparo estoura, o efeito não é só a avaliação ruim. É comida saindo fria, reembolso, refação, entregador parado esperando (e entregador parado é custo). Uma operação que aceita mais pedidos do que consegue montar está comprando faturamento com margem.
-
-Fila que você não vê é fila mesmo assim.
-
----
-
-## Como montar a margem por canal em uma tarde
-
-- **Separe a venda por canal.** Balcão, delivery próprio, marketplace, mesa. Sem essa separação, nada do resto funciona
-- **Liste o custo que só existe naquele canal.** Embalagem, comissão, taxa de entrega paga, cupom, imposto quando o regime difere
-- **Calcule a margem por pedido, não por prato.** O delivery é vendido em pedido: um pedido de item único paga embalagem inteira; um pedido de quatro itens dilui
-- **Compare a margem por hora de cozinha, não só por pedido.** Um prato de margem alta que trava a chapa por dez minutos pode render menos que dois de margem média
-- **Decida o preço por canal.** Preço diferente por canal não é truque: é reconhecer que o custo é diferente
-
----
-
-## O que o MiseOn faz com isso
-
-- **Pedido do iFood entra com o preço COM o markup do canal** — o sistema não reprecifica por cima, porque o preço praticado ali é aquele mesmo
-- **Custo por item vindo da ficha técnica**, com a nota de compra por trás
-- **Cupom com regra**: janela de horário, dia da semana, primeira compra — desconto decidido no servidor, não no navegador do cliente
-- **Cada canal é um canal**, do balcão ao aplicativo, e o relatório não mistura o que não é igual
-
----
-
-**Delivery não é uma decisão de sim ou não. É uma decisão por canal, por prato e por horário** — e essas três perguntas só têm resposta com a margem separada.
-`,
-  },
-  {
-    slug: 'restaurante-amador-na-internet-o-que-faz-perder-a-venda',
-    title: 'O Que Faz um Restaurante Parecer Amador na Internet (e Perder a Venda Antes do Cardápio)',
-    description: 'A decisão de comprar acontece em segundos, antes do primeiro item. Os sinais que fazem o cliente desconfiar da sua loja — e o que arrumar primeiro.',
-    category: 'Tecnologia & IA',
-    publishedAt: '2026-09-16',
-    readTime: '8 min de leitura',
-    coverImage: '/blog-covers/presenca-digital-restaurante-cover.jpg',
-    author: {
-      name: 'Rafael Maldivas',
-      role: 'Head de Engenharia e Arquitetura do MiseOn',
-      avatar: '/icon-192.png',
-    },
-    tags: ['Cardápio Digital', 'Presença Digital', 'Conversão', 'WhatsApp', 'Experiência do Cliente'],
-    seo: {
-      title: 'Restaurante Amador na Internet: O Que Faz Perder a Venda — MiseOn',
-      description: 'Foto ruim, cardápio desatualizado, link que não abre e WhatsApp sem resposta. Os sinais que derrubam a venda antes do cliente ver o primeiro prato.',
-      keywords: 'cardapio digital restaurante, site de restaurante que vende, presenca digital food service, qr code cardapio, conversao delivery proprio',
-      canonicalUrl: 'https://miseon.app.br/blog/restaurante-amador-na-internet-o-que-faz-perder-a-venda',
-    },
-    summary: 'Ninguém decide comer num lugar lendo o cardápio inteiro: decide em segundos, por sinais. Foto escura, preço desatualizado, link que pede aplicativo, WhatsApp que não responde. Este artigo lista os sinais que fazem um restaurante bom parecer amador na internet e a ordem em que vale a pena corrigir.',
-    content: `
-# O Que Faz um Restaurante Parecer Amador na Internet (e Perder a Venda Antes do Cardápio)
-
-Um cliente não avalia a sua comida pela internet. Ele avalia o **risco** de pedir.
-
-Essa decisão acontece em poucos segundos, antes de o primeiro item ser lido, e é feita por sinais. Cozinha excelente com sinais ruins perde para cozinha mediana com sinais bons — e isso não é injustiça do algoritmo, é como qualquer pessoa decide onde gastar quarenta reais e a própria fome.
-
-Abaixo, os sinais que mais derrubam venda, em ordem de estrago.
-
----
-
-## 1. Foto escura, tremida ou de outro prato
-
-A foto é a única prova que o cliente tem antes de pagar. Quando ela é escura, desfocada ou claramente baixada da internet, a mensagem que chega não é "foto ruim": é **"não sei o que vou receber"**.
-
-Não é preciso estúdio. É preciso luz da janela, fundo limpo, o prato montado como sai de verdade e a mesma moldura para todos os itens. Um cardápio onde cada foto tem um enquadramento e uma cor diferentes parece uma colcha de retalhos, mesmo com fotos boas.
-
-E foto que não corresponde ao prato real é pior que foto nenhuma: gera reclamação, reembolso e avaliação negativa — três custos, não um.
-
----
-
-## 2. Preço desatualizado e item indisponível
-
-O cliente monta o pedido, chega no fim e descobre que o item acabou ou que o preço é outro. Essa é uma das poucas coisas capazes de fazer alguém desistir depois de já ter decidido comprar.
-
-Cardápio impresso envelhece em silêncio. Cardápio digital envelhece em público — e por isso precisa de um lugar só onde o preço é alterado, valendo na mesma hora para a mesa, o balcão e o delivery. Preço que mora em três lugares diverge nos três.
-
----
-
-## 3. Link que pede aplicativo, cadastro ou senha
-
-Cada passo antes do "quero este" derruba uma parte das pessoas. Pedir instalação de aplicativo para um pedido de vinte e cinco reais é pedir um casamento no primeiro encontro.
-
-Cardápio que abre no navegador, em dois segundos, sem cadastro, converte mais — e não é opinião: é a diferença entre uma tela e quatro.
-
----
-
-## 4. A página que demora
-
-Três segundos de espera na tela do celular, no ponto de ônibus, é uma eternidade. Foto pesada demais, vídeo tocando sozinho na abertura, fonte que carrega antes do texto: tudo isso é tempo que o cliente não te deve.
-
-Velocidade não é vaidade técnica. É a primeira promessa que a sua loja faz — se a página é lenta, a entrega também deve ser.
-
----
-
-## 5. WhatsApp que não responde (ou responde às 23h)
-
-Muita loja transformou o WhatsApp no seu principal canal de venda e o atende como quem responde recado de vizinho.
-
-A conta é simples: se dez pessoas mandam mensagem no pico e três desistem por demora, o custo não foi o atendimento — foi o pedido. E, pior, foi o cliente que aprendeu que ali demora.
-
-Ou tem gente dedicada no horário de pico, ou tem atendimento automatizado para as perguntas repetidas — horário, taxa de entrega, formas de pagamento, status do pedido. Quase toda mensagem de restaurante é uma de cinco perguntas.
-
----
-
-## 6. Nenhum sinal de que a loja existe de verdade
-
-Endereço, horário de funcionamento, telefone, fotos do salão, respostas às avaliações. Cada um desses é uma prova de vida.
-
-Perfil sem endereço, sem horário e com a última publicação de oito meses atrás passa uma mensagem involuntária: talvez tenha fechado. E, na dúvida, ninguém pede.
-
----
-
-## A ordem em que vale a pena arrumar
-
-- **Primeiro: o cardápio que abre rápido e está certo.** Preço correto, item indisponível marcado, sem cadastro
-- **Segundo: as fotos dos dez itens que mais saem.** Não o cardápio inteiro — os dez
-- **Terceiro: a resposta no canal onde o cliente fala.** Automatize o repetitivo, reserve a pessoa para o resto
-- **Quarto: as provas de vida.** Horário, endereço, avaliações respondidas
-- **Só então: identidade visual, campanha, tráfego pago.** Investir em anúncio antes disso é pagar para mostrar o problema a mais gente
-
----
-
-## Onde o MiseOn entra
-
-- **Cardápio digital por QR Code**, que abre no navegador, sem aplicativo e sem taxa por pedido
-- **Um lugar só para o preço**: alterou, vale na hora na mesa, no balcão e no delivery
-- **Atendimento no WhatsApp pela API oficial da Meta** — as cinco perguntas de sempre respondidas na hora, a conversa difícil com gente
-- **Item indisponível some do cardápio quando o estoque acaba**, em vez de virar frustração no fim do pedido
-
----
-
-**Parecer profissional não é ter o site mais bonito. É não dar ao cliente nenhum motivo para desconfiar** — e quase todos os motivos são pequenos, baratos e corrigíveis nesta semana.
-`,
-  },
-  {
-    slug: 'padaria-da-dinheiro-onde-exatamente-esta-o-lucro',
-    title: 'Padaria Dá Dinheiro: Onde Exatamente Está o Lucro',
-    description: 'O pão francês enche a loja e quase não deixa margem. O lucro da padaria está na produção própria, no mix e no que acontece depois das dez da manhã.',
-    category: 'Engenharia de Cardápio',
-    publishedAt: '2026-09-16',
-    readTime: '9 min de leitura',
-    coverImage: '/blog-covers/padaria-onde-esta-o-lucro-cover.jpg',
-    author: {
-      name: 'Rafael Maldivas',
-      role: 'Head de Engenharia e Arquitetura do MiseOn',
-      avatar: '/icon-192.png',
-    },
-    tags: ['Padaria', 'Mix de Produtos', 'Produção Própria', 'Margem', 'Ficha Técnica'],
-    seo: {
-      title: 'Padaria Dá Dinheiro: Onde Está o Lucro de Verdade — MiseOn',
-      description: 'O pão francês é isca, não lucro. Como separar produção própria de revenda, medir a margem por categoria e usar as horas ociosas da padaria.',
-      keywords: 'padaria da lucro, margem padaria, producao propria padaria, mix de produtos padaria, ficha tecnica panificacao',
-      canonicalUrl: 'https://miseon.app.br/blog/padaria-da-dinheiro-onde-exatamente-esta-o-lucro',
-    },
-    summary: 'Padaria é o negócio de food service com mais fluxo de gente e uma das margens mais mal distribuídas. O pão francês traz a cidade inteira para dentro e quase não deixa dinheiro; a margem está na produção própria, no salgado, na confeitaria e no horário que a loja hoje desperdiça. Este artigo separa o que é isca do que é lucro.',
-    content: `
-# Padaria Dá Dinheiro: Onde Exatamente Está o Lucro
-
-Padaria é provavelmente o negócio de food service com mais fluxo de gente por metro quadrado no Brasil. E é também um dos que mais confunde movimento com resultado.
-
-O motivo é estrutural: o produto que traz a cidade para dentro da loja é justamente o que menos deixa margem.
-
----
-
-## O pão francês é isca, e isca não precisa dar lucro
-
-O pão francês tem três características que, juntas, esmagam a margem:
-
-- **Preço de referência público.** O cliente sabe quanto custa o quilo, e sabe quanto custa na padaria da esquina
-- **Insumo de commodity.** Farinha é cotada; quando ela sobe, sobe para todo mundo, e o repasse é lento porque o preço é sensível
-- **Mão de obra intensiva e horário cruel.** Alguém precisa estar assando às cinco da manhã
-
-Isso não significa que ele deva sair do cardápio — significa que ele tem outra função. Ele é o motivo pelo qual duzentas pessoas entram na sua loja antes das nove da manhã. **O lucro não está na isca. Está no que entra na sacola junto.**
-
-A pergunta certa não é "quanto ganho no pão", e sim "quanto sai de margem por cliente que veio buscar pão".
-
----
-
-## As quatro padarias dentro da mesma padaria
-
-Uma padaria não é um negócio. São quatro, com margens e horários completamente diferentes:
-
-- **Panificação** — pão, produção própria, margem apertada, fluxo enorme
-- **Revenda** — refrigerante, leite, bolacha, produto industrializado. Margem baixa e previsível, sem trabalho de produção. É conveniência, e conveniência é serviço, não fabricação
-- **Salgados, lanches e almoço** — produção própria com margem maior, concentrada em duas janelas do dia
-- **Confeitaria e encomenda** — bolo, doce, torta, festa. Margem alta, produção planejada, cliente que avisa antes
-
-Somar as quatro num caixa só é o que produz a frase "a padaria vende muito e não sobra". Cada uma tem um custo, um horário e um limite diferente. Sem separação, não existe decisão: existe palpite.
-
----
-
-## Revenda merece atenção separada
-
-Produto industrializado tem uma margem que você não controla, um preço que o cliente compara com o mercado e um capital parado na prateleira.
-
-Isso não o torna vilão: ele é conveniência, e conveniência prende cliente. Mas ele precisa ser tratado pelo que é — um serviço com giro, não uma fábrica. Refrigerante encalhado é dinheiro dormindo; refrigerante que gira é margem pequena muitas vezes.
-
-O erro comum é encher a prateleira do que dá orgulho comprar em promoção e não do que gira.
-
----
-
-## O que acontece com a sua loja entre 10h e 16h
-
-A padaria tem dois picos claros — manhã e fim de tarde — e um vale enorme no meio.
-
-Nesse vale, você continua pagando aluguel, energia, forno e equipe. Toda margem que sair dali é margem incremental: o custo fixo já foi pago pelos picos.
-
-É esse o espaço do almoço executivo, do salgado de meio de tarde, do café com bolo, da encomenda que se produz enquanto a loja está vazia. Não é "vender mais". É usar uma capacidade que já está paga.
-
----
-
-## A conta que separa isca de lucro
-
-- **Classifique cada item em uma das quatro padarias.** Panificação, revenda, salgado/lanche, confeitaria
-- **Faça a ficha técnica dos dez itens de produção própria que mais saem.** Farinha, fermento, gordura, recheio, embalagem — e o rendimento medido no SEU forno, não na tabela
-- **Meça a perda de fim de dia por categoria.** Pão que sobra é dinheiro que já foi gasto: farinha, gás, hora de padeiro
-- **Some a margem por categoria e divida pelo número de clientes.** Você vai descobrir quanto cada cliente que entra deixa de verdade
-- **Olhe o vale do meio do dia.** Quanto de custo fixo está sendo pago por quantas vendas?
-
----
-
-## O que dá para fazer nesta semana
-
-- **Pare de tratar o pão como termômetro do negócio.** Ele é o convite, não a fatura
-- **Ataque a perda de fim de dia com ajuste de produção, não com desconto.** Assar menos no último ciclo vale mais que remarcar
-- **Coloque um item de margem alta no caminho da fila.** Quem veio buscar pão precisa esbarrar no que dá dinheiro
-- **Trate encomenda como produto de verdade**, com prazo, sinal e ficha técnica
-- **Refaça o custo quando a farinha subir.** Em padaria, reajuste não repassado corrói mais rápido que em qualquer outro segmento
-
----
-
-## Onde o MiseOn entra
-
-- **Ficha técnica com rendimento medido na sua loja** — massa que ganha ou perde peso no forno é o número que decide o custo do pão
-- **Custo puxado da nota de compra**, para o preço da farinha desta semana valer na conta desta semana
-- **Categoria por categoria**, com a margem separada entre o que você fabrica e o que você revende
-- **Quando o dado não é confiável, o sistema diz o motivo** em vez de mostrar uma margem inventada
-
----
-
-**Padaria dá dinheiro. Só que raramente no produto que leva o nome dela** — e enxergar isso é a diferença entre uma loja cheia e uma loja lucrativa.
-`,
-  },
-  {
-    slug: 'voce-nunca-olhou-para-um-buffet-desse-jeito',
-    title: 'Você Nunca Olhou Para um Buffet Desse Jeito: a Engenharia do Balcão',
-    description: 'Cada cuba do self-service ocupa um espaço que custa dinheiro. A ordem dos itens, a reposição e o fim do serviço decidem a margem do quilo.',
-    category: 'Engenharia de Cardápio',
-    publishedAt: '2026-09-16',
-    readTime: '9 min de leitura',
-    coverImage: '/blog-covers/buffet-engenharia-do-balcao-cover.jpg',
-    author: {
-      name: 'Rafael Maldivas',
-      role: 'Head de Engenharia e Arquitetura do MiseOn',
-      avatar: '/icon-192.png',
-    },
-    tags: ['Buffet', 'Self-Service', 'Venda por Quilo', 'Reposição', 'Perda'],
-    seo: {
-      title: 'A Engenharia do Balcão do Buffet: Cuba, Ordem e Perda — MiseOn',
-      description: 'No self-service o cardápio é o balcão. Como a ordem das cubas, o tamanho da porção reposta e o fim do serviço decidem a margem do quilo.',
-      keywords: 'buffet por quilo margem, self service restaurante gestao, reposicao buffet perda, engenharia de cardapio buffet, custo por cuba',
-      canonicalUrl: 'https://miseon.app.br/blog/voce-nunca-olhou-para-um-buffet-desse-jeito',
-    },
-    summary: 'No self-service o cliente monta o prato e o dono descobre o resultado só no fim do dia. Mas o balcão é um cardápio: a ordem das cubas, o tamanho da porção reposta e a decisão da última hora de serviço movem a margem mais do que qualquer tabela de preço. Este artigo trata o balcão como engenharia.',
-    content: `
-# Você Nunca Olhou Para um Buffet Desse Jeito: a Engenharia do Balcão
-
-No restaurante à la carte, o cliente escolhe de uma lista que você escreveu. No self-service, ele monta o próprio prato — e a sensação é de que o dono perdeu o controle da margem.
-
-Não perdeu. Só que o cardápio deixou de ser um papel e virou **o balcão**: a ordem das cubas, o tamanho de cada uma, a colher que você coloca em cada item e a hora em que a reposição para.
-
-Isso é engenharia, e quase ninguém trata assim.
-
----
-
-## O balcão é um cardápio com ordem obrigatória
-
-A pessoa entra com o prato vazio e passa por todos os itens na sequência em que você os dispôs. Diferente do cardápio impresso, aqui ela **não pode pular** a primeira página.
-
-Isso significa que a posição de cada item é uma decisão econômica:
-
-- O que está no começo do balcão entra no prato quando ele está vazio — e o prato vazio aceita mais
-- O que está no fim disputa espaço com o que já foi servido
-- O que está na altura dos olhos sai mais do que o que está embaixo
-
-Arroz, massa, salada e guarnição de custo baixo na entrada; proteína nobre depois do prato já ter volume. Não é para enganar ninguém: é a mesma lógica de qualquer cardápio bem montado, aplicada ao espaço em vez do papel.
-
----
-
-## Cada cuba ocupa um espaço que custa dinheiro
-
-Um balcão tem um número fixo de cubas. Isso é o seu estoque de vitrine, e ele é finito.
-
-Cada cuba ocupada por um item que sai pouco é uma cuba que não está ocupada por um item que sai muito. Além do espaço, ela custa:
-
-- **Produção** — alguém preparou aquilo
-- **Energia** — banho-maria ou refrigeração ligados o serviço inteiro
-- **Perda** — o que sobrar dali dificilmente volta amanhã igual
-
-Um item que sai pouco e sobra sempre não é variedade: é custo fixo disfarçado de escolha. Medir a saída por cuba, por dia da semana, é a informação mais barata e mais ignorada do self-service.
-
----
-
-## A reposição decide a perda antes de ela existir
-
-A pergunta que define a margem do dia não é quanto produzir. É **quanto repor de cada vez, e até que horas**.
-
-Cuba cheia às 14h30 é bonita para quem chega e é prejuízo garantido para quem fecha. Cuba vazia às 12h20 é venda perdida e cliente irritado.
-
-O caminho do meio é repor pouco e com frequência no fim do serviço, trocando recipiente grande por menor, e concentrar o item caro nas duas primeiras horas. Isso exige uma decisão consciente — e alguém encarregado dela —, não o hábito de "deixar bonito até o fim".
-
----
-
-## Perda de fim de serviço é o CMV que ninguém lança
-
-O que sobra na cuba já consumiu compra, preparo, gás e mão de obra. Ele é custo cheio com receita zero.
-
-Mesmo assim, quase nenhuma operação pesa a sobra. Sem pesar, a perda vira "sensação de que sobrou bastante hoje" — e sensação não entra em planilha, não vira decisão e não corrige a produção de amanhã.
-
-Pesar a sobra por item, ainda que por duas semanas, costuma reorganizar o balcão inteiro.
-
----
-
-## O preço do quilo e o prato médio
-
-O preço do quilo é único, mas o custo do prato não é: ele depende do que o cliente colocou.
-
-Isso quer dizer que a sua margem real é determinada pelo **prato médio** — a composição que a maioria monta. E o prato médio responde ao balcão: ordem, volume das cubas, presença de itens de saciedade barata, temperatura e aparência.
-
-Mexer no balcão é mexer no prato médio. É a alavanca mais forte que o self-service tem, e não custa nada além de atenção.
-
----
-
-## O peso que muda depois do fogo
-
-Uma última peça, que o cliente nunca vê: o alimento muda de peso ao ser preparado.
-
-Arroz ganha peso ao cozinhar. Carne perde na aparação e perde de novo na chapa. Isso significa que o custo por quilo **servido** não é o custo por quilo **comprado** — e a diferença não é pequena.
-
-Quem calcula o custo do buffet pelo preço de compra está errando em todos os itens ao mesmo tempo, uns para mais, outros para menos. O número certo sai do rendimento medido na própria cozinha.
-
----
-
-## O que dá para fazer nesta semana
-
-- **Pese a sobra de cada cuba no fim do serviço, por duas semanas.** Só isso já paga o trabalho
-- **Reorganize a ordem do balcão** pensando no prato vazio que passa por ele
-- **Troque a cuba grande por duas menores no último terço do serviço**
-- **Tire da linha o item que sobra sempre e sai pouco.** Variedade que não sai é perda com nome bonito
-- **Meça o rendimento dos cinco itens mais caros na sua cozinha.** Comprado não é servido
-
----
-
-## Onde o MiseOn entra
-
-- **Rendimento medido pela loja vence a tabela de referência** — ganho e perda, porque arroz cozido pesa mais e carne pesa menos
-- **Custo por item com a nota de compra por trás**, para o preço do quilo acompanhar a realidade
-- **Venda por peso conserva o preço praticado do quilo**, sem reprecificar por fora o que a balança já resolveu
-- **Quando o custo não é confiável, o sistema mostra o motivo** em vez de fingir precisão
-
----
-
-**No self-service, o cardápio não é escrito: é montado em aço inox, todo dia, por quem repõe.** Quem enxerga o balcão como engenharia decide a margem antes de o primeiro cliente pegar o prato.
-`,
-  },
-  {
-    slug: 'loja-lotada-divida-enorme-por-que-fila-na-porta-nao-e-lucro',
-    title: 'Loja Lotada, Dívida Enorme: Por Que Fila na Porta Não Significa Dinheiro no Caixa',
-    description: 'Movimento mede quantas vezes a operação rodou; margem mede quanto sobrou de cada vez. Os cinco mecanismos que fazem uma loja cheia acumular dívida — e a conta que revela o buraco em uma tarde.',
-    category: 'Gestão Financeira',
-    publishedAt: '2026-09-16',
-    readTime: '9 min de leitura',
     coverImage: '/blog-covers/loja-lotada-divida-enorme-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
       avatar: '/icon-192.png',
     },
-    tags: ['Capital de Giro', 'CMV Real', 'Ficha Técnica', 'Precificação', 'Gestão Financeira'],
+    tags: ['Capital de Giro', 'Margem por Canal', 'Gestão Financeira', 'Delivery', 'Processos'],
     seo: {
-      title: 'Loja Lotada e Dívida Enorme: Fila na Porta Não é Lucro — MiseOn',
-      description: 'Por que restaurante cheio acumula dívida: margem unitária negativa, capital de giro e preço copiado do vizinho. A conta que mostra o vazamento em uma tarde.',
-      keywords: 'restaurante cheio sem lucro, capital de giro restaurante, margem negativa food service, precificacao ficha tecnica, por que restaurante quebra, cmv real restaurante',
+      title: 'Fila na Porta e Dívida de R$ 3 Milhões: o Caso da Doceria — MiseOn',
+      description: 'A doceria vive cheia e deve R$ 3 milhões. O que o caso do Kléber mostra sobre margem por canal, produto errado na loja certa e o dono que virou herói.',
+      keywords: 'restaurante cheio sem lucro, divida restaurante, margem delivery aplicativo, capital de giro food service, gestao de doceria',
       canonicalUrl: 'https://miseon.app.br/blog/loja-lotada-divida-enorme-por-que-fila-na-porta-nao-e-lucro',
     },
-    summary: 'Movimento e margem são números diferentes, e não existe lei que obrigue o segundo a crescer junto com o primeiro. Quando a margem por item está negativa, o volume não salva: ele multiplica. Este artigo abre os cinco mecanismos por trás da loja cheia com o caixa vazio e entrega, passo a passo, a conta que encontra o vazamento nos dez itens que mais saem.',
+    summary: 'Uma doceria com fila dobrando a esquina e R$ 3 milhões em dívida: o caso documentado pelo jornalista Marcelo Baccarini é o retrato mais honesto de um problema comum no food service brasileiro — a habilidade de vender chega antes da habilidade de administrar. Este artigo destrincha os quatro pontos em que a conta se perdeu e o que cada um deles ensina a quem tem loja cheia e caixa magro.',
     content: `
-# Loja Lotada, Dívida Enorme: Por Que Fila na Porta Não Significa Dinheiro no Caixa
+# Fila na Porta, Dívida de R$ 3 Milhões: o Que a Doceria do Kléber Ensina
 
-Existe uma cena que todo mundo do food service já viu, e quase ninguém explica direito: a loja vive cheia, a fila dobra a esquina, o movimento é inveja do bairro — e o dono não dorme, porque deve.
+Duas docerias, uma de frente para a outra. Uma vazia. A outra com uma fila que dobra a esquina e não para de crescer, porque fila atrai fila.
 
-Não é contradição. É contabilidade.
+A cheia é do Kléber. E ela deve R$ 3 milhões.
 
-Movimento é uma medida de **quantas vezes a operação rodou**. Margem é uma medida de **quanto sobrou de cada vez que ela rodou**. São dois números diferentes, e não existe nenhuma lei que obrigue o segundo a crescer junto com o primeiro. Quando a margem por item está negativa, o movimento não salva: ele acelera a queda.
+O caso foi documentado numa reportagem do jornalista Marcelo Baccarini, e vale como estudo porque não é o roteiro de sempre — aquele em que o negócio vai mal porque não aparece cliente. Aqui o cliente aparece, o produto funciona, o mercado existe. O que não existe é a conta fechando.
 
-Este artigo destrincha os cinco mecanismos que produzem essa cena e mostra a conta que revela o buraco — a mesma conta, feita à mão, que um sistema de gestão faz todo dia.
-
----
-
-## O paradoxo: quanto mais vende, mais afunda
-
-Imagine um combo vendido a R$ 32,00. O dono acredita que ele custa R$ 12,00 de insumo. Então acredita que sobram R$ 20,00 por venda.
-
-Só que a ficha técnica nunca foi medida de verdade. O pão subiu na última compra, o queijo veio em embalagem de 2,5 kg e o rendimento foi estimado no olho, a carne perde peso na chapa, e a embalagem do delivery entrou depois — sem ninguém recalcular o preço.
-
-O custo real é R$ 21,40. Sobram R$ 10,60, não R$ 20,00.
-
-Agora multiplique pelos dois cenários:
-
-- **150 combos por dia**: a distância entre o que ele acha que ganha e o que ganha é de R$ 1.410,00 por dia
-- **300 combos por dia**: a distância dobra, para R$ 2.820,00 por dia
-
-O erro não é de R$ 9,40. O erro é de R$ 9,40 **vezes o movimento**. É por isso que dobrar a fila pode dobrar o rombo: volume é um multiplicador, e ele não pergunta se o número que está multiplicando é positivo ou negativo.
-
-Os valores acima são um exemplo aritmético, não a medição de uma loja específica. O que importa aqui é a estrutura da conta — e ela vale para qualquer cardápio.
+A frase que resume está na própria reportagem: é a história de quem **aprendeu a vender antes de aprender a administrar**. Vale a pena percorrer os quatro pontos em que a coisa entortou, porque nenhum deles é exclusividade da doceria dele.
 
 ---
 
-## 1. O preço veio do vizinho, não da ficha técnica
+## Ponto 1: no delivery, o aplicativo virou o sócio majoritário
 
-A forma mais comum de precificar no Brasil é olhar quanto o concorrente cobra e ficar um pouco abaixo. Isso não é estratégia: é uma aposta de que o custo dele é igual ao seu.
+Antes da loja física, o Kléber vendia doces por aplicativo direto de casa. Chegou a R$ 150 mil por mês — número que faria qualquer um comemorar.
 
-Quase nunca é. Ele compra em outro volume, negocia outro prazo, paga outro aluguel, tem outra perda e talvez outro rendimento na mesma receita. Copiar o preço do vizinho é copiar a resposta de uma conta cujos números você nunca viu.
+Só que, segundo o próprio, de cada R$ 1.000 vendidos, cerca de **R$ 600 ficavam com a plataforma e R$ 400 com ele**. E aí vem a parte que quase ninguém calcula: dos R$ 400 ainda saía o custo do doce, a embalagem, a mão de obra e o imposto.
 
-Preço honesto nasce de baixo para cima: custo do insumo na embalagem que você comprou, rendimento medido na sua cozinha, perda real do seu processo, e só então a margem que você decidiu praticar.
+Faturamento alto com margem invertida não é crescimento: é volume de trabalho crescendo mais rápido que o dinheiro. O nome disso é armadilha justamente porque o painel mostra um número que sobe.
 
----
-
-## 2. O prazo do dinheiro não bate com o prazo da conta
-
-Este é o mecanismo mais cruel, porque derruba operações que **são** lucrativas.
-
-Olhe o calendário de uma venda no cartão:
-
-- O cliente come hoje
-- O fornecedor de proteína vence em 7 dias
-- A folha vence no dia 5
-- A maquininha credita em 30 dias
-
-A operação pode ter margem positiva e mesmo assim faltar dinheiro no dia 5 — porque o lucro existe, só que ainda não chegou. Quando isso vira rotina, entram o cheque especial, a antecipação de recebíveis e o empréstimo curto. Cada um resolve a semana e piora o ano.
-
-Lucro é uma opinião sobre o mês. Caixa é um fato sobre o dia.
+**O que isso ensina:** faturamento por canal é dado bruto. O que decide é a margem **depois** da comissão, da embalagem e do imposto — e ela precisa ser calculada canal por canal, não no bolo do fim do mês.
 
 ---
 
-## 3. O que o volume faz com um erro pequeno
+## Ponto 2: loja certa, produto errado
 
-Um erro de R$ 0,80 por prato parece desprezível. Ninguém briga por oitenta centavos.
+Sem dinheiro, sem fiador e sem depósito, ele montou a loja física. E cometeu um erro que parece pequeno e custou caro: **levou para o balcão um produto que era de delivery**, o bolo de pote.
 
-Some assim: 200 pratos por dia, 26 dias por mês.
+Bolo de pote funciona na moto. Na loja, ninguém fotografa, ninguém posta, ninguém leva a amiga para ver. O ponto físico cobra aluguel para vender experiência, e ele estava pagando aluguel para vender conveniência.
 
-**R$ 0,80 × 200 × 26 = R$ 4.160,00 por mês.**
+Resultado, nos números que ele mesmo dá: **despesa de R$ 80 mil para uma loja que vendia R$ 60 mil**. Dois meses assim já abrem um buraco que a operação não tapa sozinha. Veio o crédito. Depois o crédito para pagar o crédito.
 
-É um salário evaporando dentro de um arredondamento que ninguém enxerga — porque ele nunca aparece numa linha só. Ele aparece diluído em 5.200 vendas.
-
-É também por isso que vender mais é o conselho errado para quem está nessa situação. Vender mais multiplica o que já existe. Se o que existe é um vazamento, o conselho certo é medir primeiro.
+**O que isso ensina:** cada canal pede um produto. O que vende no aplicativo não é automaticamente o que vende no balcão, e um cardápio único para canais diferentes costuma servir mal aos dois.
 
 ---
 
-## 4. A dívida cara vira sócia majoritária
+## Ponto 3: o produto mudou e o ticket mudou junto
 
-Quando o capital de giro falta com frequência, a loja passa a operar com dinheiro de terceiro caro — e o custo financeiro deixa de ser um evento para virar despesa fixa.
+A virada veio quando ele trocou o brigadeiro de R$ 10 pela fatia gigante de R$ 70 — a que tem pudim inteiro em cima, a que as pessoas filmam antes de comer.
 
-O efeito é perverso: a partir de certo ponto, uma parte do faturamento já está comprometida antes de o primeiro cliente sentar. A loja continua cheia, continua vendendo, e a dívida continua lá — porque dívida não é paga com movimento. É paga com **margem**.
+Não foi só preço: foi outro produto, com outra proposta e outro motivo para sair de casa. O exagero virou o convite, e o convite virou fila.
 
----
-
-## 5. O que não é medido vira sensação
-
-Sem ficha técnica, sem CMV apurado e sem custo por item, o dono administra por sensação: esse prato deve dar dinheiro, acho que o desperdício aumentou, parece que a carne subiu.
-
-Sensação erra numa direção previsível: ela subestima o custo e superestima a margem, porque ninguém tem memória afetiva do que perdeu na aparação, no cozimento, na embalagem e na troca de pedido errado.
-
-Um número honesto é sempre melhor que uma certeza confortável. E quando não dá para medir, a resposta certa é **não sei** — nunca um percentual inventado.
+Essa parte deu certo. E é importante dizer que deu certo, porque a lição do caso não é "cresça devagar". É que crescer em venda sem crescer em gestão só aumenta a escala do problema que já existia.
 
 ---
 
-## A conta que revela o buraco em uma tarde
+## Ponto 4: a empresa que depende de um herói
 
-Você não precisa de sistema nenhum para começar. Precisa de disciplina e de uma tarde:
+Com a fila na porta, apareceu a segunda conta. Nas palavras dele: passa a madrugada produzindo para o fim de semana, lava louça, atende cliente, ajuda na cozinha, tira lixo, faz a folha, contrata.
 
-- **Escolha os 10 itens que mais saem.** Em quase todo cardápio, poucos itens respondem pela maior parte do faturamento
-- **Abra a nota fiscal da última compra de cada insumo.** Não o preço que você lembra: o preço da nota, na embalagem que chegou
-- **Meça o rendimento na sua cozinha.** Quanto sai de carne limpa de uma peça inteira? Quanto o arroz ganha ao cozinhar? Isso muda o custo por porção mais do que qualquer negociação
-- **Some a embalagem, o descartável e o molho de cortesia.** Não estão na receita, mas estão na conta
-- **Subtraia tudo do preço de venda.** O que sobrou é a margem real daquele item
-- **Multiplique pela quantidade vendida no mês.** Agora você tem a contribuição real de cada item — e talvez descubra que alguns campeões de venda são os que menos deixam dinheiro
+Há uma frase na reportagem que devia estar pregada na parede de toda cozinha: **empresa forte depende de processo; empresa frágil depende de herói.**
 
-Se algum item der margem negativa, você encontrou o motivo da loja cheia com o caixa vazio.
+E o custo do herói aparece em lugares inesperados. Para reduzir falta de funcionário, a doceria paga **R$ 600 de bônus por mês para quem não faltar**. É uma solução honesta para um problema real — e também o sintoma de uma operação que não tem folga para absorver uma ausência.
 
 ---
 
-## O que dá para fazer nesta semana
+## A conta da dívida, sem retórica
 
-- **Corrija o preço dos itens negativos, ou tire-os do cardápio.** Item que dá prejuízo não se conserta no volume
-- **Renegocie prazo antes de renegociar preço.** Trinta dias a mais no fornecedor costumam valer mais que 3% de desconto
-- **Separe o dinheiro do dia do dinheiro do mês.** O caixa do dia paga a operação; o resto já tem dono e data
-- **Pare de antecipar recebível por hábito.** Antecipação é remédio de emergência, não regime alimentar
-- **Refaça a ficha técnica quando o insumo subir.** Reajuste de fornecedor não repassado é o vazamento mais silencioso do setor
+Os números da reportagem fecham o raciocínio:
+
+- Faturamento da loja: **R$ 300 mil por mês**
+- Sobra: **R$ 30 mil por mês**
+- Dívida: **R$ 3 milhões**
+
+Se cada centavo que sobra fosse para a dívida, e ele não tirasse um real para viver, seriam **mais de oito anos**. Sem contar juros. Com juros, a conta não fecha — e os credores sabem que empresa fechada não paga ninguém.
+
+Não é um caso de má-fé nem de preguiça. É um caso de operação boa e engenharia financeira ausente, mantida por alguém que continua tentando: ele separa o necessário para 13º e férias e negocia o resto, dívida por dívida.
+
+---
+
+## O que um dono de restaurante tira daqui, hoje
+
+- **Meça a margem por canal, não o faturamento por canal.** Comissão, embalagem, taxa e imposto saem do mesmo prato
+- **Não leve para o balcão o produto que foi desenhado para a moto.** E vice-versa
+- **Saiba o custo real do carro-chefe.** Ficha técnica com o preço da nota de compra, não com o preço que você lembra
+- **Escreva o processo antes de precisar dele.** O que hoje só você sabe fazer é o que vai travar a loja no dia em que você não estiver
+- **Separe o caixa do dia do dinheiro do mês.** Dívida não se paga com movimento: paga-se com margem
+- **Antes de aumentar a produção, confirme que cada unidade a mais deixa dinheiro.** Se não deixar, vender mais é afundar mais rápido
+
+---
+
+## Onde o MiseOn entra nessa história
+
+O MiseOn não renegocia dívida. Ele existe para que a conta que estourou nessa história seja visível **antes** de estourar:
+
+- **Ficha técnica com custo real**, puxando o preço da nota de compra que entrou no estoque — o custo do doce de hoje, não o do semestre passado
+- **Margem por produto e por canal**, porque o pedido do aplicativo carrega o preço com markup do canal e não pode ser misturado com a venda do balcão
+- **Rendimento medido na sua cozinha** vencendo qualquer tabela de referência
+- **Quando o dado não é confiável, o sistema diz o motivo** em vez de exibir um percentual bonito e falso
+
+A fila do Kléber prova que o produto dele presta. O que falta é a segunda prova — e essa não aparece no salão, aparece na conta.
+
+---
+
+**Fonte:** caso documentado em reportagem de Marcelo Baccarini. Os números citados são os apresentados pelos entrevistados.
+`,
+  },
+  {
+    slug: 'delivery-da-dinheiro-a-conta-por-canal-que-quase-ninguem-faz',
+    title: 'R$ 31,49 na Tela, R$ 12 na Conta: a Matemática do Delivery que Ninguém Mostra',
+    description: 'O cliente paga um preço, a loja recebe outro. Comissão, taxas, preço inflado para dar desconto, nota abaixo de 4.6 e o pedido que some por falta de entregador — o jogo do delivery com os números de quem vive dele.',
+    category: 'Gestão Financeira',
+    publishedAt: '2026-09-16',
+    readTime: '12 min de leitura',
+    coverImage: '/blog-covers/delivery-margem-por-canal-cover.jpg',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Delivery', 'iFood', 'Margem por Canal', 'Ficha Técnica', 'Canal Próprio'],
+    seo: {
+      title: 'Delivery: R$ 31,49 na Tela e R$ 12 na Conta — a Conta Real — MiseOn',
+      description: 'Comissão de 26% a 40%, preço inflado para dar desconto, nota 4.6 e pedido perdido por falta de motoboy. A matemática do delivery com números de quem vive dele.',
+      keywords: 'margem delivery ifood, comissao ifood quanto e, delivery da lucro, canal proprio restaurante, ficha tecnica marmita, cmv delivery',
+      canonicalUrl: 'https://miseon.app.br/blog/delivery-da-dinheiro-a-conta-por-canal-que-quase-ninguem-faz',
+    },
+    summary: 'Numa reportagem sobre delivery, uma dona de loja mostra a conta na tela: o prato sai por R$ 31,49 e ela recebe R$ 12. Em outro item, R$ 44 viram R$ 22. Este artigo reúne o que a apuração mostrou — comissões, taxas, o truque do preço inflado, o algoritmo da nota e o pedido que evapora por falta de entregador — e traduz cada ponto em decisão para quem vende comida.',
+    content: `
+# R$ 31,49 na Tela, R$ 12 na Conta: a Matemática do Delivery que Ninguém Mostra
+
+Numa reportagem do jornalista Marcelo Baccarini sobre o delivery brasileiro, uma cena vale mais que qualquer planilha: a empresária mostra o prato na tela do aplicativo, R$ 31,49, e diz quanto cai na conta dela. **R$ 12.**
+
+Não é caso isolado. No mesmo material, o caldo verde sai por R$ 29,90 e retorna entre R$ 9 e R$ 12. A porção de batata sai por R$ 44 e devolve R$ 22 — exatamente metade.
+
+Quem olha o extrato do aplicativo vê faturamento. Quem olha a conta bancária vê outra coisa. Entre um e outro existe uma engrenagem que vale a pena abrir peça por peça, porque cada uma delas tem uma decisão do outro lado.
+
+---
+
+## Peça 1: a comissão não vem sozinha
+
+A comissão das plataformas citada na reportagem varia conforme o plano e a promoção: **26%, 30%, até 40%**.
+
+Mas o desconto da plataforma raramente é uma linha só. Há taxa de entrega, custo logístico, taxa de pagamento, taxa de serviço. Cada uma parece pequena; juntas, explicam por que R$ 44 viram R$ 22.
+
+E há um detalhe que muda a conta: a comissão incide sobre o valor cheio da venda — não sobre o que sobra para você.
+
+**A decisão:** o preço no aplicativo não pode ser o preço do balcão. Se for, você está vendendo com markup de canal negativo — e quanto mais vender, pior.
+
+---
+
+## Peça 2: o preço que sobe para poder descer
+
+A reportagem mostra o mesmo macarrão com dois preços: um no aplicativo, outro no canal próprio, onde sai por cerca de R$ 25.
+
+O mecanismo é explicado sem rodeios por quem está dentro: para aparecer na plataforma é preciso dar desconto, e para dar desconto sem sangrar é preciso subir o preço antes. A plataforma subsidia parte — o entrevistado cita uma média a partir de R$ 5 por pedido.
+
+Não é ilegal, e é o que quase todo varejo faz com a percepção de desconto. Mas é bom ter clareza do que está acontecendo: **quem não entra nesse jogo com preço calculado entra com margem emprestada.**
+
+---
+
+## Peça 3: a nota é o seu aluguel de vitrine
+
+Outro ponto que a apuração deixa explícito: loja com avaliação **abaixo de 4.6 afunda no ranking** — e no delivery, quem não aparece não vende.
+
+O que derruba a nota quase nunca é a comida em si. É o molho que vazou, o arroz que chegou empedrado, a batata que grudou no queijo, a comida fria. Ou seja: **embalagem e tempo**, dois itens que costumam ser tratados como detalhe operacional e são, na prática, o seu departamento de marketing.
+
+**A decisão:** embalagem entra na ficha técnica e no teste de rota. Se ninguém na sua loja já fez o percurso de 20 minutos com o pedido pronto para ver como ele chega, esse teste vale mais que a próxima campanha.
+
+---
+
+## Peça 4: o pedido que some sem ser culpa sua
+
+Há uma parte do jogo que o restaurante não controla. Na reportagem, uma loja aparece com os pedidos cancelados porque simplesmente **não apareceu entregador** — a plataforma fecha a loja, direciona os entregadores disponíveis para as grandes marcas, e o pequeno fica com comida pronta e sem aviso.
+
+Do outro lado do balcão, o entregador também faz a conta dele: uma entrega que custa R$ 15 ao restaurante remunera o motoboy em torno de R$ 8 — e corrida mal paga é corrida recusada.
+
+**A decisão:** não dependa de um único canal para escoar produção. Canal próprio não é vaidade, é seguro.
+
+---
+
+## Peça 5: o cliente que compra sem ver
+
+A reportagem passeia por lojas onde metade dos itens em destaque **não tem foto nenhuma**, onde a descrição é "acompanha arroz, feijão, salada", onde o logotipo preto some no fundo branco da plataforma.
+
+Na rua, o cliente encontra a loja pelo endereço. No delivery, encontra pelas palavras — quem escreve "coxinha de frango com requeijão, massa de batata" aparece em mais buscas do que quem escreve "coxinha".
+
+**A decisão:** foto e nome de item são infraestrutura de venda, não enfeite. Comece pelos dez itens que mais saem.
+
+---
+
+## Peça 6: os centavos que definem o mês
+
+A parte mais reveladora não está nas plataformas: está na cozinha.
+
+Na mesma reportagem, uma operação pesa até o granulado que caiu no chão para lançar na planilha de desperdício. E aparece a conta que quase ninguém faz: **50 gramas de alho a mais por quilo dá cerca de R$ 600 por mês. R$ 7.200 no ano.** Em um insumo. Um só.
+
+Há também a engenharia da marmita, dita em gramas: cerca de 150 g de arroz, 100 g de feijão, 150 g de proteína — e a orientação de manter a proporção com mais vegetal e menos carne, porque a proteína é o item caro do prato e é onde a mão pesada some com o lucro.
+
+**A decisão:** ficha técnica com peso, não com "uma concha". A diferença entre 100 g e 140 g de proteína, repetida 200 vezes por dia, é o seu resultado.
+
+---
+
+## E quem ganha dinheiro, ganha como?
+
+A reportagem também mostra o outro extremo: uma operação que vende cerca de **70 mil pedidos por mês**. A estrutura de resultado apresentada por ele é direta — em torno de **59% a 60% de custo**, **26% de comissão** e um lucro na casa de **14% a 15%**.
+
+Duas coisas chamam atenção na estratégia dele:
+
+- **Usar a plataforma como vitrine e migrar o cliente para o canal próprio.** Um cupom de 20% para quem pede direto custa menos que 26% a 40% de comissão — e a embalagem com QR Code faz esse convite sem custo de panfleto
+- **Aceitar não lucrar nos primeiros seis meses de uma loja nova.** A meta declarada não é ganhar dinheiro no começo: é ganhar cliente
+
+Vale registrar também o detalhe operacional que parece bobagem e mexe no algoritmo: separar os pedidos por número par e ímpar na prateleira economiza segundos na retirada; velocidade de despacho sinaliza à plataforma que a loja aguenta mais pedidos, e mais pedidos chegam.
+
+---
+
+## O roteiro para esta semana
+
+- **Monte a margem por canal** dos dez itens que mais saem: preço praticado, comissão, embalagem, imposto
+- **Defina preço por canal.** Não é truque, é reconhecer que o custo é diferente
+- **Pese a proteína.** É o item caro; é onde o lucro vaza sem ninguém ver
+- **Refaça o teste de rota** com a embalagem que você usa hoje
+- **Coloque foto nos dez campeões** e escreva o nome do item como o cliente procura
+- **Leve o cliente para o seu canal** com cupom na embalagem ou QR Code — mais barato que qualquer comissão
 
 ---
 
 ## Onde o MiseOn entra
 
-O MiseOn existe para que essa conta deixe de ser uma tarde de trabalho e vire a tela que você abre de manhã:
-
-- **Ficha técnica com custo real**, puxando o preço da nota de compra que entrou no estoque
-- **Rendimento medido pela loja vence a tabela de referência** — o que a sua cozinha mediu vale mais do que qualquer média de mercado
-- **Custo por item e margem por produto**, com um detalhe que faz diferença: quando o dado não é confiável, o sistema mostra **o motivo** em vez de exibir um percentual inventado
-- **Entrada de estoque pelo QR Code do cupom fiscal**, para que o preço que entra na conta seja o preço que você pagou de verdade
-
-Movimento é bom. Movimento com margem medida é negócio.
+- **O pedido do iFood entra com o preço COM markup do canal** — o sistema não reprecifica por cima, porque ali o preço praticado é aquele mesmo
+- **Ficha técnica em gramas, com custo puxado da nota de compra**, para a conta do alho e a da proteína pararem de ser estimativa
+- **Cardápio digital próprio por QR Code**, sem taxa por pedido, para a migração de canal ser um caminho e não um discurso
+- **Cupom com regra decidida no servidor** — por janela de horário, por dia, por primeira compra
 
 ---
 
-**A fila na porta é a prova de que a sua comida presta. A margem na tela é a prova de que o negócio presta.** As duas provas são necessárias — e só uma delas aparece sozinha.
+**Fonte:** casos e números apurados em reportagem de Marcelo Baccarini, conforme apresentados pelos entrevistados.
+`,
+  },
+  {
+    slug: 'restaurante-amador-na-internet-o-que-faz-perder-a-venda',
+    title: 'Na Internet, o Cliente Compra a Foto e Recebe o Produto',
+    description: 'Um site de cupcakes que só mostrava caixas. Uma loja de joias que parecia planilha de estoque. Os erros que fazem um negócio bom parecer amador — e o que eles significam para quem vende comida.',
+    category: 'Tecnologia & IA',
+    publishedAt: '2026-09-16',
+    readTime: '9 min de leitura',
+    coverImage: '/blog-covers/presenca-digital-restaurante-cover.jpg',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Cardápio Digital', 'Presença Digital', 'Conversão', 'Fotografia de Alimentos', 'Experiência do Cliente'],
+    seo: {
+      title: 'Cliente Compra a Foto: Por Que seu Restaurante Parece Amador — MiseOn',
+      description: 'Foto de embalagem em vez de comida, site lento, celular mal resolvido e caminho confuso até o pedido. O que derruba a venda antes do cardápio ser lido.',
+      keywords: 'cardapio digital restaurante, foto de comida delivery, site de restaurante que vende, conversao cardapio online, presenca digital food service',
+      canonicalUrl: 'https://miseon.app.br/blog/restaurante-amador-na-internet-o-que-faz-perder-a-venda',
+    },
+    summary: 'Numa análise de sites de pequenos negócios, o veredito se repetia: visual amador contamina a percepção do produto, e quem vende comida sem mostrar comida não vende. Este artigo traduz esses achados para a realidade de um restaurante — cardápio, foto, celular e o caminho até o pedido — na ordem em que vale a pena consertar.',
+    content: `
+# Na Internet, o Cliente Compra a Foto e Recebe o Produto
+
+Existe uma frase dita numa análise de sites conduzida pelo jornalista Marcelo Baccarini que resume o assunto inteiro: na internet, **o cliente compra a foto e recebe o produto**.
+
+A análise passava por negócios reais, e os diagnósticos se repetiam de um jeito quase cômico — não fosse o fato de que cada erro ali é uma venda que não aconteceu. Um site de cupcakes que mostrava **as caixas** em vez dos bolinhos. Uma loja de joias organizada como planilha de estoque, sem ninguém usando as peças. Um site com a mesma imagem de fundo repetida seis vezes. Outro que vendia aparelhos médicos com fotos amadoras e sem botão de compra — o pedido era por telefone e fax.
+
+Nenhum desses donos acha que tem um negócio amador. E é esse o ponto: **o amadorismo aparece primeiro para quem está do lado de fora.**
+
+---
+
+## A ordem em que o cliente decide: ver, se interessar, ler
+
+Essa é a espinha do problema. A pessoa não chega à sua página disposta a ler. Ela olha. Se o que vê despertar interesse, ela olha de novo. Só então lê alguma coisa.
+
+Quem inverte essa ordem — parágrafos de texto antes de qualquer imagem que valha — perde a venda no primeiro segundo, não no último.
+
+Para restaurante, isso tem uma tradução literal: **se a foto não dá vontade de comer, o resto do cardápio não importa.** É o teste mais barato que existe e quase ninguém aplica com honestidade nas próprias fotos.
+
+---
+
+## Mostrar a comida, não a embalagem
+
+O caso dos cupcakes é o mais didático. A loja fotografou as caixas — bonitas, com a marca, bem produzidas. E não fotografou o que a pessoa quer comer.
+
+No delivery brasileiro isso acontece o tempo todo: fotos de marmita fechada, de sacola, de logo. Ninguém tem desejo por embalagem. O apetite é visual e é específico: o queijo puxando, o molho brilhando, a borda dourada.
+
+Um cardápio com boas fotos dos dez itens que mais saem vale mais que um cardápio completo com foto ruim em todos.
+
+---
+
+## Visual amador contamina o preço
+
+Outro achado que se repetia: quando o site parece improvisado, o cliente conclui que o produto também é — e, pior, que o preço não se justifica.
+
+Isso é especialmente cruel para quem cobra mais caro porque usa ingrediente melhor. O cliente não vê a sua compra: ele vê a sua vitrine. Fonte desalinhada, cores brigando, foto tremida e texto desencontrado são, para ele, informação sobre a sua cozinha.
+
+---
+
+## O caminho até o pedido tem que ser curto
+
+A análise bate seguidamente na navegação: obrigar o cliente a caçar o que ele quer é o jeito mais eficiente de perdê-lo. Categorias claras, três caminhos principais, sugestão do que vai bem junto.
+
+Para restaurante, isso é o combo e o adicional na hora certa — não como enfeite, mas porque o cliente decidido merece um caminho de dois toques até "quero este".
+
+E vale a regra que o próprio material deixa clara em vários exemplos: se falta o botão de comprar, não existe venda. Um cardápio que termina em "chame no WhatsApp" às 21h de sábado, com ninguém do outro lado, termina do mesmo jeito.
+
+---
+
+## Celular e velocidade não são detalhes técnicos
+
+Vários dos sites analisados eram sofríveis no celular — e é no celular que o cliente de restaurante decide, quase sempre em pé, quase sempre com pressa.
+
+Lentidão tem o mesmo efeito de uma fila desorganizada na porta: quem não está muito decidido desiste. E página pesada, cheia de imagem grande demais e efeito desnecessário, é lentidão autoinfligida.
+
+---
+
+## O que fazer, na ordem
+
+- **Fotografe os dez itens que mais saem.** Luz de janela, fundo limpo, o prato como ele realmente sai. Mesma moldura para todos
+- **Troque foto de embalagem por foto de comida.** Sempre
+- **Garanta que o cardápio abre no celular em segundos**, sem aplicativo e sem cadastro
+- **Escreva o nome do item como o cliente procura**, com o recheio e o acompanhamento no nome
+- **Deixe o caminho até o pedido com o menor número possível de passos**
+- **Tenha resposta no canal onde o cliente fala** — automatizada para o repetitivo, humana para o resto
+- **Só depois disso** invista em anúncio. Tráfego pago sobre vitrine ruim é pagar para mais gente ver o problema
+
+---
+
+## Onde o MiseOn entra
+
+- **Cardápio digital por QR Code** que abre no navegador, sem aplicativo, sem cadastro e sem taxa por pedido
+- **Um lugar só para preço e disponibilidade**: alterou, vale na hora na mesa, no balcão e no delivery
+- **Item que acabou sai do cardápio automaticamente** quando o estoque zera, em vez de virar frustração no fim do pedido
+- **Atendimento no WhatsApp pela API oficial da Meta**, para as cinco perguntas de sempre não dependerem de alguém livre no pico
+
+---
+
+**Ninguém escolhe um restaurante lendo. Escolhe olhando.** O cardápio é a sua vitrine — e vitrine suja fecha venda de comida boa.
+
+---
+
+**Fonte:** análises de sites comentadas em reportagem de Marcelo Baccarini.
+`,
+  },
+  {
+    slug: 'padaria-da-dinheiro-onde-exatamente-esta-o-lucro',
+    title: 'O Pão é Menos de 10% do Faturamento: Onde uma Padaria Ganha Dinheiro de Verdade',
+    description: 'Uma padaria vende mais de um milhão de pães por ano — e o pão responde por menos de 10% do que ela fatura. O que está nos outros 90% e por que o balcão do caixa é o metro quadrado mais caro da loja.',
+    category: 'Engenharia de Cardápio',
+    publishedAt: '2026-09-16',
+    readTime: '10 min de leitura',
+    coverImage: '/blog-covers/padaria-onde-esta-o-lucro-cover.jpg',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Padaria', 'Mix de Produtos', 'Margem', 'Compra por Impulso', 'Aproveitamento'],
+    seo: {
+      title: 'Padaria: o Pão é Menos de 10% do Faturamento — Onde Está o Lucro — MiseOn',
+      description: 'Mais de um milhão de pães por ano e menos de 10% do faturamento. O que sustenta uma padaria: refeição, mix, impulso no caixa e aproveitamento de sobra.',
+      keywords: 'padaria da lucro, margem padaria, mix de produtos padaria, compra por impulso caixa, aproveitamento de sobras padaria, buffet padaria',
+      canonicalUrl: 'https://miseon.app.br/blog/padaria-da-dinheiro-onde-exatamente-esta-o-lucro',
+    },
+    summary: 'Uma padaria que vende mais de um milhão de pães por ano tira do pão menos de 10% do seu faturamento. Numa reportagem sobre o setor, o que apareceu foi outra coisa: refeição, mix de milhares de itens, aproveitamento de sobra e um balcão de caixa que funciona como o metro quadrado mais rentável da loja. Este artigo organiza esses achados em decisões.',
+    content: `
+# O Pão é Menos de 10% do Faturamento: Onde uma Padaria Ganha Dinheiro de Verdade
+
+Uma padaria acompanhada em reportagem do jornalista Marcelo Baccarini vende mais de **1,17 milhão de pães por ano**. É um número que impressiona em qualquer conversa de balcão.
+
+E aí vem o dado que reorganiza a cabeça: o pão responde por **menos de 10% do faturamento** dela.
+
+Não é que o pão não importe. Ele é o ímã — o motivo pelo qual a cidade entra na loja todo dia, antes das nove. Só que o dinheiro está no que acontece depois que a pessoa entrou.
+
+---
+
+## Uma padaria são vários negócios empilhados
+
+A loja da reportagem opera com cerca de **3.500 itens** e funciona 24 horas, com padeiro da noite produzindo para a manhã e o da manhã produzindo para a tarde.
+
+Dentro dela convivem negócios com margens e ritmos completamente diferentes:
+
+- **Panificação** — fluxo enorme, margem apertada, mão de obra em horário difícil
+- **Refeição** — o buffet do almoço, que na reportagem recebe mais de 500 pessoas e trabalha com mais de 50 opções
+- **Conveniência e revenda** — o que gira sem produção, com margem menor e capital parado na prateleira
+- **Confeitaria e impulso** — o que sai no caminho do caixa
+
+Somar tudo num caixa só é o que produz a frase "vende muito e não sobra". Sem separar, não existe decisão: existe palpite.
+
+---
+
+## O metro quadrado mais caro da loja fica na fila do caixa
+
+Este é o achado mais prático da reportagem inteira. Os itens pequenos posicionados perto do caixa — o doce, a trufa, a bala, o chocolate — carregam margens que o entrevistado descreve como muito altas, **chegando a 300%** nas pequenas tentações.
+
+E há a contraprova, que vale mais que a regra: quando esses itens foram mudados de lugar, a venda **caiu para menos da metade**.
+
+Ou seja: não é o produto que vende, é a posição. O cliente parado na fila é um cliente com tempo e com desejo — e a maioria das padarias desperdiça esse tempo com um balcão neutro.
+
+---
+
+## Sobra bem trabalhada é margem, não caridade
+
+Outro ponto: a cozinha funciona como laboratório do que sobrou. Baguete do dia anterior vira torrada ou bruschetta; frios que estão no limite viram recheio.
+
+Isso não é economia de miséria. É reconhecer que o custo daquele insumo **já foi pago** — compra, produção, energia, mão de obra. Transformá-lo em um item novo recupera receita de algo que iria para o lixo, e o faz com custo marginal baixo.
+
+A condição é uma só: precisa estar na ficha técnica e no controle, senão vira improviso e o que era margem vira risco.
+
+---
+
+## O clima é um parceiro comercial
+
+Detalhe que parece folclore e é operação: frente fria chegando muda a venda de sopa, bolo e doce no mesmo dia.
+
+Quem olha a previsão do tempo na segunda e ajusta a produção da semana ganha duas vezes: vende o que tem saída e não produz o que vai sobrar. É informação pública, de graça, e quase ninguém usa para planejar produção.
+
+---
+
+## O modelo pequeno que a reportagem mostra funcionar
+
+Há ainda um contraponto interessante ao "quanto maior, melhor": a mini padaria de janela, com **menos de 8 metros quadrados**, duas pessoas na operação e **150 a 200 clientes por dia** — replicada em quatro unidades pelo mesmo dono.
+
+Custo fixo baixo, cardápio curto, fila que cabe na calçada. Não é a padaria de 3.500 itens; é outro negócio, com outra conta, e que existe justamente porque a conta é outra.
+
+**A lição:** antes de crescer em metro quadrado, vale perguntar se o que você quer é mais loja ou mais margem.
+
+---
+
+## O que fazer nesta semana
+
+- **Separe seu faturamento em quatro blocos**: panificação, refeição, revenda e confeitaria/impulso. Depois separe a margem
+- **Reorganize os 80 centímetros antes do caixa.** É o espaço com o maior retorno por metro da loja
+- **Dê nome e ficha ao reaproveitamento.** Torrada e bruschetta são produtos, não sobra requentada
+- **Olhe o vale entre 10h e 16h.** O custo fixo já foi pago pelos picos; tudo que sair ali é incremental
+- **Refaça a ficha técnica quando a farinha subir.** Em padaria, reajuste não repassado corrói mais rápido que em qualquer outro segmento
+- **Meça o rendimento no seu forno.** Massa ganha e perde peso, e é isso que define o custo do que você vende
+
+---
+
+## Onde o MiseOn entra
+
+- **Ficha técnica com rendimento medido na sua loja** — o que a sua cozinha mediu vale mais que qualquer média de mercado
+- **Custo puxado da nota de compra**, para o preço da farinha desta semana valer na conta desta semana
+- **Margem por categoria**, separando o que você fabrica do que apenas revende
+- **Quando o dado não é confiável, o sistema mostra o motivo** em vez de exibir uma margem inventada
+
+---
+
+**A padaria não vive de pão.** Vive do que o pão traz para dentro — e de estar preparada para aproveitar quem entrou.
+
+---
+
+**Fonte:** dados e casos apurados em reportagem de Marcelo Baccarini, conforme apresentados pelos entrevistados.
+`,
+  },
+  {
+    slug: 'voce-nunca-olhou-para-um-buffet-desse-jeito',
+    title: 'Você Nunca Olhou Para um Buffet Desse Jeito: o Prato Oval e Outras Engenharias do Balcão',
+    description: 'Prato grande faz comer até 30% mais. Legume ganha peso no cozimento. A salada perde quase metade na limpeza. No self-service, cada decisão do balcão é uma decisão de margem.',
+    category: 'Engenharia de Cardápio',
+    publishedAt: '2026-09-16',
+    readTime: '11 min de leitura',
+    coverImage: '/blog-covers/buffet-engenharia-do-balcao-cover.jpg',
+    author: {
+      name: 'Rafael Maldivas',
+      role: 'Head de Engenharia e Arquitetura do MiseOn',
+      avatar: '/icon-192.png',
+    },
+    tags: ['Buffet', 'Self-Service', 'Venda por Quilo', 'Rendimento', 'Rotatividade'],
+    seo: {
+      title: 'A Engenharia do Buffet: Prato Oval, Ordem das Cubas e Margem — MiseOn',
+      description: 'Prato grande aumenta o consumo em até 30%, legume ganha 40% de peso cozido e a salada perde quase metade na limpeza. A engenharia por trás do self-service.',
+      keywords: 'restaurante por quilo margem, engenharia buffet self service, rendimento de alimentos cozimento, rotatividade de mesa almoco, custo salada restaurante',
+      canonicalUrl: 'https://miseon.app.br/blog/voce-nunca-olhou-para-um-buffet-desse-jeito',
+    },
+    summary: 'Numa reportagem dentro de um restaurante por quilo com 28 anos de casa, o que parecia rotina virou aula: o formato do prato muda o consumo, o cozimento muda o peso, a salada perde quase metade no preparo e a rotatividade de mesa decide o faturamento do dia. Este artigo reúne essas engenharias e mostra por que o balcão é o verdadeiro cardápio do self-service.',
+    content: `
+# Você Nunca Olhou Para um Buffet Desse Jeito: o Prato Oval e Outras Engenharias do Balcão
+
+No restaurante à la carte, o cliente escolhe de uma lista que você escreveu. No self-service, ele monta o próprio prato — e a sensação é de que o dono perdeu o controle da margem.
+
+Uma reportagem do jornalista Marcelo Baccarini dentro de um restaurante por quilo com quase três décadas de operação mostra o contrário: **o controle está todo lá, só que ele não está escrito no cardápio. Está montado em aço inox.**
+
+---
+
+## O prato decide antes do cliente decidir
+
+O primeiro achado é o mais desconcertante: prato **grande e oval** faz o cliente servir mais — a estimativa apresentada na reportagem chega a **30% a mais de consumo**.
+
+Nada foi dito ao cliente. Nenhuma placa, nenhum vendedor. Só a louça.
+
+Isso deveria mudar a forma como um dono de self-service olha para o próprio enxoval. Prato é equipamento de faturamento, e a escolha dele é uma decisão econômica tomada uma vez e cobrada todos os dias.
+
+---
+
+## A ordem do balcão é o cardápio do self-service
+
+A pessoa entra com o prato vazio e passa por todos os itens na ordem em que você os dispôs — e, diferente de um cardápio impresso, ela não pode pular a primeira página.
+
+A prática descrita na reportagem é clara: **arroz, massas e legumes pesados no começo; proteína cara no fim.** Quando a carne aparece, o prato já tem volume, e o cliente serve o que cabe.
+
+Há variações do mesmo princípio: pedaço maior nos itens baratos, pedaço menor nas carnes nobres; colocar proteínas de custo menor ao lado das caras, para o cliente misturar e o custo médio cair.
+
+Não é engodo — a comida é a mesma, o preço por quilo é o mesmo. É arranjo. E arranjo é a única alavanca de margem que o self-service tem sem mexer no preço.
+
+---
+
+## O peso muda depois do fogo (e o custo muda junto)
+
+Aqui está a parte que quase nenhuma planilha de restaurante brasileiro acerta.
+
+Legume, segundo a reportagem, pode **ganhar até 40% de peso depois de cozido**. Caldo e umidade pesam. Carne, ao contrário, perde na limpeza e perde de novo na chapa — e a técnica mostrada para reduzir isso é específica: chapa grossa, bem quente, bife mais fino, para grelhar rápido e reter a água.
+
+Ou seja: **o que você compra em quilos não é o que você serve em quilos.** Quem calcula custo pelo preço de compra está errando em todos os itens ao mesmo tempo — em alguns para mais, em outros para menos.
+
+O número certo só existe medido na sua cozinha.
+
+---
+
+## A salada é o item mais mal-entendido do balcão
+
+Parece barata. É uma das mais caras.
+
+Na reportagem, o desfolhamento e a limpeza consomem de **30% a 40% do peso** do buquê — com a perda acumulada chegando perto da metade. E há um custo que ninguém lança na ficha: **a água**. A operação mostrada gasta cerca de 60 litros para higienizar a quantidade de salada exposta, e a conta de água mensal citada pelo dono é de **R$ 6.500**.
+
+Folha que vai para a lixeira é folha comprada, transportada, lavada e paga. Sem contabilizar essa perda, o custo por quilo servido vira ficção.
+
+---
+
+## Onde o faturamento aparece sem passar pelo balcão
+
+Três acréscimos aparecem com estimativas do próprio dono:
+
+- **Suco**: cerca de 10% a mais de receita quando o cliente aceita
+- **Sobremesa**: cerca de outros 10%
+- **Balcão e caixa** (salgado, doce, item de viagem): cerca de **12% do faturamento**
+
+São três perguntas feitas no momento certo. Nenhuma delas exige cozinha nova, equipe nova ou investimento.
+
+---
+
+## A mesa que gira é o produto invisível
+
+O restaurante da reportagem atende o pico entre **meio-dia e 13h40** e gira a mesa de **4 a 5 vezes** por almoço — contra uma rotação típica de uma vez só no jantar à la carte.
+
+Isso reposiciona o que é produtividade no almoço: não é só cozinhar mais rápido. É limpar e arrumar a mesa rápido, porque cada minuto de mesa suja no pico é uma cadeira que não fatura.
+
+E há a outra ponta: desconto fora do pico, para puxar quem tem flexibilidade de horário e aliviar a fila do miolo. Sobre promoções de fidelidade agressivas, a leitura do dono é cética — atraem quem vem pelo preço, não quem volta pela comida.
+
+---
+
+## O que fazer nesta semana
+
+- **Olhe para a sua louça.** Formato e tamanho do prato mudam o consumo antes de qualquer outra ação
+- **Reorganize a ordem do balcão** pensando no prato vazio que passa por ele
+- **Meça o rendimento dos cinco itens mais caros**, ganho e perda. Comprado não é servido
+- **Some água, limpeza e desfolha no custo da salada**
+- **Pese a sobra de cada cuba no fim do serviço por duas semanas.** Esse número costuma reorganizar a produção inteira
+- **Treine a arrumação da mesa no pico.** Rotatividade é faturamento
+- **Faça as três perguntas**: suco, sobremesa, algo para viagem
+
+---
+
+## Onde o MiseOn entra
+
+- **Rendimento medido pela loja vence a tabela de referência** — e aceita ganho, não só perda: arroz cozido pesa mais, carne pesa menos
+- **Custo por item com a nota de compra por trás**, para o preço do quilo acompanhar a realidade da semana
+- **Venda por peso conserva o preço praticado do quilo**, sem reprecificar por fora o que a balança já resolveu
+- **Quando o custo não é confiável, o sistema mostra o motivo** em vez de fingir precisão
+
+---
+
+**No self-service, o cardápio não é escrito: é montado em aço inox, todo dia, por quem repõe.** Quem enxerga o balcão como engenharia decide a margem antes de o primeiro cliente pegar o prato.
+
+---
+
+**Fonte:** casos, técnicas e estimativas apurados em reportagem de Marcelo Baccarini, conforme apresentados pelos entrevistados.
 `,
   },
   {
@@ -634,7 +631,7 @@ Movimento é bom. Movimento com margem medida é negócio.
     category: 'Gestão Financeira',
     publishedAt: '2026-09-03',
     readTime: '8 min de leitura',
-    coverImage: '/blog-covers/calculadora-vazamento-cover.jpg',
+    coverImage: '/blog-covers/cmv-peps-cover.jpg',
     author: {
       name: 'Rafael Maldivas',
       role: 'Head de Engenharia e Arquitetura do MiseOn',
