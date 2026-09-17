@@ -74,3 +74,24 @@ scripts/emitir-nfse-*.mjs
 .smoke-golive-s1/
 *.diff
 .claude/
+
+# Material de marketing local — fica no disco, nunca sobe pro GitHub
+# (subir encheria o egress do Supabase e polui o repo)
+output/
+AGENTS.md
+
+# Assets de marca gerados localmente (nao versionados)
+public/brand/BANNER-MISEON.jfif
+public/brand/Mfavicon.png
+public/brand/MiseOn-repagina-removebg-preview.png
+public/brand/NewLogo-removebg-preview.png
+public/brand/NewLogo.png
+public/brand/NewMarca.png
+public/brand/banner2.jpg
+public/brand/favicon.png
+public/brand/icon-192.png
+public/brand/icon-512.png
+public/brand/miseon_banner-oficial.jpg
+scripts/ativos/marca-oficial.png
+scripts/ativos/simbolo-oficial.png
+scripts/gerar-redes-sociais-v2.mjs
