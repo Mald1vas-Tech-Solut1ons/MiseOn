@@ -64,7 +64,7 @@ jobs:
             "$URL/rest/v1/produtos?select=id&limit=1")
           codigo=$(echo "$resposta" | tail -1)
           corpo=$(echo "$resposta" | head -n -1)
-          echo "GET /rest/v1/pub_produtos -> $codigo"
+          echo "GET /rest/v1/produtos -> $codigo"
           if [ "$codigo" != "200" ]; then
             echo "::error::O cardápio público respondeu $codigo. Resposta: $corpo"
             # 402 é cota estourada: o projeto está suspenso, não é bug de código.
