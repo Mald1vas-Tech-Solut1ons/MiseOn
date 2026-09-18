@@ -33,7 +33,7 @@ const CDN_HOST = (import.meta.env?.VITE_CDN_HOST as string | undefined)?.replace
  * mexa quando a forma da RESPOSTA mudar; nao e para versionar conteudo, porque
  * cada arquivo ja nasce com nome UUID proprio.
  */
-const VERSAO_BORDA = 3;
+const VERSAO_BORDA = 4;
 
 const PREFIXO_STORAGE = /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/public\//;
 
