@@ -26,12 +26,28 @@ jobs:
     steps:
       - name: Vitrine (Vercel)
         run: |
-          codigo=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 https://miseon.app.br/)
+          # UA de navegador de proposito: na primeira execucao real deste
+          # workflow (18/09/2026) o Cloudflare devolveu 403 para o curl padrao
+          # vindo do runner — IP de datacenter e User-Agent de ferramenta.
+          codigo=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 \
+            -A 'Mozilla/5.0 (compatible; MiseOnHealthcheck/1.0)' \
+            https://miseon.app.br/)
           echo "GET https://miseon.app.br/ -> $codigo"
-          if [ "$codigo" != "200" ]; then
-            echo "::error::A vitrine respondeu $codigo (esperado 200)."
-            exit 1
-          fi
+
+          # 403/429 aqui é o Cloudflare barrando o runner, NÃO a vitrine caída.
+          # Falhar nisso faria o alarme tocar de hora em hora para sempre, e
+          # alarme que sempre toca é alarme que ninguém lê — que é exatamente
+          # como a queda de 16/09 passou três dias despercebida.
+          case "$codigo" in
+            200) : ;;
+            403|429)
+              echo "::warning::Cloudflare barrou o runner ($codigo). Não diz nada sobre a vitrine; as portas do produto são conferidas nos passos seguintes."
+              ;;
+            *)
+              echo "::error::A vitrine respondeu $codigo (esperado 200)."
+              exit 1
+              ;;
+          esac
 
       - name: Cardápio público (REST do Supabase)
         env:
