@@ -38,10 +38,14 @@ jobs:
           URL: ${{ secrets.VITE_SUPABASE_URL }}
           CHAVE: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
-          # Este é o caminho exato do cliente que abre o cardápio pelo QR Code.
+          # Caminho exato do cliente que abre o cardápio pelo QR Code:
+          # `Cardapio.tsx` consulta a tabela `produtos`, e quem libera a leitura
+          # sem login é a policy `pub_produtos` (nome de POLICY, não de tabela —
+          # a primeira versão deste arquivo batia em /rest/v1/pub_produtos e
+          # levava 404, ou seja, alarme que tocaria para sempre).
           resposta=$(curl -s -w '\n%{http_code}' --max-time 30 \
             -H "apikey: $CHAVE" \
-            "$URL/rest/v1/pub_produtos?select=id&limit=1")
+            "$URL/rest/v1/produtos?select=id&limit=1")
           codigo=$(echo "$resposta" | tail -1)
           corpo=$(echo "$resposta" | head -n -1)
           echo "GET /rest/v1/pub_produtos -> $codigo"

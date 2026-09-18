@@ -112,7 +112,13 @@ const ifoodEventSchema = z.array(
 // (c44831bc-9cc2-47c0-ac61-5e73b71645d3). Healthcheck com erro reincidente por
 // 72h DESATIVA o webhook, e webhook desativado e pedido que nao chega na
 // cozinha.
-const aceito = () => new Response('OK', { status: 200, headers: corsHeaders });
+//
+// 18/09/2026: esta linha voltou para 200 no commit 711b294 (03/09), um commit
+// de UI sobre screenshots de telas — nada a ver com iFood. O comentario acima
+// continuou explicando o 202 enquanto o codigo fazia o oposto, e os logs de
+// producao confirmaram o estrago: healthcheck respondido 200, heartbeat
+// nenhum, por duas semanas. Se precisar mexer aqui, mexa de proposito.
+const aceito = () => new Response('Accepted', { status: 202, headers: corsHeaders });
 
 // `EdgeRuntime` existe no runtime do Supabase, nao na tipagem do Deno.
 declare const EdgeRuntime: { waitUntil?: (p: Promise<unknown>) => void } | undefined;
