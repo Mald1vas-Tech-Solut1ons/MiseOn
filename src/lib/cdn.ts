@@ -19,6 +19,22 @@
  */
 const CDN_HOST = (import.meta.env?.VITE_CDN_HOST as string | undefined)?.replace(/\/+$/, '');
 
+/**
+ * Chave de invalidacao da borda.
+ *
+ * O `/img` responde com `immutable, max-age=1 ano` — otimo enquanto o arquivo
+ * nunca muda, e uma armadilha no dia em que a RESPOSTA muda sem o arquivo
+ * mudar. Foi o que aconteceu em 18/09/2026: o proxy passou a transformar a
+ * imagem na origem (16 MB viraram 301 KB), mas todo caminho ja visitado
+ * continuou servindo o PNG gigante guardado na borda — medido, a versao nova so
+ * aparecia com chave de cache nova.
+ *
+ * Mudar este numero troca a chave de cache de todas as imagens de uma vez. So
+ * mexa quando a forma da RESPOSTA mudar; nao e para versionar conteudo, porque
+ * cada arquivo ja nasce com nome UUID proprio.
+ */
+const VERSAO_BORDA = 2;
+
 const PREFIXO_STORAGE = /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/public\//;
 
 export function getOptimizedImageUrl(url?: string | null): string {
@@ -37,5 +53,5 @@ export function getOptimizedImageUrl(url?: string | null): string {
   // Em maquina local a imagem vem direto do Supabase, senao quebraria o dev.
   if (!base || /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|$)/.test(base)) return url;
 
-  return `${base}/img/${caminho}`;
+  return `${base}/img/${caminho}?v=${VERSAO_BORDA}`;
 }

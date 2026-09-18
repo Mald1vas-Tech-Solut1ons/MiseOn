@@ -185,10 +185,34 @@ O que precisa de conferência:
 | 13 tabelas com RLS e **zero policy** | nega tudo por padrão — parece proposital (acesso via função), mas não está documentado |
 | Proteção contra senha vazada | **desligada** (advisor do Supabase) |
 
-**BLOQUEADO:** eu ia provar com a chave anônima, do jeito que um visitante
-faria, se `vw_insumos_custo_suspeito` devolve custo de loja para quem não está
-logado. O gateway respondeu 402 em todas as tentativas. **Este é o primeiro
-teste a rodar quando o serviço voltar** — se vazar, é P0 de verdade.
+**RESOLVIDO em 18/09, depois da restauração do serviço.** O teste com a chave
+anônima rodou. Resultado, medido:
+
+| View | Resposta ao anônimo |
+|---|---|
+| `vw_insumos_custo_suspeito` | **bloqueada** (`permission denied for function fn_custo_unitario_insumo`) |
+| `meus_cartoes` | **bloqueada** (`permission denied for table cartoes_salvos`) |
+| `vw_custo_real_estoque`, `vw_dre_mensal`, `vw_caixa_extrato`, `vw_historico_precos_compra`, `vw_ultimo_custo_insumo`, `vw_insumo_giro` | 0 linhas (RLS segurou) |
+| `lojas_publicas` | 3 linhas — é o diretório público de lojas, correto |
+| **`vw_lucro_real_produto`** | **121 de 121 linhas** — as 8 lojas de uma vez |
+
+A que vazava não era nenhuma das suspeitas: era `vw_lucro_real_produto`, com
+`anon=arwdDxtm` na ACL e colunas `custo_real`, `receita_real`,
+`resultado_exercicio`, `lucro_real`, `margem_pct`.
+
+**Sem exagerar a gravidade:** nenhum valor financeiro vazou. Todas as colunas de
+dinheiro voltam zero para qualquer um, inclusive para o `postgres` — o join liga
+`lf.referencia_id` (que é um PEDIDO, pelo próprio `referencia_tipo = 'PEDIDO'`) a
+`p.id` (um PRODUTO), e isso nunca casa. A view está quebrada desde que nasceu, e
+o que saía era nome e preço, que já são o cardápio público. Escrita era
+impossível (view com `GROUP BY` não é atualizável).
+
+Fechada assim mesmo (`20260918180000_view_de_lucro_sai_da_api_publica.sql`): é
+superfície financeira aberta por descuido, que viraria vazamento de verdade no
+dia em que o join fosse corrigido. Conferido depois: anônimo recebe
+`permission denied`, cardápio público segue 200. A view está órfã (nenhum
+arquivo em `src/` a consulta) e sucedida por `vw_margem_produto_real` — **DROP é
+decisão do dono**, registrada aqui em vez de feita calada.
 
 ---
 
@@ -316,6 +340,50 @@ em 402); filtrar o Realtime de entregas por loja — `localizacao_entregador`
 **não tem `loja_id`** (só `pedido_id`, `entregador_id`, `lat`, `lng`,
 `atualizado_em`), então o filtro exige mudança de schema e teste com o canal
 de pé; estreitar os 83 `select('*')`, que sem banco vivo é mexer no escuro.
+
+---
+
+## 12-B. Lote 1 executado — 18/09, depois do Pro
+
+O plano Pro foi assinado no fim da tarde de 18/09 e o serviço voltou. O Lote 1
+saiu inteiro no mesmo dia.
+
+| # | Item | Resultado |
+|---|---|---|
+| 1 | Restaurar o serviço | **feito pelo dono** — REST, Auth e Storage em 200 |
+| 2 | Monitor com alerta | workflow horário no ar, simulado nas 3 portas |
+| 3 | Teste anônimo nas views | **feito** — achou e fechou `vw_lucro_real_produto` (§7) |
+| 4 | Provar que `/contato` grava lead | **funciona**: HTTP 201 pelo caminho real; anônimo não lê o CRM; linha de teste apagada |
+| 5 | Webhook do iFood | **não foi desativado** — e achou-se coisa pior (abaixo) |
+| 6 | Banners de 10–16 MB | resolvido por transformação, sem tocar nos arquivos |
+
+**O achado mais caro do dia não estava no plano.** Com o serviço de volta, os
+logs mostraram o webhook do iFood respondendo **HTTP 200** aos healthchecks. O
+iFood só registra presença com **202**; 200 não gera heartbeat nenhum, e
+healthcheck falhando por 72h **desativa o webhook**.
+
+O conserto já existia (`e660c91`, 01/09). Duas noites depois, `711b294` — um
+commit de UI sobre screenshots nos cards de nicho — trouxe a linha de volta para
+200 e deixou intacto o comentário de quinze linhas explicando que tem de ser
+202. O comentário mentiu por duas semanas.
+
+Corrigido, publicado a partir do disco (versão 59) e conferido ao vivo: **202
+nas três variantes de healthcheck**. Vai com teste de regressão
+(`__tests__/ifood-webhook-202.test.ts`) — o módulo chama `serve()` no topo e não
+dá para importar, então o teste lê a fonte e trava as três coisas que importam.
+Comentário não segura código.
+
+**Privilégios do Pro já aproveitados:**
+
+- **Transformação de imagem** no proxy (`api/img.ts`). Medido no maior banner:
+  16.772.595 → 4.999.288 (width=1600, q=75) → **307.898 bytes com WebP**. 98% a
+  menos, sem tocar em nenhum objeto, valendo para tudo que subir daqui em
+  diante. Com queda para o objeto cru se a transformação falhar.
+- **Proteção contra senha vazada** ligada (`password_hibp_enabled`), que antes
+  devolvia 402 por ser recurso pago. Os avisos de segurança caíram de 7 para 6.
+
+**A conferir amanhã:** se o backup diário apareceu de verdade. Foi olhando que
+se descobriu, em 19/08, que não existia nenhum.
 
 ---
 

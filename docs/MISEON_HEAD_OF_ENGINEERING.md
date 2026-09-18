@@ -24,6 +24,24 @@ bate na vitrine, no cardápio e no Auth. A queda de três dias passou despercebi
 porque `miseon.app.br` responde 200 sendo estático: olhar a home não diz nada
 sobre o produto estar de pé.
 
+**Fim do dia 18/09 — Pro assinado, serviço restaurado, Lote 1 inteiro entregue.**
+Detalhe e números em [auditoria-inicial.md](auditoria-inicial.md) §12-B. O que
+importa para a arquitetura:
+
+- **Regressão silenciosa em integração é risco de classe própria.** O webhook do
+  iFood voltou a responder 200 (em vez de 202, o único código que gera
+  heartbeat) porque um commit de UI — `711b294`, sobre screenshots — reverteu a
+  linha e deixou o comentário que a explicava. Ficou assim duas semanas.
+  Decisão: onde a regra é textual e o módulo não é importável (chama `serve()`
+  no topo), a guarda é um teste que lê a fonte. Comentário não segura código.
+- **View financeira não pode nascer com grant de `anon`.** `vw_lucro_real_produto`
+  entregava 121 linhas ao visitante não logado. Não vazou dinheiro — o join dela
+  nunca casa e as colunas são sempre zero —, mas a superfície estava aberta.
+  Fechada. A regra do `CLAUDE.md` continua valendo e agora tem um caso concreto.
+- **Transformação de imagem é a resposta certa para peso de asset**, não
+  recompressão manual: 16 MB → 301 KB no maior banner, sem tocar em objeto
+  nenhum e valendo para o que subir depois.
+
 **Riscos registrados, não corrigidos:** `vw_insumos_custo_suspeito` e
 `lojas_publicas` são views `SECURITY DEFINER` legíveis por `anon` — o teste com
 chave anônima ficou **BLOQUEADO** pelo 402 e é a primeira coisa a rodar quando

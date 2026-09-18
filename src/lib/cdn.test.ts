@@ -27,8 +27,16 @@ describe('getOptimizedImageUrl', () => {
 
   it('deve servir a imagem por /img no próprio domínio', () => {
     expect(getOptimizedImageUrl(SUPABASE_IMG)).toBe(
-      `${window.location.origin}/img/produtos/hamburguer.jpg`
+      `${window.location.origin}/img/produtos/hamburguer.jpg?v=2`
     );
+  });
+
+  it('deve carregar a chave de invalidação da borda', () => {
+    // O /img responde com `immutable, max-age=1 ano`. Quando a RESPOSTA muda
+    // sem o arquivo mudar — foi o caso em 18/09/2026, quando o proxy passou a
+    // transformar a imagem na origem — só uma chave nova tira o conteúdo velho
+    // da borda. Sem este sufixo, o PNG de 16 MB continuaria sendo servido.
+    expect(getOptimizedImageUrl(SUPABASE_IMG)).toMatch(/\?v=\d+$/);
   });
 
   it('deve devolver URL absoluta, porque o helper alimenta og:image', () => {
@@ -39,7 +47,7 @@ describe('getOptimizedImageUrl', () => {
     const input =
       'https://uvthidnqmezmmdrteqks.supabase.co/storage/v1/object/public/loja-assets/abc/produtos/x.png';
     expect(getOptimizedImageUrl(input)).toBe(
-      `${window.location.origin}/img/loja-assets/abc/produtos/x.png`
+      `${window.location.origin}/img/loja-assets/abc/produtos/x.png?v=2`
     );
   });
 
