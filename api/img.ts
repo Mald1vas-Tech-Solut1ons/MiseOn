@@ -63,15 +63,26 @@ export default async function handler(req: Request): Promise<Response> {
   // egress de uma vez so. Foi esse tipo de gasto que estourou a cota e derrubou
   // a producao por tres dias em 16/09.
   //
-  // O `Accept` do navegador viaja para a origem, entao quem aceita WebP recebe
-  // WebP e quem nao aceita (crawler velho de rede social lendo og:image) recebe
-  // o formato original. Por isso o `Vary: Accept` la embaixo: sem ele a borda
-  // entregaria o WebP cacheado para quem nao sabe ler.
+  // WebP SEMPRE, e nao o `Accept` de quem pediu. Isto e deliberado.
+  //
+  // A ideia obvia era repassar o `Accept` do cliente e deixar a origem
+  // negociar. Medido no dominio real em 18/09, nao funciona: a borda da Vercel
+  // NAO respeita `Vary: Accept` aqui — duas chaves iguais com `Accept`
+  // diferente colapsam numa entrada so. Ou seja, quem chegasse primeiro
+  // decidiria o formato de todo mundo. E o pior caso e justamente o silencioso:
+  //
+  //   cliente com WebP primeiro ......  338.318 bytes para todos
+  //   crawler sem WebP primeiro ...... 4.999.288 bytes para todos
+  //
+  // Um crawler passando antes do primeiro cliente devolveria a maior parte do
+  // ganho sem ninguem perceber. Fixar o formato troca essa loteria por um
+  // numero previsivel. WebP e lido por todo navegador desde 2020 e pelos
+  // crawlers de busca e rede social que leem og:image.
   //
   // SVG nao passa pelo transformador — nao ha o que redimensionar num vetor, e
   // o endpoint recusa. Vai direto ao objeto.
   const ehSvg = /\.svg$/i.test(caminho.split('?')[0]);
-  const aceita = req.headers.get('Accept') ?? 'image/*,*/*';
+  const aceita = 'image/webp,image/*,*/*';
   const origem = ehSvg
     ? `${BASE_STORAGE}/${caminho}`
     : `${BASE_RENDER}/${caminho}?width=${LARGURA_MAX}&quality=${QUALIDADE}`;
@@ -110,8 +121,9 @@ export default async function handler(req: Request): Promise<Response> {
   if (tamanho) headers.set('Content-Length', tamanho);
   headers.set('Cache-Control', CACHE);
   headers.set('X-Content-Type-Options', 'nosniff');
-  // O corpo depende do `Accept` de quem pediu (WebP ou formato original).
-  headers.set('Vary', 'Accept');
+  // Sem `Vary: Accept` de proposito: a resposta NAO varia com o `Accept` de
+  // quem pediu (ver o bloco acima). Declarar variacao que nao existe so
+  // fragmentaria o cache — e a borda daqui nao respeita esse cabecalho.
 
   return new Response(resposta.body, { status: 200, headers });
 }

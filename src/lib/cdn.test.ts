@@ -27,7 +27,7 @@ describe('getOptimizedImageUrl', () => {
 
   it('deve servir a imagem por /img no próprio domínio', () => {
     expect(getOptimizedImageUrl(SUPABASE_IMG)).toBe(
-      `${window.location.origin}/img/produtos/hamburguer.jpg?v=2`
+      `${window.location.origin}/img/produtos/hamburguer.jpg?v=3`
     );
   });
 
@@ -47,7 +47,7 @@ describe('getOptimizedImageUrl', () => {
     const input =
       'https://uvthidnqmezmmdrteqks.supabase.co/storage/v1/object/public/loja-assets/abc/produtos/x.png';
     expect(getOptimizedImageUrl(input)).toBe(
-      `${window.location.origin}/img/loja-assets/abc/produtos/x.png?v=2`
+      `${window.location.origin}/img/loja-assets/abc/produtos/x.png?v=3`
     );
   });
 
