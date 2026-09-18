@@ -95,11 +95,21 @@ function LiveTrackingAdmin({ lojaId }: { lojaId: string }) {
       })
       .subscribe();
 
-    const interval = setInterval(carregarPosicoes, 15000); // fallback polling a cada 15s
+    // Fallback de 15s — mas só com a aba à vista. Mapa de entrega em aba de
+    // fundo são 5.760 consultas por dia que ninguém olha, e o Realtime acima
+    // já traz a posição nova quando ela chega.
+    const interval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      carregarPosicoes();
+    }, 15000);
+
+    const aoVoltar = () => { if (document.visibilityState === 'visible') carregarPosicoes(); };
+    document.addEventListener('visibilitychange', aoVoltar);
 
     return () => {
       supabase.removeChannel(canal);
       clearInterval(interval);
+      document.removeEventListener('visibilitychange', aoVoltar);
     };
   }, [carregarPosicoes]);
 

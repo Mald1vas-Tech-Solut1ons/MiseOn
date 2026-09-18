@@ -350,8 +350,30 @@ export default function KDS() {
         carregar();
       })
       .subscribe();
-    const timer = setInterval(() => { setTick((t) => t + 1); carregar(); carregarMetricas(); }, 60_000);
-    return () => { supabase.removeChannel(canal); clearInterval(timer); };
+    // A aba escondida não consulta: o KDS fica aberto o dia inteiro e, quando
+    // o operador vai para outra aba, cada minuto vira uma consulta que ninguém
+    // lê. Foi esse tipo de gasto que estourou a cota de egress em 16/09 e
+    // derrubou a produção. O relógio (`setTick`) continua, porque é local e
+    // não custa rede.
+    const timer = setInterval(() => {
+      setTick((t) => t + 1);
+      if (document.visibilityState !== 'visible') return;
+      carregar();
+      carregarMetricas();
+    }, 60_000);
+
+    // Voltar para a aba recarrega na hora — sem isto, quem volta olharia até
+    // um minuto de pedido velho na tela, que na cozinha é pior que a economia.
+    const aoVoltar = () => {
+      if (document.visibilityState === 'visible') { carregar(); carregarMetricas(); }
+    };
+    document.addEventListener('visibilitychange', aoVoltar);
+
+    return () => {
+      supabase.removeChannel(canal);
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', aoVoltar);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lojaId]);
 

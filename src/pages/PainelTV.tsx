@@ -362,7 +362,27 @@ export default function PainelTV() {
     // cardapio ninguem esta esperando chamada, entao nao ha motivo para dobrar
     // a carga: o cardapio nao muda a cada 4 segundos.
     const intervaloMs = modo === 'MENU_BOARD' ? 15_000 : 4_000;
-    const interval = setInterval(carregarComGuarda, intervaloMs);
+
+    // Aba escondida desacelera, mas NAO para. Aqui a decisao e diferente da do
+    // KDS de proposito: se algum receptor de TV relatar `hidden` enquanto ainda
+    // esta na parede, parar de buscar deixaria o cliente esperando uma senha
+    // que nunca aparece. Desacelerar para 30s erra barato nos dois sentidos —
+    // corta ~87% das requisicoes de uma tela esquecida em aba de fundo e
+    // continua abaixo dos 60s que o vigia usa para marcar OFFLINE.
+    const INTERVALO_ESCONDIDO = 30_000;
+    let ultimaBusca = 0;
+    const interval = setInterval(() => {
+      const escondida = document.visibilityState !== 'visible';
+      if (escondida && Date.now() - ultimaBusca < INTERVALO_ESCONDIDO) return;
+      ultimaBusca = Date.now();
+      carregarComGuarda();
+    }, intervaloMs);
+
+    // Voltar para a aba busca na hora: a TV nao pode mostrar senha velha.
+    const aoVoltar = () => {
+      if (document.visibilityState === 'visible') { ultimaBusca = Date.now(); carregarComGuarda(); }
+    };
+    document.addEventListener('visibilitychange', aoVoltar);
 
     // Vigia independente do resultado da busca: mesmo que a chamada trave sem
     // rejeitar (rede da loja caindo devagar e o pedido ficando pendurado), o
@@ -375,7 +395,11 @@ export default function PainelTV() {
       });
     }, 10_000);
 
-    return () => { clearInterval(interval); clearInterval(vigia); };
+    return () => {
+      clearInterval(interval);
+      clearInterval(vigia);
+      document.removeEventListener('visibilitychange', aoVoltar);
+    };
   }, [carregarComGuarda, modo]);
 
   /** Gongo curto antes da chamada.

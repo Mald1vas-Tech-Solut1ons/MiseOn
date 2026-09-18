@@ -1,5 +1,37 @@
 # MISEON - Head of Engineering Document
 
+## 18/09/2026 — produção fora do ar por cota, e o que foi feito sem o gateway
+
+**Estado:** o projeto Supabase devolve `HTTP 402 exceed_egress_quota` em REST,
+Auth, Storage e Edge Functions desde 16/09 — terceiro dia. O banco está
+`ACTIVE_HEALTHY` e a Management API responde; quem está barrado é o gateway.
+Plano da organização: **free**. Restaurar é decisão de plano, do dono.
+Diagnóstico completo em [auditoria-inicial.md](auditoria-inicial.md).
+
+**Decisão de arquitetura tomada hoje:** o freio de uma integração pertence a
+quem gasta o recurso, não só a quem o consome. O disjuntor do iFood existia
+dentro de `ifood-polling`, mas o cron pagava uma requisição por minuto só para
+ouvir "estou em espera" — e, com a função inalcançável, o freio nunca se
+atualizava. `fn_ifood_coletar_eventos` passou a ler `integracao_ifood_saude`
+antes de disparar e a registrar a própria tentativa
+(`ultima_tentativa_em`, coluna nova). A autoridade sobre o ESTADO continua na
+edge function: o cron só decide se vale gastar a chamada.
+
+**Também entregue:** guarda de visibilidade nas três telas que ficam abertas o
+dia inteiro (KDS, Entregas, Painel de TV — esta desacelerando em vez de parar,
+porque senha na parede não pode congelar), e um workflow horário de saúde que
+bate na vitrine, no cardápio e no Auth. A queda de três dias passou despercebida
+porque `miseon.app.br` responde 200 sendo estático: olhar a home não diz nada
+sobre o produto estar de pé.
+
+**Riscos registrados, não corrigidos:** `vw_insumos_custo_suspeito` e
+`lojas_publicas` são views `SECURITY DEFINER` legíveis por `anon` — o teste com
+chave anônima ficou **BLOQUEADO** pelo 402 e é a primeira coisa a rodar quando
+voltar. O Realtime de entregas assina `localizacao_entregador` sem filtro de
+loja, num canal de nome fixo; a tabela não tem `loja_id`, então o conserto
+exige schema. E nada mede o funil do site: o único GA4 do código é o do
+lojista.
+
 ## Correções de 14/09/2026 — preparação de produção
 
 Implementados no código: separação entre callback OAuth e recuperação de senha, tratamento de erros de autenticação, sessão de chat inicializada antes das requisições, remoção de tokens dos logs e correção dos valores das parcelas anuais. PDV passou a registrar pedido, itens, pagamento e cashback numa transação idempotente com preços e vínculo da loja validados no servidor. Confirmação Pix não apresenta sucesso quando a consolidação falha; vendas por peso continuam pelo fluxo de balança/comanda.

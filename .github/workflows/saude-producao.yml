@@ -1,0 +1,69 @@
+name: Saúde da produção
+
+# Por que este workflow existe: em 16/09/2026 a cota de egress do plano free
+# estourou e o gateway do Supabase passou a devolver 402 em REST, Auth, Storage
+# e Functions. Ninguém logava, nenhum pedido entrava — e a queda só foi
+# descoberta três dias depois, por acaso, durante uma auditoria.
+#
+# O que enganava: `miseon.app.br` responde 200 o tempo todo, porque é estático
+# na Vercel. Olhar a home não diz nada sobre o produto estar de pé. Por isso
+# aqui se bate nas portas que o cliente realmente usa.
+#
+# Falhou = e-mail do GitHub para quem é dono do repositório. É o alarme mais
+# barato que existe: não depende de serviço pago nem de cartão.
+
+on:
+  schedule:
+    # De hora em hora. Detecta em até 60 min, em vez de três dias. Enquanto a
+    # produção estiver caída isto notifica de hora em hora, o que é chato de
+    # propósito — silêncio foi exatamente o que custou caro.
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  saude:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vitrine (Vercel)
+        run: |
+          codigo=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 https://miseon.app.br/)
+          echo "GET https://miseon.app.br/ -> $codigo"
+          if [ "$codigo" != "200" ]; then
+            echo "::error::A vitrine respondeu $codigo (esperado 200)."
+            exit 1
+          fi
+
+      - name: Cardápio público (REST do Supabase)
+        env:
+          URL: ${{ secrets.VITE_SUPABASE_URL }}
+          CHAVE: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          # Este é o caminho exato do cliente que abre o cardápio pelo QR Code.
+          resposta=$(curl -s -w '\n%{http_code}' --max-time 30 \
+            -H "apikey: $CHAVE" \
+            "$URL/rest/v1/pub_produtos?select=id&limit=1")
+          codigo=$(echo "$resposta" | tail -1)
+          corpo=$(echo "$resposta" | head -n -1)
+          echo "GET /rest/v1/pub_produtos -> $codigo"
+          if [ "$codigo" != "200" ]; then
+            echo "::error::O cardápio público respondeu $codigo. Resposta: $corpo"
+            # 402 é cota estourada: o projeto está suspenso, não é bug de código.
+            if [ "$codigo" = "402" ]; then
+              echo "::error::402 = cota da Supabase estourada. O produto está FORA DO AR até subir de plano ou virar o ciclo."
+            fi
+            exit 1
+          fi
+
+      - name: Login (Auth do Supabase)
+        env:
+          URL: ${{ secrets.VITE_SUPABASE_URL }}
+          CHAVE: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          # Sem esta porta o lojista não entra no painel, mesmo com o resto de pé.
+          codigo=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 \
+            -H "apikey: $CHAVE" "$URL/auth/v1/settings")
+          echo "GET /auth/v1/settings -> $codigo"
+          if [ "$codigo" != "200" ]; then
+            echo "::error::O Auth respondeu $codigo — ninguém consegue fazer login."
+            exit 1
+          fi
