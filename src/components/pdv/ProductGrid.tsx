@@ -1,9 +1,11 @@
-import { Search } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Search } from 'lucide-react';
 import { fmt } from '../../types';
 import type { ProductGridProps } from '../../types';
 import { HorizontalScrollContainer } from '../ui';
+import { useI18n } from '../../contexts/I18nContext';
 
-export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva, produtosVisiveis, tocarProduto }: ProductGridProps) {
+export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva, produtosVisiveis, tocarProduto, carregando, erro, onTentarNovamente }: ProductGridProps) {
+  const { tDynamic } = useI18n();
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-gray-50 dark:bg-[#0B1120]">
       <div className="flex items-center gap-2 p-3 pb-0">
@@ -39,7 +41,28 @@ export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva
         ))}
       </HorizontalScrollContainer>
       <div className="grid flex-1 auto-rows-min grid-cols-2 gap-3 overflow-y-auto p-4 pb-28 pt-2 sm:grid-cols-3 lg:pb-4 xl:grid-cols-4 custom-scrollbar">
-        {produtosVisiveis.map((p) => (
+        {carregando && (
+          <div className="col-span-full flex items-center justify-center gap-2 py-14 text-sm font-semibold text-gray-500 dark:text-gray-400">
+            <RefreshCw size={17} className="animate-spin" /> {tDynamic('Carregando catálogo do PDV…')}
+          </div>
+        )}
+        {!carregando && erro && (
+          <div role="alert" className="col-span-full rounded-2xl border border-red-300 bg-red-50 p-5 text-red-800 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={20} className="mt-0.5 shrink-0" />
+              <div>
+                <p className="font-black">{tDynamic('O catálogo do PDV não pôde ser carregado')}</p>
+                <p className="mt-1 text-sm leading-relaxed">{erro}</p>
+                {onTentarNovamente && (
+                  <button type="button" onClick={onTentarNovamente} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-red-700 px-3.5 py-2 text-xs font-bold text-white hover:bg-red-800">
+                    <RefreshCw size={14} /> {tDynamic('Tentar novamente')}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        {!carregando && !erro && produtosVisiveis.map((p) => (
           <button type="button" 
             key={p.id} 
             onClick={() => tocarProduto(p)}
@@ -63,7 +86,7 @@ export function ProductGrid({ busca, setBusca, categorias, catAtiva, setCatAtiva
             </span>
           </button>
         ))}
-        {produtosVisiveis.length === 0 && <p className="col-span-full py-10 text-center text-sm font-medium text-gray-400">Nenhum produto encontrado.</p>}
+        {!carregando && !erro && produtosVisiveis.length === 0 && <p className="col-span-full py-10 text-center text-sm font-medium text-gray-400">{tDynamic('Nenhum produto encontrado para esta categoria ou busca.')}</p>}
       </div>
     </div>
   );

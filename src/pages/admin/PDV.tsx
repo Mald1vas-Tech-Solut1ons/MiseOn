@@ -63,6 +63,8 @@ export default function PDV() {
   const [loja, setLoja] = useState<Loja | null>(null);
   const [catAtiva, setCatAtiva] = useState<string | 'TODAS'>('TODAS');
   const [busca, setBusca] = useState('');
+  const [carregandoCatalogo, setCarregandoCatalogo] = useState(true);
+  const [erroCatalogo, setErroCatalogo] = useState('');
 
   // modo mesa (garçom lança pedido pra comanda em vez de cobrar na hora)
   const [modo, setModo] = useState<ModoPDV>('BALCAO');
@@ -99,19 +101,60 @@ export default function PDV() {
 
   /* ── carregamento ── */
   const carregarCatalogo = useCallback(async () => {
-    const [{ data: prods }, { data: cats }, { data: lj }, { data: mesasData }, { data: nut }] = await Promise.all([
-      supabase.from('produtos').select('*, grupos_opcoes(*, opcoes(*))').eq('loja_id', lojaId).eq('disponivel', true).order('ordem'),
+    setCarregandoCatalogo(true);
+    setErroCatalogo('');
+    const [produtosResp, categoriasResp, lojaResp, mesasResp, nutricaoResp] = await Promise.all([
+      // O catálogo e os modificadores são consultados separadamente. Uma
+      // falha no relacionamento aninhado do PostgREST antes virava [] e o PDV
+      // dizia "nenhum produto", apesar de a loja possuir catálogo.
+      supabase.from('produtos').select('*').eq('loja_id', lojaId).eq('disponivel', true).order('ordem'),
       supabase.from('categorias').select('id, nome').eq('loja_id', lojaId).eq('ativo', true).order('ordem'),
       supabase.from('lojas').select('*').eq('id', lojaId).single(),
       supabase.from('mesas').select('*').eq('loja_id', lojaId).eq('ativo', true).order('numero'),
       // Alergênicos por produto: o balcão responde na hora, sem abrir o cardápio.
       supabase.rpc('fn_nutricao_cardapio', { p_loja_id: lojaId }),
     ]);
-    setProdutos((prods as Produto[]) ?? []);
-    setCategorias(cats ?? []);
-    setLoja((lj as Loja) ?? null);
-    setMesas((mesasData as Mesa[]) ?? []);
-    setNutricao(new Map(((nut as NutricaoProduto[]) ?? []).map((n) => [n.produto_id, n])));
+
+    const erroBase = produtosResp.error || categoriasResp.error || lojaResp.error || mesasResp.error;
+    if (erroBase) {
+      setProdutos([]);
+      setErroCatalogo(erroBase.message || 'Falha de acesso ao catálogo. Confira a conexão e a loja ativa.');
+      setCarregandoCatalogo(false);
+      return;
+    }
+
+    const produtosBase = (produtosResp.data as Produto[]) ?? [];
+    let produtosComOpcoes = produtosBase;
+    if (produtosBase.length > 0) {
+      const { data: grupos, error: erroGrupos } = await supabase
+        .from('grupos_opcoes')
+        .select('*, opcoes(*)')
+        .in('produto_id', produtosBase.map((produto) => produto.id))
+        .order('ordem');
+      if (erroGrupos) {
+        setProdutos([]);
+        setErroCatalogo(erroGrupos.message || 'Os produtos existem, mas os modificadores não puderam ser carregados com segurança.');
+        setCarregandoCatalogo(false);
+        return;
+      }
+      const porProduto = new Map<string, any[]>();
+      for (const grupo of grupos ?? []) {
+        const lista = porProduto.get(grupo.produto_id) ?? [];
+        lista.push(grupo);
+        porProduto.set(grupo.produto_id, lista);
+      }
+      produtosComOpcoes = produtosBase.map((produto) => ({
+        ...produto,
+        grupos_opcoes: porProduto.get(produto.id) ?? [],
+      }));
+    }
+
+    setProdutos(produtosComOpcoes);
+    setCategorias(categoriasResp.data ?? []);
+    setLoja((lojaResp.data as Loja) ?? null);
+    setMesas((mesasResp.data as Mesa[]) ?? []);
+    setNutricao(new Map((((nutricaoResp.data as NutricaoProduto[]) ?? [])).map((n) => [n.produto_id, n])));
+    setCarregandoCatalogo(false);
   }, [lojaId]);
 
   const carregarCaixa = useCallback(async () => {
@@ -608,6 +651,9 @@ export default function PDV() {
           setCatAtiva={setCatAtiva}
           produtosVisiveis={produtosVisiveis}
           tocarProduto={tocarProduto}
+          carregando={carregandoCatalogo}
+          erro={erroCatalogo}
+          onTentarNovamente={carregarCatalogo}
         />
 
         <CartSidebar

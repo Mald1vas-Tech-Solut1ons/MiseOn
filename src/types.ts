@@ -1152,6 +1152,9 @@ export interface ProductGridProps {
   setCatAtiva: (cat: string) => void;
   produtosVisiveis: Produto[];
   tocarProduto: (p: Produto) => void;
+  carregando?: boolean;
+  erro?: string;
+  onTentarNovamente?: () => void;
 }
 
 export interface ClientePDV {
