@@ -110,6 +110,11 @@ export function SEO({
         document.head.appendChild(scriptElement);
       }
       scriptElement.textContent = JSON.stringify(schemaJson);
+    } else if (scriptElement) {
+      // Navegação SPA: sem remover, uma página sem schema herdava o JSON-LD
+      // da rota anterior (por exemplo, FAQ da home aparecendo em /contato).
+      // Schema incorreto é pior que ausência de schema.
+      scriptElement.remove();
     }
 
     // 7. Meta Pixel Injection (Requer consentimento de marketing)

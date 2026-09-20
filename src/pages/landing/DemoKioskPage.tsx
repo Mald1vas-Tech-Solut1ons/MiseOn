@@ -10,8 +10,8 @@ export default function DemoKioskPage() {
   return (
     <div className="min-h-screen bg-[#070C18] text-white selection:bg-[#FC5B24] selection:text-white font-sans pt-20 pb-12">
       <SEO
-        title="Demonstração Interativa | MiseOn Kiosk & KDS Cozinha"
-        description="Experimente o simulador do MiseOn Kiosk: faça um pedido virtual no totem Bravus e veja a comanda surgir no KDS Kanban da cozinha em tempo real."
+        title="Demonstração interativa de autoatendimento | MiseOn"
+        description="Experimente no navegador uma jornada demonstrativa de autoatendimento, da escolha dos itens ao encaminhamento do pedido para a produção."
         canonicalUrl="https://miseon.app.br/demo-kiosk"
       />
 
@@ -22,10 +22,10 @@ export default function DemoKioskPage() {
             to="/autoatendimento"
             className="inline-flex items-center gap-2 text-xs font-bold text-gray-300 hover:text-white transition"
           >
-            <ArrowLeft size={16} /> {tDynamic('Voltar para a Landing Page do Kiosk')}
+            <ArrowLeft size={16} /> {tDynamic('Voltar para autoatendimento')}
           </Link>
           <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#FC5B24]">
-            <Sparkles size={14} /> {tDynamic('DEMONSTRAÇÃO INTERATIVA AO VIVO')}
+            <Sparkles size={14} /> {tDynamic('DEMONSTRAÇÃO INTERATIVA')}
           </span>
         </div>
       </div>

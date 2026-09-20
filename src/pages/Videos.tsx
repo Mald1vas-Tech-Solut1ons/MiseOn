@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Play, Pause, Volume2, VolumeX, Maximize2, Sparkles, Video, Star, Quote, CheckCircle2 } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize2, Sparkles, Video } from 'lucide-react';
 import { FooterSEO } from '../components/FooterSEO';
 import MiseOnLogo from '../components/MiseOnLogo';
 import LanguageToggle from '../components/LanguageToggle';
@@ -13,7 +13,7 @@ interface VideoItem {
   titulo: string;
   subtitulo: string;
   descricao: string;
-  categoria: 'marca' | 'demonstracao' | 'depoimento' | 'case';
+  categoria: 'marca' | 'demonstracao';
   // Vídeo autohospedado (arquivo em public/): usa `src`.
   // Vídeo hospedado no canal do YouTube (a partir de agora, o padrão para
   // conteúdo novo — soma view/inscrito no canal, entra na busca de vídeo do
@@ -55,53 +55,15 @@ const VIDEOS: VideoItem[] = [
     src: '/videoIntro.mp4',
     duracao: 'Demonstração Prática',
   },
-  {
-    id: 'demo-ifood-integracao',
-    titulo: 'Integração Nativa com iFood',
-    subtitulo: 'Sincronização instantânea de cardápio e estoque',
-    descricao: 'Acompanhe a chegada dos pedidos do iFood direto no KDS da cozinha, com impressão automática e baixa de estoque.',
-    categoria: 'demonstracao',
-    src: '/videoMarketing.mp4',
-    duracao: 'Recurso em Ação',
-  },
-  {
-    id: 'demo-whatsapp-ia',
-    titulo: 'Atendimento Inteligente no WhatsApp com IA',
-    subtitulo: 'Atenda clientes automaticamente 24 horas por dia',
-    descricao: 'Como a IA do MiseOn conversa com o cliente no WhatsApp, tira dúvidas do cardápio e gera pedidos com pagamento automático.',
-    categoria: 'demonstracao',
-    src: '/videomarketing2.mp4',
-    duracao: 'Visão Geral',
-  },
-  {
-    id: 'case-1',
-    titulo: 'Pare de Perder Pedidos no WhatsApp | MiseOn Case #1',
-    subtitulo: 'O primeiro de uma série de cases reais de uso do MiseOn',
-    descricao: 'Case #1 da série MiseOn: como o atendimento por WhatsApp com IA evita pedido perdido e organiza o fluxo da cozinha.',
-    categoria: 'case',
-    youtubeId: '0ZP6ZQ7wvVA',
-    duracao: 'Case #1',
-    destaque: true,
-  },
-];
-
-const DEPOIMENTOS_FUTUROS = [
-  {
-    nome: 'Empresários e Chefs parceiros',
-    restaurante: 'Depoimentos de Clientes SaaS em Breve',
-    frase: 'Estamos colhendo histórias de sucesso de restaurantes, pizzarias e hamburguerias em todo o Brasil. Seu depoimento poderá estar aqui!',
-    badge: 'Histórias Reais de Sucesso',
-  },
 ];
 
 export default function Videos() {
   const { t, tDynamic } = useI18n();
-  // /videos, /depoimentos e /demonstracao renderizam este mesmo componente.
-  // Título varia por rota para intenção de busca distinta, mas o canonical
-  // sempre aponta para /videos — evita conteúdo duplicado nos três URLs.
+  // /videos e /demonstracao renderizam este mesmo componente; o canonical
+  // aponta para /videos para evitar conteúdo duplicado.
   const location = useLocation();
   const meta = PAGE_META[location.pathname] ?? PAGE_META['/videos'];
-  const [categoriaAtiva, setCategoriaAtiva] = useState<'todos' | 'marca' | 'demonstracao' | 'depoimento' | 'case'>('todos');
+  const [categoriaAtiva, setCategoriaAtiva] = useState<'todos' | 'marca' | 'demonstracao'>('todos');
   const [videoAtivo, setVideoAtivo] = useState<VideoItem>(VIDEOS[0]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -163,7 +125,7 @@ export default function Videos() {
             description: videoAtivo.descricao,
             thumbnailUrl: videoAtivo.youtubeId
               ? youtubeThumbnail(videoAtivo.youtubeId)
-              : 'https://miseon.app.br/MISEON-logo.png',
+              : 'https://miseon.app.br/icon-512.png',
             uploadDate: '2026-07-24',
             contentUrl: videoAtivo.youtubeId
               ? youtubeWatchUrl(videoAtivo.youtubeId)
@@ -176,7 +138,7 @@ export default function Videos() {
               name: 'MiseOn Tecnologia',
               logo: {
                 '@type': 'ImageObject',
-                url: 'https://miseon.app.br/MISEON-logo.png',
+                url: 'https://miseon.app.br/icon-512.png',
               },
             },
           }),
@@ -222,14 +184,14 @@ export default function Videos() {
         
         <div className="relative mx-auto max-w-4xl px-4">
           <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 text-xs font-bold text-orange-400 backdrop-blur-md mb-6">
-            <Sparkles size={14} /> {tDynamic('Galeria Oficial de Vídeos & Demonstrações')}
+            <Sparkles size={14} /> {tDynamic('Biblioteca oficial de vídeos e demonstrações')}
           </div>
 
           <h1 className="font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
-            {tDynamic('MiseOn em Ação: Assista e Comprove')}
+            {tDynamic('MiseOn em ação: vídeos e demonstrações')}
           </h1>
           <p className="mt-4 text-base text-slate-300 sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            {tDynamic('Veja como a nossa arquitetura de software transforma a operação de restaurantes, lanchonetes e deliveries com velocidade, inteligência de margem e estabilidade.')}
+            {tDynamic('Conheça a identidade do produto e veja uma demonstração do fluxo entre o PDV e a produção.')}
           </p>
         </div>
       </section>
@@ -322,8 +284,6 @@ export default function Videos() {
                   <Video size={14} />{' '}
                   {videoAtivo.categoria === 'marca'
                     ? 'Vídeo Oficial de Apresentação'
-                    : videoAtivo.categoria === 'case'
-                    ? 'Case de Cliente'
                     : 'Demonstração de Produto'}
                 </span>
                 <h2 className="font-['Sora'] mt-1 text-xl font-bold text-white sm:text-2xl">
@@ -366,11 +326,10 @@ export default function Videos() {
               { id: 'todos', label: 'Todos os Vídeos' },
               { id: 'marca', label: 'Marca & Conceito' },
               { id: 'demonstracao', label: 'Demonstrações' },
-              { id: 'case', label: 'Cases de Clientes' },
             ].map((cat) => (
               <button type="button"
                 key={cat.id}
-                onClick={() => setCategoriaAtiva(cat.id as any)}
+                onClick={() => setCategoriaAtiva(cat.id as 'todos' | 'marca' | 'demonstracao')}
                 className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                   categoriaAtiva === cat.id
                     ? 'bg-orange-500 text-white shadow-sm'
@@ -434,11 +393,7 @@ export default function Videos() {
               {/* Informações do Card */}
               <div className="p-5">
                 <span className="text-xs opacity-90 font-bold uppercase tracking-wider text-orange-400">
-                  {v.categoria === 'marca'
-                    ? 'Identidade Institucional'
-                    : v.categoria === 'case'
-                    ? 'Case de Cliente'
-                    : 'Demonstração'}
+                  {v.categoria === 'marca' ? 'Identidade Institucional' : 'Demonstração'}
                 </span>
                 <h4 className="font-['Sora'] mt-1 text-base font-bold text-white group-hover:text-orange-400 transition">
                   {v.titulo}
@@ -452,77 +407,6 @@ export default function Videos() {
               </div>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Seção Futura: Depoimentos de Usuários do SaaS */}
-      <section className="border-t border-slate-800 bg-[#060A14] py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1 text-xs font-bold text-emerald-400 mb-3">
-              <Star size={14} className="fill-emerald-400" /> {tDynamic('Depoimentos &amp; Histórias de Clientes')}
-            </div>
-            <h2 className="font-['Sora'] text-3xl font-extrabold text-white">
-              {tDynamic('O Que Dizem os Restaurantes Parceiros')}
-            </h2>
-            <p className="mt-3 text-sm text-slate-400">
-              {tDynamic('Estamos gravando novos depoimentos em vídeo de proprietários e gestores que usam o MiseOn no seu dia a dia.')}
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {DEPOIMENTOS_FUTUROS.concat([
-              {
-                nome: 'Hamburguerias e Lanchonetes',
-                restaurante: 'Agilidade no Salão e no Delivery',
-                frase: 'Zero fila de espera, pedidos integrados no WhatsApp e balcão funcionando sem quedas na hora do pico.',
-                badge: 'Alta Performance',
-              },
-              {
-                nome: 'Pizzarias e Restaurantes',
-                restaurante: 'KDS & Produção sem papel',
-                frase: 'Passagem de bastão precisa entre as etapas do forno e expedição, eliminando erros de cozinha.',
-                badge: 'Eficiência Operacional',
-              },
-            ]).map((dep, idx) => (
-              <div key={idx} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 relative">
-                <Quote size={32} className="text-slate-800 absolute top-4 right-4" />
-                <span className="inline-block rounded-full bg-slate-800 px-3 py-1 text-xs opacity-90 font-bold text-orange-400 mb-4">
-                  {dep.badge}
-                </span>
-                <p className="text-xs text-slate-300 leading-relaxed italic mb-6">
-                  "{dep.frase}"
-                </p>
-                <div className="flex items-center gap-3 border-t border-slate-800 pt-4">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center font-bold text-white text-sm">
-                    M
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-white">{dep.nome}</p>
-                    <p className="text-xs opacity-95 text-slate-400">{dep.restaurante}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Banner Chamada para Clientes gravarem depoimento */}
-          <div className="mt-12 rounded-3xl border border-orange-500/30 bg-gradient-to-r from-orange-950/40 via-slate-900 to-slate-900 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="font-['Sora'] text-lg font-bold text-white flex items-center gap-2">
-                <CheckCircle2 className="text-orange-400" size={20} /> {tDynamic('É cliente MiseOn e quer aparecer aqui?')}
-              </h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-xl">
-                {tDynamic('Grave um vídeo sobre a experiência da sua loja com o MiseOn e ganhe destaque oficial no nosso portal.')}
-              </p>
-            </div>
-            <Link
-              to="/contato"
-              className="shrink-0 rounded-xl bg-orange-500 px-6 py-3 text-xs font-bold text-white hover:bg-orange-600 transition"
-            >
-              {tDynamic('Falar com Nossa Equipe')}
-            </Link>
-          </div>
         </div>
       </section>
 

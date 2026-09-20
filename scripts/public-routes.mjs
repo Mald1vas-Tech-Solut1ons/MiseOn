@@ -68,37 +68,16 @@ export const PUBLIC_ROUTES = [
     priority: 0.9,
     video: [
       {
-        thumbnail: '/MISEON-logo.png',
+        thumbnail: '/icon-512.png',
         title: 'Identidade e Ecossistema MiseOn',
         description: 'Conheça o conceito, o rigor de engenharia e o design da plataforma MiseOn.',
         content: '/MiseOn%20brand%20identity/videoIntro1.mp4',
       },
       {
-        thumbnail: '/MISEON-logo.png',
-        title: 'Demonstracao do PDV e KDS em Tempo Real',
-        description: 'Veja como o fluxo continuo conecta o salao, o caixa e a linha de producao.',
+        thumbnail: '/icon-512.png',
+        title: 'Demonstracao do fluxo entre PDV e producao',
+        description: 'Veja a demonstracao do pedido registrado no PDV e encaminhado para a producao.',
         content: '/videoIntro.mp4',
-      },
-      {
-        thumbnail: '/MISEON-logo.png',
-        title: 'Integracao Nativa com iFood',
-        description: 'Sincronizacao instantanea de cardapio, pedidos do iFood no KDS e estoque.',
-        content: '/videoMarketing.mp4',
-      },
-      {
-        thumbnail: '/MISEON-logo.png',
-        title: 'Atendimento Inteligente no WhatsApp com IA',
-        description: 'Como a IA do MiseOn conversa no WhatsApp e gera pedidos automaticamente.',
-        content: '/videomarketing2.mp4',
-      },
-      {
-        // Hospedado no canal do YouTube — usa player_loc (embed de terceiro),
-        // não content_loc (reservado a arquivo de mídia bruto), conforme a
-        // spec do Google para vídeo em sitemap.
-        thumbnail: 'https://img.youtube.com/vi/0ZP6ZQ7wvVA/hqdefault.jpg',
-        title: 'Pare de Perder Pedidos no WhatsApp | MiseOn Case #1',
-        description: 'Case #1 da série MiseOn: como o atendimento por WhatsApp com IA evita pedido perdido e organiza o fluxo da cozinha.',
-        player: 'https://www.youtube-nocookie.com/embed/0ZP6ZQ7wvVA?rel=0',
       },
     ],
   },
@@ -140,7 +119,6 @@ export const PUBLIC_ROUTES = [
 // apontando para a rota principal, então submetê-las ao Google seria
 // conteúdo duplicado.
 export const DUPLICATE_ROUTES = [
-  '/depoimentos', // mesmo componente de /videos, canonical -> /videos
   '/demonstracao', // mesmo componente de /videos, canonical -> /videos
   '/ajuda/estoque', // mesmo componente de /gestao-de-estoque-3d, canonical já embutido no componente
 ];

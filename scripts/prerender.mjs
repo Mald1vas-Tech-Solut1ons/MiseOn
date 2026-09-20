@@ -142,8 +142,14 @@ function faqJsonLd(data) {
 }
 
 /** Aplica meta + conteúdo de uma rota sobre o shell gerado pelo Vite. */
-function renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd, headExtra, imagem }) {
+function renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd, headExtra, imagem, preserveTemplateSchema = false }) {
   let html = template;
+
+  // O schema-base descreve a home. Nas demais rotas ele seria um segundo
+  // assunto, contradizendo o schema específico da página.
+  if (!preserveTemplateSchema) {
+    html = html.replace(/<script\s+id="seo-json-ld"[^>]*>[\s\S]*?<\/script>\s*/i, '');
+  }
 
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(title)}</title>`);
   html = html.replace(
@@ -355,6 +361,28 @@ async function main() {
       );
     }
 
+    // Mesmo sem JavaScript, toda página pública mantém navegação interna e
+    // os três próximos passos comerciais definidos no mapa de mensagens.
+    bodyHtml += [
+      '<nav aria-label="Próximos passos">',
+      '<a href="/cadastre-se">Testar o sistema</a>',
+      '<a href="/contato">Agendar demonstração</a>',
+      '<a href="/api-whatsapp-restaurantes">Conhecer o WhatsApp com IA</a>',
+      '<a href="/">Voltar à página inicial</a>',
+      '</nav>',
+    ].join('\n      ');
+
+    if (!jsonLd) {
+      jsonLd = `<script type="application/ld+json">${JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': routePath === '/videos' || routePath === '/demonstracao' ? 'CollectionPage' : 'WebPage',
+        name: title,
+        description,
+        url: canonicalUrl,
+        isPartOf: { '@type': 'WebSite', name: 'MiseOn', url: BASE },
+      })}</script>`;
+    }
+
     // Barreira anti-regressão: dois títulos iguais entre rotas distintas
     // significa que o bug original voltou. Falha o build em vez de publicar.
     if (!DUPLICATE_ROUTES.includes(routePath)) {
@@ -397,7 +425,16 @@ async function main() {
       }
     }
 
-    const html = renderPage(template, { title, description, canonicalUrl, bodyHtml, jsonLd, headExtra, imagem });
+    const html = renderPage(template, {
+      title,
+      description,
+      canonicalUrl,
+      bodyHtml,
+      jsonLd,
+      headExtra,
+      imagem,
+      preserveTemplateSchema: routePath === '/',
+    });
 
     // Verificação do produto final, não da intenção: se o HTML gravado não
     // tiver exatamente um H1 e o título certo, algo no template mudou e os

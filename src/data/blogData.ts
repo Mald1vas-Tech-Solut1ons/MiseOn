@@ -33,6 +33,7 @@ export interface BlogPost {
 export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'loja-lotada-divida-enorme-por-que-fila-na-porta-nao-e-lucro',
+    rascunho: true,
     title: 'Fila na Porta, Dívida de R$ 3 Milhões: o Que a Doceria do Kléber Ensina',
     description: 'Duas docerias na mesma rua: uma vazia, a outra com fila dobrando a esquina. A que tem fila deve R$ 3 milhões. A história mostra, passo a passo, como se aprende a vender antes de aprender a administrar.',
     category: 'Gestão Financeira',
@@ -152,6 +153,7 @@ A fila do Kléber prova que o produto dele presta. O que falta é a segunda prov
   },
   {
     slug: 'delivery-da-dinheiro-a-conta-por-canal-que-quase-ninguem-faz',
+    rascunho: true,
     title: 'R$ 31,49 na Tela, R$ 12 na Conta: a Matemática do Delivery que Ninguém Mostra',
     description: 'O cliente paga um preço, a loja recebe outro. Comissão, taxas, preço inflado para dar desconto, nota abaixo de 4.6 e o pedido que some por falta de entregador — o jogo do delivery com os números de quem vive dele.',
     category: 'Gestão Financeira',
@@ -284,6 +286,7 @@ Vale registrar também o detalhe operacional que parece bobagem e mexe no algori
   },
   {
     slug: 'restaurante-amador-na-internet-o-que-faz-perder-a-venda',
+    rascunho: true,
     title: 'Na Internet, o Cliente Compra a Foto e Recebe o Produto',
     description: 'Um site de cupcakes que só mostrava caixas. Uma loja de joias que parecia planilha de estoque. Os erros que fazem um negócio bom parecer amador — e o que eles significam para quem vende comida.',
     category: 'Tecnologia & IA',
@@ -390,6 +393,7 @@ Lentidão tem o mesmo efeito de uma fila desorganizada na porta: quem não está
   },
   {
     slug: 'padaria-da-dinheiro-onde-exatamente-esta-o-lucro',
+    rascunho: true,
     title: 'O Pão é Menos de 10% do Faturamento: Onde uma Padaria Ganha Dinheiro de Verdade',
     description: 'Uma padaria vende mais de um milhão de pães por ano — e o pão responde por menos de 10% do que ela fatura. O que está nos outros 90% e por que o balcão do caixa é o metro quadrado mais caro da loja.',
     category: 'Engenharia de Cardápio',
@@ -502,6 +506,7 @@ Custo fixo baixo, cardápio curto, fila que cabe na calçada. Não é a padaria 
   },
   {
     slug: 'voce-nunca-olhou-para-um-buffet-desse-jeito',
+    rascunho: true,
     title: 'Você Nunca Olhou Para um Buffet Desse Jeito: o Prato Oval e Outras Engenharias do Balcão',
     description: 'Prato grande faz comer até 30% mais. Legume ganha peso no cozimento. A salada perde quase metade na limpeza. No self-service, cada decisão do balcão é uma decisão de margem.',
     category: 'Engenharia de Cardápio',
@@ -626,6 +631,7 @@ E há a outra ponta: desconto fora do pico, para puxar quem tem flexibilidade de
   },
   {
     slug: 'calculadora-vazamento-de-caixa-diagnostico-operacional-restaurantes',
+    rascunho: true,
     title: 'Calculadora de Vazamento de Caixa: Como Identificar e Estancar Perdas Invisíveis no seu Restaurante',
     description: 'Saiba como pequenos desvios de CMV, faltas de estoque no rush e reajustes de fornecedores não repassados consomem até R$ 5.500/mês da margem do seu estabelecimento.',
     category: 'Gestão Financeira',
@@ -699,6 +705,7 @@ Não deixe sua margem de lucro escorrer pelo ralo. Coloque a engenharia de dados
   },
   {
     slug: 'dark-kitchen-hamburgueria-gestao-multi-marcas-logistica-delivery',
+    rascunho: true,
     title: 'Dark Kitchens e Hamburguerias de Escala: Como Operar Multi-Marcas no Mesmo Estoque com KDS Centralizado',
     description: 'Guia de engenharia de delivery: o que o modelo multimarcas exige de um sistema, o que o MiseOn entrega hoje (estoque único por loja, KDS por estação e selo de canal) e o que ainda está no roadmap.',
     category: 'Operação & KDS',
@@ -776,6 +783,7 @@ Com o MiseOn, sua Dark Kitchen ganha controle de custo e de tempo sem trocar de 
   },
   {
     slug: 'engenharia-de-pizzarias-kds-sabores-meio-a-meio-forno-alta-temperatura',
+    rascunho: true,
     title: 'Engenharia para Pizzarias: Como Gerenciar Pedidos Meio a Meio, Tempo de Forno e Fichas Técnicas de Massas',
     description: 'Guia definitivo de operação para pizzarias: controle de CMV em pizzas de sabores mistos, gestão de bordas recheadas, KDS para praça de forno e lote de longa fermentação.',
     category: 'Operação & KDS',
@@ -849,6 +857,7 @@ Com tecnologia direcionada para os desafios reais da pizzaria, sua operação ga
   },
   {
     slug: 'como-transformar-smart-tv-salao-menu-board-4k-chamada-por-voz',
+    rascunho: true,
     title: 'Como Transformar Qualquer Smart TV em um Menu Board 4K com Chamada de Pedidos por Voz em Viva-Voz',
     description: 'Guia prático para eliminar filas no balcão e modernizar o salão: aprenda a conectar a Smart TV do restaurante ao KDS da cozinha com alertas sonoros e QR Code de autoatendimento.',
     category: 'Tecnologia & IA',
@@ -919,6 +928,7 @@ Eleve a experiência visual do seu restaurante hoje mesmo com a tecnologia nativ
   },
   {
     slug: 'estrategia-whatsapp-atribuicao-pixel-meta-vendas-sem-comissao',
+    rascunho: true,
     title: 'Como Criar uma Máquina de Vendas no WhatsApp Sem Pagar Comissões: Atribuição de Pedidos e Meta Pixel',
     description: 'Guia definitivo de growth para food service: como transformar o WhatsApp do seu restaurante em um canal direto rastreável com Meta Pixel, IA consultiva e atribuição de vendas.',
     category: 'Tecnologia & IA',
@@ -991,6 +1001,7 @@ Inicie hoje a transição do seu delivery para o canal próprio e recupere o con
   },
   {
     slug: 'dre-gastronomico-margem-lucro-liquido-restaurantes',
+    rascunho: true,
     title: 'DRE Gastronômico: A Diferença entre Faturar R$ 100 Mil e Sobrar Dinheiro no Bolso',
     description: 'Como a Demonstração do Resultado do Exercício (DRE) com escrituração contábil por dupla entrada revela a margem líquida real de restaurantes e elimina sangrias de caixa.',
     category: 'Gestão Financeira',
@@ -1057,6 +1068,7 @@ Ao final do mês, a tela de **Financeiro & DRE** do MiseOn gera a Demonstração
   },
   {
     slug: 'engenharia-de-cardapio-combos-upsell-lucratividade',
+    rascunho: true,
     title: 'Engenharia de Cardápio e Venda Cruzada: Como Aumentar o Ticket Médio em até 28% sem Subir Preços',
     description: 'Técnicas avançadas de psicologia de preços, matriz de lucratividade (Estrelas, Enigmas, Burros de Carga e Cães) e automação de upsell no cardápio digital.',
     category: 'Engenharia de Cardápio',
@@ -1115,6 +1127,7 @@ O cliente percebe o saldo acumulado como um incentivo exclusivo da sua loja, gar
   },
   {
     slug: 'gestao-de-suprimentos-compras-peps-fornecedores',
+    rascunho: true,
     title: 'Gestão de Compras e Suprimentos no Food Service: O Guia Definitivo para Não Queimar Caixa no Estoque',
     description: 'Como automatizar ordens de compra, negociar com fornecedores baseado no histórico de preços e evitar que ingrediente vire lixo nas prateleiras.',
     category: 'Operação & KDS',
@@ -1174,8 +1187,8 @@ Sua cozinha ganha agilidade, seu estoque opera sem perdas e seu caixa preserva a
   },
   {
     slug: 'evolucao-do-cmv-do-caderno-ao-custeio-peps-3d',
-    title: 'A Evolução do CMV no Food Service: Do Caderno de Receitas à Engenharia de Estoque 3D e Custeio PEPS',
-    description: 'Como o controle de custos na gastronomia evoluiu de palpites em cadernos para o custeio real por lote PEPS e a inteligência de rendimento com perda de cocção.',
+    title: 'Como o MiseOn Forma o Custo: Lote, Embalagem, Rendimento e Confiança',
+    description: 'Entenda as regras implementadas no MiseOn para formar o custo de insumos e preparos sem transformar dado incompleto em margem aparentemente precisa.',
     category: 'Gestão Financeira',
     publishedAt: '2026-07-28',
     readTime: '8 min de leitura',
@@ -1185,66 +1198,67 @@ Sua cozinha ganha agilidade, seu estoque opera sem perdas e seu caixa preserva a
       role: 'Head de Engenharia e Arquitetura do MiseOn',
       avatar: '/icon-192.png',
     },
-    tags: ['CMV', 'Ficha Técnica', 'Custeio PEPS', 'Estoque 3D', 'Gestão de Restaurante'],
+    tags: ['Custo', 'Ficha Técnica', 'Custeio PEPS', 'Rendimento', 'Estoque'],
     seo: {
-      title: 'A Evolução do CMV no Food Service: Do Caderno ao Custeio PEPS — MiseOn',
-      description: 'Entenda a evolução do Custo de Mercadoria Vendida (CMV) no food service. Descubra como o custeio PEPS e a perda de cocção protegem a margem de restaurantes.',
+      title: 'Como o MiseOn Forma o Custo de Insumos e Preparos',
+      description: 'Veja como lote PEPS, quantidade por embalagem, rendimento, ficha técnica e confiança do dado participam do custo calculado pelo MiseOn.',
       keywords: 'cmv restaurante, custeio peps restaurante, ficha técnica alimentos, perda de coccao comida, calculo cmv hamburgueria',
       canonicalUrl: 'https://miseon.app.br/blog/evolucao-do-cmv-do-caderno-ao-custeio-peps-3d',
     },
-    summary: 'Historicamente, restaurantes calculavam suas margens com base no preço de compra bruto dos ingredientes. A revolução do custeio PEPS (Primeiro a Entrar, Primeiro a Sair) e o tratamento da perda de cocção transformaram a gestão financeira gastronômica moderna.',
+    summary: 'O custo só é útil quando sua origem pode ser explicada. Este guia descreve o fluxo que o MiseOn implementa e também os casos em que o sistema deve admitir que ainda não há base confiável.',
     content: `
-# A Evolução do CMV no Food Service: Do Caderno de Receitas à Engenharia de Estoque 3D
+# Como o MiseOn Forma o Custo: Lote, Embalagem, Rendimento e Confiança
 
-Durante décadas, a gestão financeira da maioria dos restaurantes brasileiros operava sobre uma ilusão confortável: a margem teórica. O dono da hamburgueria comprava 10 kg de carne por R$ 35,00/kg, dividia o valor pelo número de hambúrgueres teóricos e acreditava que seu Custo de Mercadoria Vendida (CMV) estava controlado em 25%.
+Um custo exibido com duas casas decimais pode parecer preciso e ainda estar errado. No MiseOn, a formação do custo parte de uma regra simples: **a origem do dado precisa acompanhar o número**.
 
-Na prática, ao final do mês, a conta bancária não fechava. Onde estava o vazamento de lucro?
-
-A resposta reside na diferença brutal entre o **passado artesanal da gestão** e a **engenharia de alimentos moderna**.
+Este texto descreve o comportamento implementado no produto. Ele não é uma promessa de DRE pronta nem uma estimativa de economia.
 
 ---
 
-## 1. O Passado: O Mito da "Ficha Técnica Estática"
+## 1. A entrada define o lote e o valor disponível
 
-No modelo tradicional, as fichas técnicas eram planilhas do Excel ou anotações em cadernos atualizadas uma vez por ano. Esse modelo cometia três erros fatais:
+Compras e entradas criam a base física e financeira do estoque. Quando há lotes com preços diferentes, o custeio PEPS consome primeiro o lote mais antigo disponível. Assim, o valor usado na baixa vem de uma entrada identificável, e não apenas de um preço médio digitado em outro momento.
 
-1. **Ignorava a Inflação de Fornecedores**: Se o pão subia de R$ 1,20 para R$ 1,85 na terça-feira, a ficha técnica continuava calculando a margem com o preço antigo.
-2. **Ignorava os Preparos Internos**: Quando a cozinha moía a carne, temperava e moldava o blend, ou reduzida 10 litros de molho de tomate para 6 litros concentrados, esse "trabalho de panela" entrava no estoque valendo ZERO. O produto pronto nascia barato na ficha, mas caro na vida real.
-3. **Não Trata a Perda de Cocção (Descarte de Água e Gordura)**: Se 10 kg de peça crua de cupim perdem 30% do peso no forno e viram 7 kg prontos para a travessa do buffet, o custo dos 10 kg precisa ser concentrado nos 7 kg líquidos servidos. Se você diluir o custo nos 10 kg brutos, estará vendendo com prejuízo a cada grama servida.
+## 2. Quantidade por embalagem decide a unidade de custo
+
+Comprar uma caixa e consumir unidades exige saber quantas unidades a caixa contém. O mesmo vale para pacote, fardo, garrafa, quilo ou litro.
+
+No MiseOn, a quantidade por embalagem registra também sua origem. Uma correção feita pelo usuário tem prioridade sobre leituras automáticas. Sem uma conversão confiável, o sistema não deveria tratar o custo unitário como confirmado.
+
+## 3. Rendimento pode representar perda ou ganho
+
+O preparo pode perder peso, como ocorre em algumas cocções, ou ganhar volume, como em alimentos hidratados. Por isso, rendimento não é limitado a perda.
+
+A medição da própria loja tem prioridade sobre referências genéricas. O objetivo é preservar o que foi efetivamente observado na cozinha, sem confundir uma referência com uma medição.
+
+## 4. Preparos participam da ficha técnica
+
+Molhos, massas, blends e outros preparos podem ser usados dentro da ficha de um produto. O MiseOn calcula o custo do preparo a partir de seus insumos e permite que esse custo suba para a ficha que o consome, com um limite de segurança para relações recursivas.
+
+Gás e mão de obra não são misturados automaticamente ao custo do lote: pertencem à ordem de serviço e exigem tratamento próprio.
+
+## 5. Custo incerto não vira margem bonita
+
+A função de custo devolve o valor e um veredito de confiança. Se faltam embalagem, conversão, rendimento ou outra base necessária, quem consome esse dado deve respeitar o estado de incerteza.
+
+Nessa situação, a margem pode ficar sem valor e apresentar o motivo. É melhor admitir a informação ausente do que publicar um percentual convincente e incorreto.
+
+## 6. Venda por peso preserva o preço praticado
+
+Em operações por quilo, o item vendido preserva o preço praticado na pesagem. Ele não deve ser reprecificado depois com um valor genérico do cadastro do produto.
 
 ---
 
-## 2. O Presente: Valoração por Lote e Método PEPS (Primeiro a Entrar, Primeiro a Sair)
+## O que este fluxo não significa
 
-A engenharia moderna de software para food service trouxe o método **PEPS (Primeiro a Entrar, Primeiro a Sair)** para o centro da cozinha.
+Estoque, ficha e custo implementados não tornam automaticamente a DRE gerencial operacional. A tela de DRE do MiseOn permanece identificada como demonstrativa enquanto não estiver reconciliada com vendas, impostos, despesas e demais autoridades financeiras reais.
 
-Quando um restaurante produz 20 receitas de molho ou 50 blends de carne:
-- O sistema consulta os lotes de insumos brutos no estoque em ordem cronológica de compra.
-- Baixa primeiro a carne comprada no lote de semana passada pelo preço X.
-- Quando o lote antigo acaba, consome o lote novo pelo preço Y.
-- **Soma exatamente o valor total gasto na panela** e divide pela quantidade de unidades ou kg finais obtidos.
-
-O preparo entra no estoque já com seu **Custo Apropriado Real**. Quando o garçom lança um prato no salão ou um pedido entra no iFood, a baixa da ficha técnica deduz o valor exato desse lote.
-
----
-
-## 3. O Futuro: Observabilidade de Estoque 3D e Análise Preditiva de Perdas
-
-O futuro da gestão de restaurantes não é apenas saber *quanto custou*, mas visualizar *onde o estoque está* e *quando ele vai vencer*.
-
-Com mapeamento tridimensional de prateleiras e câmaras frias, aliando rastreabilidade de lote e data de validade com alertas sonoros na cozinha:
-- O cozinheiro sabe exatamente qual lote de molho deve ser consumido primeiro (FEFO: First Expire, First Out).
-- Lotes vencidos geram alerta de descarte por perda no sistema, impedindo que ingredientes deteriorados sejam servidos ao cliente ou fiquem acumulando custo fantasma no balanço.
-
----
-
-## Conclusão: A Margem Que Não Mente
-
-A diferença entre um restaurante que estagna e um grupo gastronômico que escala com saúde financeira é a precisão dos seus números. Deixar de tratar o estoque como um "depósito genérico" e passá-lo a enxergar como **dinheiro estocado em transformação** é o primeiro passo para garantir a vida longa do seu negócio.
+Essa separação é intencional: **produto confiável começa pelo limite claro entre o que foi calculado e o que ainda precisa ser configurado ou medido**.
 `,
   },
   {
     slug: 'o-fim-do-papel-na-cozinha-kds-kanban-operacional',
+    rascunho: true,
     title: 'O Fim do Papel na Cozinha: Como o KDS Kanban Transforma a Eficiência Operacional e Elimina o Caos nos Picos',
     description: 'Análise técnica da transição de comandas de papel para a tela de produção KDS (Kitchen Display System), reduzindo o tempo de ticket em até 35%.',
     category: 'Operação & KDS',
@@ -1304,6 +1318,7 @@ A transição para a cozinha digital não é mais um luxo futurista — é a inf
   },
   {
     slug: 'ia-no-whatsapp-do-restaurante-atendimento-oficial-meta-vs-bots-amadores',
+    rascunho: true,
     title: 'Atendimento por Inteligência Artificial no WhatsApp: Conexão Oficial Meta vs Bots Amadores',
     description: 'Por que o atendimento automatizado no WhatsApp exige a API Cloud Oficial da Meta com dados reais do cardápio para evitar banimentos e garantir vendas sem erros.',
     category: 'Tecnologia & IA',
@@ -1368,6 +1383,7 @@ Proteger o canal de atendimento mais valioso da sua loja com tecnologia oficial 
   },
   {
     slug: 'verdade-sobre-venda-por-quilo-perda-coccao-peso-inteligente',
+    rascunho: true,
     title: 'A Verdade sobre a Venda por Quilo: Como a Perda de Cocção e o Peso Inteligente Decidem a Margem do Buffet',
     description: 'Estudo profundo sobre estabelecimentos self-service e buffets a quilo. Descubra como tratar o peso fracionado e o encolhimento de assados e grelhados.',
     category: 'Engenharia de Cardápio',

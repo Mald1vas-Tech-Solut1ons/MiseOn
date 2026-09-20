@@ -60,7 +60,7 @@ export function LeadForm({ compact = false, origem = 'landing' }: { compact?: bo
         subtitulo={`Vamos te chamar no WhatsApp ${whatsapp} para agendar sua demonstração.`}
       >
         <a
-          href={zap(`Olá! Acabei de deixar meu contato no site da MiseOn (nome: ${nome.trim()}) e quero adiantar a conversa.`)}
+          href={zap(`Olá! Acabei de deixar meu contato no site do MiseOn (nome: ${nome.trim()}) e quero adiantar a conversa.`)}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-emerald-500/60 px-5 py-2.5 text-sm font-bold text-emerald-400 transition hover:bg-emerald-500/10"

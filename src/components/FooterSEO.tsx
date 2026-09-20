@@ -21,7 +21,7 @@ export function FooterSEO() {
   const funcionalidades = [
     { title: tDynamic('Totem de Autoatendimento (Bravus Core)'), href: '/autoatendimento' },
     { title: tDynamic('Demonstração Interativa do Kiosk'), href: '/demo-kiosk' },
-    { title: tDynamic('Integração iFood Nativa'), href: '/integracao-ifood' },
+    { title: tDynamic('Configuração da integração iFood'), href: '/integracao-ifood' },
     { title: tDynamic('Cardápio Digital QR Code'), href: '/cardapio-qr-code' },
     { title: tDynamic('Atendimento WhatsApp com IA'), href: '/api-whatsapp-restaurantes' },
     { title: tDynamic('Painel de Senhas na TV'), href: '/painel-de-senhas-tv' },
@@ -53,10 +53,10 @@ export function FooterSEO() {
               <MiseOnLogo size={140} />
             </Link>
             <p className="text-xs leading-relaxed text-slate-400">
-              {tDynamic('O MiseOn é a plataforma completa para simplificar e organizar a gestão de restaurantes, hamburguerias, pizzarias, lanchonetes e deliveries em um único painel.')}
+              {tDynamic('O MiseOn conecta etapas da operação de restaurantes, hamburguerias, pizzarias, lanchonetes e dark kitchens em um único sistema.')}
             </p>
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
-              <ShieldCheck size={16} /> {tDynamic('Plataforma Segura & Certificada')}
+              <ShieldCheck size={16} /> {tDynamic('Acesso protegido e operação por perfis')}
             </div>
             <div className="pt-1">
               <LanguageToggle variant="dropdown" />
@@ -164,19 +164,19 @@ export function FooterSEO() {
               </div>
             </div>
 
-            {/* Selos de Confiança e Parceiros Oficiais */}
+            {/* Capacidades técnicas e meios configuráveis */}
             <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
               <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5">
                 <CreditCard size={14} className="text-blue-400" />
-                <span>{tDynamic('Pagamentos Efí Bank')}</span>
+                <span>{tDynamic('Cobrança por Efí configurável')}</span>
               </div>
               <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5">
                 <ShieldCheck size={14} className="text-emerald-400" />
-                <span>API Oficial Meta</span>
+                <span>{tDynamic('WhatsApp Cloud API configurável')}</span>
               </div>
               <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5">
                 <Lock size={14} className="text-amber-400" />
-                <span>{tDynamic('Conexão SSL 256-bit')}</span>
+                <span>{tDynamic('Conexão HTTPS')}</span>
               </div>
             </div>
 
@@ -199,7 +199,7 @@ export function FooterSEO() {
             </button>
           </div>
           <p className="mt-1">
-            MiseOn — Sistema para Hamburguerias, Lanchonetes, Pizzarias, Restaurantes e Deliveries. Cardápio Digital com QR Code, Integração iFood, Atendimento WhatsApp IA, KDS de Cozinha, PDV Frente de Caixa, Ficha Técnica e Emissão Fiscal NFC-e/NF-e.
+            MiseOn — sistema para hamburguerias, lanchonetes, pizzarias, restaurantes e dark kitchens. PDV, mesas, cardápio digital, KDS, estoque e custos; iFood, WhatsApp e emissão fiscal dependem de configuração.
           </p>
         </div>
 

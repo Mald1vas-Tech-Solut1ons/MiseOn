@@ -94,7 +94,7 @@ export function KioskHomeSection() {
                 <CheckCircle2 size={16} className="text-[#FC5B24]" /> {tDynamic('Baixa de Estoque PEPS')}
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-gray-200">
-                <CheckCircle2 size={16} className="text-[#FC5B24]" /> {tDynamic('DRE e Financeiro Real')}
+                <CheckCircle2 size={16} className="text-[#FC5B24]" /> {tDynamic('Prévia de DRE e financeiro')}
               </div>
             </div>
 

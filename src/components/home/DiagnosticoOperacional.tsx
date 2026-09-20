@@ -8,42 +8,33 @@ const CENAS = [
     id: 'fornecedor',
     titulo: 'O aumento surpresa do fornecedor',
     descricao: 'O preço da carne, queijo ou óleo subiu e você só percebeu semanas depois, vendendo pratos com margem reduzida sem saber.',
-    perdaEstimada: 1400,
   },
   {
     id: 'pico',
     titulo: 'O caos no pico de sexta-feira à noite',
     descricao: 'Pedidos do iFood, balcão e WhatsApp se misturam, comandas rasuram e a cozinha perde o tempo de preparo.',
-    perdaEstimada: 1200,
   },
   {
     id: 'estoque',
     titulo: 'A ilusão do estoque no olhômetro',
     descricao: 'A planilha ou a memória dizia que tinha insumo, mas no meio do movimento de sábado o ingrediente principal acabou.',
-    perdaEstimada: 1800,
   },
   {
     id: 'caixa',
     titulo: 'O mistério do fechamento de caixa',
     descricao: 'As vendas aconteceram e o caixa fechou, mas no final do mês você não sabe explicar exatamente para onde foi a margem.',
-    perdaEstimada: 2500,
   },
 ];
 
 export default function DiagnosticoOperacional() {
   const { tDynamic } = useI18n();
-  const [marcados, setMarcados] = useState<Record<string, boolean>>({
-    fornecedor: true,
-    pico: true,
-  });
+  const [marcados, setMarcados] = useState<Record<string, boolean>>({});
 
   const alternar = (id: string) => {
     setMarcados((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const itensMarcados = CENAS.filter((c) => marcados[c.id]);
-  const totalMarcados = itensMarcados.length;
-  const perdaTotalEstimada = itensMarcados.reduce((acc, c) => acc + c.perdaEstimada, 0);
+  const totalMarcados = CENAS.filter((c) => marcados[c.id]).length;
 
   return (
     <section className="relative overflow-hidden bg-[#0B1120] py-20 border-b border-white/10 text-white">
@@ -130,7 +121,7 @@ export default function DiagnosticoOperacional() {
                 )}
                 <h3 className="font-['Sora'] text-lg font-extrabold text-white">
                   {totalMarcados >= 2
-                    ? tDynamic('ALERTA CRÍTICO: Você sabe que esse dinheiro está saindo do seu bolso todo dia.')
+                  ? tDynamic('ATENÇÃO: sua operação reúne mais de um ponto que merece medição.')
                     : totalMarcados === 1
                     ? tDynamic('ALERTA MODERADO: Sua loja possui 1 gargalo ativo tirando dinheiro do seu caixa.')
                     : tDynamic('OPERAÇÃO SAUDÁVEL: Nenhum gargalo marcado! O dinheiro continua no seu bolso.')}
@@ -139,22 +130,22 @@ export default function DiagnosticoOperacional() {
 
               <p className="text-xs leading-relaxed text-slate-300">
                 {totalMarcados >= 2
-                  ? tDynamic('Você sabe que administrando assim, cada dia sem controle é dinheiro saindo direto do seu bolso. O MiseOn estanca esses vazamentos na hora.')
+                  ? tDynamic('O valor do impacto depende dos números da sua loja. Use a calculadora abaixo e valide cada hipótese com faturamento, CMV, ticket e ocorrências reais.')
                   : tDynamic('Mesmo com poucos gargalos, pequenos desvios acumulam grandes valores fora do seu caixa no final do ano.')}
               </p>
             </div>
 
-            {/* Contador de Perda em Tempo Real */}
+            {/* Contador de situações — não transforma hipótese em dinheiro inventado. */}
             {totalMarcados > 0 && (
               <div className="shrink-0 rounded-2xl border border-red-500/40 bg-black/60 p-4 text-center sm:min-w-[240px]">
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">
-                  {tDynamic('Vazamento invisível acumulado:')}
+                  {tDynamic('Situações selecionadas')}
                 </span>
                 <span className="font-['Sora'] text-3xl font-black text-red-400 block mt-1 animate-pulse">
-                  R$ {perdaTotalEstimada.toLocaleString('pt-BR')}
+                  {totalMarcados} de {CENAS.length}
                 </span>
                 <span className="text-[11px] font-semibold text-slate-400 block mt-0.5">
-                  {tDynamic('por mês caindo pelo ralo')}
+                  {tDynamic('Calcule o impacto com os dados da sua loja')}
                 </span>
               </div>
             )}
@@ -164,7 +155,7 @@ export default function DiagnosticoOperacional() {
           {/* CTA de Urgência */}
           <div className="mt-6 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
             <span className="text-xs text-slate-300 font-semibold text-center sm:text-left">
-              {tDynamic('Recupere o controle financeiro e zere o desperdício em menos de 24 horas.')}
+              {tDynamic('Comece identificando onde a sua operação perde margem e acompanhe a evolução com seus próprios números.')}
             </span>
             <Link
               to="/cadastre-se"

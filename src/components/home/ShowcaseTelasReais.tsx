@@ -130,13 +130,13 @@ const TELAS: TelaReal[] = [
   },
   {
     id: 'dre-financeiro',
-    titulo: 'DRE Gerencial de Dupla Entrada & Margem Líquida',
-    subtitulo: 'Financeiro Transparente sem Planilhas',
+    titulo: 'Prévia da DRE Gerencial',
+    subtitulo: 'Estrutura financeira em evolução',
     categoria: 'DRE Financeiro',
     icone: BarChart3,
     src: '/images/telas-reais/dre-financeiro.png',
-    alt: 'Painel DRE Gerencial do MiseOn exibindo faturamento bruto, deduções de taxas, CMV real e margem líquida',
-    descricao: 'Veja exatamente quanto sobrou no seu bolso. O DRE cruza vendas, custos fixos, CMV das fichas técnicas e taxas de cartões/iFood automaticamente.',
+    alt: 'Prévia demonstrativa do painel DRE Gerencial do MiseOn',
+    descricao: 'Veja a estrutura planejada para receita, taxas, CMV e custos fixos. Hoje esta tela usa um cenário demonstrativo e não substitui a contabilidade.',
     largura: 1200,
     altura: 680,
   },
@@ -221,7 +221,7 @@ export default function ShowcaseTelasReais() {
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1 text-xs font-black uppercase tracking-widest text-emerald-400">
-            <Sparkles size={14} /> {tDynamic('Provação Real do Produto')}
+            <Sparkles size={14} /> {tDynamic('Demonstração real do produto')}
           </span>
           <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold tracking-tight sm:text-4xl">
             {tDynamic('Você sabe exatamente o que está levando: telas reais da sua operação.')}
@@ -362,4 +362,3 @@ export default function ShowcaseTelasReais() {
     </section>
   );
 }
-

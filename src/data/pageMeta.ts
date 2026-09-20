@@ -34,13 +34,13 @@ export const PAGE_META: Record<string, PageMeta> = {
   // técnica conhecida de spam. Conteúdo dentro de <noscript> ele também não
   // conta. A única coisa que resolve é H1 de verdade no HTML servido.
   '/': {
-    title: 'MiseOn | Sistema de Gestão para Food Service e Restaurantes',
+    title: 'MiseOn | Operação e custos conectados para restaurantes',
     description:
-      'MiseOn: sistema de gestão para todo o food service — hamburgueria, pizzaria, lanchonete, restaurante à la carte, buffet por quilo, bar e dark kitchen. Cardápio digital, KDS, estoque pelo cupom fiscal e iFood.',
+      'Conecte salão, delivery, WhatsApp, cozinha, estoque e custos em um único fluxo com o MiseOn. Teste por 30 dias ou agende uma demonstração.',
     keywords:
       'sistema para restaurante, comanda eletrônica para bares, gerenciador de delivery integrado, sistema para hamburgueria, sistema para pizzaria, cardápio digital qr code, integração ifood, whatsapp ia restaurante',
     canonicalUrl: `${BASE}/`,
-    h1: 'MiseOn | Sistema de gestão para food service — da hamburgueria ao buffet por quilo',
+    h1: 'Do pedido ao custo real, o MiseOn conecta sua operação.',
   },
 
   '/acesso': {
@@ -52,19 +52,19 @@ export const PAGE_META: Record<string, PageMeta> = {
   },
 
   '/lojas': {
-    title: 'Lojas na MiseOn | Encontre Restaurantes Perto de Você',
+    title: 'Lojas no MiseOn | Encontre Restaurantes Perto de Você',
     description:
       'Veja restaurantes, hamburguerias e pizzarias cadastrados no MiseOn perto de você e monte seu pedido direto, sem precisar instalar app.',
     canonicalUrl: `${BASE}/lojas`,
-    h1: 'Lojas na MiseOn',
+    h1: 'Lojas no MiseOn',
   },
 
   '/cadastre-se': {
-    title: 'Cadastre sua Loja no MiseOn | 30 Dias Grátis, Sem Cartão',
+    title: 'Cadastre sua loja no MiseOn | Teste o sistema',
     description:
-      'Crie sua loja no MiseOn e libere 30 dias de uso completo sem compromisso: cardápio digital, WhatsApp com IA, PDV, entregas e controle de estoque.',
+      'Crie sua loja no MiseOn para conhecer o sistema. Integrações como WhatsApp, iFood e emissão fiscal dependem de configuração e credenciais próprias.',
     canonicalUrl: `${BASE}/cadastre-se`,
-    h1: 'Cadastre sua loja na MiseOn',
+    h1: 'Cadastre sua loja no MiseOn',
   },
 
   '/sobre': {
@@ -101,29 +101,21 @@ export const PAGE_META: Record<string, PageMeta> = {
     h1: 'Política de Privacidade',
   },
 
-  // /videos, /depoimentos e /demonstracao renderizam o MESMO componente.
-  // Título varia por intenção de busca, canonical sempre aponta para /videos
-  // — evita o Google tratar as três URLs como conteúdo duplicado.
+  // /videos e /demonstracao renderizam o mesmo componente. O canonical da
+  // demonstração aponta para /videos para evitar conteúdo duplicado.
   '/videos': {
-    title: 'Vídeos MiseOn | Identidade, Demonstração e Depoimentos',
+    title: 'Vídeos MiseOn | Identidade e demonstração do produto',
     description:
-      'Vídeos institucionais do MiseOn: identidade da marca, demonstração do PDV e KDS em tempo real e depoimentos de clientes reais.',
+      'Conheça a identidade do MiseOn e veja uma demonstração do fluxo entre o PDV e a produção, sem resultados ou depoimentos não comprovados.',
     canonicalUrl: `${BASE}/videos`,
-    h1: 'MiseOn em Ação: Assista e Comprove',
-  },
-  '/depoimentos': {
-    title: 'Depoimentos de Clientes MiseOn | Cases Reais de Restaurantes',
-    description:
-      'Veja depoimentos em vídeo de donos de restaurante, hamburgueria e pizzaria que usam o MiseOn no dia a dia — resultado real, sem atores.',
-    canonicalUrl: `${BASE}/videos`,
-    h1: 'MiseOn em Ação: Assista e Comprove',
+    h1: 'MiseOn em ação: vídeos e demonstrações',
   },
   '/demonstracao': {
-    title: 'Demonstração do Sistema MiseOn | PDV, KDS e iFood em Ação',
+    title: 'Demonstração do sistema MiseOn | PDV e produção',
     description:
-      'Demonstração em vídeo do PDV, KDS de cozinha e integração com iFood do MiseOn funcionando em tempo real.',
+      'Veja uma demonstração do fluxo entre o PDV e a produção no MiseOn e conheça a identidade visual do produto.',
     canonicalUrl: `${BASE}/videos`,
-    h1: 'MiseOn em Ação: Assista e Comprove',
+    h1: 'MiseOn em ação: vídeos e demonstrações',
   },
 
   // /ajuda/estoque renderiza o mesmo componente de /gestao-de-estoque-3d;
@@ -162,10 +154,10 @@ export const PAGE_META: Record<string, PageMeta> = {
     h1: 'Autoatendimento que Acelera o Balcão e a Mesa',
   },
   '/demo-kiosk': {
-    title: 'Simulador do Totem MiseOn Kiosk | Veja o Pedido em Ação',
+    title: 'Demonstração interativa de autoatendimento | MiseOn',
     description:
-      'Experimente o totem de autoatendimento do MiseOn no navegador: monte o pedido como o cliente monta, com cardápio, adicionais e checkout — sem cadastro.',
+      'Experimente no navegador uma jornada demonstrativa de autoatendimento, da escolha dos itens ao encaminhamento do pedido para a produção.',
     canonicalUrl: `${BASE}/demo-kiosk`,
-    h1: 'Simulador do MiseOn Kiosk',
+    h1: 'Demonstração interativa de autoatendimento',
   },
 };

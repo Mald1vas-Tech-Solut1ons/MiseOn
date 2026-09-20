@@ -6,6 +6,7 @@ import {
   Mail, ChevronDown, Headset, BarChart3, BadgeCheck, Scale, Quote, CheckCircle2,
   Database, FlaskConical, Eye, AlertTriangle, BookOpen,
   Globe, PlayCircle, Compass, Tv, Mic, ShoppingCart, Store, Touchpad,
+  Coffee, Sandwich, Pizza, Wine, Smartphone, Bot, ReceiptText, PenLine,
 } from 'lucide-react';
 import { useState } from 'react';
 import MiseOnLogo from '../components/MiseOnLogo';
@@ -187,12 +188,12 @@ const RECURSOS = [
     titulo: 'Financeiro com Pix (Efí) & DRE',
     detalhes: [
       'Pix cai na conta da sua loja, com conciliação automática',
-      'DRE com margem de contribuição e lucro líquido reais',
+      'Prévia de DRE com margem de contribuição e estrutura auditável',
       'Custo fixo e variável separados, por período',
     ],
-    metrica: 'LUCRO SEM PLANILHA',
+    metrica: 'VISÃO FINANCEIRA',
     badge: 'FINANCEIRO',
-    texto: 'Pix cai direto na sua conta, com conciliação automática e DRE Gerencial de Dupla Entrada revelando seu lucro líquido real.',
+    texto: 'Pix integrado à conta da loja e uma prévia gerencial da DRE. A integração do demonstrativo com os lançamentos reais está em evolução.',
     cor: 'text-teal-500',
     fundo: 'bg-teal-500/10',
   },
@@ -258,7 +259,7 @@ const PLATAFORMA = [
       'Inteligência Preditiva de Compras (Ordem no WhatsApp)',
       'Ficha técnica, alergênicos e CMV real por prato',
       'Tabela nutricional calculada pela ficha (rótulo, código de barras ou IA)',
-      'DRE Gerencial de Dupla Entrada com Margem Líquida',
+      'Prévia visual da DRE gerencial, com integração de dados em evolução',
       'Marketing, Meta Pixel, GA4 e Cashback Fidelidade',
       'Conformidade LGPD com E-mails Transacionais',
     ],
@@ -436,7 +437,7 @@ export default function Home() {
                 'Atendimento automatizado por Inteligência Artificial no WhatsApp (API Oficial Meta)',
                 'Controle de Estoque com Ficha Técnica, CMV e Venda por Quilo (R$/kg)',
                 'Emissão Fiscal NFC-e e NF-e integrada com FocusNFe',
-                'Pagamento via Pix automático com conciliação instantânea (Efí Bank)',
+                'Pagamento via Pix integrado ao Efí Bank',
               ],
               'author': {
                 '@type': 'Organization',
@@ -912,7 +913,7 @@ export default function Home() {
                 {t('hero.ctaPrincipal')} <ArrowRight size={18} />
               </Link>
               <span className="mt-2 text-xs font-semibold text-slate-400">
-                {tDynamic('30 dias. Todas as funcionalidades. Sem cartão e sem fidelidade.')}
+                {tDynamic('30 dias sem cartão. Integrações externas dependem de configuração.')}
               </span>
             </div>
             <a
@@ -960,19 +961,19 @@ export default function Home() {
           <div className="mt-10 pt-8 border-t border-white/10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-300 font-semibold">
             <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-emerald-300 backdrop-blur-md">
               <ShieldCheck size={16} className="text-emerald-400" />
-              <span>{tDynamic('API Cloud Oficial Meta Verified')}</span>
+              <span>{tDynamic('WhatsApp Business Platform configurável')}</span>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-blue-300 backdrop-blur-md">
               <Wallet size={16} className="text-blue-400" />
-              <span>{tDynamic('Parceiro Homologado Efí Bank (Pix)')}</span>
+              <span>{tDynamic('Pagamentos via Efí configuráveis')}</span>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-amber-300 backdrop-blur-md">
               <Boxes size={16} className="text-amber-400" />
-              <span>{tDynamic('Emissão Fiscal FocusNFe Homologada')}</span>
+              <span>{tDynamic('Emissão fiscal via Focus NFe configurável')}</span>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-purple-300 backdrop-blur-md">
               <BadgeCheck size={16} className="text-purple-400" />
-              <span>{tDynamic('Conexão SSL 256-bit Certificada')}</span>
+              <span>{tDynamic('Conexão protegida por HTTPS')}</span>
             </div>
           </div>
         </div>
@@ -1078,7 +1079,7 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
-                    <span>🍔 PDV & Combos Artesanais</span>
+                    <span className="inline-flex items-center gap-1.5"><Sandwich size={14} aria-hidden="true" /> {tDynamic('PDV & Combos Artesanais')}</span>
                     <span className="text-orange-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
@@ -1130,7 +1131,7 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
-                    <span>☕ Painel Balcão & Comandas</span>
+                    <span className="inline-flex items-center gap-1.5"><Coffee size={14} aria-hidden="true" /> {tDynamic('Painel Balcão & Comandas')}</span>
                     <span className="text-blue-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
@@ -1182,7 +1183,7 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
-                    <span>🍕 KDS Cozinha & Forno</span>
+                    <span className="inline-flex items-center gap-1.5"><Pizza size={14} aria-hidden="true" /> {tDynamic('KDS Cozinha & Forno')}</span>
                     <span className="text-emerald-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
@@ -1234,7 +1235,7 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
-                    <span>🍷 Modal Mesa & Divisão por Assento</span>
+                    <span className="inline-flex items-center gap-1.5"><Wine size={14} aria-hidden="true" /> {tDynamic('Modal Mesa & Divisão por Assento')}</span>
                     <span className="text-amber-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
@@ -1286,7 +1287,7 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
-                    <span>🛵 Fila de Delivery & GPS Ao Vivo</span>
+                    <span className="inline-flex items-center gap-1.5"><Bike size={14} aria-hidden="true" /> {tDynamic('Fila de Delivery & GPS Ao Vivo')}</span>
                     <span className="text-indigo-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
@@ -1338,7 +1339,7 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex items-center justify-between border-t border-white/10 bg-slate-900/90 px-3 py-2 text-[11px] font-bold text-slate-300">
-                    <span>⚖️ Leitura Digital R$/kg & Balança</span>
+                    <span className="inline-flex items-center gap-1.5"><Scale size={14} aria-hidden="true" /> {tDynamic('Leitura Digital R$/kg & Balança')}</span>
                     <span className="text-emerald-400 group-hover:underline">Ver Tela →</span>
                   </div>
                 </div>
@@ -1358,20 +1359,20 @@ export default function Home() {
                 {tDynamic('Principais Integrações:')}
               </span>
               <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
-                <Link to="/integracao-ifood" className="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-rose-500 hover:text-rose-400">
-                  🛵 {tDynamic('Integração iFood')}
+                <Link to="/integracao-ifood" className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-rose-500 hover:text-rose-400">
+                  <Bike size={14} aria-hidden="true" /> {tDynamic('Integração iFood')}
                 </Link>
-                <Link to="/cardapio-qr-code" className="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-orange-500 hover:text-orange-400">
-                  📱 {tDynamic('Cardápio QR Code')}
+                <Link to="/cardapio-qr-code" className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-orange-500 hover:text-orange-400">
+                  <Smartphone size={14} aria-hidden="true" /> {tDynamic('Cardápio QR Code')}
                 </Link>
-                <Link to="/api-whatsapp-restaurantes" className="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-400">
-                  🤖 {tDynamic('WhatsApp IA Oficial')}
+                <Link to="/api-whatsapp-restaurantes" className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-400">
+                  <Bot size={14} aria-hidden="true" /> {tDynamic('WhatsApp IA Oficial')}
                 </Link>
-                <Link to="/gestao-fiscal-nfe" className="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-blue-500 hover:text-blue-400">
-                  🧾 {tDynamic('Emissão Fiscal NFC-e')}
+                <Link to="/gestao-fiscal-nfe" className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-blue-500 hover:text-blue-400">
+                  <ReceiptText size={14} aria-hidden="true" /> {tDynamic('Emissão Fiscal NFC-e')}
                 </Link>
-                <Link to="/painel-de-senhas-tv" className="rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-amber-500 hover:text-amber-400">
-                  📺 {tDynamic('Painel de Senhas na TV')}
+                <Link to="/painel-de-senhas-tv" className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/10 px-3.5 py-2 text-slate-200 transition hover:border-amber-500 hover:text-amber-400">
+                  <Tv size={14} aria-hidden="true" /> {tDynamic('Painel de Senhas na TV')}
                 </Link>
               </div>
             </div>
@@ -1475,8 +1476,8 @@ export default function Home() {
 
               <div className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-[#1877F2]/20 bg-[#1877F2]/10 px-3 py-1.5 shadow-[0_0_15px_rgba(24,119,242,0.15)] backdrop-blur-sm">
                 <BadgeCheck size={18} fill="#1877F2" stroke="white" strokeWidth={1.5} />
-                <span className="font-['Sora'] text-[13px] font-extrabold text-white">Meta Verified</span>
-                <span className="text-xs opacity-95 font-medium text-emerald-100/60 ml-1">— {tDynamic('Parceiro Oficial')}</span>
+                <span className="font-['Sora'] text-[13px] font-extrabold text-white">WhatsApp Business Platform</span>
+                <span className="text-xs opacity-95 font-medium text-emerald-100/60 ml-1">— {tDynamic('configuração assistida')}</span>
               </div>
               <div className="mt-8">
                 <Link
@@ -1538,17 +1539,17 @@ export default function Home() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-amber-400 backdrop-blur-md">
               <Sparkles size={14} className="text-amber-400" />
-              {tDynamic('Por Que o MiseOn é Infinitamente Superior')}
+              {tDynamic('Diferenciais do produto')}
             </span>
             <h2 className="mt-5 font-['Sora'] text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-              "{tDynamic('Todo sistema te diz quanto você vendeu.')}{' '}
+              "{tDynamic('Veja a venda, a operação e o custo no mesmo fluxo.')}{' '}
               <span className="bg-gradient-to-r from-[#FF8A5C] via-[#FC5B24] to-[#6B9EFF] bg-clip-text text-transparent">
-                {tDynamic('O MiseOn é o único que te mostra quanto sobrou no bolso')}
+                {tDynamic('O MiseOn conecta o que normalmente fica espalhado')}
               </span>
-              {' '}{tDynamic('— e por quê.')}"
+              "
             </h2>
             <p className="mt-5 text-base leading-relaxed text-slate-300 sm:text-lg">
-              {tDynamic('Enquanto concorrentes te vendem robôs travados por botões que apenas disparam links secos e seguram o seu dinheiro por semanas, o MiseOn entrega um ecossistema completo de vendas, inteligência de IA e gestão financeira real.')}
+              {tDynamic('Compare recursos concretos e valide durante o período de teste. Integrações externas dependem de configuração e homologação dos respectivos provedores.')}
             </p>
           </div>
 
@@ -1587,9 +1588,9 @@ export default function Home() {
                   destaque: true,
                 },
                 {
-                  recurso: 'DRE & Lucro Líquido Real',
+                  recurso: 'DRE gerencial',
                   concorrente: 'Relatório simples de faturamento bruto',
-                  miseon: 'Contabilidade de Dupla Entrada (Ledger) com DRE mensal automatizado',
+                  miseon: 'Prévia visual estruturada; automação contábil ainda não concluída',
                   destaque: true,
                 },
                 {
@@ -1608,7 +1609,7 @@ export default function Home() {
                     {tDynamic(row.concorrente)}
                   </div>
                   <div className="col-span-4 text-center font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-2.5 sm:p-3 text-xs sm:text-sm shadow-inner">
-                    ✨ {tDynamic(row.miseon)}
+                    <CheckCircle2 size={15} aria-hidden="true" className="mr-1.5 inline-block align-[-2px]" /> {tDynamic(row.miseon)}
                   </div>
                 </div>
               ))}
@@ -1968,7 +1969,7 @@ export default function Home() {
               {tDynamic('Construído sem atrito, sem comissões e sem letras miúdas')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-slate-300">
-              {tDynamic('Não inventamos frases de efeito. Convidamos você a testar o MiseOn na rotina real do seu estabelecimento por 30 dias grátis e comprovar o controle absoluto da sua cozinha e do seu caixa.')}
+              {tDynamic('Teste o MiseOn na rotina real do seu estabelecimento por 30 dias e valide, com seus próprios dados, quais controles fazem diferença na operação.')}
             </p>
           </div>
 
@@ -1979,7 +1980,7 @@ export default function Home() {
                 {tDynamic('Zero Cartão no Cadastro')}
               </div>
               <p className="mt-3 text-xs leading-relaxed text-gray-600 dark:text-slate-300">
-                {tDynamic('Crie sua conta em 3 minutos e use todas as funcionalidades. Não pedimos cartão de crédito nem fazemos cobrança surpresa.')}
+                {tDynamic('Crie sua conta sem informar cartão. Recursos que dependem de iFood, WhatsApp, Efí ou emissão fiscal exigem configuração dos respectivos provedores.')}
               </p>
             </div>
 
@@ -2055,7 +2056,7 @@ export default function Home() {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="inline-flex rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs opacity-90 font-black uppercase tracking-widest text-emerald-300">
-                      ✨ 30 Dias Grátis Sem Cartão
+                      <BadgeCheck size={14} aria-hidden="true" className="mr-1.5" /> 30 Dias Grátis Sem Cartão
                     </span>
                     {planoAnual && (
                       <span className="inline-flex rounded-full bg-gradient-to-r from-[#FC5B24] to-[#E34A1B] px-3 py-1 text-xs opacity-90 font-black uppercase tracking-widest text-white shadow-lg">
@@ -2120,7 +2121,7 @@ export default function Home() {
                     <ul className="space-y-2.5 text-xs text-slate-400">
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("PDV Frente de Caixa")}</strong> inteligente</span></li>
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Cardápio QR Code")}</strong> p/ mesas</span></li>
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Integração iFood")}</strong> nativa</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Integração iFood")}</strong> {tDynamic('mediante credenciais e aprovação do iFood')}</span></li>
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-emerald-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Gestão de Comandas")}</strong> na palma</span></li>
                     </ul>
                   </div>
@@ -2131,7 +2132,7 @@ export default function Home() {
                       <MessageCircle size={16} className="text-blue-400" /> IA e Delivery
                     </h5>
                     <ul className="space-y-2.5 text-xs text-slate-400">
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Robô WhatsApp")}</strong> (API Oficial Meta)</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("WhatsApp com IA")}</strong> {tDynamic('via Business Platform, após configuração')}</span></li>
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Cardápio Online")}</strong> {tDynamic("livre de taxas")}</span></li>
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Impressão Automática")}</strong> {tDynamic("de pedidos")}</span></li>
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-blue-500/70 mt-0.5" /> <span><strong className="text-slate-300">Cozinha KDS</strong> {tDynamic("em telas")}</span></li>
@@ -2157,7 +2158,7 @@ export default function Home() {
                       <Wallet size={16} className="text-indigo-400" /> Controle e Equipe
                     </h5>
                     <ul className="space-y-2.5 text-xs text-slate-400">
-                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Pix Automático (Efí)")}</strong> direto na conta</span></li>
+                      <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Pix via Efí")}</strong> {tDynamic('após vincular a conta da loja')}</span></li>
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Caixa e Relatórios")}</strong> {tDynamic("analíticos")}</span></li>
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">{tDynamic("Usuários Ilimitados")}</strong> {tDynamic("com permissões")}</span></li>
                       <li className="flex items-start gap-2"><Check size={14} className="shrink-0 text-indigo-500/70 mt-0.5" /> <span><strong className="text-slate-300">Atendimento Humano</strong> {tDynamic("prioritário")}</span></li>
@@ -2194,7 +2195,7 @@ export default function Home() {
               {tDynamic('Conteúdo profundo sobre CMV, KDS, Engenharia de Cardápio e IA')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-300">
-              {tDynamic('Aprenda com estudos de caso reais, análises financeiras e regras de operação validadas na prática em cozinhas profissionais.')}
+              {tDynamic('Leia guias técnicos sobre CMV, operação, estoque e tecnologia. Exemplos demonstrativos são identificados como tal.')}
             </p>
           </div>
 
@@ -2221,7 +2222,7 @@ export default function Home() {
                   {tDynamic('O Fim do Papel na Cozinha com KDS Kanban')}
                 </h3>
                 <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                  {tDynamic('Reduza até 35% do tempo de preparo eliminando rasuras e papel engordurado.')}
+                  {tDynamic('Organize a fila de preparo e meça o tempo de cada etapa sem depender de papel.')}
                 </p>
               </div>
               <Link to="/blog/o-fim-do-papel-na-cozinha-kds-kanban-operacional" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FC5B24] hover:underline">
@@ -2264,14 +2265,14 @@ export default function Home() {
           <div className="mt-12 rounded-3xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-blue-500/10 p-8 backdrop-blur-xl">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
-                <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs opacity-90 font-black uppercase tracking-wider text-orange-300">
-                  🖋️ Escreva para o Blog MiseOn
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs opacity-90 font-black uppercase tracking-wider text-orange-300">
+                  <PenLine size={14} aria-hidden="true" /> {tDynamic('Escreva para o Blog MiseOn')}
                 </span>
                 <h3 className="mt-2 font-['Sora'] text-2xl font-bold text-white">
                   {tDynamic('É Consultor de CMV, Chef, Nutricionista ou Especialista em Gastronomia?')}
                 </h3>
                 <p className="mt-2 text-xs text-slate-300 max-w-2xl leading-relaxed">
-                  {tDynamic('Publique seus artigos técnicos em nosso Blog e seja lido por milhares de donos de restaurantes e gestores de food service de todo o Brasil.')}
+                  {tDynamic('Publique seus artigos técnicos no Blog MiseOn e compartilhe conhecimento com donos de restaurantes e gestores de food service.')}
                 </p>
               </div>
 

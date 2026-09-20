@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, TrendingDown, Sparkles, SlidersHorizontal, Store } from 'lucide-react';
+import { ArrowRight, TrendingDown, SlidersHorizontal, Store, Coffee, Sandwich, Pizza, Utensils, Lightbulb, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SAAS_PRICING } from '../../lib/efiInfo';
 import { useI18n } from '../../contexts/I18nContext';
@@ -14,6 +14,7 @@ import { useI18n } from '../../contexts/I18nContext';
  */
 interface Preset {
   nome: string;
+  icone: typeof Store;
   fat: number;
   desp: number;
   aum: number;
@@ -23,10 +24,10 @@ interface Preset {
 }
 
 const PRESETS: Preset[] = [
-  { nome: '☕ Lanchonete / Cafeteria (R$ 25k)', fat: 25000, desp: 3, aum: 4, erros: 2, cmv: 32, ticket: 22 },
-  { nome: '🍔 Hamburgueria / Delivery (R$ 50k)', fat: 50000, desp: 4, aum: 5, erros: 4, cmv: 35, ticket: 42 },
-  { nome: '🍕 Pizzaria / Salão (R$ 100k)', fat: 100000, desp: 5, aum: 6, erros: 5, cmv: 33, ticket: 75 },
-  { nome: '🍱 Buffet / Quilo (R$ 150k)', fat: 150000, desp: 6, aum: 7, erros: 6, cmv: 38, ticket: 48 },
+  { nome: 'Lanchonete / Cafeteria (R$ 25k)', icone: Coffee, fat: 25000, desp: 3, aum: 4, erros: 2, cmv: 32, ticket: 22 },
+  { nome: 'Hamburgueria / Delivery (R$ 50k)', icone: Sandwich, fat: 50000, desp: 4, aum: 5, erros: 4, cmv: 35, ticket: 42 },
+  { nome: 'Pizzaria / Salão (R$ 100k)', icone: Pizza, fat: 100000, desp: 5, aum: 6, erros: 5, cmv: 33, ticket: 75 },
+  { nome: 'Buffet / Quilo (R$ 150k)', icone: Utensils, fat: 150000, desp: 6, aum: 7, erros: 6, cmv: 38, ticket: 48 },
 ];
 
 export default function CalculadoraVazamento() {
@@ -66,7 +67,7 @@ export default function CalculadoraVazamento() {
           
           <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-blue-400 shadow-lg shadow-blue-500/10 animate-pulse">
             <SlidersHorizontal size={14} className="text-blue-400" />
-            {tDynamic('⚡ CALCULADORA INTERATIVA — ARRASTE OS CONTROLES ABAIXO')}
+            {tDynamic('CALCULADORA INTERATIVA — ARRASTE OS CONTROLES ABAIXO')}
           </span>
 
           <h2 className="mt-4 font-['Sora'] text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -83,8 +84,9 @@ export default function CalculadoraVazamento() {
           <span className="text-xs font-bold text-slate-400 flex items-center gap-1 mr-2">
             <Store size={14} /> {tDynamic('Exemplos (ajuste depois com os seus números):')}
           </span>
-          {PRESETS.map((p, idx) => (
-            <button type="button"
+          {PRESETS.map((p, idx) => {
+            const Icone = p.icone;
+            return <button type="button"
               key={idx}
               onClick={() => aplicarPreset(p)}
               className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition border ${
@@ -93,9 +95,10 @@ export default function CalculadoraVazamento() {
                   : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10'
               }`}
             >
+              <Icone size={13} aria-hidden="true" className="mr-1.5 inline-block align-[-2px]" />
               {tDynamic(p.nome)}
-            </button>
-          ))}
+            </button>;
+          })}
         </div>
 
         {/* Card Interativo da Calculadora */}
@@ -252,8 +255,9 @@ export default function CalculadoraVazamento() {
                 <p>
                   {tDynamic('Esta é a soma dos valores que você informou acima: desperdício, aumento de insumo não repassado e pedidos refeitos. Não é promessa de economia, é o tamanho do problema que você mesmo estimou.')}
                 </p>
-                <p>
-                  💡 {tDynamic('O plano anual do MiseOn custa')} <strong>R$ {precoMensalSaaS.toFixed(2).replace('.', ',')}/mês</strong>. {tDynamic('Quanto disso o sistema evita depende da sua operação, e quem mede é você.')}
+                <p className="flex items-start gap-2">
+                  <Lightbulb size={15} className="mt-0.5 shrink-0 text-amber-300" aria-hidden="true" />
+                  <span>{tDynamic('O plano anual do MiseOn custa')} <strong>R$ {precoMensalSaaS.toFixed(2).replace('.', ',')}/mês</strong>. {tDynamic('Quanto disso o sistema evita depende da sua operação, e quem mede é você.')}</span>
                 </p>
               </div>
 

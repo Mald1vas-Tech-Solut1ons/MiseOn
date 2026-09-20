@@ -68,8 +68,8 @@ const ETAPAS = [
     id: 4,
     icone: Wallet,
     titulo: '4. Margem Aparece',
-    subtitulo: 'DRE Financeiro Real',
-    descricao: 'O faturamento é conciliado, a taxa do iFood/maquininha é abatida e a margem de lucro líquido do pedido surge no painel.',
+    subtitulo: 'Prévia da DRE gerencial',
+    descricao: 'Um cenário demonstrativo mostra como receita, taxas, CMV e custos formarão o resultado quando a integração estiver concluída.',
     cor: 'text-emerald-400',
     bgBadge: 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300',
     detalhes: [
@@ -78,9 +78,9 @@ const ETAPAS = [
       'Contabilidade de Dupla Entrada automatizada',
     ],
     previewData: {
-      origem: 'Demonstrativo Financeiro DRE',
+      origem: 'Cenário demonstrativo da DRE',
       itens: ['Venda Bruta: R$ 68,00', 'CMV Insumos: -R$ 21,40 | Taxa: -R$ 2,38'],
-      valor: 'Lucro Líquido: R$ 44,22 (65%)',
+      valor: 'Resultado operacional demonstrativo: R$ 44,22',
       status: 'MARGEM REGISTRADA NO CAIXA',
     },
   },

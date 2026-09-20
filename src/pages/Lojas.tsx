@@ -172,7 +172,7 @@ export default function Lojas() {
           </div>
         </div>
 
-        <h1 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight">{tDynamic('Lojas na MiseOn')}</h1>
+        <h1 style={{ fontFamily: "'Sora', sans-serif" }} className="text-3xl font-extrabold tracking-tight">{tDynamic('Lojas no MiseOn')}</h1>
         <p style={{ color: 'rgba(234,241,251,0.6)' }} className="mt-1 mb-5 text-sm">{tDynamic('Escolha uma loja e peça direto pelo cardápio, sem app.')}</p>
 
         <div
