@@ -5,7 +5,6 @@ import { Insumo, fmt } from '../../types';
 import { getUnidade } from '../../lib/unidades';
 import {
   sugerirDaNota,
-  fatorPara,
   normalizarTexto,
   unidadeSegura,
   GRUPOS_UNIDADE_COMPRA,
@@ -14,6 +13,7 @@ import {
   type SugestaoImportacao,
 } from '../../lib/catalogoInsumos';
 import { aplicarClassificacao, type ClassificacaoIA } from '../../lib/classificacaoIA';
+import { resolverFatorImportacao } from '../../lib/fatorImportacaoNota';
 import { compararPreco, idadeDaNota, type UltimoCusto } from '../../lib/variacaoPreco';
 import {
   sugerirValidade, ehPerecivel, avaliarValidade, recomendarModo, type ModoEntrada,
@@ -153,7 +153,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
       (historico || []).forEach(h => {
         mapaHistorico.set(h.chave_item_fornecedor, {
           insumo_id: h.insumo_id,
-          fator_conversao: Number(h.fator_conversao) || 1
+          fator_conversao: Number(h.fator_conversao),
         });
       });
 
@@ -171,14 +171,22 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         });
 
         /** Vincular a insumo existente: a unidade é a DELE, o fator se ajusta. */
-        const vincular = (ins: Insumo, fator: number, confianca: LinhaDePara['confiancaMatch']): LinhaDePara => ({
+        const vincular = (
+          ins: Insumo,
+          confianca: LinhaDePara['confiancaMatch'],
+          fatorHistorico?: number,
+        ): LinhaDePara => ({
           itemNota: item,
           importar: true,
           insumoId: ins.id,
           criarNovo: false,
           nomeNovoInsumo: sugestao.nome,
           unidadeInsumo: unidadeSegura(ins.unidade_medida),
-          fatorConversao: fator,
+          fatorConversao: resolverFatorImportacao(
+            item,
+            unidadeSegura(ins.unidade_medida),
+            fatorHistorico,
+          ).fator,
           venceEm: sugerirValidade(sugestao.slug, dadosNota.data_emissao)?.vence_em ?? '',
           confiancaMatch: confianca,
           sugestao,
@@ -188,7 +196,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         //    vale mais que qualquer palpite nosso.
         const hist = mapaHistorico.get(chaveChave) || mapaHistorico.get(item.descricao.trim().toUpperCase());
         if (hist && porId.has(hist.insumo_id)) {
-          return vincular(porId.get(hist.insumo_id)!, hist.fator_conversao, 'ALTA');
+          return vincular(porId.get(hist.insumo_id)!, 'ALTA', hist.fator_conversao);
         }
 
         // 2. Nível 2: Match por GTIN/EAN no cadastro existente
@@ -199,8 +207,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
           if (matchEan) {
             // Mesmo código de barras: a embalagem é idêntica, então o conteúdo
             // lido na descrição vale se a unidade do insumo for a mesma.
-            const fator = unidadeSegura(matchEan.unidade_medida) === sugestao.unidade ? sugestao.fator : 1;
-            return vincular(matchEan, fator, 'ALTA');
+            return vincular(matchEan, 'ALTA');
           }
         }
 
@@ -209,8 +216,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         //    mercado nunca casaria sozinho.
         const matchNome = casarInsumoPorNome(sugestao.nome, insumosExistentes);
         if (matchNome) {
-          const fator = unidadeSegura(matchNome.unidade_medida) === sugestao.unidade ? sugestao.fator : 1;
-          return vincular(matchNome, fator, 'MEDIA');
+          return vincular(matchNome, 'MEDIA');
         }
 
         // 4. Nada no cadastro: nasce insumo novo, já na medida em que o gênero
@@ -389,7 +395,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
       proximo[index] = {
         ...linha,
         unidadeInsumo: unidade,
-        fatorConversao: fatorPara(linha.itemNota, unidade).fator,
+        fatorConversao: resolverFatorImportacao(linha.itemNota, unidade).fator,
       };
       return proximo;
     });
@@ -440,7 +446,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
             // zerado, senao o saldo antigo passaria a significar outra coisa.
             trocar_unidade: !!insumoExistente && unidade !== porId.get(insumoExistente)?.unidade_medida,
             qtd_nota: Number(l.itemNota.qtd) || 0,
-            fator: Number(l.fatorConversao) || 1,
+            fator: Number(l.fatorConversao),
             custo_total: custoComDesconto(l.itemNota, notaConferida),
             chave_depara: chaveDoItem(l.itemNota, dadosNota.emitente?.cnpj),
             descricao_nota: l.itemNota.descricao,
@@ -692,7 +698,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
               <div className="space-y-3">
                 {linhas.map((l, i) => {
                   const insumoSelecionado = porId.get(l.insumoId);
-                  const qtdFinal = l.itemNota.qtd * (l.fatorConversao || 1);
+                  const qtdFinal = l.itemNota.qtd * Number(l.fatorConversao);
                   const custoUnitFinal = qtdFinal > 0 ? custoComDesconto(l.itemNota, notaConferida) / qtdFinal : 0;
                   const conferencia = avaliarConferenciaNota(l.itemNota, dadosNota.origem);
                   // A unidade de destino é escolha do lojista: ao criar insumo
@@ -831,7 +837,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                                     criarNovo: false,
                                     insumoId: v,
                                     unidadeInsumo: unidade,
-                                    fatorConversao: fatorPara(l.itemNota, unidade).fator,
+                                    fatorConversao: resolverFatorImportacao(l.itemNota, unidade).fator,
                                   });
                                 }
                               }}
@@ -947,9 +953,16 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               min="0.001"
                               step="any"
                               value={l.fatorConversao}
-                              onChange={e => atualizarLinha(i, { fatorConversao: parseFloat(e.target.value) || 1 })}
+                              onChange={e => atualizarLinha(i, {
+                                fatorConversao: e.target.value === '' ? 0 : Number(e.target.value),
+                              })}
                               className="w-20 p-1 rounded border border-gray-300 dark:border-gray-700 text-center font-bold dark:bg-gray-900 dark:text-gray-100"
                             />
+                            {l.importar && !(l.fatorConversao > 0) && (
+                              <span className="w-full text-xs opacity-95 font-bold text-red-600 dark:text-red-400">
+                                {tDynamic('Conversão não comprovada. Informe quanto uma unidade da nota rende no estoque antes de importar.')}
+                              </span>
+                            )}
                             <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                               = {Number(qtdFinal.toFixed(3))} {unidadeDestino} ({fmt(custoUnitFinal)}/{unidadeDestino})
                             </span>
