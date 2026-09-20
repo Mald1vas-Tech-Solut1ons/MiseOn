@@ -52,6 +52,88 @@ export async function lancarItemAvulsoComanda(params: {
   return data as { comanda_id: string; pedido_id: string; valor_total: number };
 }
 
+/**
+ * Lança um único item do catálogo e registra os assentos que participam do
+ * rateio. O preço continua sendo o preço integral validado no servidor; os
+ * participantes não viram cópias financeiras do item.
+ */
+export async function lancarItemDivididoComanda(params: {
+  lojaId: string;
+  comandaId: string;
+  produtoId: string;
+  quantidade: number;
+  observacao?: string | null;
+  participantes: number[];
+  opcoes?: { id: string }[];
+}): Promise<{ comanda_id: string; pedido_id: string; item_id: string; valor_total: number; participantes_assentos: number[] }> {
+  const { data, error } = await supabase.rpc('fn_lancar_item_dividido_comanda', {
+    p_loja_id: params.lojaId,
+    p_comanda_id: params.comandaId,
+    p_produto_id: params.produtoId,
+    p_quantidade: params.quantidade,
+    p_observacao: params.observacao || null,
+    p_participantes: params.participantes,
+    p_opcoes: params.opcoes ?? [],
+  });
+  if (error) throw error;
+  return data as { comanda_id: string; pedido_id: string; item_id: string; valor_total: number; participantes_assentos: number[] };
+}
+
+/** Persiste somente o mapa item → assentos, preservando o total da comanda. */
+export async function definirDivisaoItensComanda(
+  comandaId: string,
+  divisoes: Record<string, number[]>,
+): Promise<{ comanda_id: string; itens_atualizados: number; valor_total: number }> {
+  const payload = Object.entries(divisoes).map(([itemId, assentos]) => ({
+    item_id: itemId,
+    assentos,
+  }));
+  const { data, error } = await supabase.rpc('fn_definir_divisao_itens_comanda', {
+    p_comanda_id: comandaId,
+    p_divisoes: payload,
+  });
+  if (error) throw error;
+  return data as { comanda_id: string; itens_atualizados: number; valor_total: number };
+}
+
+/**
+ * Registra uma parcela presencial e, quando o saldo zera, fecha pedidos e
+ * comanda na mesma transação. A chave deve ser reutilizada num retry incerto.
+ */
+export async function receberComandaMesa(params: {
+  comandaId: string;
+  metodoPagamento: Exclude<MetodoPgto, 'IFOOD'>;
+  valorRecebido: number;
+  taxaServicoPct: number;
+  idempotenciaChave: string;
+}): Promise<{
+  comanda_id: string;
+  pagamento_id: string;
+  valor_pago: number;
+  troco: number;
+  saldo_restante: number;
+  status: 'ABERTA' | 'FECHADA';
+  idempotente: boolean;
+}> {
+  const { data, error } = await supabase.rpc('fn_receber_comanda_mesa', {
+    p_comanda_id: params.comandaId,
+    p_metodo_pagamento: params.metodoPagamento,
+    p_valor_recebido: params.valorRecebido,
+    p_taxa_servico_pct: params.taxaServicoPct,
+    p_idempotencia_chave: params.idempotenciaChave,
+  });
+  if (error) throw error;
+  return data as {
+    comanda_id: string;
+    pagamento_id: string;
+    valor_pago: number;
+    troco: number;
+    saldo_restante: number;
+    status: 'ABERTA' | 'FECHADA';
+    idempotente: boolean;
+  };
+}
+
 /** Registra o recebimento presencial e fecha a comanda de forma atômica. */
 export async function fecharComandaBuffet(
   comandaId: string,

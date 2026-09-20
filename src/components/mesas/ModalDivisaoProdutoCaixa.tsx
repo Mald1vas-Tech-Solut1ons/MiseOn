@@ -8,7 +8,7 @@ interface ModalDivisaoProdutoCaixaProps {
   numeroMesa: number;
   capacidadeMesa: number;
   itensMesa: ItemPedido[];
-  onConfirmarDivisao: (divisaoAssentos: Record<number, { itens: { item: ItemPedido; fracao: number; valor: number }[]; total: number }>) => void;
+  onConfirmarDivisao: (divisoes: Record<string, number[]>) => void | Promise<void>;
   onCancelar: () => void;
 }
 
@@ -210,7 +210,7 @@ export function ModalDivisaoProdutoCaixa({
           </button>
 
           <button type="button"
-            onClick={() => onConfirmarDivisao(resumoPorAssento)}
+            onClick={() => onConfirmarDivisao(mapaDivisao)}
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg hover:brightness-110 transition"
           >
             <span>{tDynamic('Confirmar e Gerar Cobranças Individuais')}</span>

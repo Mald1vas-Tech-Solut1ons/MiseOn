@@ -2,7 +2,7 @@
  * GarcomMesaDrawer.tsx — Painel Mobile & App do Garçom para Gestão da Mesa e Assentos.
  */
 
-import { useState, useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   X, Utensils, Calculator, Check, Banknote, QrCode, CreditCard,
   Clock, Plus, ShieldAlert,
@@ -11,7 +11,7 @@ import type { Mesa3DPosicionada, ModoDivisaoConta } from '../../lib/mesas3d/type
 import type { MetodoPgto, Loja } from '../../types';
 import { fmt } from '../../types';
 import { imprimir } from '../../lib/print';
-import { supabase } from '../../lib/supabase';
+import { receberComandaMesa } from '../../lib/comandas';
 
 import { useI18n } from '../../contexts/I18nContext';
 interface Props {
@@ -46,6 +46,7 @@ export function GarcomMesaDrawer({
   const [valorDigitado, setValorDigitado] = useState('');
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState('');
+  const chaveRecebimentoRef = useRef<string | null>(null);
 
   // Taxa de serviço
   const [taxaPct, setTaxaPct] = useState<number>(loja?.taxa_servico_padrao_pct ?? 10);
@@ -89,45 +90,16 @@ export function GarcomMesaDrawer({
 
     try {
       const comanda = mesa3d.comanda;
-      const pedidoBase = [...mesa3d.pedidos].sort((a, b) => b.criado_em.localeCompare(a.criado_em))[0];
-      const isPagamentoParcial = valorACobrar < saldoDevedorMesa - 0.05;
-
-      // Grava o pagamento atrelado à comanda
-      await supabase.from('pagamentos').insert({
-        pedido_id: pedidoBase.id,
-        metodo,
-        valor_pago: valorACobrar,
-        status: 'PAGO',
-        data_pagamento: new Date().toISOString(),
+      chaveRecebimentoRef.current ??= crypto.randomUUID();
+      const recebimento = await receberComandaMesa({
+        comandaId: comanda.id,
+        metodoPagamento: metodo as Exclude<MetodoPgto, 'IFOOD'>,
+        valorRecebido: valorACobrar,
+        taxaServicoPct: taxaPct,
+        idempotenciaChave: chaveRecebimentoRef.current,
       });
-
-      if (!isPagamentoParcial) {
-        // Fechamento Total da Mesa
-        if (valorServico > 0) {
-          await supabase
-            .from('pedidos')
-            .update({ valor_total: Number(pedidoBase.valor_total) + valorServico })
-            .eq('id', pedidoBase.id);
-        }
-        await supabase
-          .from('pedidos')
-          .update({ status: 'FINALIZADO' })
-          .eq('comanda_id', comanda.id)
-          .not('status', 'in', '(CANCELADO,FINALIZADO)');
-
-        const { data: { user } } = await supabase.auth.getUser();
-        await supabase
-          .from('comandas')
-          .update({
-            status: 'FECHADA',
-            fechada_em: new Date().toISOString(),
-            fechada_por: user?.id ?? null,
-            metodo_pagamento: metodo,
-            valor_servico: valorServico,
-            taxa_servico_pct: taxaPct,
-          })
-          .eq('id', comanda.id);
-      }
+      chaveRecebimentoRef.current = null;
+      const isPagamentoParcial = recebimento.status === 'ABERTA';
 
       // Impressão do recibo do assento ou da mesa
       imprimir({

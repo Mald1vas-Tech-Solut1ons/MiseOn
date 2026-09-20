@@ -34,6 +34,7 @@ import type { NutricaoOpcao, NutricaoProduto, NutrienteCatalogo } from '../lib/n
 import { montarJsonLdCardapio } from '../lib/jsonLdCardapio';
 
 import { useI18n } from '../contexts/I18nContext';
+import { cancelarMeuPedidoPendente } from '../lib/pedidosPendentes';
 
 const guardarUltimoPedido = (slug: string | undefined, pedidoId: string, numero: number) => {
   if (!slug) return;
@@ -369,14 +370,6 @@ export default function Cardapio() {
   const addAoCarrinho = (item: ItemCarrinho) => {
     setCarrinho((c) => [...c, item]);
     setProdutoAberto(null);
-  };
-
-  const cancelarPedidoPendente = async (pedidoId: string) => {
-    await Promise.all([
-      supabase.from('pagamentos').update({ status: 'CANCELADO' }).eq('pedido_id', pedidoId).eq('status', 'PENDENTE'),
-      supabase.from('pedidos').update({ status: 'CANCELADO' }).eq('id', pedidoId)
-        .in('status', ['NOVO', 'AGUARDANDO_PAGAMENTO']),
-    ]);
   };
 
   // Gera uma nova cobrança Pix para o mesmo pedido (usado quando a janela expira).
@@ -945,7 +938,7 @@ export default function Cardapio() {
       )}
 
       {cartao && <CartaoModal loja={loja} info={cartao} onFechar={async () => {
-        await cancelarPedidoPendente(cartao.pedidoId);
+        await cancelarMeuPedidoPendente(cartao.pedidoId);
         setCartao(null);
       }} onAprovado={() => {
         guardarUltimoPedido(slug, cartao.pedidoId, cartao.numero);

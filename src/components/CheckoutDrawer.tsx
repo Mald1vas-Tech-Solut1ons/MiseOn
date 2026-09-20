@@ -15,6 +15,7 @@ import { maskTelefone } from '../lib/mascaras';
 import { calcularEntrega, ResultadoEntrega } from '../lib/geo';
 import { enderecoParaLabel, salvarLocalizacaoCliente } from '../lib/localizacao-cliente';
 import { useI18n } from '../contexts/I18nContext';
+import { cancelarMeuPedidoPendente } from '../lib/pedidosPendentes';
 
 const entrarComGoogle = (url: string) =>
   supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: url } });
@@ -276,13 +277,6 @@ export default function CheckoutDrawer({
     })().catch((e) => console.error('Falha ao salvar endereço padrão do checkout:', e));
   };
 
-  const cancelarPedidoPendente = async (pedidoId: string) => {
-    await Promise.all([
-      supabase.from('pagamentos').update({ status: 'CANCELADO' }).eq('pedido_id', pedidoId).eq('status', 'PENDENTE'),
-      supabase.from('pedidos').update({ status: 'CANCELADO' }).eq('id', pedidoId).in('status', ['AGUARDANDO_PAGAMENTO', 'NOVO']),
-    ]);
-  };
-
   // A tabela `cupons` não é mais legível pelo cliente: a policy pública lia
   // TODOS os cupons de TODAS as lojas (inclusive os de recuperação de carrinho,
   // que são gerados para uma pessoa específica). Agora manda-se o código e o
@@ -427,7 +421,7 @@ export default function CheckoutDrawer({
     if (totalServidor <= 0 && cashbackAplicado > 0) {
       const { error: erroQuita } = await supabase.rpc('fn_quitar_pedido_cashback', { p_pedido_id: pedido.id });
       if (erroQuita) {
-        await cancelarPedidoPendente(pedido.id);
+        await cancelarMeuPedidoPendente(pedido.id);
         setEnviando(false);
         return setErro(mensagemErroSupabase('Erro ao confirmar o pagamento por cashback.', erroQuita));
       }
@@ -449,7 +443,7 @@ export default function CheckoutDrawer({
         body: { pedido_id: pedido.id },
       });
       if (e2 || cob?.error) {
-        await cancelarPedidoPendente(pedido.id);
+        await cancelarMeuPedidoPendente(pedido.id);
         setEnviando(false);
         return setErro(`Falha na plataforma de pagamento: ${e2?.message || cob?.error || 'Erro desconhecido ao gerar Pix'}`);
       }

@@ -4,7 +4,7 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { toast } from 'sonner';
-import { Bike, Check, ChefHat, Clock, Compass, Download, MapPin, Package, PartyPopper, ShieldCheck, Sparkles, XCircle, MessageSquareWarning, CheckCircle2, Loader2 } from 'lucide-react';
+import { Bike, Check, ChefHat, Clock, Compass, Download, MapPin, Package, PartyPopper, ShieldCheck, Sparkles, XCircle, MessageSquareWarning, CheckCircle2, Loader2, LockKeyhole } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { fmt, type Loja, type Pedido, type StatusPedido } from '../types';
 import { tocarSom } from '../lib/som';
@@ -111,6 +111,7 @@ export default function AcompanharPedido() {
   const statusAnterior = useRef<StatusPedido | null>(null);
   const [temaCliente, setTemaCliente] = useState<PreferenciaTema>(() => obterTemaPreferido());
   const [confirmando, setConfirmando] = useState(false);
+  const [falhaAcesso, setFalhaAcesso] = useState(false);
 
   const handleConfirmarRecebimento = async () => {
     if (!id || confirmando) return;
@@ -149,11 +150,18 @@ export default function AcompanharPedido() {
   };
 
   const carregar = useCallback(async () => {
-    // Leitura por link (uuid = token) via RPC: a tabela pedidos não é mais
-    // legível em massa (RLS). fn_acompanhar_pedido devolve só este pedido.
-    const { data } = await supabase.rpc('fn_acompanhar_pedido', { p_id: id });
+    // Leitura privada via RPC: o UUID apenas identifica o pedido. O servidor
+    // confirma que a sessão pertence ao cliente ou à equipe da loja.
+    const { data, error } = await supabase.rpc('fn_acompanhar_pedido', { p_id: id });
+
+    if (error || !data) {
+      setPedido(null);
+      setFalhaAcesso(true);
+      return;
+    }
 
     const atual = (data as Pedido) ?? null;
+    setFalhaAcesso(false);
     setPedido(atual);
     if (atual && statusAnterior.current === null) statusAnterior.current = atual.status;
 
@@ -320,6 +328,22 @@ export default function AcompanharPedido() {
   }, [pedido?.tipo_pedido, pedido?.requer_cozinha]);
 
   if (!pedido) {
+    if (falhaAcesso) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-[#F4F7FA] px-4 dark:bg-[#070C18]">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-xl dark:border-white/10 dark:bg-slate-900">
+            <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#004198] dark:bg-blue-500/10 dark:text-blue-300">
+              <LockKeyhole size={23} aria-hidden="true" />
+            </span>
+            <h1 className="font-['Sora'] text-xl font-black text-slate-950 dark:text-white">{tDynamic('Não foi possível abrir este pedido.')}</h1>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{tDynamic('Entre com a mesma conta usada na compra. O número do pedido sozinho não libera dados pessoais.')}</p>
+            <Link to="/" className="mt-5 inline-flex rounded-xl bg-[#004198] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#0A5CC4]">
+              {tDynamic('Voltar ao início')}
+            </Link>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex h-screen items-center justify-center bg-[#F4F7FA] dark:bg-[#070C18]">
         <MiseOnLoader status={tDynamic('Carregando acompanhamento do pedido...')} rows={2} />

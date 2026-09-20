@@ -3,7 +3,7 @@ import { Bell, Smartphone, CheckCircle, Volume2, Divide, ChevronRight, Zap, Rece
 import { useOutletContext } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useGarcomPush } from '../../hooks/useGarcomPush';
-import { fecharComandaBuffet, lancarItemAvulsoComanda } from '../../lib/comandas';
+import { fecharComandaBuffet, lancarItemAvulsoComanda, lancarItemDivididoComanda } from '../../lib/comandas';
 import type { CtxLoja } from './AdminLayout';
 import type { Mesa, Produto, Comanda, MetodoPgto } from '../../types';
 import { ModalDivisaoItemGarcom } from '../../components/mesas/ModalDivisaoItemGarcom';
@@ -134,77 +134,18 @@ export function PainelGarcomMobile() {
         comanda = novaCom;
       }
 
-      // Buscar ou criar pedido vinculado
-      let { data: pedido } = await supabase
-        .from('pedidos')
-        .select('*')
-        .eq('comanda_id', comanda.id)
-        .neq('status', 'CANCELADO')
-        .maybeSingle();
-
-      if (!pedido) {
-        const { data: novoPed, error: errPed } = await supabase
-          .from('pedidos')
-          .insert({
-            loja_id: lojaId,
-            comanda_id: comanda.id,
-            mesa_numero: mesaSelecionada.numero,
-            tipo_pedido: 'SALAO',
-            status: 'ACEITO',
-            identificador_cliente: `Mesa #${mesaSelecionada.numero}`,
-            subtotal: 0,
-            taxa_entrega: 0,
-            desconto: 0,
-            valor_total: 0,
-            origem: 'garcom_mobile',
-          })
-          .select()
-          .single();
-
-        if (errPed) throw errPed;
-        pedido = novoPed;
-      }
-
-      // Fracionar e inserir 1 registro para cada assento selecionado
-      const fracao = 1 / assentos.length;
-      const precoFracionado = Number((produto.preco * fracao).toFixed(2));
-
-      const inserts = assentos.map((assentoNum) => ({
-        pedido_id: pedido.id,
-        produto_id: produto.id,
-        nome_produto: `${produto.nome} (1/${assentos.length})`,
-        preco_unitario: precoFracionado,
+      await lancarItemDivididoComanda({
+        lojaId,
+        comandaId: comanda.id,
+        produtoId: produto.id,
         quantidade: 1,
-        fracionado: true,
-        participantes_assentos: assentos,
-        assento_numero: assentoNum,
-        // Ponto da carne, "sem cebola": o que o cliente fala na mesa só chega
-        // em quem prepara se viajar no item. Sem isto, a cozinha adivinha.
         observacao: observacaoMesa.trim() || null,
-      }));
-
-      const { error: errItens } = await supabase.from('itens_pedido').insert(inserts);
-      if (errItens) throw errItens;
-
-      // Recalcular total do pedido
-      const { data: todosItens } = await supabase
-        .from('itens_pedido')
-        .select('preco_unitario, quantidade')
-        .eq('pedido_id', pedido.id);
-
-      const novoSubtotal = (todosItens || []).reduce(
-        (acc, item) => acc + Number(item.preco_unitario) * Number(item.quantidade),
-        0
-      );
-
-      await supabase
-        .from('pedidos')
-        .update({ subtotal: novoSubtotal, valor_total: novoSubtotal })
-        .eq('id', pedido.id);
+        participantes: assentos,
+      });
 
       setProdutoParaFracionar(null);
       setObservacaoMesa('');
-      alert(`✅ ${produto.nome} fracionado com sucesso entre os assentos [${assentos.join(', ')}]!`);
+      alert(`${produto.nome} foi associado aos assentos ${assentos.join(', ')} sem alterar o preço total.`);
     } catch (err: any) {
       console.error('Erro ao fracionar item no lançamento:', err);
       alert('Falha ao lançar item fracionado.');

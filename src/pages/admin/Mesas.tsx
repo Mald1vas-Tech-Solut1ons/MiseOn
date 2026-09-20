@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useOutletContext, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +21,7 @@ import { EditorLayout3DModal } from '../../components/mesas3d/EditorLayout3DModa
 import { ModalDivisaoProdutoCaixa } from '../../components/mesas/ModalDivisaoProdutoCaixa';
 import type { ItemPedido } from '../../types';
 import { useI18n } from '../../contexts/I18nContext';
+import { definirDivisaoItensComanda, receberComandaMesa } from '../../lib/comandas';
 
 /* ─────────────────────────────────────────────────────────────
    Mapa de Mesas — visão do salão para o garçom/gerente.
@@ -97,6 +98,7 @@ export default function Mesas() {
   const [valorRecebido, setValorRecebido] = useState('');
   const [erroFechamento, setErroFechamento] = useState('');
   const [processandoFechamento, setProcessandoFechamento] = useState(false);
+  const chaveRecebimentoRef = useRef<string | null>(null);
 
   const [mostrarTransferencia, setMostrarTransferencia] = useState(false);
   const [transferindoPara, setTransferindoPara] = useState('');
@@ -121,7 +123,7 @@ export default function Mesas() {
     if (comandaIds.length > 0) {
       const { data: pedidos } = await supabase
         .from('pedidos')
-        .select('id, comanda_id, status, valor_total, criado_em, itens_pedido(*), pagamentos(valor_pago)')
+        .select('id, comanda_id, status, valor_total, criado_em, itens_pedido(*), pagamentos(valor_pago, status)')
         .in('comanda_id', comandaIds)
         .neq('status', 'CANCELADO');
 
@@ -131,7 +133,7 @@ export default function Mesas() {
       for (const p of (pedidos as any[]) ?? []) {
         const atual = pedidosPorComanda.get(p.comanda_id) ?? { total: 0, pago: 0, qtd: 0, emPreparo: false };
         atual.total += Number(p.valor_total);
-        atual.pago += (p.pagamentos ?? []).reduce((s: number, pg: any) => s + Number(pg.valor_pago), 0);
+        atual.pago += (p.pagamentos ?? []).reduce((s: number, pg: any) => s + (pg.status === 'PAGO' ? Number(pg.valor_pago) : 0), 0);
         atual.qtd += (p.itens_pedido ?? []).reduce((s: number, i: any) => s + i.quantidade, 0);
         if (STATUS_EM_PREPARO.includes(p.status)) atual.emPreparo = true;
         pedidosPorComanda.set(p.comanda_id, atual);
@@ -234,6 +236,7 @@ export default function Mesas() {
 
   /* ── detalhe da mesa / comanda ── */
   const abrirDetalhe = async (mesa: MesaComComanda) => {
+    chaveRecebimentoRef.current = null;
     setMesaDetalhe(mesa);
     setErroFechamento(''); setFechando(null); setValorRecebido('');
     setTaxaEditavel(String(loja?.taxa_servico_padrao_pct ?? mesa.comanda?.taxa_servico_pct ?? 0));
@@ -241,7 +244,7 @@ export default function Mesas() {
     setCarregandoDetalhe(true);
     const { data } = await supabase
       .from('pedidos')
-      .select('id, numero, status, valor_total, criado_em, itens_pedido(id, nome_produto, quantidade, preco_unitario, observacao, itens_pedido_opcoes(nome_opcao, preco_adicional)), pagamentos(valor_pago)')
+      .select('id, numero, status, valor_total, criado_em, itens_pedido(id, nome_produto, quantidade, preco_unitario, observacao, itens_pedido_opcoes(nome_opcao, preco_adicional)), pagamentos(valor_pago, status)')
       .eq('comanda_id', mesa.comanda.id)
       .neq('status', 'CANCELADO')
       .order('criado_em');
@@ -264,7 +267,13 @@ export default function Mesas() {
   const subtotalComanda = useMemo(() => pedidosComanda.reduce((s, p) => s + Number(p.valor_total), 0), [pedidosComanda]);
   const valorServico = subtotalComanda * (Number(String(taxaEditavel).replace(',', '.') || 0) / 100);
   const totalComanda = subtotalComanda + valorServico;
-  const valorJaPago = pedidosComanda.reduce((s, p) => s + ((p.pagamentos as any) ?? []).reduce((s2: number, pg: any) => s2 + Number(pg.valor_pago), 0), 0);
+  const valorJaPago = pedidosComanda.reduce(
+    (s, p) => s + ((p.pagamentos as any) ?? []).reduce(
+      (s2: number, pg: any) => s2 + (pg.status === 'PAGO' ? Number(pg.valor_pago) : 0),
+      0,
+    ),
+    0,
+  );
   const saldoDevedor = Math.max(0, totalComanda - valorJaPago);
   const bloqueadoPorPreparo = pedidosComanda.some((p) => STATUS_EM_PREPARO.includes(p.status));
   
@@ -279,37 +288,17 @@ export default function Mesas() {
     setProcessandoFechamento(true); setErroFechamento('');
     try {
       const comanda = mesaDetalhe.comanda;
-      const pedidoBase = [...pedidosComanda].sort((a, b) => b.criado_em.localeCompare(a.criado_em))[0];
-      const isPagamentoParcial = recebidoNum < saldoDevedor;
-      const valorAPagar = isPagamentoParcial ? recebidoNum : saldoDevedor;
-
-      // O cliente Supabase NÃO lança em erro — devolve { error }. O try/catch
-      // em volta deste bloco nunca pegou nada: a conta era impressa e a tela
-      // dizia "fechado" mesmo quando a mesa continuava ocupada no sistema ou o
-      // pagamento não constava. Cada escrita é conferida antes da seguinte.
-
-      // Cria o registro do pagamento atrelado ao último pedido (apenas para constar na comanda)
-      const { error: ePgto } = await supabase.from('pagamentos').insert({
-        pedido_id: pedidoBase.id, metodo, valor_pago: valorAPagar, status: 'PAGO', data_pagamento: new Date().toISOString(),
+      chaveRecebimentoRef.current ??= crypto.randomUUID();
+      const recebimento = await receberComandaMesa({
+        comandaId: comanda.id,
+        metodoPagamento: metodo as Exclude<MetodoPgto, 'IFOOD'>,
+        valorRecebido: recebidoNum,
+        taxaServicoPct: Number(taxaEditavel || 0),
+        idempotenciaChave: chaveRecebimentoRef.current,
       });
-      if (ePgto) throw ePgto;
-
-      if (!isPagamentoParcial) {
-        // Fechamento Total
-        if (valorServico > 0) {
-          // Acrescenta a taxa no último pedido
-          const { error: eTaxa } = await supabase.from('pedidos').update({ valor_total: Number(pedidoBase.valor_total) + valorServico }).eq('id', pedidoBase.id);
-          if (eTaxa) throw eTaxa;
-        }
-        const { error: eFin } = await supabase.from('pedidos').update({ status: 'FINALIZADO' }).eq('comanda_id', comanda.id).not('status', 'in', '(CANCELADO,FINALIZADO)');
-        if (eFin) throw eFin;
-        const { data: { user } } = await supabase.auth.getUser();
-        const { error: eCom } = await supabase.from('comandas').update({
-          status: 'FECHADA', fechada_em: new Date().toISOString(), fechada_por: user?.id ?? null,
-          metodo_pagamento: metodo, valor_servico: valorServico, taxa_servico_pct: Number(taxaEditavel || 0),
-        }).eq('id', comanda.id);
-        if (eCom) throw eCom;
-      }
+      chaveRecebimentoRef.current = null;
+      const isPagamentoParcial = recebimento.status === 'ABERTA';
+      const valorAPagar = recebimento.valor_pago;
 
       imprimir({
         template: 'CONTA_MESA',
@@ -860,11 +849,17 @@ export default function Mesas() {
           capacidadeMesa={mesaDetalhe.capacidade || 6}
           itensMesa={pedidosComanda.flatMap((p) => (p.itens_pedido || []) as unknown as ItemPedido[])}
           onCancelar={() => setModalDivisaoCaixa(false)}
-          onConfirmarDivisao={(resumoAssentos) => {
-            console.log('Divisão confirmada pelo caixa:', resumoAssentos);
-            setModalDivisaoCaixa(false);
-            alert('Divisão por produto gravada com sucesso! As contas individuais dos assentos foram atualizadas.');
-            carregar();
+          onConfirmarDivisao={async (divisoes) => {
+            if (!mesaDetalhe.comanda) return;
+            try {
+              await definirDivisaoItensComanda(mesaDetalhe.comanda.id, divisoes);
+              setModalDivisaoCaixa(false);
+              alert('Divisão por produto gravada sem alterar o valor total da mesa.');
+              await abrirDetalhe(mesaDetalhe);
+              await carregar();
+            } catch (error: any) {
+              setErroFechamento(error?.message || 'Não foi possível salvar a divisão dos itens.');
+            }
           }}
         />
       )}
