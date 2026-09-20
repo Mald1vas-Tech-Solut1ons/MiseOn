@@ -80,8 +80,8 @@ export function EstoqueRastreio3D({ lojaId }: { lojaId: string }) {
             <ScanLine size={18} className="text-cyan-500" /> {tDynamic('Rastreio 3D do estoque')}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            Todos os itens por setor (❄️ geladeira, 🗄️ armário, 🥫 dispensa): o valor da compra
-            subdividido até a unidade de uso. ⚠️ marca etapa humana (rendimento declarado).
+            Todos os itens por setor — geladeira, armário e dispensa — com o valor da compra
+            subdividido até a unidade de uso. O sistema identifica separadamente as etapas humanas de rendimento declarado.
             Selecione uma receita para checar os ingredientes.
           </p>
         </div>

@@ -9,6 +9,8 @@ const mocks = vi.hoisted(() => ({
   loja: {} as Record<string, unknown>,
   produtos: 1 as number | null,
   horarios: 7 as number | null,
+  ifoodSaude: { estado: 'DESCONHECIDO' } as { estado: string } | null,
+  whatsappStatus: { status: 'PENDENTE' } as { status: string } | null,
   copiar: vi.fn(),
 }));
 
@@ -21,13 +23,12 @@ vi.mock('react-router-dom', async (importOriginal) => ({
 }));
 vi.mock('../../lib/supabase', () => ({
   supabase: {
-    from: (tabela: string) => ({
-      select: () => ({
-        eq: () => tabela === 'lojas'
-          ? { single: async () => ({ data: mocks.loja }) }
-          : Promise.resolve({ data: null, count: tabela === 'produtos' ? mocks.produtos : mocks.horarios }),
-      }),
-    }),
+    from: (tabela: string) => ({ select: () => ({ eq: () => {
+      if (tabela === 'lojas') return { single: async () => ({ data: mocks.loja }) };
+      if (tabela === 'integracao_ifood_saude') return { maybeSingle: async () => ({ data: mocks.ifoodSaude }) };
+      return Promise.resolve({ data: null, count: tabela === 'produtos' ? mocks.produtos : mocks.horarios });
+    } }) }),
+    rpc: async () => ({ data: mocks.whatsappStatus ? [mocks.whatsappStatus] : [] }),
   },
 }));
 
@@ -38,6 +39,8 @@ beforeEach(() => {
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: mocks.copiar } });
   mocks.produtos = 1;
   mocks.horarios = 7;
+  mocks.ifoodSaude = { estado: 'DESCONHECIDO' };
+  mocks.whatsappStatus = { status: 'PENDENTE' };
   mocks.loja = {
     nome: 'Restaurante de teste', logo_url: '/logo.png', slug: 'restaurante-teste',
     aceita_online: true, efi_payee_code: 'favorecido', efi_titular_documento: 'documento', efi_conta: 'conta',
@@ -52,12 +55,12 @@ describe('configuração essencial da loja', () => {
   it('reconhece contagens head:true e conclui sem as integrações opcionais após copiar o link', async () => {
     montar();
     await screen.findByText('4/5 essenciais concluídos');
-    expect(screen.queryByText('🎉 Configuração essencial concluída!')).toBeNull();
+    expect(screen.queryByText('Configuração essencial concluída!')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: /Divulgar a loja/ }));
     await screen.findByText('5/5 essenciais concluídos');
     expect(mocks.copiar).toHaveBeenCalledWith(`${window.location.origin}/restaurante-teste`);
-    expect(screen.getByText('🎉 Configuração essencial concluída!')).toBeTruthy();
+    expect(screen.getByText('Configuração essencial concluída!')).toBeTruthy();
     expect(screen.getByText('Conecte sua loja ao iFood')).toBeTruthy();
     expect(screen.getByText('Configure o atendimento automático')).toBeTruthy();
     expect(localStorage.getItem('miseon_link_copiado_confirmado_loja-teste')).toBe('true');
@@ -102,5 +105,21 @@ describe('configuração essencial da loja', () => {
     await waitFor(() => expect(mocks.nav).toHaveBeenCalledWith('/admin/loja'));
     expect(mocks.copiar).not.toHaveBeenCalled();
     expect(localStorage.getItem('miseon_link_copiado_confirmado_loja-teste')).toBeNull();
+  });
+
+  it('só conclui integrações opcionais quando a saúde medida está conectada', async () => {
+    mocks.loja.ifood_merchant_id = 'merchant-vinculado';
+    mocks.ifoodSaude = { estado: 'SEM_PERMISSAO' };
+    mocks.whatsappStatus = { status: 'ERRO' };
+    montar();
+    await screen.findByText('Conecte sua loja ao iFood');
+    expect(screen.getByText('Configure o atendimento automático')).toBeTruthy();
+    cleanup();
+
+    mocks.ifoodSaude = { estado: 'OK' };
+    mocks.whatsappStatus = { status: 'CONECTADO' };
+    montar();
+    const feitos = await screen.findAllByText('Feito!');
+    expect(feitos.length).toBeGreaterThanOrEqual(2);
   });
 });

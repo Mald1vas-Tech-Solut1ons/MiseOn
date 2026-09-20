@@ -49,7 +49,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
                 idioma === 'pt-BR' ? 'bg-[#FC5B24]/10 text-[#FC5B24]' : 'text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10'
               }`}
             >
-              <span className="flex items-center gap-2">🇧🇷 Português</span>
+              <span className="flex items-center gap-2"><Globe size={13} /> Português (BR)</span>
               {idioma === 'pt-BR' && <Check size={14} />}
             </button>
             <button type="button"
@@ -58,7 +58,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
                 idioma === 'en-US' ? 'bg-[#FC5B24]/10 text-[#FC5B24]' : 'text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10'
               }`}
             >
-              <span className="flex items-center gap-2">🇺🇸 English</span>
+              <span className="flex items-center gap-2"><Globe size={13} /> English (US)</span>
               {idioma === 'en-US' && <Check size={14} />}
             </button>
           </div>
@@ -78,7 +78,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
             : 'text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white'
         }`}
       >
-        <span>🇧🇷</span> PT
+        <span className="font-mono text-[10px] opacity-80">BR</span> PT
       </button>
       <button type="button"
         onClick={() => setIdioma('en-US')}
@@ -88,7 +88,7 @@ export default function LanguageToggle({ variant = 'pill', className = '' }: Lan
             : 'text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white'
         }`}
       >
-        <span>🇺🇸</span> EN
+        <span className="font-mono text-[10px] opacity-80">US</span> EN
       </button>
     </div>
   );

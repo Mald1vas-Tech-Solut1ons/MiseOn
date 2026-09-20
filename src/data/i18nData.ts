@@ -45,9 +45,9 @@ export const DICIONARIO = {
     // Hero
     'hero.badge': 'SISTEMA DE GESTÃO E OPERAÇÃO PARA RESTAURANTES',
     'hero.title': 'Você sabe quanto seu restaurante faturou ontem.',
-    'hero.titleHighlight': 'Mas você sabe o quanto realmente sobrou no seu bolso?',
-    'hero.subtitle': 'O MiseOn conecta venda, operação, estoque, custos e financeiro em uma única operação — para você saber não apenas quanto vendeu, mas quanto realmente sobrou no seu bolso e no seu caixa.',
-    'hero.ctaPrincipal': 'Quero Descobrir Meu Lucro Real (30 Dias Grátis)',
+    'hero.titleHighlight': 'Consegue explicar o custo e a operação por trás desse valor?',
+    'hero.subtitle': 'O MiseOn conecta venda, operação, estoque, custos e financeiro para você acompanhar o que aconteceu em cada pedido. A DRE atual é uma prévia demonstrativa, ainda sem integração contábil completa.',
+    'hero.ctaPrincipal': 'Quero testar a operação conectada (30 dias grátis)',
     'hero.ctaSecundario': 'Veja o Sistema Funcionando (60s)',
 
     // Cards de Prova
@@ -56,7 +56,7 @@ export const DICIONARIO = {
     'prova.kds': 'Cozinha sob controle (KDS)',
     'prova.kdsDesc': 'Tela de produção inteligente por etapas Kanban. Sem papel engordurado nem confusão.',
     'prova.ia': 'IA no WhatsApp (API Meta)',
-    'prova.iaDesc': 'A IA tira dúvidas, envia o cardápio e não deixa nenhum cliente sem resposta.',
+    'prova.iaDesc': 'Após a configuração, a IA consulta os dados cadastrados, envia o cardápio e permite que a equipe assuma a conversa.',
 
     // Badges de Confiança
     'badge.meta': 'API Cloud Oficial Meta Verified',
@@ -179,9 +179,9 @@ export const DICIONARIO = {
     // Hero
     'hero.badge': 'MANAGEMENT AND OPERATING SYSTEM FOR RESTAURANTS',
     'hero.title': 'You know how much your restaurant billed yesterday.',
-    'hero.titleHighlight': 'But do you know how much actually stayed in your pocket?',
-    'hero.subtitle': 'MiseOn connects sales, operation, stock, costs, and finance in a single system — so you know not just what you sold, but what actually remained in your pocket and cash register.',
-    'hero.ctaPrincipal': 'I Want to Discover My Real Profit (30 Days Free)',
+    'hero.titleHighlight': 'Can you explain the cost and operation behind that amount?',
+    'hero.subtitle': 'MiseOn connects sales, operations, inventory, costs and finance so you can track what happened in each order. The current income statement is a demonstration preview without full accounting integration yet.',
+    'hero.ctaPrincipal': 'I want to test the connected operation (30 days free)',
     'hero.ctaSecundario': 'See the System Working (60s)',
 
     // Cards de Prova
@@ -190,7 +190,7 @@ export const DICIONARIO = {
     'prova.kds': 'Kitchen under control (KDS)',
     'prova.kdsDesc': 'Smart production screen by Kanban stages. No greasy paper slips or chaos.',
     'prova.ia': 'WhatsApp AI (Meta API)',
-    'prova.iaDesc': 'AI answers questions, sends the menu, and leaves no customer unanswered.',
+    'prova.iaDesc': 'After setup, AI checks registered data, sends the menu and lets the team take over the conversation.',
 
     // Badges de Confiança
     'badge.meta': 'Official Cloud API Meta Verified',
@@ -1036,6 +1036,13 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Ajuda': 'Help',
   'Operação': 'Operations',
   'Loja Atual': 'Current Store',
+  'Loja Atual · trocar': 'Current Store · switch',
+  'Trocar de loja': 'Switch store',
+  'Vamos criar sua loja': 'Let’s create your store',
+  'Digite seu e-mail — sem senha para inventar agora': 'Enter your email — no password to create right now',
+  'Continuar com Google': 'Continue with Google',
+  'Criar conta sem senha, por link': 'Create an account without a password, by link',
+  'Já tenho conta — entrar com e-mail e senha': 'I already have an account — sign in with email and password',
 
   // Como Funciona (Passos)
   'Como funciona': 'How it works',
@@ -1305,9 +1312,11 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Caixa e Relatórios': 'Register & Reports',
   'Caixa fechado': 'Register closed',
   'Cardápio Online': 'Online Menu',
-  'Cardápio digital, WhatsApp IA, PDV, entregas e controle de estoque com 30 dias de uso liberado sem compromisso.': 'Digital menu, WhatsApp AI, POS, deliveries and inventory control with 30 days free, no strings attached.',
+  'Conheça PDV, cardápio, entregas, estoque e custos por 30 dias. WhatsApp e outras integrações dependem de configuração.': 'Explore POS, menu, deliveries, inventory, and costs for 30 days. WhatsApp and other integrations require setup.',
   'Cardápio próprio + Cozinha (KDS)': 'Your own menu + Kitchen (KDS)',
   'Carregando acompanhamento do pedido...': 'Loading order tracking...',
+  'Não foi possível abrir este pedido.': 'This order could not be opened.',
+  'Entre com a mesma conta usada na compra. O número do pedido sozinho não libera dados pessoais.': 'Sign in with the same account used for the purchase. The order number alone does not grant access to personal data.',
   'Cashback, cupons e banners de vitrine na sua mão': 'Cashback, coupons and storefront banners in your hands',
   'Cashback:': 'Cashback:',
   'Categorias': 'Categories',
@@ -1438,7 +1447,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Link e QR próprios, com a sua marca — sem comissão por pedido': 'Your own link and QR code, with your brand — no commission per order',
   'Links de Acesso Rápido': 'Quick Links',
   'Loja Temporariamente Suspensa': 'Store Temporarily Suspended',
-  'Lojas na MiseOn': 'Stores on MiseOn',
+  'Lojas no MiseOn': 'Stores on MiseOn',
   'MESA': 'TABLE',
   'Mapa 3D interativo do seu salão com divisão inteligente de comanda por cadeira e tempo de permanência.': 'Interactive 3D map of your dining room with smart bill splitting per seat and dwell time.',
   'Mapa do Salão & Assentos 3D': '3D Floor Plan & Seating',
@@ -1787,7 +1796,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Criptografia end-to-end. Nossos servidores não armazenam dados do seu cartão.': 'End-to-end encryption. Our servers never store your card details.',
   'Cruzando itens da nota com o seu estoque...': 'Matching invoice items against your inventory...',
   'Custo que muda de lugar': 'Cost that moves around',
-  'Dados da MiseOn (emissora) usados na NFS-e da assinatura dos lojistas.': 'MiseOn details (as issuer) used on the service invoice for merchant subscriptions.',
+  'Dados do MiseOn (emissor) usados na NFS-e da assinatura dos lojistas.': 'MiseOn details (as issuer) used on the service invoice for merchant subscriptions.',
   'Dados insuficientes para gerar o gráfico.': 'Not enough data to draw the chart.',
   'Dados para a nota fiscal': 'Details for the tax receipt',
   'De-Para de Produtos': 'Product Mapping',
@@ -1937,6 +1946,8 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Lojista não quer tecnologia.': 'Merchants do not want technology.',
   'Líquido que entra no seu caixa': 'Net amount that reaches your till',
   'Mapeamento tridimensional dos lotes físicos em estoque e suas esteiras de conversão.': 'Three-dimensional mapping of physical batches in stock and their conversion lanes.',
+  'Mapeamento tridimensional dos lotes registrados e das conversões atualmente cadastradas.': 'Three-dimensional mapping of registered batches and currently configured conversions.',
+  'Conversão não comprovada. Informe quanto uma unidade da nota rende no estoque antes de importar.': 'Unverified conversion. Enter how much one invoice unit yields in stock before importing.',
   'Marketplace nenhum fica com percentual do seu faturamento. Aqui você escolhe a mensalidade e fica com 100% das suas vendas.': 'No marketplace takes a cut of your revenue. Here you pick the monthly fee and keep 100% of your sales.',
   'MiseOn × anota-ai: o que muda na prática': 'MiseOn × anota-ai: what changes in practice',
   'Modelos de e-mail responsivos com alta entregabilidade anti-spam e layout personalizado com a cor da sua marca.': 'Responsive email templates with high anti-spam deliverability and a layout styled in your brand colour.',
@@ -1960,7 +1971,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   // Estado MEDIDO do canal iFood — ver integracao_ifood_saude.
   'Vinculado, sem receber': 'Linked, not receiving',
   'Nenhum pedido do iFood está entrando.': 'No iFood orders are coming in.',
-  'O aplicativo da MiseOn ainda não recebeu os módulos no Portal do Desenvolvedor do iFood. Enquanto isso, a conexão fica de pé mas nenhum pedido chega. É liberação no portal do iFood — não há nada a corrigir na sua loja.':
+  'O aplicativo do MiseOn ainda não recebeu os módulos no Portal do Desenvolvedor do iFood. Enquanto isso, a conexão fica de pé mas nenhum pedido chega. É liberação no portal do iFood — não há nada a corrigir na sua loja.':
     'MiseOn’s app has not been granted the modules in the iFood Developer Portal yet. Until then the connection stays up but no order arrives. This is a release on iFood’s side — there is nothing to fix in your store.',
   'O iFood recusou as credenciais da plataforma.': 'iFood rejected the platform credentials.',
   'As credenciais do aplicativo foram recusadas ou o aplicativo está desativado no portal do iFood.':
@@ -1993,7 +2004,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
     'Request registered. MiseOn will reach out with the kiosk proposal.',
   'a partir de': 'from',
   '/mês': '/month',
-  'Totem em comodato — o aparelho é da MiseOn e vem junto com a mensalidade.':
+  'Totem em comodato — o aparelho é do MiseOn e vem junto com a mensalidade.':
     'Kiosk on loan — the device belongs to MiseOn and comes with the monthly fee.',
   'Prefere comprar o aparelho? Peça a condição na conversa.':
     'Rather buy the device? Ask for terms when we talk.',
@@ -2094,6 +2105,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'A cozinha está preparando itens desta mesa.': 'The kitchen is preparing items for this table.',
   'A paleta se adapta automaticamente a partir da cor primária.': 'The palette adapts automatically from the primary colour.',
   'Abrir Guia de Estoque 3D 🌐': 'Open 3D Inventory Guide 🌐',
+  'Abrir Guia de Estoque 3D': 'Open 3D Inventory Guide',
   'Abrir Versão em Tela Cheia (HTML)': 'Open Full-Screen Version (HTML)',
   'Abrir minha conta Efí': 'Open my Efí account',
   'Acessar Hub do Blog': 'Go to Blog Hub',
@@ -2248,6 +2260,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Densidade de Custo': 'Cost Density',
   'Densidade necessária': 'Required density',
   'Dentro da meta hoje! 🔥': 'On target today! 🔥',
+  'Dentro da meta hoje!': 'On target today!',
   'Depende da modalidade escolhida abaixo.': 'Depends on the mode chosen below.',
   'Depoimentos &amp; Histórias de Clientes': 'Testimonials &amp; Customer Stories',
   'Depoimentos ilustrativos baseados em relatos reais de lojistas do segmento.': 'Illustrative testimonials based on real accounts from merchants in the sector.',
@@ -2540,7 +2553,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Qualquer método': 'Any method',
   'Quando o dinheiro cai na conta?': 'When does the money land in the account?',
   'Quantas receitas de': 'How many recipes of',
-  'Quero iniciar meu teste grátis de 30 dias na MiseOn.': 'I want to start my 30-day free trial on MiseOn.',
+  'Quero iniciar meu teste grátis de 30 dias no MiseOn.': 'I want to start my 30-day free trial on MiseOn.',
   'R$ 0,00 de comissão': 'R$0.00 in commission',
   'Raio Máximo de Cobertura (Km)': 'Maximum coverage radius (km)',
   'Raio médio de rota': 'Average route radius',
@@ -2771,7 +2784,7 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Criar Minha Conta Grátis': 'Create My Free Account',
   'Criar minha loja agora': 'Create my store now',
   '30 Dias Grátis · Sem Cartão': '30 Days Free · No Credit Card Required',
-  'Cadastre sua loja na MiseOn': 'Register your store on MiseOn',
+  'Cadastre sua loja no MiseOn': 'Register your store on MiseOn',
   'Escolha o seu acesso': 'Choose your access portal',
   'Como você quer entrar?': 'How would you like to sign in?',
   'Sou Cliente': 'I am a Customer',
@@ -3552,6 +3565,24 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'DIGITAÇÃO MANUAL': 'MANUAL ENTRY',
   'DRE & Relatórios': 'P&L & Reports',
   'DRE e Financeiro Real': 'Real P&L and Finance',
+  'Prévia de DRE e financeiro': 'P&L and finance preview',
+  'Prévia de DRE com margem de contribuição e estrutura auditável': 'P&L preview with contribution margin and an auditable structure',
+  'VISÃO FINANCEIRA': 'FINANCIAL VIEW',
+  'Pix integrado à conta da loja e uma prévia gerencial da DRE. A integração do demonstrativo com os lançamentos reais está em evolução.': 'Pix integrated with the store account and a management P&L preview. Integration with actual entries is still evolving.',
+  'Prévia visual da DRE gerencial, com integração de dados em evolução': 'Visual management P&L preview, with data integration still evolving',
+  'Pagamento via Pix integrado ao Efí Bank': 'Pix payment integrated with Efí Bank',
+  'DRE gerencial': 'Management P&L',
+  'Prévia visual estruturada; automação contábil ainda não concluída': 'Structured visual preview; accounting automation is not yet complete',
+  'Prévia da DRE gerencial': 'Management P&L preview',
+  'Um cenário demonstrativo mostra como receita, taxas, CMV e custos formarão o resultado quando a integração estiver concluída.': 'A demonstration scenario shows how revenue, fees, COGS and costs will form the result once integration is complete.',
+  'Cenário demonstrativo da DRE': 'P&L demonstration scenario',
+  'Resultado operacional demonstrativo: R$ 44,22': 'Demonstration operating result: R$ 44.22',
+  'Financeiro organizado': 'Organised finance',
+  'Extrato de vendas e uma prévia visual da DRE. A integração completa dos dados contábeis ainda está em evolução.': 'Sales statement and a visual P&L preview. Full accounting data integration is still evolving.',
+  'Prévia da DRE Gerencial': 'Management P&L Preview',
+  'Estrutura financeira em evolução': 'Financial structure in progress',
+  'Prévia demonstrativa do painel DRE Gerencial do MiseOn': 'Demonstration preview of the MiseOn management P&L panel',
+  'Veja a estrutura planejada para receita, taxas, CMV e custos fixos. Hoje esta tela usa um cenário demonstrativo e não substitui a contabilidade.': 'See the planned structure for revenue, fees, COGS and fixed costs. Today this screen uses a demonstration scenario and does not replace accounting.',
   'Demonstração Interativa do Kiosk': 'Interactive Kiosk Demo',
   'Desafoga o caixa físico e reduz desistências no balcão.': 'Takes pressure off the counter register and reduces walk-aways.',
   'Desconto Especial: 5% OFF à Vista': 'Special Discount: 5% OFF Upfront',
@@ -3634,6 +3665,7 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Na cozinha:': 'In the kitchen:',
   'Nenhum pedido finalizado na gaveta ainda.': 'No finished orders in the drawer yet.',
   'Nenhum pedido nesta etapa 🎉': 'No orders at this stage 🎉',
+  'Nenhum pedido nesta etapa': 'No orders at this stage',
   'Nome da nova etapa...': 'New stage name...',
   'Nome do seu Estabelecimento': 'Your Establishment Name',
   'Novo Recurso Interativo': 'New Interactive Feature',
@@ -3859,6 +3891,138 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   // Promoção "De/Por" no cadastro de produto (Sprint 6)
   'O preço "De" precisa ser maior que o preço de venda para a vitrine riscar.':
     'The "was" price must be higher than the selling price for the storefront to strike it through.',
+
+  // Posicionamento comercial e estados demonstrativos (19/09/2026)
+  'Acesso protegido e operação por perfis': 'Protected access and role-based operation',
+  'Biblioteca oficial de vídeos e demonstrações': 'Official video and demo library',
+  'Cobrança por Efí configurável': 'Configurable Efí billing',
+  'Conexão HTTPS': 'HTTPS connection',
+  'Configuração da integração iFood': 'iFood integration setup',
+  'Conheça a identidade do produto e veja uma demonstração do fluxo entre o PDV e a produção.':
+    'Explore the product identity and watch a demonstration of the flow between POS and production.',
+  'DEMONSTRAÇÃO INTERATIVA': 'INTERACTIVE DEMO',
+  'Dados demonstrativos — não usar para decisão financeira':
+    'Demonstration data — do not use for financial decisions',
+  'Imprimir demonstração': 'Print demonstration',
+  'MiseOn em ação: vídeos e demonstrações': 'MiseOn in action: videos and demonstrations',
+  'O MiseOn conecta etapas da operação de restaurantes, hamburguerias, pizzarias, lanchonetes e dark kitchens em um único sistema.':
+    'MiseOn connects the operation of restaurants, burger shops, pizzerias, snack bars and dark kitchens in one system.',
+  'Os valores abaixo são um cenário fixo para visualizar o formato da DRE. Eles não representam pedidos, custos, impostos ou resultado real desta loja.':
+    'The values below are a fixed scenario for previewing the income statement format. They do not represent actual orders, costs, taxes or results for this store.',
+  'Período fixo da demonstração': 'Fixed demonstration period',
+  'Prévia visual da estrutura de uma DRE gerencial. A integração com os dados reais ainda não está concluída.':
+    'Visual preview of a management income statement. Integration with actual data is not yet complete.',
+  'Cenário de demonstração': 'Demonstration scenario',
+  'Demonstrativo do Resultado do Exercício': 'Income Statement',
+  'Ponte gerencial para entender como receita, custos e despesas formam o resultado. A integração contábil com dados reais ainda não está concluída.':
+    'Management bridge showing how revenue, costs, and expenses form the result. Accounting integration with actual data is not yet complete.',
+  'Receita bruta demonstrativa': 'Demonstration gross revenue',
+  'Ponto de partida do cenário': 'Scenario starting point',
+  'CMV demonstrativo': 'Demonstration COGS',
+  'Margem de contribuição': 'Contribution margin',
+  'Resultado operacional demonstrativo': 'Demonstration operating result',
+  'Ponte do resultado demonstrativo': 'Demonstration result bridge',
+  'Cada redução mostra quanto do valor anterior foi consumido até chegar ao resultado operacional.':
+    'Each reduction shows how much of the previous amount was consumed before reaching the operating result.',
+  'Valores de exemplo': 'Example values',
+  'Gráfico demonstrativo da formação do resultado operacional':
+    'Demonstration chart showing how the operating result is formed',
+  'Leitura da ponte': 'Reading the bridge',
+  'Neste cenário, CMV e taxas consomem a maior parte da receita líquida antes dos custos fixos.':
+    'In this scenario, COGS and fees consume most of net revenue before fixed costs.',
+  'Custos variáveis': 'Variable costs',
+  'Custos fixos': 'Fixed costs',
+  'Resultado operacional': 'Operating result',
+  'Uma DRE operacional não substitui a escrituração nem a apuração do contador.':
+    'An operating income statement does not replace bookkeeping or the accountant’s assessment.',
+  'Estrutura do cenário demonstrativo': 'Demonstration scenario structure',
+  'A tabela explica a composição; o gráfico mostra a formação do resultado.':
+    'The table explains the composition; the chart shows how the result is formed.',
+  'Conta da DRE': 'Income statement account',
+  'Valor': 'Amount',
+  'Percentual': 'Percentage',
+  'Leitura gerencial': 'Management interpretation',
+  'Tour completo': 'Full tour',
+  'Tour desta página': 'Tour this page',
+  'Carregando catálogo do PDV…': 'Loading POS catalog…',
+  'O catálogo do PDV não pôde ser carregado': 'The POS catalog could not be loaded',
+  'Tentar novamente': 'Try again',
+  'Nenhum produto encontrado para esta categoria ou busca.': 'No product matches this category or search.',
+  'Valor de exemplo': 'Example value',
+  'Voltar para autoatendimento': 'Back to self-service',
+  'WhatsApp Cloud API configurável': 'Configurable WhatsApp Cloud API',
+  'Captura da loja de demonstração': 'Capture from the demo store',
+  'Veja o MiseOn no fluxo da sua operação.': 'See MiseOn in your operation flow.',
+  'Conte se você atende no salão, balcão, delivery ou em mais de um canal.':
+    'Tell us whether you serve customers in the dining room, at the counter, through delivery or across multiple channels.',
+  'O foco desta página é a rotina específica de': 'This page focuses on the specific routine of',
+  'Integrações externas só são apresentadas como disponíveis após configuração; custo depende da qualidade de embalagem, unidade, entrada e ficha técnica.':
+    'External integrations are only presented as available after setup; cost depends on accurate packaging, unit, purchase entry and recipe data.',
+  'Uma tela que corresponde ao assunto desta página.': 'A screen that matches the subject of this page.',
+  'Dados de demonstração — não representam cliente pagante.':
+    'Demonstration data — it does not represent a paying customer.',
+  'Demonstração orientada à rotina, sem depoimentos ou resultados inventados.':
+    'A routine-focused demonstration, without invented testimonials or results.',
+  'MiseOn — gestão conectada para food service.': 'MiseOn — connected management for food service.',
+  'E-mail': 'Email',
+  'CALCULADORA INTERATIVA — ARRASTE OS CONTROLES ABAIXO':
+    'INTERACTIVE CALCULATOR — MOVE THE CONTROLS BELOW',
+  'Lanchonete / Cafeteria (R$ 25k)': 'Snack bar / Cafe (R$ 25k)',
+  'Hamburgueria / Delivery (R$ 50k)': 'Burger shop / Delivery (R$ 50k)',
+  'Pizzaria / Salão (R$ 100k)': 'Pizzeria / Dine-in (R$ 100k)',
+  'Buffet / Quilo (R$ 150k)': 'Buffet / By weight (R$ 150k)',
+  'WhatsApp Business Platform configurável': 'Configurable WhatsApp Business Platform',
+  'Pagamentos via Efí configuráveis': 'Configurable payments through Efí',
+  'Emissão fiscal via Focus NFe configurável': 'Configurable tax issuance through Focus NFe',
+  'Conexão protegida por HTTPS': 'HTTPS-protected connection',
+  'configuração assistida': 'assisted setup',
+  'Diferenciais do produto': 'Product highlights',
+  'Veja a venda, a operação e o custo no mesmo fluxo.':
+    'See sales, operations and costs in the same flow.',
+  'O MiseOn conecta o que normalmente fica espalhado':
+    'MiseOn connects what is usually scattered',
+  'Compare recursos concretos e valide durante o período de teste. Integrações externas dependem de configuração e homologação dos respectivos provedores.':
+    'Compare concrete features and validate them during the trial. External integrations depend on setup and approval by their respective providers.',
+  'Organize a fila de preparo e meça o tempo de cada etapa sem depender de papel.':
+    'Organize the preparation queue and measure each stage without relying on paper.',
+  'Publique seus artigos técnicos no Blog MiseOn e compartilhe conhecimento com donos de restaurantes e gestores de food service.':
+    'Publish your technical articles on the MiseOn Blog and share knowledge with restaurant owners and food-service managers.',
+  'Comece identificando onde a sua operação perde margem e acompanhe a evolução com seus próprios números.':
+    'Start by identifying where your operation loses margin and track progress with your own numbers.',
+  'Demonstração real do produto': 'Real product demonstration',
+  'Concluir Tour': 'Finish tour',
+  'PDV & Combos Artesanais': 'POS & Craft Combos',
+  'Painel Balcão & Comandas': 'Counter & Tabs Panel',
+  'KDS Cozinha & Forno': 'Kitchen & Oven KDS',
+  'Modal Mesa & Divisão por Assento': 'Table & Seat Split Dialog',
+  'Fila de Delivery & GPS Ao Vivo': 'Delivery Queue & Live GPS',
+  'Leitura Digital R$/kg & Balança': 'Digital R$/kg Scale Reading',
+  'Tamanho da esfera': 'Sphere size',
+  'Escala de custo': 'Cost scale',
+  'Verde indica custo unitário menor; amarelo, intermediário; vermelho, maior densidade financeira por unidade.':
+    'Green indicates a lower unit cost; yellow, an intermediate cost; red, a higher financial density per unit.',
+  'Dutos de conversão': 'Conversion links',
+  'Brilho pulsante': 'Pulsing glow',
+  'Simulador de custo': 'Cost simulator',
+  'Escreva para o Blog MiseOn': 'Write for the MiseOn Blog',
+  'ATENÇÃO: sua operação reúne mais de um ponto que merece medição.':
+    'ATTENTION: your operation has more than one area that should be measured.',
+  'O valor do impacto depende dos números da sua loja. Use a calculadora abaixo e valide cada hipótese com faturamento, CMV, ticket e ocorrências reais.':
+    'The impact depends on your store data. Use the calculator below and validate each hypothesis with actual revenue, food cost, average ticket and occurrence data.',
+  'Situações selecionadas': 'Selected situations',
+  'Calcule o impacto com os dados da sua loja': 'Calculate the impact using your store data',
+  '30 dias sem cartão. Integrações externas dependem de configuração.':
+    '30 days with no card required. External integrations require setup.',
+  'Teste o MiseOn na rotina real do seu estabelecimento por 30 dias e valide, com seus próprios dados, quais controles fazem diferença na operação.':
+    'Test MiseOn in your actual operation for 30 days and use your own data to validate which controls make a difference.',
+  'Crie sua conta sem informar cartão. Recursos que dependem de iFood, WhatsApp, Efí ou emissão fiscal exigem configuração dos respectivos provedores.':
+    'Create your account without entering a card. Features that depend on iFood, WhatsApp, Efí or tax issuance require setup with their respective providers.',
+  'mediante credenciais e aprovação do iFood': 'subject to iFood credentials and approval',
+  'via Business Platform, após configuração': 'through the Business Platform, after setup',
+  'Pix via Efí': 'Pix through Efí',
+  'após vincular a conta da loja': 'after linking the store account',
+  'Leia guias técnicos sobre CMV, operação, estoque e tecnologia. Exemplos demonstrativos são identificados como tal.':
+    'Read technical guides on food cost, operations, inventory and technology. Demonstration examples are clearly identified.',
 };
 
 function escaparRegex(str: string) {

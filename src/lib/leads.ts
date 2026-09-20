@@ -91,7 +91,7 @@ export async function registrarLead(d: DadosLead): Promise<boolean> {
 /** Link de WhatsApp com os dados do formulário — a saída quando o banco falha. */
 export function whatsappDoLead(d: DadosLead): string {
   const partes = [
-    'Olá! Tentei deixar meu contato no site da MiseOn e não foi.',
+    'Olá! Tentei deixar meu contato no site do MiseOn e não foi.',
     `Nome: ${d.nome.trim()}`,
     `WhatsApp: ${d.whatsapp.trim()}`,
     d.segmento ? `Segmento: ${d.segmento}` : '',

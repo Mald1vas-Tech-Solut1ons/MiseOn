@@ -22,7 +22,6 @@ export type SetorId = 'geladeira' | 'armario' | 'dispensa';
 export interface Setor {
   id: SetorId;
   rotulo: string;
-  icone: string; // emoji semântico
   /** Cor principal vibrante (hex CSS). */
   cor: string;
   /** Cor numérica para materiais Three.js. */
@@ -35,7 +34,6 @@ export const SETORES: Record<SetorId, Setor> = {
   geladeira: {
     id: 'geladeira',
     rotulo: 'Geladeira',
-    icone: '❄️',
     cor: '#22d3ee',
     corHex: 0x22d3ee,
     faixa: 'rgba(34, 211, 238, 0.10)',
@@ -43,7 +41,6 @@ export const SETORES: Record<SetorId, Setor> = {
   armario: {
     id: 'armario',
     rotulo: 'Armário',
-    icone: '🗄️',
     cor: '#fbbf24',
     corHex: 0xfbbf24,
     faixa: 'rgba(251, 191, 36, 0.10)',
@@ -51,7 +48,6 @@ export const SETORES: Record<SetorId, Setor> = {
   dispensa: {
     id: 'dispensa',
     rotulo: 'Dispensa',
-    icone: '🥫',
     cor: '#a3e635',
     corHex: 0xa3e635,
     faixa: 'rgba(163, 230, 53, 0.10)',
@@ -100,7 +96,7 @@ export function validarSetor(valor: string | null | undefined): SetorId | null {
 /** Opções do select de cadastro — vazio = automático (derivação). */
 export const OPCOES_SETOR: Array<{ valor: SetorId | ''; rotulo: string }> = [
   { valor: '', rotulo: 'Automático (pelo tipo de item)' },
-  { valor: 'geladeira', rotulo: '❄️ Geladeira' },
-  { valor: 'armario', rotulo: '🗄️ Armário' },
-  { valor: 'dispensa', rotulo: '🥫 Dispensa' },
+  { valor: 'geladeira', rotulo: 'Geladeira' },
+  { valor: 'armario', rotulo: 'Armário' },
+  { valor: 'dispensa', rotulo: 'Dispensa' },
 ];

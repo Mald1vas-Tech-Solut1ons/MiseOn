@@ -4,7 +4,7 @@ import {
   LifeBuoy, ChevronDown, Landmark, QrCode, CreditCard, Check,
   ExternalLink, MessageCircle, ShieldCheck, Wallet, HelpCircle, ClipboardList,
   Settings, BarChart3, Users, PhoneCall, PlayCircle, MonitorSmartphone, LayoutDashboard, Mail,
-  Compass, Sparkles, ArrowRight
+  Compass, Sparkles, ArrowRight, Rocket, Lightbulb, AlertTriangle
 } from 'lucide-react';
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
 
@@ -80,8 +80,8 @@ export default function Ajuda() {
             <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/20 border border-orange-500/40 px-3 py-1 text-xs font-black uppercase tracking-wider text-orange-400">
               <Sparkles size={14} /> {tDynamic('Treinamento Interativo Completo')}
             </span>
-            <h3 className="font-['Sora'] text-xl sm:text-2xl font-black leading-snug">
-              🚀 {tDynamic('Tour Completo do Sistema (20 Passos)')}
+            <h3 className="flex items-center gap-2 font-['Sora'] text-xl sm:text-2xl font-black leading-snug">
+              <Rocket size={22} className="shrink-0 text-orange-400" aria-hidden="true" /> {tDynamic('Tour Completo do Sistema (20 Passos)')}
             </h3>
             <p className="text-sm text-slate-300 font-medium leading-relaxed">
               {tDynamic('Percorra todos os módulos do MiseOn de ponta a ponta: do recebimento de pedidos no Balcão, baixa de estoque, Custo 3D, Salão 3D, KDS até a conciliação Efí Bank.')}
@@ -193,8 +193,8 @@ export default function Ajuda() {
                 <li><b>{tDynamic('Finalizado:')}</b> {tDynamic('entregue ao cliente. A venda entra no seu Financeiro.')}</li>
               </ol>
               <div className="mt-4 rounded-lg bg-purple-50 p-3 dark:bg-purple-900/10">
-                <p className="text-xs text-purple-800 dark:text-purple-300">
-                  💡 {tDynamic('O sistema')} <b>{tDynamic('bloqueia pulos de etapa')}</b> {tDynamic('de propósito: é a garantia de que nenhum pedido sai sem passar pelo preparo ou sem baixar o estoque corretamente.')}
+                <p className="flex items-start gap-2 text-xs text-purple-800 dark:text-purple-300">
+                  <Lightbulb size={14} className="mt-0.5 shrink-0" aria-hidden="true" /><span>{tDynamic('O sistema')} <b>{tDynamic('bloqueia pulos de etapa')}</b> {tDynamic('de propósito: é a garantia de que nenhum pedido sai sem passar pelo preparo ou sem baixar o estoque corretamente.')}</span>
                 </p>
               </div>
             </Expansivel>
@@ -235,7 +235,7 @@ export default function Ajuda() {
               <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{tDynamic('Guia Visual Completo com Imagens e Passos do Estoque 3D:')}</span>
                 <Link to="/gestao-de-estoque-3d" target="_blank" className="inline-flex items-center gap-1 text-xs font-black text-[var(--cor-primaria)] hover:underline bg-[var(--cor-primaria)]/10 px-3 py-1.5 rounded-lg">
-                  {tDynamic('Abrir Guia de Estoque 3D 🌐')}
+                  <ExternalLink size={13} aria-hidden="true" /> {tDynamic('Abrir Guia de Estoque 3D')}
                 </Link>
               </div>
             </Expansivel>
@@ -315,8 +315,8 @@ export default function Ajuda() {
               <p><b>{tDynamic('Opção A — disponível hoje: número dedicado.')}</b> {tDynamic('Você usa um chip novo só para o atendimento automático (qualquer pré-pago serve). O assistente de conexão te guia em 4 passos, com imagem de cada tela, e valida tudo sozinho.')}</p>
               <p className="mt-2"><b>{tDynamic('Opção B — em breve: manter seu número atual.')}</b> {tDynamic('Conexão com Facebook em poucos cliques, mantendo o WhatsApp que você já usa no celular. Estamos finalizando a homologação com a Meta para liberar essa opção.')}</p>
               <div className="mt-3 rounded-lg bg-amber-50 p-3 dark:bg-amber-900/10">
-                <p className="text-xs text-amber-800 dark:text-amber-300">
-                  ⚠️ <b>{tDynamic('Importante:')}</b> {tDynamic('na Opção A, o número escolhido sai do WhatsApp comum e passa a ser só do atendimento automático. Por isso recomendamos um chip dedicado — nunca o número que você já usa para falar com clientes.')}
+                <p className="flex items-start gap-2 text-xs text-amber-800 dark:text-amber-300">
+                  <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden="true" /><span><b>{tDynamic('Importante:')}</b> {tDynamic('na Opção A, o número escolhido sai do WhatsApp comum e passa a ser só do atendimento automático. Por isso recomendamos um chip dedicado — nunca o número que você já usa para falar com clientes.')}</span>
                 </p>
               </div>
             </Expansivel>

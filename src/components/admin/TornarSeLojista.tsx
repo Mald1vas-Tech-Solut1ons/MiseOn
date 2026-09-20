@@ -232,7 +232,7 @@ export default function TornarSeLojista({ emailUsuario, onCriada }: Props) {
             </div>
             <label className="flex items-start gap-2 rounded-xl border border-gray-200 dark:border-gray-800 p-3 text-sm dark:text-gray-300">
               <input type="checkbox" checked={aceiteTrial} onChange={(e) => setAceiteTrial(e.target.checked)} className="mt-0.5 h-4 w-4" />
-              {tDynamic('Quero iniciar meu teste grátis de 30 dias na MiseOn.')}
+              {tDynamic('Quero iniciar meu teste grátis de 30 dias no MiseOn.')}
             </label>
 
             <div className="flex gap-2">

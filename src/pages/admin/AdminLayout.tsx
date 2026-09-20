@@ -16,6 +16,7 @@ import { GuidedTourModal } from '../../components/tour/GuidedTourModal';
 import { StoreSetupWizard } from '../../components/admin/StoreSetupWizard';
 import TornarSeLojista from '../../components/admin/TornarSeLojista';
 import LanguageToggle from '../../components/LanguageToggle';
+import MiseOnLogo from '../../components/MiseOnLogo';
 import { useI18n } from '../../contexts/I18nContext';
 import { definirLojaDoMonitor, registrarErro } from '../../lib/monitorErros';
 
@@ -44,6 +45,9 @@ export default function AdminLayout() {
   const loc = useLocation();
   const [ctx, setCtx] = useState<CtxLoja | null>(null);
   const [semLoja, setSemLoja] = useState(false);
+  // Lojas que este usuário pode operar — só tem mais de uma entrada em conta
+  // de administrador de rede. Usado exclusivamente para desenhar o seletor.
+  const [minhasLojas, setMinhasLojas] = useState<Array<{ id: string; nome: string; papel: string }>>([]);
   const [emailUsuario, setEmailUsuario] = useState('');
   const [erroConexao, setErroConexao] = useState(false);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
@@ -169,6 +173,16 @@ export default function AdminLayout() {
     nav('/acesso');
   };
 
+  // Troca de loja para quem administra mais de uma. Recarrega a página em vez
+  // de só atualizar o estado: a loja atual alimenta hooks, notificações e
+  // monitor de erro espalhados pela árvore inteira, e um reload garante que
+  // nada fica com dado da loja anterior por engano.
+  const trocarLoja = (novoLojaId: string) => {
+    if (novoLojaId === ctx?.lojaId) return;
+    localStorage.setItem('miseon_loja_ativa_id', novoLojaId);
+    window.location.reload();
+  };
+
   useEffect(() => {
     let unmounted = false;
 
@@ -184,8 +198,13 @@ export default function AdminLayout() {
 
         const { data: rels, error: relErr } = await supabase
           .from('usuarios_loja')
-          .select('loja_id, papel, lojas(id, nome, slug, status_assinatura, trial_termina_em, segmento_negocio, modulos_ativos)')
-          .eq('user_id', user.id);
+          .select('loja_id, papel, criado_em, lojas(id, nome, slug, status_assinatura, trial_termina_em, segmento_negocio, modulos_ativos)')
+          .eq('user_id', user.id)
+          // Determinístico: sem isto, qual loja abre primeiro dependia da
+          // ordem que o Postgres decidisse devolver — podia mudar de um login
+          // para o outro. O vínculo mais antigo (a loja que o admin criou ou
+          // entrou primeiro) é o que sempre abre por padrão.
+          .order('criado_em', { ascending: true });
 
         if (relErr) {
           // Registra no painel de erros ANTES de mostrar a tela genérica.
@@ -208,12 +227,25 @@ export default function AdminLayout() {
           return;
         }
 
-        const ativo = rels[0];
+        // Administrador de rede: o usuário escolheu uma loja numa sessão
+        // anterior e essa escolha é respeitada enquanto o vínculo existir.
+        // Sem preferência salva (ou vínculo removido nesse meio-tempo), cai
+        // no primeiro pela ordem determinística acima.
+        const preferida = localStorage.getItem('miseon_loja_ativa_id');
+        const ativo = (preferida && rels.find((r: any) => r.loja_id === preferida)) || rels[0];
         const lj = (ativo as any).lojas;
 
         if (!lj) {
           if (!unmounted) setSemLoja(true);
           return;
+        }
+
+        if (!unmounted) {
+          setMinhasLojas(
+            rels
+              .filter((r: any) => r.lojas)
+              .map((r: any) => ({ id: r.lojas.id, nome: r.lojas.nome, papel: r.papel ?? 'operador' })),
+          );
         }
 
         const stats = avaliarAssinatura(lj);
@@ -538,7 +570,7 @@ export default function AdminLayout() {
             {isCollapsed ? (
               <img src="/icon.png" alt="MiseOn" className="h-10 w-10 shrink-0 object-contain drop-shadow-[0_4px_12px_rgba(252,91,36,0.6)] animate-in fade-in zoom-in duration-500" onError={(e) => { e.currentTarget.style.display = 'none' }} />
             ) : (
-              <img src="/MiseOn-repagina-removebg-preview.png" alt="MiseOn" className="w-[180px] h-auto shrink-0 object-contain drop-shadow-[0_4px_16px_rgba(10,92,196,0.6)] animate-in fade-in duration-500" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+              <MiseOnLogo size={180} className="shrink-0 animate-in fade-in duration-500" />
             )}
           </div>
           {/* Toggle Button Luxuoso */}
@@ -552,8 +584,26 @@ export default function AdminLayout() {
 
         {/* Informações da Loja */}
         <div className={`px-4 py-5 flex flex-col gap-1 overflow-hidden transition-all duration-300 shrink-0 ${isCollapsed ? 'items-center opacity-0 h-0 p-0 m-0 border-0' : 'opacity-100'}`}>
-          <span className="text-xs opacity-90 font-bold tracking-wider text-gray-400 uppercase whitespace-nowrap">{tDynamic('Loja Atual')}</span>
-          <h2 className="font-bold text-base truncate text-gray-900 dark:text-white whitespace-nowrap">{ctx.lojaNome}</h2>
+          <span className="text-xs opacity-90 font-bold tracking-wider text-gray-400 uppercase whitespace-nowrap">
+            {minhasLojas.length > 1 ? tDynamic('Loja Atual · trocar') : tDynamic('Loja Atual')}
+          </span>
+          {minhasLojas.length > 1 ? (
+            // Administrador de mais de uma unidade: sem isto, a segunda loja
+            // simplesmente não existia no painel — quem geria a rede ficava
+            // preso na que o banco devolvesse primeiro.
+            <select
+              value={ctx.lojaId}
+              onChange={(e) => trocarLoja(e.target.value)}
+              className="-ml-1 w-[calc(100%+0.5rem)] truncate rounded-lg border-0 bg-transparent p-1 font-bold text-base text-gray-900 outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]/40 dark:text-white"
+              aria-label={tDynamic('Trocar de loja')}
+            >
+              {minhasLojas.map((l) => (
+                <option key={l.id} value={l.id}>{l.nome}</option>
+              ))}
+            </select>
+          ) : (
+            <h2 className="font-bold text-base truncate text-gray-900 dark:text-white whitespace-nowrap">{ctx.lojaNome}</h2>
+          )}
           {ctx.papel !== 'admin' && (
             <span className="inline-block mt-1 self-start rounded-md bg-[#004198]/10 px-2 py-0.5 text-xs opacity-90 font-bold text-[#004198] dark:text-[#6B9EFF] uppercase">
               {ctx.papel}
@@ -737,7 +787,7 @@ export default function AdminLayout() {
               >
                 <Compass size={15} />
                 <span className="hidden sm:inline">
-                  {location.pathname === '/admin/ajuda' ? 'Tour Completo 🚀' : 'Tour desta Página 📍'}
+                  {location.pathname === '/admin/ajuda' ? tDynamic('Tour completo') : tDynamic('Tour desta página')}
                 </span>
               </button>
               <LanguageToggle variant="pill" />

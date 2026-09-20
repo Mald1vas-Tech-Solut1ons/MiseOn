@@ -12,7 +12,7 @@
  * custa a confiança na primeira renegociação.
  */
 export const KIOSK_COMERCIAL = {
-  /** Mensalidade com o totem em comodato (o aparelho continua da MiseOn). */
+  /** Mensalidade com o totem em comodato (o aparelho continua sendo do MiseOn). */
   mensalidadeComodato: 600,
 
   /** O preço ainda não passou pela reunião de custos. */

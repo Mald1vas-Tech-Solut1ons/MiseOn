@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
-  Plus, Pencil, Trash2, X, Star, EyeOff, Eye, Search, ChevronUp, ChevronDown, Save, Sparkles, ChefHat, Store,
+  Plus, Pencil, Trash2, X, Star, EyeOff, Eye, Search, ChevronUp, ChevronDown, Save, Sparkles, ChefHat, Store, Package, Scale,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Categoria, Produto, Insumo, EstacaoPreparo, TipoVenda, KdsEstacao, KdsWorkflow, fmt } from '../../types';
@@ -550,7 +550,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                     ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)]'
                     : 'border-gray-200 text-gray-400 dark:border-gray-700'
                 }`}>
-                📦 Por Unidade (Inteira)
+                <span className="flex items-center justify-center gap-2"><Package size={15} aria-hidden="true" /> Por Unidade (Inteira)</span>
               </button>
               <button type="button" onClick={() => setTipoVenda('POR_PESO')}
                 className={`rounded-xl border p-2.5 text-xs font-bold transition-all ${
@@ -558,7 +558,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                     ? 'border-[var(--cor-primaria)] bg-[var(--cor-primaria)]/10 text-[var(--cor-primaria)]'
                     : 'border-gray-200 text-gray-400 dark:border-gray-700'
                 }`}>
-                ⚖️ Por Quilo (Self-Service)
+                <span className="flex items-center justify-center gap-2"><Scale size={15} aria-hidden="true" /> Por Quilo (Self-Service)</span>
               </button>
             </div>
           </div>
@@ -701,9 +701,9 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
             <p className="mb-2 text-sm font-semibold dark:text-gray-200">{tDynamic('Perfil operacional do produto')}</p>
             <div className="grid grid-cols-3 gap-2">
               {([
-                ['ALIMENTO', '🍳 Alimento'],
-                ['DRINK', '🍹 Drink'],
-                ['BEBIDA_PRONTA', '🥤 Pronta'],
+                ['ALIMENTO', 'Alimento'],
+                ['DRINK', 'Drink'],
+                ['BEBIDA_PRONTA', 'Bebida pronta'],
               ] as const).map(([valorPerfil, rotulo]) => (
                 <button
                   key={valorPerfil}

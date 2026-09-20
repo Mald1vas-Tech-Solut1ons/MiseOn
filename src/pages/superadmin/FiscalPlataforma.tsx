@@ -108,7 +108,7 @@ export default function FiscalPlataforma() {
         <Receipt className="text-emerald-400" size={24} />
         <div>
           <h2 className="text-lg font-bold text-white">{tDynamic('Configuração Fiscal da Plataforma')}</h2>
-          <p className="text-xs text-gray-400">{tDynamic('Dados da MiseOn (emissora) usados na NFS-e da assinatura dos lojistas.')}</p>
+          <p className="text-xs text-gray-400">{tDynamic('Dados do MiseOn (emissor) usados na NFS-e da assinatura dos lojistas.')}</p>
         </div>
         {config.certificado_status === 'valido' && (
           <span className="ml-auto flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400">

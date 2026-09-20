@@ -1837,7 +1837,7 @@ export default function Loja() {
                     <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{tDynamic('/mês')}</span>
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {tDynamic('Totem em comodato — o aparelho é da MiseOn e vem junto com a mensalidade.')}
+                    {tDynamic('Totem em comodato — o aparelho é do MiseOn e vem junto com a mensalidade.')}
                   </p>
                   {!KIOSK_COMERCIAL.compraDisponivel && (
                     <p className="mt-1 text-xs text-gray-400">

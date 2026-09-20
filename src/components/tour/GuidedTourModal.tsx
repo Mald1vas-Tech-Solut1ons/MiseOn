@@ -409,7 +409,7 @@ export function GuidedTourModal({
                     : '0 0 24px rgba(249,115,22,0.5), 0 4px 12px rgba(0,0,0,0.3)',
                 }}
               >
-                <span>{isUltimoPasso ? tDynamic('Concluir Tour 🎉') : tDynamic('Próximo')}</span>
+                <span>{isUltimoPasso ? tDynamic('Concluir Tour') : tDynamic('Próximo')}</span>
                 {isUltimoPasso ? <CheckCircle2 size={18} /> : <ArrowRight size={18} />}
               </button>
             </div>

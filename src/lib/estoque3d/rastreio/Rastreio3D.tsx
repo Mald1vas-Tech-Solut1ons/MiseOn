@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, AlertTriangle, PackageX, TrendingUp, ChefHat, X } from 'lucide-react';
+import { Search, AlertTriangle, PackageX, TrendingUp, ChefHat, X, Snowflake, Archive, PackageOpen, UtensilsCrossed, CheckCircle2, XCircle } from 'lucide-react';
 import { RastreioEngine } from './RastreioEngine';
 import { verificarReceita, type DadosReceitas, type ReceitaCheck } from './receitas';
 import { SETORES, type SetorId } from './setores';
@@ -36,6 +36,12 @@ const ESTADO_UI: Record<ItemRastreio['estado'], { rotulo: string; classe: string
   sem_custo: { rotulo: 'Sem custo', classe: 'sem-custo' },
   alerta_desvio: { rotulo: 'Desvio de custo', classe: 'desvio' },
 };
+
+const ICONE_SETOR = {
+  geladeira: Snowflake,
+  armario: Archive,
+  dispensa: PackageOpen,
+} satisfies Record<SetorId, typeof Snowflake>;
 
 export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
   const { tDynamic } = useI18n();
@@ -126,8 +132,9 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
 
       {/* Setores — o mapa de cores do armazenamento */}
       <div className="mo-r3d-setores" role="tablist" aria-label="Setores do estoque">
-        {setores.map((s) => (
-          <button type="button"
+        {setores.map((s) => {
+          const IconeSetor = ICONE_SETOR[s.setor.id];
+          return <button type="button"
             key={s.setor.id}
             role="tab"
             aria-selected={s.setor.id === setorId}
@@ -135,11 +142,11 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
             style={{ ['--cor-setor' as string]: s.setor.cor }}
             onClick={() => { setSetorId(s.setor.id); setPagina(0); setSelecionado(null); }}
           >
-            {s.setor.icone} {s.setor.rotulo}
+            <IconeSetor size={14} aria-hidden="true" /> {s.setor.rotulo}
             <span className="mo-r3d-setor-n">{s.itens.length}</span>
-            {s.alertas > 0 && <span className="mo-r3d-setor-alerta">{s.alertas}⚠</span>}
-          </button>
-        ))}
+            {s.alertas > 0 && <span className="mo-r3d-setor-alerta"><AlertTriangle size={11} aria-hidden="true" /> {s.alertas}</span>}
+          </button>;
+        })}
       </div>
 
       {/* HUD superior: resumo do setor + busca + receita */}
@@ -171,7 +178,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
               >
                 <option value="">Verificar receita…</option>
                 {dadosReceitas.receitas.map((r) => (
-                  <option key={r.id} value={r.id}>{r.tipo === 'preparo' ? '🥣 ' : '🍽️ '}{r.nome}</option>
+                  <option key={r.id} value={r.id}>{r.tipo === 'preparo' ? 'Preparo — ' : 'Produto — '}{r.nome}</option>
                 ))}
               </select>
             </label>
@@ -198,7 +205,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
       {/* Legenda */}
       <div data-tour="tour-estoque-3d-legenda-rastreio" className="mo-r3d-legenda">
         <span><i className="mo-r3d-dot" style={{ background: '#22d3ee' }} /> etapa física (automática)</span>
-        <span><i className="mo-r3d-dot" style={{ background: '#f59e0b' }} /> etapa humana ⚠️ (rendimento declarado)</span>
+        <span><i className="mo-r3d-dot" style={{ background: '#f59e0b' }} /> etapa humana (rendimento declarado)</span>
         <span><i className="mo-r3d-dot" style={{ background: '#ef4444' }} /> crítico</span>
       </div>
 
@@ -206,7 +213,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
       {receitaCheck && (
         <aside className={`mo-r3d-recpanel ${receitaCheck.completa ? 'ok' : 'falta'}`} aria-live="polite">
           <header>
-            <strong>{receitaCheck.tipo === 'preparo' ? '🥣' : '🍽️'} {receitaCheck.nome}</strong>
+            <strong className="flex items-center gap-1.5">{receitaCheck.tipo === 'preparo' ? <ChefHat size={15} aria-hidden="true" /> : <UtensilsCrossed size={15} aria-hidden="true" />} {receitaCheck.nome}</strong>
             <button type="button" onClick={() => setReceitaId('')} aria-label="Fechar checagem de receita"><X size={15} /></button>
           </header>
           {receitaCheck.ingredientes.length === 0 ? (
@@ -215,16 +222,16 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
             <>
               <p className={`mo-r3d-rec-veredito ${receitaCheck.completa ? 'ok' : 'falta'}`}>
                 {receitaCheck.completa
-                  ? `✅ Dá para produzir — rende até ${receitaCheck.maxPorcoes} porç${receitaCheck.maxPorcoes === 1 ? 'ão' : 'ões'}.`
+                  ? `Dá para produzir — rende até ${receitaCheck.maxPorcoes} porç${receitaCheck.maxPorcoes === 1 ? 'ão' : 'ões'}.`
                   : receitaCheck.maxPorcoes > 0
-                    ? `⚠️ Rende só ${receitaCheck.maxPorcoes} porç${receitaCheck.maxPorcoes === 1 ? 'ão' : 'ões'} — limita: ${receitaCheck.gargalo}.`
-                    : `❌ Não rende nenhuma porção — falta: ${receitaCheck.gargalo}.`}
+                    ? `Rende só ${receitaCheck.maxPorcoes} porç${receitaCheck.maxPorcoes === 1 ? 'ão' : 'ões'} — limita: ${receitaCheck.gargalo}.`
+                    : `Não rende nenhuma porção — falta: ${receitaCheck.gargalo}.`}
               </p>
               <ul className="mo-r3d-rec-lista">
                 {receitaCheck.ingredientes.map((ing) => (
                   <li key={`${ing.insumoId}-${ing.viaPreparo ?? ''}`} className={ing.cobre ? 'ok' : 'falta'}>
                     <span className="mo-r3d-rec-nome">
-                      {ing.cobre ? '✅' : '❌'} {ing.nome}
+                      {ing.cobre ? <CheckCircle2 size={13} aria-hidden="true" /> : <XCircle size={13} aria-hidden="true" />} {ing.nome}
                       {ing.viaPreparo && <em> (via {ing.viaPreparo})</em>}
                     </span>
                     <span className="mo-r3d-rec-num">
@@ -246,7 +253,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
             <button type="button" onClick={() => setSelecionado(null)} aria-label="Fechar detalhe"><X size={15} /></button>
           </header>
           <p className="mo-r3d-painel-meta">
-            {SETORES[selecionado.setor].icone} {SETORES[selecionado.setor].rotulo} · {selecionado.categoria}
+            {(() => { const Icone = ICONE_SETOR[selecionado.setor]; return <Icone size={13} aria-hidden="true" />; })()} {SETORES[selecionado.setor].rotulo} · {selecionado.categoria}
             <span className={`mo-r3d-badge ${ESTADO_UI[selecionado.estado].classe}`}>{ESTADO_UI[selecionado.estado].rotulo}</span>
           </p>
           <dl>
@@ -265,7 +272,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
           <ul className="mo-r3d-painel-cadeia">
             {selecionado.estagios.map((e, i) => (
               <li key={i}>
-                <span>{e.rotulo}{i > 0 && (e.tipo === 'humana' ? ' ⚠️' : ' ✓')}</span>
+                <span>{e.rotulo}{i > 0 && (e.tipo === 'humana' ? ' · rendimento declarado' : ' · conversão automática')}</span>
                 <span>{fmtQtd(e.quantidade)} {e.unidade}{e.custoUnitario != null ? ` · ${brl(e.custoUnitario, 4)}/${e.unidade}` : ''}</span>
               </li>
             ))}
@@ -289,7 +296,7 @@ export function Rastreio3D({ setores, dadosReceitas, altura = 620 }: Props) {
             <span className="mo-r3d-cartao-cadeia">
               {item.estagios.map((e, i) => (
                 <span key={i} className="mo-r3d-cartao-estagio">
-                  {i > 0 && <i className="mo-r3d-cartao-seta">{e.tipo === 'humana' ? '⚠️' : '→'}</i>}
+                  {i > 0 && <i className="mo-r3d-cartao-seta">{e.tipo === 'humana' ? '!' : '→'}</i>}
                   {fmtQtd(e.quantidade)} {e.unidade}
                   {e.custoUnitario != null && <em> {brl(e.custoUnitario)}/{e.unidade}</em>}
                 </span>

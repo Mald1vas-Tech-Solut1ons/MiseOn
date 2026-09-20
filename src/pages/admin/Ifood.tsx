@@ -274,7 +274,7 @@ export default function Ifood() {
           </p>
           <p className="mt-1 text-[13px] leading-relaxed text-red-700/90 dark:text-red-300/90">
             {saude.estado === 'SEM_PERMISSAO'
-              ? tDynamic('O aplicativo da MiseOn ainda não recebeu os módulos no Portal do Desenvolvedor do iFood. Enquanto isso, a conexão fica de pé mas nenhum pedido chega. É liberação no portal do iFood — não há nada a corrigir na sua loja.')
+              ? tDynamic('O aplicativo do MiseOn ainda não recebeu os módulos no Portal do Desenvolvedor do iFood. Enquanto isso, a conexão fica de pé mas nenhum pedido chega. É liberação no portal do iFood — não há nada a corrigir na sua loja.')
               : saude.estado === 'CREDENCIAL'
                 ? tDynamic('As credenciais do aplicativo foram recusadas ou o aplicativo está desativado no portal do iFood.')
                 : tDynamic('Estamos tentando de novo automaticamente. Se persistir, fale com o suporte.')}

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Store, ShoppingBag, CreditCard, Clock, Share2,
   Link2, MessageSquare, CheckCircle2, ChevronDown, ChevronUp,
-  X, Rocket, ArrowRight, Circle,
+  X, Rocket, ArrowRight, Circle, Compass,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useI18n } from '../../contexts/I18nContext';
@@ -135,23 +135,36 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
     setCarregando(true);
 
     try {
-      const [{ data: loja }, { count: qtdProdutos }, { count: qtdHorarios }] = await Promise.all([
-        supabase.from('lojas').select('logo_url, nome, slug, efi_payee_code, efi_titular_documento, efi_conta, aceita_online, cartao_online_bloqueado_em, ifood_merchant_id, whatsapp').eq('id', lojaId).single(),
+      const [
+        { data: loja },
+        { count: qtdProdutos },
+        { count: qtdHorarios },
+        { data: saudeIfood },
+        { data: statusWhatsapp },
+      ] = await Promise.all([
+        supabase.from('lojas').select('logo_url, nome, slug, efi_payee_code, efi_titular_documento, efi_conta, aceita_online, cartao_online_bloqueado_em, ifood_merchant_id').eq('id', lojaId).single(),
         supabase.from('produtos').select('id', { count: 'exact', head: true }).eq('loja_id', lojaId),
         supabase.from('horarios_funcionamento').select('id', { count: 'exact', head: true }).eq('loja_id', lojaId),
+        // Merchant id preenchido significa apenas "vinculado". O passo só
+        // fica verde quando o polling mediu que o canal está respondendo.
+        supabase.from('integracao_ifood_saude').select('estado').eq('id', true).maybeSingle(),
+        // A coluna antiga `lojas.whatsapp` é cadastro, não saúde. A função
+        // devolve a conexão real e já aplica a autorização da loja.
+        supabase.rpc('fn_whatsapp_status', { p_loja_id: lojaId }),
       ]);
 
       const divulgarFeito = localStorage.getItem(linkCopiadoKey) === 'true';
       setSlug(loja?.slug || '');
 
+      const conexaoWhatsapp = Array.isArray(statusWhatsapp) ? statusWhatsapp[0] : statusWhatsapp;
       setStatus({
         identidade: !!(loja?.logo_url && loja?.nome),
         produto: (qtdProdutos ?? 0) > 0,
         pagamento: recebimentosConfigurados(loja),
         horarios: (qtdHorarios ?? 0) > 0,
         divulgar: divulgarFeito,
-        ifood: !!loja?.ifood_merchant_id,
-        whatsapp: !!loja?.whatsapp,
+        ifood: !!loja?.ifood_merchant_id && saudeIfood?.estado === 'OK',
+        whatsapp: conexaoWhatsapp?.status === 'CONECTADO',
       });
     } catch {
       // Silencioso — wizard não bloqueia nada
@@ -274,7 +287,7 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
           </div>
           <p className="mt-1.5 mb-3 text-[10px] text-white/30">
             {tudo_concluido
-              ? (isEn ? '🎉 Essential setup complete!' : '🎉 Configuração essencial concluída!')
+              ? (isEn ? 'Essential setup complete!' : 'Configuração essencial concluída!')
               : tDynamic('Complete os passos para colocar sua loja no ar de forma independente.')}
           </p>
         </div>
@@ -348,7 +361,7 @@ export function StoreSetupWizard({ lojaId }: { lojaId: string }) {
               onClick={() => window.dispatchEvent(new Event('iniciar-guided-tour'))}
               className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/15 px-3 py-1.5 text-[10px] font-black text-orange-400 hover:bg-orange-500/25 transition"
             >
-              <span>🧭</span>
+              <Compass size={12} aria-hidden="true" />
               {isEn ? 'Take the tour' : 'Fazer o tour'}
             </button>
           </div>

@@ -4,7 +4,7 @@ import {
   ChefHat, Bike, Store, Maximize, Minimize, Check, Package, UtensilsCrossed, Trophy, Flame,
   SlidersHorizontal, Settings, Plus, Trash2, ArrowLeft, ArrowRight, RotateCcw, X,
   Clock, BarChart2, AlertCircle, ChevronDown, ChevronRight, LayoutGrid,
-  Columns, Archive, Sparkles, MoveRight, ZoomIn, ZoomOut, User, Users
+  Columns, Archive, Sparkles, MoveRight, ZoomIn, ZoomOut, User, Users, GlassWater
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { type Pedido, type EtapaKDS, type StatusPedido, type KdsEstacao } from '../../types';
@@ -785,7 +785,7 @@ export default function KDS() {
               {(filtroEstacao === 'TODAS' || filtroEstacao === 'COZINHA') && cozinha.length > 0 && (
                 <div className="space-y-1.5">
                   <span className="font-['JetBrains_Mono'] text-[11px] opacity-90 font-extrabold uppercase tracking-wider text-orange-400 flex items-center gap-1">
-                    🍳 {tDynamic('Preparo Cozinha')} ({cozinha.length})
+                    <ChefHat size={13} aria-hidden="true" /> {tDynamic('Preparo Cozinha')} ({cozinha.length})
                   </span>
                   {cozinha.map((i) => (
                     <div key={i.id} className="pl-1">
@@ -797,7 +797,7 @@ export default function KDS() {
                       ))}
                       {i.observacao && (
                         <p className="pl-3.5 text-[12px] font-bold text-red-400 bg-red-500/10 rounded px-1.5 py-0.5 mt-0.5 border border-red-500/20 inline-block">
-                          ⚠ {i.observacao.toUpperCase()}
+                          <AlertCircle size={13} className="mr-1 inline" aria-hidden="true" /> {i.observacao.toUpperCase()}
                         </p>
                       )}
                     </div>
@@ -808,7 +808,7 @@ export default function KDS() {
               {(filtroEstacao === 'TODAS' || filtroEstacao === 'BAR') && bar.length > 0 && (
                 <div className="space-y-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 p-2">
                   <span className="font-['JetBrains_Mono'] text-[11px] opacity-90 font-extrabold uppercase tracking-wider text-purple-400 flex items-center gap-1">
-                    🍹 {tDynamic('Bar & Drinks')} ({bar.length})
+                    <GlassWater size={13} aria-hidden="true" /> {tDynamic('Bar & Drinks')} ({bar.length})
                   </span>
                   {bar.map((i) => (
                     <div key={i.id} className="pl-1">
@@ -819,7 +819,7 @@ export default function KDS() {
                         <p key={x} className="pl-3.5 text-[11px] text-purple-300">+ {o.nome_opcao}</p>
                       ))}
                       {i.observacao && (
-                        <p className="pl-3.5 text-[11px] font-bold text-amber-300">⚠ {i.observacao.toUpperCase()}</p>
+                        <p className="flex items-center gap-1 pl-3.5 text-[11px] font-bold text-amber-300"><AlertCircle size={12} aria-hidden="true" /> {i.observacao.toUpperCase()}</p>
                       )}
                     </div>
                   ))}
@@ -1063,14 +1063,14 @@ export default function KDS() {
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${filtroEstacao === 'COZINHA' ? 'bg-orange-500 text-slate-950' : 'text-slate-400 hover:text-white'
                 }`}
             >
-              🍳 {tDynamic('Cozinha')}
+              <span className="flex items-center gap-1"><ChefHat size={13} aria-hidden="true" /> {tDynamic('Cozinha')}</span>
             </button>
             <button type="button"
               onClick={() => setFiltroEstacao('BAR')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${filtroEstacao === 'BAR' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
                 }`}
             >
-              🍹 {tDynamic('Bar')}
+              <span className="flex items-center gap-1"><GlassWater size={13} aria-hidden="true" /> {tDynamic('Bar')}</span>
             </button>
           </div>
 
@@ -1221,7 +1221,7 @@ export default function KDS() {
                     {listaPedidos.length === 0 && (
                       <div className="flex h-40 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 text-center text-xs text-slate-500">
                         <Sparkles size={20} className="mb-2 text-slate-600 opacity-60" />
-                        <span>{tDynamic('Nenhum pedido nesta etapa 🎉')}</span>
+                        <span>{tDynamic('Nenhum pedido nesta etapa')}</span>
                         <span className="text-[11px] text-slate-600 mt-1">{tDynamic('Arraste um pedido para cá')}</span>
                       </div>
                     )}
@@ -1326,7 +1326,7 @@ export default function KDS() {
                     {listaPedidos.length === 0 && (
                       <div className="flex h-40 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 text-center text-xs text-slate-500">
                         <Sparkles size={20} className="mb-2 text-slate-600 opacity-60" />
-                        <span>{tDynamic('Nenhum pedido nesta etapa 🎉')}</span>
+                        <span>{tDynamic('Nenhum pedido nesta etapa')}</span>
                         <span className="text-[11px] text-slate-600 mt-1">{tDynamic('Arraste um pedido para cá')}</span>
                       </div>
                     )}
@@ -1584,8 +1584,8 @@ export default function KDS() {
                         className="shrink-0 rounded-xl border border-white/10 bg-white/10 px-2 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-orange-500"
                       >
                         <option value="" className="bg-[#0F172A]">{tDynamic('Global')}</option>
-                        <option value="COZINHA" className="bg-[#0F172A]">🍳 {tDynamic('Cozinha')}</option>
-                        <option value="BAR" className="bg-[#0F172A]">🍹 {tDynamic('Bar')}</option>
+                        <option value="COZINHA" className="bg-[#0F172A]">{tDynamic('Cozinha')}</option>
+                        <option value="BAR" className="bg-[#0F172A]">{tDynamic('Bar')}</option>
                       </select>
                     </div>
 
@@ -1655,7 +1655,7 @@ export default function KDS() {
 
       {celebrar && (
         <div className="pointer-events-none fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-3 text-emerald-300 shadow-2xl backdrop-blur-sm">
-          <Trophy size={20} /> <span className="font-['Sora'] text-sm font-black">{tDynamic('Dentro da meta hoje! 🔥')}</span>
+          <Trophy size={20} /> <span className="font-['Sora'] text-sm font-black">{tDynamic('Dentro da meta hoje!')}</span>
         </div>
       )}
     </div>

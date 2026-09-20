@@ -15,6 +15,7 @@
  */
 
 import { useMemo, useState } from 'react';
+import { BarChart3, Boxes, ShoppingCart, Ruler, UtensilsCrossed, Zap, Scale, type LucideIcon } from 'lucide-react';
 import {
   custoDeUso,
   custoUnitarioBase,
@@ -24,6 +25,7 @@ import {
   type LinhaBOM,
 } from '../../lib/custeio';
 import { VisualizadorCaminho } from './VisualizadorCaminho';
+import { useI18n } from '../../contexts/I18nContext';
 import './SimuladorCusto.css';
 
 // ---------------------------------------------------------------------------
@@ -81,7 +83,7 @@ function CardMetrica({
   alerta,
   destaque,
 }: {
-  icone: string;
+  icone: LucideIcon;
   titulo: string;
   valor: string;
   sub?: string;
@@ -90,7 +92,7 @@ function CardMetrica({
 }) {
   return (
     <div className={`sc-card ${alerta ? 'sc-card-alerta' : ''} ${destaque ? 'sc-card-destaque' : ''}`}>
-      <span className="sc-icone">{icone}</span>
+      <span className="sc-icone">{(() => { const Icone = icone; return <Icone size={18} aria-hidden="true" />; })()}</span>
       <div className="sc-corpo">
         <span className="sc-titulo">{titulo}</span>
         <span className="sc-valor">{valor}</span>
@@ -113,6 +115,7 @@ export function SimuladorCusto({
   metodo = 'PEPS',
   className = '',
 }: PropsSimuladorCusto) {
+  const { tDynamic } = useI18n();
   const [mostrarCaminho, setMostrarCaminho] = useState(false);
 
   const metricas = useMemo(() => {
@@ -188,7 +191,7 @@ export function SimuladorCusto({
       {/* Cabeçalho */}
       <div className="sc-header">
         <div className="sc-header-texto">
-          <span className="sc-titulo-principal">📊 Simulador de Custo</span>
+          <span className="sc-titulo-principal inline-flex items-center gap-1.5"><BarChart3 size={17} aria-hidden="true" /> {tDynamic('Simulador de custo')}</span>
           <span className="sc-subtitulo">{item.nome} · {metodo}</span>
         </div>
         <button type="button"
@@ -215,7 +218,7 @@ export function SimuladorCusto({
       {/* Grade de métricas */}
       <div className="sc-grade">
         <CardMetrica
-          icone="📦"
+          icone={Boxes}
           titulo={`Custo PEPS (${item.unidadeBase})`}
           valor={temLotes ? brl(metricas.custoPEPS) + `/${item.unidadeBase}` : '—'}
           sub={temLotes ? `Médio: ${brl(metricas.custoMedio)}/${item.unidadeBase}` : 'Sem lotes em estoque'}
@@ -224,7 +227,7 @@ export function SimuladorCusto({
 
         {custoEstimado != null && (
           <CardMetrica
-            icone="🛒"
+            icone={ShoppingCart}
             titulo="Custo estimado cadastro"
             valor={brl(custoEstimado) + `/${item.unidadeBase}`}
             sub={desvio != null
@@ -236,7 +239,7 @@ export function SimuladorCusto({
 
         {unidadeDestino !== item.unidadeBase && (
           <CardMetrica
-            icone="📐"
+            icone={Ruler}
             titulo={`Custo por ${unidadeDestino}`}
             valor={metricas.custoPorUso != null
               ? brl(custoDeUso(item, 1, unidadeDestino, metodo)) + `/${unidadeDestino}`
@@ -248,7 +251,7 @@ export function SimuladorCusto({
 
         {metricas.custoBomDepois != null && (
           <CardMetrica
-            icone="🍽️"
+            icone={UtensilsCrossed}
             titulo="Custo total da receita"
             valor={brl(metricas.custoBomDepois, 2)}
             sub={metricas.custoBomAntes != null
@@ -261,10 +264,11 @@ export function SimuladorCusto({
 
       {/* Nota de rodapé sobre o método */}
       <div className="sc-rodape">
-        <span className="sc-nota">
+        <span className="sc-nota flex items-start gap-1.5">
+          {metodo === 'PEPS' ? <Zap size={14} aria-hidden="true" /> : <Scale size={14} aria-hidden="true" />}
           {metodo === 'PEPS'
-            ? '⚡ PEPS: usa o custo do lote mais antigo com saldo — reflete o que será baixado na próxima venda.'
-            : '⚖️ Médio: pondera todos os lotes com saldo — suaviza variações de preço.'}
+            ? 'PEPS: usa o custo do lote mais antigo com saldo — reflete o que será baixado na próxima venda.'
+            : 'Médio: pondera todos os lotes com saldo — suaviza variações de preço.'}
         </span>
       </div>
     </div>

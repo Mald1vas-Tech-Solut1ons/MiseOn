@@ -17,6 +17,7 @@
  */
 
 import { useMemo } from 'react';
+import { Atom, UserRound, TriangleAlert } from 'lucide-react';
 import { resolverFator, type ItemEstoque, ErroCusteio } from '../../lib/custeio';
 import { getUnidade } from '../../lib/unidades';
 import './VisualizadorCaminho.css';
@@ -153,7 +154,7 @@ export function VisualizadorCaminho({
   if (erro) {
     return (
       <div className={`vcp-raiz vcp-erro ${className}`} role="alert">
-        <span className="vcp-icone-erro">⚠</span>
+        <span className="vcp-icone-erro"><TriangleAlert size={15} aria-hidden="true" /></span>
         <span>{erro}</span>
       </div>
     );
@@ -187,8 +188,10 @@ export function VisualizadorCaminho({
           <div className={`vcp-aresta vcp-aresta-${etapa.tipo}`}>
             <span className="vcp-mult">{fmtMult(etapa.multiplicador)}</span>
             <div className="vcp-linha-aresta" />
-            <span className={`vcp-tipo-badge vcp-tipo-badge-${etapa.tipo}`}>
-              {etapa.tipo === 'fisica' ? '⚛ Física' : '👤 Humana'}
+            <span className={`vcp-tipo-badge vcp-tipo-badge-${etapa.tipo} inline-flex items-center gap-1`}>
+              {etapa.tipo === 'fisica'
+                ? <><Atom size={12} aria-hidden="true" /> Física</>
+                : <><UserRound size={12} aria-hidden="true" /> Humana</>}
             </span>
           </div>
 

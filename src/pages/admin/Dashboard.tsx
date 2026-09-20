@@ -221,7 +221,7 @@ export default function Dashboard() {
       {/* ── Saudação ── */}
       <div data-tour="tour-dashboard-header" className="mb-5">
         <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{hoje}</p>
-        <h2 className="mt-1 text-2xl font-black dark:text-gray-100">{saudacao()}, {lojaNome} 👋</h2>
+        <h2 className="mt-1 text-2xl font-black dark:text-gray-100">{saudacao()}, {lojaNome}</h2>
       </div>
 
       {/* ── Cartão bloqueado pelo provedor ── */}
@@ -429,12 +429,16 @@ export default function Dashboard() {
                   </span>
                 )}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                 {metricasCozinha.media_hoje_min != null
                   ? `${metricasCozinha.media_hoje_min}min de média · meta ${metricasCozinha.meta_min}min · ${metricasCozinha.pedidos_hoje} pedido(s)`
                   : 'Ainda sem pedidos concluídos hoje'}
-                {metricasCozinha.ranking_operadores[0] && ` · 🥇 ${metricasCozinha.ranking_operadores[0].operador_nome}`}
-              </p>
+                {metricasCozinha.ranking_operadores[0] && (
+                  <span className="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                    <Trophy size={11} /> {metricasCozinha.ranking_operadores[0].operador_nome}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <ArrowRight size={18} className="shrink-0 text-gray-300" />

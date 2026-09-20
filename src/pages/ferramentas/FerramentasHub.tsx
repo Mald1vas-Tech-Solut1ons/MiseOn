@@ -67,7 +67,7 @@ export default function FerramentasHub() {
         </div>
 
         <div className="mt-12">
-          <CtaMiseOn mensagemWhatsapp="Olá! Vi as ferramentas grátis no site da MiseOn e quero conhecer o sistema." />
+          <CtaMiseOn mensagemWhatsapp="Olá! Vi as ferramentas grátis no site do MiseOn e quero conhecer o sistema." />
         </div>
       </main>
 

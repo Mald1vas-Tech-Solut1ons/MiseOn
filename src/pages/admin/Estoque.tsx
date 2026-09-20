@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale, ClipboardCheck, Scissors, CheckCircle2, Apple, ChevronDown } from 'lucide-react';
+import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale, ClipboardCheck, Scissors, CheckCircle2, Apple, ChevronDown, Zap, Settings2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Insumo, TipoItem, fmt, InsumoRendimentoJSON } from '../../types';
 import { UNIDADES, destinosPermitidos, validarConversao, opcoesDeEntrada } from '../../lib/unidades';
@@ -766,11 +766,11 @@ export default function Estoque() {
              <div className="flex rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
                <button type="button" onClick={() => setModoCadastro('RAPIDO')}
                  className={`rounded px-3 py-1 text-xs font-bold transition-all ${modoCadastro === 'RAPIDO' ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
-                 ⚡ {tDynamic('Rápido (Direto)')}
+                 <Zap size={14} aria-hidden="true" /> {tDynamic('Rápido (Direto)')}
                </button>
                <button type="button" data-tour="tour-estoque-btn-modo-avancado" onClick={() => setModoCadastro('AVANCADO')}
                  className={`rounded px-3 py-1 text-xs font-bold transition-all ${modoCadastro === 'AVANCADO' ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>
-                 ⚙️ {tDynamic('Conversão de Embalagem')}
+                 <Settings2 size={14} aria-hidden="true" /> {tDynamic('Conversão de Embalagem')}
                </button>
              </div>
            </div>
@@ -881,7 +881,7 @@ export default function Estoque() {
                )}
 
                <button type="button" onClick={() => setModoCadastro('AVANCADO')} className="text-xs opacity-95 text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center gap-1">
-                 ⚙️ Compras este item em Fardo/Caixa e usa em Gramas/Unidades? Clique para configurar conversão de embalagem
+                 <Settings2 size={14} className="shrink-0" aria-hidden="true" /> Compras este item em Fardo/Caixa e usa em Gramas/Unidades? Clique para configurar conversão de embalagem
                </button>
              </div>
            ) : (
@@ -986,7 +986,7 @@ export default function Estoque() {
                </div>
 
                <button type="button" onClick={() => setModoCadastro('RAPIDO')} className="text-xs opacity-95 text-gray-500 font-bold hover:underline flex items-center gap-1">
-                 ⚡ Voltar para Cadastro Direto / Rápido
+                 <Zap size={13} aria-hidden="true" /> Voltar para Cadastro Direto / Rápido
                </button>
              </>
            )}
@@ -1095,7 +1095,7 @@ export default function Estoque() {
                         title={i.setor ? `Setor: ${s.rotulo} (cadastro)` : `Setor: ${s.rotulo} (automático)`}
                         className="text-xs opacity-80 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border"
                         style={{ color: s.cor, borderColor: `${s.cor}55`, backgroundColor: `${s.cor}1a` }}>
-                        {s.icone} {s.rotulo}{i.setor ? '' : ' ·auto'}
+                        {s.rotulo}{i.setor ? '' : ' ·auto'}
                       </span>
                     );
                   })()}

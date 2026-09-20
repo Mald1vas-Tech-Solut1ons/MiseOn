@@ -2,7 +2,7 @@
 
 # 🍽️ MiseOn — Sistema Inteligente de Gestão para Food Service
 
-<img src="public/logo.png" alt="MiseOn Banner" width="520"/>
+<img src="public/brand/icon.png" alt="Símbolo oficial MiseOn" width="160"/>
 
 ### *Plataforma SaaS Multi-Tenant Enterprise para Restaurantes, Hamburguerias, Pizzarias, Lanchonetes, Bares, Buffets por Quilo e Dark Kitchens*
 

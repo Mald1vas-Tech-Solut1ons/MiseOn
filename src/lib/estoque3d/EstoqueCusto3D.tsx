@@ -9,7 +9,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Boxes, AlertTriangle, RefreshCw, Info, ChevronDown, ChevronUp, Layers, Flame, DollarSign, Package } from 'lucide-react';
+import { Boxes, AlertTriangle, RefreshCw, Info, ChevronDown, ChevronUp, Layers, Flame, DollarSign, Package, CircleGauge, Thermometer, GitBranch, Sparkles } from 'lucide-react';
 import { supabase } from '../supabase';
 import { CostGraph3D } from './CostGraph3D';
 import { carregarGrafoDaLoja } from './carregarGrafo';
@@ -75,6 +75,11 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'lotes_estoque', filter: `loja_id=eq.${lojaId}` },
+        agendarRebuild,
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'fatores_conversao' },
         agendarRebuild,
       )
       .subscribe();
@@ -208,7 +213,7 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
             )}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {tDynamic('Mapeamento tridimensional dos lotes físicos em estoque e suas esteiras de conversão.')}
+            {tDynamic('Mapeamento tridimensional dos lotes registrados e das conversões atualmente cadastradas.')}
           </p>
         </div>
 
@@ -229,20 +234,20 @@ export function EstoqueCusto3D({ lojaId }: { lojaId: string }) {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
-              <span className="font-bold text-blue-300 block mb-1">⚽ Tamanho da Esfera</span>
-              <p className="text-gray-300 text-xs opacity-95">Representa a <b>quantidade física em depósito</b>. Esferas maiores retêm mais volume físico.</p>
+              <span className="font-bold text-blue-300 mb-1 flex items-center gap-1.5"><CircleGauge size={14} aria-hidden="true" /> {tDynamic('Tamanho da esfera')}</span>
+              <p className="text-gray-300 text-xs opacity-95">Representa a <b>quantidade registrada no lote</b>. O tamanho não substitui a contagem física.</p>
             </div>
             <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
-              <span className="font-bold text-emerald-300 block mb-1">🌡️ Escala de Temperatura</span>
-              <p className="text-gray-300 text-xs opacity-95">🟢 Custo unitário econômico $\to$ 🟡 Moderado $\to$ 🔴 Alta densidade financeira/unidade.</p>
+              <span className="font-bold text-emerald-300 mb-1 flex items-center gap-1.5"><Thermometer size={14} aria-hidden="true" /> {tDynamic('Escala de custo')}</span>
+              <p className="text-gray-300 text-xs opacity-95">{tDynamic('Verde indica custo unitário menor; amarelo, intermediário; vermelho, maior densidade financeira por unidade.')}</p>
             </div>
             <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
-              <span className="font-bold text-amber-300 block mb-1">🔗 Dutos de Conversão</span>
-              <p className="text-gray-300 text-xs opacity-95">Conectam a <b>compra original</b> (raiz) às suas frações físicas (ex: Caixa $\to$ Unidade $\to$ Fatia).</p>
+              <span className="font-bold text-amber-300 mb-1 flex items-center gap-1.5"><GitBranch size={14} aria-hidden="true" /> {tDynamic('Dutos de conversão')}</span>
+              <p className="text-gray-300 text-xs opacity-95">Conectam o <b>lote registrado</b> (raiz) às conversões atuais (ex: Caixa $\to$ Unidade $\to$ Fatia). Não são um histórico imutável de eventos.</p>
             </div>
             <div className="bg-white/5 p-2.5 rounded-xl border border-white/10">
-              <span className="font-bold text-purple-300 block mb-1">✨ Brilho Pulsante</span>
-              <p className="text-gray-300 text-xs opacity-95">Indica <b>compras recentes</b> (últimos 7 dias) que estão entrando na esteira de produção.</p>
+              <span className="font-bold text-purple-300 mb-1 flex items-center gap-1.5"><Sparkles size={14} aria-hidden="true" /> {tDynamic('Brilho pulsante')}</span>
+              <p className="text-gray-300 text-xs opacity-95">Indica <b>lotes registrados recentemente</b> (últimos 7 dias).</p>
             </div>
           </div>
         </div>
