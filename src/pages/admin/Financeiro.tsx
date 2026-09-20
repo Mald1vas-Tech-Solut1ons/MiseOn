@@ -3,7 +3,9 @@ import { useOutletContext } from 'react-router-dom';
 import {
   TrendingUp, TrendingDown, DollarSign, Calculator, Save, Receipt,
     ShoppingBag, Ticket, Bike, Store, XCircle, Banknote, CreditCard, QrCode, HelpCircle,
+    ChartNoAxesCombined, Building2,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { supabase } from '../../lib/supabase';
 import { fmt, ProdutoCusto, ConfiguracoesCusto, Pedido, MetodoPgto } from '../../types';
@@ -224,14 +226,14 @@ export default function Financeiro() {
   const totalFixoMensal = Number(configCusto.custo_aluguel) + Number(configCusto.custo_energia) + Number(configCusto.custo_agua) + Number(configCusto.custo_internet) + Number(configCusto.custo_gas) + Number(configCusto.outros_custos_fixos);
   const rateioSimulado = Number(configCusto.expectativa_vendas_mes) > 0 ? totalFixoMensal / Number(configCusto.expectativa_vendas_mes) : 0;
 
-  const abaBtn = (id: typeof aba, rotulo: string) => (
-    <button type="button" onClick={() => setAba(id)} className={`px-4 py-2 text-sm font-semibold rounded-t-xl transition-colors ${aba === id ? 'bg-white dark:bg-gray-900 border-t border-x border-gray-100 dark:border-gray-800 text-[var(--cor-primaria)] -mb-[9px] shadow-[0_-2px_4px_rgba(0,0,0,0.02)]' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
-      {tDynamic(rotulo)}
+  const abaBtn = (id: typeof aba, rotulo: string, Icone: LucideIcon) => (
+    <button type="button" onClick={() => setAba(id)} className={`inline-flex items-center gap-2 rounded-t-xl px-4 py-2 text-sm font-semibold transition-colors ${aba === id ? 'bg-white dark:bg-gray-900 border-t border-x border-gray-100 dark:border-gray-800 text-[var(--cor-primaria)] -mb-[9px] shadow-[0_-2px_4px_rgba(0,0,0,0.02)]' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
+      <Icone size={16} aria-hidden="true" /> {tDynamic(rotulo)}
     </button>
   );
 
   return (
-    <div data-tour="tour-financeiro-header" className="p-4 max-w-3xl mx-auto">
+    <div data-tour="tour-financeiro-header" className="mx-auto max-w-6xl p-4">
       <div className="mb-3 flex items-center gap-2">
         <h2 className="font-bold text-xl dark:text-gray-100">{tDynamic('Financeiro')}</h2>
         <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs opacity-90 font-black uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
@@ -241,10 +243,10 @@ export default function Financeiro() {
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 mb-4 border-b border-gray-100 dark:border-gray-800 pb-2">
-        {abaBtn('EXTRATO', '💰 Extrato de Vendas')}
-        {abaBtn('MARGENS', '📈 Margens')}
-        {abaBtn('DRE', '📊 DRE Gerencial')}
-        {abaBtn('CUSTOS_FIXOS', '🏢 Custos Operacionais')}
+        {abaBtn('EXTRATO', 'Extrato de Vendas', Receipt)}
+        {abaBtn('MARGENS', 'Margens', TrendingUp)}
+        {abaBtn('DRE', 'DRE Gerencial', ChartNoAxesCombined)}
+        {abaBtn('CUSTOS_FIXOS', 'Custos Operacionais', Building2)}
       </div>
 
       {aba === 'DRE' && <DreGerencial />}
