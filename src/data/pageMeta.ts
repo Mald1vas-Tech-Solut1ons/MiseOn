@@ -121,7 +121,7 @@ export const PAGE_META: Record<string, PageMeta> = {
   // /ajuda/estoque renderiza o mesmo componente de /gestao-de-estoque-3d;
   // canonical aponta para a rota principal.
   '/gestao-de-estoque-3d': {
-    title: 'Estoque, Compras e Desmonte de Insumos com Custo Real — MiseOn',
+    title: 'Estoque, compras e custeio de insumos — MiseOn',
     description:
       'Controle de compras com fornecedor, marca e recebimento parcial; desmonte de insumos com rateio de custo PEPS; inventário em qualquer unidade e mapa 3D do capital parado na cozinha.',
     keywords: 'controle de compras restaurante, gestão de fornecedores food service, desmonte de insumos, rendimento de desossa, inventario de estoque restaurante, estoque 3d restaurante, ficha técnica restaurante, custeio peps comida',
@@ -137,7 +137,7 @@ export const PAGE_META: Record<string, PageMeta> = {
     h1: 'Blog MiseOn: Engenharia, CMV & Tecnologia para Food Service',
   },
   '/ajuda/estoque': {
-    title: 'Estoque, Compras e Desmonte de Insumos com Custo Real — MiseOn',
+    title: 'Estoque, compras e custeio de insumos — MiseOn',
     description:
       'Controle de compras com fornecedor, marca e recebimento parcial; desmonte de insumos com rateio de custo PEPS; inventário em qualquer unidade e mapa 3D do capital parado na cozinha.',
     canonicalUrl: `${BASE}/gestao-de-estoque-3d`,

@@ -175,7 +175,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     slug: 'sistema-para-dark-kitchen',
     category: 'nicho',
     seo: {
-      title: 'Sistema para Dark Kitchen | Delivery, iFood e CMV Real — MiseOn',
+      title: 'Sistema para Dark Kitchen | Delivery, iFood e custos — MiseOn',
       description: 'Sistema de gestão para dark kitchen e cozinha exclusiva de delivery: pedidos do iFood e do canal próprio na mesma tela, KDS de produção, estoque e CMV por prato.',
       keywords: 'sistema para dark kitchen, cozinha delivery, gestão dark kitchen, sistema delivery próprio, kds delivery, cmv dark kitchen',
       canonicalUrl: 'https://miseon.app.br/sistema-para-dark-kitchen',
@@ -183,11 +183,11 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     badge: 'Operação 100% Delivery',
     h1Title: 'Cozinha sem salão precisa de',
     h1Highlight: 'margem, não de mesa',
-    subheadline: 'Sem salão para diluir custo, a dark kitchen vive de duas coisas: volume de pedido e CMV sob controle. O MiseOn junta iFood e canal próprio numa tela só, e mostra o custo real de cada prato.',
+    subheadline: 'Sem salão para diluir custo, a dark kitchen vive de duas coisas: volume de pedido e CMV sob controle. O MiseOn reúne os canais configurados e calcula o custo dos pratos que possuem ficha e insumos confiáveis.',
     heroMetrics: [
       { label: 'Canais', value: 'iFood + próprio' },
       { label: 'Comissão no canal próprio', value: 'Zero' },
-      { label: 'Custo por prato', value: 'Real (PEPS)' },
+      { label: 'Custo por prato', value: 'PEPS + ficha' },
     ],
     painPointsTitle: 'O que corroi a margem de uma dark kitchen',
     painPointsSubtitle: 'Sem salão, cada ponto de margem perdido aparece direto no resultado:',
@@ -302,7 +302,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     subheadline: 'Centralize pedidos do balcão, cardápio digital e iFood em uma tela de cozinha (KDS) em tempo real. Controle adicionais, fichas técnicas no estoque e Pix automático direto na sua conta.',
     heroMetrics: [
       { label: 'Tempo por etapa, cronometrado', value: 'No KDS' },
-      { label: 'Pedidos centralizados na cozinha', value: '100%' },
+      { label: 'Pedidos centralizados na cozinha', value: 'No KDS' },
       { label: 'Baixa de insumo e CMV', value: 'Por ficha' },
     ],
     painPointsTitle: 'Chega de perder tempo com desorganização na cozinha e no caixa',
@@ -361,7 +361,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         iconName: 'BarChart3',
-        title: 'Custo Real do Blend e dos Molhos',
+        title: 'Custo Calculado do Blend e dos Molhos',
         description: 'O que a sua cozinha produz entra no estoque valendo o que custou. A cada produção o sistema mostra o custo da panela e o custo por unidade — e esse valor entra na ficha do lanche.',
         tag: 'CMV Que Não Mente',
       },
@@ -436,7 +436,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     subheadline: 'Agilize o atendimento no caixa de balcão, gerencie comandas por mesa, controle o estoque de bebidas e salgados e receba via Pix direto na sua conta.',
     heroMetrics: [
       { label: 'Atendimento ágil no caixa', value: 'Em segundos' },
-      { label: 'Controle de fechamento de caixa', value: '100%' },
+      { label: 'Controle de fechamento de caixa', value: 'Por turno' },
       { label: 'Pedido do canal direto na cozinha', value: 'Sem redigitar' },
     ],
     painPointsTitle: 'Sua lanchonete precisa de um caixa ágil e sem complicações',
@@ -504,7 +504,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     faqs: [
       {
         pergunta: 'O PDV funciona em qualquer computador de caixa?',
-        resposta: 'Sim! O MiseOn é 100% web e roda direto no navegador (Chrome, Edge, Firefox) em computadores, notebooks ou tablets.',
+        resposta: 'O MiseOn roda no navegador em computadores, notebooks ou tablets compatíveis. Valide impressoras e periféricos no equipamento que será usado na operação.',
       },
       {
         pergunta: 'Consigo emitir cupom impresso para a cozinha ou para o cliente?',
@@ -549,9 +549,9 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     h1Highlight: 'agiliza as entregas do seu delivery',
     subheadline: 'Centralize pedidos do salão, balcão e delivery em um painel único. Acompanhe a produção no KDS, gerencie motoboys e calcule taxas de entrega com precisão.',
     heroMetrics: [
-      { label: 'Organização de forno e montagem', value: '100%' },
-      { label: 'Precisão na gestão de entregas', value: '100%' },
-      { label: 'Pedidos centralizados', value: 'iFood + Site' },
+      { label: 'Organização de forno e montagem', value: 'Etapas no KDS' },
+      { label: 'Gestão de entregas', value: 'Status e motoboy' },
+      { label: 'Pedidos centralizados', value: 'Canais configurados' },
     ],
     painPointsTitle: 'Mantenha o forno e o delivery da sua pizzaria sob controle',
     painPointsSubtitle: 'Elimine erros de produção e atrasos nas entregas de pizza:',
@@ -609,7 +609,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         iconName: 'BarChart3',
-        title: 'Custo Real de Massas e Molhos',
+        title: 'Custo Calculado de Massas e Molhos',
         description: 'Tudo o que sua cozinha produz (massa fermentada, molho de tomate, recheios) é custeado na produção e entra na ficha técnica com preço apurado por kg ou porção.',
         tag: 'CMV da Pizza',
       },
@@ -637,11 +637,11 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         pergunta: 'Consigo integrar os pedidos do iFood com os pedidos do meu site?',
-        resposta: 'Sim. A integração oficial iFood envia os pedidos diretamente para a mesma fila de produção no KDS do MiseOn.',
+        resposta: 'Depois que as credenciais e os módulos forem aprovados pelo iFood, os pedidos podem seguir para a fila de produção do KDS. A disponibilidade depende da homologação do provedor.',
       },
       {
         pergunta: 'Como o MiseOn calcula o custo das pizzas com massas e molhos caseiros?',
-        resposta: 'Quando o pizzaiolo produz 10 kg de massa ou 5 litros de molho, o MiseOn calcula em tempo real o valor total dos insumos consumidos pelo PEPS e atribui o custo exato por kg ou litro. Assim, ao vender a pizza, o custo da fatia de massa e da concha de molho é abatido com precisão no CMV.',
+        resposta: 'Quando a produção informa insumos e rendimento, o MiseOn calcula o custo do lote pelo PEPS e distribui o valor por kg, litro ou porção. O resultado depende de unidades, lotes e fichas corretamente cadastrados.',
       },
     ],
     screenshots: [
@@ -679,7 +679,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     subheadline: 'Integre seu salão com comanda eletrônica no celular do garçom, mapa de mesas em tempo real, autoatendimento QR Code, DRE financeiro e emissão fiscal NFC-e.',
     heroMetrics: [
       { label: 'Giro de mesas no salão', value: 'Otimizado' },
-      { label: 'Integração Salão x Cozinha', value: '100%' },
+      { label: 'Integração Salão x Cozinha', value: 'Fluxo no KDS' },
       { label: 'Emissão a partir da própria venda', value: 'Integrada' },
     ],
     painPointsTitle: 'Sincronia total entre o atendimento de salão e a cozinha',
@@ -771,7 +771,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
         titulo: 'DRE Financeiro & Margem Líquida',
         src: '/images/telas-reais/media__1788461951624.png',
         alt: 'Painel DRE Gerencial no MiseOn para restaurantes',
-        legenda: 'DRE gerencial automático mostrando CMV, faturamento e margem real.',
+        legenda: 'Prévia demonstrativa da estrutura de CMV, faturamento e margem; não representa a contabilidade da loja.',
         largura: 1047,
         altura: 580,
       },
@@ -794,10 +794,10 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     badge: 'Integração via API do iFood',
     h1Title: 'Integração iFood para restaurantes',
     h1Highlight: 'com a margem de cada pedido na tela',
-    subheadline: 'Os pedidos do iFood entram no mesmo painel do salão, do site e do WhatsApp — com a comanda inteira, a comissão descontada pedido a pedido e o preço sugerido para o seu cardápio de lá não comer sua margem.',
+    subheadline: 'Com credenciais e módulos aprovados pelo iFood, os pedidos podem entrar no mesmo painel dos demais canais. As taxas configuradas ajudam a estimar o líquido de cada pedido; o repasse oficial continua sendo o do iFood.',
     heroMetrics: [
       { label: 'Comissão do iFood por pedido', value: 'Descontada na tela' },
-      { label: 'Redigitação de pedidos', value: 'Zerada' },
+      { label: 'Redigitação de pedidos', value: 'Dispensada após homologação' },
       { label: 'Mudanças no seu iFood sem você mandar', value: 'Nenhuma' },
     ],
     painPointsTitle: 'Opere o iFood sem perder margem nem informação no caminho',
@@ -937,7 +937,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     subheadline: 'Coloque sua loja no ar com link personalizado e QR Code para mesas ou balcão. Fotos atraentes, grupos de adicionais e pagamentos via Pix direto na sua conta.',
     heroMetrics: [
       { label: 'Comissão por pedido feito no site', value: '0%' },
-      { label: 'Reimpressões de papel', value: 'Zeradas' },
+      { label: 'Cardápio de papel', value: 'Opcional' },
       { label: 'Atualização de preços', value: 'Em tempo real' },
     ],
     painPointsTitle: 'Tenha seu próprio canal de vendas digital e livre de taxas',
@@ -949,7 +949,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         semMiseOn: 'Pagar porcentagens sobre cada venda feita no seu próprio estabelecimento.',
-        comMiseOn: 'Zero comissão sobre pedidos: 100% do faturamento das suas vendas é seu.',
+        comMiseOn: 'O MiseOn não cobra comissão por pedido do canal próprio; permanecem as taxas do meio de pagamento contratado.',
       },
       {
         semMiseOn: 'Clientes aguardando o garçom trazer o cardápio impresso na mesa.',
@@ -1169,16 +1169,16 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       keywords: 'whatsapp ia restaurante, robo whatsapp delivery, atendimento automático whatsapp comida, api oficial whatsapp meta',
       canonicalUrl: 'https://miseon.app.br/api-whatsapp-restaurantes',
     },
-    badge: 'API Oficial Meta Verified',
-    h1Title: 'Atendimento inteligente via WhatsApp com IA Oficial Meta',
+    badge: 'WhatsApp Business Platform',
+    h1Title: 'Atendimento inteligente via WhatsApp com IA',
     h1Highlight: 'para o seu restaurante',
-    subheadline: 'Atenda clientes no WhatsApp com Inteligência Artificial conectada à API Oficial da Meta. Responda dúvidas sobre cardápio, horários e envie o link do seu cardápio digital.',
+    subheadline: 'Após configurar a WhatsApp Business Platform, a IA pode responder dúvidas sobre cardápio e horários e enviar o link do cardápio digital.',
     heroMetrics: [
       { label: 'Conexão WhatsApp', value: 'API Oficial Meta' },
-      { label: 'Tempo de resposta', value: 'Instantâneo' },
+      { label: 'Tempo de resposta', value: 'Automatizado' },
       { label: 'Sem número pessoal no atendimento', value: 'API Oficial' },
     ],
-    painPointsTitle: 'Atendimento rápido e oficial no WhatsApp do seu delivery',
+    painPointsTitle: 'Atendimento automatizado no WhatsApp do seu delivery',
     painPointsSubtitle: 'Elimine a demora nas respostas no canal de atendimento mais usado pelos clientes:',
     painPoints: [
       {
@@ -1187,7 +1187,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         semMiseOn: 'Risco de bloqueio por utilizar sistemas não autorizados de automação de WhatsApp.',
-        comMiseOn: 'Integração 100% Oficial via WhatsApp Business Cloud API da Meta (Meta Verified).',
+        comMiseOn: 'Integração pela WhatsApp Business Platform, sujeita à configuração e às políticas da Meta.',
       },
       {
         semMiseOn: 'Atendentes sobrecarregados digitando respostas repetitivas toda noite.',
@@ -1195,7 +1195,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
     ],
     featuresTitle: 'Recursos reais do Atendimento WhatsApp MiseOn',
-    featuresSubtitle: 'Tecnologia oficial e segura para a comunicação da sua loja:',
+    featuresSubtitle: 'Recursos disponíveis após configurar a conta da loja na plataforma da Meta:',
     features: [
       {
         iconName: 'MessageCircle',
@@ -1205,9 +1205,9 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         iconName: 'ShieldCheck',
-        title: 'Conexão Oficial Meta',
-        description: 'Integração via WhatsApp Business Cloud API Oficial da Meta sem risco de banimento de número.',
-        tag: 'Meta Official',
+        title: 'WhatsApp Business Platform',
+        description: 'Integração pela plataforma da Meta, sujeita à configuração, aprovação e políticas do provedor.',
+        tag: 'Requer configuração',
       },
       {
         iconName: 'QrCode',
@@ -1236,7 +1236,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     faqs: [
       {
         pergunta: 'O número de WhatsApp da loja corre risco de ser banido?',
-        resposta: 'Não! O MiseOn utiliza exclusivamente a API Oficial da WhatsApp Business Platform da Meta, garantindo total conformidade e segurança.',
+        resposta: 'Nenhuma integração pode garantir risco zero. O MiseOn usa a WhatsApp Business Platform, mas a loja precisa cumprir as políticas da Meta, manter consentimento dos contatos e configurar corretamente a conta.',
       },
       {
         pergunta: 'A IA fecha o pedido sozinha no WhatsApp?',
@@ -1249,10 +1249,10 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     ],
     screenshots: [
       {
-        titulo: 'WhatsApp Business Cloud API Conectado',
+        titulo: 'Painel de configuração do WhatsApp',
         src: '/images/telas-reais/whatsapp-conectado.png',
         alt: 'Painel de conexão WhatsApp no MiseOn',
-        legenda: 'Número oficial verificado pela Meta com IA automatizada para respostas.',
+        legenda: 'Tela do módulo; a conexão depende da conta, das credenciais e da aprovação da Meta.',
         largura: 1047,
         altura: 477,
       },
@@ -1275,7 +1275,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
     heroMetrics: [
       { label: 'Emissão de NFC-e', value: 'Integrada' },
       { label: 'Certificado Digital', value: 'Modelo A1' },
-      { label: 'Conformidade SEFAZ', value: '100%' },
+      { label: 'Autorização fiscal', value: 'Conforme credenciamento' },
     ],
     painPointsTitle: 'Facilite a emissão fiscal no seu estabelecimento',
     painPointsSubtitle: 'Mantenha sua loja em dia com a SEFAZ sem retrabalho na hora de vender:',
@@ -1463,7 +1463,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         pergunta: 'Posso vender produtos por peso e produtos unitários no mesmo pedido?',
-        resposta: 'Com certeza! O sistema é 100% híbrido. Você pode lançar o prato por peso (0,450 kg) junto com um refrigerante por unidade (1x Coca-Cola) na mesma comanda.',
+        resposta: 'Sim. Você pode lançar o prato por peso (0,450 kg) junto com um refrigerante por unidade na mesma comanda.',
       },
       {
         pergunta: 'Preciso de alguma balança específica para usar com o sistema?',
@@ -1471,7 +1471,7 @@ export const LANDING_PAGES_DATA: Record<string, LandingPageData> = {
       },
       {
         pergunta: 'Como o sistema calcula a perda de cocção dos assados e grelhados do buffet?',
-        resposta: 'No MiseOn, a ordem de produção permite informar o rendimento padrão em kg após o cozimento. Se você cozinha 10 kg de carne e obtém 7 kg de assado pronto na travessa, o sistema ajusta o custo unitário por kg final servido. Dessa forma, o valor por grama consumido pelo cliente reflete 100% do custo real do ingrediente.',
+        resposta: 'No MiseOn, a ordem de produção permite informar o rendimento em kg após o cozimento. Se 10 kg de carne resultam em 7 kg prontos, o sistema distribui o custo dos insumos informados pelo peso final, desde que lotes, unidades e consumo estejam confiáveis.',
       },
     ],
     screenshots: [

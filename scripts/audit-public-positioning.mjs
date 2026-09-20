@@ -65,6 +65,9 @@ for (const route of routes) {
   if (schemas.length === 0 || schemas.includes('JSON-LD inválido')) errors.push('schema ausente ou inválido');
   if (/\b(?:na|da|pela) MiseOn\b/i.test(html)) errors.push('gênero da marca inconsistente');
   if (/depoimentos? de clientes reais|case(?:s)? reais? de clientes?/i.test(html)) errors.push('prova social não comprovada');
+  if (/Meta Verified|sem risco de banimento|Conformidade SEFAZ[^<]{0,40}100%/i.test(html)) {
+    errors.push('garantia externa não comprovada');
+  }
 
   results.push({ route, title, canonical, h1Count, ctas, schemas, errors });
 }
