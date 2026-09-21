@@ -1,256 +1,240 @@
 # Teste de usabilidade simulada — MiseOn
 
-**Data:** 18/09/2026 · **Alvo:** `https://miseon.app.br` em produção · **Commit:** `f8e8af0`
+**Data:** 20/09/2026
 
-## Como este teste foi feito
+**Código avaliado:** `228ecd3` + alterações locais não publicadas
 
-Cinco perfis percorreram o produto sem conhecimento prévio. O que dá para
-percorrer sem senha foi **percorrido de verdade no navegador**; o que está atrás
-do login foi **lido no código**, porque não há credencial de lojista disponível
-nesta máquina.
+**Ambientes:** produção (`miseon.app.br`) e build local validado (`127.0.0.1:4174`)
 
-Cada achado abaixo traz a origem:
+**Loja usada nos testes autenticados:** `lanchepaulista`
 
-- **[medido]** — observado ao vivo, com número.
-- **[código]** — lido no repositório, com arquivo e linha.
+## Veredito executivo
 
-Nada aqui é suposição de comportamento. Onde eu não pude verificar, está
-escrito que não pude.
+O MiseOn **não está pronto para venda self-service sem acompanhamento**. O produto
+tem uma base operacional ampla e vários controles de servidor corretos, mas o
+primeiro valor é interrompido por falhas confirmadas no PDV, na configuração
+inicial e em regras de salão/pagamento. Para venda hoje, o formato defensável é
+**piloto assistido**, com escopo e integrações declarados por escrito.
 
-**Limite declarado:** ninguém completou cadastro real, configuração, cadastro de
-produto ou primeiro pedido — isso exigiria criar conta em produção. Os passos 3
-a 6 do roteiro foram avaliados pelo código do fluxo, não pela execução.
+Este documento não é uma certificação de ausência de defeitos. É um registro
+reproduzível do que foi testado, do que falhou e do que ainda não pôde ser
+executado sem criar transações reais em produção.
 
----
+## Método e limites
 
-## O que funciona bem (para não consertar o que não está quebrado)
+- Páginas públicas, preço, suporte, cadastro e primeiro acesso foram percorridos
+  no navegador.
+- O painel foi percorrido em produção com a conta autenticada da loja de testes.
+- Cardápio, carrinho, cupom, entrega, KDS, mesas, produto e integrações foram
+  inspecionados sem salvar alterações.
+- Nova conta, gravação de produto, finalização de pedido, cobrança real e envio
+  por integrações externas não foram executados porque criariam dados ou
+  transações em produção.
+- Comportamentos não concluídos na interface foram confrontados com o código e,
+  quando necessário, com as funções reais do banco de produção.
 
-Antes das falhas, o que os cinco perfis encontrariam de bom:
+Legenda: **[UI-prod]** interface publicada; **[UI-local]** build local;
+**[código]** código-fonte; **[banco-prod]** consulta somente de leitura.
 
-- **Suporte real e visível** [medido]: WhatsApp, `suporte@miseon.app.br`,
-  `contato@miseon.app.br` e 7 perguntas frequentes, incluindo "Posso cancelar
-  quando quiser?". Rodapé com CNPJ e cidade. Isso é mais do que muita
-  concorrente entrega.
-- **Assistente de configuração existe** [código]
-  (`StoreSetupWizard.tsx:23`): 5 passos obrigatórios — identidade, primeiro
-  produto, pagamento, horários, divulgar — e 2 opcionais (iFood, WhatsApp).
-  É onboarding de verdade, orientado a ativação.
-- **Honestidade em dois pontos difíceis** [medido]: a calculadora diz "Não é
-  promessa de economia, é o tamanho do problema que você mesmo estimou", e a
-  foto do totem diz "Cena ilustrativa". Não há depoimento inventado.
-- **Trial sem cartão** [código]: `lojas.trial_termina_em` existe e
-  `src/lib/assinatura.ts` avalia. A promessa tem lastro.
+## O que funcionou
+
+- TypeScript, 558 testes automatizados e build Vite aprovados.
+- Prerender de 32 rotas e sitemap com 30 URLs.
+- O caminho local `/cadastre-se` → `/admin/login?novo=1` comunica criação de
+  loja e permite Google ou link por e-mail. **[UI-local]**
+- A vitrine de `lanchepaulista` mostrou 17 produtos; carrinho e checkout
+  abriram. **[UI-prod] [banco-prod]**
+- Cupom inválido explicou o motivo; cupom válido atualizou desconto e total.
+  **[UI-prod]**
+- A taxa de entrega por distância foi recalculada e possui cálculo autoritativo
+  no servidor. **[UI-prod] [banco-prod]**
+- Fechar o checkout sem concluir não criou pedido. **[UI-prod] [banco-prod]**
+- O formulário de produto cobre categoria, preço, fotos, estação do KDS, ficha
+  técnica, nutrição e personalizações. **[UI-prod]**
+- KDS por estação, mesas, divisão de conta e produção existem no painel.
+  **[UI-prod]**
+- Preço e suporte existem nas páginas públicas, embora distantes do início.
+  **[UI-local]**
 
 ---
 
 ## Perfil 1 — Hamburgueria com delivery e dois funcionários
 
-**Entende o produto?** Em parte. O selo acima do título diz "SISTEMA DE GESTÃO E
-OPERAÇÃO PARA RESTAURANTES", mas o H1 é uma pergunta sobre lucro, não uma frase
-sobre o que o produto é. Ele entende o *problema* em 5 segundos; o *produto*,
-não.
+### Percurso
 
-**Cria conta?** Clica em "Cadastrar minha loja", cai em `/cadastre-se`, que tem
-**zero campos** e um botão. O botão leva a `/admin/login`, que diz **"Bem-vindo
-de volta — Entre para gerenciar sua operação"**. [medido]
+1. A landing comunica cardápio, KDS, estoque e iFood.
+2. O CTA leva ao cadastro e ao acesso para criar a loja.
+3. O cadastro pede dados fiscais/empresariais antes da experimentação.
+4. Informar delivery não configura taxa, raio, entregadores nem horários.
+5. Cadastrar produto é compreensível, mas há campos sem rótulo acessível.
+6. O primeiro pedido de balcão ficou bloqueado: o PDV publicado mostrou
+   “Nenhum produto encontrado”, embora a loja tivesse 17 produtos disponíveis.
+7. Preço e suporte aparecem apenas perto do final.
 
-> Aqui ele hesita. Ele nunca esteve aqui. Não existe "criar conta".
+**Dúvidas:** regra de taxa; estado real do iFood; convite/permissão dos dois
+funcionários; qual canal usar no primeiro pedido.
 
-**Configura a operação?** O cadastro pergunta se ele faz entregas e qual o
-modelo (fixo/freelancer). Ele responde. Nenhum passo do assistente trata de
-entrega ou taxa. [código]
+**Desistiria:** no PDV vazio.
 
-**Preço?** Só a 84% da página — depois de ~50 telas. [medido]
+**Confiaria:** vendo produto próprio → pedido → KDS → estoque de ponta a ponta.
 
-**Desistiria:** na tela de login que diz "bem-vindo de volta".
-**Confiaria:** vendo o próprio cardápio no ar com um produto seu.
-**Iria ao concorrente:** qualquer um com "Criar conta grátis" visível.
+**Escolheria concorrente:** se ele demonstrar balcão + delivery antes de pedir
+dados fiscais.
 
 ---
 
 ## Perfil 2 — Lanchonete de balcão e WhatsApp
 
-**O que ele procura:** WhatsApp. A home promete "IA no WhatsApp (API Meta)" logo
-no primeiro bloco e o FAQ responde "A IA fecha pedidos sozinha no WhatsApp?".
-[medido]
+### Percurso
 
-**Fricção:** o WhatsApp é passo **opcional** do assistente, o último da lista
-[código] (`StoreSetupWizard.tsx`, `id: 'whatsapp'`, `obrigatorio: false`) — para
-ele é o motivo da compra, não um extra. E o cadastro nunca pergunta se ele vende
-por WhatsApp, embora pergunte sobre salão e entrega.
+1. A landing explica PDV, comandas, estoque, Pix e WhatsApp, mas é longa e
+   repetitiva.
+2. O cadastro funciona localmente, porém a operação nasce genérica.
+3. WhatsApp é tratado como integração opcional.
+4. Em produção, a tela mostrou **DESCONECTADO** e nenhum número conectado.
+5. O assistente, simultaneamente, marcava WhatsApp como “Feito”.
+6. O pedido de balcão ficou bloqueado pelo PDV sem produtos.
+7. O plano é único: R$ 169,90/mês ou R$ 149,90/mês no anual.
 
-**Preço:** ele é o menor ticket dos cinco. O plano único de R$ 169,90/mês
-(R$ 149,90 no anual) [medido] não tem degrau para quem só quer balcão e
-WhatsApp.
+**Dúvidas:** IA fecha pedido ou só conversa; contratação da Meta; contingência;
+plano menor.
 
-**Desistiria:** ao descobrir que paga pelo pacote inteiro.
-**Confiaria:** vendo a IA responder no número dele antes de assinar.
-**Iria ao concorrente:** Anota AI, que nasce dessa dor específica.
+**Desistiria:** na contradição “desconectado” × “feito”.
+
+**Confiaria:** teste no próprio número e indicador único de saúde.
+
+**Escolheria concorrente:** se oferecer prova imediata no WhatsApp e preço de
+entrada.
 
 ---
 
 ## Perfil 3 — Restaurante com salão e quatro garçons
 
-**Fricção central:** no cadastro ele marca "Atendo no salão com garçom" e
-informa 4 funcionários. Depois disso, **nenhuma das duas respostas é usada para
-configurar nada**. [código] — as colunas `atende_salao_garcom`, `faz_entregas` e
-`qtd_funcionarios` aparecem em exatamente **um** lugar fora do formulário:
-`src/pages/superadmin/Tenants.tsx:458-466`, a tela do **superadmin**. Ou seja:
-são coletadas para o vendedor ver, não para montar a operação do cliente.
+### Percurso
 
-O assistente é uma lista estática [código] (`StoreSetupWizard.tsx:178` filtra só
-por `obrigatorio`, nunca por segmento ou perfil): ele recebe os mesmos 7 passos
-que um dark kitchen sem salão. Nenhum passo cria mesas ou convida garçom, apesar
-de existirem as telas `Mesas.tsx` e `PainelGarcomMobile.tsx`.
+1. A landing comunica comanda, mesas, garçons, KDS, DRE e fiscal.
+2. O cadastro pergunta por salão e funcionários.
+3. As respostas não criam mesas, não convidam garçons e não adaptam o wizard.
+4. Mapa de mesas e lançamento por garçom existem.
+5. Na divisão por assento, a tela calcula uma fração, mas o trigger real repõe o
+   preço integral do produto em cada item fracionado.
+6. “Já pago” soma pagamentos sem filtrar status; PENDENTE/CANCELADO pode reduzir
+   o saldo.
+7. O fechamento 3D não verifica cada erro e pode imprimir após falha parcial.
 
-Isso contradiz o princípio escrito no próprio documento de engenharia do
-produto: "a máquina infere, o usuário confirma".
+**Dúvidas:** convite/permissão dos garçons; taxa no DRE; modos de divisão;
+contingência de rede.
 
-**Desistiria:** ao terminar o assistente e ainda não ter mesa nem garçom.
-**Confiaria:** se ao marcar "salão com garçom" o sistema já perguntasse quantas
-mesas e oferecesse o convite para os quatro.
-**Iria ao concorrente:** Saipos ou GrandChef, que vendem salão como carro-chefe.
+**Desistiria:** na primeira cobrança incorreta ou fechamento parcial.
+
+**Confiaria:** transação única, idempotente e testada sob falhas.
+
+**Escolheria concorrente:** se divisão e fechamento já forem consolidados.
 
 ---
 
-## Perfil 4 — Pizzaria de alto volume
+## Perfil 4 — Pizzaria com alto volume
 
-**O que ele encontra:** `/sistema-para-pizzaria` fala de KDS de forno, taxa por
-raio/bairro, iFood e custeio de massa e molho da casa. É uma página honesta: não
-promete o que o produto não faz. [código] (`landingPagesData.ts`)
+### Percurso
 
-**Onde trava:** a primeira pergunta de qualquer pizzaria é **meio a meio** — e o
-site não responde. O termo aparece no blog do MiseOn, em artigo chamado
-"Engenharia para Pizzarias: Como Gerenciar Pedidos Meio a Meio" [código]
-(`blogData.ts:779`), mas **não existe no fluxo de pedido nem no schema**: zero
-ocorrências em `PDV.tsx`, `Cardapio.tsx` (público e admin), `components/pdv/` e
-nas migrations. [código]
+1. A landing fala de KDS de forno, entregas, iFood e custeio de preparos.
+2. Usa “100% organização”, “100% precisão” e “iFood + Site” sem medição.
+3. KDS por estação e gestão de entrega existem.
+4. O iFood publicado está **vinculado, sem receber**: 131 tentativas seguidas,
+   última verificação em 20/09/2026, HTTP 403.
+5. Não existe fluxo implementado de pizza meio a meio/bordas; há flag de módulo
+   e conteúdo público que cria essa expectativa.
+6. Não foi comprovada adequação a alto volume.
 
-Não é propaganda enganosa — é conteúdo educativo. Mas o leitor sai do artigo
-achando que o sistema resolve, e não há nada no site que diga sim ou não.
+**Dúvidas:** precificação e estoque de duas metades; capacidade por hora;
+contingência.
 
-**Segundo ponto:** as landings de nicho exibem métricas como
-`value: '100%'` — seis ocorrências no arquivo [código]
-(`landingPagesData.ts`). Número redondo sem origem, num público que desconfia de
-promessa.
+**Desistiria:** no iFood 403 e na ausência de meio a meio.
 
-**Desistiria:** na dúvida não respondida sobre meio a meio.
-**Confiaria:** vendo uma pizza meio a meio sendo montada, precificada e baixada
-do estoque.
-**Iria ao concorrente:** qualquer sistema que mostre meio a meio em 30 segundos.
+**Confiaria:** pedido real com duas metades, borda, KDS e estoque sob carga.
+
+**Escolheria concorrente:** se demonstrar o fluxo específico em vez de módulos
+genéricos.
 
 ---
 
 ## Perfil 5 — Administrador de duas unidades
 
-**Este é o pior caso dos cinco.**
+### Percurso
 
-**Não há como operar duas lojas.** [código] `AdminLayout.tsx:185-211` busca
-todos os vínculos do usuário e faz `const ativo = rels[0]` — pega o primeiro.
-Não há `.order()` na consulta e não há seletor de loja em lugar nenhum do
-painel. Consequência: ele entra, vê **uma** unidade, não tem como trocar, e qual
-delas aparece depende da ordem que o Postgres devolver — pode mudar entre um
-login e outro.
+1. A home não explica cobrança, limites nem visão consolidada por unidade.
+2. O painel local possui seletor para vínculos existentes e preserva a escolha.
+3. A Edge Function rejeita qualquer usuário que já possua vínculo; a segunda
+   unidade não pode ser criada no self-service.
+4. Não há onboarding de rede, preço adicional nem consolidação.
+5. A troca real não pôde ser executada porque a conta de teste tem uma loja.
 
-**O site não avisa.** O plano único não menciona unidade adicional; não há preço
-por loja nem indicação de limite. Ele descobre depois de pagar.
+**Dúvidas:** preço por loja/CNPJ/usuário; DRE consolidado; funcionários em duas
+lojas; cópia de cardápio.
 
-**Desistiria:** no primeiro login, ao não achar a segunda unidade.
-**Confiaria:** com um seletor de unidade no topo e um painel consolidado.
-**Iria ao concorrente:** Consumer ou Saipos, que tratam rede como caso normal.
+**Desistiria:** no conflito ao cadastrar a segunda unidade.
 
----
+**Confiaria:** fluxo explícito, seletor, permissões e consolidação.
 
-## Problemas, classificação, correção e medição
-
-### CRÍTICO
-
-| # | Problema | Evidência |
-|---|---|---|
-| C1 | "Cadastrar minha loja" leva a uma tela de **login** que diz "Bem-vindo de volta". Não existe opção de criar conta: `signUp` só é usado para o **cliente final** (`ModalAuthCliente.tsx:36` — única ocorrência no projeto). Para o lojista há Google OAuth, senha e link mágico. O cadastro **está habilitado** no projeto (`disable_signup = false`, medido na Management API) e `signInWithOtp` cria o usuário por padrão — ou seja, **a capacidade existe e quem esconde é a interface**. Quem chega por e-mail e não quer usar Google não descobre isso em lugar nenhum. | [medido] + [código] |
-| C2 | Quem tem duas unidades fica preso na primeira: `AdminLayout.tsx:211` usa `rels[0]`, sem ordenação e sem seletor de loja. | [código] |
-
-**C1 — correção:** separar cadastro de login. Em `/cadastre-se`, formulário
-próprio (nome, e-mail, senha) chamando `supabase.auth.signUp`, ou, mantendo o
-link mágico, trocar o texto para "Criar conta / Entrar" e rotular o botão como
-"Receber link para criar minha conta". A tela nunca deve dizer "bem-vindo de
-volta" para quem chega de `/cadastre-se`.
-**Como medir:** taxa `clicou em Cadastrar → chegou no assistente` (hoje não
-medida, depende do evento `start_signup`); e contagem de `auth.users` criados
-por dia. Alvo: sair de zero conta nova por semana.
-
-**C2 — correção:** ordenar a consulta (`.order('criado_em')`) e adicionar
-seletor de unidade no cabeçalho quando `rels.length > 1`, guardando a escolha.
-Enquanto não houver seletor, mostrar aviso explícito ao usuário com mais de um
-vínculo, em vez de escolher em silêncio.
-**Como medir:** consulta em `usuarios_loja` por `user_id` com mais de uma loja
-(hoje: verificar quantos existem); e teste de regressão que falha se
-`AdminLayout` voltar a usar índice fixo.
-
-### ALTO
-
-| # | Problema | Evidência |
-|---|---|---|
-| A1 | CPF/CNPJ e razão social obrigatórios **antes** de ver o produto (`TornarSeLojista.tsx:53-58`), enquanto a home promete "Crie sua conta em 3 minutos" e "Zero Cartão no Cadastro". | [código] + [medido] |
-| A2 | O perfil operacional coletado no cadastro (`atende_salao_garcom`, `faz_entregas`, `qtd_funcionarios`) é lido **apenas** em `superadmin/Tenants.tsx:458-466`. Não configura nada para o cliente. | [código] |
-| A3 | O preço aparece a **84% da página**; a home tem **58,7 telas** de rolagem no desktop e **53,4** no celular. | [medido] |
-
-**A1 — correção:** mover CPF/CNPJ e razão social para o momento em que são
-necessários (emissão fiscal ou primeira cobrança). Para começar o trial bastam
-nome da loja e segmento.
-**Como medir:** conclusão do formulário por etapa (abandono na etapa 1 vs 2 vs
-3). Alvo: reduzir abandono da etapa 1.
-
-**A2 — correção:** derivar os passos do assistente do perfil informado — salão
-com garçom acrescenta "Criar mesas" e "Convidar garçom"; entregas acrescenta
-"Definir taxa de entrega". `PASSOS_WIZARD` passa a ser filtrado por perfil, como
-já é por `obrigatorio`.
-**Como medir:** % de lojas com salão que criam ao menos uma mesa nos 7 primeiros
-dias; % de lojas com entrega que configuram taxa.
-
-**A3 — correção:** bloco de preço logo após o herói (resumo com valor e "30 dias
-grátis"), mantendo o detalhamento embaixo; e cortar a home — hoje ela repete a
-mesma dor em quatro blocos (alerta de margem, calculadora, comparativo, tabela
-de realidade).
-**Como medir:** profundidade de rolagem até o bloco de preço e cliques no CTA de
-preço (depende de analytics, hoje inexistente).
-
-### MÉDIO
-
-| # | Problema | Correção | Medição |
-|---|---|---|---|
-| M1 | Plano único (R$ 169,90/mês; R$ 149,90 anual) sem degrau para lanchonete de balcão nem preço para unidade adicional [medido] | Definir preço por unidade adicional e decidir se haverá plano de entrada. Se não houver, dizer na página de planos. | Perguntas sobre preço no WhatsApp; % de leads que citam "caro" |
-| M2 | **37 alvos de toque menores que 32px** na home em 375px [medido] | Piso de 44px em links e botões do site público | Repetir a medição; alvo: zero |
-| M3 | Números não medidos no material: "Aumente o Ticket Médio em 28%", "Reduza até 35% do tempo de preparo", seis métricas `'100%'` nas landings [código] | Trocar por número medido com fonte, ou por afirmação qualitativa. É a regra que o próprio `CLAUDE.md` estabelece | Auditoria: zero número sem fonte no site |
-| M4 | Assistente não cobre mesas/garçom nem entregas, embora as telas existam [código] | Ver A2 | Ver A2 |
-| M5 | Loja nasce vazia: `saas-tornar-se-lojista` não chama `fn_semear_loja`, que existe no banco [código] | Decidir se o segmento semeia categorias/produtos de exemplo — e, se semear, deixar apagar em um clique | Tempo até o primeiro produto cadastrado |
-
-### BAIXO
-
-| # | Problema | Correção | Medição |
-|---|---|---|---|
-| B1 | "Meio a meio" aparece no blog mas não existe no produto nem no schema [código] | Responder no FAQ o que o sistema faz hoje para pizzaria meio a meio — inclusive se a resposta for "ainda não" | Dúvidas sobre meio a meio no suporte |
-| B2 | Bloco do totem Bravus (B2B enterprise, "sob proposta") aparece muito cedo, antes das funcionalidades [medido] | Mover para depois do fluxo do pedido | Rolagem até o bloco de funcionalidades |
-| B3 | `/cadastre-se` é uma página inteira só para um botão [medido] | Ou recebe o formulário de cadastro (ver C1), ou o CTA da home aponta direto ao destino | Passos até criar conta: hoje 3 cliques, alvo 1 |
+**Escolheria concorrente:** se multiunidade for padrão e tiver preço claro.
 
 ---
 
-## Resumo por perfil
+## Problemas priorizados, correção e medição
 
-| Perfil | Onde desistiria | Gravidade |
+### Críticos
+
+| ID | Problema confirmado | Correção concreta | Como medir/aceitar |
+|---|---|---|---|
+| C1 | PDV mostra zero produtos; loja tem 17 disponíveis. | Separar produtos de grupos/opções, tratar erro e adicionar E2E autenticado. | 17 produtos no cardápio e no PDV; erro nunca vira lista vazia. |
+| C2 | Item fracionado recebe preço integral em cada fração. | RPC transacional que preserve um total e modele participantes. | Produto de R$ 40 dividido por 4 soma R$ 40. |
+| C3 | Cashback integral paga, mas deixa pedido `AGUARDANDO_PAGAMENTO`. | Transicionar `NOVO` ou `AGUARDANDO_PAGAMENTO` para `ACEITO` na RPC. | Pedido `ACEITO`, pagamento `PAGO`, uma baixa de estoque. |
+| C4 | Falha de Pix/cartão tenta cancelamento sem permissão; erros são ignorados. | RPC do cliente para cancelar o próprio pedido pendente. | Falha simulada não deixa pedido/pagamento pendente. |
+| C5 | iFood vinculado não recebe: 131 HTTP 403. | Liberar módulos e homologar webhook/polling. | Cinco pedidos consecutivos, sem 403 nem duplicidade. |
+| C6 | Conteúdo de pizzaria cria expectativa de meio a meio não implementado. | Implementar composição ou remover a promessa. | E2E de duas metades + borda + ficha/estoque. |
+
+### Altos
+
+| ID | Problema confirmado | Correção concreta | Como medir/aceitar |
+|---|---|---|---|
+| A1 | Perfil de salão/equipe/delivery não configura a loja. | Persistir perfil, semear e gerar passos condicionais. | Lojas de salão criam mesa/equipe sem suporte. |
+| A2 | Usuário vinculado não cria segunda unidade. | Regra de plano + ação “Adicionar unidade”. | Criar, alternar e isolar duas lojas. |
+| A3 | “Já pago” soma qualquer status. | Somar apenas `PAGO` em cálculo autoritativo. | PENDENTE/CANCELADO não reduz saldo. |
+| A4 | Fechamento de mesa é não atômico; 3D ignora erros. | Uma RPC idempotente para pagamento, taxa, pedidos e comanda. | Falha injetada causa rollback integral. |
+| A5 | Acompanhamento público usa apenas UUID e devolve PII/pagamento. | Token específico, expirável, e payload mínimo. | UUID sem token retorna 401/404. |
+| A6 | Loja de teste tem 2 divergências saldo×lote, 1 custo em escala errada, 1 embalagem contraditória e 5 produtos sem ficha. A escala errada é compatível com a importação `kg→g` que antes assumia fator 1; há correção local, ainda não publicada. | Publicar a trava de conversão, reconciliar pela autoridade de estoque/custo e corrigir seeds. | Varredura retorna zero ALTA; demos sem ficha = zero; nenhum fator desconhecido é autoaprovado. |
+| A7 | Onboarding mostra integrações concluídas por ID, não por saúde. | Publicar a correção local e unificar fonte de verdade. | Desconectado/403 nunca aparece como “Feito”. |
+| A8 | Vitrine e checkout comunicam frete contraditório. | Derivar ambos da mesma RPC e validar antes de publicar. | Vitrine = checkout = pedido para mesmo endereço/subtotal. |
+
+### Médios
+
+| ID | Problema confirmado | Correção concreta | Como medir/aceitar |
+|---|---|---|---|
+| M1 | Preço e suporte ficam depois de uma página longa. | Resumo após o herói e redução de repetição. | Usuário encontra ambos em até 30 s. |
+| M2 | Campos/botões do produto sem nome acessível. | `label`, `htmlFor` e `aria-label`. | Axe/Lighthouse sem essa violação. |
+| M3 | Dados fiscais obrigatórios antes do primeiro valor. | Adiar para cobrança/fiscal. | Menor abandono e tempo até produto. |
+| M4 | Checkout abre com loja fechada/abaixo do mínimo. | Bloquear antes e explicar no carrinho. | Zero abertura inválida. |
+| M5 | Números e absolutos sem medição pública. | Remover ou anexar metodologia/fonte. | Zero alegação quantitativa sem fonte. |
+
+### Baixos
+
+| ID | Problema confirmado | Correção concreta | Como medir/aceitar |
+|---|---|---|---|
+| B1 | `/cadastre-se` adiciona uma etapa antes do acesso. | Incorporar o formulário ou avançar mantendo contexto. | Um CTA até o cadastro. |
+| B2 | Wizard visualmente igual para operações diferentes. | Trilha específica por segmento. | 4/5 usuários reconhecem a próxima ação. |
+
+## Onde cada perfil desistiria
+
+| Perfil | Ponto | Gravidade |
 |---|---|---|
-| 1. Hamburgueria | Tela de login dizendo "bem-vindo de volta" | Crítico (C1) |
-| 2. Lanchonete | Preço único para quem só quer WhatsApp | Médio (M1) |
-| 3. Restaurante com garçons | Assistente acaba sem mesa nem garçom | Alto (A2) |
-| 4. Pizzaria | Dúvida de meio a meio sem resposta | Baixo (B1) |
-| 5. Duas unidades | Primeiro login — a segunda unidade não existe | Crítico (C2) |
+| Hamburgueria | PDV sem produtos | Crítico |
+| Lanchonete | WhatsApp desconectado marcado como concluído | Alto |
+| Restaurante | divisão/fechamento sem integridade | Crítico |
+| Pizzaria | iFood 403 e ausência de meio a meio | Crítico |
+| Duas unidades | criação da segunda unidade bloqueada | Alto |
 
-**O padrão que atravessa os cinco:** o MiseOn pergunta bem e usa mal a resposta.
-Ele coleta segmento, número de funcionários, salão e entrega — e depois entrega
-a todos a mesma tela. O produto tem as peças (mesas, garçom, entregas, KDS por
-estação); falta ligar a resposta do cadastro à configuração.
+## Critério para repetir
 
-**A trava anterior a tudo:** nada disso é mensurável hoje. Não existe analytics
-no site (o único GA4 do código é o do lojista, injetado por
-`SEO.tsx:135` com o ID dele). Todas as medições propostas acima dependem de
-instrumentar o funil primeiro — ver §12 de [auditoria-inicial.md](auditoria-inicial.md).
+Reexecutar após C1–C6, com conta nova e loja descartável. O aceite comercial
+deve comprovar em vídeo e logs: `cadastro → configuração → produto → pedido →
+pagamento → KDS → estoque → financeiro`, sem intervenção manual no banco.

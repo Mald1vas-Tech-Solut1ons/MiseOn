@@ -470,10 +470,10 @@ export default function WhatsApp() {
 
   const status = conexao?.status ?? null;
   const semaforo = status === 'CONECTADO'
-    ? { rotulo: 'Conectado', dot: 'bg-emerald-500 shadow-[0_0_8px_#22c55e]', pill: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', emoji: '🟢' }
+    ? { rotulo: 'Conectado', dot: 'bg-emerald-500 shadow-[0_0_8px_#22c55e]', pill: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' }
     : status === 'PENDENTE'
-      ? { rotulo: 'Pendente', dot: 'bg-amber-500 shadow-[0_0_8px_#f59e0b]', pill: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', emoji: '🟡' }
-      : { rotulo: status === 'ERRO' ? 'Erro' : 'Desconectado', dot: status === 'ERRO' ? 'bg-red-500 shadow-[0_0_8px_#ef4444]' : 'bg-gray-400', pill: status === 'ERRO' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400', emoji: status === 'ERRO' ? '🔴' : '⚪' };
+      ? { rotulo: 'Pendente', dot: 'bg-amber-500 shadow-[0_0_8px_#f59e0b]', pill: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' }
+      : { rotulo: status === 'ERRO' ? 'Erro' : 'Desconectado', dot: status === 'ERRO' ? 'bg-red-500 shadow-[0_0_8px_#ef4444]' : 'bg-gray-400', pill: status === 'ERRO' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400' };
 
   return (
     <div className="px-4 py-6">
@@ -492,7 +492,7 @@ export default function WhatsApp() {
         </div>
         <span className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-black uppercase tracking-wide ${semaforo.pill}`}>
           <span className={`h-2 w-2 rounded-full ${semaforo.dot}`} />
-          {semaforo.emoji} {semaforo.rotulo}
+          {semaforo.rotulo}
         </span>
       </div>
 

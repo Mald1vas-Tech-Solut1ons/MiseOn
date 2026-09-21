@@ -1,5 +1,101 @@
 # MISEON - Head of Engineering Document
 
+## 20/09/2026 — auditoria de venda, nota fiscal e inteligência 3D
+
+**Objetivo:** verificar o MiseOn como usuário e como CTO antes de autorizar
+venda/onboarding; produzir manual operacional, teste com cinco perfis e laudo
+honesto de prontidão.
+
+**Evidência:** navegação pública e autenticada no tenant de provas
+`lanchepaulista`, leitura de frontend/Edge Functions/funções reais do banco,
+Security Advisor e varredura SQL de integridade. O tenant `natureba` não foi
+acessado nem alterado. Nenhum pedido, produto, pagamento ou mensagem externa
+foi criado.
+
+**Decisão:** não aprovado para self-service. Piloto assistido é possível com
+escopo declarado. Bloqueadores confirmados: PDV sem catálogo; divisão por
+assento que pode multiplicar preço; cashback integral sem liberar pedido;
+cancelamento de falha do gateway sem autoridade; iFood em HTTP 403;
+acompanhamento público por UUID com PII; fechamento de mesa não atômico;
+segunda unidade sem criação self-service; marketing acima da evidência.
+
+**Causa de custo encontrada:** a importação de nota fiscal assumia fator 1 ao
+vincular unidades diferentes. Isso explica o padrão de cenoura comprada em kg
+e custeada como se cada grama valesse o quilo. A correção local aplica conversão
+física/documental, preserva histórico confirmado e bloqueia o caso desconhecido
+em vez de inventar 1. Testes cobrem kg→g, L→ml, embalagem, histórico e bloqueio.
+Lotes históricos não são reescritos automaticamente.
+
+**Custo/Rastreio 3D:** o Custo 3D atual reconstrói conversões a partir do estado
+e dos fatores atuais; não é ainda um ledger histórico. A copy local passou a
+dizer isso e o Realtime também reage a mudança de fatores. A arquitetura
+recomendada é um ledger imutável `nota→lote→transformação→venda/perda`, com
+confiança/proveniência, linha do tempo, reconciliação reversível e localização
+física/QR/FEFO no Rastreio 3D.
+
+**Artefatos:** `docs/teste-de-usabilidade-simulada.md`,
+`docs/auditoria-cto-logica-regras-negocio-2026-09-20.md` e o manual oficial em
+`public/MiseOn_Manual_do_Sistema_2026-09-19.docx`.
+
+## 19/09/2026 — documentação comercial e manual validados contra produção
+
+**Objetivo do sprint:** entregar auditoria de posicionamento, mapa de mensagens,
+backlog de conversão e um manual operacional profissional, sem transformar
+implementação de código em alegação de operação ativa.
+
+**Escopo:** leitura do código e das migrations, inspeção autenticada e somente
+leitura do tenant de provas `lanchepaulista`, revisão do diff local já iniciado
+em cadastro/login/seleção de loja e validação do documento renderizado. **Fora
+de escopo:** alterar produção, ativar integrações, emitir documento, criar pedido,
+mexer no tenant `natureba` ou publicar o frontend.
+
+**Decisões:**
+
+- a promessa central recomendada passa de “lucro real” para “Do pedido ao custo
+  real, o MiseOn conecta sua operação”; a DRE atual não sustenta a promessa
+  anterior;
+- documentação e marketing devem distinguir **disponível**, **requer
+  configuração**, **demonstrativo** e **comprovado em produção**;
+- a cadeia de gestão permanece `entrada fiscal → produto → unidade → conversão
+  → lote → custo → estoque → consumo → PEPS → CMV → DRE`; a DRE não pode ser
+  apresentada como autoridade enquanto continuar independente dessa cadeia;
+- capturas antigas com estado divergente foram excluídas do manual. Quando não
+  há captura atual versionada e reutilizável, o documento usa um esquema
+  explicitamente identificado como tal — nunca uma imagem errada tratada como
+  tela real.
+
+**Evidência autenticada em 19/09/2026, `lanchepaulista`, sem escrita:**
+
+- WhatsApp: **DESCONECTADO**, nenhum número conectado;
+- iFood: **VINCULADO, SEM RECEBER**; a interface informa falta de módulos no
+  Portal do Desenvolvedor, 111 tentativas seguidas e HTTP 403;
+- fiscal: zero notas no módulo da loja, nenhum certificado A1 e ambiente de
+  homologação;
+- DRE: a interface exibe “AO VIVO” e “tempo real”, mas o componente usa mês e
+  valores fixos (`2026-07`, R$ 84.500,00 etc.); risco P0 de credibilidade;
+- assinatura: tela exibe R$ 149,90/mês no anual, R$ 169,90/mês no mensal e 5%
+  de desconto no Pix anual;
+- onboarding mostra iFood e WhatsApp como “Feito” apesar dos estados acima;
+  progresso de onboarding não pode ser usado como autoridade de saúde da
+  integração.
+
+**Diff local herdado e concluído:** cadastro direciona para login com contexto
+de conta nova; link mágico explicita criação de usuário; administrador com mais
+de uma loja ganha seleção determinística da unidade; traduções faltantes foram
+adicionadas. Validação: TypeScript/build/prerender/sitemap **PASS**; Vitest
+**550 PASS / 17 SKIPPED**, nenhuma falha. O build ainda evidencia conteúdo de
+marketing a corrigir (`/depoimentos`, “CMV real” e promessas correlatas).
+
+**Backlog de maior risco/valor:** ligar a DRE à autoridade financeira real ou
+rotulá-la de forma impossível de confundir; corrigir o estado “Feito” do
+onboarding para refletir saúde real; unificar preço visível e schema; retirar
+prova social sem cliente comprovado; resolver os módulos do aplicativo no portal
+do iFood; homologar fiscal somente com certificado/ambiente e prova controlada.
+
+**Artefatos:** `docs/auditoria-posicionamento-miseon.md`,
+`docs/mapa-de-mensagens-miseon.md`, `docs/backlog-conversao-miseon.md` e
+`output/documents/MiseOn_Manual_do_Sistema_2026-09-19.docx`.
+
 ## 18/09/2026 — produção fora do ar por cota, e o que foi feito sem o gateway
 
 **Estado:** o projeto Supabase devolve `HTTP 402 exceed_egress_quota` em REST,
@@ -534,3 +630,17 @@ A tela da estação exibe badge de drink, ABV, ml, kcal e ingredientes. As RPCs 
 **Validação:** typecheck, ESLint, build e 800 testes passando. 8 migrations aplicadas em produção, 2 Edge Functions publicadas. Ciclo completo executado no tenant de provas: 5 un de tomate (78% de rendimento) + 2 cebolas (90%) + 10 g de sal → custo material R$ 7,33 sobre o bruto, gás R$ 1,49 (43 min de chama), mão de obra R$ 10,00 (66 min), nutrição sobre 748 g de líquido, e o lote entrando com 0,62 L pesados contra 0,85 L previstos (72,94% de rendimento de cocção).
 
 **Riscos residuais:** o motor nutricional em produção chama-se `fn_calcular_nutricao_receita` e divergiu do arquivo versionado do motor v2 — a alteração foi cirúrgica (lê `pg_get_functiondef`, troca a expressão, reinstala, aborta em voz alta se a âncora sumir), mas o drift em si continua aberto. O tenant de provas tem preços de embalagem sujos (cebola a R$ 4,99 por grama), o que infla qualquer custo calculado ali. Fichas antigas seguem sem `quantidade_liquida`: contam bruto na nutrição até alguém declarar a técnica, e o `coalesce` garante que nada quebra.
+
+## Execução de 19/09 — posicionamento comercial, confiança pública e onboarding de integrações
+
+**Objetivo:** transformar a auditoria comercial em uma experiência pública coerente com o produto real, eliminando promessas sem prova antes de ampliar o manual do sistema.
+
+**Produto e site:** a home foi substituída por uma narrativa única — pedido, produção, estoque e custo — organizada em salão; delivery/WhatsApp; custos/gestão; fiscal/financeiro. Foram implementados o fluxo visual completo, “Por que MiseOn?”, três CTAs e cinco páginas segmentadas. As demais páginas de capacidade pública também passaram a declarar quando algo está disponível, requer configuração ou é demonstrativo.
+
+**Confiança:** `/depoimentos` passou a redirecionar para demonstrações. Vídeos de iFood/WhatsApp e cases sem comprovação saíram da biblioteca. Dezesseis artigos com percentuais, resultados ou alegações não sustentadas foram preservados como rascunho e removidos do sitemap; um artigo técnico permaneceu publicado depois de reescrito pelas regras efetivamente implementadas no motor de custos. O schema-base deixou de anunciar `R$ 99,90` e passou a refletir a oferta vigente.
+
+**Produto interno:** a DRE de valores fixos agora exibe alerta persistente, período bloqueado e nomenclatura demonstrativa. O onboarding deixou de marcar iFood e WhatsApp como concluídos apenas por identificador/campo: consulta a saúde medida do iFood e `fn_whatsapp_status`.
+
+**Validação:** TypeScript passou. Build Vite passou. Prerender gerou 32 páginas. A auditoria `scripts/audit-public-positioning.mjs` aprovou 32/32 rotas em metadata, canonical, Open Graph, H1, CTAs, links e JSON-LD. A auditoria visual `scripts/verify-positioning-ui.mjs` aprovou 10 cenários desktop/mobile sem imagem quebrada, overflow ou erro de runtime. A suíte completa aprovou 60 arquivos e 558 testes; 9 arquivos e 17 testes permanecem explicitamente ignorados pela configuração existente.
+
+**Riscos residuais:** `integracao_ifood_saude` continua global (`id=true`), não por loja; isso é aceitável apenas enquanto a arquitetura tiver um único merchant operacional e precisa virar saúde por tenant antes de escala multiunidade. O perfil empresarial oficial do LinkedIn não foi localizado; uma publicação pessoal encontrada usa “margem real” e exige revisão externa. Nenhuma mudança foi publicada, nenhum dado de produção foi gravado e o tenant `natureba` não foi acessado.

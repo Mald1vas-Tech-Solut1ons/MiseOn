@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import {
   TrendingUp, TrendingDown, DollarSign, Calculator, Save, Receipt,
     ShoppingBag, Ticket, Bike, Store, XCircle, Banknote, CreditCard, QrCode, HelpCircle,
-    ChartNoAxesCombined, Building2,
+    ChartNoAxesCombined, Building2, Database, FlaskConical,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -236,9 +236,15 @@ export default function Financeiro() {
     <div data-tour="tour-financeiro-header" className="mx-auto max-w-6xl p-4">
       <div className="mb-3 flex items-center gap-2">
         <h2 className="font-bold text-xl dark:text-gray-100">{tDynamic('Financeiro')}</h2>
-        <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs opacity-90 font-black uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" /> {tDynamic('Ao vivo')}
-        </span>
+        {aba === 'DRE' ? (
+          <span className="flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+            <FlaskConical size={13} aria-hidden="true" /> {tDynamic('Cenário de demonstração')}
+          </span>
+        ) : (
+          <span className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-300">
+            <Database size={13} aria-hidden="true" /> {tDynamic('Dados da operação')}
+          </span>
+        )}
       </div>
 
       {/* Tabs */}

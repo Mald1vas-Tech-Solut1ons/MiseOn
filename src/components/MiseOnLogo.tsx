@@ -1,24 +1,32 @@
 export default function MiseOnLogo({ size = 160, className = '' }: { size?: number, className?: string }) {
+  // O arquivo oficial possui transparência ao redor da arte. O recorte abaixo
+  // remove somente essa área vazia por CSS; nenhum traço, cor ou lettering da
+  // marca é redesenhado.
+  const scale = size / 459;
+
   return (
     <span
       role="img"
       aria-label="MiseOn — Sistema de Gestão para Food Service e Restaurantes"
-      className={`inline-flex items-center gap-[0.04em] ${className}`}
-      style={{ width: size, maxWidth: '100%' }}
+      className={`relative inline-block shrink-0 overflow-hidden ${className}`}
+      style={{
+        width: size,
+        maxWidth: '100%',
+        height: 170 * scale,
+      }}
     >
       <img
-        src="/brand/icon.png"
+        src="/MiseOn-repagina-removebg-preview.png"
         alt=""
         aria-hidden="true"
-        className="h-auto w-[34%] shrink-0 object-contain"
+        className="pointer-events-none absolute max-w-none select-none"
+        style={{
+          width: 823 * scale,
+          height: 303 * scale,
+          left: -185 * scale,
+          top: -51 * scale,
+        }}
       />
-      <span
-        aria-hidden="true"
-        className="whitespace-nowrap font-['Sora'] font-extrabold leading-none tracking-[-0.075em] text-[#EAF1FB] drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]"
-        style={{ fontSize: `${size * 0.265}px` }}
-      >
-        Mise<span className="ml-[0.08em] text-[#FC5B24]">ON</span>
-      </span>
     </span>
   );
 }

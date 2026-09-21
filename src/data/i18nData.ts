@@ -3913,6 +3913,7 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Prévia visual da estrutura de uma DRE gerencial. A integração com os dados reais ainda não está concluída.':
     'Visual preview of a management income statement. Integration with actual data is not yet complete.',
   'Cenário de demonstração': 'Demonstration scenario',
+  'Dados da operação': 'Operational data',
   'Demonstrativo do Resultado do Exercício': 'Income Statement',
   'Ponte gerencial para entender como receita, custos e despesas formam o resultado. A integração contábil com dados reais ainda não está concluída.':
     'Management bridge showing how revenue, costs, and expenses form the result. Accounting integration with actual data is not yet complete.',
