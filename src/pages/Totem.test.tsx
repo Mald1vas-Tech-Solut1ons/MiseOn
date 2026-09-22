@@ -39,7 +39,14 @@ function deferred<T>() {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.grupos = [];
-  mocks.rpc.mockResolvedValue({ data: pedido, error: null });
+  // Sensível ao NOME, não à ordem. O totem também chama fn_nutricao_* ao abrir
+  // o cardápio; um mock por ordem fazia essas chamadas consumirem o valor
+  // preparado para a criação do pedido, e o teste passava a depender de qual
+  // rotina disparasse primeiro.
+  mocks.rpc.mockImplementation((nome: string) =>
+    Promise.resolve(String(nome).startsWith('fn_nutricao')
+      ? { data: [], error: null }
+      : { data: pedido, error: null }));
   mocks.invoke.mockResolvedValue(cobranca);
   mocks.imprimir.mockImplementation(() => undefined);
 });
@@ -88,7 +95,8 @@ describe('fechamento do totem sem cobrança real', () => {
   it('bloqueia toques repetidos até a criação do pedido e da cobrança terminarem', async () => {
     const criar = deferred<{ data: typeof pedido; error: null }>();
     const cobrar = deferred<typeof cobranca>();
-    mocks.rpc.mockReturnValueOnce(criar.promise);
+    mocks.rpc.mockImplementation((nome: string) =>
+      nome === 'fn_totem_criar_pedido' ? criar.promise : Promise.resolve({ data: [], error: null }));
     mocks.invoke.mockReturnValueOnce(cobrar.promise);
     await irAoPagamento();
     const pagar = screen.getByRole('button', { name: 'Pagar com Pix' });
@@ -96,14 +104,14 @@ describe('fechamento do totem sem cobrança real', () => {
       pagar.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       pagar.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
-    expect(mocks.rpc).toHaveBeenCalledTimes(1);
+    expect(mocks.rpc.mock.calls.filter(([nome]) => nome === 'fn_totem_criar_pedido')).toHaveLength(1);
     expect((screen.getByRole('button', { name: /Preparando pagamento/ }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Recomeçar' }) as HTMLButtonElement).disabled).toBe(true);
 
     await act(async () => { criar.resolve({ data: pedido, error: null }); });
     await waitFor(() => expect(mocks.invoke).toHaveBeenCalledTimes(1));
     fireEvent.click(screen.getByRole('button', { name: /Preparando pagamento/ }));
-    expect(mocks.rpc).toHaveBeenCalledTimes(1);
+    expect(mocks.rpc.mock.calls.filter(([nome]) => nome === 'fn_totem_criar_pedido')).toHaveLength(1);
     expect((screen.getByRole('button', { name: /Preparando pagamento/ }) as HTMLButtonElement).disabled).toBe(true);
     await act(async () => { cobrar.resolve(cobranca); });
     expect(await screen.findByAltText('QR Code do Pix')).toBeTruthy();

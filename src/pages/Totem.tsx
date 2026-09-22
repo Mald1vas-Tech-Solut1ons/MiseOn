@@ -37,7 +37,10 @@ import { supabase } from '../lib/supabase';
 import { useI18n } from '../contexts/I18nContext';
 import { getOptimizedImageUrl } from '../lib/cdn';
 import { imprimir } from '../lib/print';
-import type { Produto, Categoria, GrupoOpcoes, Opcao } from '../types';
+import type { Produto, Categoria, GrupoOpcoes, Opcao, ItemCarrinho } from '../types';
+import TabelaNutricional from '../components/cardapio/TabelaNutricional';
+import ResumoNutricionalPedido from '../components/cardapio/ResumoNutricionalPedido';
+import type { NutricaoProduto, NutricaoOpcao, NutrienteCatalogo } from '../lib/nutricao';
 
 /** Volta ao repouso e ESQUECE o carrinho. Ver regra 8. */
 const SEGUNDOS_ATE_ESQUECER = 75;
@@ -103,6 +106,13 @@ export default function Totem() {
   const [loja, setLoja] = useState<{ id: string; nome: string; logo_url?: string | null } | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [produtos, setProdutos] = useState<ProdutoComOpcoes[]>([]);
+  // Nutricional: mesma fonte do cardápio do celular (fn_nutricao_cardapio e
+  // fn_nutricao_opcoes_cardapio). Quem está no totem decide em pé, na fila, e
+  // sem ninguém para perguntar — se a informação existe no cardápio, ela tem
+  // que existir aqui.
+  const [nutricao, setNutricao] = useState<Map<string, NutricaoProduto>>(new Map());
+  const [nutricaoOpcoes, setNutricaoOpcoes] = useState<Map<string, NutricaoOpcao>>(new Map());
+  const [catalogoNutrientes, setCatalogoNutrientes] = useState<NutrienteCatalogo[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erroFatal, setErroFatal] = useState('');
 
@@ -146,6 +156,36 @@ export default function Totem() {
       setProdutos((prods ?? []) as ProdutoComOpcoes[]);
       setCatAtiva(listaCats[0]?.id ?? '');
       setCarregando(false);
+
+      // NUTRICIONAL VEM DEPOIS, E DE PROPÓSITO.
+      //
+      // É informação acessória: quem está na fila precisa ver o cardápio agora.
+      // Se estas três chamadas entrassem no Promise.all acima, uma delas lenta
+      // atrasaria o menu inteiro, e uma delas travada deixaria o totem girando
+      // o "carregando" para sempre — com a fila parada na frente do balcão.
+      // Aqui elas chegam atrasadas no máximo, nunca bloqueiam a venda.
+      //
+      // A loja que desliga o nutricional não recebe linha nenhuma das RPCs, e
+      // então os componentes simplesmente não renderizam: o gate é do servidor.
+      try {
+        const [nut, cat, nutOpc] = await Promise.all([
+          supabase.rpc('fn_nutricao_cardapio', { p_loja_id: l.id }),
+          supabase.from('nutrientes').select('*').eq('ativo', true).order('ordem'),
+          supabase.rpc('fn_nutricao_opcoes_cardapio', { p_loja_id: l.id }),
+        ]);
+        if (!vivo) return;
+
+        // Resposta fora do formato não pode virar exceção: `.map` em algo que
+        // não é lista derrubaria esta rotina inteira.
+        const lista = <T,>(r: { data?: unknown } | undefined): T[] =>
+          (Array.isArray(r?.data) ? r.data : []) as T[];
+
+        setNutricao(new Map(lista<NutricaoProduto>(nut).map((n) => [n.produto_id, n])));
+        setCatalogoNutrientes(lista<NutrienteCatalogo>(cat));
+        setNutricaoOpcoes(new Map(lista<NutricaoOpcao>(nutOpc).map((o) => [o.opcao_id, o])));
+      } catch {
+        // Sem nutricional o totem vende igual. Silêncio aqui é a escolha certa.
+      }
     })();
     return () => { vivo = false; };
   }, [slug]);
@@ -623,6 +663,22 @@ export default function Totem() {
                 </section>
               );
             })}
+
+            {/* O adicional escolhido muda o que a pessoa vai comer, então muda
+                a tabela na frente dela — mesma regra do cardápio do celular. */}
+            {(nutricao.get(itemAberto.id)
+              || Object.values(escolhas).flat().some((o) => nutricaoOpcoes.has(o.id))) && (
+              <section className="mt-8">
+                <TabelaNutricional
+                  dados={nutricao.get(itemAberto.id)}
+                  catalogo={catalogoNutrientes}
+                  extras={Object.values(escolhas).flat()
+                    .map((o) => nutricaoOpcoes.get(o.id))
+                    .filter((n): n is NutricaoOpcao => !!n)}
+                  totalExtrasSelecionados={Object.values(escolhas).flat().length}
+                />
+              </section>
+            )}
           </div>
 
           <footer className="fixed inset-x-0 bottom-0 border-t border-white/10 bg-[#0B1120] p-5">
@@ -703,6 +759,22 @@ export default function Totem() {
             ))}
             {carrinho.length === 0 && (
               <p className="p-10 text-center text-2xl text-slate-400">{tDynamic('Seu pedido está vazio.')}</p>
+            )}
+
+            {/* Total nutricional da refeição inteira. O componente é o mesmo do
+                carrinho do celular; só o formato da linha muda, porque o totem
+                guarda `opcoes` e o cardápio, `opcoesSelecionadas`. */}
+            {carrinho.length > 0 && (
+              <ResumoNutricionalPedido
+                carrinho={carrinho.map((l): ItemCarrinho => ({
+                  produto: l.produto,
+                  quantidade: l.quantidade,
+                  opcoesSelecionadas: l.opcoes,
+                }))}
+                nutricao={nutricao}
+                nutricaoOpcoes={nutricaoOpcoes}
+                catalogo={catalogoNutrientes}
+              />
             )}
           </div>
 
