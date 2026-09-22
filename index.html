@@ -143,6 +143,93 @@
 
     <meta name="description" content="Conecte salão, delivery, WhatsApp, cozinha, estoque e custos em um único fluxo com o MiseOn. Teste por 30 dias ou agende uma demonstração." />
     <title>MiseOn | Operação e custos conectados para restaurantes</title>
+
+    <!-- ── NAVEGADOR ANTIGO ABRE A PÁGINA CRUA ──────────────────────────────
+         Medido em 22/09/2026, num totem H2150B (Android 11, RK3568) aberto
+         pela primeira vez, na frente de um parceiro comercial: a página veio
+         sem nenhum estilo, como HTML de 1995.
+
+         A causa não é cache. O CSS que o Tailwind v4 gera usa color-mix()
+         (1774 vezes no bundle publicado), oklch() (159) e @layer (5). Num
+         navegador anterior ao Chrome 111 os blocos @layer são descartados
+         inteiros e toda cor vira valor inválido — a folha de estilo não
+         degrada, ela morre. Não existe caminho suportado para rebaixar isso:
+         o próprio Tailwind documenta Chrome 111 / Safari 16.4 / Firefox 128
+         como piso da v4.
+
+         Então o que se pode garantir é o aviso. Esta cortina aparece por
+         padrão e só some quando o navegador PROVA que entende as mesmas
+         funções de cor que o app precisa. Ela é escrita em CSS antigo de
+         propósito (position fixed, hex, sem variável, sem JS): tem que
+         desenhar certo justamente onde todo o resto falha — inclusive onde o
+         bundle JS nem chega a ser interpretado.
+
+         Se um dia o CSS do app deixar de exigir essas funções, é neste
+         @supports que se afrouxa. A trava e o teste andam juntos:
+         src/lib/navegadorMinimo.test.ts. -->
+    <style>
+      #navegador-incompativel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2147483647;
+        overflow: auto;
+        background: #070c18;
+        color: #eaf1fb;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.5;
+        text-align: center;
+        padding: 32px 24px;
+      }
+      #navegador-incompativel .ni-caixa {
+        max-width: 520px;
+        margin: 0 auto;
+      }
+      #navegador-incompativel img {
+        width: 72px;
+        height: 72px;
+        margin-bottom: 24px;
+      }
+      #navegador-incompativel h2 {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0 0 16px;
+        color: #ffffff;
+      }
+      #navegador-incompativel p {
+        font-size: 16px;
+        margin: 0 0 16px;
+      }
+      #navegador-incompativel .ni-passos {
+        text-align: left;
+        display: inline-block;
+        margin: 0 0 20px;
+        padding: 16px 20px 16px 36px;
+        background: #0f1626;
+        border-left: 4px solid #fc5b24;
+      }
+      #navegador-incompativel .ni-passos li {
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+      #navegador-incompativel .ni-versoes {
+        font-size: 13px;
+        color: #9aa7bd;
+        margin: 0;
+      }
+
+      /* A única porta de saída: entender oklch() e color-mix(). É exatamente o
+         que o bundle do app usa em toda cor. Navegador que não conhece
+         @supports também não conhece essas funções — e, ignorando o bloco,
+         mantém a cortina de pé, que é o comportamento certo. */
+      @supports (color: oklch(50% 0.1 250)) and (color: color-mix(in srgb, #ffffff 50%, #000000)) {
+        #navegador-incompativel {
+          display: none;
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- Este arquivo é só o esqueleto. No build (scripts/prerender.mjs) ele
@@ -163,6 +250,87 @@
     <noscript>
       <p>MiseOn é o sistema de gestão completo para restaurantes, hamburguerias, pizzarias, lanchonetes e bares. Cardápio digital QR Code, KDS, comanda eletrônica, iFood, WhatsApp IA e Pix.</p>
     </noscript>
+
+    <!-- Cortina para navegador antigo. Fica FORA do #root de propósito: o
+         prerender (scripts/prerender.mjs) reescreve o conteúdo do #root em
+         cada rota e esvazia o dele no app.html. Aqui ela sobrevive aos dois e
+         chega igual em toda página servida. A explicação está no <style>. -->
+    <div id="navegador-incompativel">
+      <div class="ni-caixa">
+        <img src="/icon-192.png" width="72" height="72" alt="MiseOn" />
+        <h2>Atualize o navegador para abrir o MiseOn</h2>
+        <p>
+          Este navegador é anterior ao Chrome 111 e não interpreta as cores e o
+          layout do sistema. Por isso a página aparece sem formatação.
+        </p>
+        <ul class="ni-passos">
+          <li><strong>Android:</strong> Play Store &rarr; Chrome &rarr; Atualizar.</li>
+          <li>Atualize também o <strong>Android System WebView</strong>.</li>
+          <li><strong>Windows:</strong> Chrome ou Edge atualizado.</li>
+        </ul>
+        <p class="ni-versoes">
+          Versões mínimas: Chrome 111 &middot; Edge 111 &middot; Safari 16.4 &middot; Firefox 128
+        </p>
+      </div>
+    </div>
+
+    <!-- ── RESGATE DO NAVEGADOR ANTIGO ──────────────────────────────────────
+         Roda antes do bundle (script de módulo é adiado; este, clássico, não).
+
+         Medido no totem H2150B que motivou tudo isto: o JavaScript do MiseOn
+         RODA no Chrome 92 — a tela do Kiosk chegou a montar pelo React, com
+         #root vazio no HTML. Não há bloqueio de sintaxe no bundle: nenhum
+         bloco `static{}`, nenhum `??=`. Só o CSS morre, e faltam duas funções
+         de runtime. Então dá para resgatar em vez de só avisar.
+
+         A cortina continua sendo a rede de baixo: ela só sai de cena quando a
+         folha legada CARREGA de fato. Se o arquivo faltar, o aviso fica de pé
+         em vez de deixar a página abrir crua. -->
+    <script>
+      (function () {
+        if (!Object.hasOwn) {
+          Object.hasOwn = function (alvo, chave) {
+            return Object.prototype.hasOwnProperty.call(alvo, chave);
+          };
+        }
+        if (typeof window.structuredClone !== 'function') {
+          // Cópia pobre, sem ciclos nem Map/Set. O bundle usa isto uma vez.
+          window.structuredClone = function (valor) {
+            return valor === undefined ? valor : JSON.parse(JSON.stringify(valor));
+          };
+        }
+
+        var suporta = window.CSS
+          && typeof CSS.supports === 'function'
+          && CSS.supports('color', 'oklch(50% 0.1 250)')
+          && CSS.supports('color', 'color-mix(in srgb, #ffffff 50%, #000000)');
+        if (suporta) return;
+
+        var folha = document.createElement('link');
+        folha.rel = 'stylesheet';
+        folha.href = '/css-legado.css';
+
+        // `onload` sozinho não serve de prova. O rewrite "/(.*)" → "/app" do
+        // vercel.json devolve o HTML do SPA com status 200 para QUALQUER
+        // caminho que não exista — inclusive um .css. Medido em 22/09/2026: o
+        // link dispara onload, a cortina subia, e o navegador antigo ficava com
+        // a página crua E sem aviso. Só conta como resgate se a folha virou
+        // regra de verdade.
+        folha.onload = function () {
+          var virouCss = false;
+          try {
+            virouCss = !!folha.sheet && folha.sheet.cssRules.length > 0;
+          } catch (e) {
+            virouCss = false;
+          }
+          if (!virouCss) return;
+          var cortina = document.getElementById('navegador-incompativel');
+          if (cortina) cortina.style.display = 'none';
+        };
+        document.head.appendChild(folha);
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

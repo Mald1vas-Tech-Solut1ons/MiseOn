@@ -841,6 +841,29 @@ export default function Home() {
                 </Link>
               ))}
 
+              {/* As cinco páginas de recurso existiam só no dropdown do desktop.
+                  No celular o visitante não tinha como chegar a elas por
+                  navegação — e são justamente as que sustentam o argumento
+                  comercial (WhatsApp, iFood, QR, fiscal, estoque). */}
+              <div className="mt-2 px-3 py-1 text-xs opacity-95 font-black uppercase text-slate-400">{t('nav.funcionalidades')}</div>
+              {[
+                { to: '/api-whatsapp-restaurantes', icone: <MessageCircle size={16} />, rotulo: 'WhatsApp IA Oficial Meta' },
+                { to: '/integracao-ifood', icone: <ShoppingBag size={16} />, rotulo: tDynamic('Integração iFood') },
+                { to: '/cardapio-qr-code', icone: <QrCode size={16} />, rotulo: tDynamic('Cardápio QR Code') },
+                { to: '/gestao-fiscal-nfe', icone: <ShieldCheck size={16} />, rotulo: tDynamic('Emissão Fiscal NFC-e') },
+                { to: '/gestao-de-estoque-3d', icone: <Boxes size={16} />, rotulo: 'Estoque 3D & Preparos' },
+              ].map((i) => (
+                <Link
+                  key={i.to}
+                  to={i.to}
+                  onClick={() => setMenuAberto(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10"
+                >
+                  <span className="text-gray-400 dark:text-slate-400">{i.icone}</span>
+                  {i.rotulo}
+                </Link>
+              ))}
+
               <div className="mt-2 px-3 py-1 text-xs opacity-95 font-black uppercase text-slate-400">{t('nav.navegacao')}</div>
               <a href="#como-funciona" onClick={() => setMenuAberto(false)} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/10">
                 <span className="text-gray-400 dark:text-slate-400"><Compass size={16} /></span> {t('nav.comoFunciona')}

@@ -70,6 +70,30 @@ const PALAVRAS_SOBREMESA = /sobremesa|doce|sorvete|açaí|acai|milk\s?shake|tort
 const dinheiro = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+/**
+ * Pede tela cheia ao navegador.
+ *
+ * No Android, a tela cheia do Chrome entra em modo imersivo e recolhe a barra
+ * de navegação do sistema — que num totem é justamente o que deixa o cliente
+ * sair do pedido e mexer no aparelho. Só que o navegador só concede isso a
+ * partir de um gesto real, então o pedido sai do toque que abre o cardápio.
+ *
+ * A recusa é silenciosa de propósito: no desktop, num iframe ou em navegador
+ * que não expõe a API, o totem tem que seguir funcionando em janela normal.
+ */
+function entrarEmTelaCheia() {
+  const alvo = document.documentElement as HTMLElement & {
+    webkitRequestFullscreen?: () => Promise<void> | void;
+  };
+  const pedir = alvo.requestFullscreen ?? alvo.webkitRequestFullscreen;
+  if (!pedir) return;
+  try {
+    void Promise.resolve(pedir.call(alvo)).catch(() => {});
+  } catch {
+    // Navegador antigo lança em vez de rejeitar.
+  }
+}
+
 export default function Totem() {
   const { tDynamic } = useI18n();
   const { slug } = useParams<{ slug: string }>();
@@ -473,7 +497,7 @@ export default function Totem() {
       {tela === 'repouso' && (
         <button
           type="button"
-          onClick={() => setTela('cardapio')}
+          onClick={() => { entrarEmTelaCheia(); setTela('cardapio'); }}
           className="flex flex-1 flex-col items-center justify-center gap-10 p-12"
         >
           {loja?.logo_url
