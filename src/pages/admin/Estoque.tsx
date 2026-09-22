@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState, useMemo, lazy, Suspense } from 'react';
+import { useCallback, useEffect, useState, useMemo, Suspense } from 'react';
+import { lazyComRecarga } from '../../lib/lazyComRecarga';
 import { Link, useOutletContext } from 'react-router-dom';
 import { AlertTriangle, Plus, Pencil, Calculator, Trash2, ArrowRight, ArchiveRestore, Loader2, Search, Scale, ClipboardCheck, Scissors, CheckCircle2, Apple, ChevronDown, Zap, Settings2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -14,8 +15,8 @@ import ModalInventario from '../../components/estoque/ModalInventario';
 import ModalTransformar from '../../components/estoque/ModalTransformar';
 
 // three.js pesa ~600 KB: só entra no bundle de quem abrir a aba 3D.
-const EstoqueCusto3D = lazy(() => import('../../lib/estoque3d/EstoqueCusto3D'));
-const EstoqueRastreio3D = lazy(() => import('../../lib/estoque3d/rastreio/EstoqueRastreio3D'));
+const EstoqueCusto3D = lazyComRecarga(() => import('../../lib/estoque3d/EstoqueCusto3D'));
+const EstoqueRastreio3D = lazyComRecarga(() => import('../../lib/estoque3d/rastreio/EstoqueRastreio3D'));
 import ModalRaioXProduto from '../../components/estoque/ModalRaioXProduto';
 import ModalNutricaoInsumo from '../../components/estoque/ModalNutricaoInsumo';
 import ScannerQRCodeModal from '../../components/estoque/ScannerQRCodeModal';

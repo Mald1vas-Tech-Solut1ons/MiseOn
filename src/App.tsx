@@ -1,4 +1,5 @@
-import React, { lazy, Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
+import { lazyComRecarga, liberarNovaRecarga } from './lib/lazyComRecarga';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ScreenTransition } from './components/ScreenTransition';
 import { ToastProvider } from './components/ui/Toast';
@@ -13,87 +14,87 @@ import Home from './pages/Home';
 import Cardapio from './pages/Cardapio';
 
 // ── Lazy: PUBLIC_AUX (raramente acessadas, baixo impacto no LCP) ─────────────
-const Acesso          = lazy(() => import('./pages/Acesso'));
-const Lojas           = lazy(() => import('./pages/Lojas'));
-const CadastreSuaLoja = lazy(() => import('./pages/CadastreSuaLoja'));
-const MeusPedidos     = lazy(() => import('./pages/MeusPedidos'));
-const PerfilLoja      = lazy(() => import('./pages/PerfilLoja'));
-const AcompanharPedido= lazy(() => import('./pages/Pedido'));
-const Termos          = lazy(() => import('./pages/legal/Termos'));
-const Privacidade     = lazy(() => import('./pages/legal/Privacidade'));
-const Sobre          = lazy(() => import('./pages/legal/Sobre'));
-const Contato         = lazy(() => import('./pages/legal/Contato'));
-const DescadastroEmail = lazy(() => import('./pages/legal/DescadastroEmail'));
-const RedefinirSenha    = lazy(() => import('./pages/RedefinirSenha'));
-const Videos           = lazy(() => import('./pages/Videos'));
-const NicheLandingPage = lazy(() => import('./pages/landing/NicheLandingPage'));
-const EstoquePage      = lazy(() => import('./pages/landing/EstoquePage'));
-const Blog             = lazy(() => import('./pages/Blog'));
-const FerramentasHub   = lazy(() => import('./pages/ferramentas/FerramentasHub'));
-const FerramentaPage   = lazy(() => import('./pages/ferramentas/FerramentaPage'));
-const BlogPost         = lazy(() => import('./pages/BlogPost'));
-const PainelTV         = lazy(() => import('./pages/PainelTV'));
-const TvPareamento     = lazy(() => import('./pages/TvPareamento'));
-const CastReceiver     = lazy(() => import('./pages/CastReceiver'));
-const MarketingStrategyPage = lazy(() => import('./pages/landing/MarketingStrategyPage'));
-const AutoatendimentoPage = lazy(() => import('./pages/landing/AutoatendimentoPage'));
-const DemoKioskPage       = lazy(() => import('./pages/landing/DemoKioskPage'));
-const Totem               = lazy(() => import('./pages/Totem'));
+const Acesso          = lazyComRecarga(() => import('./pages/Acesso'));
+const Lojas           = lazyComRecarga(() => import('./pages/Lojas'));
+const CadastreSuaLoja = lazyComRecarga(() => import('./pages/CadastreSuaLoja'));
+const MeusPedidos     = lazyComRecarga(() => import('./pages/MeusPedidos'));
+const PerfilLoja      = lazyComRecarga(() => import('./pages/PerfilLoja'));
+const AcompanharPedido= lazyComRecarga(() => import('./pages/Pedido'));
+const Termos          = lazyComRecarga(() => import('./pages/legal/Termos'));
+const Privacidade     = lazyComRecarga(() => import('./pages/legal/Privacidade'));
+const Sobre          = lazyComRecarga(() => import('./pages/legal/Sobre'));
+const Contato         = lazyComRecarga(() => import('./pages/legal/Contato'));
+const DescadastroEmail = lazyComRecarga(() => import('./pages/legal/DescadastroEmail'));
+const RedefinirSenha    = lazyComRecarga(() => import('./pages/RedefinirSenha'));
+const Videos           = lazyComRecarga(() => import('./pages/Videos'));
+const NicheLandingPage = lazyComRecarga(() => import('./pages/landing/NicheLandingPage'));
+const EstoquePage      = lazyComRecarga(() => import('./pages/landing/EstoquePage'));
+const Blog             = lazyComRecarga(() => import('./pages/Blog'));
+const FerramentasHub   = lazyComRecarga(() => import('./pages/ferramentas/FerramentasHub'));
+const FerramentaPage   = lazyComRecarga(() => import('./pages/ferramentas/FerramentaPage'));
+const BlogPost         = lazyComRecarga(() => import('./pages/BlogPost'));
+const PainelTV         = lazyComRecarga(() => import('./pages/PainelTV'));
+const TvPareamento     = lazyComRecarga(() => import('./pages/TvPareamento'));
+const CastReceiver     = lazyComRecarga(() => import('./pages/CastReceiver'));
+const MarketingStrategyPage = lazyComRecarga(() => import('./pages/landing/MarketingStrategyPage'));
+const AutoatendimentoPage = lazyComRecarga(() => import('./pages/landing/AutoatendimentoPage'));
+const DemoKioskPage       = lazyComRecarga(() => import('./pages/landing/DemoKioskPage'));
+const Totem               = lazyComRecarga(() => import('./pages/Totem'));
 
 // ── Lazy: ADMIN_LAYOUT (único layout compartilhado — carrega rápido) ─────────
-const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
-const Login       = lazy(() => import('./pages/admin/Login'));
+const AdminLayout = lazyComRecarga(() => import('./pages/admin/AdminLayout'));
+const Login       = lazyComRecarga(() => import('./pages/admin/Login'));
 
 // ── Lazy: ADMIN_OPERACAO (turno de trabalho — pré-carrega após login) ────────
-const Dashboard     = lazy(() => import('./pages/admin/Dashboard'));
-const PainelPedidos = lazy(() => import('./pages/admin/PainelPedidos'));
-const PDV           = lazy(() => import('./pages/admin/PDV'));
-const KDS           = lazy(() => import('./pages/admin/KDS'));
-const KDSEstacao    = lazy(() => import('./pages/admin/KDSEstacao'));
-const KDSExpeditor  = lazy(() => import('./pages/admin/KDSExpeditor'));
-const KDSEstacoesConfig = lazy(() => import('./pages/admin/KDSEstacoesConfig'));
-const KDSProducao   = lazy(() => import('./pages/admin/KDSProducao'));
-const Mesas         = lazy(() => import('./pages/admin/Mesas'));
-const Entregas      = lazy(() => import('./pages/admin/Entregas'));
-const PainelBalanca = lazy(() => import('./pages/admin/PainelBalanca').then((m) => ({ default: m.PainelBalanca })));
-const PainelGarcomMobile = lazy(() => import('./pages/admin/PainelGarcomMobile').then((m) => ({ default: m.PainelGarcomMobile })));
+const Dashboard     = lazyComRecarga(() => import('./pages/admin/Dashboard'));
+const PainelPedidos = lazyComRecarga(() => import('./pages/admin/PainelPedidos'));
+const PDV           = lazyComRecarga(() => import('./pages/admin/PDV'));
+const KDS           = lazyComRecarga(() => import('./pages/admin/KDS'));
+const KDSEstacao    = lazyComRecarga(() => import('./pages/admin/KDSEstacao'));
+const KDSExpeditor  = lazyComRecarga(() => import('./pages/admin/KDSExpeditor'));
+const KDSEstacoesConfig = lazyComRecarga(() => import('./pages/admin/KDSEstacoesConfig'));
+const KDSProducao   = lazyComRecarga(() => import('./pages/admin/KDSProducao'));
+const Mesas         = lazyComRecarga(() => import('./pages/admin/Mesas'));
+const Entregas      = lazyComRecarga(() => import('./pages/admin/Entregas'));
+const PainelBalanca = lazyComRecarga(() => import('./pages/admin/PainelBalanca').then((m) => ({ default: m.PainelBalanca })));
+const PainelGarcomMobile = lazyComRecarga(() => import('./pages/admin/PainelGarcomMobile').then((m) => ({ default: m.PainelGarcomMobile })));
 
 // ── Lazy: ADMIN_GESTAO (chunk separado — só carrega ao navegar) ───────────────
-const CardapioAdmin = lazy(() => import('./pages/admin/Cardapio'));
-const Estoque       = lazy(() => import('./pages/admin/Estoque'));
-const Compras       = lazy(() => import('./pages/admin/Compras'));
-const Financeiro    = lazy(() => import('./pages/admin/Financeiro'));
-const Historico     = lazy(() => import('./pages/admin/Historico'));
-const Marketing     = lazy(() => import('./pages/admin/Marketing'));
-const Equipe        = lazy(() => import('./pages/admin/Equipe'));
-const Loja          = lazy(() => import('./pages/admin/Loja'));
-const Assinatura    = lazy(() => import('./pages/admin/Assinatura'));
-const Ajuda         = lazy(() => import('./pages/admin/Ajuda'));
-const MinhaConta    = lazy(() => import('./pages/admin/MinhaConta'));
-const ChatAdmin     = lazy(() => import('./pages/admin/ChatAdmin'));
-const Ifood         = lazy(() => import('./pages/admin/Ifood'));
-const WhatsApp      = lazy(() => import('./pages/admin/WhatsApp'));
-const Fiscal        = lazy(() => import('./pages/admin/Fiscal'));
+const CardapioAdmin = lazyComRecarga(() => import('./pages/admin/Cardapio'));
+const Estoque       = lazyComRecarga(() => import('./pages/admin/Estoque'));
+const Compras       = lazyComRecarga(() => import('./pages/admin/Compras'));
+const Financeiro    = lazyComRecarga(() => import('./pages/admin/Financeiro'));
+const Historico     = lazyComRecarga(() => import('./pages/admin/Historico'));
+const Marketing     = lazyComRecarga(() => import('./pages/admin/Marketing'));
+const Equipe        = lazyComRecarga(() => import('./pages/admin/Equipe'));
+const Loja          = lazyComRecarga(() => import('./pages/admin/Loja'));
+const Assinatura    = lazyComRecarga(() => import('./pages/admin/Assinatura'));
+const Ajuda         = lazyComRecarga(() => import('./pages/admin/Ajuda'));
+const MinhaConta    = lazyComRecarga(() => import('./pages/admin/MinhaConta'));
+const ChatAdmin     = lazyComRecarga(() => import('./pages/admin/ChatAdmin'));
+const Ifood         = lazyComRecarga(() => import('./pages/admin/Ifood'));
+const WhatsApp      = lazyComRecarga(() => import('./pages/admin/WhatsApp'));
+const Fiscal        = lazyComRecarga(() => import('./pages/admin/Fiscal'));
 
 // ── Lazy: ENTREGADOR (app isolado) ────────────────────────────────────────────
-const EntregadorLayout   = lazy(() => import('./pages/entregador/EntregadorLayout'));
-const EntregadorLogin    = lazy(() => import('./pages/entregador/Login'));
-const EntregadorDashboard= lazy(() => import('./pages/entregador/Dashboard'));
-const EntregadorRota     = lazy(() => import('./pages/entregador/Rota'));
-const EntregadorDocumentos = lazy(() => import('./pages/entregador/Documentos'));
+const EntregadorLayout   = lazyComRecarga(() => import('./pages/entregador/EntregadorLayout'));
+const EntregadorLogin    = lazyComRecarga(() => import('./pages/entregador/Login'));
+const EntregadorDashboard= lazyComRecarga(() => import('./pages/entregador/Dashboard'));
+const EntregadorRota     = lazyComRecarga(() => import('./pages/entregador/Rota'));
+const EntregadorDocumentos = lazyComRecarga(() => import('./pages/entregador/Documentos'));
 
 // ── Lazy: SUPERADMIN (area interna restrita) ──────────────────────────────────
-const SuperAdminLogin  = lazy(() => import('./pages/superadmin/Login'));
-const SuperAdminLayout = lazy(() => import('./pages/superadmin/SuperAdminLayout'));
-const CrmLeads         = lazy(() => import('./pages/superadmin/CrmLeads'));
-const GuiaCeoGtm       = lazy(() => import('./pages/superadmin/GuiaCeoGtm'));
-const Tenants          = lazy(() => import('./pages/superadmin/Tenants'));
-const Onboarding       = lazy(() => import('./pages/superadmin/Onboarding'));
-const Churn            = lazy(() => import('./pages/superadmin/Churn'));
-const Auditoria        = lazy(() => import('./pages/superadmin/Auditoria'));
-const FiscalPlataforma = lazy(() => import('./pages/superadmin/FiscalPlataforma'));
-const WhatsAppPlataforma = lazy(() => import('./pages/superadmin/WhatsAppPlataforma'));
-const SuperErros       = lazy(() => import('./pages/superadmin/Erros'));
+const SuperAdminLogin  = lazyComRecarga(() => import('./pages/superadmin/Login'));
+const SuperAdminLayout = lazyComRecarga(() => import('./pages/superadmin/SuperAdminLayout'));
+const CrmLeads         = lazyComRecarga(() => import('./pages/superadmin/CrmLeads'));
+const GuiaCeoGtm       = lazyComRecarga(() => import('./pages/superadmin/GuiaCeoGtm'));
+const Tenants          = lazyComRecarga(() => import('./pages/superadmin/Tenants'));
+const Onboarding       = lazyComRecarga(() => import('./pages/superadmin/Onboarding'));
+const Churn            = lazyComRecarga(() => import('./pages/superadmin/Churn'));
+const Auditoria        = lazyComRecarga(() => import('./pages/superadmin/Auditoria'));
+const FiscalPlataforma = lazyComRecarga(() => import('./pages/superadmin/FiscalPlataforma'));
+const WhatsAppPlataforma = lazyComRecarga(() => import('./pages/superadmin/WhatsAppPlataforma'));
+const SuperErros       = lazyComRecarga(() => import('./pages/superadmin/Erros'));
 
 function CookieBannerForaDoReceiver() {
   const location = useLocation();
@@ -101,6 +102,11 @@ function CookieBannerForaDoReceiver() {
 }
 
 export default function App() {
+  // O app subiu: devolve a permissão de recarga automática, para que a próxima
+  // publicação do dia também seja recuperável nesta mesma aba. Enquanto o app
+  // não monta, a permissão fica gasta — é ela que impede laço de recarga.
+  useEffect(() => { liberarNovaRecarga(); }, []);
+
   return (
     <I18nProvider>
       <AcessibilidadeProvider>
