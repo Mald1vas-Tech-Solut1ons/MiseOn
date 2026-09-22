@@ -39,6 +39,7 @@ import { getOptimizedImageUrl } from '../lib/cdn';
 import { imprimir } from '../lib/print';
 import type { Produto, Categoria, GrupoOpcoes, Opcao, ItemCarrinho } from '../types';
 import TabelaNutricional from '../components/cardapio/TabelaNutricional';
+import SeloNutricional from '../components/cardapio/SeloNutricional';
 import ResumoNutricionalPedido from '../components/cardapio/ResumoNutricionalPedido';
 import type { NutricaoProduto, NutricaoOpcao, NutrienteCatalogo } from '../lib/nutricao';
 
@@ -583,6 +584,13 @@ export default function Totem() {
                   )}
                   <div className="p-5">
                     <p className="line-clamp-2 text-2xl font-black leading-tight">{p.nome}</p>
+                    {/* A caloria tem que estar AQUI, na grade, e não só dentro
+                        do item: quem percorre o cardápio compara antes de
+                        abrir qualquer coisa. Era isto que faltava para o totem
+                        mostrar o mesmo que o celular já mostrava no card. */}
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <SeloNutricional dados={nutricao.get(p.id)} compacto />
+                    </div>
                     <p className="mt-2 text-3xl font-black text-[#FC5B24]">{dinheiro(Number(p.preco))}</p>
                   </div>
                 </button>
@@ -811,6 +819,12 @@ export default function Totem() {
                   )}
                   <div className="p-5">
                     <p className="line-clamp-2 text-2xl font-black leading-tight">{p.nome}</p>
+                    {/* Sobremesa oferecida no fim do pedido é justamente onde a
+                        caloria pesa na decisão. Esconder aqui seria escolher
+                        por quem está comprando. */}
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <SeloNutricional dados={nutricao.get(p.id)} compacto />
+                    </div>
                     <p className="mt-2 text-3xl font-black text-[#FC5B24]">{dinheiro(Number(p.preco))}</p>
                   </div>
                 </button>

@@ -62,9 +62,20 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # `version: latest` faz a action perguntar à API do GitHub qual é o
+      # último release. Sem token essa chamada é anônima e divide a cota do
+      # IP do runner com o mundo inteiro — em 22/09/2026 ela falhou com
+      # "Failed to resolve latest Supabase CLI release: rate limit exceeded"
+      # e derrubou o job inteiro, sem nada de errado no código.
+      #
+      # `secrets.GITHUB_TOKEN` é emitido pelo próprio Actions em toda execução
+      # (não precisa cadastrar nada) e sobe a cota de 60 para 1000 chamadas por
+      # hora. É a diferença entre um job que depende da sorte e um que não.
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm ci --no-fund
       - name: Subir banco local (migrations + seed)
         run: |
