@@ -122,8 +122,16 @@ describe('fechamento do totem sem cobrança real', () => {
     await irAoPagamento();
     fireEvent.click(screen.getByRole('button', { name: 'Pagar com Pix' }));
     await screen.findByRole('alert');
+    // Igual ao supabase-js: a consulta só sai do aparelho quando é consumida.
+    // Com um mock ansioso, um `void supabase.rpc(...)` passava aqui e nunca
+    // cancelava nada em produção.
+    const executou = vi.fn();
+    mocks.rpc.mockImplementation((nome: string) => nome === 'fn_totem_cancelar_pedido'
+      ? { then: (ok: (v: unknown) => unknown) => { executou(); return Promise.resolve(ok({ data: { cancelado: true }, error: null })); } }
+      : Promise.resolve({ data: [], error: null }));
     fireEvent.click(screen.getByRole('button', { name: 'Recomeçar' }));
     expect(mocks.rpc).toHaveBeenCalledWith('fn_totem_cancelar_pedido', { p_token: 'token-teste', p_pedido_id: 'pedido-1' });
+    expect(executou).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: /Começar pedido/ })).toBeTruthy();
     expect(screen.queryByText(/Pedido #42/)).toBeNull();
   });
@@ -168,5 +176,80 @@ describe('fechamento do totem sem cobrança real', () => {
     expect((screen.getByRole('button', { name: 'Adicionar' }) as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: 'Arroz' }));
     expect(screen.getByText('Faltam escolhas: 1')).toBeTruthy();
+  });
+});
+
+describe('resgate de cashback', () => {
+  /** Mock por NOME: a consulta de saldo é mais uma chamada no meio do fluxo. */
+  function comSaldo(consulta: { saldo: number; resgate: number; expira_em?: string | null }) {
+    mocks.rpc.mockImplementation((nome: string) => Promise.resolve(
+      String(nome).startsWith('fn_nutricao') ? { data: [], error: null }
+        : nome === 'fn_totem_saldo_cashback' ? { data: consulta, error: null }
+          : { data: pedido, error: null }));
+  }
+
+  async function identificar() {
+    await abrirProduto();
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
+    fireEvent.click(screen.getByRole('button', { name: /Ver pedido/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+    for (const d of '11987654321') fireEvent.click(screen.getByRole('button', { name: d }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+  }
+
+  const payloadDoPedido = () => mocks.rpc.mock.calls.find(([n]) => n === 'fn_totem_criar_pedido')?.[1].p_payload;
+
+  it('com saldo, oferece o valor do servidor e manda só a intenção', async () => {
+    comSaldo({ saldo: 12, resgate: 6, expira_em: '2026-10-07T12:00:00Z' });
+    await identificar();
+    expect(await screen.findByText('Seu saldo de cashback')).toBeTruthy();
+    expect(mocks.rpc).toHaveBeenCalledWith('fn_totem_saldo_cashback', expect.objectContaining({
+      p_token: 'token-teste', p_telefone: '11987654321',
+      p_itens: [{ produto_id: 'p-1', quantidade: 1, opcoes: [] }],
+    }));
+    fireEvent.click(screen.getByRole('button', { name: /^Usar/ }));
+
+    // Prévia: 20 do lanche menos os 6 que o servidor calculou.
+    expect(screen.getByText(/14,00/)).toBeTruthy();
+    expect(screen.getByText(/Cashback usado/)).toBeTruthy();
+
+    mocks.rpc.mockImplementation((nome: string) => Promise.resolve(nome === 'fn_totem_criar_pedido'
+      ? { data: { ...pedido, valor_total: 14, cashback_usado: 6, cashback_validade_dias: 15 }, error: null }
+      : { data: [], error: null }));
+    fireEvent.click(screen.getByRole('button', { name: 'Pagar com Pix' }));
+    await screen.findByAltText('QR Code do Pix');
+    const payload = payloadDoPedido();
+    expect(payload.usar_cashback).toBe(true);
+    expect(payload.telefone).toBe('11987654321');
+    // Nenhum valor de desconto sai do aparelho.
+    expect(JSON.stringify(payload)).not.toMatch(/cashback_usado|desconto|valor/);
+  });
+
+  it('guardar para depois cria o pedido sem resgate', async () => {
+    comSaldo({ saldo: 12, resgate: 6 });
+    await identificar();
+    fireEvent.click(await screen.findByRole('button', { name: 'Guardar para depois' }));
+    expect(screen.queryByText(/Cashback usado/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Pagar com Pix' }));
+    await screen.findByAltText('QR Code do Pix');
+    expect(payloadDoPedido().usar_cashback).toBeUndefined();
+  });
+
+  it('sem saldo resgatável, pula a tela de resgate inteira', async () => {
+    comSaldo({ saldo: 3, resgate: 0 });
+    await identificar();
+    expect(await screen.findByRole('button', { name: 'Pagar com Pix' })).toBeTruthy();
+    expect(screen.queryByText('Seu saldo de cashback')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Pagar com Pix' }));
+    await screen.findByAltText('QR Code do Pix');
+    expect(payloadDoPedido().usar_cashback).toBeUndefined();
+  });
+
+  it('consulta que falha não trava a fila', async () => {
+    mocks.rpc.mockImplementation((nome: string) => nome === 'fn_totem_saldo_cashback'
+      ? Promise.reject(new Error('offline'))
+      : Promise.resolve(String(nome).startsWith('fn_nutricao') ? { data: [], error: null } : { data: pedido, error: null }));
+    await identificar();
+    expect(await screen.findByRole('button', { name: 'Pagar com Pix' })).toBeTruthy();
   });
 });

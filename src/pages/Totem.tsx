@@ -66,7 +66,17 @@ type LinhaCarrinho = {
  * refeição, e a identificação vem por último — pedir e-mail antes de a pessoa
  * saber o que quer é o jeito mais rápido de perder o pedido na fila.
  */
-type Tela = 'repouso' | 'cardapio' | 'item' | 'carrinho' | 'sugestao' | 'identificacao' | 'pagamento' | 'pix' | 'pronto';
+type Tela = 'repouso' | 'cardapio' | 'item' | 'carrinho' | 'sugestao' | 'identificacao' | 'cashback' | 'pagamento' | 'pix' | 'pronto';
+
+/**
+ * A consulta de saldo não pode segurar a fila: se o servidor demorar mais que
+ * isto, a pessoa segue para o pagamento sem a oferta. Perder um resgate é
+ * melhor que travar o totem.
+ */
+const MS_ATE_DESISTIR_DO_SALDO = 4000;
+
+/** O que o servidor diz sobre o saldo deste telefone para ESTE carrinho. */
+type SaldoCashback = { saldo: number; resgate: number; expiraEm: string | null };
 
 /** Categorias que valem como sobremesa para a sugestão do fim do fluxo. */
 const PALAVRAS_SOBREMESA = /sobremesa|doce|sorvete|açaí|acai|milk\s?shake|torta|pudim/i;
@@ -126,7 +136,10 @@ export default function Totem() {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
   const [resultado, setResultado] = useState<
-    { pedidoId: string; senha: number | null; numero: number; total: number; identificado: boolean; cashbackPct: number } | null
+    {
+      pedidoId: string; senha: number | null; numero: number; total: number;
+      identificado: boolean; cashbackPct: number; cashbackUsado: number; validadeDias: number;
+    } | null
   >(null);
   const resultadoRef = useRef<typeof resultado>(null);
   // O ref bloqueia também dois toques no mesmo ciclo, antes do React renderizar.
@@ -135,6 +148,11 @@ export default function Totem() {
   const [contato, setContato] = useState('');
   const [pix, setPix] = useState<{ pedidoId: string; qr: string; copiaECola: string } | null>(null);
   const [aguardandoPix, setAguardandoPix] = useState(false);
+  // Resgate: a oferta vem do servidor e a escolha da pessoa é só a intenção.
+  // O valor que vale é o que `fn_totem_criar_pedido` devolver.
+  const [saldoCashback, setSaldoCashback] = useState<SaldoCashback | null>(null);
+  const [usarCashback, setUsarCashback] = useState(false);
+  const [consultandoSaldo, setConsultandoSaldo] = useState(false);
 
   // ── Cardápio real da loja ────────────────────────────────────────────────
   useEffect(() => {
@@ -204,7 +222,13 @@ export default function Totem() {
    */
   const desistirDoPedido = useCallback((pedidoId: string | undefined) => {
     if (!pedidoId) return;
-    void supabase.rpc('fn_totem_cancelar_pedido', { p_token: token, p_pedido_id: pedidoId });
+    // O `.then` NÃO é enfeite: a consulta do supabase-js é preguiçosa e só
+    // sai do aparelho quando alguém a consome. Com um `void` aqui, o
+    // cancelamento nunca chegou ao servidor — 20 pedidos do totem ficaram
+    // AGUARDANDO_PAGAMENTO no tenant de provas entre 08 e 22/09/2026, e com o
+    // resgate de cashback o saldo do cliente ficaria preso junto.
+    supabase.rpc('fn_totem_cancelar_pedido', { p_token: token, p_pedido_id: pedidoId })
+      .then(() => undefined, () => undefined);
   }, [token]);
 
   const zerar = useCallback(() => {
@@ -214,6 +238,7 @@ export default function Totem() {
     // Se havia pedido esperando pagamento, ele morre junto com a sessão.
     if (aguardandoPix) desistirDoPedido(resultado?.pedidoId);
     setErro(''); setResultado(null); setSegundosRestantes(null); setContato('');
+    setSaldoCashback(null); setUsarCashback(false);
     resultadoRef.current = null;
     setPix(null); setAguardandoPix(false);
     setTela('repouso');
@@ -316,6 +341,41 @@ export default function Totem() {
   /** Do carrinho, vai para a sugestão quando ela existe; senão, direto. */
   const seguirDoCarrinho = () => setTela(valeSugerir ? 'sugestao' : 'identificacao');
 
+  // ── Resgate de cashback ──────────────────────────────────────────────────
+  // A identificação fica DEPOIS do carrinho de propósito: pedir telefone antes
+  // do cardápio perde pedido na fila. Com o telefone em mãos, o servidor diz
+  // quanto dá para usar neste carrinho (saldo anterior, teto de 30%, mínimo de
+  // R$ 5). Sem nada para usar, a tela de resgate nem aparece.
+  const itensDoPayload = () => carrinho.map((l) => ({
+    produto_id: l.produto.id,
+    quantidade: l.quantidade,
+    opcoes: l.opcoes.map((o) => ({ id: o.id })),
+  }));
+
+  const seguirDaIdentificacao = async () => {
+    setUsarCashback(false); setSaldoCashback(null);
+    setConsultandoSaldo(true);
+    try {
+      const consulta = supabase.rpc('fn_totem_saldo_cashback', {
+        p_token: token, p_telefone: contato.replace(/[^0-9]/g, ''), p_itens: itensDoPayload(),
+      });
+      const limite = new Promise<null>((r) => setTimeout(() => r(null), MS_ATE_DESISTIR_DO_SALDO));
+      const resposta = await Promise.race([consulta, limite]);
+      const d = (resposta?.data ?? null) as { saldo?: number; resgate?: number; expira_em?: string | null } | null;
+      const resgate = Number(d?.resgate ?? 0);
+      if (resgate > 0) {
+        setSaldoCashback({ saldo: Number(d?.saldo ?? 0), resgate, expiraEm: d?.expira_em ?? null });
+        setTela('cashback');
+        return;
+      }
+    } catch {
+      // Consulta falhou: segue sem oferta. O pedido não depende dela.
+    } finally {
+      setConsultandoSaldo(false);
+    }
+    setTela('pagamento');
+  };
+
   // ── Fechamento ───────────────────────────────────────────────────────────
   const finalizar = async () => {
     if (!carrinho.length || finalizandoRef.current) return;
@@ -329,17 +389,16 @@ export default function Totem() {
         // O telefone é opcional e reconhece o cliente sem exigir teclado alfabético.
         const soDigitos = contato.replace(/\D/g, '');
         const ehTelefone = soDigitos.length >= 10;
+        // Só a intenção. Nenhum valor sai daqui.
+        const querCashback = ehTelefone && usarCashback && !!saldoCashback;
 
         const { data, error } = await supabase.rpc('fn_totem_criar_pedido', {
           p_token: token,
           p_payload: {
             metodo: 'PIX',
             telefone: ehTelefone ? soDigitos : undefined,
-            itens: carrinho.map((l) => ({
-              produto_id: l.produto.id,
-              quantidade: l.quantidade,
-              opcoes: l.opcoes.map((o) => ({ id: o.id })),
-            })),
+            usar_cashback: querCashback || undefined,
+            itens: itensDoPayload(),
           },
         });
         if (error) { setErro(error.message); return; }
@@ -347,6 +406,7 @@ export default function Totem() {
         const r = data as {
           pedido_id: string; senha: number | null; numero: number; valor_total: number;
           identificado: boolean; cashback_pct: number;
+          cashback_usado?: number; cashback_validade_dias?: number;
         };
         if (!r?.pedido_id) {
           setErro('Não foi possível confirmar a criação do pedido. Procure ajuda no balcão.');
@@ -356,6 +416,8 @@ export default function Totem() {
           pedidoId: r.pedido_id,
           senha: r.senha, numero: r.numero, total: Number(r.valor_total),
           identificado: !!r.identificado, cashbackPct: Number(r.cashback_pct ?? 0),
+          cashbackUsado: Number(r.cashback_usado ?? 0),
+          validadeDias: Number(r.cashback_validade_dias ?? 0),
         };
         resultadoRef.current = fechado;
         setResultado(fechado);
@@ -853,7 +915,7 @@ export default function Totem() {
             <p className="text-center font-['Sora'] text-4xl font-black leading-tight">
               Quer acumular <span className="text-emerald-400">cashback</span>?
             </p>
-            <p className="max-w-xl text-center text-xl text-slate-400">{tDynamic('Informe seu telefone e o valor volta como crédito para a próxima compra.')}</p>
+            <p className="max-w-xl text-center text-xl text-slate-400">{tDynamic('Informe seu telefone para acumular — e para usar o saldo que você já tem.')}</p>
 
             <div className="mt-2 flex min-h-[96px] w-full max-w-lg items-center justify-center rounded-3xl bg-white/5 text-5xl font-black tracking-widest ring-2 ring-white/10">
               {contato || <span className="text-slate-600">(00) 00000-0000</span>}
@@ -873,12 +935,53 @@ export default function Totem() {
             {erro && <p className="text-center text-2xl font-black text-red-400">{erro}</p>}
           </div>
           <footer className="fixed inset-x-0 bottom-0 grid grid-cols-2 gap-3 border-t border-white/10 bg-[#0B1120] p-5">
-            <button type="button" disabled={enviando}
-              onClick={() => { setContato(''); setTela('pagamento'); }}
+            <button type="button" disabled={enviando || consultandoSaldo}
+              onClick={() => { setContato(''); setSaldoCashback(null); setUsarCashback(false); setTela('pagamento'); }}
               className="flex min-h-[88px] items-center justify-center rounded-2xl bg-white/10 text-2xl font-black disabled:opacity-50">{tDynamic('Pular')}</button>
-            <button type="button" disabled={enviando || contato.replace(/\D/g, '').length < 10}
-              onClick={() => setTela('pagamento')}
-              className="flex min-h-[88px] items-center justify-center rounded-2xl bg-emerald-500 text-2xl font-black disabled:opacity-40">{tDynamic('Continuar')}</button>
+            <button type="button" disabled={enviando || consultandoSaldo || contato.replace(/\D/g, '').length < 10}
+              onClick={seguirDaIdentificacao}
+              className="flex min-h-[88px] items-center justify-center gap-3 rounded-2xl bg-emerald-500 text-2xl font-black disabled:opacity-40">
+              {consultandoSaldo ? <Loader2 size={28} className="animate-spin" aria-label={tDynamic('Consultando…')} /> : tDynamic('Continuar')}
+            </button>
+          </footer>
+        </>
+      )}
+
+      {/* ══════════ CASHBACK ══════════
+          Só aparece quando há o que usar (o servidor já aplicou saldo mínimo e
+          teto). Uma pergunta, duas respostas do mesmo tamanho — guardar o
+          saldo é tão legítimo quanto gastar. O valor mostrado é o que o
+          servidor calculou; o pedido refaz a conta e é ela que vale. */}
+      {tela === 'cashback' && saldoCashback && (
+        <>
+          <header className="flex items-center gap-4 border-b border-white/10 p-5">
+            <button type="button" onClick={() => setTela('identificacao')}
+              className="flex min-h-[72px] items-center gap-3 rounded-2xl bg-white/5 px-6 text-2xl font-black">
+              <ArrowLeft size={28} />{tDynamic('Voltar')}</button>
+          </header>
+          <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
+            <p className="text-3xl font-bold text-slate-300">{tDynamic('Seu saldo de cashback')}</p>
+            <p className="font-['Sora'] text-7xl font-black text-emerald-400">{dinheiro(saldoCashback.saldo)}</p>
+            <div className="w-full max-w-xl rounded-3xl bg-emerald-500/10 px-8 py-6 ring-2 ring-emerald-500/40">
+              <p className="text-2xl font-bold text-emerald-200">{tDynamic('Usar neste pedido')}</p>
+              <p className="font-['Sora'] text-6xl font-black text-emerald-300">− {dinheiro(saldoCashback.resgate)}</p>
+            </div>
+            <p className="max-w-xl text-xl text-slate-400">
+              {tDynamic('O cashback cobre até 30% de cada pedido.')}
+              {saldoCashback.expiraEm && (
+                <span className="mt-1 block">
+                  {tDynamic('Parte do saldo vence em')} {new Date(saldoCashback.expiraEm).toLocaleDateString('pt-BR')}.
+                </span>
+              )}
+            </p>
+          </div>
+          <footer className="fixed inset-x-0 bottom-0 grid grid-cols-2 gap-3 border-t border-white/10 bg-[#0B1120] p-5">
+            <button type="button" onClick={() => { setUsarCashback(false); setTela('pagamento'); }}
+              className="flex min-h-[88px] items-center justify-center rounded-2xl bg-white/10 text-2xl font-black">{tDynamic('Guardar para depois')}</button>
+            <button type="button" onClick={() => { setUsarCashback(true); setTela('pagamento'); }}
+              className="flex min-h-[88px] items-center justify-center rounded-2xl bg-emerald-500 text-2xl font-black">
+              {tDynamic('Usar')} {dinheiro(saldoCashback.resgate)}
+            </button>
           </footer>
         </>
       )}
@@ -889,13 +992,22 @@ export default function Totem() {
       {tela === 'pagamento' && (
         <>
           <header className="flex items-center gap-4 border-b border-white/10 p-5">
-            <button type="button" disabled={enviando || !!resultado} onClick={() => setTela('identificacao')}
+            <button type="button" disabled={enviando || !!resultado} onClick={() => setTela(saldoCashback ? 'cashback' : 'identificacao')}
               className="flex min-h-[72px] items-center gap-3 rounded-2xl bg-white/5 px-6 text-2xl font-black disabled:opacity-40">
               <ArrowLeft size={28} />{tDynamic('Voltar')}</button>
           </header>
           <div className="flex flex-1 flex-col justify-center gap-6 p-6">
             <p className="text-center text-3xl font-bold text-slate-300">{tDynamic('Total a pagar')}</p>
-            <p className="text-center font-['Sora'] text-7xl font-black text-[#FC5B24]">{dinheiro(resultado?.total ?? totalVisual)}</p>
+            {/* Antes do pedido existir, o abatimento é a prévia que o servidor
+                calculou na consulta; depois, é o que o pedido gravou. */}
+            <p className="text-center font-['Sora'] text-7xl font-black text-[#FC5B24]">
+              {dinheiro(resultado?.total ?? Math.max(0, totalVisual - (usarCashback && saldoCashback ? saldoCashback.resgate : 0)))}
+            </p>
+            {(resultado ? resultado.cashbackUsado > 0 : usarCashback && !!saldoCashback) && (
+              <p className="text-center text-2xl font-bold text-emerald-300">
+                {tDynamic('Cashback usado')}: − {dinheiro(resultado ? resultado.cashbackUsado : saldoCashback?.resgate ?? 0)}
+              </p>
+            )}
             {resultado && (
               <p className="text-center text-2xl text-slate-300">{tDynamic('Pedido')} #{resultado.numero} · {tDynamic('Pagamento pendente')}</p>
             )}
@@ -960,7 +1072,15 @@ export default function Totem() {
               <p className="text-3xl font-black text-emerald-300">
                 Você acumulou {dinheiro(resultado.total * resultado.cashbackPct / 100)} de cashback
               </p>
-              <p className="mt-1 text-xl text-emerald-200/80">{tDynamic('Use na próxima compra informando o mesmo telefone.')}</p>
+              <p className="mt-1 text-xl text-emerald-200/80">
+                {tDynamic('Use na próxima compra informando o mesmo telefone.')}
+                {resultado.validadeDias > 0 && <> {tDynamic('Válido por')} {resultado.validadeDias} {tDynamic('dias')}.</>}
+              </p>
+              {resultado.cashbackUsado > 0 && (
+                <p className="mt-2 text-xl font-bold text-emerald-200">
+                  {tDynamic('Cashback usado')}: − {dinheiro(resultado.cashbackUsado)}
+                </p>
+              )}
             </div>
           )}
           <p className="max-w-xl text-2xl text-slate-300">

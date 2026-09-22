@@ -2044,6 +2044,21 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Toque para adicionar ao seu pedido.': 'Tap to add it to your order.',
   'Agora não, continuar': 'Not now, continue',
   'Pular': 'Skip',
+  // ── Resgate de cashback no totem (22/09/2026) ───────────────────────────
+  'Informe seu telefone para acumular — e para usar o saldo que você já tem.':
+    'Enter your phone number to earn — and to use the balance you already have.',
+  'Consultando…': 'Checking…',
+  'Seu saldo de cashback': 'Your cashback balance',
+  'Usar neste pedido': 'Use on this order',
+  'O cashback cobre até 30% de cada pedido.': 'Cashback covers up to 30% of each order.',
+  'Parte do saldo vence em': 'Part of your balance expires on',
+  'Guardar para depois': 'Save it for later',
+  'Cashback usado': 'Cashback used',
+  'Válido por': 'Valid for',
+  'O saldo de cashback vale 15 dias a partir de cada compra. Regra da plataforma: sem prazo, o saldo vira passivo que só cresce e não traz o cliente de volta.':
+    'Cashback balance is valid for 15 days from each purchase. Platform rule: without a deadline, the balance becomes a liability that only grows and does not bring the customer back.',
+  'Validade do saldo': 'Balance validity',
+  '15 dias': '15 days',
   'Informe seu telefone e o valor volta como crédito para a próxima compra.':
     'Enter your phone number and the amount comes back as credit on your next purchase.',
   'Total a pagar': 'Amount due',
