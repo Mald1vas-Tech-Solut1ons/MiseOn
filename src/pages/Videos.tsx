@@ -39,7 +39,7 @@ const VIDEOS: VideoItem[] = [
     subtitulo: 'A revolução visual e operacional para Food Service',
     descricao: 'Conheça o conceito, o rigor de engenharia da Maldivas Tech e o design state-of-the-art por trás da plataforma MiseOn.',
     categoria: 'marca',
-    src: '/MiseOn%20brand%20identity/videoIntro1.mp4',
+    src: '/videoMarketing.mp4',
     duracao: 'Vídeo Oficial',
     destaque: true,
     autor: 'Rafael Maldivas',
