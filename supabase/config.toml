@@ -95,3 +95,10 @@ entrypoint = "./functions/preparo-sugerir/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/fiscal-pdf-nfse/index.ts"
+
+# Retomada de cadastro: chamada pelo pg_cron (x-worker-token) e pelo clique
+# de descadastro no e-mail (GET sem sessão). A prévia confere o JWT no corpo.
+[functions.onboarding-retomada]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/onboarding-retomada/index.ts"

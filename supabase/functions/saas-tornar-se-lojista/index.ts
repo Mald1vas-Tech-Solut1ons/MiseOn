@@ -43,11 +43,18 @@ Deno.serve(async (req) => {
     } = body;
 
     if (!nome_loja?.trim()) return json({ error: 'Informe o nome da loja.' }, { status: 400 });
-    if (!['PF', 'PJ'].includes(tipo_pessoa)) return json({ error: 'tipo_pessoa inválido.' }, { status: 400 });
-    if (!cpf_cnpj?.trim()) return json({ error: 'Informe o CPF/CNPJ.' }, { status: 400 });
-    if (!razao_social_ou_nome?.trim()) return json({ error: 'Informe a razão social/nome.' }, { status: 400 });
-    if (!email_cobranca?.trim()) return json({ error: 'Informe o e-mail de cobrança.' }, { status: 400 });
     if (!segmento_negocio) return json({ error: 'Informe o segmento do negócio.' }, { status: 400 });
+
+    // DADO FISCAL NÃO É MAIS PORTA DE ENTRADA (22/09/2026).
+    // Pedir CNPJ, razão social e endereço antes de a pessoa ver o sistema foi
+    // o muro onde uma lead real parou. No teste grátis não há nota a emitir;
+    // a tela de Assinatura exige o cadastro fiscal antes de cobrar. Se vier
+    // (tela antiga em cache), continua valendo — e aí vem inteiro.
+    const temFiscal = !!String(cpf_cnpj ?? '').trim();
+    if (temFiscal) {
+      if (!['PF', 'PJ'].includes(tipo_pessoa)) return json({ error: 'tipo_pessoa inválido.' }, { status: 400 });
+      if (!razao_social_ou_nome?.trim()) return json({ error: 'Informe a razão social/nome.' }, { status: 400 });
+    }
 
     const supabaseAuth = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -88,17 +95,22 @@ Deno.serve(async (req) => {
 
     const { error: eVinculo } = await admin.from('usuarios_loja')
       .insert({ user_id: user.id, loja_id: loja.id, papel: 'admin' });
-    if (eVinculo) throw eVinculo;
+    if (eVinculo) {
+      // Sem o vínculo a loja fica sem dono e a pessoa volta para a tela de
+      // cadastro; na segunda tentativa nasceria outra loja. Desfaz.
+      await admin.from('lojas').delete().eq('id', loja.id);
+      throw eVinculo;
+    }
 
     const { error: eCadastro } = await admin.from('assinatura_dados_cadastro').insert({
       loja_id: loja.id,
-      tipo_pessoa,
-      cpf_cnpj: String(cpf_cnpj).replace(/\D/g, ''),
-      razao_social_ou_nome: razao_social_ou_nome.trim(),
+      tipo_pessoa: temFiscal ? tipo_pessoa : null,
+      cpf_cnpj: temFiscal ? String(cpf_cnpj).replace(/\D/g, '') : null,
+      razao_social_ou_nome: temFiscal ? razao_social_ou_nome.trim() : null,
       logradouro, numero, complemento, bairro, cidade,
       uf: uf ? String(uf).toUpperCase() : null,
       cep: cep ? String(cep).replace(/\D/g, '') : null,
-      email_cobranca: email_cobranca.trim().toLowerCase(),
+      email_cobranca: String(email_cobranca || user.email || '').trim().toLowerCase(),
       segmento_negocio,
       qtd_funcionarios: qtd_funcionarios ?? null,
       atende_salao_garcom: !!atende_salao_garcom,
@@ -106,7 +118,9 @@ Deno.serve(async (req) => {
       modelo_entrega: faz_entregas ? (modelo_entrega ?? null) : null,
       aceite_trial_em: new Date().toISOString(),
     });
-    if (eCadastro) throw eCadastro;
+    // A loja já existe e já é dela: falhar aqui faria a pessoa tentar de novo
+    // e bater no "já vinculada". Fica no log; a Assinatura pede depois.
+    if (eCadastro) console.error('Cadastro da assinatura não gravou:', eCadastro);
 
     await admin.rpc('fn_email_enfileirar', {
       p_loja: loja.id,

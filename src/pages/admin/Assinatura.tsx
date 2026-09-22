@@ -7,12 +7,20 @@ import { SAAS_PRICING, maxParcelasAnual, parcelamentoAnualCurto, rotuloParcelaAn
 import { BandeiraMark } from '../../components/ui';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
+import DadosFiscaisAssinatura from '../../components/admin/DadosFiscaisAssinatura';
 import { getOptimizedImageUrl } from '../../lib/cdn';
 
 import { useI18n } from '../../contexts/I18nContext';
 export default function Assinatura() {
   const { idioma, tDynamic } = useI18n();
   const { lojaId, lojaNome } = useOutletContext<CtxLoja>();
+  // Dado fiscal saiu do cadastro e passou a ser pedido aqui: sem ele não há
+  // nota da assinatura, então pagar fica travado até estar completo.
+  const [fiscalOk, setFiscalOk] = useState(false);
+  const [emailSessao, setEmailSessao] = useState('');
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setEmailSessao(data.user?.email ?? ''), () => undefined);
+  }, []);
   const [status, setStatus] = useState<string>('trial');
   const [emDia, setEmDia] = useState<boolean>(true);
   const [vencimento, setVencimento] = useState<string | null>(null);
@@ -107,6 +115,7 @@ export default function Assinatura() {
   };
 
   const assinarCartao = async () => {
+    if (!fiscalOk) { setErro(tDynamic('Preencha os dados para a nota fiscal antes de pagar.')); return; }
     setErro(''); setSucesso('');
     const num = numero.replace(/\s/g, '');
     const [mes, ano] = validade.split('/');
@@ -180,6 +189,7 @@ export default function Assinatura() {
   const economiaAnualPix = SAAS_PRICING.mensal.bruto * 12 - SAAS_PRICING.anual.pix;
 
   const gerarPix = async () => {
+    if (!fiscalOk) { setErro(tDynamic('Preencha os dados para a nota fiscal antes de pagar.')); return; }
     setErro(''); setSucesso(''); setProcessando(true);
     try {
       // O valor NÃO vai daqui: quem define o preço é a Edge Function. A tela
@@ -408,6 +418,7 @@ export default function Assinatura() {
             </div>
 
             <div className="p-4 sm:p-6 pt-0">
+              {lojaId && <DadosFiscaisAssinatura key={`${lojaId}-${emailSessao}`} lojaId={lojaId} emailPadrao={emailSessao} onMudou={setFiscalOk} />}
               {erro && (
                 <div className="mb-6 animate-in fade-in flex items-center gap-3 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 p-4 text-sm font-semibold text-red-700 dark:text-red-400">
                   <AlertCircle size={20} className="shrink-0" /> <p>{erro}</p>
@@ -485,7 +496,7 @@ export default function Assinatura() {
                     </label>
                   )}
 
-                  <button type="button" onClick={assinarCartao} disabled={processando}
+                  <button type="button" onClick={assinarCartao} disabled={processando || !fiscalOk}
                     className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 dark:bg-gray-100 py-4 font-bold text-white dark:text-gray-900 transition-transform hover:scale-[1.01] active:scale-95 disabled:pointer-events-none disabled:opacity-50">
                     {processando ? (
                       <><div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-500 border-t-white dark:border-t-gray-900"></div> {tDynamic('Autenticando no Banco...')}</>
@@ -509,7 +520,7 @@ export default function Assinatura() {
                   </div>
 
                   {!qrCode ? (
-                     <button type="button" onClick={gerarPix} disabled={processando}
+                     <button type="button" onClick={gerarPix} disabled={processando || !fiscalOk}
                        className="flex w-full max-w-sm items-center justify-center gap-2 rounded-xl bg-teal-600 py-4 font-bold text-white transition-transform hover:scale-[1.01] active:scale-95 disabled:pointer-events-none disabled:opacity-50">
                        {processando ? (
                          <><div className="h-5 w-5 animate-spin rounded-full border-2 border-teal-800 border-t-white"></div> {tDynamic('Gerando código seguro...')}</>
