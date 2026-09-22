@@ -96,14 +96,20 @@ export async function confirmarPagamentoPedido(
   //
   // Até aqui o dinheiro JÁ entrou e o pagamento JÁ está PAGO. Se o pedido não
   // avançou, ele fica em AGUARDANDO_PAGAMENTO — e esse status nasce invisível
-  // para o lojista de propósito. Antes, o resultado deste update era
-  // descartado: a função devolvia {pago:true} de qualquer jeito, o totem
-  // mostrava sucesso e o pedido sumia sem deixar rastro em lugar nenhum.
+  // para o lojista de propósito. O resultado deste update era descartado: a
+  // função devolvia {pago:true} de qualquer jeito, o totem mostrava sucesso e
+  // o pedido sumia sem deixar rastro em lugar nenhum.
   //
-  // Conferir o erro não basta, porque o caso real veio sem erro: a suspeita é
-  // que a function morreu entre um comando e outro. Então o que vale é o
-  // ESTADO, lido de volta. Reexecução legítima (webhook e tela perguntando ao
-  // mesmo tempo) já encontra o pedido adiantado e não alarma.
+  // A CAUSA, MEDIDA. Não foi falha transitória. A versão publicada (v50, de
+  // 21/08/2026) filtrava `.eq('status','NOVO')` — a linha acima só ganhou
+  // AGUARDANDO_PAGAMENTO no repositório em 08/09 e nunca foi publicada. O
+  // update acertava ZERO linhas, em silêncio, exatamente como estava escrito.
+  // Edge Function não sai no push: o repositório estava certo e a produção,
+  // parada. Mesma lição das RPCs — o que vale é o que está publicado.
+  //
+  // Conferir só o erro não bastaria, porque esse caso não gera erro nenhum.
+  // O que vale é o ESTADO, lido de volta. Reexecução legítima (webhook e tela
+  // perguntando ao mesmo tempo) já encontra o pedido adiantado e não alarma.
   const { data: depois } = await supabase
     .from('pedidos')
     .select('status, numero, loja_id')
