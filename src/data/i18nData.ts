@@ -2117,6 +2117,17 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Ainda sem eventos: o rastreio começou em 22/09/2026 e só registra quem abrir a tela a partir daí.':
     'No events yet: tracking started on 09/22/2026 and only records people who open the screen from then on.',
   'contas': 'accounts',
+  'Não foi possível enviar a prévia': 'Could not send the preview',
+  'Prévia enviada para': 'Preview sent to',
+  'Lembrete por e-mail para quem não criou a loja': 'E-mail reminder for people who did not create a store',
+  'No máximo dois: cerca de 1h e 24h depois de entrar. Assinado por você, com WhatsApp e link para parar de receber.':
+    'At most two: about 1h and 24h after signing in. Signed by you, with WhatsApp and an unsubscribe link.',
+  'Ligado': 'On',
+  'Desligado': 'Off',
+  'Enviar prévia do 1º e-mail para mim': 'Send me a preview of e-mail #1',
+  'Enviar prévia do 2º e-mail para mim': 'Send me a preview of e-mail #2',
+  'Desligar lembretes': 'Turn reminders off',
+  'Ligar lembretes': 'Turn reminders on',
   // ── Superadmin: erros por família (22/09/2026) ──────────────────────────
   'agora': 'now',
   'Pico agora': 'Spiking now',

@@ -72,6 +72,31 @@ export default function Cadastros() {
 
   useEffect(() => { void carregar(); }, [carregar]);
 
+  // ── Lembrete por e-mail (onboarding-retomada) ──────────────────────────
+  // Nasce desligado. O dono manda a prévia para o próprio e-mail, lê, e só
+  // então liga: e-mail para lead real não tem volta.
+  const [retomadaLigada, setRetomadaLigada] = useState<boolean | null>(null);
+  const [avisoRetomada, setAvisoRetomada] = useState('');
+  useEffect(() => {
+    supabase.rpc('fn_superadmin_flag', { p_chave: 'onboarding_retomada' })
+      .then(({ data }) => setRetomadaLigada(!!data), () => setRetomadaLigada(null));
+  }, []);
+
+  const enviarPrevia = async (envio: 1 | 2) => {
+    setAvisoRetomada('');
+    const { data, error } = await supabase.functions.invoke('onboarding-retomada', { body: { acao: 'previa', envio } });
+    setAvisoRetomada(error || data?.error
+      ? `${tDynamic('Não foi possível enviar a prévia')}: ${data?.error ?? error?.message}`
+      : `${tDynamic('Prévia enviada para')} ${data.enviado_para}`);
+  };
+
+  const alternarRetomada = async () => {
+    const novo = !retomadaLigada;
+    const { data, error } = await supabase.rpc('fn_superadmin_definir_flag', { p_chave: 'onboarding_retomada', p_ligado: novo });
+    if (error) { setAvisoRetomada(error.message); return; }
+    setRetomadaLigada(!!data);
+  };
+
   const donos = useMemo(() => contas.filter((c) => c.situacao !== 'equipe'), [contas]);
   // Degrau alcançado: quem está em "vendendo" também passou por todos os anteriores.
   const funil = useMemo(() => {
@@ -127,6 +152,27 @@ export default function Cadastros() {
             </div>
           );
         })}
+      </div>
+
+      <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="flex items-center gap-2 font-black"><Mail size={16} /> {tDynamic('Lembrete por e-mail para quem não criou a loja')}</p>
+            <p className="mt-1 text-xs text-slate-400">{tDynamic('No máximo dois: cerca de 1h e 24h depois de entrar. Assinado por você, com WhatsApp e link para parar de receber.')}</p>
+          </div>
+          <span className={`rounded-full px-3 py-1 text-xs font-black ${retomadaLigada ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-slate-300'}`}>
+            {retomadaLigada === null ? '…' : retomadaLigada ? tDynamic('Ligado') : tDynamic('Desligado')}
+          </span>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button type="button" onClick={() => enviarPrevia(1)} className="rounded-xl border border-white/10 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-white/10">{tDynamic('Enviar prévia do 1º e-mail para mim')}</button>
+          <button type="button" onClick={() => enviarPrevia(2)} className="rounded-xl border border-white/10 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-white/10">{tDynamic('Enviar prévia do 2º e-mail para mim')}</button>
+          <button type="button" onClick={alternarRetomada} disabled={retomadaLigada === null}
+            className={`rounded-xl px-3 py-2 text-xs font-black ${retomadaLigada ? 'border border-red-500/40 text-red-300' : 'bg-emerald-500 text-slate-900'} disabled:opacity-40`}>
+            {retomadaLigada ? tDynamic('Desligar lembretes') : tDynamic('Ligar lembretes')}
+          </button>
+        </div>
+        {avisoRetomada && <p className="mt-2 text-xs text-slate-300">{avisoRetomada}</p>}
       </div>
 
       <h2 className="mb-2 font-['Sora'] text-lg font-black">{tDynamic('Entraram e não criaram a loja')} ({semLoja.length})</h2>
