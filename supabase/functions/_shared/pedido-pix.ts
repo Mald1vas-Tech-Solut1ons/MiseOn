@@ -86,11 +86,52 @@ export async function confirmarPagamentoPedido(
   // AGUARDANDO_PAGAMENTO e a origem do pedido online desde 20260908: ele nasce
   // invisivel para o lojista e so entra na operacao aqui, com o Pix confirmado.
   // NOVO continua aceito para nao quebrar pedido criado antes dessa mudanca.
-  await supabase
+  const { error: erroPedido } = await supabase
     .from('pedidos')
     .update({ status: 'ACEITO' })
     .eq('id', pagoRow.pedido_id)
     .in('status', ['NOVO', 'AGUARDANDO_PAGAMENTO']);
+
+  // O PONTO CEGO QUE CUSTOU O PEDIDO #304 (22/09/2026).
+  //
+  // Até aqui o dinheiro JÁ entrou e o pagamento JÁ está PAGO. Se o pedido não
+  // avançou, ele fica em AGUARDANDO_PAGAMENTO — e esse status nasce invisível
+  // para o lojista de propósito. Antes, o resultado deste update era
+  // descartado: a função devolvia {pago:true} de qualquer jeito, o totem
+  // mostrava sucesso e o pedido sumia sem deixar rastro em lugar nenhum.
+  //
+  // Conferir o erro não basta, porque o caso real veio sem erro: a suspeita é
+  // que a function morreu entre um comando e outro. Então o que vale é o
+  // ESTADO, lido de volta. Reexecução legítima (webhook e tela perguntando ao
+  // mesmo tempo) já encontra o pedido adiantado e não alarma.
+  const { data: depois } = await supabase
+    .from('pedidos')
+    .select('status, numero, loja_id')
+    .eq('id', pagoRow.pedido_id)
+    .maybeSingle();
+
+  if (!depois || depois.status === 'AGUARDANDO_PAGAMENTO' || depois.status === 'NOVO') {
+    const motivo = erroPedido?.message ?? 'update não encontrou o pedido no status esperado';
+    log.error('Pix pago mas pedido NÃO entrou na operação', erroPedido, {
+      txid,
+      pedido_id: pagoRow.pedido_id,
+      status_atual: depois?.status ?? 'desconhecido',
+    });
+
+    // Vai para o painel do superadmin na hora. A reconciliação agendada
+    // (fn_reconciliar_pedidos_pagos, de minuto em minuto) conserta sozinha;
+    // este registro existe para que ninguém descubra por acaso, como foi
+    // preciso descobrir desta vez.
+    await supabase.rpc('fn_registrar_erro', {
+      p_origem: 'servidor',
+      p_mensagem: `Pix pago e pedido #${depois?.numero ?? '?'} não entrou na operação: ${motivo}`,
+      p_contexto: 'pix/confirmarPagamentoPedido',
+      p_stack: txid,
+      p_url: null,
+      p_user_agent: null,
+      p_loja_id: depois?.loja_id ?? null,
+    });
+  }
 
   log.info('Pagamento Pix confirmado (receita lança no FINALIZADO)', { txid, pedido_id: pagoRow.pedido_id });
   return { pago: true, pedido_id: pagoRow.pedido_id };
