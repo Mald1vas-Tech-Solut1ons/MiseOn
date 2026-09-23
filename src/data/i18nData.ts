@@ -4325,6 +4325,8 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Ângulo de 45° mostra volume; direto de cima funciona bem para pratos únicos.': 'A 45° angle shows volume; straight from above works well for single-bowl dishes.',
   'Fundo liso e sem bagunça deixa o prato em destaque.': 'A plain, clutter-free background makes the dish stand out.',
   'Evite flash direto — ele cria brilho duro e sombra dura no prato.': 'Avoid direct flash — it creates harsh glare and hard shadows on the dish.',
+  'nesta receita': 'in this recipe',
+  'por unidade do pedido': 'per ordered unit',
 };
 
 function escaparRegex(str: string) {

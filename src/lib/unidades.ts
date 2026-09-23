@@ -326,3 +326,26 @@ export function converter(
   if (origem.grandeza !== destino.grandeza) return null;
   return (quantidade * origem.fatorBase) / destino.fatorBase;
 }
+
+/**
+ * Quantos gramas (ou ml) valem 1 unidade de uma quebra semântica ou agrupador
+ * (porção, pacote, fatia…) — só existe quando a cadeia de rendimento declarada
+ * no cadastro do insumo alcança massa ou volume. "1 porção" não tem peso
+ * universal; o que responde aqui é a cadeia que o PRÓPRIO lojista declarou
+ * (ex.: 1 kg rende 5 porções), nunca um chute do sistema. Sem essa cadeia,
+ * null é a resposta certa — não existe estimativa a inventar.
+ */
+export function equivalenteFisico(
+  unidadeBase: string,
+  regras?: RegraRendimento[] | null,
+  equivalencias?: EquivalenciaEntrada[] | null,
+): { valor: number; unidade: 'g' | 'ml' } | null {
+  const base = getUnidade(unidadeBase);
+  if (base && ehDimensional(base)) return null; // já é claro (kg, g, L, ml) — não precisa de tradução
+  const opcoes = opcoesDeEntrada(unidadeBase, regras, equivalencias);
+  for (const alvo of ['g', 'ml'] as const) {
+    const opcao = opcoes.find((o) => o.codigo === alvo);
+    if (opcao && opcao.fatorParaBase > 0) return { valor: 1 / opcao.fatorParaBase, unidade: alvo };
+  }
+  return null;
+}

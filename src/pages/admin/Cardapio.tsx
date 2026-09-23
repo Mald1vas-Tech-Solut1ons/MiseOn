@@ -16,6 +16,7 @@ import PainelNutricaoCardapio, { type CoberturaProduto } from '../../components/
 import SeletorInsumo from '../../components/producao/SeletorInsumo';
 import { CurrencyInput } from '../../components/ui/CurrencyInput';
 import { ModalOpcoes } from '../../components/pdv/ModalOpcoes';
+import { equivalenteFisico } from '../../lib/unidades';
 
 /** Input de dinheiro com prefixo "R$" fixo e máscara de centavos (vírgula). */
 function CampoPreco({ value, onChange, placeholder, className = '', autoFocus }: {
@@ -809,18 +810,32 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
             <p className="mb-2 text-sm font-semibold dark:text-gray-200">{tDynamic('Ficha técnica (consumo de insumos)')}</p>
             {ficha.map((f, idx) => {
               const insumoDaLinha = insumos.find((i) => i.id === f.insumo_id);
+              const equivalencia = insumoDaLinha
+                ? equivalenteFisico(insumoDaLinha.unidade_medida, insumoDaLinha.detalhes_rendimento?.regras, insumoDaLinha.detalhes_rendimento?.equivalencias)
+                : null;
+              const qtdNum = Number(f.quantidade_consumida);
               return (
-                <div key={idx} className="mb-1.5 flex items-center gap-1.5">
-                  <SeletorInsumo
-                    insumos={insumos}
-                    valor={f.insumo_id}
-                    jaUsados={ficha.map((x) => x.insumo_id)}
-                    onChange={(insumoId) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, insumo_id: insumoId } : x))}
-                  />
-                  <input value={f.quantidade_consumida} onChange={(e) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, quantidade_consumida: e.target.value } : x))}
-                    type="number" placeholder={insumoDaLinha ? tDynamic('Qtd em') + ' ' + insumoDaLinha.unidade_medida : 'Qtd'}
-                    className="w-24 rounded-lg border p-1.5 text-xs" />
-                  <button type="button" onClick={() => setFicha((arr) => arr.filter((_, i) => i !== idx))} className="text-red-400"><X size={14} /></button>
+                <div key={idx} className="mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <SeletorInsumo
+                      insumos={insumos}
+                      valor={f.insumo_id}
+                      jaUsados={ficha.map((x) => x.insumo_id)}
+                      onChange={(insumoId) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, insumo_id: insumoId } : x))}
+                    />
+                    <input value={f.quantidade_consumida} onChange={(e) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, quantidade_consumida: e.target.value } : x))}
+                      type="number" placeholder={insumoDaLinha ? tDynamic('Qtd em') + ' ' + insumoDaLinha.unidade_medida : 'Qtd'}
+                      className="w-24 rounded-lg border p-1.5 text-xs" />
+                    <button type="button" onClick={() => setFicha((arr) => arr.filter((_, i) => i !== idx))} className="text-red-400"><X size={14} /></button>
+                  </div>
+                  {equivalencia && (
+                    <p className="pl-1 pt-0.5 text-[11px] text-gray-400">
+                      1 {insumoDaLinha!.unidade_medida} ≈ {equivalencia.valor.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} {equivalencia.unidade}
+                      {qtdNum > 0 && (
+                        <> · {qtdNum} {insumoDaLinha!.unidade_medida} = <b className="text-gray-600 dark:text-gray-300">{(qtdNum * equivalencia.valor).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} {equivalencia.unidade}</b> {tDynamic('nesta receita')}</>
+                      )}
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -920,7 +935,13 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                     {tDynamic('Nome da opção · quanto soma no preço ao ser escolhida · (opcional) qual insumo baixa do estoque')}
                   </p>
                 )}
-                {g.opcoes.map((o) => (
+                {g.opcoes.map((o) => {
+                  const insumoDaOpcao = insumos.find((i) => i.id === o.insumo_id);
+                  const equivalenciaOpcao = insumoDaOpcao
+                    ? equivalenteFisico(insumoDaOpcao.unidade_medida, insumoDaOpcao.detalhes_rendimento?.regras, insumoDaOpcao.detalhes_rendimento?.equivalencias)
+                    : null;
+                  const qtdInsumoNum = Number(o.quantidade_insumo) || 0;
+                  return (
                   <div key={o._key} className="flex flex-col gap-1.5 border-b border-gray-200 dark:border-gray-800 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
                     <div className="flex items-center gap-1.5">
                       <input value={o.nome} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key
@@ -955,9 +976,17 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                           {tDynamic('Sem quantidade, o sistema assume 1 por unidade do pedido ao baixar o estoque.')}
                         </p>
                       )}
+                      {equivalenciaOpcao && (
+                        <p className="text-[11px] text-gray-400">
+                          1 {insumoDaOpcao!.unidade_medida} ≈ {equivalenciaOpcao.valor.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} {equivalenciaOpcao.unidade}
+                          {qtdInsumoNum > 0 && (
+                            <> · {qtdInsumoNum} {insumoDaOpcao!.unidade_medida} = <b className="text-gray-600 dark:text-gray-300">{(qtdInsumoNum * equivalenciaOpcao.valor).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} {equivalenciaOpcao.unidade}</b> {tDynamic('por unidade do pedido')}</>
+                          )}
+                        </p>
+                      )}
                     </div>
                   </div>
-                ))}
+                  );})}
                 <button type="button" onClick={() => addOpcao(g._key)} className="flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
                   <Plus size={12} /> Opção
                 </button>
