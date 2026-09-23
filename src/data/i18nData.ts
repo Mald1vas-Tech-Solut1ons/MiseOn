@@ -2041,6 +2041,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Seu pedido está vazio.': 'Your order is empty.',
   'Tirar': 'Remove',
   'Vai uma sobremesa?': 'How about dessert?',
+  'Vai uma bebida?': 'How about a drink?',
   'Toque para adicionar ao seu pedido.': 'Tap to add it to your order.',
   'Agora não, continuar': 'Not now, continue',
   'Pular': 'Skip',

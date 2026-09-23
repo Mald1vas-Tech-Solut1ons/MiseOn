@@ -7,6 +7,8 @@ import Totem from './Totem';
 const mocks = vi.hoisted(() => ({
   rpc: vi.fn(), invoke: vi.fn(), imprimir: vi.fn(),
   grupos: [] as unknown[],
+  /** Catálogo extra por teste (categorias e produtos além do lanche). */
+  extra: { cats: [] as unknown[], prods: [] as unknown[] },
 }));
 vi.mock('../contexts/I18nContext', () => ({ useI18n: () => ({ tDynamic: (s: string) => s }) }));
 vi.mock('../lib/cdn', () => ({ getOptimizedImageUrl: (s: string) => s }));
@@ -20,8 +22,8 @@ vi.mock('../lib/supabase', () => ({ supabase: {
       eq: () => query,
       maybeSingle: async () => ({ data: { id: 'loja-1', nome: 'Loja de teste' } }),
       order: async () => ({ data: table === 'categorias'
-        ? [{ id: 'cat-1', nome: 'Lanches' }]
-        : [{ id: 'p-1', nome: 'Lanche de teste', preco: 20, categoria_id: 'cat-1', grupos_opcoes: mocks.grupos }] }),
+        ? [{ id: 'cat-1', nome: 'Lanches' }, ...mocks.extra.cats]
+        : [{ id: 'p-1', nome: 'Lanche de teste', preco: 20, categoria_id: 'cat-1', grupos_opcoes: mocks.grupos }, ...mocks.extra.prods] }),
     };
     return query;
   },
@@ -39,6 +41,7 @@ function deferred<T>() {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.grupos = [];
+  mocks.extra = { cats: [], prods: [] };
   // Sensível ao NOME, não à ordem. O totem também chama fn_nutricao_* ao abrir
   // o cardápio; um mock por ordem fazia essas chamadas consumirem o valor
   // preparado para a criação do pedido, e o teste passava a depender de qual
@@ -251,5 +254,66 @@ describe('resgate de cashback', () => {
       : Promise.resolve(String(nome).startsWith('fn_nutricao') ? { data: [], error: null } : { data: pedido, error: null }));
     await identificar();
     expect(await screen.findByRole('button', { name: 'Pagar com Pix' })).toBeTruthy();
+  });
+});
+
+describe('oferta do fim do pedido: uma tela, uma pergunta', () => {
+  const BEBIDAS = { id: 'cat-beb', nome: 'Bebidas' };
+  const DOCES = { id: 'cat-doce', nome: 'Sobremesas' };
+  const REFRI = { id: 'p-refri', nome: 'Refri lata', preco: 6, categoria_id: 'cat-beb', grupos_opcoes: [] };
+  const PUDIM = { id: 'p-pudim', nome: 'Pudim', preco: 9, categoria_id: 'cat-doce', grupos_opcoes: [] };
+
+  async function comCarrinho(...nomes: string[]) {
+    render(<MemoryRouter initialEntries={['/totem/demo?k=token-teste']}>
+      <Routes><Route path="/totem/:slug" element={<Totem />} /></Routes>
+    </MemoryRouter>);
+    fireEvent.click(await screen.findByRole('button', { name: /Começar pedido/ }));
+    const aba: Record<string, string> = { 'Refri lata': 'Bebidas', Pudim: 'Sobremesas', 'Lanche de teste': 'Lanches' };
+    for (const nome of nomes) {
+      // Como o cliente faz: troca para a aba da categoria antes de tocar no item.
+      fireEvent.click(screen.getByRole('button', { name: new RegExp('^' + aba[nome], 'i') }));
+      fireEvent.click(screen.getByRole('button', { name: new RegExp(nome) }));
+      fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
+    }
+    fireEvent.click(screen.getByRole('button', { name: /Ver pedido/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+  }
+
+  it('sem bebida no carrinho, oferece bebida (e não sobremesa)', async () => {
+    mocks.extra = { cats: [BEBIDAS, DOCES], prods: [REFRI, PUDIM] };
+    await comCarrinho('Lanche de teste');
+    expect(screen.getByText('Vai uma bebida?')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Refri lata/ })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Pudim/ })).toBeNull();
+  });
+
+  it('com bebida e sem sobremesa, oferece sobremesa', async () => {
+    mocks.extra = { cats: [BEBIDAS, DOCES], prods: [REFRI, PUDIM] };
+    await comCarrinho('Lanche de teste', 'Refri lata');
+    expect(screen.getByText('Vai uma sobremesa?')).toBeTruthy();
+  });
+
+  it('com as duas no carrinho, pula direto para a identificação', async () => {
+    mocks.extra = { cats: [BEBIDAS, DOCES], prods: [REFRI, PUDIM] };
+    await comCarrinho('Lanche de teste', 'Refri lata', 'Pudim');
+    expect(screen.queryByText(/Vai uma/)).toBeNull();
+    expect(screen.getByRole('button', { name: 'Pular' })).toBeTruthy();
+  });
+
+  it('quem aceita a bebida não recebe uma segunda oferta', async () => {
+    mocks.extra = { cats: [BEBIDAS, DOCES], prods: [REFRI, PUDIM] };
+    await comCarrinho('Lanche de teste');
+    fireEvent.click(screen.getByRole('button', { name: /Refri lata/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
+    fireEvent.click(screen.getByRole('button', { name: /Ver pedido/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+    expect(screen.queryByText('Vai uma sobremesa?')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Pular' })).toBeTruthy();
+  });
+
+  it('loja sem bebida cadastrada segue oferecendo a sobremesa', async () => {
+    mocks.extra = { cats: [DOCES], prods: [PUDIM] };
+    await comCarrinho('Lanche de teste');
+    expect(screen.getByText('Vai uma sobremesa?')).toBeTruthy();
   });
 });

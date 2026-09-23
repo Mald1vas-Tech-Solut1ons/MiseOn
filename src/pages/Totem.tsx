@@ -80,6 +80,8 @@ type SaldoCashback = { saldo: number; resgate: number; expiraEm: string | null }
 
 /** Categorias que valem como sobremesa para a sugestão do fim do fluxo. */
 const PALAVRAS_SOBREMESA = /sobremesa|doce|sorvete|açaí|acai|milk\s?shake|torta|pudim/i;
+/** Categorias que valem como bebida. Milk-shake fica com a sobremesa. */
+const PALAVRAS_BEBIDA = /bebida|refri|refrigerante|suco|água|agua|cerveja|chopp?|drink|drinque|ch[aá]\b|caf[eé]|limonada|soda|energético|energetico/i;
 
 const dinheiro = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -153,6 +155,9 @@ export default function Totem() {
   const [saldoCashback, setSaldoCashback] = useState<SaldoCashback | null>(null);
   const [usarCashback, setUsarCashback] = useState(false);
   const [consultandoSaldo, setConsultandoSaldo] = useState(false);
+  // A oferta do fim do pedido aparece UMA vez por pedido: quem aceita a bebida
+  // volta ao carrinho, e oferecer a sobremesa em seguida seria empilhar upsell.
+  const [ofertaMostrada, setOfertaMostrada] = useState<'bebida' | 'sobremesa' | null>(null);
 
   // ── Cardápio real da loja ────────────────────────────────────────────────
   useEffect(() => {
@@ -238,7 +243,7 @@ export default function Totem() {
     // Se havia pedido esperando pagamento, ele morre junto com a sessão.
     if (aguardandoPix) desistirDoPedido(resultado?.pedidoId);
     setErro(''); setResultado(null); setSegundosRestantes(null); setContato('');
-    setSaldoCashback(null); setUsarCashback(false);
+    setSaldoCashback(null); setUsarCashback(false); setOfertaMostrada(null);
     resultadoRef.current = null;
     setPix(null); setAguardandoPix(false);
     setTela('repouso');
@@ -323,23 +328,51 @@ export default function Totem() {
   const removerLinha = (linhaId: string) =>
     setCarrinho((c) => c.filter((l) => l.linhaId !== linhaId));
 
-  // ── Sugestão de sobremesa (padrão QSR) ───────────────────────────────────
-  // Só existe se a loja TIVER sobremesa cadastrada, e só aparece se ainda não
-  // houver uma no carrinho. Oferecer o que a pessoa já pegou é o tipo de
-  // insistência que o estudo de dark patterns associa a abandono.
-  const categoriasSobremesa = useMemo(
-    () => categorias.filter((c) => PALAVRAS_SOBREMESA.test(c.nome)).map((c) => c.id),
+  // ── Sugestão do fim do pedido (padrão QSR) ───────────────────────────────
+  // UMA tela, UMA pergunta — nunca duas de upsell empilhadas:
+  //   sem bebida no carrinho            → oferece bebida;
+  //   com bebida e sem sobremesa         → oferece sobremesa;
+  //   com as duas (ou a loja não tem)    → pula direto.
+  // Só oferece o que a loja TEM cadastrado e o que a pessoa ainda não pegou:
+  // insistir no que já está no carrinho é o que o estudo de dark patterns
+  // associa a abandono.
+  const idsDaCategoria = useCallback(
+    (padrao: RegExp) => categorias.filter((c) => padrao.test(c.nome)).map((c) => c.id),
     [categorias],
+  );
+  const categoriasBebida = useMemo(() => idsDaCategoria(PALAVRAS_BEBIDA), [idsDaCategoria]);
+  const categoriasSobremesa = useMemo(
+    // Milk-shake casa com as duas listas: conta como sobremesa, não como bebida.
+    () => idsDaCategoria(PALAVRAS_SOBREMESA),
+    [idsDaCategoria],
+  );
+  const bebidas = useMemo(
+    () => produtos.filter((p) => categoriasBebida.includes(p.categoria_id ?? '') && !categoriasSobremesa.includes(p.categoria_id ?? '')),
+    [produtos, categoriasBebida, categoriasSobremesa],
   );
   const sobremesas = useMemo(
     () => produtos.filter((p) => categoriasSobremesa.includes(p.categoria_id ?? '')),
     [produtos, categoriasSobremesa],
   );
-  const jaTemSobremesa = carrinho.some((l) => categoriasSobremesa.includes(l.produto.categoria_id ?? ''));
-  const valeSugerir = sobremesas.length > 0 && !jaTemSobremesa;
+  const noCarrinho = (ids: string[]) => carrinho.some((l) => ids.includes(l.produto.categoria_id ?? ''));
+  const jaTemBebida = noCarrinho(categoriasBebida.filter((id) => !categoriasSobremesa.includes(id)));
+  const jaTemSobremesa = noCarrinho(categoriasSobremesa);
+  const oferta: 'bebida' | 'sobremesa' | null =
+    bebidas.length > 0 && !jaTemBebida ? 'bebida'
+      : sobremesas.length > 0 && !jaTemSobremesa ? 'sobremesa'
+        : null;
+
 
   /** Do carrinho, vai para a sugestão quando ela existe; senão, direto. */
-  const seguirDoCarrinho = () => setTela(valeSugerir ? 'sugestao' : 'identificacao');
+  const seguirDoCarrinho = () => {
+    if (oferta && !ofertaMostrada) {
+      setOfertaMostrada(oferta);
+      setTela('sugestao');
+      return;
+    }
+    setTela('identificacao');
+  };
+  const listaOfertada = ofertaMostrada === 'bebida' ? bebidas : sobremesas;
 
   // ── Resgate de cashback ──────────────────────────────────────────────────
   // A identificação fica DEPOIS do carrinho de propósito: pedir telefone antes
@@ -870,10 +903,12 @@ export default function Totem() {
               <ArrowLeft size={28} />{tDynamic('Voltar')}</button>
           </header>
           <div className="flex-1 overflow-y-auto p-5 pb-44">
-            <h2 className="mb-1 font-['Sora'] text-4xl font-black leading-tight">{tDynamic('Vai uma sobremesa?')}</h2>
+            <h2 className="mb-1 font-['Sora'] text-4xl font-black leading-tight">
+              {ofertaMostrada === 'bebida' ? tDynamic('Vai uma bebida?') : tDynamic('Vai uma sobremesa?')}
+            </h2>
             <p className="mb-5 text-xl text-slate-400">{tDynamic('Toque para adicionar ao seu pedido.')}</p>
             <div className="grid grid-cols-2 gap-4">
-              {sobremesas.slice(0, 6).map((p) => (
+              {listaOfertada.slice(0, 6).map((p) => (
                 <button key={p.id} type="button" onClick={() => abrirItem(p)}
                   className="overflow-hidden rounded-3xl bg-white/5 text-left ring-1 ring-white/10 active:scale-[0.98]">
                   {p.imagem_url && (
@@ -907,7 +942,7 @@ export default function Totem() {
       {tela === 'identificacao' && (
         <>
           <header className="flex items-center gap-4 border-b border-white/10 p-5">
-            <button type="button" onClick={() => setTela(valeSugerir ? 'sugestao' : 'carrinho')}
+            <button type="button" onClick={() => setTela('carrinho')}
               className="flex min-h-[72px] items-center gap-3 rounded-2xl bg-white/5 px-6 text-2xl font-black">
               <ArrowLeft size={28} />{tDynamic('Voltar')}</button>
           </header>
