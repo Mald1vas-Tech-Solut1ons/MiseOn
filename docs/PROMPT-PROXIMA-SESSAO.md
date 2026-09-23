@@ -51,7 +51,8 @@ remendo: quer causa, decisão, implementação, teste e prova.
   **Superadmin: `rafaelmaldivas@yahoo.com.br`** (não opera loja).
   **Nunca grave em `natureba`** (prospect, visita não aconteceu).
 - Domínio da marca: **https://miseon.app.br** (nunca `vercel.app`).
-- Definição de pronto: `npx tsc -b --noEmit && npx vitest run && npm run build`
+- Definição de pronto: `npx tsc -b --noEmit && npm run lint && npx vitest run && npm run build`
+  (`npm run lint` é `--max-warnings 0`: um aviso reprova o CI)
   antes do push (push publica na hora); depois `gh run list` verde (CI/CD e
   Cypress E2E); mudança de tela verificada com evidência.
 
