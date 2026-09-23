@@ -1,13 +1,12 @@
 /**
  * Backup lógico do banco, via Management API.
  *
- * Existe porque o projeto está no plano Free do Supabase, que NÃO tem backup
- * automático — `pitr_enabled: false` e `backups: []`. Sem isto, uma migration
- * errada, um delete sem where ou um comprometimento da conta levam pedido,
- * estoque, financeiro e nota fiscal junto. NF-e tem retenção legal de 5 anos.
- *
- * Isto não substitui o backup gerenciado do plano Pro — é o que dá para ter
- * hoje, e é infinitamente melhor que nada.
+ * Nasceu no plano Free, sem backup nenhum. Desde 18/09/2026 o projeto está no
+ * Pro: backup físico diário, conferido em 23/09 (8 backups, `pitr_enabled:
+ * false`). Continua existindo por dois motivos que o Pro não resolve:
+ *   - o backup gerenciado guarda 7 dias; NF-e tem retenção legal de 5 anos;
+ *   - ele mora na mesma conta: um comprometimento dela leva o backup junto.
+ * Esta cópia sai da Supabase e fica com a gente.
  *
  * Uso:   node scripts/qa/backup-logico.mjs [pasta-destino]
  * Saída: backups/miseon-YYYY-MM-DDTHH-mm.json.gz  (+ manifesto com contagens)

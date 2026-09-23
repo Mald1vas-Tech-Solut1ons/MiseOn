@@ -10,7 +10,7 @@ declare
   v_fila uuid := gen_random_uuid();
   v_total int;
 begin
-  select id into strict v_loja from public.lojas where nome = 'Lanche do Paulista';
+  select id into strict v_loja from public.lojas where slug = 'lanchepaulista';
   begin
     insert into public.clientes(id,loja_id,telefone,nome,email)
     values(v_cliente,v_loja,v_cliente::text,'Teste transacional','teste@example.invalid');

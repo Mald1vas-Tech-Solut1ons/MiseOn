@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
   // ou o IFOOD_POLLING_TOKEN, que é de menor privilégio e só serve para
   // disparar este coletor — é ele que fica no Vault para o pg_cron usar.
   // A service role key NUNCA vai para o banco: é a mesma regra que
-  // api/cron/email.ts documenta.
+  // a fila de e-mail segue (docs/PLANO-EMAIL.md, seção 5.1).
   // Sem isto, um terceiro dispara polling em laço e queima a cota do iFood.
   const pollingToken = Deno.env.get('IFOOD_POLLING_TOKEN');
   const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '').trim();

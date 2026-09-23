@@ -147,15 +147,27 @@ DEFINER`. `email_log` estava **sem RLS** antes desta entrega.
 
 ### 5.1 Como a fila é drenada
 
-O plano Hobby da Vercel limita cron a **1x por dia**, o que serve de rede de
-segurança mas não de entrega — "seu pedido saiu para entrega" chegando no dia
-seguinte não vale nada. Por isso são três camadas:
+**Atualizado em 23/09/2026.** Quem entrega é o `pg_cron` `drenar-fila-email`,
+de minuto em minuto, dentro do banco (`fn_email_drenar_fila`). Medido: mediana
+de 30 s entre agendar e enviar, pior caso 92 s. O antigo Vercel Cron diário
+(`/api/cron/email`, 08:00 BRT, limite do plano Hobby) foi removido por
+redundância.
 
 | Camada | Quando | Autenticação | Alcance |
 |---|---|---|---|
-| Painel aberto | a cada 60s durante o serviço | JWT do usuário | só a própria loja |
-| Cron diário | 08:00 BRT (`0 11 * * *` UTC) | `CRON_SECRET` + `EMAIL_WORKER_TOKEN` | todas as lojas |
+| `pg_cron` | a cada minuto, só se há item pronto | `EMAIL_WORKER_TOKEN_DB` (Vault) | todas as lojas |
 | Manual | sob demanda | `EMAIL_WORKER_TOKEN` | todas as lojas |
+
+O drenador só chama a edge function se existir item que ela **consegue**
+enviar agora (`fn_email_pronto_para_envio`, o mesmo predicado da reserva).
+Antes de olhar, arruma a fila (`fn_email_arrumar_fila`): reserva órfã
+(`ENVIANDO` há mais de 15 min) volta contando tentativa e, na 4ª, vira
+`FALHOU`; confirmação de pedido cancelado ou apagado vira `SUPRIMIDO`. Nenhum
+item fica eterno. Prova: `supabase/tests/email_fila_sem_item_eterno.sql`.
+
+> O restante desta seção descreve o desenho original com o Vercel Cron. O
+> modelo de tokens continua valendo; `CRON_SECRET` e `SUPABASE_FUNCTIONS_URL`
+> na Vercel não são mais usados por nada.
 
 O horário do cron coincide com a abertura da janela de silêncio, então o
 marketing represado durante a madrugada sai na primeira execução do dia.

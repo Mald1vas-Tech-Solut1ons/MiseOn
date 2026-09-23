@@ -13,7 +13,7 @@ declare
   v_result record;
   v_total integer;
 begin
-  select id into strict v_loja from public.lojas where nome = 'Lanche do Paulista';
+  select id into strict v_loja from public.lojas where slug = 'lanchepaulista';
   begin
     perform set_config('request.jwt.claim.role', 'service_role', true);
     insert into public.faturas_assinatura (
