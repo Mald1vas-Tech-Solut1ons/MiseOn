@@ -12,6 +12,18 @@
 (código `228ecd3`). Este documento **substitui** a versão anterior e marca
 explicitamente o que mudou.
 
+**Pós-escrita (mesmo dia, commit `41ad6ea`):** N1 e A1 foram corrigidos e
+publicados depois deste documento estar pronto — ver a nota em cada achado
+abaixo. `token_acompanhamento` (pedido de mesa passa a ter link de
+acompanhamento sem exigir login) e criação automática da Mesa 1 quando o
+cadastro marca "Salão com garçom". **N1 verificado por clique real em
+produção** (mesa 10 da loja de provas, pedido #309): pedir → "Acompanhar
+pedido" → tela carrega sem login; recarregar sem `?t=` na URL continua
+funcionando (localStorage); limpar localStorage e tentar sem token é negado
+com aviso claro ("O número do pedido sozinho não libera dados pessoais").
+A1 (mesa automática) só foi verificado por código — criar uma loja de
+verdade continua bloqueado pela falta de senha de teste.
+
 ## Veredito executivo
 
 Desde 20/09 a operação central ficou sensivelmente mais sólida: dos 6
@@ -84,7 +96,7 @@ rodada; **[antigo]** achado da rodada de 20/09 não reverificado agora.
 | B1 — `/cadastre-se` é uma etapa extra antes do acesso | **Melhorado, não eliminado** | Continua em duas telas (`/cadastre-se` → `/admin/login?novo=1`), mas cada uma ficou mínima: um CTA na primeira, e-mail/Google na segunda. **[UI-prod]** |
 | C5 — iFood vinculado, HTTP 403 | **Continua aberto** | `integracao_ifood_saude`: estado `SEM_PERMISSAO`, HTTP 403, "No permissions granted to client", **269 falhas seguidas**, última tentativa hoje (23/09 03:36). É ação no portal do parceiro, não código. **[banco-prod]** |
 | C6 — "pizza meio a meio" sem implementação | **Continua aberto** | Não existe composição de sabor duplo no código de pedido/ficha técnica. Existe um artigo de blog inteiro sobre o tema ("Engenharia para Pizzarias: Como Gerenciar Pedidos Meio a Meio...") em `blogData.ts`, mas está marcado `rascunho: true` — `Blog.tsx`/`BlogPost.tsx` filtram rascunho da listagem e da rota, e a navegação confirmou que o link não resolve em produção. Não é uma promessa pública hoje; é um risco represado para quando alguém publicar o rascunho sem checar se o recurso existe. **[código] [UI-prod]** |
-| A1 — perfil de salão/entrega não configura a operação | **Continua aberto** | `TornarSeLojista.tsx` agora pergunta "Salão com garçom?" e "Faço entregas?", mas a Edge Function `saas-tornar-se-lojista` só grava essas respostas em `assinatura_dados_cadastro` (para a nota fiscal da assinatura depois). Nenhuma mesa é criada, nenhum garçom é convidado, nenhuma taxa de entrega é configurada. **[código]** |
+| A1 — perfil de salão/entrega não configura a operação | **Parcialmente corrigido em `41ad6ea`, mesmo dia** | `saas-tornar-se-lojista` agora cria a Mesa 1 quando "Salão com garçom" é marcado. "Faço entregas" continua só gravando metadado — configurar taxa/raio automaticamente exigiria inventar um valor de negócio que ninguém informou, então ficou de fora de propósito. Convite de equipe continua manual. **[código]** |
 | A2 — conta já vinculada não pode criar segunda loja | **Continua aberto** | A mesma Edge Function recusa com HTTP 409 "Esta conta já está vinculada a uma loja" e não oferece nenhum caminho alternativo de self-service. **[código]** |
 | A5 — acompanhamento público por UUID devolvia PII/pagamento | **Corrigido, mas trocou de problema** | `fn_acompanhar_pedido` agora exige `auth.uid()` e (`cliente_user_id = auth.uid()` ou vínculo de equipe) — UUID sozinho não abre mais nada. Ver **N1** abaixo. **[código] [banco-prod]** |
 | C4 — falha de pagamento tentava cancelar sem permissão do cliente | **Não reverificado nesta rodada** | Não foi localizada uma RPC de "cliente cancela o próprio pedido pendente"; tratar como ainda aberto até nova checagem. **[antigo]** |
@@ -92,6 +104,15 @@ rodada; **[antigo]** achado da rodada de 20/09 não reverificado agora.
 | A8 — vitrine e checkout com frete contraditório | **Não reverificado nesta rodada** | **[antigo]** |
 
 ### N1 — Novo: pedido de convidado (sem login) perde o link de acompanhamento (crítico)
+
+**Corrigido em `41ad6ea`, mesmo dia — verificado por clique real em produção.**
+`pedidos.token_acompanhamento` (segredo próprio, gerado no nascimento do
+pedido); `fn_pedido_mesa_criar` devolve o token; o cardápio mostra
+"Acompanhar pedido" no toast de sucesso da mesa, levando para
+`/pedido/:id?t=<token>`; `fn_acompanhar_pedido` aceita o token como caminho
+de acesso alternativo ao login. Pedido real #309 na mesa 10 da loja de
+provas: link abre sem login, sobrevive a recarregar sem o parâmetro na URL
+(localStorage), e um acesso sem token/sem login é negado com aviso claro.
 
 A correção de A5 é correta para o vazamento de dado, mas trocou o critério de
 acesso de "eu sei o UUID" para "eu estou logado como o dono do pedido". O
@@ -300,7 +321,7 @@ de primeira classe, com preço e fluxo publicados.
 
 | ID | Problema confirmado agora | Correção concreta | Como medir/aceitar |
 |---|---|---|---|
-| N1 | Pedido de convidado (`cliente_user_id` nulo) nunca pode ser acompanhado via `/pedido/:id` depois de fechar a aba — 9/65 pedidos na loja de provas estão nesse estado. | Gerar um token de acompanhamento (aleatório, por pedido, sem PII) na criação do pedido e aceitar esse token em `fn_acompanhar_pedido` como alternativa a `auth.uid()`, além do vínculo de conta. | Pedido de convidado consegue reabrir `/pedido/:id` a partir do link enviado (e-mail/WhatsApp) sem estar logado; UUID sozinho continua não bastando. |
+| N1 | ~~Pedido de convidado (`cliente_user_id` nulo) nunca pode ser acompanhado via `/pedido/:id` depois de fechar a aba~~ — **corrigido e verificado ao vivo em `41ad6ea`** | Token de acompanhamento por pedido; `fn_acompanhar_pedido` aceita o token como alternativa a `auth.uid()`. | Feito: pedido real #309 na mesa 10, link "Acompanhar pedido" abriu sem login, sobreviveu a recarregar sem `?t=` na URL, e acesso sem token foi negado. |
 | C5 | iFood vinculado, HTTP 403 "No permissions granted", 269 falhas seguidas (23/09). | Resolver no Portal do Desenvolvedor iFood (liberação de módulos/permissões); enquanto não resolvido, o onboarding e a tela de iFood devem avisar isso ANTES de a pessoa tentar vincular, não só depois. | Cinco pedidos consecutivos do iFood, sem 403 nem duplicidade; e, até lá, aviso visível na etapa de vínculo. |
 | C6 | Pizza "meio a meio" não existe no código de pedido/ficha técnica — recurso central do segmento pizzaria, um dos que a home lista como solução dedicada. Um artigo de blog sobre o tema já está escrito (`blogData.ts`, `rascunho: true`) e represado para publicar. | Implementar composição de sabores (preço/estoque proporcional por metade) antes de publicar qualquer conteúdo sobre o tema; travar a publicação do rascunho a essa entrega. | Pedido de teste com duas metades diferentes: ficha técnica debita as duas, preço reflete a regra escolhida (maior valor, média, etc., decidida e documentada) — só então o artigo de blog sai do rascunho. |
 
@@ -308,7 +329,7 @@ de primeira classe, com preço e fluxo publicados.
 
 | ID | Problema confirmado agora | Correção concreta | Como medir/aceitar |
 |---|---|---|---|
-| A1 | "Salão com garçom" e "Faço entregas" são perguntados no cadastro mas só gravam metadado de nota fiscal — não criam mesa, não convidam garçom, não configuram taxa de entrega. | Ligar as respostas a ações reais: perfil "salão" pré-cria N mesas e leva ao convite de equipe; perfil "entrega" leva direto para a configuração de taxa/raio. | Loja criada com "salão" marcado nasce com pelo menos 1 mesa; loja com "entrega" marcado é redirecionada para configurar taxa antes de poder ativar delivery. |
+| A1 | ~~"Salão com garçom" não criava mesa~~ — **corrigido em `41ad6ea`** (nasce com Mesa 1). "Faço entregas" continua só metadado — configurar taxa/raio sozinho exigiria valor de negócio que ninguém informou. | Levar quem marcou "entrega" direto para a tela de configurar taxa/raio no primeiro acesso, em vez de deixar a descoberta para depois. Convite de equipe também continua manual. | Loja com "entrega" marcado recebe um nudge explícito para configurar taxa antes do primeiro pedido de delivery; equipe é convidada a partir de um passo do wizard, não achada por conta própria. |
 | A2 | Conta já vinculada a uma loja recebe 409 ao tentar criar outra, sem alternativa de self-service. | Regra de plano explícita ("Adicionar unidade") ou, no mínimo, a mensagem de erro linkar para o WhatsApp comercial com contexto pré-preenchido. | Usuário com uma loja consegue, sem sair do painel, iniciar o processo de adicionar uma segunda (mesmo que vá para atendimento humano) em vez de esbarrar num 409 mudo. |
 | C4 | (não reverificado) Falha de pagamento tentava cancelar pedido sem checar permissão do cliente. | RPC dedicada para o próprio cliente cancelar seu pedido pendente, com guarda de posse (`cliente_user_id = auth.uid()` ou token de convidado, ver N1). | Falha de pagamento simulada não deixa pedido/pagamento em estado ambíguo; cancelamento só funciona para o dono do pedido. |
 | A4 | (não reverificado) Fechamento de mesa apontado como não atômico na rodada anterior. | Consolidar em uma RPC transacional única (pagamento + pedidos + comanda), com teste de falha injetada. | Falha no meio do fechamento não deixa comanda meio fechada nem pagamento duplicado/perdido. |
