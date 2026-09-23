@@ -45,9 +45,18 @@ export default function AdminLayout() {
   const loc = useLocation();
   const [ctx, setCtx] = useState<CtxLoja | null>(null);
   const [semLoja, setSemLoja] = useState(false);
+  // Conta de plataforma sem loja NÃO é lojista em potencial. Em 22/09/2026 a
+  // conta de superadmin abriu /admin, caiu no cadastro de loja e criou uma
+  // segunda "Lanche do Paulista" vazia — e o painel passou a mostrar zero
+  // pedidos enquanto os pedidos chegavam na loja de provas.
+  const [souSuperadmin, setSouSuperadmin] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!semLoja) return;
+    supabase.rpc('fn_sou_superadmin').then(({ data }) => setSouSuperadmin(!!data), () => setSouSuperadmin(false));
+  }, [semLoja]);
   // Lojas que este usuário pode operar — só tem mais de uma entrada em conta
   // de administrador de rede. Usado exclusivamente para desenhar o seletor.
-  const [minhasLojas, setMinhasLojas] = useState<Array<{ id: string; nome: string; papel: string }>>([]);
+  const [minhasLojas, setMinhasLojas] = useState<Array<{ id: string; nome: string; slug: string; papel: string }>>([]);
   const [emailUsuario, setEmailUsuario] = useState('');
   const [erroConexao, setErroConexao] = useState(false);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
@@ -244,7 +253,7 @@ export default function AdminLayout() {
           setMinhasLojas(
             rels
               .filter((r: any) => r.lojas)
-              .map((r: any) => ({ id: r.lojas.id, nome: r.lojas.nome, papel: r.papel ?? 'operador' })),
+              .map((r: any) => ({ id: r.lojas.id, nome: r.lojas.nome, slug: r.lojas.slug, papel: r.papel ?? 'operador' })),
           );
         }
 
@@ -306,6 +315,20 @@ export default function AdminLayout() {
         <p className="text-xs text-gray-400 max-w-sm">{tDynamic('Verifique sua conexão com a internet ou tente recarregar a página.')}</p>
         <button type="button" onClick={() => window.location.reload()} className="mt-2 rounded-xl bg-[var(--cor-primaria)] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:brightness-110 transition-all">{tDynamic('Tentar Novamente')}</button>
         <button type="button" onClick={sair} className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-red-500">{tDynamic('Sair do Sistema')}</button>
+      </div>
+    );
+  }
+
+  if (semLoja && souSuperadmin === null) return <BrandLoader />;
+
+  if (semLoja && souSuperadmin) {
+    return (
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 bg-gray-50 p-8 text-center text-gray-900 dark:bg-[#0B1120] dark:text-gray-100">
+        <Store size={44} className="text-[var(--cor-primaria)]" />
+        <h1 className="text-xl font-bold">{tDynamic('Esta é uma conta de superadmin')}</h1>
+        <p className="max-w-md text-sm text-gray-500 dark:text-gray-400">{tDynamic('Ela administra a plataforma e não opera loja. Para operar uma loja, entre com a conta vinculada a ela.')}</p>
+        <button type="button" onClick={() => nav('/superadmin')} className="mt-2 rounded-xl bg-[var(--cor-primaria)] px-6 py-3 text-sm font-bold text-white">{tDynamic('Abrir o painel do superadmin')}</button>
+        <button type="button" onClick={sair} className="text-sm font-semibold text-gray-500 hover:text-red-500 dark:text-gray-400">{tDynamic('Sair do Sistema')}</button>
       </div>
     );
   }
@@ -598,12 +621,16 @@ export default function AdminLayout() {
               aria-label={tDynamic('Trocar de loja')}
             >
               {minhasLojas.map((l) => (
-                <option key={l.id} value={l.id}>{l.nome}</option>
+                <option key={l.id} value={l.id}>{l.nome} · /{l.slug}</option>
               ))}
             </select>
           ) : (
             <h2 className="font-bold text-base truncate text-gray-900 dark:text-white whitespace-nowrap">{ctx.lojaNome}</h2>
           )}
+          {/* O endereço identifica a loja; o nome não. Em 22/09/2026 duas lojas
+              "Lanche do Paulista" existiam ao mesmo tempo e o painel de uma
+              mostrava "nenhum pedido" enquanto o pedido chegava na outra. */}
+          <span className="truncate font-mono text-xs text-gray-400 dark:text-gray-500" title={tDynamic('Endereço desta loja')}>/{ctx.lojaSlug}</span>
           {ctx.papel !== 'admin' && (
             <span className="inline-block mt-1 self-start rounded-md bg-[#004198]/10 px-2 py-0.5 text-xs opacity-90 font-bold text-[#004198] dark:text-[#6B9EFF] uppercase">
               {ctx.papel}

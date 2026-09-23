@@ -16,6 +16,7 @@ import { calcularEntrega, ResultadoEntrega } from '../lib/geo';
 import { enderecoParaLabel, salvarLocalizacaoCliente } from '../lib/localizacao-cliente';
 import { useI18n } from '../contexts/I18nContext';
 import { cancelarMeuPedidoPendente } from '../lib/pedidosPendentes';
+import { lerIdentidade, salvarIdentidade } from '../lib/identidadeCliente';
 
 const entrarComGoogle = (url: string) =>
   supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: url } });
@@ -47,16 +48,19 @@ export default function CheckoutDrawer({
   setCarrinho, onClose, onSucesso, onCartao, onAbrirAuth, waToken,
 }: Props) {
   const { tDynamic } = useI18n();
-  const [tipo, setTipo] = useState<'DELIVERY' | 'RETIRADA_BALCAO'>('DELIVERY');
-  const [nome, setNome] = useState('');
-  const [telefone, setTelefone] = useState('');
-  const [enderecoObj, setEnderecoObj] = useState<EnderecoFormData | null>(null);
-  const [bairroManual, setBairroManual] = useState('');
+  // O que a pessoa já digitou nesta loja volta sozinho (lib/identidadeCliente):
+  // fechar o carrinho e voltar não pode custar nome e telefone de novo.
+  const [lembrado] = useState(() => lerIdentidade(loja.slug));
+  const [tipo, setTipo] = useState<'DELIVERY' | 'RETIRADA_BALCAO'>(lembrado.tipo ?? 'DELIVERY');
+  const [nome, setNome] = useState(lembrado.nome);
+  const [telefone, setTelefone] = useState(lembrado.telefone);
+  const [enderecoObj, setEnderecoObj] = useState<EnderecoFormData | null>(lembrado.endereco ?? null);
+  const [bairroManual, setBairroManual] = useState(lembrado.bairro ?? '');
   // Guardado fora de state: só serve para salvar o endereço padrão depois do
   // pedido, não precisa re-renderizar nada quando muda.
   const clienteIdRef = useRef<string | null>(null);
   const enderecoPadraoAtualRef = useRef<EnderecoFormData | null>(null);
-  const [metodo, setMetodo] = useState<MetodoPgto>('PIX');
+  const [metodo, setMetodo] = useState<MetodoPgto>((lembrado.metodo as MetodoPgto) ?? 'PIX');
   const [trocoPara, setTrocoPara] = useState('');
   const [codCupom, setCodCupom] = useState('');
   const [cupom, setCupom] = useState<Cupom | null>(null);
@@ -88,6 +92,10 @@ export default function CheckoutDrawer({
     }
   }, [perfilCarregado, user]);
 
+  useEffect(() => {
+    salvarIdentidade(loja.slug, { nome, telefone, tipo, metodo, endereco: enderecoObj, bairro: bairroManual });
+  }, [loja.slug, nome, telefone, tipo, metodo, enderecoObj, bairroManual]);
+
   // Carrega perfil do cliente logado
   useEffect(() => {
     if (!user) { setPerfilCarregado(true); return; }
@@ -98,8 +106,8 @@ export default function CheckoutDrawer({
       const c = data as Cliente | null;
       if (c) {
         clienteIdRef.current = c.id;
-        setNome(c.nome ?? '');
-        setTelefone(c.telefone ?? '');
+        setNome((atual) => atual || (c.nome ?? ''));
+        setTelefone((atual) => atual || (c.telefone ?? ''));
         supabase.from('cashback_saldos').select('saldo').eq('cliente_id', c.id).maybeSingle()
           .then(({ data: sc }) => setSaldoCashback(Number(sc?.saldo ?? 0)));
         supabase.from('enderecos_cliente').select('*')
@@ -114,17 +122,16 @@ export default function CheckoutDrawer({
                 sem_numero: !end.numero || end.numero === 'SN',
               };
               enderecoPadraoAtualRef.current = carregado;
-              setEnderecoObj(carregado);
-              setBairroManual(end.bairro);
+              setEnderecoObj((atual) => atual ?? carregado);
+              setBairroManual((atual) => atual || end.bairro);
             } else {
               enderecoPadraoAtualRef.current = null;
-              setEnderecoObj(null);
-              setBairroManual(c.bairro ?? '');
+              setBairroManual((atual) => atual || (c.bairro ?? ''));
             }
           });
-        if (c.forma_pagamento_preferida) setMetodo(c.forma_pagamento_preferida);
+        if (c.forma_pagamento_preferida && !lembrado.metodo) setMetodo(c.forma_pagamento_preferida);
       } else if (user.user_metadata?.full_name || user.user_metadata?.name) {
-        setNome(user.user_metadata.full_name ?? user.user_metadata.name);
+        setNome((atual) => atual || (user.user_metadata.full_name ?? user.user_metadata.name));
       }
       setPerfilCarregado(true);
     })();

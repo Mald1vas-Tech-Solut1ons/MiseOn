@@ -5,6 +5,8 @@ type PrintTemplate = 'COMANDA_COZINHA' | 'OS_PRODUCAO' | 'VIA_ENTREGADOR' | 'REC
 
 interface PrintOptions {
   template: PrintTemplate;
+  /** Largura da bobina em mm. 80 é o padrão do balcão; 58 é a mini. */
+  larguraMm?: 58 | 80;
   lojaNome: string;
   loja?: Loja | null;      // dados de marca + comerciais (logo, CNPJ, razão social, endereço)
   pedido?: Pedido;
@@ -35,18 +37,40 @@ interface PrintOptions {
   };
 }
 
+/** Margem de segurança dentro do papel: a cabeça térmica não imprime rente à borda. */
+export const MARGEM_SEGURA_MM = 3;
+const MM_POR_PX = 25.4 / 96;
+
+/**
+ * Regra de página da bobina: largura real do papel e altura EXATA do conteúdo.
+ *
+ * Sem `size`, o navegador montava uma folha A4 com o cupom de 80 mm colado na
+ * borda e `margin: 0` — a impressora cortava o que caía na área que ela não
+ * alcança ("abre cortado na parte externa") e a térmica ainda puxava um A4
+ * inteiro de papel em branco. Altura sob medida = sem corte e sem desperdício.
+ */
+export function regraDePagina(larguraMm: number, alturaConteudoPx: number): string {
+  const alturaMm = Math.max(40, Math.ceil(alturaConteudoPx * MM_POR_PX) + MARGEM_SEGURA_MM * 2);
+  return `@page { size: ${larguraMm}mm ${alturaMm}mm; margin: 0; }`;
+}
+
 /**
  * Motor de Impressão (Thermal 58mm/80mm)
- * Cria um iframe invisível, injeta o CSS otimizado para bobinas e dispara o window.print()
+ * Cria um iframe fora da tela, na largura real da bobina, injeta o CSS da
+ * bobina, mede o conteúdo e só então dispara o window.print().
  */
 export function imprimir(options: PrintOptions) {
+  const larguraMm = options.larguraMm ?? 80;
   const iframe = document.createElement('iframe');
+  // Fora da tela mas com a LARGURA DO PAPEL: é assim que a altura medida é a
+  // altura que vai sair impressa. Largura 0 media um cupom de uma letra por linha.
   iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
+  iframe.style.left = '-10000px';
+  iframe.style.top = '0';
+  iframe.style.width = `${larguraMm}mm`;
+  iframe.style.height = '10px';
   iframe.style.border = 'none';
+  iframe.setAttribute('aria-hidden', 'true');
   document.body.appendChild(iframe);
 
   const doc = iframe.contentWindow?.document;
@@ -60,14 +84,16 @@ export function imprimir(options: PrintOptions) {
       <head>
         <title>Impressão - ${esc(options.loja?.nome || options.lojaNome)}</title>
         <style>
-          @page { margin: 0; }
+          /* Reserva válida; a regra com a altura medida entra depois e prevalece. */
+          @page { size: ${larguraMm}mm 297mm; margin: 0; }
+          html, body { margin: 0; padding: 0; }
           body {
             font-family: 'Courier New', Courier, monospace;
             color: #000;
-            margin: 0;
-            padding: 8px;
-            width: 100%;
-            max-width: 80mm; /* Padrão térmica, ajusta automaticamente pra 58mm */
+            /* Largura do papel menos a margem segura dos dois lados. */
+            width: ${larguraMm}mm;
+            padding: ${MARGEM_SEGURA_MM}mm;
+            overflow-wrap: anywhere;
             font-size: 12px;
             line-height: 1.25;
           }
@@ -114,7 +140,16 @@ export function imprimir(options: PrintOptions) {
   `);
   doc.close();
 
+  // Mede com o layout pronto (logo pode chegar depois) e fixa a página.
+  const fixarPagina = () => {
+    const altura = doc.body?.scrollHeight ?? 0;
+    const estilo = doc.createElement('style');
+    estilo.textContent = regraDePagina(larguraMm, altura);
+    doc.head.appendChild(estilo);
+  };
+
   setTimeout(() => {
+    fixarPagina();
     iframe.contentWindow?.focus();
     iframe.contentWindow?.print();
     setTimeout(() => { document.body.removeChild(iframe); }, 1000);

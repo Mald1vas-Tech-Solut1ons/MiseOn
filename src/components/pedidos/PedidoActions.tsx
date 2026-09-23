@@ -13,7 +13,9 @@ export function PedidoActions({
   const { tDynamic } = useI18n();
   const [menu, setMenu] = useState(false);
   const [emitindoNfe, setEmitindoNfe] = useState(false);
-  const [posicaoMenu, setPosicaoMenu] = useState<{ top: number; right: number } | null>(null);
+  // Abre para CIMA do botão quando cabe; senão para BAIXO. Sempre abrir para
+  // cima jogava o menu para fora da tela nos pedidos do topo da lista.
+  const [posicaoMenu, setPosicaoMenu] = useState<{ top?: number; bottom?: number; right: number } | null>(null);
   const botaoRef = useRef<HTMLButtonElement>(null);
   const menuPortalRef = useRef<HTMLDivElement>(null);
 
@@ -24,7 +26,11 @@ export function PedidoActions({
     if (!menu || !botaoRef.current) { setPosicaoMenu(null); return; }
     const calcular = () => {
       const r = botaoRef.current!.getBoundingClientRect();
-      setPosicaoMenu({ top: window.innerHeight - r.top + 8, right: window.innerWidth - r.right });
+      const ALTURA_MENU = 260; // cinco opções + título, com folga
+      const right = Math.max(8, window.innerWidth - r.right);
+      setPosicaoMenu(r.top >= ALTURA_MENU + 16
+        ? { bottom: window.innerHeight - r.top + 8, right }
+        : { top: Math.min(r.bottom + 8, Math.max(8, window.innerHeight - ALTURA_MENU - 8)), right });
     };
     calcular();
     window.addEventListener('resize', calcular);
@@ -155,7 +161,7 @@ export function PedidoActions({
         {menu && posicaoMenu && createPortal(
           <div
             ref={menuPortalRef}
-            style={{ position: 'fixed', bottom: posicaoMenu.top, right: posicaoMenu.right }}
+            style={{ position: 'fixed', top: posicaoMenu.top, bottom: posicaoMenu.bottom, right: posicaoMenu.right, maxHeight: 'calc(100vh - 16px)', overflowY: 'auto' }}
             className="z-[100] w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0B1120]"
           >
             <p className="px-3 pt-2.5 pb-1 text-xs opacity-90 font-bold uppercase tracking-wider text-gray-400">Imprimir via</p>

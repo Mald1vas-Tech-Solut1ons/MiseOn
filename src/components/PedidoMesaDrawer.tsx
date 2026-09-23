@@ -4,6 +4,7 @@ import { X, Check, Loader2, UtensilsCrossed } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { fmt, precoItem, type Loja, type Mesa, type ItemCarrinho } from '../types';
 import { useI18n } from '../contexts/I18nContext';
+import { lerIdentidade, salvarIdentidade } from '../lib/identidadeCliente';
 
 interface Props {
   loja: Loja;
@@ -18,8 +19,9 @@ interface Props {
 
 export default function PedidoMesaDrawer({ loja, mesa, tokenMesa, carrinho, setCarrinho, onClose, onSucesso }: Props) {
   const { tDynamic } = useI18n();
-  const chaveNome = `miseon_nome_mesa_${loja.slug}`;
-  const [nome, setNome] = useState(() => localStorage.getItem(chaveNome) ?? '');
+  // Mesma identidade do cardápio online (lib/identidadeCliente): quem já
+  // pediu nesta loja não digita o nome de novo.
+  const [nome, setNome] = useState(() => lerIdentidade(loja.slug).nome);
   const [observacao, setObservacao] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
@@ -30,7 +32,7 @@ export default function PedidoMesaDrawer({ loja, mesa, tokenMesa, carrinho, setC
     if (carrinho.length === 0) return;
     setEnviando(true); setErro('');
     try {
-      if (nome.trim()) localStorage.setItem(chaveNome, nome.trim());
+      if (nome.trim()) salvarIdentidade(loja.slug, { nome: nome.trim() });
       // Pedido de mesa nasce 100% no servidor (RPC security definer):
       // anônimo não tem SELECT em pedidos/itens_pedido, então o
       // INSERT..RETURNING direto falhava na RLS — e de quebra os preços

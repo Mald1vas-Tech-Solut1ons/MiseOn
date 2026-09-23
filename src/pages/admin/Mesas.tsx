@@ -224,7 +224,7 @@ export default function Mesas() {
         <div class="card">
           <p style="text-transform:uppercase;font-weight:700;letter-spacing:2px;">Mesa</p>
           <h1>${mesaQr.numero}</h1>
-          <p>{tDynamic('Aponte a câmera do celular')}<br/>para ver o cardápio e pedir</p>
+          <p>${tDynamic('Aponte a câmera do celular')}<br/>${tDynamic('para ver o cardápio e pedir')}</p>
           <img src="${qrDataUrl}" />
           <div class="rodape">MiseOn</div>
         </div>
