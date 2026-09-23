@@ -630,7 +630,9 @@ export function sugerirDaNota(item: ItemDaNota): SugestaoImportacao {
   return {
     nome: catalogo?.nome ?? limparDescricao(item.descricao),
     unidade,
-    fator: Number.isFinite(fator) && fator > 0 ? fator : 1,
+    // Sem conversão comprovada, 0 = "não sei, pare". Nunca 1 inventado:
+    // "10 CX a R$ 50" viraria 10 un a R$ 50 cada e contaminaria o custo.
+    fator: rendimento.certo && Number.isFinite(fator) && fator > 0 ? fator : 0,
     unidadeNota,
     siglaNota,
     categoria: catalogo?.categoria ?? null,
@@ -673,6 +675,18 @@ function calcularRendimento(
     return {
       fator: fisico,
       explicacao: `1 ${unidadeNota} = ${fmtNum(fisico)} ${unidadeEstoque} (conversão fixa).`,
+      conteudo: null,
+      certo: true,
+    };
+  }
+
+  // Garrafa e lata são embalagem de UMA unidade: contar garrafas é contar
+  // unidades. Regra determinística, não chute — diferente de caixa e pacote,
+  // que agrupam uma quantidade que a nota não diz.
+  if ((unidadeNota === 'gf' || unidadeNota === 'lata') && unidadeEstoque === 'un') {
+    return {
+      fator: 1,
+      explicacao: `1 ${siglaNota || unidadeNota} é uma unidade (embalagem individual).`,
       conteudo: null,
       certo: true,
     };

@@ -69,6 +69,8 @@ export interface SugestaoIA extends SugestaoImportacao {
   nomeCompleto: string;
   /** `true` quando a decisão veio da IA e a tela deve marcar como sugestão. */
   daIA: true;
+  /** Conteúdo da embalagem lido pela IA: pista para confirmar, nunca fato. */
+  conteudoIA: { qtd: number; unidade: string } | null;
 }
 
 /**
@@ -90,18 +92,24 @@ export function aplicarClassificacao(item: ItemDaNota, c: ClassificacaoIA): Suge
 
   // O rendimento sai da mesma conta determinística de sempre; o conteúdo lido
   // pela IA só entra quando o texto da descrição não disse nada por si só.
+  // O fator é da regra determinística. O que a IA leu na embalagem vai como
+  // DADO (`conteudoIA`) para a autoridade (`resolverFatorLinha`), que o marca
+  // como origem IA e exige confirmação — o servidor recusa sem ela. Antes o
+  // número da IA virava fator direto, e na falta dele inventava-se 1.
   const calculado = fatorPara(item, unidade);
-  let fator = calculado.fator;
+  const fator = calculado.certo && Number.isFinite(calculado.fator) && calculado.fator > 0 ? calculado.fator : 0;
   let explicacao = calculado.explicacao;
 
-  if (!calculado.certo && c.conteudo_qtd && c.conteudo_unidade) {
-    const naUnidade = c.conteudo_unidade === unidade
-      ? c.conteudo_qtd
-      : converter(c.conteudo_qtd, unidadeSegura(c.conteudo_unidade), unidade);
+  const conteudoIA = c.conteudo_qtd && c.conteudo_qtd > 0 && c.conteudo_unidade
+    ? { qtd: Number(c.conteudo_qtd), unidade: unidadeSegura(c.conteudo_unidade) }
+    : null;
+  if (!calculado.certo && conteudoIA) {
+    const naUnidade = conteudoIA.unidade === unidade
+      ? conteudoIA.qtd
+      : converter(conteudoIA.qtd, conteudoIA.unidade, unidade);
     if (naUnidade != null && naUnidade > 0) {
-      fator = naUnidade;
       explicacao = `A IA leu "${c.conteudo_qtd} ${c.conteudo_unidade}" na embalagem: ` +
-        `1 ${item.unidade || 'unidade'} rende ${Number(naUnidade.toFixed(4)).toLocaleString('pt-BR')} ${unidade}.`;
+        `1 ${item.unidade || 'unidade'} renderia ${Number(naUnidade.toFixed(4)).toLocaleString('pt-BR')} ${unidade}. Confirme.`;
     }
   }
 
@@ -111,7 +119,8 @@ export function aplicarClassificacao(item: ItemDaNota, c: ClassificacaoIA): Suge
     nome: base,
     nomeCompleto: montarNomeInsumo({ base, variedade, marca }),
     unidade,
-    fator: Number.isFinite(fator) && fator > 0 ? fator : 1,
+    fator,
+    conteudoIA,
     unidadeNota,
     siglaNota: (item.unidade ?? '').trim(),
     categoria,

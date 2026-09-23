@@ -12,11 +12,32 @@ export interface ItemLidoNota {
   /** Classificador fiscal determinístico (só o XML traz hoje). */
   ncm?: string | null;
   codigo_fornecedor?: string | null;
+  /** Quantidade COMERCIAL (qCom): o que foi vendido, na unidade `unidade`. */
   qtd: number;
+  /** Unidade COMERCIAL (uCom), crua como veio. */
   unidade: string;
+  /** Preço por unidade comercial (vUnCom). */
   valor_unitario: number;
+  /** Valor total da linha (vProd), antes do desconto. Nunca é quantidade. */
   valor_total: number;
+  /**
+   * Unidade/quantidade TRIBUTÁVEL (uTrib/qTrib) — só o XML traz. Quando
+   * difere da comercial (10 CX com 120 UN tributáveis), é o fato fiscal que
+   * converte caixa em unidade sem ninguém adivinhar.
+   */
+  unidade_tributavel?: string | null;
+  qtd_tributavel?: number | null;
+  /** Lotes declarados pelo fornecedor no XML (grupo `rastro`). */
+  lotes?: LoteDaNota[];
   conferencia?: ConferenciaLeitura;
+}
+
+/** Lote do grupo `rastro` da NF-e: fato do fornecedor, não estimativa. */
+export interface LoteDaNota {
+  numero: string;
+  qtd: number | null;
+  fabricado_em: string | null;
+  vence_em: string | null;
 }
 
 /**

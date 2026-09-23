@@ -13,7 +13,7 @@ import {
   type SugestaoImportacao,
 } from '../../lib/catalogoInsumos';
 import { aplicarClassificacao, type ClassificacaoIA } from '../../lib/classificacaoIA';
-import { resolverFatorImportacao } from '../../lib/fatorImportacaoNota';
+import { resolverFatorLinha, type OrigemFator, type ConteudoLidoIA } from '../../lib/fatorImportacaoNota';
 import { compararPreco, idadeDaNota, type UltimoCusto } from '../../lib/variacaoPreco';
 import {
   sugerirValidade, ehPerecivel, avaliarValidade, recomendarModo, type ModoEntrada,
@@ -92,12 +92,57 @@ interface LinhaDePara {
   nomeNovoInsumo: string;
   unidadeInsumo: string;
   fatorConversao: number;
+  /** De onde saiu o fator. O servidor (fn_importar_nfce) decide com isto. */
+  origemFator: OrigemFator;
+  /** `false` quando a origem exige que o lojista assine (IA, nenhuma). */
+  fatorConfirmado: boolean;
+  /** Por que o fator é esse — mostrado na linha. */
+  explicacaoFator: string;
   /** Validade do item — sugerida pelo gênero, confirmada pelo lojista. */
   venceEm: string;
   confiancaMatch: 'ALTA' | 'MEDIA' | 'NENHUMA';
   /** O que o sistema entendeu da linha — mostrado para o lojista conferir. */
   sugestao: SugestaoImportacao;
 }
+
+/**
+ * A ÚNICA porta para o fator de uma linha: sempre pela autoridade
+ * (resolverFatorLinha), sempre com a origem. Vínculo, insumo novo, sugestão da
+ * IA e troca de unidade passam por aqui — nenhum caminho monta fator na mão.
+ */
+function fatorDaLinha(
+  item: ItemLidoNFCe,
+  unidade: string,
+  opcoes: { fatorHistorico?: number | null; conteudoIA?: ConteudoLidoIA | null } = {},
+) {
+  const r = resolverFatorLinha(item, unidade, opcoes);
+  return {
+    fatorConversao: r.fator,
+    origemFator: r.origem,
+    fatorConfirmado: !r.requerConfirmacao,
+    explicacaoFator: r.explicacao,
+  };
+}
+
+const conteudoIADe = (sugestao: unknown): ConteudoLidoIA | null =>
+  (sugestao as { conteudoIA?: ConteudoLidoIA | null }).conteudoIA ?? null;
+
+const ROTULO_ORIGEM: Record<OrigemFator, string> = {
+  NOTA_FISCAL: 'Fonte: nota fiscal (XML)',
+  REGRA: 'Fonte: regra de conversão',
+  HISTORICO: 'Fonte: conversão já confirmada',
+  IA: 'Fonte: IA — confirme',
+  USUARIO: 'Fonte: você',
+  NENHUMA: 'Sem fonte — informe',
+};
+const ESTILO_ORIGEM: Record<OrigemFator, string> = {
+  NOTA_FISCAL: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+  REGRA: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+  HISTORICO: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
+  IA: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300',
+  USUARIO: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  NENHUMA: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+};
 
 interface Props {
   lojaId: string;
@@ -182,12 +227,10 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
           criarNovo: false,
           nomeNovoInsumo: sugestao.nome,
           unidadeInsumo: unidadeSegura(ins.unidade_medida),
-          fatorConversao: resolverFatorImportacao(
-            item,
-            unidadeSegura(ins.unidade_medida),
-            fatorHistorico,
-          ).fator,
-          venceEm: sugerirValidade(sugestao.slug, dadosNota.data_emissao)?.vence_em ?? '',
+          ...fatorDaLinha(item, unidadeSegura(ins.unidade_medida), { fatorHistorico }),
+          // Validade declarada no XML (grupo rastro) é fato do fornecedor e
+          // vence a estimativa pelo gênero.
+          venceEm: item.lotes?.[0]?.vence_em || sugerirValidade(sugestao.slug, dadosNota.data_emissao)?.vence_em || '',
           confiancaMatch: confianca,
           sugestao,
         });
@@ -228,8 +271,10 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
           criarNovo: true,
           nomeNovoInsumo: sugestao.nome,
           unidadeInsumo: unidadeSegura(sugestao.unidade),
-          fatorConversao: sugestao.fator,
-          venceEm: sugerirValidade(sugestao.slug, dadosNota.data_emissao)?.vence_em ?? '',
+          ...fatorDaLinha(item, unidadeSegura(sugestao.unidade)),
+          // Validade declarada no XML (grupo rastro) é fato do fornecedor e
+          // vence a estimativa pelo gênero.
+          venceEm: item.lotes?.[0]?.vence_em || sugerirValidade(sugestao.slug, dadosNota.data_emissao)?.vence_em || '',
           confiancaMatch: 'NENHUMA',
           sugestao,
         };
@@ -316,7 +361,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
               ...linha,
               nomeNovoInsumo: sugerido.nomeCompleto || linha.nomeNovoInsumo,
               unidadeInsumo: unidadeSegura(sugerido.unidade),
-              fatorConversao: sugerido.fator,
+              ...fatorDaLinha(linha.itemNota, unidadeSegura(sugerido.unidade), { conteudoIA: sugerido.conteudoIA }),
               sugestao: sugerido,
             };
             aplicados++;
@@ -395,7 +440,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
       proximo[index] = {
         ...linha,
         unidadeInsumo: unidade,
-        fatorConversao: resolverFatorImportacao(linha.itemNota, unidade).fator,
+        ...fatorDaLinha(linha.itemNota, unidade, { conteudoIA: conteudoIADe(linha.sugestao) }),
       };
       return proximo;
     });
@@ -411,6 +456,10 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
     if (marcados.some(l => !Number.isFinite(l.itemNota.qtd * l.fatorConversao)
       || l.itemNota.qtd <= 0 || l.fatorConversao <= 0)) {
       setErro('Informe quantidade e fator de conversão maiores que zero para todos os itens selecionados.');
+      return;
+    }
+    if (marcados.some(l => !l.fatorConfirmado)) {
+      setErro('Confirme a conversão dos itens sugeridos pela IA (ou informe a sua) antes de importar.');
       return;
     }
     importandoRef.current = true;
@@ -447,6 +496,16 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
             trocar_unidade: !!insumoExistente && unidade !== porId.get(insumoExistente)?.unidade_medida,
             qtd_nota: Number(l.itemNota.qtd) || 0,
             fator: Number(l.fatorConversao),
+            // Semântica fiscal separada: o servidor confere a aritmética e
+            // decide pela origem — IA sem confirmação é recusada lá também.
+            origem_fator: l.origemFator,
+            fator_confirmado: l.fatorConfirmado,
+            unidade_nota: l.itemNota.unidade || null,
+            valor_unitario_nota: Number(l.itemNota.valor_unitario) || null,
+            valor_total_nota: Number(l.itemNota.valor_total) || null,
+            aritmetica_confirmada: !!l.conferenciaConfirmada,
+            lote_fornecedor: l.itemNota.lotes?.[0]?.numero || null,
+            fabricado_em: l.itemNota.lotes?.[0]?.fabricado_em || null,
             custo_total: custoComDesconto(l.itemNota, notaConferida),
             chave_depara: chaveDoItem(l.itemNota, dadosNota.emitente?.cnpj),
             descricao_nota: l.itemNota.descricao,
@@ -493,6 +552,8 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         itens_lancados?: number;
         insumos_criados?: number;
         insumos_reaproveitados?: number;
+        itens_recusados?: number;
+        recusas?: { descricao: string; motivo: string }[];
       } | null;
 
       // Cupom já lançado antes: não duplica nada por conta própria. Duplicar
@@ -515,7 +576,13 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
         reaproveitados > 0 ? `${reaproveitados} vinculado(s) a insumo já existente` : '',
       ].filter(Boolean).join(', ');
 
-      onSucesso(`Importação concluída! ${lancados} itens lançados no estoque${detalhes ? ` — ${detalhes}` : ''}.`);
+      // O que o servidor recusou é dito com nome e motivo: item que não entrou
+      // em silêncio é estoque errado que ninguém percebe.
+      const recusas = r?.recusas ?? [];
+      const textoRecusas = recusas.length
+        ? ` ${recusas.length} item(ns) NÃO entraram: ${recusas.map((x) => `${x.descricao} (${x.motivo})`).join('; ')}.`
+        : '';
+      onSucesso(`Importação concluída! ${lancados} itens lançados no estoque${detalhes ? ` — ${detalhes}` : ''}.${textoRecusas}`);
     } catch (e) {
       console.error(e);
       // Erro do Supabase é objeto simples, não Error: com `instanceof` a tela
@@ -769,15 +836,15 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               <p className="text-xs text-gray-500 dark:text-gray-400">
                                 Nota: <b>{l.itemNota.qtd} {l.itemNota.unidade}</b> · Total: <b>{fmt(l.itemNota.valor_total)}</b>
                               </p>
-                              {conferencia.porFoto && (
+                              {conferencia.mostrar && (
                                 <details className="mt-2 text-xs" open={conferencia.precisaConfirmacao ? true : undefined}>
                                   <summary className="cursor-pointer font-bold text-amber-800 dark:text-amber-300">
-                                    {tDynamic('Conferir valores lidos por foto')}
+                                    {conferencia.porFoto ? tDynamic('Conferir valores lidos por foto') : tDynamic('Os valores desta linha não fecham')}
                                   </summary>
                                   {conferencia.precisaConfirmacao && (
                                     <p role="status" className="mt-2 text-amber-800 dark:text-amber-300">{tDynamic(conferencia.motivo)}</p>
                                   )}
-                                  <div className="mt-2 grid grid-cols-3 gap-2">
+                                  {conferencia.podeEditar && <div className="mt-2 grid grid-cols-3 gap-2">
                                     {([
                                       ['qtd', 'Quantidade'], ['valor_unitario', 'Valor unitário'], ['valor_total', 'Total da linha'],
                                     ] as const).map(([campo, rotulo]) => (
@@ -792,7 +859,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                                         />
                                       </label>
                                     ))}
-                                  </div>
+                                  </div>}
                                   {conferencia.precisaConfirmacao && !conferencia.valoresInvalidos && (
                                     <label className="mt-2 flex items-start gap-2 text-amber-900 dark:text-amber-200">
                                       <input type="checkbox" className="mt-0.5" checked={!!l.conferenciaConfirmada} disabled={salvando}
@@ -828,7 +895,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                                     insumoId: '',
                                     nomeNovoInsumo: l.sugestao.nome,
                                     unidadeInsumo: unidadeSegura(l.sugestao.unidade),
-                                    fatorConversao: l.sugestao.fator,
+                                    ...fatorDaLinha(l.itemNota, unidadeSegura(l.sugestao.unidade), { conteudoIA: conteudoIADe(l.sugestao) }),
                                   });
                                 } else {
                                   const ins = porId.get(v);
@@ -837,7 +904,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                                     criarNovo: false,
                                     insumoId: v,
                                     unidadeInsumo: unidade,
-                                    fatorConversao: resolverFatorImportacao(l.itemNota, unidade).fator,
+                                    ...fatorDaLinha(l.itemNota, unidade),
                                   });
                                 }
                               }}
@@ -938,7 +1005,7 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               linhas com o olho, em vez de digitar 53 vezes.
                             */}
                             <span className="w-full text-xs opacity-95 leading-snug text-gray-500 dark:text-gray-400">
-                              {l.sugestao.explicacao}
+                              {l.explicacaoFator || l.sugestao.explicacao}
                               <span className="ml-1 text-gray-400 dark:text-gray-500">
                                 {tDynamic('Na nota veio como')} <b>{unidadeNota}</b>.
                               </span>
@@ -955,9 +1022,27 @@ export default function ModalImportarNFCe({ lojaId, dadosNota, insumosExistentes
                               value={l.fatorConversao}
                               onChange={e => atualizarLinha(i, {
                                 fatorConversao: e.target.value === '' ? 0 : Number(e.target.value),
+                                // Número digitado é decisão do lojista: origem USUARIO.
+                                origemFator: 'USUARIO',
+                                fatorConfirmado: true,
+                                explicacaoFator: 'Conversão informada por você.',
                               })}
                               className="w-20 p-1 rounded border border-gray-300 dark:border-gray-700 text-center font-bold dark:bg-gray-900 dark:text-gray-100"
                             />
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${ESTILO_ORIGEM[l.origemFator]}`}>
+                              {tDynamic(ROTULO_ORIGEM[l.origemFator])}
+                            </span>
+                            {l.importar && !l.fatorConfirmado && l.fatorConversao > 0 && (
+                              <button type="button" onClick={() => atualizarLinha(i, {
+                                fatorConfirmado: true,
+                                // Confirmar a sugestão da regra ambígua é decisão do lojista.
+                                // A da IA continua marcada IA (confirmada) para o rastro.
+                                origemFator: l.origemFator === 'IA' ? 'IA' : 'USUARIO',
+                              })}
+                                className="rounded-lg bg-violet-600 px-2 py-1 text-xs font-bold text-white">
+                                {l.origemFator === 'IA' ? tDynamic('Confirmar conversão sugerida pela IA') : tDynamic('Confirmar esta conversão')}
+                              </button>
+                            )}
                             {l.importar && !(l.fatorConversao > 0) && (
                               <span className="w-full text-xs opacity-95 font-bold text-red-600 dark:text-red-400">
                                 {tDynamic('Conversão não comprovada. Informe quanto uma unidade da nota rende no estoque antes de importar.')}

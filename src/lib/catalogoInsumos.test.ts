@@ -211,10 +211,13 @@ describe('sugerirDaNota — regras gerais', () => {
     expect(s.fator).toBe(1);
   });
 
-  it('item desconhecido em agrupador cai em contagem, nunca na sigla crua', () => {
+  it('item desconhecido em agrupador cai em contagem e NÃO inventa fator', () => {
+    // 3 CX sem conteúdo conhecido: não dá para saber quantas unidades há na
+    // caixa. Fator 0 = pare e pergunte. Até 22/09/2026 saía 1, e "3 CX a R$ 50"
+    // entrava como 3 un a R$ 50 cada.
     const s = sugerirDaNota({ descricao: 'ZZZ PRODUTO EXOTICO', unidade: 'cx', qtd: 3 });
     expect(s.unidade).toBe('un');
-    expect(s.fator).toBe(1);
+    expect(s.fator).toBe(0);
     expect(s.confianca).toBe('baixa');
   });
 
@@ -229,7 +232,7 @@ describe('sugerirDaNota — regras gerais', () => {
     expect(s.explicacao).toMatch(/mais de um significado/i);
   });
 
-  it('toda sugestão sai com unidade existente no catálogo', () => {
+  it('toda sugestão sai com unidade existente no catálogo e fator só com prova', () => {
     const validos = new Set(UNIDADES.map((u) => u.codigo));
     const amostra = [
       { descricao: 'TOMATE SALADA KG', unidade: 'kg', qtd: 1 },
@@ -242,8 +245,11 @@ describe('sugerirDaNota — regras gerais', () => {
     for (const item of amostra) {
       const s = sugerirDaNota(item);
       expect(validos.has(s.unidade), `${item.descricao} → ${s.unidade}`).toBe(true);
-      expect(s.fator).toBeGreaterThan(0);
+      // Fator nunca é negativo nem NaN; 0 é "não sei" e bloqueia a importação.
+      expect(Number.isFinite(s.fator) && s.fator >= 0).toBe(true);
     }
+    expect(sugerirDaNota(amostra[0]).fator).toBe(1);   // kg → kg
+    expect(sugerirDaNota(amostra[1]).fator).toBe(20);  // "20UN" na descrição
   });
 });
 

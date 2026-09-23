@@ -2128,6 +2128,16 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Enviar prévia do 2º e-mail para mim': 'Send me a preview of e-mail #2',
   'Desligar lembretes': 'Turn reminders off',
   'Ligar lembretes': 'Turn reminders on',
+  // ── Entrada fiscal com origem (23/09/2026) ──────────────────────────────
+  'Os valores desta linha não fecham': 'The values on this line do not add up',
+  'Confirmar conversão sugerida pela IA': 'Confirm the AI-suggested conversion',
+  'Confirmar esta conversão': 'Confirm this conversion',
+  'Fonte: nota fiscal (XML)': 'Source: tax invoice (XML)',
+  'Fonte: regra de conversão': 'Source: conversion rule',
+  'Fonte: conversão já confirmada': 'Source: previously confirmed conversion',
+  'Fonte: IA — confirme': 'Source: AI — please confirm',
+  'Fonte: você': 'Source: you',
+  'Sem fonte — informe': 'No source — enter it',
   // ── Superadmin: e-mails medidos (23/09/2026) ────────────────────────────
   'Retomada de cadastro · 1º lembrete': 'Sign-up recovery · reminder 1',
   'Retomada de cadastro · 2º lembrete': 'Sign-up recovery · reminder 2',

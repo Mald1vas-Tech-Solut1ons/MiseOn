@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NF-e 4.00 de distribuidora de food service, montada no formato da SEFAZ
+     (namespace, uTrib/qTrib, rastro) para provar a entrada fiscal. Valores
+     e produtos são de teste; a estrutura é a do leiaute oficial. -->
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00">
+  <NFe>
+    <infNFe Id="NFe35260912345678000190550010000123451000123456" versao="4.00">
+      <ide><cUF>35</cUF><nNF>12345</nNF><dhEmi>2026-09-20T09:30:00-03:00</dhEmi></ide>
+      <emit><CNPJ>12345678000190</CNPJ><xNome>DISTRIBUIDORA FOOD TESTE LTDA</xNome></emit>
+      <det nItem="1">
+        <prod>
+          <cProd>ALC001</cProd><cEAN>SEM GTIN</cEAN><xProd>ALCATRA BOV RESF KG</xProd>
+          <NCM>02013000</NCM><CFOP>5102</CFOP>
+          <uCom>KG</uCom><qCom>20.0000</qCom><vUnCom>18.9000000000</vUnCom><vProd>378.00</vProd>
+          <cEANTrib>SEM GTIN</cEANTrib><uTrib>KG</uTrib><qTrib>20.0000</qTrib><vUnTrib>18.9000000000</vUnTrib>
+          <indTot>1</indTot>
+        </prod>
+      </det>
+      <det nItem="2">
+        <prod>
+          <cProd>REF350</cProd><cEAN>7894900011517</cEAN><xProd>REFRIGERANTE COLA LATA 350ML CX</xProd>
+          <NCM>22021000</NCM><CFOP>5405</CFOP>
+          <uCom>CX</uCom><qCom>10.0000</qCom><vUnCom>50.0000000000</vUnCom><vProd>500.00</vProd>
+          <cEANTrib>7894900011517</cEANTrib><uTrib>UN</uTrib><qTrib>120.0000</qTrib><vUnTrib>4.1666666667</vUnTrib>
+          <indTot>1</indTot>
+        </prod>
+      </det>
+      <det nItem="3">
+        <prod>
+          <cProd>SAN2L</cProd><cEAN>SEM GTIN</cEAN><xProd>AGUA SANITARIA 2L</xProd>
+          <NCM>28289011</NCM><CFOP>5102</CFOP>
+          <uCom>CX</uCom><qCom>2.0000</qCom><vUnCom>36.0000000000</vUnCom><vProd>72.00</vProd>
+          <cEANTrib>SEM GTIN</cEANTrib><uTrib>UN</uTrib><qTrib>24.0000</qTrib><vUnTrib>3.0000000000</vUnTrib>
+          <indTot>1</indTot>
+        </prod>
+      </det>
+      <det nItem="4">
+        <prod>
+          <cProd>MUS01</cProd><cEAN>SEM GTIN</cEAN><xProd>QUEIJO MUSSARELA PECA KG</xProd>
+          <NCM>04069010</NCM><CFOP>5102</CFOP>
+          <uCom>KG</uCom><qCom>3.2150</qCom><vUnCom>32.9000000000</vUnCom><vProd>105.77</vProd>
+          <cEANTrib>SEM GTIN</cEANTrib><uTrib>KG</uTrib><qTrib>3.2150</qTrib><vUnTrib>32.9000000000</vUnTrib>
+          <indTot>1</indTot>
+          <rastro><nLote>L2309A</nLote><qLote>3.215</qLote><dFab>2026-09-10</dFab><dVal>2026-10-10</dVal></rastro>
+        </prod>
+      </det>
+      <det nItem="5">
+        <prod>
+          <cProd>GUA100</cProd><cEAN>SEM GTIN</cEAN><xProd>GUARDANAPO FOLHA SIMPLES PCT</xProd>
+          <NCM>48183000</NCM><CFOP>5102</CFOP>
+          <uCom>PCT</uCom><qCom>5.0000</qCom><vUnCom>8.0000000000</vUnCom><vProd>40.00</vProd>
+          <cEANTrib>SEM GTIN</cEANTrib><uTrib>PCT</uTrib><qTrib>5.0000</qTrib><vUnTrib>8.0000000000</vUnTrib>
+          <indTot>1</indTot>
+        </prod>
+      </det>
+      <det nItem="6">
+        <prod>
+          <cProd>OLE900</cProd><cEAN>SEM GTIN</cEAN><xProd>OLEO DE SOJA 900ML</xProd>
+          <NCM>15079011</NCM><CFOP>5102</CFOP>
+          <uCom>UN</uCom><qCom>20.0000</qCom><vUnCom>7.4900000000</vUnCom><vProd>149.80</vProd>
+          <cEANTrib>SEM GTIN</cEANTrib><uTrib>UN</uTrib><qTrib>20.0000</qTrib><vUnTrib>7.4900000000</vUnTrib>
+          <indTot>1</indTot>
+        </prod>
+      </det>
+      <total><ICMSTot><vProd>1245.57</vProd><vDesc>0.00</vDesc><vNF>1245.57</vNF></ICMSTot></total>
+    </infNFe>
+  </NFe>
+</nfeProc>
