@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Building2, UserPlus, TrendingDown, ScrollText, LogOut, Receipt, Users, BookOpen, MessageCircle, AlertTriangle, Filter, Mail } from 'lucide-react';
+import { Building2, UserPlus, TrendingDown, ScrollText, LogOut, Receipt, Users, BookOpen, MessageCircle, AlertTriangle, Filter, Mail, LayoutDashboard } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 import LanguageToggle from '../../components/LanguageToggle';
@@ -39,6 +39,7 @@ export default function SuperAdminLayout() {
   }
 
   const itens = [
+    { to: '/superadmin', icon: <LayoutDashboard size={18} />, label: 'Visão do negócio', end: true },
     { to: '/superadmin/leads', icon: <Users size={18} />, label: 'CRM Leads B2B' },
     { to: '/superadmin/guia-ceo', icon: <BookOpen size={18} />, label: 'Manual CEO & GTM' },
     { to: '/superadmin/tenants', icon: <Building2 size={18} />, label: 'Tenants' },
@@ -74,7 +75,7 @@ export default function SuperAdminLayout() {
           <nav className="sticky top-24 flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-md">
             <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Módulos</p>
             {itens.map((i) => (
-              <NavLink key={i.to} to={i.to}
+              <NavLink key={i.to} to={i.to} end={'end' in i && !!i.end}
                 className={({ isActive }) => `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${isActive ? 'bg-indigo-500/20 text-indigo-400 shadow-[inset_0_0_10px_rgba(99,102,241,0.2)]' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'}`}>
                 {i.icon} {i.label}
               </NavLink>

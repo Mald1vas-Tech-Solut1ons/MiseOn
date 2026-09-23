@@ -15,10 +15,10 @@ export default function Churn() {
     (async () => {
       const [{ data: lojas }, { data: m }] = await Promise.all([
         supabase.from('lojas').select('id, slug, nome, status_assinatura, trial_termina_em').eq('ativo', true),
-        supabase.functions.invoke('superadmin-metricas'),
+        supabase.rpc('fn_superadmin_metricas_lojas', { p_dias: 30 }),
       ]);
       const metricas: Record<string, Metrica> = {};
-      (m?.metricas ?? []).forEach((x: Metrica) => { metricas[x.loja_id] = x; });
+      ((m ?? []) as Metrica[]).forEach((x) => { metricas[x.loja_id] = x; });
 
       const agora = Date.now();
       const lista = ((lojas as Loja[]) ?? []).map((l) => {

@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { fmt } from '../../types';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
@@ -10,6 +11,7 @@ interface Loja {
   plano: string; status_assinatura: string; trial_termina_em: string | null; observacao_admin: string | null;
 }
 interface Metrica { loja_id: string; pedidos_30d: number; gmv_30d: number; ultimo_pedido: string | null }
+type MetricaBanco = { loja_id: string; pedidos: number; gmv: number; ultimo_pedido: string | null };
 
 export default function Tenants() {
   const { tDynamic } = useI18n();
@@ -49,11 +51,16 @@ export default function Tenants() {
 
     const [{ data: l }, { data: m }] = await Promise.all([
       supabase.from('lojas').select('id, slug, nome, ativo, totem_ativo, plano, status_assinatura, trial_termina_em, observacao_admin').order('nome'),
-      supabase.functions.invoke('superadmin-metricas'),
+      // Agregado no banco. A Edge Function antiga baixava todos os pedidos de
+      // 30 dias para somar — e esta tela lia m.data.metricas, que nunca
+      // existiu: as colunas de pedidos/GMV vinham sempre vazias.
+      supabase.rpc('fn_superadmin_metricas_lojas', { p_dias: 30 }),
     ]);
     setLojas((l as Loja[]) ?? []);
     const dict: Record<string, Metrica> = {};
-    (m?.data?.metricas ?? []).forEach((x: Metrica) => { dict[x.loja_id] = x; });
+    ((m ?? []) as MetricaBanco[]).forEach((x) => {
+      dict[x.loja_id] = { loja_id: x.loja_id, pedidos_30d: Number(x.pedidos), gmv_30d: Number(x.gmv), ultimo_pedido: x.ultimo_pedido };
+    });
     setMetricas(dict);
     setCarregando(false);
   };
@@ -284,7 +291,7 @@ export default function Tenants() {
                       {l.nome.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-white">{l.nome}</p>
+                      <Link to={`/superadmin/lojas/${l.id}`} className="text-lg font-bold text-white hover:underline">{l.nome}</Link>
                       <a href={`/${l.slug}`} target="_blank" className="text-sm text-indigo-400 hover:underline">miseon.com.br/{l.slug}</a>
                     </div>
                   </div>

@@ -97,6 +97,8 @@ const WhatsAppPlataforma = lazyComRecarga(() => import('./pages/superadmin/Whats
 const SuperErros       = lazyComRecarga(() => import('./pages/superadmin/Erros'));
 const SuperCadastros   = lazyComRecarga(() => import('./pages/superadmin/Cadastros'));
 const SuperEmails      = lazyComRecarga(() => import('./pages/superadmin/Emails'));
+const SuperPainel      = lazyComRecarga(() => import('./pages/superadmin/Painel'));
+const SuperLoja360     = lazyComRecarga(() => import('./pages/superadmin/Loja360'));
 
 function CookieBannerForaDoReceiver() {
   const location = useLocation();
@@ -156,7 +158,8 @@ export default function App() {
                 {/* ── Superadmin ── */}
                 <Route path="/superadmin/login" element={<SuperAdminLogin />} />
                 <Route path="/superadmin" element={<SuperAdminLayout />}>
-                  <Route index element={<Navigate to="leads" replace />} />
+                  <Route index element={<SuperPainel />} />
+                  <Route path="lojas/:id"  element={<SuperLoja360 />} />
                   <Route path="leads"      element={<CrmLeads />} />
                   <Route path="guia-ceo"   element={<GuiaCeoGtm />} />
                   <Route path="tenants"    element={<Tenants />} />
