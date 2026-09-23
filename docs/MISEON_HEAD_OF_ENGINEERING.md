@@ -1,5 +1,73 @@
 # MISEON - Head of Engineering Document
 
+## 23/09/2026 — Sprint 18: entrada fiscal com fonte e confiança
+
+**Objetivo:** nenhuma quantidade de estoque nasce de palpite. Um dado fiscal
+correto nunca vira estoque semanticamente errado.
+
+**Causas medidas (camada do domínio, não do prompt da IA):**
+- `aplicarClassificacao` usava o conteúdo lido pela IA como fator de estoque
+  sem confirmação e, sem ele, inventava **1**; `sugerirDaNota` também
+  inventava 1 (3 CX a R$ 50 = 3 un a R$ 50).
+- "ÁGUA SANITÁRIA 2L" vendida por **CX** entrava como 2 L por caixa (12 frascos).
+- O parser de XML descartava `uTrib/qTrib` (a conversão CX→UN que a nota
+  declara) e o grupo `rastro` (lote/validade).
+- `fn_importar_nfce` não sabia a origem do fator, gravava embalagem por
+  UPDATE direto (por cima de `fn_definir_embalagem_insumo` e da correção do
+  lojista), não conferia aritmética e não deixava rastro fiscal no movimento.
+
+**Decisão / arquitetura:**
+- **Autoridade única:** `resolverFatorLinha` (`src/lib/fatorImportacaoNota.ts`),
+  origem declarada em ordem de confiança: `NOTA_FISCAL` (qTrib/uTrib) >
+  `REGRA` (física, descrição, garrafa/lata = 1) > `HISTORICO` > `IA`
+  (exige confirmação) > `NENHUMA` (fator 0 = pare). Caixa/fardo com conteúdo
+  em medida e sem `uTrib` é ambíguo → sugere e pede confirmação.
+- **Semântica separada no payload:** `qtd_nota`, `unidade_nota`,
+  `valor_unitario_nota`, `valor_total_nota`, `origem_fator`,
+  `fator_confirmado`, `aritmetica_confirmada`, lote/fabricação/validade.
+- **Servidor decide:** `fn_importar_nfce` recusa (e devolve `recusas` com
+  motivo) IA não confirmada, fator ≤ 0 e linha com qtd × unitário ≠ total;
+  embalagem passa por `fn_definir_embalagem_insumo` (nova origem
+  `NOTA_FISCAL`, abaixo só de `USUARIO`); movimento grava `documento_chave`,
+  `qtd_nota`, `unidade_nota`, `fator_conversao`, `origem_fator`. Cliente
+  antigo segue funcionando (`LEGADO`). `anon` perdeu EXECUTE.
+- **Conferência em toda rota:** XML/QR confirmam; só a foto edita.
+
+**Testes:** `src/lib/entradaFiscal.test.ts` (fixture NF-e 4.00 realista, 24
+casos: KG, CX com/sem uTrib, pesável 3,215 kg, LT/ml, PCT sem conteúdo, lote,
+IA); cupom real de 53 itens sem linha sem conversão; prova SQL
+`supabase/tests/entrada_fiscal_com_origem.sql` 8/8 em produção; integração
+estoque/PEPS + ledger **21 PASS** contra o banco. **BLOCKED:** estorno após
+FINALIZADO (FINALIZADO é terminal por regra). **BLOCKED no CI:** as 17 suítes
+de integração não rodam no GitHub (sem `SUPABASE_SERVICE_ROLE_KEY`) — risco
+registrado abaixo.
+
+**Não-escopo:** lotes históricos não foram reescritos (fator antigo é
+ambíguo sem a unidade da nota; `origem_fator = LEGADO` marca o que é anterior).
+
+## 23/09/2026 — e-mail medido e domínio
+
+`SITE_URL` valia `https://miseon.vercel.app` (conferido por SHA-256): todo
+e-mail saía com o domínio errado. Corrigido para `https://miseon.app.br`.
+Todo envio grava `email_log` antes de sair (token nos links); rastreio em
+`miseon.app.br/e/a|c|sair` (função `email-rastreio`); superadmin → E-mails.
+
+## Riscos abertos (23/09/2026)
+
+1. **Integração não roda no CI** (estoque/PEPS, ledger, pedidos): verde do CI
+   não prova o núcleo. Próximo passo: secret dedicado + banco de branch.
+2. **Lotes anteriores ao Sprint 18** podem ter fator inventado; só dá para
+   reconciliar com a unidade da nota, que agora passa a existir.
+
+## Backlog priorizado (23/09/2026)
+
+1. Superadmin profissional: painel inicial de negócio (MRR, trial→pago,
+   ativação, inadimplência, churn, e-mail, erros) + ficha 360 da loja.
+2. Totem: bebida na tela de sugestão (uma pergunta, sem empilhar upsell).
+3. Modal de impressão (etiqueta/comanda/nota) abrindo cortado.
+4. Vídeo quebrado em `/depoimentos` e `/videos` (achado pelo painel de erros).
+5. Integração no CI (risco 1).
+
 ## 20/09/2026 — auditoria de venda, nota fiscal e inteligência 3D
 
 **Objetivo:** verificar o MiseOn como usuário e como CTO antes de autorizar
