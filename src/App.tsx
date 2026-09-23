@@ -96,6 +96,7 @@ const FiscalPlataforma = lazyComRecarga(() => import('./pages/superadmin/FiscalP
 const WhatsAppPlataforma = lazyComRecarga(() => import('./pages/superadmin/WhatsAppPlataforma'));
 const SuperErros       = lazyComRecarga(() => import('./pages/superadmin/Erros'));
 const SuperCadastros   = lazyComRecarga(() => import('./pages/superadmin/Cadastros'));
+const SuperEmails      = lazyComRecarga(() => import('./pages/superadmin/Emails'));
 
 function CookieBannerForaDoReceiver() {
   const location = useLocation();
@@ -166,6 +167,7 @@ export default function App() {
                   <Route path="whatsapp"   element={<WhatsAppPlataforma />} />
                   <Route path="erros"      element={<SuperErros />} />
                   <Route path="cadastros"  element={<SuperCadastros />} />
+                  <Route path="emails"     element={<SuperEmails />} />
                 </Route>
 
                 {/* ── Entregador ── */}

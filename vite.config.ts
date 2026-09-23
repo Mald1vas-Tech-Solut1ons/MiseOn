@@ -121,6 +121,13 @@ export default defineConfig({
         navigateFallback: null,
         runtimeCaching: [
           {
+            // Rastreio de e-mail (miseon.app.br/e/...): cada abertura, clique e
+            // descadastro TEM que chegar ao servidor. Cache aqui apagaria a
+            // medição e serviria um descadastro velho.
+            urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/e/'),
+            handler: 'NetworkOnly',
+          },
+          {
             // O painel do lojista nunca sai do cache: e ferramenta de trabalho
             // de quem esta com a loja aberta, e um shell antigo faz o dono
             // achar que o sistema caiu. Sem conexao, erro honesto.

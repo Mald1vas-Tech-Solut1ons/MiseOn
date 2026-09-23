@@ -102,3 +102,8 @@ entrypoint = "./functions/fiscal-pdf-nfse/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/onboarding-retomada/index.ts"
+
+[functions.email-rastreio]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/email-rastreio/index.ts"

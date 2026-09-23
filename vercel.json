@@ -22,6 +22,10 @@
       "destination": "/api/img?p=$1"
     },
     {
+      "source": "/e/:acao(a|c|sair)",
+      "destination": "https://zzuxklwhaoisuuvndtfw.supabase.co/functions/v1/email-rastreio?acao=:acao"
+    },
+    {
       "source": "/(.*)",
       "destination": "/app"
     }
