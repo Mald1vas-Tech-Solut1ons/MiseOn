@@ -62,21 +62,29 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      # `version: latest` faz a action perguntar à API do GitHub qual é o
-      # último release. Sem token essa chamada é anônima e divide a cota do
-      # IP do runner com o mundo inteiro — em 22/09/2026 ela falhou com
-      # "Failed to resolve latest Supabase CLI release: rate limit exceeded"
-      # e derrubou o job inteiro, sem nada de errado no código.
-      #
-      # `secrets.GITHUB_TOKEN` é emitido pelo próprio Actions em toda execução
-      # (não precisa cadastrar nada) e sobe a cota de 60 para 1000 chamadas por
-      # hora. É a diferença entre um job que depende da sorte e um que não.
+      # `version: latest` fazia a action perguntar à API do GitHub qual é o
+      # último release a cada execução. `secrets.GITHUB_TOKEN` (adicionado em
+      # 22/09/2026) sobe a cota de 60 para 1000/h, mas em 23/09/2026 o job
+      # ainda caiu com "Failed to resolve latest Supabase CLI release: rate
+      # limit exceeded" — a cota é do runner, compartilhada com o resto do
+      # mundo que usa o mesmo range de IP, e 1000/h não é infinito. Fixar a
+      # versão elimina essa chamada por completo: a action baixa o binário
+      # do release já sabido, sem perguntar "qual é o mais novo" toda vez.
+      # Atualizar aqui é manual (de propósito — CLI nova sem aviso já quebrou
+      # coisa antes); conferir a versão atual em `gh api repos/supabase/cli/releases/latest`.
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.117.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm ci --no-fund
+      # `supabase start` puxa ~11 imagens do ghcr.io (postgres, gotrue, kong,
+      # storage-api, edge-runtime...). Anônimo, o ghcr.io também tem cota por
+      # IP — em 23/09/2026 o pull falhou em massa com "toomanyrequests" e
+      # nenhuma imagem subiu. Login com o GITHUB_TOKEN (só leitura, imagens
+      # já são públicas) troca a cota anônima pela cota autenticada, bem maior.
+      - name: Autentica no ghcr.io (evita rate limit no pull das imagens)
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Subir banco local (migrations + seed)
         run: |
           supabase start
