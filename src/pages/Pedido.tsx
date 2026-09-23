@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -104,6 +104,22 @@ function MapUpdater({ posicao }: { posicao: { lat: number; lng: number } }) {
 export default function AcompanharPedido() {
   const { tDynamic } = useI18n();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  // Quem pediu pela mesa/QR (sem login) só tem este segredo pra acompanhar o
+  // próprio pedido — não o id, que é público na URL. Chega uma vez por `?t=`
+  // e fica em localStorage: se a pessoa voltar no link salvo sem o parâmetro
+  // (histórico do navegador, PWA reaberto), o acesso não se perde.
+  const [tokenAcompanhamento] = useState(() => {
+    if (!id) return '';
+    const chave = `miseon_pedido_token_${id}`;
+    const daUrl = searchParams.get('t');
+    try {
+      if (daUrl) { localStorage.setItem(chave, daUrl); return daUrl; }
+      return localStorage.getItem(chave) ?? '';
+    } catch {
+      return daUrl ?? '';
+    }
+  });
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [loja, setLoja] = useState<Partial<Loja> | null>(null);
   const [posicao, setPosicao] = useState<{ lat: number; lng: number } | null>(null);
@@ -151,8 +167,12 @@ export default function AcompanharPedido() {
 
   const carregar = useCallback(async () => {
     // Leitura privada via RPC: o UUID apenas identifica o pedido. O servidor
-    // confirma que a sessão pertence ao cliente ou à equipe da loja.
-    const { data, error } = await supabase.rpc('fn_acompanhar_pedido', { p_id: id });
+    // confirma que a sessão pertence ao cliente/equipe da loja OU que o
+    // token de acompanhamento bate — pedido de mesa/QR não tem login.
+    const { data, error } = await supabase.rpc('fn_acompanhar_pedido', {
+      p_id: id,
+      p_token: tokenAcompanhamento || null,
+    });
 
     if (error || !data) {
       setPedido(null);
@@ -173,7 +193,7 @@ export default function AcompanharPedido() {
         .maybeSingle();
       setLoja(lojaData ?? null);
     }
-  }, [id]);
+  }, [id, tokenAcompanhamento]);
 
   useEffect(() => {
     if (!loja) return;
@@ -271,7 +291,10 @@ export default function AcompanharPedido() {
     // 2) Polling de segurança: mesmo se o realtime falhar por completo,
     // o pedido é reconsultado a cada 12s enquanto estiver em andamento.
     const verificarAgora = async () => {
-      const { data } = await supabase.rpc('fn_acompanhar_pedido', { p_id: id });
+      const { data } = await supabase.rpc('fn_acompanhar_pedido', {
+        p_id: id,
+        p_token: tokenAcompanhamento || null,
+      });
       if (!data) return;
       const novo = data as Pedido;
       if (statusAnterior.current !== novo.status) {
@@ -301,7 +324,7 @@ export default function AcompanharPedido() {
       window.removeEventListener('focus', aoVoltar);
       if (canal) supabase.removeChannel(canal);
     };
-  }, [id, carregar]);
+  }, [id, carregar, tokenAcompanhamento]);
 
   useEffect(() => {
     if (!id || pedido?.status !== 'EM_ROTA') return;

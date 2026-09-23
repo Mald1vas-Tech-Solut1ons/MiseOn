@@ -2304,6 +2304,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'O QR aparece na tela ao lado do totem para você pagar pelo celular.':
     'The QR code appears on the screen beside the kiosk so you can pay from your phone.',
   'Pedido enviado!': 'Order sent!',
+  'Acompanhar pedido': 'Track order',
   'Use na próxima compra informando o mesmo telefone.':
     'Use it on your next purchase with the same phone number.',
   'Seu comprovante está sendo impresso.': 'Your receipt is printing.',

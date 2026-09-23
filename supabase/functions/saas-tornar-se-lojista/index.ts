@@ -102,6 +102,19 @@ Deno.serve(async (req) => {
       throw eVinculo;
     }
 
+    // Achado do teste de usabilidade simulada (23/09/2026, A1): marcar "Salão
+    // com garçom" só gravava o metadado pra nota fiscal — nenhuma mesa nascia,
+    // ninguém era convidado, e quem prometeu ao cliente que "já configurou" a
+    // conta desmentia a própria fala na primeira tela. A loja não fica pronta
+    // sozinha, mas passa a nascer com a Mesa 1 — não zero.
+    let mesaCriada = false;
+    if (atende_salao_garcom) {
+      const { error: eMesa } = await admin.from('mesas')
+        .insert({ loja_id: loja.id, numero: 1, nome: 'Mesa 1', capacidade: 4 });
+      if (eMesa) console.error('Mesa inicial não criada:', eMesa);
+      else mesaCriada = true;
+    }
+
     const { error: eCadastro } = await admin.from('assinatura_dados_cadastro').insert({
       loja_id: loja.id,
       tipo_pessoa: temFiscal ? tipo_pessoa : null,
@@ -131,7 +144,7 @@ Deno.serve(async (req) => {
       p_classe: 'TRANSACIONAL',
     });
 
-    return json({ ok: true, loja_id: loja.id, slug: loja.slug });
+    return json({ ok: true, loja_id: loja.id, slug: loja.slug, mesa_criada: mesaCriada });
   } catch (e) {
     console.error('Falha ao tornar-se lojista:', e);
     return json({ error: String((e as Error)?.message ?? e) }, { status: 500 });

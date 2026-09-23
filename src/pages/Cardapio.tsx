@@ -109,7 +109,7 @@ export default function Cardapio() {
   const waTokenUrl = searchParams.get('wa');
   const [mesaAtual, setMesaAtual] = useState<Mesa | null>(null);
   const [mesaErro, setMesaErro] = useState(false);
-  const [pedidoMesaSucesso, setPedidoMesaSucesso] = useState<number | null>(null);
+  const [pedidoMesaSucesso, setPedidoMesaSucesso] = useState<{ numero: number; pedidoId: string; token: string } | null>(null);
   const [loja, setLoja] = useState<Loja | null>(null);
   const [horarios, setHorarios] = useState<HorarioFuncionamento[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -572,9 +572,19 @@ export default function Cardapio() {
       )}
       {pedidoMesaSucesso && (
         <div className="mx-auto -mt-px max-w-6xl px-4 pt-3 sm:px-6">
-          <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400">
-            <span className="flex items-center gap-2.5"><PartyPopper size={18} className="shrink-0" /> {tDynamic('Pedido')} #{pedidoMesaSucesso} {tDynamic('enviado! A cozinha já está preparando.')}</span>
-            <button type="button" onClick={() => setPedidoMesaSucesso(null)} className="shrink-0"><X size={16} /></button>
+          <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400">
+            <span className="flex items-center gap-2.5"><PartyPopper size={18} className="shrink-0" /> {tDynamic('Pedido')} #{pedidoMesaSucesso.numero} {tDynamic('enviado! A cozinha já está preparando.')}</span>
+            <div className="flex items-center gap-3">
+              {/* Sem login, o cliente da mesa só tem este link pra achar o
+                  próprio pedido de novo — antes não existia nenhum. */}
+              <button type="button"
+                onClick={() => navigate(`/pedido/${pedidoMesaSucesso.pedidoId}?t=${pedidoMesaSucesso.token}`)}
+                className="shrink-0 underline underline-offset-2 hover:text-emerald-900 dark:hover:text-emerald-200"
+              >
+                {tDynamic('Acompanhar pedido')}
+              </button>
+              <button type="button" onClick={() => setPedidoMesaSucesso(null)} className="shrink-0"><X size={16} /></button>
+            </div>
           </div>
         </div>
       )}
@@ -920,7 +930,7 @@ export default function Cardapio() {
       {checkoutAberto && mesaAtual && (
         <PedidoMesaDrawer loja={loja} mesa={mesaAtual} tokenMesa={tokenMesaUrl} carrinho={carrinho} setCarrinho={setCarrinho}
           onClose={() => setCheckoutAberto(false)}
-          onSucesso={(num) => { setCheckoutAberto(false); setPedidoMesaSucesso(num); }} />
+          onSucesso={(num, pedidoId, token) => { setCheckoutAberto(false); setPedidoMesaSucesso({ numero: num, pedidoId, token }); }} />
       )}
 
       {checkoutAberto && !mesaAtual && (

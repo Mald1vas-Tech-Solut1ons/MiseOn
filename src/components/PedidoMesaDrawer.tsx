@@ -14,7 +14,7 @@ interface Props {
   carrinho: ItemCarrinho[];
   setCarrinho: (c: ItemCarrinho[]) => void;
   onClose: () => void;
-  onSucesso: (numero: number) => void;
+  onSucesso: (numero: number, pedidoId: string, token: string) => void;
 }
 
 export default function PedidoMesaDrawer({ loja, mesa, tokenMesa, carrinho, setCarrinho, onClose, onSucesso }: Props) {
@@ -55,11 +55,11 @@ export default function PedidoMesaDrawer({ loja, mesa, tokenMesa, carrinho, setC
           opcoes: i.opcoesSelecionadas.map((o) => ({ opcao_id: o.id })),
         })),
       });
-      const pedido = (data as { pedido_id: string; numero: number }[] | null)?.[0];
+      const pedido = (data as { pedido_id: string; numero: number; token_acompanhamento: string }[] | null)?.[0];
       if (erroPedido || !pedido) throw erroPedido ?? new Error(tDynamic('Falha ao enviar o pedido'));
 
       setCarrinho([]);
-      onSucesso(pedido.numero);
+      onSucesso(pedido.numero, pedido.pedido_id, pedido.token_acompanhamento);
     } catch (e) {
       console.error(e);
       setErro(tDynamic('Não deu para enviar o pedido: ') + String((e as Error)?.message ?? e));
