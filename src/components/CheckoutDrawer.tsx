@@ -135,7 +135,7 @@ export default function CheckoutDrawer({
       }
       setPerfilCarregado(true);
     })();
-  }, [user, loja.id]);
+  }, [user, loja.id, lembrado.metodo]);
 
   // --- Cálculo da entrega por localização, reativo e com debounce ---
   const bairroAtual = enderecoObj?.bairro || bairroManual;
