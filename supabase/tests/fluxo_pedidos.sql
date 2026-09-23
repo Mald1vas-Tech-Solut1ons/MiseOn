@@ -56,7 +56,10 @@ pedido_sem_item as (
 ),
 
 -- Pagamento nunca registrado (nem PENDENTE): a rota do canal não gravou
--- `pagamentos`, e sem essa linha não tem como confirmar nem estornar.
+-- `pagamentos`, e sem essa linha não tem como confirmar nem estornar. Mesa
+-- com comanda ainda ABERTA é exceção de propósito: quem senta pra comer não
+-- paga a cada item, paga ao fechar a conta — achado falso confirmado em
+-- 23/09 com o pedido #309 (mesa 10, comanda aberta de propósito no teste).
 pedido_sem_pagamento as (
   select 'ALTA', 'pedido: sem nenhum registro de pagamento',
          l.nome, 'pedido #'||p.numero,
@@ -65,6 +68,10 @@ pedido_sem_pagamento as (
   where p.status <> 'CANCELADO' and p.valor_total > 0
     and p.criado_em < now() - interval '10 minutes'
     and not exists (select 1 from public.pagamentos g where g.pedido_id = p.id)
+    and not exists (
+      select 1 from public.comandas c
+      where c.id = p.comanda_id and c.status = 'ABERTA'
+    )
 ),
 
 -- O gateway (ou a consulta manual) marcou PAGO, mas o pedido ficou parado no
@@ -200,6 +207,10 @@ baixa_ausente as (
 ),
 
 -- Flag diz que baixou, mas não existe o movimento BAIXA_VENDA correspondente.
+-- Falso positivo conhecido: produto que ganhou ficha técnica DEPOIS do
+-- pedido (fichas_tecnicas não tem carimbo de tempo pra filtrar isso). Antes
+-- de tratar um achado aqui como bug, confira se o produto já tinha ficha na
+-- data do pedido — não dá pra saber por SQL, só olhando o caso.
 baixa_sem_movimento as (
   select 'ALTA', 'pedido: flag de baixa true mas sem movimento de estoque',
          l.nome, 'pedido #'||p.numero, 'estoque_baixado = true sem BAIXA_VENDA'
