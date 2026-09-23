@@ -8,7 +8,7 @@ import Handlebars from 'npm:handlebars@4.7.8';
 // Domínio de produção. Vive em secret porque muda quando o domínio
 // próprio entrar no ar — link errado em e-mail não tem como ser corrigido
 // depois de enviado.
-export const SITE = (Deno.env.get('SITE_URL') ?? 'https://miseon.vercel.app').replace(/\/+$/, '');
+export const SITE = (Deno.env.get('SITE_URL') ?? 'https://miseon.app.br').replace(/\/+$/, '');
 
 export type Classe = 'TRANSACIONAL' | 'MARKETING';
 
