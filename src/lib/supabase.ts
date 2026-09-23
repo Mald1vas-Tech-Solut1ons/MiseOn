@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { registrarEventoAuth } from './authCallback';
 import { fetchComSessaoChat } from './sessaoChat';
+import { instalarMensagemDeErroNasFunctions } from './edgeFunctionErro';
 
 /** Remove trailing newlines / whitespace that Vercel sometimes injects into env vars.
  *  The SDK puts the key as-is into the WebSocket query string, so a stray \n
@@ -36,6 +37,9 @@ export const supabase = createClient(url, anon, {
     },
   },
 });
+
+// Erro de Edge Function chega na tela com o texto da function, não o do SDK.
+instalarMensagemDeErroNasFunctions(supabase);
 
 // O listener nasce com o cliente, antes das rotas lazy montarem.
 supabase.auth.onAuthStateChange((event) => registrarEventoAuth(event));

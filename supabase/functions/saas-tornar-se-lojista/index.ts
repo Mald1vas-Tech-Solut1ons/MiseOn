@@ -69,10 +69,24 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
+    // Conta de plataforma não opera loja. A tela já esconde o cadastro dela,
+    // mas a regra mora aqui: foi assim que nasceu a loja duplicada
+    // `lanche-do-paulista` em 22/09.
+    const { data: ehPlataforma, error: ePlataforma } = await admin
+      .from('plataforma_admins').select('user_id').eq('user_id', user.id).limit(1);
+    if (ePlataforma) return json({ error: 'Não foi possível conferir a conta. Tente de novo.' }, { status: 500 });
+    if (ehPlataforma?.length) {
+      return json({ error: 'Conta de superadmin não cria loja. Entre com a conta do lojista.' }, { status: 403 });
+    }
+
     // Se esse usuário já tem loja, não deixa criar outra por engano.
-    const { data: vinculoExistente } = await admin
-      .from('usuarios_loja').select('loja_id').eq('user_id', user.id).maybeSingle();
-    if (vinculoExistente) return json({ error: 'Esta conta já está vinculada a uma loja.' }, { status: 409 });
+    // `limit(1)`, não `maybeSingle()`: com dois vínculos o maybeSingle devolve
+    // ERRO e data nula — e a trava deixava passar justamente quem tem mais de
+    // uma loja. Erro de consulta também barra, em vez de liberar.
+    const { data: vinculos, error: eVinculos } = await admin
+      .from('usuarios_loja').select('loja_id').eq('user_id', user.id).limit(1);
+    if (eVinculos) return json({ error: 'Não foi possível conferir a conta. Tente de novo.' }, { status: 500 });
+    if (vinculos?.length) return json({ error: 'Esta conta já está vinculada a uma loja.' }, { status: 409 });
 
     const base = gerarSlug(nome_loja) || 'loja';
     let slug = base;

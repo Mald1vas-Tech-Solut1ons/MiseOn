@@ -38,11 +38,26 @@ function repetidoAgora(chave: string): boolean {
   return false;
 }
 
+export function ehMaquinaLocal(hostname: string): boolean {
+  return hostname === 'localhost'
+    || hostname === '[::1]'
+    || hostname.endsWith('.localhost')
+    || /^127\./.test(hostname)
+    || /^(10|192\.168)\./.test(hostname)
+    || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(hostname);
+}
+
 export async function registrarErro(
   mensagem: string,
   opcoes: { contexto?: string; stack?: string; origem?: string } = {},
 ): Promise<void> {
   try {
+    // `.env.local` aponta para PRODUÇÃO: sem isto, o `npm run preview` e o
+    // Cypress da máquina de desenvolvimento gravam no painel de erros real.
+    // Medido em 23/09/2026: erro de `http://127.0.0.1:4173` misturado aos do
+    // cliente, disputando atenção com defeito de verdade.
+    if (ehMaquinaLocal(window.location.hostname)) return;
+
     const contexto = opcoes.contexto ?? window.location.pathname;
     if (repetidoAgora(`${contexto}|${mensagem}`)) return;
 

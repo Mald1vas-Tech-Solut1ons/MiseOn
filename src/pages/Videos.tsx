@@ -68,17 +68,23 @@ export default function Videos() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  // Vídeo escolhido na lista toca quando o NOVO arquivo estiver pronto
+  // (`onCanPlay`), não depois de um tempo chutado.
+  const tocarQuandoPronto = useRef(false);
+
+  // `play()` devolve promessa e pode recusar (autoplay bloqueado, arquivo
+  // ainda carregando, rede caiu). Sem o catch isso virava erro não tratado no
+  // painel ("The element has no supported sources", 22/09/2026) — e o botão
+  // dizia "tocando" sem estar. Quem manda no estado são os eventos do vídeo.
+  const tocar = (video: HTMLVideoElement | null) => {
+    video?.play().catch(() => setIsPlaying(false));
+  };
 
   const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        videoRef.current.play();
-        setIsPlaying(true);
-      }
-    }
+    const video = videoRef.current;
+    if (!video) return;
+    if (isPlaying) video.pause();
+    else tocar(video);
   };
 
   const toggleMute = () => {
@@ -91,21 +97,17 @@ export default function Videos() {
   const fullScreen = () => {
     if (videoRef.current) {
       if (videoRef.current.requestFullscreen) {
-        videoRef.current.requestFullscreen();
+        videoRef.current.requestFullscreen().catch(() => {});
       }
     }
   };
 
   const selecionarVideo = (v: VideoItem) => {
+    // Mesmo vídeo: o src não muda, `canplay` não dispara de novo — toca já.
+    if (v.id === videoAtivo.id) { tocar(videoRef.current); return; }
     setVideoAtivo(v);
     setIsPlaying(false);
-    if (videoRef.current) {
-      videoRef.current.load();
-      setTimeout(() => {
-        videoRef.current?.play();
-        setIsPlaying(true);
-      }, 150);
-    }
+    tocarQuandoPronto.current = !v.youtubeId;
     window.scrollTo({ top: 300, behavior: 'smooth' });
   };
 
@@ -221,6 +223,11 @@ export default function Videos() {
                 src={videoAtivo.src}
                 className="h-full w-full object-contain"
                 playsInline
+                onCanPlay={(e) => {
+                  if (!tocarQuandoPronto.current) return;
+                  tocarQuandoPronto.current = false;
+                  tocar(e.currentTarget);
+                }}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
                 onEnded={() => setIsPlaying(false)}
@@ -371,7 +378,7 @@ export default function Videos() {
                     muted
                     loop
                     playsInline
-                    onMouseOver={(e) => (e.currentTarget as HTMLVideoElement).play()}
+                    onMouseOver={(e) => { (e.currentTarget as HTMLVideoElement).play().catch(() => {}); }}
                     onMouseOut={(e) => {
                       const vid = e.currentTarget as HTMLVideoElement;
                       vid.pause();
