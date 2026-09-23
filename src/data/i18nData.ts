@@ -4327,6 +4327,9 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Evite flash direto — ele cria brilho duro e sombra dura no prato.': 'Avoid direct flash — it creates harsh glare and hard shadows on the dish.',
   'nesta receita': 'in this recipe',
   'por unidade do pedido': 'per ordered unit',
+  'Sugerindo…': 'Suggesting…',
+  'Sugerir com IA': 'Suggest with AI',
+  'Sugerir extras com IA': 'Suggest extras with AI',
 };
 
 function escaparRegex(str: string) {

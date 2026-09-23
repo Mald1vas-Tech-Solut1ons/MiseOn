@@ -345,6 +345,10 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
   const [gerandoIA, setGerandoIA] = useState(false);
   const [erro, setErro] = useState('');
   const [mostrarPreview, setMostrarPreview] = useState(false);
+  const [sugerindoFicha, setSugerindoFicha] = useState(false);
+  const [avisoFichaIA, setAvisoFichaIA] = useState('');
+  const [sugerindoExtras, setSugerindoExtras] = useState(false);
+  const [avisoExtrasIA, setAvisoExtrasIA] = useState('');
   // Como o prato é servido (porções, cocção, revenda) — produtos_nutricao_config.
   const [nutriConfig, setNutriConfig] = useState<ConfigNutricaoPrato>(CONFIG_NUTRICAO_PADRAO);
 
@@ -436,6 +440,103 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
     ? { ...x, opcoes: [...x.opcoes, { _key: crypto.randomUUID(), nome: '', preco_adicional: 0, disponivel: true }] }
     : x));
   const addInsumoFicha = () => insumos[0] && setFicha((f) => [...f, { insumo_id: insumos[0].id, quantidade_consumida: '' }]);
+
+  // IA sugere, nunca decide: só some insumos já cadastrados na loja, nunca
+  // sobrescreve o que já está na ficha (só acrescenta o que ainda não tem).
+  const sugerirFichaIA = async () => {
+    if (!nome.trim()) return setErro('Preencha o nome do produto primeiro para a IA saber o que sugerir.');
+    if (!insumos.length) return setErro('Cadastre insumos em Estoque antes de pedir sugestão de ficha técnica.');
+    setSugerindoFicha(true);
+    setAvisoFichaIA('');
+    setErro('');
+    try {
+      const nomeCat = categorias.find((c) => c.id === categoriaId)?.nome;
+      const { data, error } = await supabase.functions.invoke('ai-sugerir-ficha', {
+        body: {
+          tipo: 'ficha_tecnica',
+          nome_produto: nome,
+          nome_categoria: nomeCat,
+          descricao,
+          insumos: insumos.map((i) => ({ id: i.id, nome: i.nome, unidade_medida: i.unidade_medida })),
+        },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      const sugestao = data?.sugestao ?? {};
+      const itens: { insumo_id: string; quantidade: number }[] = Array.isArray(sugestao.itens) ? sugestao.itens : [];
+      const faltando: string[] = Array.isArray(sugestao.insumos_faltando) ? sugestao.insumos_faltando : [];
+
+      const idsValidos = new Set(insumos.map((i) => i.id));
+      const jaNaFicha = new Set(ficha.map((f) => f.insumo_id));
+      const novos = itens
+        .filter((it) => idsValidos.has(it.insumo_id) && !jaNaFicha.has(it.insumo_id) && Number(it.quantidade) > 0)
+        .map((it) => ({ insumo_id: it.insumo_id, quantidade_consumida: String(it.quantidade) }));
+
+      if (!novos.length && !faltando.length) {
+        setAvisoFichaIA('A IA não encontrou nenhum insumo cadastrado que combine com este produto.');
+      } else {
+        if (novos.length) setFicha((f) => [...f, ...novos]);
+        const partes: string[] = [];
+        if (novos.length) partes.push(`${novos.length} insumo(s) adicionado(s) — revise as quantidades antes de salvar.`);
+        if (faltando.length) partes.push(`A IA também sugere: ${faltando.join(', ')} — cadastre em Estoque para incluir.`);
+        setAvisoFichaIA(partes.join(' '));
+      }
+    } catch (e: any) {
+      setErro('Erro na IA: ' + (e?.message || 'Falha ao conectar com o serviço de IA.'));
+    }
+    setSugerindoFicha(false);
+  };
+
+  // Mesma regra: acrescenta grupos novos, nunca troca ou apaga o que o
+  // lojista já configurou (nem grupos com o mesmo nome de um já existente).
+  const sugerirExtrasIA = async () => {
+    if (!nome.trim()) return setErro('Preencha o nome do produto primeiro para a IA saber o que sugerir.');
+    setSugerindoExtras(true);
+    setAvisoExtrasIA('');
+    setErro('');
+    try {
+      const nomeCat = categorias.find((c) => c.id === categoriaId)?.nome;
+      const { data, error } = await supabase.functions.invoke('ai-sugerir-ficha', {
+        body: { tipo: 'extras', nome_produto: nome, nome_categoria: nomeCat, descricao },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      const sugestao = data?.sugestao ?? {};
+      const gruposSugeridos: any[] = Array.isArray(sugestao.grupos) ? sugestao.grupos : [];
+      const nomesAtuais = new Set(grupos.map((g) => g.nome.trim().toLocaleLowerCase('pt-BR')));
+
+      const novos = gruposSugeridos
+        .filter((g) => g?.nome && Array.isArray(g.opcoes) && g.opcoes.some((o: any) => o?.nome)
+          && !nomesAtuais.has(String(g.nome).trim().toLocaleLowerCase('pt-BR')))
+        .map((g) => {
+          const opcoesValidas = g.opcoes.filter((o: any) => o?.nome);
+          return {
+            _key: crypto.randomUUID(),
+            nome: String(g.nome).trim(),
+            min_escolhas: Math.max(0, Number(g.min_escolhas) || 0),
+            max_escolhas: Math.min(Math.max(1, Number(g.max_escolhas) || 1), opcoesValidas.length),
+            opcoes: opcoesValidas.map((o: any) => ({
+              _key: crypto.randomUUID(),
+              nome: String(o.nome).trim(),
+              preco_adicional: Number(o.preco_adicional) || 0,
+              disponivel: true,
+            })),
+          };
+        });
+
+      if (!novos.length) {
+        setAvisoExtrasIA('A IA não sugeriu nenhum grupo novo (ou já existem grupos com esses nomes neste produto).');
+      } else {
+        setGrupos((atuais) => [...atuais, ...novos]);
+        setAvisoExtrasIA(`${novos.length} grupo(s) sugerido(s) — revise nomes, valores e vínculo de estoque antes de salvar.`);
+      }
+    } catch (e: any) {
+      setErro('Erro na IA: ' + (e?.message || 'Falha ao conectar com o serviço de IA.'));
+    }
+    setSugerindoExtras(false);
+  };
 
   const salvar = async () => {
     setErro('');
@@ -807,7 +908,18 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
         {/* Ficha técnica */}
         {controlaEstoque && (
           <div className="mt-4 rounded-2xl border p-3 dark:border-gray-800">
-            <p className="mb-2 text-sm font-semibold dark:text-gray-200">{tDynamic('Ficha técnica (consumo de insumos)')}</p>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold dark:text-gray-200">{tDynamic('Ficha técnica (consumo de insumos)')}</p>
+              <button type="button" onClick={sugerirFichaIA} disabled={sugerindoFicha || !nome.trim() || !insumos.length}
+                className="flex items-center gap-1.5 rounded-lg bg-orange-100 px-2.5 py-1.5 text-xs font-bold text-orange-600 transition-colors hover:bg-orange-200 disabled:opacity-50 dark:bg-orange-900/30 dark:text-orange-400">
+                <Sparkles size={13} className={sugerindoFicha ? 'animate-pulse' : ''} /> {sugerindoFicha ? tDynamic('Sugerindo…') : tDynamic('Sugerir com IA')}
+              </button>
+            </div>
+            {avisoFichaIA && (
+              <p className="mb-2 flex items-start gap-1.5 rounded-lg bg-orange-50 p-2 text-[11px] leading-relaxed text-orange-800 dark:bg-orange-950/20 dark:text-orange-300">
+                <Sparkles size={12} className="mt-0.5 shrink-0" /> {avisoFichaIA}
+              </p>
+            )}
             {ficha.map((f, idx) => {
               const insumoDaLinha = insumos.find((i) => i.id === f.insumo_id);
               const equivalencia = insumoDaLinha
@@ -890,10 +1002,21 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                 {tDynamic('Ponto da carne, tamanho, recheio, gelo e limão aparecem no item do pedido e no cartão do KDS — não viram etapas da cozinha.')}
               </p>
             </div>
-            <button type="button" onClick={addGrupoPontoCarne} className="min-h-11 rounded-xl border border-orange-300 bg-orange-50 px-3 text-xs font-black text-orange-800 hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-950/30 dark:text-orange-200">
-              + {tDynamic('Ponto da carne obrigatório')}
-            </button>
+            <div className="flex flex-wrap gap-1.5">
+              <button type="button" onClick={sugerirExtrasIA} disabled={sugerindoExtras || !nome.trim()}
+                className="min-h-11 flex items-center gap-1.5 rounded-xl bg-orange-100 px-3 text-xs font-black text-orange-600 hover:bg-orange-200 disabled:opacity-50 dark:bg-orange-900/30 dark:text-orange-400">
+                <Sparkles size={14} className={sugerindoExtras ? 'animate-pulse' : ''} /> {sugerindoExtras ? tDynamic('Sugerindo…') : tDynamic('Sugerir extras com IA')}
+              </button>
+              <button type="button" onClick={addGrupoPontoCarne} className="min-h-11 rounded-xl border border-orange-300 bg-orange-50 px-3 text-xs font-black text-orange-800 hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-950/30 dark:text-orange-200">
+                + {tDynamic('Ponto da carne obrigatório')}
+              </button>
+            </div>
           </div>
+          {avisoExtrasIA && (
+            <p className="mb-2 flex items-start gap-1.5 rounded-lg bg-orange-50 p-2 text-[11px] leading-relaxed text-orange-800 dark:bg-orange-950/20 dark:text-orange-300">
+              <Sparkles size={12} className="mt-0.5 shrink-0" /> {avisoExtrasIA}
+            </p>
+          )}
           {grupos.map((g) => {
             const opcoesValidasDoGrupo = g.opcoes.filter((o) => o.nome.trim()).length;
             return (
