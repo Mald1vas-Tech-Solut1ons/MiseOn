@@ -1,5 +1,51 @@
 # MISEON - Head of Engineering Document
 
+## 23/09/2026 — Incidente da loja fantasma + Sprint 20 item 1: varredura de fluxo de pedidos
+
+**Incidente (resolvido):** a conta de superadmin (@yahoo) tinha ficado vinculada
+como admin à loja fantasma `lanche-do-paulista` (criada por engano em 22/09,
+0 produtos). Removido o vínculo em `usuarios_loja` e `lojas.ativo = false`,
+registrado em `auditoria`. Nenhum pedido se perdeu — a correção de código
+(`915c40f`) já estava publicada; faltava só o banco.
+
+**Sprint 20 item 1 — `supabase/tests/fluxo_pedidos.sql`:** varredura só-leitura
+no padrão de `varredura_de_integridade.sql`, focada no fluxo de pedidos
+(sem item, sem pagamento, pagamento PAGO com pedido preso, senha duplicada,
+total ≠ partes, FINALIZADO sem receita ou em dobro, baixa de estoque ausente
+ou sem movimento, totem AGUARDANDO_PAGAMENTO antigo).
+
+**Dois bugs reais encontrados e corrigidos** (migration
+`20260923140000_pedido_nascido_aceito_e_pagamento_por_pedido.sql`, lida
+contra `pg_get_functiondef` antes de reescrever):
+
+1. `fn_trg_status_pedido` só dispara em `UPDATE`. `fn_pedido_mesa_criar`
+   (mesa/QR/garçom) e `fn_registrar_pesagem_comanda` (balança) inserem o
+   pedido já com status `ACEITO` — nunca passam pela transição
+   NOVO/AGUARDANDO_PAGAMENTO → ACEITO que baixa o estoque. Todo pedido de
+   mesa ou balança nunca baixava estoque, mesmo chegando em FINALIZADO.
+   Corrigido com `trg_pedido_genesis_efeitos` — `AFTER INSERT`,
+   `CONSTRAINT TRIGGER ... DEFERRABLE INITIALLY DEFERRED` (mesmo padrão de
+   `trg_revalidar_desconto_cupom`) para rodar só depois que `itens_pedido`
+   já foi inserido pela função chamadora.
+2. `fn_fechar_comanda_buffet` somava o valor de todos os pedidos da comanda
+   e gravava um único pagamento no pedido mais recente: os demais pedidos
+   viravam FINALIZADO sem nenhum pagamento próprio registrado. Agora um
+   pagamento por pedido, cada um pelo próprio valor.
+
+Backfill aplicado nos pedidos já afetados (baixa e receita reais, não só a
+flag) e um `valor_total` que tinha ficado divergente do próprio `subtotal`
+por causa do bug de pagamento foi corrigido para bater com a fórmula
+(`subtotal + taxa - desconto - cashback`) — não um número inventado.
+
+**Estado da varredura:** limpa de achado ALTA. Sobra 1 MEDIA conhecido: 3
+pedidos de totem presos em AGUARDANDO_PAGAMENTO (>30 min), aguardando decisão
+de regra de limpeza (item do backlog, não corrigido às cegas).
+
+**Pendente do Sprint 20:** telas operacionais ainda descartam erro de
+consulta (`const { data } = await ...`) e mostram "nenhum pedido" em vez do
+erro; prova de integração por canal contra loja descartável; integração no
+CI (17 suítes seguem BLOCKED por falta de `SUPABASE_SERVICE_ROLE_KEY`).
+
 ## 23/09/2026 — Sprint 18: entrada fiscal com fonte e confiança
 
 **Objetivo:** nenhuma quantidade de estoque nasce de palpite. Um dado fiscal
