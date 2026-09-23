@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
-import { Upload, Loader2, X, Image as ImageIcon, AlertCircle, RotateCw, ZoomIn, ZoomOut, Check } from 'lucide-react';
+import { Upload, Loader2, X, Image as ImageIcon, AlertCircle, RotateCw, ZoomIn, ZoomOut, Check, Sparkles, Lightbulb } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
@@ -20,8 +20,29 @@ function parseAspect(aspecto: string): number | undefined {
   return undefined; // livre
 }
 
+/** Ajustes de cor aplicados na hora do recorte — mesma sintaxe do CSS `filter`,
+ *  então o preview (mediaStyle do Cropper) e o canvas exportado usam o mesmo
+ *  cálculo e nunca saem diferentes um do outro. */
+interface AjustesFoto {
+  brilho: number;
+  contraste: number;
+  saturacao: number;
+}
+const AJUSTES_PADRAO: AjustesFoto = { brilho: 1, contraste: 1, saturacao: 1 };
+
+const FILTROS_PRESET: { chave: string; rotulo: string; ajustes: AjustesFoto }[] = [
+  { chave: 'natural', rotulo: 'Natural', ajustes: { brilho: 1, contraste: 1, saturacao: 1 } },
+  { chave: 'vivido', rotulo: 'Vívido', ajustes: { brilho: 1.05, contraste: 1.15, saturacao: 1.35 } },
+  { chave: 'suave', rotulo: 'Suave', ajustes: { brilho: 1.08, contraste: 0.92, saturacao: 0.95 } },
+  { chave: 'pb', rotulo: 'Preto e branco', ajustes: { brilho: 1.02, contraste: 1.08, saturacao: 0 } },
+];
+
+function cssFiltro(a: AjustesFoto): string {
+  return `brightness(${a.brilho}) contrast(${a.contraste}) saturate(${a.saturacao})`;
+}
+
 /** Cria um canvas recortado, limita dimensões máximas (1600px) e retorna como Blob otimizado. */
-async function getCroppedBlob(imageSrc: string, crop: Area, rotation: number, maxWidth = 1600): Promise<Blob> {
+async function getCroppedBlob(imageSrc: string, crop: Area, rotation: number, ajustes: AjustesFoto, maxWidth = 1600): Promise<Blob> {
   const img = await createImage(imageSrc);
   const rotRad = (rotation * Math.PI) / 180;
   const { width: bW, height: bH } = getRotatedSize(img.width, img.height, rotation);
@@ -40,6 +61,7 @@ async function getCroppedBlob(imageSrc: string, crop: Area, rotation: number, ma
   canvas.width = targetWidth;
   canvas.height = targetHeight;
 
+  ctx.filter = cssFiltro(ajustes);
   ctx.scale(targetWidth / crop.width, targetHeight / crop.height);
   ctx.translate(crop.width / 2, crop.height / 2);
   ctx.translate(-crop.x - crop.width / 2, -crop.y - crop.height / 2);
@@ -101,6 +123,8 @@ export default function ImageUpload({
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [croppedArea, setCroppedArea] = useState<Area | null>(null);
+  const [ajustes, setAjustes] = useState<AjustesFoto>(AJUSTES_PADRAO);
+  const [mostrarDicas, setMostrarDicas] = useState(false);
 
   const aspectRatio = parseAspect(aspecto) ?? 16 / 9;
 
@@ -119,6 +143,7 @@ export default function ImageUpload({
         setCrop({ x: 0, y: 0 });
         setZoom(1);
         setRotation(0);
+        setAjustes(AJUSTES_PADRAO);
         setIsEditorOpen(true);
       }
     };
@@ -137,7 +162,7 @@ export default function ImageUpload({
       setEnviando(true);
       setErro('');
 
-      const blob = await getCroppedBlob(imgSrc, croppedArea, rotation);
+      const blob = await getCroppedBlob(imgSrc, croppedArea, rotation, ajustes);
       const fileName = `${crypto.randomUUID()}.jpg`;
       const caminho = `${lojaId}/${pasta}/${fileName}`;
 
@@ -222,7 +247,7 @@ export default function ImageUpload({
               Cancelar
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setRotation((r) => (r + 90) % 360)}
@@ -231,6 +256,15 @@ export default function ImageUpload({
               >
                 <RotateCw size={16} />
                 <span className="hidden sm:inline">Girar</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMostrarDicas((v) => !v)}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${mostrarDicas ? 'bg-amber-500/20 text-amber-300' : 'text-gray-300 hover:text-white hover:bg-gray-800'}`}
+                title={tDynamic('Dicas de foto')}
+              >
+                <Lightbulb size={16} />
+                <span className="hidden sm:inline">{tDynamic('Dicas')}</span>
               </button>
             </div>
 
@@ -259,41 +293,97 @@ export default function ImageUpload({
               style={{
                 containerStyle: { background: '#0a0a0a' },
                 cropAreaStyle: { border: '2px solid rgba(255,255,255,0.6)' },
+                mediaStyle: { filter: cssFiltro(ajustes) },
               }}
             />
+
+            {mostrarDicas && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 to-transparent p-4 pt-10">
+                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-amber-300">
+                  <Lightbulb size={13} /> {tDynamic('Dicas para uma foto que vende')}
+                </p>
+                <ul className="space-y-1 text-xs leading-relaxed text-gray-200">
+                  <li>• {tDynamic('Luz natural perto de uma janela fica melhor que luz amarela de teto.')}</li>
+                  <li>• {tDynamic('Deixe o prato ocupar o quadro inteiro — evite sobrar fundo vazio.')}</li>
+                  <li>• {tDynamic('Ângulo de 45° mostra volume; direto de cima funciona bem para pratos únicos.')}</li>
+                  <li>• {tDynamic('Fundo liso e sem bagunça deixa o prato em destaque.')}</li>
+                  <li>• {tDynamic('Evite flash direto — ele cria brilho duro e sombra dura no prato.')}</li>
+                </ul>
+              </div>
+            )}
           </div>
 
-          {/* Controles de zoom na parte inferior */}
-          <div className="flex items-center justify-center gap-4 px-4 py-4 bg-gray-900 border-t border-gray-800">
-            <button
-              type="button"
-              onClick={() => setZoom((z) => Math.max(1, z - 0.2))}
-              className="rounded-full p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-            >
-              <ZoomOut size={20} />
-            </button>
+          {/* Filtros, ajustes finos e zoom na parte inferior */}
+          <div className="space-y-3 bg-gray-900 border-t border-gray-800 px-4 py-3">
+            <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
+              <Sparkles size={14} className="shrink-0 text-gray-500" />
+              {FILTROS_PRESET.map((f) => {
+                const ativo = ajustes.brilho === f.ajustes.brilho && ajustes.contraste === f.ajustes.contraste && ajustes.saturacao === f.ajustes.saturacao;
+                return (
+                  <button
+                    key={f.chave}
+                    type="button"
+                    onClick={() => setAjustes(f.ajustes)}
+                    className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${ativo ? 'bg-white text-gray-900' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                  >
+                    {tDynamic(f.rotulo)}
+                  </button>
+                );
+              })}
+            </div>
 
-            <input
-              type="range"
-              min={1}
-              max={3}
-              step={0.05}
-              value={zoom}
-              onChange={(e) => setZoom(Number(e.target.value))}
-              className="w-40 sm:w-56 accent-green-500"
-            />
+            <div className="grid grid-cols-3 gap-3">
+              <label className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                {tDynamic('Brilho')}
+                <input type="range" min={0.7} max={1.4} step={0.02} value={ajustes.brilho}
+                  onChange={(e) => setAjustes((a) => ({ ...a, brilho: Number(e.target.value) }))}
+                  className="mt-1 w-full accent-green-500" />
+              </label>
+              <label className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                {tDynamic('Contraste')}
+                <input type="range" min={0.7} max={1.4} step={0.02} value={ajustes.contraste}
+                  onChange={(e) => setAjustes((a) => ({ ...a, contraste: Number(e.target.value) }))}
+                  className="mt-1 w-full accent-green-500" />
+              </label>
+              <label className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                {tDynamic('Saturação')}
+                <input type="range" min={0} max={2} step={0.02} value={ajustes.saturacao}
+                  onChange={(e) => setAjustes((a) => ({ ...a, saturacao: Number(e.target.value) }))}
+                  className="mt-1 w-full accent-green-500" />
+              </label>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => setZoom((z) => Math.min(3, z + 0.2))}
-              className="rounded-full p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-            >
-              <ZoomIn size={20} />
-            </button>
+            <div className="flex items-center justify-center gap-4 pt-1">
+              <button
+                type="button"
+                onClick={() => setZoom((z) => Math.max(1, z - 0.2))}
+                className="rounded-full p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                <ZoomOut size={20} />
+              </button>
 
-            <span className="ml-2 text-xs font-mono text-gray-500 w-12 text-center">
-              {Math.round(zoom * 100)}%
-            </span>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.05}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="w-40 sm:w-56 accent-green-500"
+              />
+
+              <button
+                type="button"
+                onClick={() => setZoom((z) => Math.min(3, z + 0.2))}
+                className="rounded-full p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                <ZoomIn size={20} />
+              </button>
+
+              <span className="ml-2 text-xs font-mono text-gray-500 w-12 text-center">
+                {Math.round(zoom * 100)}%
+              </span>
+            </div>
           </div>
         </div>
       )}

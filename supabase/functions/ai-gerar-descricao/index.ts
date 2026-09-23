@@ -40,9 +40,9 @@ serve(async (req) => {
     if (userError || !user) throw new Error('Sessão de usuário expirada ou inválida. Recarregue a página e faça login novamente.');
 
 
-    const groqKey = Deno.env.get('GROQ_API_KEY');
-    if (!groqKey) {
-      throw new Error('Chave GROQ_API_KEY não configurada no Supabase (Secrets). Adicione GROQ_API_KEY no painel do Supabase.');
+    const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY');
+    if (!deepseekKey) {
+      throw new Error('Chave DEEPSEEK_API_KEY não configurada no Supabase (Secrets). Adicione DEEPSEEK_API_KEY no painel do Supabase.');
     }
 
     const prompt = `Você é um copywriter especialista em gastronomia e food delivery.\n` +
@@ -50,56 +50,42 @@ serve(async (req) => {
       (nome_categoria ? `O produto é da categoria: ${nome_categoria}. ` : '') +
       `A descrição deve ser curta (no máximo 3 linhas), direta, sem emojis exagerados, focando em texturas, sabores e desejo. Não use aspas na resposta.`;
 
-    // Modelos em ordem de preferencia. O Groq aposenta modelo sem aviso, entao a
-    // lista mistura geracoes e o GROQ_MODEL permite fixar um sem novo deploy.
-    const modelos = [
-      Deno.env.get('GROQ_MODEL') ?? '',
-      'llama-3.3-70b-versatile',
-      'llama-3.1-8b-instant',
-      'openai/gpt-oss-120b',
-      'openai/gpt-oss-20b',
-      'meta-llama/llama-4-scout-17b-16e-instruct',
-      'qwen/qwen3-32b',
-    ].filter(Boolean);
+    // DeepSeek — API compatível com o formato OpenAI. DEEPSEEK_MODEL permite
+    // trocar de modelo (ex.: deepseek-reasoner) sem novo deploy.
+    const modelo = Deno.env.get('DEEPSEEK_MODEL') || 'deepseek-chat';
     let respostaTexto = '';
     let ultimoErro = '';
 
-    for (const model of modelos) {
-      try {
-        const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${groqKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model,
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-            max_tokens: 150
-          })
-        });
+    try {
+      const deepseekResponse = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${deepseekKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: modelo,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.7,
+          max_tokens: 150
+        })
+      });
 
-        const aiData = await groqResponse.json();
-        if (aiData.error) {
-          ultimoErro = aiData.error.message || JSON.stringify(aiData.error);
-          console.warn(`Erro no modelo ${model}:`, ultimoErro);
-          continue;
-        }
-
+      const aiData = await deepseekResponse.json();
+      if (aiData.error) {
+        ultimoErro = aiData.error.message || JSON.stringify(aiData.error);
+        console.warn(`Erro no modelo ${modelo}:`, ultimoErro);
+      } else {
         const texto = aiData.choices?.[0]?.message?.content?.trim();
-        if (texto) {
-          respostaTexto = texto;
-          break;
-        }
-      } catch (err: any) {
-        ultimoErro = err.message || String(err);
-        console.warn(`Exceção ao chamar modelo ${model}:`, ultimoErro);
+        if (texto) respostaTexto = texto;
       }
+    } catch (err: any) {
+      ultimoErro = err.message || String(err);
+      console.warn(`Exceção ao chamar DeepSeek (${modelo}):`, ultimoErro);
     }
 
     if (!respostaTexto) {
-      throw new Error(ultimoErro ? `Erro do Groq: ${ultimoErro}` : 'Não foi possível gerar a descrição.');
+      throw new Error(ultimoErro ? `Erro do DeepSeek: ${ultimoErro}` : 'Não foi possível gerar a descrição.');
     }
 
     return new Response(JSON.stringify({ texto: respostaTexto }), {

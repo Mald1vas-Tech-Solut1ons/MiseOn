@@ -4279,6 +4279,52 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'após vincular a conta da loja': 'after linking the store account',
   'Leia guias técnicos sobre CMV, operação, estoque e tecnologia. Exemplos demonstrativos são identificados como tal.':
     'Read technical guides on food cost, operations, inventory and technology. Demonstration examples are clearly identified.',
+
+  // Cardápio admin — campos do produto e das personalizações (adicionais)
+  'Qtd em': 'Qty in',
+  'Sem baixa de estoque — toque para vincular': 'No stock deduction — tap to link',
+  'Sem quantidade, o sistema assume 1 por unidade do pedido ao baixar o estoque.':
+    'Without a quantity, the system assumes 1 per ordered unit when deducting stock.',
+  'Remover vínculo': 'Remove link',
+  'Nome do grupo': 'Group name',
+  '0 = o cliente pode pular este grupo. 1 ou mais = obrigatório escolher.':
+    '0 = the customer can skip this group. 1 or more = required to choose.',
+  'Quantas opções deste grupo o cliente pode marcar ao mesmo tempo. 1 = só uma (vira botão único); mais que 1 = várias ao mesmo tempo.':
+    'How many options in this group the customer can pick at once. 1 = only one (becomes a single choice); more than 1 = several at once.',
+  'Mín.': 'Min.',
+  'Máx.': 'Max.',
+  'Como o cliente vê:': 'What the customer sees:',
+  'obrigatório': 'required',
+  'opcional': 'optional',
+  'escolha 1': 'choose 1',
+  '— o cliente só marca uma destas opções por vez. Para permitir várias juntas, aumente o Máx.':
+    'The customer can only pick one of these at a time. To allow several together, increase Max.',
+  'Nome da opção · quanto soma no preço ao ser escolhida · (opcional) qual insumo baixa do estoque':
+    'Option name · how much it adds to the price when chosen · (optional) which ingredient it deducts from stock',
+  'Preço por Kg': 'Price per Kg',
+  'Preço de venda': 'Sale price',
+  'Preço "De:" (opcional — mostra risco de promoção)': 'Original "From:" price (optional — shows a strikethrough promo)',
+  'Abrir exatamente como o cliente vê este produto no cardápio': 'Open exactly as the customer sees this product on the menu',
+  'Ver como o cliente vê': 'View as the customer sees it',
+  'Pré-visualização — é assim que o cliente vê este produto. Nada aqui é salvo.':
+    'Preview — this is how the customer sees this product. Nothing here is saved.',
+
+  // Editor de imagem — filtros e dicas de foto
+  'Natural': 'Natural',
+  'Vívido': 'Vivid',
+  'Suave': 'Soft',
+  'Preto e branco': 'Black and white',
+  'Brilho': 'Brightness',
+  'Contraste': 'Contrast',
+  'Saturação': 'Saturation',
+  'Dicas': 'Tips',
+  'Dicas de foto': 'Photo tips',
+  'Dicas para uma foto que vende': 'Tips for a photo that sells',
+  'Luz natural perto de uma janela fica melhor que luz amarela de teto.': 'Natural light near a window looks better than yellow ceiling light.',
+  'Deixe o prato ocupar o quadro inteiro — evite sobrar fundo vazio.': 'Let the dish fill the frame — avoid empty background space.',
+  'Ângulo de 45° mostra volume; direto de cima funciona bem para pratos únicos.': 'A 45° angle shows volume; straight from above works well for single-bowl dishes.',
+  'Fundo liso e sem bagunça deixa o prato em destaque.': 'A plain, clutter-free background makes the dish stand out.',
+  'Evite flash direto — ele cria brilho duro e sombra dura no prato.': 'Avoid direct flash — it creates harsh glare and hard shadows on the dish.',
 };
 
 function escaparRegex(str: string) {

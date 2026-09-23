@@ -13,6 +13,22 @@ import { HorizontalScrollContainer } from '../../components/ui';
 import NutricaoDoPrato from '../../components/admin/NutricaoDoPrato';
 import { CONFIG_NUTRICAO_PADRAO, type ConfigNutricaoPrato } from '../../lib/nutricao';
 import PainelNutricaoCardapio, { type CoberturaProduto } from '../../components/admin/PainelNutricaoCardapio';
+import SeletorInsumo from '../../components/producao/SeletorInsumo';
+import { CurrencyInput } from '../../components/ui/CurrencyInput';
+import { ModalOpcoes } from '../../components/pdv/ModalOpcoes';
+
+/** Input de dinheiro com prefixo "R$" fixo e máscara de centavos (vírgula). */
+function CampoPreco({ value, onChange, placeholder, className = '', autoFocus }: {
+  value: string; onChange: (v: string) => void; placeholder?: string; className?: string; autoFocus?: boolean;
+}) {
+  return (
+    <div className={`flex items-center gap-1 rounded-xl border pl-2.5 dark:border-gray-700 dark:bg-gray-800 ${className}`}>
+      <span className="shrink-0 text-xs font-bold text-gray-400">R$</span>
+      <CurrencyInput value={value} onChange={onChange} placeholder={placeholder} autoFocus={autoFocus}
+        className="min-w-0 flex-1 bg-transparent py-2.5 pr-2.5 text-sm outline-none dark:text-gray-100" />
+    </div>
+  );
+}
 
 type Tab = 'produtos' | 'categorias';
 
@@ -327,6 +343,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
   const [salvando, setSalvando] = useState(false);
   const [gerandoIA, setGerandoIA] = useState(false);
   const [erro, setErro] = useState('');
+  const [mostrarPreview, setMostrarPreview] = useState(false);
   // Como o prato é servido (porções, cocção, revenda) — produtos_nutricao_config.
   const [nutriConfig, setNutriConfig] = useState<ConfigNutricaoPrato>(CONFIG_NUTRICAO_PADRAO);
 
@@ -524,12 +541,55 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
     setSalvando(false);
   };
 
+  // Monta um Produto temporário a partir do formulário — nada gravado — só
+  // para alimentar o MESMO componente que o cliente usa no cardápio real.
+  // WYSIWYG de verdade: se mudar o ModalOpcoes do cliente, o preview muda junto.
+  const produtoPreview: Produto = useMemo(() => ({
+    id: produto?.id ?? 'preview',
+    nome: nome.trim() || tDynamic('Novo produto'),
+    descricao: descricao || undefined,
+    preco: precoNum,
+    preco_original: precoOriginal.trim() ? Number(precoOriginal) : undefined,
+    imagem_url: galeria[0],
+    galeria,
+    is_combo: isCombo,
+    destaque,
+    disponivel: true,
+    controla_estoque: controlaEstoque,
+    vendidos: 0,
+    tipo_venda: tipoVenda,
+    preco_por_quilo: tipoVenda === 'POR_PESO' ? Number(precoPorQuilo || 0) : undefined,
+    grupos_opcoes: grupos.filter((g) => g.nome.trim()).map((g) => ({
+      id: g._key,
+      produto_id: produto?.id ?? 'preview',
+      nome: g.nome.trim(),
+      min_escolhas: g.min_escolhas,
+      max_escolhas: g.max_escolhas,
+      opcoes: g.opcoes.filter((o) => o.nome.trim()).map((o) => ({
+        id: o._key,
+        grupo_id: g._key,
+        nome: o.nome.trim(),
+        preco_adicional: Number(o.preco_adicional) || 0,
+        disponivel: o.disponivel,
+        insumo_id: o.insumo_id,
+        quantidade_insumo: o.quantidade_insumo,
+      })),
+    })),
+  }), [produto?.id, nome, descricao, precoNum, precoOriginal, galeria, isCombo, destaque, controlaEstoque, tipoVenda, precoPorQuilo, grupos, tDynamic]);
+
   return (
     <div className="fade fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={onClose}>
       <div className="sheet max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white dark:bg-gray-900 dark:border-gray-800 p-4 dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <h3 className="text-lg font-bold dark:text-gray-100">{produto ? 'Editar produto' : 'Novo produto'}</h3>
-          <button type="button" onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
+          <div className="flex items-center gap-1">
+            <button type="button" onClick={() => setMostrarPreview(true)} disabled={!nome.trim() || !preco}
+              title={tDynamic('Abrir exatamente como o cliente vê este produto no cardápio')}
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+              <Eye size={14} /> {tDynamic('Ver como o cliente vê')}
+            </button>
+            <button type="button" onClick={onClose} className="dark:text-gray-300"><X size={20} /></button>
+          </div>
         </div>
 
         <div className="mt-3 space-y-2">
@@ -565,37 +625,37 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
 
           <div className="grid grid-cols-2 gap-2">
             {tipoVenda === 'POR_PESO' ? (
-              <input
-                value={precoPorQuilo}
-                onChange={(e) => {
-                  setPrecoPorQuilo(e.target.value);
-                  setPreco(e.target.value); // 1kg reference
-                }}
-                type="number"
-                step="0.01"
-                placeholder="Preço por Kg (R$/kg)"
-                className="rounded-xl border border-emerald-400 bg-emerald-50/30 p-2.5 text-sm font-semibold text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
-              />
+              <label className="text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                {tDynamic('Preço por Kg')}
+                <CampoPreco
+                  value={precoPorQuilo}
+                  onChange={(v) => { setPrecoPorQuilo(v); setPreco(v); }}
+                  placeholder="0,00 /kg"
+                  className="mt-0.5 border-emerald-400 bg-emerald-50/30 font-semibold text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
+                />
+              </label>
             ) : (
-              <input value={preco} onChange={(e) => setPreco(e.target.value)} type="number" placeholder="Preço R$" className="rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+              <label className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                {tDynamic('Preço de venda')}
+                <CampoPreco value={preco} onChange={setPreco} placeholder="0,00" className="mt-0.5" />
+              </label>
             )}
-            <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)} className="rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-              <option value="">Sem categoria</option>
-              {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-            </select>
+            <label className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+              {tDynamic('Categoria')}
+              <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)} className="mt-0.5 w-full rounded-xl border p-2.5 text-sm font-normal normal-case dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                <option value="">Sem categoria</option>
+                {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              </select>
+            </label>
           </div>
           {/* Promoção "De/Por": o preço riscado da vitrine. Até 20260908 os
               únicos valores possíveis estavam fixados por nome no bundle do
               cardápio público — agora é campo da loja. */}
           <div className="pt-1">
-            <input
-              value={precoOriginal}
-              onChange={(e) => setPrecoOriginal(e.target.value)}
-              type="number"
-              step="0.01"
-              placeholder='Preço "De:" para promoção riscada (opcional)'
-              className="w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-            />
+            <label className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+              {tDynamic('Preço "De:" (opcional — mostra risco de promoção)')}
+              <CampoPreco value={precoOriginal} onChange={setPrecoOriginal} placeholder="0,00" className="mt-0.5" />
+            </label>
             {precoOriginal !== '' && Number(precoOriginal) <= Number(preco || 0) && (
               <p className="mt-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
                 {tDynamic('O preço "De" precisa ser maior que o preço de venda para a vitrine riscar.')}
@@ -747,17 +807,23 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
         {controlaEstoque && (
           <div className="mt-4 rounded-2xl border p-3 dark:border-gray-800">
             <p className="mb-2 text-sm font-semibold dark:text-gray-200">{tDynamic('Ficha técnica (consumo de insumos)')}</p>
-            {ficha.map((f, idx) => (
-              <div key={idx} className="mb-1.5 flex items-center gap-1.5">
-                <select value={f.insumo_id} onChange={(e) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, insumo_id: e.target.value } : x))}
-                  className="flex-1 rounded-lg border p-1.5 text-xs">
-                  {insumos.map((i) => <option key={i.id} value={i.id}>{i.nome} ({i.unidade_medida})</option>)}
-                </select>
-                <input value={f.quantidade_consumida} onChange={(e) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, quantidade_consumida: e.target.value } : x))}
-                  type="number" placeholder="Qtd" className="w-20 rounded-lg border p-1.5 text-xs" />
-                <button type="button" onClick={() => setFicha((arr) => arr.filter((_, i) => i !== idx))} className="text-red-400"><X size={14} /></button>
-              </div>
-            ))}
+            {ficha.map((f, idx) => {
+              const insumoDaLinha = insumos.find((i) => i.id === f.insumo_id);
+              return (
+                <div key={idx} className="mb-1.5 flex items-center gap-1.5">
+                  <SeletorInsumo
+                    insumos={insumos}
+                    valor={f.insumo_id}
+                    jaUsados={ficha.map((x) => x.insumo_id)}
+                    onChange={(insumoId) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, insumo_id: insumoId } : x))}
+                  />
+                  <input value={f.quantidade_consumida} onChange={(e) => setFicha((arr) => arr.map((x, i) => i === idx ? { ...x, quantidade_consumida: e.target.value } : x))}
+                    type="number" placeholder={insumoDaLinha ? tDynamic('Qtd em') + ' ' + insumoDaLinha.unidade_medida : 'Qtd'}
+                    className="w-24 rounded-lg border p-1.5 text-xs" />
+                  <button type="button" onClick={() => setFicha((arr) => arr.filter((_, i) => i !== idx))} className="text-red-400"><X size={14} /></button>
+                </div>
+              );
+            })}
             <button type="button" onClick={addInsumoFicha} disabled={!insumos.length} className="mt-1 flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)] disabled:opacity-40">
               <Plus size={12} /> Adicionar insumo
             </button>
@@ -813,42 +879,81 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
               + {tDynamic('Ponto da carne obrigatório')}
             </button>
           </div>
-          {grupos.map((g) => (
+          {grupos.map((g) => {
+            const opcoesValidasDoGrupo = g.opcoes.filter((o) => o.nome.trim()).length;
+            return (
             <div key={g._key} className="mb-2 rounded-xl bg-gray-50 p-2 dark:bg-gray-800">
-              <div className="flex items-center gap-1.5">
-                <input value={g.nome} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key ? { ...x, nome: e.target.value } : x))}
-                  placeholder="Nome do grupo (ex: Extras)" className="flex-1 rounded-lg border p-1.5 text-xs" />
-                <input value={g.min_escolhas} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key ? { ...x, min_escolhas: Number(e.target.value) } : x))}
-                  type="number" placeholder="Mín" className="w-14 rounded-lg border p-1.5 text-xs" />
-                <input value={g.max_escolhas} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key ? { ...x, max_escolhas: Number(e.target.value) } : x))}
-                  type="number" placeholder="Máx" className="w-14 rounded-lg border p-1.5 text-xs" />
-                <button type="button" onClick={() => setGrupos((arr) => arr.filter((x) => x._key !== g._key))} className="text-red-400"><Trash2 size={14} /></button>
+              <div className="flex items-end gap-1.5">
+                <label className="flex-1 text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                  {tDynamic('Nome do grupo')}
+                  <input value={g.nome} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key ? { ...x, nome: e.target.value } : x))}
+                    placeholder="Ex.: Extras" className="mt-0.5 w-full rounded-lg border p-1.5 text-xs font-normal normal-case" />
+                </label>
+                <label className="w-16 text-[10px] font-bold uppercase tracking-wide text-gray-400" title={tDynamic('0 = o cliente pode pular este grupo. 1 ou mais = obrigatório escolher.')}>
+                  {tDynamic('Mín.')}
+                  <input value={g.min_escolhas} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key ? { ...x, min_escolhas: Number(e.target.value) } : x))}
+                    type="number" min={0} className="mt-0.5 w-full rounded-lg border p-1.5 text-xs font-normal" />
+                </label>
+                <label className="w-16 text-[10px] font-bold uppercase tracking-wide text-gray-400" title={tDynamic('Quantas opções deste grupo o cliente pode marcar ao mesmo tempo. 1 = só uma (vira botão único); mais que 1 = várias ao mesmo tempo.')}>
+                  {tDynamic('Máx.')}
+                  <input value={g.max_escolhas} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key ? { ...x, max_escolhas: Number(e.target.value) } : x))}
+                    type="number" min={1} className="mt-0.5 w-full rounded-lg border p-1.5 text-xs font-normal" />
+                </label>
+                <button type="button" onClick={() => setGrupos((arr) => arr.filter((x) => x._key !== g._key))} className="mb-1.5 text-red-400"><Trash2 size={14} /></button>
               </div>
+              <p className="mt-1 pl-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                {tDynamic('Como o cliente vê:')}{' '}
+                <b className="text-gray-700 dark:text-gray-300">
+                  {g.min_escolhas > 0 ? tDynamic('obrigatório') : tDynamic('opcional')}
+                  {' · '}
+                  {g.max_escolhas === 1 ? tDynamic('escolha 1') : `${tDynamic('até')} ${g.max_escolhas}`}
+                </b>
+                {opcoesValidasDoGrupo > 1 && g.max_escolhas === 1 && (
+                  <span className="ml-1 text-amber-600 dark:text-amber-400">
+                    {tDynamic('— o cliente só marca uma destas opções por vez. Para permitir várias juntas, aumente o Máx.')}
+                  </span>
+                )}
+              </p>
               <div className="mt-1.5 space-y-1 pl-2">
+                {g.opcoes.length > 0 && (
+                  <p className="pl-1 text-[10px] font-medium text-gray-400">
+                    {tDynamic('Nome da opção · quanto soma no preço ao ser escolhida · (opcional) qual insumo baixa do estoque')}
+                  </p>
+                )}
                 {g.opcoes.map((o) => (
                   <div key={o._key} className="flex flex-col gap-1.5 border-b border-gray-200 dark:border-gray-800 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
                     <div className="flex items-center gap-1.5">
                       <input value={o.nome} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key
                         ? { ...x, opcoes: x.opcoes.map((y) => y._key === o._key ? { ...y, nome: e.target.value } : y) } : x))}
                         placeholder="Opção (ex: Cebola roxa)" className="flex-1 rounded-lg border p-1.5 text-xs" />
-                      <input value={o.preco_adicional} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key
-                        ? { ...x, opcoes: x.opcoes.map((y) => y._key === o._key ? { ...y, preco_adicional: Number(e.target.value) } : y) } : x))}
-                        type="number" placeholder="+R$" className="w-16 rounded-lg border p-1.5 text-xs" />
+                      <CampoPreco value={String(o.preco_adicional)} onChange={(v) => setGrupos((arr) => arr.map((x) => x._key === g._key
+                        ? { ...x, opcoes: x.opcoes.map((y) => y._key === o._key ? { ...y, preco_adicional: Number(v) || 0 } : y) } : x))}
+                        placeholder="0,00" className="w-28 shrink-0 text-xs" />
                       <button type="button" onClick={() => setGrupos((arr) => arr.map((x) => x._key === g._key
                         ? { ...x, opcoes: x.opcoes.filter((y) => y._key !== o._key) } : x))} className="text-red-400"><X size={13} /></button>
                     </div>
                     {/* Vínculo de Estoque do Adicional */}
-                    <div className="flex items-center gap-1.5 pl-2">
-                      <select value={o.insumo_id || ''} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key
-                        ? { ...x, opcoes: x.opcoes.map((y) => y._key === o._key ? { ...y, insumo_id: e.target.value || null } : y) } : x))}
-                        className="flex-1 rounded-lg border border-dashed border-gray-300 p-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        <option value="">{tDynamic('Sem baixa de estoque')}</option>
-                        {insumos.map((i) => <option key={i.id} value={i.id}>Baixar: {i.nome} ({i.unidade_medida})</option>)}
-                      </select>
-                      {o.insumo_id && (
-                        <input value={o.quantidade_insumo || ''} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key
-                          ? { ...x, opcoes: x.opcoes.map((y) => y._key === o._key ? { ...y, quantidade_insumo: Number(e.target.value) } : y) } : x))}
-                          type="number" placeholder="Qtd Consumida" className="w-28 rounded-lg border border-dashed border-gray-300 p-1.5 text-xs" />
+                    <div className="flex flex-col gap-1 pl-2">
+                      <div className="flex items-center gap-1.5">
+                        <SeletorInsumo
+                          insumos={insumos}
+                          valor={o.insumo_id || ''}
+                          permiteLimpar
+                          placeholder={tDynamic('Sem baixa de estoque — toque para vincular')}
+                          onChange={(insumoId) => setGrupos((arr) => arr.map((x) => x._key === g._key
+                            ? { ...x, opcoes: x.opcoes.map((y) => y._key === o._key ? { ...y, insumo_id: insumoId || null, quantidade_insumo: insumoId ? y.quantidade_insumo : null } : y) } : x))}
+                        />
+                        {o.insumo_id && (
+                          <input value={o.quantidade_insumo || ''} onChange={(e) => setGrupos((arr) => arr.map((x) => x._key === g._key
+                            ? { ...x, opcoes: x.opcoes.map((y) => y._key === o._key ? { ...y, quantidade_insumo: Number(e.target.value) } : y) } : x))}
+                            type="number" placeholder={tDynamic('Qtd em') + ' ' + (insumos.find((i) => i.id === o.insumo_id)?.unidade_medida ?? '')}
+                            className="w-28 rounded-lg border border-dashed border-gray-300 p-1.5 text-xs" />
+                        )}
+                      </div>
+                      {o.insumo_id && !o.quantidade_insumo && (
+                        <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                          {tDynamic('Sem quantidade, o sistema assume 1 por unidade do pedido ao baixar o estoque.')}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -858,7 +963,7 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
                 </button>
               </div>
             </div>
-          ))}
+          );})}
           <button type="button" onClick={addGrupo} className="min-h-11 flex items-center gap-1 text-xs font-medium text-[var(--cor-primaria)]">
             <Plus size={12} /> {tDynamic('Novo grupo de personalização')}
           </button>
@@ -871,6 +976,17 @@ function ProdutoModal({ lojaId, produto, categorias, insumos, rateioFixo, lojaIn
           <Save size={16} /> {salvando ? 'Salvando…' : 'Salvar produto'}
         </button>
       </div>
+
+      {mostrarPreview && (
+        <>
+          <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex justify-center">
+            <span className="mt-3 flex items-center gap-1.5 rounded-full bg-gray-900 px-4 py-1.5 text-xs font-black text-white shadow-lg dark:bg-white dark:text-gray-900">
+              <Eye size={13} /> {tDynamic('Pré-visualização — é assim que o cliente vê este produto. Nada aqui é salvo.')}
+            </span>
+          </div>
+          <ModalOpcoes produto={produtoPreview} onFechar={() => setMostrarPreview(false)} onConfirmar={() => setMostrarPreview(false)} />
+        </>
+      )}
     </div>
   );
 }

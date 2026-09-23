@@ -22,9 +22,16 @@ interface Props {
   onChange: (insumoId: string) => void;
   /** Ids já usados em outras linhas da ficha — some da lista para não duplicar. */
   jaUsados?: string[];
+  /** Texto do botão quando nada está selecionado. Padrão: "Buscar matéria-prima…". */
+  placeholder?: string;
+  /**
+   * Mostra um "×" para voltar a nenhum selecionado — usado quando o vínculo é
+   * opcional (ex.: adicional que não baixa estoque de nenhum insumo).
+   */
+  permiteLimpar?: boolean;
 }
 
-export default function SeletorInsumo({ insumos, valor, onChange, jaUsados = [] }: Props) {
+export default function SeletorInsumo({ insumos, valor, onChange, jaUsados = [], placeholder, permiteLimpar = false }: Props) {
   const { tDynamic } = useI18n();
   const [aberto, setAberto] = useState(false);
   const [busca, setBusca] = useState('');
@@ -72,22 +79,30 @@ export default function SeletorInsumo({ insumos, valor, onChange, jaUsados = [] 
 
   return (
     <div ref={containerRef} className="relative min-w-0 flex-1">
-      <button
-        type="button"
-        onClick={() => { setAberto(a => !a); setBusca(''); }}
-        className={`flex w-full items-center justify-between gap-2 rounded-lg border p-2 text-left text-sm transition-colors ${
+      <div className={`flex w-full items-center gap-1 rounded-lg border p-2 text-left text-sm transition-colors ${
           selecionado
             ? 'border-gray-200 bg-transparent dark:border-gray-800'
             : 'border-orange-300 bg-orange-50/50 dark:border-orange-900/50 dark:bg-orange-950/20'
         }`}
       >
-        <span className="min-w-0 truncate font-semibold dark:text-gray-100">
-          {selecionado
-            ? <>{selecionado.nome} <span className="font-medium text-gray-400">· {tDynamic('estoque em')} {selecionado.unidade_medida}</span></>
-            : <span className="text-gray-500">{tDynamic('Buscar matéria-prima…')}</span>}
-        </span>
-        <ChevronDown size={16} className={`shrink-0 text-gray-400 transition-transform ${aberto ? 'rotate-180' : ''}`} />
-      </button>
+        <button
+          type="button"
+          onClick={() => { setAberto(a => !a); setBusca(''); }}
+          className="flex min-w-0 flex-1 items-center justify-between gap-2"
+        >
+          <span className="min-w-0 truncate font-semibold dark:text-gray-100">
+            {selecionado
+              ? <>{selecionado.nome} <span className="font-medium text-gray-400">· {tDynamic('estoque em')} {selecionado.unidade_medida}</span></>
+              : <span className="text-gray-500">{placeholder ?? tDynamic('Buscar matéria-prima…')}</span>}
+          </span>
+          <ChevronDown size={16} className={`shrink-0 text-gray-400 transition-transform ${aberto ? 'rotate-180' : ''}`} />
+        </button>
+        {permiteLimpar && selecionado && (
+          <button type="button" onClick={() => onChange('')} title={tDynamic('Remover vínculo')} className="shrink-0 text-gray-400 hover:text-red-500">
+            <X size={14} />
+          </button>
+        )}
+      </div>
 
       {aberto && (
         <div className="absolute z-50 mt-1 max-h-80 w-full min-w-[18rem] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-950">
