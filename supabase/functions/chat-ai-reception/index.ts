@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { checkRateLimit, ipDaRequisicao } from "../_shared/rate-limit.ts";
+import { cotarEntrega, descreverRegraEntrega } from "../_shared/entrega.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -30,6 +31,20 @@ const MODELOS_GROQ = [
   "qwen/qwen3-32b",
 ].filter((m) => !!m);
 
+// Modelo que RACIOCINA antes de responder gasta o limite de tokens pensando.
+// Medido em 24/09/2026: com os Llama aposentados o chat caiu no gpt-oss-120b
+// e as respostas saíam cortadas no meio da frase (max_tokens 500 consumido
+// pelo raciocínio). Para eles: raciocínio baixo e folga no limite.
+function ajustarParaModelo(modelo: string, corpo: Record<string, unknown>): Record<string, unknown> {
+  if (/gpt-oss/i.test(modelo)) {
+    return { ...corpo, reasoning_effort: "low", max_tokens: Number(corpo.max_tokens ?? 500) + 1500 };
+  }
+  if (/qwen3/i.test(modelo)) {
+    return { ...corpo, reasoning_effort: "none" };
+  }
+  return corpo;
+}
+
 // Erro que significa "troque de modelo" em vez de "desista"
 function modeloIndisponivel(msg: string): boolean {
   const m = msg.toLowerCase();
@@ -48,11 +63,14 @@ async function chamarGroq(
     const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ ...corpo, model: modelo }),
+      body: JSON.stringify({ ...ajustarParaModelo(modelo, corpo), model: modelo }),
     });
     const data = await resp.json().catch(() => ({}));
     if (resp.ok && !data.error) {
       const texto = data.choices?.[0]?.message?.content?.trim();
+      if (data.choices?.[0]?.finish_reason === "length") {
+        console.warn(`Groq: resposta de "${modelo}" cortada pelo limite de tokens`);
+      }
       if (texto) {
         if (modelo !== MODELOS_GROQ[0]) {
           console.warn(`Groq: modelo preferido indisponível — respondido por "${modelo}"`);
@@ -189,26 +207,28 @@ serve(async (req) => {
     }
 
     // ── 6. Verifica horário ───────────────────────────────────────────────
-    let lojaAberta = false;
-    if (loja.aberto_manual !== null && loja.aberto_manual !== undefined) {
-      lojaAberta = Boolean(loja.aberto_manual);
-    } else {
-      const { data: horarios } = await db.from("horarios_funcionamento").select("*").eq("loja_id", conv.loja_id);
-      const sp   = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
-      const dia  = sp.getDay();
-      const hora = sp.getHours().toString().padStart(2, "0") + ":" + sp.getMinutes().toString().padStart(2, "0");
-      if (horarios) {
-        for (const h of horarios.filter((h: any) => h.dia_semana === dia)) {
-          if (hora >= h.abre.substring(0, 5) && hora <= h.fecha.substring(0, 5)) { lojaAberta = true; break; }
-        }
-      }
-    }
+    // A mesma regra que o pedido usa (fn_loja_aberta): o cálculo local não
+    // entendia turno que passa da meia-noite. E a IA recebe a grade de
+    // horários — sem ela, inventava ("seg a sáb, 11h às 22h", medido 24/09).
+    const [{ data: abertaSrv }, { data: grade }] = await Promise.all([
+      db.rpc("fn_loja_aberta", { p_loja_id: conv.loja_id }),
+      db.from("horarios_funcionamento").select("dia_semana, abre, fecha").eq("loja_id", conv.loja_id).order("dia_semana").order("abre"),
+    ]);
+    const lojaAberta = abertaSrv === true;
+    const DIAS = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+    const horariosTexto = grade?.length
+      ? DIAS.map((nome, d) => {
+          const turnos = grade.filter((h: any) => h.dia_semana === d)
+            .map((h: any) => `${String(h.abre).slice(0, 5)} às ${String(h.fecha).slice(0, 5)}`);
+          return `• ${nome}: ${turnos.length ? turnos.join(" e ") : "fechado"}`;
+        }).join("\n")
+      : "Horários não cadastrados: não informe horário, peça para o cliente conferir no cardápio.";
 
-    // ── 7. Busca cardápio agrupado + taxas ───────────────────────────────
-    const [{ data: cats }, { data: prods }, { data: taxas }] = await Promise.all([
+    // ── 7. Busca cardápio agrupado + regra de entrega ─────────────────────
+    const [{ data: cats }, { data: prods }, regraEntrega] = await Promise.all([
       db.from("categorias").select("id, nome, ordem").eq("loja_id", conv.loja_id).order("ordem"),
       db.from("produtos").select("id, nome, preco, disponivel, descricao, categoria_id, tipo_venda, preco_por_quilo, destaque, grupos_opcoes(nome, opcoes(nome, preco_adicional))").eq("loja_id", conv.loja_id).order("nome"),
-      db.from("taxas_entrega").select("bairro, valor").eq("loja_id", conv.loja_id).eq("ativo", true),
+      descreverRegraEntrega(db, conv.loja_id).catch(() => "A taxa de entrega é calculada no cardápio pelo endereço."),
     ]);
 
     // Monta cardápio rico e estruturado
@@ -243,11 +263,18 @@ serve(async (req) => {
       if (lines.length) cardapio = lines.join("\n");
     }
 
-    // Taxas de entrega
-    let taxasTexto = "Taxas de entrega: consulte ao informar o bairro no cardápio.";
-    if (taxas?.length) {
-      taxasTexto = "Taxas de entrega aproximadas:\n" + taxas.map((t: any) => `• ${t.bairro}: R$ ${Number(t.valor).toFixed(2)}`).join("\n");
-    }
+    // Entrega: a MESMA regra do checkout (fn_entrega_regra). Até 23/09/2026 o
+    // chat lia uma tabela de bairros que o checkout ignorava — informava um
+    // preço e o caixa cobrava outro. Se o cliente mandou CEP, cota de verdade.
+    let taxasTexto = regraEntrega;
+    // O CEP pode ter vindo algumas mensagens antes ("e que horas abrem?"):
+    // usa a mensagem mais recente do cliente que tenha CEP.
+    const comCep = [...msgs].reverse()
+      .find((m: any) => m.remetente_tipo === "CLIENTE" && /\b\d{5}-?\d{3}\b/.test(m.conteudo || ""));
+    const cotacaoTexto = comCep ? await cotacaoDaMensagem(db, conv.loja_id, comCep.conteudo) : null;
+    if (cotacaoTexto) taxasTexto += "\n\n" + cotacaoTexto;
+    taxasTexto += "\nNunca pergunte ao cliente a distância em km: quem mede é o sistema, pelo CEP e número.";
+    taxasTexto += "\nNunca invente taxa: sem CEP e número, explique a regra acima e peça o CEP. O valor final aparece no cardápio ao informar o endereço.";
 
     // ── 8. System prompt humanizado & consultivo ──────────────────────────
     const primeiroNome = (conv.cliente_nome ?? "").trim().split(/\s+/)[0] || "";
@@ -267,6 +294,9 @@ SITUAÇÃO DA LOJA AGORA:
 ${lojaAberta
   ? "🟢 ABERTA e pronta para receber pedidos!"
   : "🔴 FECHADA no momento. Avise gentilmente o horário de funcionamento e informe que o cliente pode deixar o pedido agendado no link do cardápio."}
+
+HORÁRIO DE FUNCIONAMENTO (use exatamente este; nunca invente outro):
+${horariosTexto}
 
 ━━━ CARDÁPIO OFICIAL DA LOJA ━━━
 ${cardapio}
@@ -354,3 +384,41 @@ COMO RESPONDER AS DUVIDAS E ATENDER:
     return erro(e?.message ?? "Erro interno", 500);
   }
 });
+
+/**
+ * Se a mensagem do cliente traz um CEP, cota a entrega com a regra da loja.
+ * A rua vem do CEP (ViaCEP); o número, se ele escreveu. Sem número, a cotação
+ * vale pelo centro do CEP e o texto avisa que é aproximada.
+ */
+async function cotacaoDaMensagem(db: any, lojaId: string, texto: string): Promise<string | null> {
+  const cep = texto.match(/\b(\d{5})-?(\d{3})\b/);
+  if (!cep) return null;
+  const cepLimpo = cep[1] + cep[2];
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 5000);
+    const via = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`, { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    clearTimeout(t);
+    if (!via || via.erro) return `O cliente informou o CEP ${cep[0]}, mas ele não foi encontrado. Peça para conferir.`;
+
+    const semCep = texto.replace(cep[0], " ");
+    const num = semCep.match(/(?:n[ºo°.]?\s*|n[uú]mero\s*|,\s*)(\d{1,6})\b/i)?.[1] ?? null;
+    const c = await cotarEntrega(db, lojaId, {
+      cep: cepLimpo, logradouro: via.logradouro || via.bairro || via.localidade,
+      numero: num, sem_numero: !num, bairro: via.bairro, cidade: via.localidade, uf: via.uf,
+    }, 0);
+
+    const onde = `${via.logradouro || "CEP " + cep[0]}${num ? ", " + num : ""} (${via.bairro || via.localidade})`;
+    const brl = (n: number) => `R$ ${Number(n).toFixed(2).replace(".", ",")}`;
+    const kmTxt = c.distancia_km != null ? `${String(c.distancia_km).replace(".", ",")} km${c.metodo === "ROTA" ? " pela rua" : " (estimado)"}` : "";
+    const aprox = num ? "" : " Valor APROXIMADO pelo centro do CEP: peça o número para confirmar.";
+    if (c.atende) {
+      return `COTAÇÃO REAL para ${onde}: ${kmTxt}, taxa ${c.taxa ? brl(c.taxa) : "grátis"}.${aprox} Use exatamente este valor.`;
+    }
+    return `COTAÇÃO REAL para ${onde}: ${c.mensagem ?? "a loja não entrega neste endereço"}. Ofereça a retirada no balcão.`;
+  } catch (e) {
+    console.error("cotacaoDaMensagem:", (e as Error).message);
+    return null;
+  }
+}
