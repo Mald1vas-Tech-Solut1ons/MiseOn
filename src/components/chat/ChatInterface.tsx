@@ -155,10 +155,12 @@ export default function ChatInterface({ loja, user }: ChatInterfaceProps) {
           className="flex-1 overflow-y-auto p-5 space-y-4 relative custom-scrollbar bg-[#E5DDD5] dark:bg-[#0B141A]"
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}
         >
-          {/* Default Welcome Message */}
+          {/* Aviso honesto. Até 23/09/2026 dizia "criptografia de ponta a ponta
+              — ninguém fora desta conversa pode lê-las", o que é falso: a
+              conversa fica gravada no banco e passa por IA. */}
           <div className="flex justify-center mb-6">
             <span className="bg-[#FEEFCA] dark:bg-[#1E2A30] text-[#54656F] dark:text-[#8696A0] text-xs opacity-95 font-medium px-4 py-1.5 rounded-xl shadow-sm text-center max-w-[85%]">
-              {tDynamic('As mensagens são protegidas com criptografia de ponta a ponta. Ninguém fora desta conversa pode lê-las.')}
+              {tDynamic('Esta conversa fica registrada para a loja atender você e pode ser respondida por um assistente automático. Não envie senhas nem dados de cartão.')}
             </span>
           </div>
 

@@ -1764,7 +1764,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Ao alterar o e-mail, enviaremos um código OTP de 6 dígitos para confirmação por segurança.': 'When you change the email we send a 6-digit one-time code to confirm it, for security.',
   'App MiseOn na Meta (vale para todos os tenants)': 'MiseOn app on Meta (applies to all tenants)',
   'Aprenda na prática! O assistente conduz você pelas telas de': 'Learn by doing! The assistant walks you through the screens for',
-  'As mensagens são protegidas com criptografia de ponta a ponta. Ninguém fora desta conversa pode lê-las.': 'Messages are protected with end-to-end encryption. Nobody outside this conversation can read them.',
+  'Esta conversa fica registrada para a loja atender você e pode ser respondida por um assistente automático. Não envie senhas nem dados de cartão.': 'This conversation is recorded so the store can help you and may be answered by an automated assistant. Do not send passwords or card details.',
   'Assinatura mensal flexível com cancelamento online.': 'Flexible monthly subscription, cancel online.',
   'Atendimento automático com IA': 'Automated service with AI',
   'Atendimento automático com IA direto no WhatsApp da sua loja.': 'Automated AI service right on your store WhatsApp.',
