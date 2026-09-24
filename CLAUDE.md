@@ -182,6 +182,21 @@ e nada casa — em silêncio. Use classes POSIX: `[0-9]`, `[[:space:]]`.
 - Pedido do iFood carrega o preço COM markup do canal — não reprecifique.
 - `FINALIZADO` é terminal: não sai nem re-entra.
 
+**Entrega** (24/09/2026)
+- Uma regra só: `fn_entrega_regra(loja, distancia_km, subtotal)`. Pedido,
+  chat, vitrine e simulador usam ela. O espelho no navegador
+  (`aplicarRegraEntrega`, `src/lib/geo.ts`) serve só para simular e tem os
+  mesmos casos de `supabase/tests/entrega_regra_e_cotacao.sql`: mudou um,
+  muda o outro.
+- Modos: `HIBRIDO` = faixas de distância (padrão), `FIXA` = taxa única,
+  `DISTANCIA` = saída + R$/km. Faixas vazias ou loja sem lat/lng = **sem
+  entrega**, nunca grátis.
+- A distância é medida no servidor (`entrega-cotar`: OpenStreetMap + rota
+  OSRM, cache em `geocode_cache`) e vira uma cotação. O pedido de entrega
+  **exige** `cotacao_id` do mesmo CEP e número; coordenada do navegador não
+  vale nada.
+- Não existe mais taxa por bairro.
+
 **Senha ≠ número do pedido.** Colunas separadas. Senha zera às 4h e delivery
 não tem. Nunca grave o `displayId` do iFood em `numero`.
 
