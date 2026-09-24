@@ -243,3 +243,48 @@ export async function calcularEntrega(
     raioConsideradoKm: obterRaioMaximo(loja, faixasDistancia),
   };
 }
+
+export type ResumoEntrega =
+  | { tipo: 'INDISPONIVEL' }
+  | { tipo: 'GRATIS' }
+  | { tipo: 'A_PARTIR_DE'; valor: number };
+
+/**
+ * O que a vitrine anuncia sobre a entrega, derivado da MESMA regra que cobra
+ * (`calcularEntrega` aqui e `fn_taxa_entrega_calculada` no servidor).
+ *
+ * Até 23/09/2026 o selo lia `entrega_taxa_padrao`, campo que o cálculo nem
+ * usa: toda loja com ele zerado anunciava "Entrega grátis" enquanto o checkout
+ * cobrava base + km. Promessa no topo do cardápio que o caixa não cumpre.
+ *
+ * - Sem localização da loja o servidor recusa entrega: não se anuncia nada.
+ * - Faixas: o menor valor entre elas, medido no início de cada faixa.
+ * - Por km: o valor base (distância zero é o piso).
+ */
+export function resumoEntrega(
+  loja: ConfigEntrega,
+  faixasDistancia: FaixaEntregaCalculo[] = [],
+): ResumoEntrega {
+  if (loja.lat == null || loja.lng == null) return { tipo: 'INDISPONIVEL' };
+
+  const base = Number(loja.entrega_taxa_base ?? 0);
+  const porKm = Number(loja.entrega_taxa_km ?? 0);
+  const faixas = faixasDistancia
+    .filter((f) => f.ativo !== false && Number(f.km_ate) > 0)
+    .sort((a, b) => Number(a.km_ate) - Number(b.km_ate));
+
+  let minimo: number;
+  if (loja.entrega_modo === 'HIBRIDO' && faixas.length > 0) {
+    minimo = Math.min(...faixas.map((f, i) => {
+      const inicioKm = i === 0 ? 0 : Number(faixas[i - 1].km_ate);
+      return f.taxa_fixa != null
+        ? Number(f.taxa_fixa)
+        : base + Number(f.taxa_por_km ?? porKm) * inicioKm;
+    }));
+  } else {
+    minimo = base;
+  }
+
+  minimo = r2(minimo);
+  return minimo > 0 ? { tipo: 'A_PARTIR_DE', valor: minimo } : { tipo: 'GRATIS' };
+}

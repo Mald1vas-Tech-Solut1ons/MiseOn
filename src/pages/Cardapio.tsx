@@ -6,6 +6,7 @@ import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, Histor
 import { urlDaRede, arrobaDaRede, type RedeSocial } from '../lib/redesSociais';
 import { supabase } from '../lib/supabase';
 import { FotoProduto, FotoIlustrativaContext } from '../lib/fotoProduto';
+import { resumoEntrega } from '../lib/geo';
 import { obterFotoProduto } from '../lib/fotoProdutoUtils';
 import { maskCartaoCredito, maskValidadeCartao, maskCPF, validarCPF } from '../lib/mascaras';
 import ModalAuthCliente from '../components/ModalAuthCliente';
@@ -382,6 +383,9 @@ export default function Cardapio() {
 
   if (!loja) return <CardapioSkeleton />;
 
+  // O selo de entrega vem da mesma regra que cobra no checkout (geo.ts).
+  const entregaResumo = resumoEntrega(loja, faixasDistancia);
+
   const iniciais = (loja.nome || '').trim() ? (loja.nome || '').trim()[0].toUpperCase() : '?';
 
   return (
@@ -497,12 +501,12 @@ export default function Cardapio() {
                       <Clock size={11} /> ~{loja.meta_preparo_min} min
                     </span>
                   )}
-                  {loja.aceita_entrega && (
+                  {loja.aceita_entrega && entregaResumo.tipo !== 'INDISPONIVEL' && (
                     <span className="flex items-center gap-1 rounded-full px-2 py-0.5 backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.92)', color: '#111827' }}>
                       <Bike size={11} />
-                      {Number(loja.entrega_taxa_padrao ?? 0) > 0
-                        ? `${tDynamic('Entrega')} ${fmt(Number(loja.entrega_taxa_padrao))}`
-                        : tDynamic('Entrega grátis')}
+                      {entregaResumo.tipo === 'GRATIS'
+                        ? tDynamic('Entrega grátis')
+                        : `${tDynamic('Entrega a partir de')} ${fmt(entregaResumo.valor)}`}
                     </span>
                   )}
                   {loja.pedido_minimo > 0 && (
@@ -1159,11 +1163,11 @@ export default function Cardapio() {
               <ul className="space-y-1 pt-1 text-xs" style={{ color: 'var(--cor-texto-suave)' }}>
                 {loja.pedido_minimo > 0 && <li>{tDynamic('Pedido mínimo')} {fmt(loja.pedido_minimo)}</li>}
                 {(loja.meta_preparo_min ?? 0) > 0 && <li>{tDynamic('Preparo em cerca de')} {loja.meta_preparo_min} min</li>}
-                {loja.aceita_entrega && (
+                {loja.aceita_entrega && entregaResumo.tipo !== 'INDISPONIVEL' && (
                   <li>
-                    {Number(loja.entrega_taxa_padrao ?? 0) > 0
-                      ? `${tDynamic('Entrega')} ${fmt(Number(loja.entrega_taxa_padrao))}`
-                      : tDynamic('Entrega grátis')}
+                    {entregaResumo.tipo === 'GRATIS'
+                      ? tDynamic('Entrega grátis')
+                      : `${tDynamic('Entrega a partir de')} ${fmt(entregaResumo.valor)}`}
                     {Number(loja.entrega_raio_km ?? 0) > 0 && ` · ${tDynamic('até')} ${loja.entrega_raio_km} km`}
                   </li>
                 )}

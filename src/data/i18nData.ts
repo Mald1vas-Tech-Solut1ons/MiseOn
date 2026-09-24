@@ -3169,6 +3169,7 @@ const DADOS_PALAVRAS_SUBSTITUICAO: Record<string, string> = {
   'Continuar comprando': 'Continue Shopping',
   'Pedido mínimo': 'Minimum order',
   'Taxa de entrega': 'Delivery Fee',
+  'Entrega a partir de': 'Delivery from',
   'Entrega grátis': 'Free Delivery',
   'Retirada no local': 'Store Pickup',
   'Consumo no local': 'Dine-In',

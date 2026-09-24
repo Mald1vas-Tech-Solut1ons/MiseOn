@@ -23,6 +23,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { resumoEntrega, type FaixaEntregaCalculo } from '../lib/geo';
 import {
   MapPin, Clock, ShoppingBag, MessageCircle, Instagram, Facebook, Music2,
   Bike, Wallet, ChevronRight,
@@ -44,6 +45,7 @@ export default function PerfilLoja() {
   const { tDynamic } = useI18n();
   const [loja, setLoja] = useState<Loja | null>(null);
   const [horarios, setHorarios] = useState<HorarioFuncionamento[]>([]);
+  const [faixas, setFaixas] = useState<FaixaEntregaCalculo[]>([]);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
@@ -52,9 +54,12 @@ export default function PerfilLoja() {
       const { data: l } = await supabase.from('lojas_publicas').select('*').eq('slug', slug).single();
       if (l) {
         setLoja(l as Loja);
-        const { data: h } = await supabase
-          .from('horarios_funcionamento').select('*').eq('loja_id', (l as Loja).id).order('dia_semana');
+        const [{ data: h }, { data: f }] = await Promise.all([
+          supabase.from('horarios_funcionamento').select('*').eq('loja_id', (l as Loja).id).order('dia_semana'),
+          supabase.from('faixas_entrega').select('*').eq('loja_id', (l as Loja).id).eq('ativo', true),
+        ]);
         setHorarios((h as HorarioFuncionamento[]) ?? []);
+        setFaixas((f as FaixaEntregaCalculo[]) ?? []);
       }
       setCarregando(false);
     })();
@@ -107,6 +112,7 @@ export default function PerfilLoja() {
   }
 
   const iniciais = (loja.nome || '?').trim()[0].toUpperCase();
+  const entregaResumo = resumoEntrega(loja, faixas);
   const whatsappDigitos = String(loja.whatsapp ?? '').replace(/\D/g, '');
 
   const schema = {
@@ -274,12 +280,13 @@ export default function PerfilLoja() {
           <ul className="mt-3 space-y-1.5 text-sm" style={{ color: 'var(--cor-texto-suave)' }}>
             {loja.pedido_minimo > 0 && <li>{tDynamic('Pedido mínimo')} {fmt(loja.pedido_minimo)}</li>}
             {(loja.meta_preparo_min ?? 0) > 0 && <li>{tDynamic('Preparo em cerca de')} {loja.meta_preparo_min} min</li>}
-            {loja.aceita_entrega && (
+            {loja.aceita_entrega && entregaResumo.tipo !== 'INDISPONIVEL' && (
               <li className="flex items-center gap-1.5">
                 <Bike size={14} />
-                {Number(loja.entrega_taxa_padrao ?? 0) > 0
-                  ? `${tDynamic('Entrega')} ${fmt(Number(loja.entrega_taxa_padrao))}`
-                  : tDynamic('Entrega grátis')}
+                {/* Mesma regra que cobra no checkout (geo.ts). */}
+                {entregaResumo.tipo === 'GRATIS'
+                  ? tDynamic('Entrega grátis')
+                  : `${tDynamic('Entrega a partir de')} ${fmt(entregaResumo.valor)}`}
                 {Number(loja.entrega_raio_km ?? 0) > 0 && ` · ${tDynamic('até')} ${loja.entrega_raio_km} km`}
               </li>
             )}

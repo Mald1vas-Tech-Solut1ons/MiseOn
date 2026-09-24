@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calcularEntrega } from './geo';
+import { calcularEntrega, resumoEntrega } from './geo';
 
 const loja = {
   lat: -23.5505,
@@ -32,5 +32,33 @@ describe('calcularEntrega', () => {
 
     expect(entrega.origem).toBe('CONFIGURACAO_PENDENTE');
     expect(entrega.taxa).toBe(0);
+  });
+});
+
+describe('resumoEntrega: a vitrine anuncia o que o checkout cobra', () => {
+  it('por km anuncia o valor base, não "grátis"', () => {
+    expect(resumoEntrega(loja)).toEqual({ tipo: 'A_PARTIR_DE', valor: 5 });
+  });
+
+  it('sem localização da loja não anuncia entrega', () => {
+    expect(resumoEntrega({ ...loja, lat: null, lng: null })).toEqual({ tipo: 'INDISPONIVEL' });
+  });
+
+  it('só é grátis quando a regra dá zero de verdade', () => {
+    expect(resumoEntrega({ ...loja, entrega_taxa_base: 0, entrega_taxa_km: 0 })).toEqual({ tipo: 'GRATIS' });
+  });
+
+  it('faixas: menor valor, medido no início de cada faixa', () => {
+    const faixas = [
+      { km_ate: 5, taxa_fixa: 9 },
+      { km_ate: 2, taxa_fixa: 6 },
+      { km_ate: 8, taxa_fixa: null, taxa_por_km: 2 },
+    ];
+    expect(resumoEntrega({ ...loja, entrega_modo: 'HIBRIDO' }, faixas)).toEqual({ tipo: 'A_PARTIR_DE', valor: 6 });
+  });
+
+  it('faixa inativa não entra na conta', () => {
+    const faixas = [{ km_ate: 2, taxa_fixa: 1, ativo: false }, { km_ate: 5, taxa_fixa: 8 }];
+    expect(resumoEntrega({ ...loja, entrega_modo: 'HIBRIDO' }, faixas)).toEqual({ tipo: 'A_PARTIR_DE', valor: 8 });
   });
 });
