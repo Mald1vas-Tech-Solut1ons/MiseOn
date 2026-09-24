@@ -5,8 +5,8 @@ import type { User } from '@supabase/supabase-js';
 import { ShoppingBag, Plus, Minus, X, Search, Clock, MapPin, Star, LogIn, History, Lock, ShieldCheck, User as UserIcon, Trash2, CreditCard, Loader2, Check, Sparkles, Compass, UtensilsCrossed, PartyPopper, Receipt, Mic, Bike, ChevronLeft, ChevronRight, Instagram, Facebook, Music2 } from 'lucide-react';
 import { urlDaRede, arrobaDaRede, type RedeSocial } from '../lib/redesSociais';
 import { supabase } from '../lib/supabase';
-import { FotoProduto } from '../lib/fotoProduto';
-import { obterFotoFallback, obterFotoProduto } from '../lib/fotoProdutoUtils';
+import { FotoProduto, FotoIlustrativaContext } from '../lib/fotoProduto';
+import { obterFotoProduto } from '../lib/fotoProdutoUtils';
 import { maskCartaoCredito, maskValidadeCartao, maskCPF, validarCPF } from '../lib/mascaras';
 import ModalAuthCliente from '../components/ModalAuthCliente';
 import ModalMinhaConta from '../components/ModalMinhaConta';
@@ -385,6 +385,7 @@ export default function Cardapio() {
   const iniciais = (loja.nome || '').trim() ? (loja.nome || '').trim()[0].toUpperCase() : '?';
 
   return (
+    <FotoIlustrativaContext.Provider value={Boolean(loja.eh_teste)}>
     <div className="loja-marca vitrine-papel min-h-screen pb-28 lg:pb-16">
       <SEO
         title={`${loja.nome} | Cardápio Digital & Pedidos Online`}
@@ -1197,6 +1198,7 @@ export default function Cardapio() {
       {/* Interface de Chat do Cliente */}
       <ChatInterface loja={loja} user={user} />
     </div>
+    </FotoIlustrativaContext.Provider>
   );
 }
 
@@ -1277,7 +1279,7 @@ function ModalProduto({ produto, nutricao, catalogoNutrientes, nutricaoOpcoes, o
                 <div key={i} className="min-w-full snap-center bg-black/5 dark:bg-black/40 flex items-center justify-center">
                   <FotoProduto
                     src={getOptimizedImageUrl(url) || url || fotoPrincipal}
-                    fallback={obterFotoFallback(produto.nome)}
+                    nome={produto.nome}
                     className="h-64 sm:h-72 w-full object-cover"
                     alt={`${produto.nome} - foto ${i+1}`}
                   />
@@ -1538,7 +1540,7 @@ const MaisPedidoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: 
         <div className="relative mb-3.5 h-36 sm:h-44 w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800/80 shadow-sm flex items-center justify-center">
           <FotoProduto
             src={foto}
-            fallback={obterFotoFallback(p.nome)}
+            nome={p.nome}
             className="vitrine-card-media h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             alt={p.nome}
           />
@@ -1656,7 +1658,7 @@ const ProdutoCard = memo(({ p, nutricao, onClick }: { p: Produto; nutricao?: Nut
       <div className="relative h-32 w-32 sm:h-36 sm:w-36 shrink-0 overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800/80 shadow-sm flex items-center justify-center">
         <FotoProduto
           src={foto}
-          fallback={obterFotoFallback(p.nome)}
+          nome={p.nome}
           className="vitrine-card-media h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           alt={p.nome}
         />

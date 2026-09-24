@@ -1,4 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { UtensilsCrossed } from 'lucide-react';
+import { obterFotoFallback } from './fotoProdutoUtils';
+
+/**
+ * Loja pode mostrar foto ILUSTRATIVA em produto sem foto própria?
+ *
+ * Só loja de demonstração (`lojas_publicas.eh_teste`). Em loja real, foto de
+ * banco de imagens no lugar do prato é oferta que não corresponde ao produto —
+ * em 23/09/2026 a "Baguete de salame" do Natureba aparecia com um hambúrguer.
+ * O padrão é `false`: quem esquecer de prover o contexto erra para o lado
+ * honesto.
+ */
+export const FotoIlustrativaContext = createContext(false);
 
 /**
  * Foto de produto com prazo para carregar.
@@ -10,25 +23,30 @@ import { useEffect, useRef, useState } from 'react';
  * lugar do prato. Numa vitrine, isso e venda perdida.
  *
  * Entao alem do onError existe um prazo: se a foto do lojista nao aparecer em
- * `prazoMs`, entra a foto curada. Vale para qualquer URL externa, nao so para o
- * placeholder de hoje — foto propria hospedada em servidor lento cai na mesma
- * armadilha.
+ * `prazoMs`, entra o substituto — foto ilustrativa na loja de demonstração,
+ * espaço reservado neutro na loja real.
  */
 export function FotoProduto({
-  src, fallback, alt, className, prazoMs = 2500,
-}: { src: string; fallback: string; alt: string; className?: string; prazoMs?: number }) {
-  const [atual, setAtual] = useState(src);
+  src, nome, alt, className, prazoMs = 2500,
+}: { src: string; nome: string; alt: string; className?: string; prazoMs?: number }) {
+  const ilustrativaPermitida = useContext(FotoIlustrativaContext);
+  const substituta = ilustrativaPermitida ? obterFotoFallback(nome) : '';
+  const inicial = src || substituta;
+
+  const [atual, setAtual] = useState(inicial);
   const carregou = useRef(false);
 
   useEffect(() => {
-    setAtual(src);
+    setAtual(inicial);
     carregou.current = false;
-    if (!src || src === fallback) return;
+    if (!inicial || inicial === substituta) return;
     const t = window.setTimeout(() => {
-      if (!carregou.current) setAtual(fallback);
+      if (!carregou.current) setAtual(substituta);
     }, prazoMs);
     return () => window.clearTimeout(t);
-  }, [src, fallback, prazoMs]);
+  }, [inicial, substituta, prazoMs]);
+
+  if (!atual) return <SemFoto nome={nome} className={className} />;
 
   return (
     <img
@@ -36,8 +54,34 @@ export function FotoProduto({
       alt={alt}
       className={className}
       onLoad={() => { carregou.current = true; }}
-      onError={() => { carregou.current = true; setAtual(fallback); }}
+      onError={() => { carregou.current = true; setAtual(substituta); }}
     />
+  );
+}
+
+/** Espaço reservado honesto: cor da loja, ícone e a inicial do produto. */
+function SemFoto({ nome, className }: { nome: string; className?: string }) {
+  const inicial = (nome || '').trim().charAt(0).toUpperCase();
+  return (
+    <div
+      role="img"
+      aria-label={nome}
+      data-sem-foto="true"
+      className={`${className ?? ''} relative flex items-center justify-center overflow-hidden`}
+      style={{
+        background:
+          'linear-gradient(135deg, color-mix(in srgb, var(--cor-primaria, #FC5B24) 22%, transparent), color-mix(in srgb, var(--cor-primaria, #FC5B24) 6%, transparent))',
+      }}
+    >
+      <span
+        aria-hidden="true"
+        className="absolute select-none font-black leading-none opacity-[0.12]"
+        style={{ fontSize: '5rem', color: 'var(--cor-primaria, #FC5B24)' }}
+      >
+        {inicial}
+      </span>
+      <UtensilsCrossed aria-hidden="true" size={30} style={{ color: 'var(--cor-primaria, #FC5B24)', opacity: 0.55 }} />
+    </div>
   );
 }
 

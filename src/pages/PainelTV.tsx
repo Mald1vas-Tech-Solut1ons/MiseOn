@@ -6,8 +6,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { gerarQrDataUrl } from '../lib/qr';
-import { FotoProduto } from '../lib/fotoProduto';
-import { obterFotoFallback, obterFotoProduto } from '../lib/fotoProdutoUtils';
+import { FotoProduto, FotoIlustrativaContext } from '../lib/fotoProduto';
+import { obterFotoProduto } from '../lib/fotoProdutoUtils';
 import { Loja, Categoria, Produto, fmt } from '../types';
 import MiseOnLoader from '../components/MiseOnLoader';
 import { getOptimizedImageUrl } from '../lib/cdn';
@@ -608,6 +608,7 @@ export default function PainelTV() {
   const urlCardapio = `${window.location.origin}/${loja.slug}`;
 
   return (
+    <FotoIlustrativaContext.Provider value={Boolean(loja.eh_teste)}>
     <div className="relative h-screen w-screen overflow-hidden bg-[#050811] text-white font-['Inter'] select-none flex flex-col justify-between p-4 sm:p-5">
       <header className="flex items-center justify-between border-b border-white/10 pb-4 z-20">
         <div className="flex items-center gap-4">
@@ -852,7 +853,7 @@ export default function PainelTV() {
                           carrega, foto gastronomica curada quando nao. */}
                       <FotoProduto
                         src={obterFotoProduto(produto as never)}
-                        fallback={obterFotoFallback(produto.nome)}
+                        nome={produto.nome}
                         alt={produto.nome}
                         className={`w-full rounded-2xl object-cover border border-white/10 shadow-md group-hover:scale-[1.02] transition-transform ${cardCompacto ? 'h-20 mb-2' : 'h-36 mb-4'}`}
                       />
@@ -1022,5 +1023,6 @@ export default function PainelTV() {
         <p className="text-xs opacity-95 text-slate-500">{tDynamic('Pressione F11 na Smart TV para alternar para modo Tela Cheia sem bordas.')}</p>
       </footer>
     </div>
+    </FotoIlustrativaContext.Provider>
   );
 }

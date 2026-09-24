@@ -181,6 +181,8 @@ export interface Loja {
   efi_payee_code?: string; // só no painel admin — NUNCA na vitrine (ver `lojas_publicas`)
   /** Vem de `lojas_publicas`: diz se a loja aceita cartão online sem expor o payee_code. */
   efi_configurado?: boolean;
+  /** Loja de demonstração/provas (`lojas_publicas`). Só nela o cardápio usa foto ilustrativa. */
+  eh_teste?: boolean;
   efi_titular_documento?: string | null; // CPF/CNPJ do titular da conta Efí (favorecido do split Pix)
   efi_conta?: string | null; // número da conta Efí do lojista (favorecido do split Pix)
   antecipacao_cartao?: boolean | null; // true = crédito processado na modalidade antecipada (~2 dias úteis, taxa maior)

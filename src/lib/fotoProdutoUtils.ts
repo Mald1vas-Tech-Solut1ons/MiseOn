@@ -127,9 +127,10 @@ export function obterFotoFallback(nome: string): string {
   return FOTO_GENERICA;
 }
 
-export function obterFotoProduto(p: Produto): string {
-  const fotoCurada = obterFotoFallback(p.nome);
-  if (!p.imagem_url) return fotoCurada;
-  return getOptimizedImageUrl(p.imagem_url) || p.imagem_url || fotoCurada;
+/** Foto PRÓPRIA do produto, ou '' se ele não tem. O substituto (ilustrativa na
+ *  loja de demonstração, espaço reservado na real) é decisão do <FotoProduto>. */
+export function obterFotoProduto(p: Pick<Produto, 'imagem_url'>): string {
+  if (!p.imagem_url) return '';
+  return getOptimizedImageUrl(p.imagem_url) || p.imagem_url;
 }
 
