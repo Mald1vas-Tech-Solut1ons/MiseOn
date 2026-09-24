@@ -143,6 +143,13 @@ e nada casa — em silêncio. Use classes POSIX: `[0-9]`, `[[:space:]]`.
   guarda, troca-se o uuid e lê-se a loja do concorrente.
 - `CREATE OR REPLACE VIEW` não muda o tipo de uma coluna existente. Derrube e
   recrie.
+- **View simples é GRAVÁVEL.** View de uma tabela só é auto-atualizável, e
+  sem `security_invoker` grava com os direitos do dono, por cima do RLS. Com
+  o DEFAULT PRIVILEGES, `anon` herdava UPDATE: até 23/09/2026 qualquer um
+  alterava loja por `lojas_publicas` e o payee do cartão por
+  `plataforma_pagamento_publico`. Hoje o event trigger
+  `trg_view_nasce_somente_leitura` revoga a escrita de toda view nova, e
+  `supabase/tests/views_publicas_somente_leitura.sql` prova. View é só leitura.
 
 ---
 
