@@ -93,7 +93,9 @@ export function taxaDaDistancia(
   const minFreteGratis = loja.frete_gratis_valor_minimo != null ? Number(loja.frete_gratis_valor_minimo) : 0;
   const freteGratis = minFreteGratis > 0 && subtotal >= minFreteGratis;
 
-  const taxaFinal = freteGratis ? 0 : r2(base + perKm * distanciaKm);
+  // Taxa única: o mesmo valor em qualquer distância até o raio.
+  const bruta = loja.entrega_modo === 'FIXA' ? base : base + perKm * distanciaKm;
+  const taxaFinal = freteGratis ? 0 : r2(bruta);
 
   return { taxa: taxaFinal, fora, freteGratis };
 }
@@ -259,7 +261,8 @@ export type ResumoEntrega =
  *
  * - Sem localização da loja o servidor recusa entrega: não se anuncia nada.
  * - Faixas: o menor valor entre elas, medido no início de cada faixa.
- * - Por km: o valor base (distância zero é o piso).
+ * - Faixas sem faixa ativa: indisponível (o servidor recusa).
+ * - Por km e taxa única: o valor base (distância zero é o piso).
  */
 export function resumoEntrega(
   loja: ConfigEntrega,
@@ -273,8 +276,11 @@ export function resumoEntrega(
     .filter((f) => f.ativo !== false && Number(f.km_ate) > 0)
     .sort((a, b) => Number(a.km_ate) - Number(b.km_ate));
 
+  // Faixas sem nenhuma faixa ativa: o servidor recusa a entrega (fn_entrega_regra).
+  if (loja.entrega_modo === 'HIBRIDO' && faixas.length === 0) return { tipo: 'INDISPONIVEL' };
+
   let minimo: number;
-  if (loja.entrega_modo === 'HIBRIDO' && faixas.length > 0) {
+  if (loja.entrega_modo === 'HIBRIDO') {
     minimo = Math.min(...faixas.map((f, i) => {
       const inicioKm = i === 0 ? 0 : Number(faixas[i - 1].km_ate);
       return f.taxa_fixa != null

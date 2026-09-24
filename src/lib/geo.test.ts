@@ -57,6 +57,14 @@ describe('resumoEntrega: a vitrine anuncia o que o checkout cobra', () => {
     expect(resumoEntrega({ ...loja, entrega_modo: 'HIBRIDO' }, faixas)).toEqual({ tipo: 'A_PARTIR_DE', valor: 6 });
   });
 
+  it('faixas sem faixa ativa: não anuncia entrega (o servidor recusa)', () => {
+    expect(resumoEntrega({ ...loja, entrega_modo: 'HIBRIDO' }, [])).toEqual({ tipo: 'INDISPONIVEL' });
+  });
+
+  it('taxa única anuncia o valor único', () => {
+    expect(resumoEntrega({ ...loja, entrega_modo: 'FIXA', entrega_taxa_base: 7 })).toEqual({ tipo: 'A_PARTIR_DE', valor: 7 });
+  });
+
   it('faixa inativa não entra na conta', () => {
     const faixas = [{ km_ate: 2, taxa_fixa: 1, ativo: false }, { km_ate: 5, taxa_fixa: 8 }];
     expect(resumoEntrega({ ...loja, entrega_modo: 'HIBRIDO' }, faixas)).toEqual({ tipo: 'A_PARTIR_DE', valor: 8 });

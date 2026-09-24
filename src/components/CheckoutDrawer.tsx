@@ -12,7 +12,8 @@ import {
   MetodoPgto, fmt, precoItem,
 } from '../types';
 import { maskTelefone } from '../lib/mascaras';
-import { calcularEntrega, ResultadoEntrega } from '../lib/geo';
+import { resumoEntrega } from '../lib/geo';
+import { cotarEntrega, descreverDistancia, type CotacaoEntrega } from '../lib/entregaCotacao';
 import { enderecoParaLabel, salvarLocalizacaoCliente } from '../lib/localizacao-cliente';
 import { useI18n } from '../contexts/I18nContext';
 import { cancelarMeuPedidoPendente } from '../lib/pedidosPendentes';
@@ -72,7 +73,7 @@ export default function CheckoutDrawer({
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [perfilCarregado, setPerfilCarregado] = useState(false);
-  const [entrega, setEntrega] = useState<ResultadoEntrega | null>(null);
+  const [entrega, setEntrega] = useState<CotacaoEntrega | null>(null);
   const [calcTaxa, setCalcTaxa] = useState(false);
   const nomeRef = useRef<HTMLInputElement>(null);
 
@@ -148,24 +149,38 @@ export default function CheckoutDrawer({
     tipo === 'DELIVERY' &&
     !!enderecoObj?.logradouro && !!enderecoObj?.numero;
 
+  // A loja entrega pelo cardápio? Sem localização, ou no modo faixas sem
+  // nenhuma faixa, o servidor recusa — então o checkout nem oferece.
+  const lojaEntrega = loja.aceita_entrega !== false && resumoEntrega(loja, faixasDistancia).tipo !== 'INDISPONIVEL';
+  useEffect(() => {
+    if (!lojaEntrega && tipo === 'DELIVERY') setTipo('RETIRADA_BALCAO');
+  }, [lojaEntrega, tipo]);
+
   useEffect(() => {
     if (tipo !== 'DELIVERY') { setEntrega(null); return; }
-    if (!prontoParaCalcular) { setEntrega(null); return; }
+    if (!prontoParaCalcular || !enderecoObj) { setEntrega(null); return; }
     let cancelado = false;
     setCalcTaxa(true);
     const id = setTimeout(async () => {
-      const res = await calcularEntrega(loja, {
-        enderecoQuery,
-        subtotal,
-        faixasDistancia,
-      });
+      // A cotação é do SERVIDOR: ele localiza, mede pela rua e aplica a regra.
+      let res: CotacaoEntrega;
+      try {
+        res = await cotarEntrega(loja.id, enderecoObj, subtotal);
+      } catch (e) {
+        res = {
+          atende: false, motivo: 'ENDERECO_NAO_LOCALIZADO',
+          mensagem: (e as Error)?.message || 'Não foi possível calcular a entrega agora.',
+          taxa: null, distancia_km: null, raio_km: null, frete_gratis: false, frete_gratis_acima: null,
+          pedido_minimo: 0, faixa_nome: null, cotacao_id: null, metodo: null, precisao: null, destino: null,
+        };
+      }
       if (!cancelado) {
         setEntrega(res);
-        if (res.geo) {
+        if (res.destino) {
           salvarLocalizacaoCliente({
             origem: 'endereco',
-            lat: res.geo.lat,
-            lng: res.geo.lng,
+            lat: res.destino.lat,
+            lng: res.destino.lng,
             label: enderecoParaLabel(enderecoObj ?? undefined) || bairroAtual,
           });
         }
@@ -174,12 +189,13 @@ export default function CheckoutDrawer({
     }, 700);
     return () => { cancelado = true; clearTimeout(id); setCalcTaxa(false); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tipo, enderecoQuery, bairroAtual, subtotal, loja.id, faixasDistancia]);
+    }, [tipo, enderecoQuery, bairroAtual, subtotal, loja.id]);
 
   // --- Calculos financeiros ---
-  const taxa = tipo === 'DELIVERY' ? (cupom?.frete_gratis ? 0 : (entrega?.taxa ?? 0)) : 0;
-  const foraDeArea = tipo === 'DELIVERY' && !!entrega?.foraDeArea;
-  const entregaLocalizada = entrega?.origem === 'DISTANCIA';
+  const taxa = tipo === 'DELIVERY' ? (cupom?.frete_gratis ? 0 : (entrega?.atende ? (entrega.taxa ?? 0) : 0)) : 0;
+  // Endereço cotado mas não atendido (fora da área, abaixo do mínimo da faixa…).
+  const foraDeArea = tipo === 'DELIVERY' && !!entrega && !entrega.atende;
+  const entregaLocalizada = !!entrega?.atende && !!entrega.cotacao_id;
   // Espelha fn_recalcular_pedido: no cupom FIXO o desconto nunca passa do
   // subtotal (o servidor usa least(valor, subtotal)). Sem esse limite, cupom de
   // R$5 num carrinho de R$3 mostrava total negativo antes do clamp.
@@ -352,15 +368,8 @@ export default function CheckoutDrawer({
     if (!nome.trim() || !telefone.trim()) return setErro('Preencha nome e telefone.');
     if (tipo === 'DELIVERY' && (!enderecoObj?.logradouro || !enderecoObj?.numero))
       return setErro('Preencha o endereco completo com número.');
-    if (tipo === 'DELIVERY' && !entregaLocalizada) {
-      return setErro(
-        entrega?.origem === 'CONFIGURACAO_PENDENTE'
-          ? 'Esta loja ainda não configurou a localização para calcular a entrega.'
-          : 'Não conseguimos localizar este endereço. Confira rua, número, cidade e CEP.',
-      );
-    }
-    if (foraDeArea)
-      return setErro('Seu endereco esta fora da area de entrega desta loja.');
+    if (tipo === 'DELIVERY' && !entregaLocalizada)
+      return setErro(entrega?.mensagem ?? 'Informe o endereço completo para calcular a entrega.');
     if (subtotal < Number(loja.pedido_minimo))
       return setErro(`Pedido minimo: ${fmt(Number(loja.pedido_minimo))}.`);
     if (metodo === 'CREDITO' && (!cartaoOnlineConfigurado || !onCartao))
@@ -395,9 +404,9 @@ export default function CheckoutDrawer({
         metodo,
         endereco: tipo === 'DELIVERY' && enderecoObj ? enderecoObj : null,
         endereco_formatado: enderecoFormatado,
-        distancia_km: entrega?.distanciaKm ?? null,
-        lat: entrega?.geo?.lat ?? null,
-        lng: entrega?.geo?.lng ?? null,
+        // A distância e a taxa quem decide é o servidor, pela cotação.
+        cotacao_id: tipo === 'DELIVERY' ? entrega?.cotacao_id ?? null : null,
+        distancia_km: entrega?.distancia_km ?? null,
         taxa_entrega: taxa,
         cupom_id: cupom?.id ?? null,
         troco_para: metodo === 'DINHEIRO' && trocoPara ? Number(trocoPara) : null,
@@ -579,8 +588,8 @@ export default function CheckoutDrawer({
                   <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
                     {tDynamic('Tipo de pedido')}
                   </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(['DELIVERY', 'RETIRADA_BALCAO'] as const).map((t) => (
+                  <div className={`grid gap-2 ${lojaEntrega ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                    {(lojaEntrega ? (['DELIVERY', 'RETIRADA_BALCAO'] as const) : (['RETIRADA_BALCAO'] as const)).map((t) => (
                       <button type="button"
                         key={t}
                         onClick={() => setTipo(t)}
@@ -595,6 +604,11 @@ export default function CheckoutDrawer({
                       </button>
                     ))}
                   </div>
+                  {!lojaEntrega && (
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                      {tDynamic('Esta loja ainda não faz entrega pelo cardápio. Retire no balcão.')}
+                    </p>
+                  )}
                 </div>
 
                 {/* Agendamento (só se a loja aceitar) */}
@@ -700,38 +714,39 @@ export default function CheckoutDrawer({
                         <p className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                           <Loader2 size={14} className="animate-spin" /> {tDynamic('Calculando pela distância…')}
                         </p>
-                      ) : entrega?.origem === 'DISTANCIA' ? (
+                      ) : entrega?.atende ? (
                         <>
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-semibold dark:text-gray-200">
-                              ~{entrega.distanciaKm} km da loja{entrega.faixaNome ? ` · ${entrega.faixaNome}` : ''}
+                              {descreverDistancia(entrega)}{entrega.faixa_nome ? ` · ${entrega.faixa_nome}` : ''}
                             </span>
-                            <span className={`text-sm font-black ${foraDeArea ? 'text-red-600 dark:text-red-400' : 'text-[var(--cor-primaria-texto)]'}`}>
-                              {foraDeArea ? 'Fora da área' : fmt(taxa)}
+                            <span className="text-sm font-black text-[var(--cor-primaria-texto)]">
+                              {taxa > 0 ? fmt(taxa) : tDynamic('Grátis')}
                             </span>
                           </div>
-                          {!foraDeArea && entrega.faixaNome && (
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              {tDynamic('Faixa aplicada automaticamente conforme a distância do cliente.')}
+                          {entrega.frete_gratis && (
+                            <p className="mt-1 text-xs font-semibold text-green-600 dark:text-green-400">
+                              {tDynamic('Frete grátis pelo valor do pedido.')}
                             </p>
                           )}
-                          {foraDeArea && entrega.raioConsideradoKm != null && (
-                            <p className="mt-1 text-xs font-bold text-red-600 dark:text-red-400">
-                              Fora do raio de {Number(entrega.raioConsideradoKm)} km desta loja.
+                          {!entrega.frete_gratis && entrega.frete_gratis_acima != null && (
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                              {tDynamic('Frete grátis a partir de')} {fmt(entrega.frete_gratis_acima)}
+                            </p>
+                          )}
+                          {entrega.precisao === 'CEP' && (
+                            <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                              {tDynamic('Localizamos pelo CEP. Confira o número para o entregador achar você.')}
                             </p>
                           )}
                         </>
-                      ) : entrega?.origem === 'CONFIGURACAO_PENDENTE' ? (
-                        <p role="alert" className="text-sm font-semibold text-amber-700 dark:text-amber-300">
-                          A loja ainda está configurando a localização para calcular a entrega.
-                        </p>
-                      ) : entrega?.origem === 'NAO_LOCALIZADO' ? (
-                        <p role="alert" className="text-sm font-semibold text-amber-700 dark:text-amber-300">
-                          Não localizamos este endereço. Confira rua, número, cidade e CEP.
+                      ) : entrega ? (
+                        <p role="alert" className="text-sm font-semibold text-red-700 dark:text-red-300">
+                          {entrega.mensagem ?? tDynamic('Entrega indisponível neste endereço.')}
                         </p>
                       ) : (
                         <p className="text-sm font-semibold dark:text-gray-200">
-                          Informe o endereço completo para calcular pela localização.
+                          {tDynamic('Informe o endereço completo para calcular a entrega.')}
                         </p>
                       )}
                     </div>
@@ -938,7 +953,7 @@ export default function CheckoutDrawer({
                   {enviando
                     ? 'Processando...'
                     : foraDeArea
-                    ? 'Bairro não atendido'
+                    ? 'Entrega indisponível neste endereço'
                     : quando === 'AGENDADO' && diaAgendado && horaAgendada
                     ? `Agendar para ${diasDisponiveis.find((d) => d.data === diaAgendado)?.label} ${horaAgendada} - ${fmt(total)}`
                     : `Finalizar Pedido - ${fmt(total)}`}
