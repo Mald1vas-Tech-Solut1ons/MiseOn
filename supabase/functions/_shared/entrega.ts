@@ -129,6 +129,21 @@ export async function geocodificar(
   return achado;
 }
 
+/** CEP → rua, bairro, cidade e UF (ViaCEP). */
+export async function enderecoPorCep(cep: string): Promise<EnderecoEntrega | null> {
+  const limpo = soDigitos(cep);
+  if (limpo.length !== 8) return null;
+  const via = await buscarJson(`https://viacep.com.br/ws/${limpo}/json/`, 5000);
+  if (!via || via.erro) return null;
+  return {
+    cep: limpo,
+    logradouro: via.logradouro || via.bairro || via.localidade,
+    bairro: via.bairro ?? null,
+    cidade: via.localidade ?? null,
+    uf: via.uf ?? null,
+  };
+}
+
 /** Texto livre (endereço da loja) → coordenada. */
 export async function localizarTexto(texto: string): Promise<{ geo: Coordenada; precisao: Precisao } | null> {
   if (!texto || texto.trim().length < 5) return null;

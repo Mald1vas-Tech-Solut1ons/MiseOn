@@ -9,7 +9,7 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
-import { cotarEntrega, localizarTexto, type EnderecoEntrega } from '../_shared/entrega.ts';
+import { cotarEntrega, enderecoPorCep, geocodificar, localizarTexto, medirDistancia, type EnderecoEntrega } from '../_shared/entrega.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   const acao = String(corpo.acao ?? 'cotar');
   const ip = ipDaRequisicao(req);
   // Provedores abertos de mapa pedem uso moderado; o cache cobre o repetido.
-  const rl = await checkRateLimit(`entrega-${acao}:${ip}`, { windowMs: 60_000, maxRequests: acao === 'localizar' ? 10 : 40 });
+  const rl = await checkRateLimit(`entrega-${acao}:${ip}`, { windowMs: 60_000, maxRequests: acao === 'cotar' ? 40 : 15 });
   if (!rl.allowed) return json({ error: 'Muitas consultas seguidas. Aguarde um instante.' }, 429);
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -45,6 +45,26 @@ Deno.serve(async (req) => {
       const achado = await localizarTexto(String(corpo.texto ?? ''));
       if (!achado) return json({ error: 'Não encontramos esse endereço. Confira rua, número, cidade e UF.' }, 404);
       return json({ lat: achado.geo.lat, lng: achado.geo.lng, precisao: achado.precisao });
+    }
+
+    // Simulador da tela de configuração: mede a distância a partir de uma
+    // origem (o pino da loja, mesmo ainda não salvo) até um CEP + número. Não
+    // grava cotação — quem aplica a regra é a tela, com os valores em edição.
+    if (acao === 'distancia') {
+      const origem = corpo.origem as { lat?: number; lng?: number } | undefined;
+      const lat = Number(origem?.lat), lng = Number(origem?.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return json({ error: 'Localize a loja no mapa primeiro.' }, 400);
+      const base = await enderecoPorCep(String(corpo.cep ?? ''));
+      if (!base) return json({ error: 'CEP não encontrado.' }, 404);
+      const numero = String(corpo.numero ?? '').trim();
+      const endereco = { ...base, numero, sem_numero: !numero };
+      const achado = await geocodificar(db, endereco);
+      if (!achado) return json({ error: 'Não localizamos esse endereço.' }, 404);
+      const dist = await medirDistancia({ lat, lng }, achado.geo);
+      return json({
+        distancia_km: dist.km, metodo: dist.metodo, precisao: achado.precisao,
+        destino: achado.geo, endereco: `${base.logradouro}${numero ? ', ' + numero : ''} — ${base.bairro ?? ''} ${base.cidade ?? ''}`.trim(),
+      });
     }
 
     if (acao !== 'cotar') return json({ error: 'Ação desconhecida.' }, 400);

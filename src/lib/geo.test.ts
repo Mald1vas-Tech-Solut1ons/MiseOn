@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calcularEntrega, resumoEntrega } from './geo';
+import { aplicarRegraEntrega, calcularEntrega, resumoEntrega } from './geo';
 
 const loja = {
   lat: -23.5505,
@@ -68,5 +68,40 @@ describe('resumoEntrega: a vitrine anuncia o que o checkout cobra', () => {
   it('faixa inativa não entra na conta', () => {
     const faixas = [{ km_ate: 2, taxa_fixa: 1, ativo: false }, { km_ate: 5, taxa_fixa: 8 }];
     expect(resumoEntrega({ ...loja, entrega_modo: 'HIBRIDO' }, faixas)).toEqual({ tipo: 'A_PARTIR_DE', valor: 8 });
+  });
+});
+
+describe('aplicarRegraEntrega: mesmos casos de supabase/tests/entrega_regra_e_cotacao.sql', () => {
+  const l = { ...loja, entrega_taxa_base: 5, entrega_taxa_km: 2, entrega_raio_km: 6, frete_gratis_valor_minimo: 0 };
+  const faixas = [
+    { nome: 'Perto', km_ate: 2, taxa_fixa: 6, pedido_minimo: 0 },
+    { nome: 'Médio', km_ate: 4, taxa_fixa: 9, pedido_minimo: 30 },
+    { nome: 'Longe', km_ate: 6, taxa_fixa: null, taxa_por_km: 3, pedido_minimo: 0 },
+  ];
+
+  it('por km: 5 + 2 × 3 = 11; acima do raio, fora', () => {
+    expect(aplicarRegraEntrega({ ...l, entrega_modo: 'DISTANCIA' }, [], 3, 50).taxa).toBe(11);
+    expect(aplicarRegraEntrega({ ...l, entrega_modo: 'DISTANCIA' }, [], 7, 50).motivo).toBe('FORA_DA_AREA');
+  });
+
+  it('taxa única vale em qualquer distância até o raio', () => {
+    expect(aplicarRegraEntrega({ ...l, entrega_modo: 'FIXA' }, [], 5.9, 50).taxa).toBe(5);
+  });
+
+  it('faixas: vazias = não configurada; fixa, mínimo, por km e fora', () => {
+    const h = { ...l, entrega_modo: 'HIBRIDO' };
+    expect(aplicarRegraEntrega(h, [], 1, 50).motivo).toBe('ENTREGA_NAO_CONFIGURADA');
+    expect(aplicarRegraEntrega(h, faixas, 1.5, 50).taxa).toBe(6);
+    expect(aplicarRegraEntrega(h, faixas, 3, 20).motivo).toBe('ABAIXO_DO_MINIMO_DA_FAIXA');
+    expect(aplicarRegraEntrega(h, faixas, 3, 30).taxa).toBe(9);
+    expect(aplicarRegraEntrega(h, faixas, 5, 50).taxa).toBe(20);
+    expect(aplicarRegraEntrega(h, faixas, 6.5, 50).motivo).toBe('FORA_DA_AREA');
+  });
+
+  it('frete grátis zera a taxa; sem localização não entrega', () => {
+    const r = aplicarRegraEntrega({ ...l, entrega_modo: 'HIBRIDO', frete_gratis_valor_minimo: 40 }, faixas, 1.5, 45);
+    expect(r.taxa).toBe(0);
+    expect(r.freteGratis).toBe(true);
+    expect(aplicarRegraEntrega({ ...l, lat: null }, faixas, 1, 50).motivo).toBe('ENTREGA_NAO_CONFIGURADA');
   });
 });

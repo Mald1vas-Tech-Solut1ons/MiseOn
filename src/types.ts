@@ -9,7 +9,8 @@ export type MetodoPgto = 'PIX' | 'CREDITO' | 'DEBITO' | 'DINHEIRO' | 'IFOOD';
 export type TipoRemetente = 'CLIENTE' | 'LOJA' | 'ENTREGADOR';
 export type TipoRemuneracao = 'FIXO' | 'POR_ENTREGA' | 'POR_KM' | 'DESLIGADO';
 export type StatusRota = 'PENDENTE' | 'EM_ANDAMENTO' | 'FINALIZADA';
-export type EntregaModo = 'BAIRRO' | 'DISTANCIA' | 'HIBRIDO';
+/** FIXA = taxa única · HIBRIDO = faixas de distância (padrão) · DISTANCIA = valor base + R$/km. */
+export type EntregaModo = 'FIXA' | 'DISTANCIA' | 'HIBRIDO';
 // Fluxo passa-bastão (docs/PLANO-FLUXO-PEDIDOS.md): estação de preparo do
 // produto e o bastão atual do pedido entre balcão e cozinha.
 // O CHECK do banco (20260720100000) admite só COZINHA | DIRETO — o tipo não

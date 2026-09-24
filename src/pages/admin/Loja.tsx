@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, LocateFixed, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone, Calculator, Tv, AlertCircle, Bell } from 'lucide-react';
+import { Store, Save, Check, Palette, Type as TypeIcon, Copy, ExternalLink, Share2, Clock, Plus, Trash2, MapPin, ArrowRight, Shield, Monitor, Sun, Moon, Bike, Scale, Utensils, Pizza, ChefHat, ShoppingBag, Sliders, Layers, Smartphone, Tv, AlertCircle, Bell } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { KIOSK_COMERCIAL, kioskMensalidadeFormatada } from '../../data/kiosk';
 import { PALETA_CORES, PALETA_FUNDO_POR_TEMA, isLightColor, fonteFamilia, obterFundoLojaPorTema, obterTokensLoja, resolverTemaLoja, type TemaLoja } from '../../lib/personalizacao';
@@ -13,10 +13,11 @@ import { IfoodOnboarding } from '../../components/admin/IfoodOnboarding';
 import type { CtxLoja } from './AdminLayout';
 import MiseOnLoader from '../../components/MiseOnLoader';
 import type { EntregaModo, FaixaEntrega, HorarioFuncionamento, SegmentoNegocio, ModulosAtivos } from '../../types';
-import { fmt } from '../../types';
 import { maskCPFouCNPJ, maskTelefone, validarCPFouCNPJ } from '../../lib/mascaras';
 import { EFI_TARIFAS, EFI_LINKS } from '../../lib/efiInfo';
-import { geocode } from '../../lib/geo';
+import { ConfiguracaoEntrega } from '../../components/admin/entrega/ConfiguracaoEntrega';
+import { faixasParaSalvar, validarConfigEntrega, type FaixaEntregaForm } from '../../lib/entregaConfig';
+import { localizarEnderecoLoja } from '../../lib/entregaCotacao';
 import { useI18n } from '../../contexts/I18nContext';
 import { useToast } from '../../contexts/ToastContext';
 import { CastTvControl } from '../../components/admin/CastTvControl';
@@ -121,16 +122,6 @@ interface FormLoja {
   nutricao_disclaimer: string;
 }
 
-interface FaixaEntregaForm {
-  id?: string;
-  nome: string;
-  km_ate: string;
-  taxa_fixa: string;
-  taxa_por_km: string;
-  pedido_minimo: string;
-  ordem: number;
-  ativo: boolean;
-}
 
 const vazio: FormLoja = {
   painel_tv_tipos: ['RETIRADA_BALCAO', 'SALAO'],
@@ -143,7 +134,7 @@ const vazio: FormLoja = {
   efi_titular_documento: '', efi_conta: '', antecipacao_cartao: false,
   aceita_online: true, aceita_entrega: true,
   aceita_agendamento: false, agendamento_antecedencia_min: '30',
-  lat: '', lng: '', entrega_modo: 'DISTANCIA', entrega_raio_km: '8', entrega_taxa_base: '5', entrega_taxa_km: '2.0', entrega_taxa_padrao: '0', frete_gratis_valor_minimo: '0',
+  lat: '', lng: '', entrega_modo: 'HIBRIDO', entrega_raio_km: '', entrega_taxa_base: '', entrega_taxa_km: '', entrega_taxa_padrao: '0', frete_gratis_valor_minimo: '0',
   nfe_ambiente: 'homologacao', nfe_habilitado: false, nfe_regime_tributario: 'Simples Nacional', nfe_inscricao_estadual: '', nfe_id_csc: '', nfe_csc: '',
   ifood_merchant_id: '', ifood_addon_ativo: false, ifood_taxa_pct: '0', ifood_taxa_fixa: '0',
   segmento_negocio: 'GERAL',
@@ -360,10 +351,7 @@ export default function Loja() {
           agendamento_antecedencia_min: String(data.agendamento_antecedencia_min ?? 30),
           lat: data.lat != null ? String(data.lat) : '',
           lng: data.lng != null ? String(data.lng) : '',
-          // BAIRRO era o motor legado: preço fixo pelo nome do bairro não
-          // representa a distância real e faz o cliente escolher uma tabela.
-          // Ao editar uma loja antiga, ela migra para a configuração por raio.
-          entrega_modo: (data.entrega_modo === 'BAIRRO' ? 'DISTANCIA' : (data.entrega_modo ?? 'DISTANCIA')) as EntregaModo,
+          entrega_modo: (data.entrega_modo ?? 'HIBRIDO') as EntregaModo,
           entrega_raio_km: data.entrega_raio_km != null ? String(data.entrega_raio_km) : '8',
           entrega_taxa_base: data.entrega_taxa_base != null ? String(data.entrega_taxa_base) : '5',
           entrega_taxa_km: data.entrega_taxa_km != null ? String(data.entrega_taxa_km) : '2.0',
@@ -431,7 +419,6 @@ export default function Loja() {
     setErro(''); setOk(false); setSalvando(true);
     const fundoClaroGerado = obterFundoLojaPorTema('claro', form);
     const fundoEscuroGerado = obterFundoLojaPorTema('escuro', form);
-    const usaEntregaPorDistancia = form.aceita_entrega && (form.entrega_modo === 'DISTANCIA' || form.entrega_modo === 'HIBRIDO');
 
     if (form.cnpj) {
       if (!validarCPFouCNPJ(form.cnpj)) {
@@ -469,43 +456,33 @@ export default function Loja() {
       return;
     }
 
-    const geoLoja = form.endereco.trim() ? await geocode(form.endereco.trim()) : null;
-    const latFinal = geoLoja?.lat ?? (form.lat ? Number(form.lat) : null);
-    const lngFinal = geoLoja?.lng ?? (form.lng ? Number(form.lng) : null);
+    // A localização é a do pino (arrastável na aba Entrega). Só se a loja
+    // entrega e ainda não tem ponto, tenta localizar pelo endereço — antes, cada
+    // "Salvar" refazia a busca e jogava fora o ajuste manual do pino.
+    let latFinal = form.lat.trim() ? Number(form.lat) : null;
+    let lngFinal = form.lng.trim() ? Number(form.lng) : null;
+    if (form.aceita_entrega && (latFinal == null || lngFinal == null) && form.endereco.trim()) {
+      try {
+        const achado = await localizarEnderecoLoja(form.endereco.trim());
+        latFinal = achado.lat; lngFinal = achado.lng;
+        setForm((f) => ({ ...f, lat: String(achado.lat), lng: String(achado.lng) }));
+      } catch {
+        // cai na validação abaixo, que explica o que fazer
+      }
+    }
 
-    if (usaEntregaPorDistancia && (latFinal == null || lngFinal == null)) {
-      setErro('Não consegui localizar o endereço da loja para calcular entrega por raio. Revise o endereço completo ou informe coordenadas válidas.');
+    const erroEntrega = validarConfigEntrega(
+      { ...form, lat: latFinal != null ? String(latFinal) : '', lng: lngFinal != null ? String(lngFinal) : '' },
+      faixasEntrega,
+    );
+    if (erroEntrega) {
+      setErro(erroEntrega);
       setSalvando(false);
       setAba('logistica');
       return;
     }
 
-    if (usaEntregaPorDistancia && !form.entrega_raio_km) {
-      setErro('Defina o raio máximo de atendimento para a entrega.');
-      setSalvando(false);
-      setAba('logistica');
-      return;
-    }
-
-    const faixasNormalizadas = faixasEntrega
-      .filter((faixa) => faixa.ativo && faixa.km_ate)
-      .map((faixa, index) => ({
-        loja_id: lojaId,
-        nome: faixa.nome.trim() || null,
-        km_ate: Number(faixa.km_ate),
-        taxa_fixa: faixa.taxa_fixa ? Number(faixa.taxa_fixa) : null,
-        taxa_por_km: faixa.taxa_por_km ? Number(faixa.taxa_por_km) : null,
-        pedido_minimo: Number(faixa.pedido_minimo || 0),
-        ordem: index + 1,
-        ativo: faixa.ativo,
-      }));
-
-    if (form.entrega_modo === 'HIBRIDO' && usaEntregaPorDistancia && faixasNormalizadas.length === 0) {
-      setErro('No modo híbrido, cadastre pelo menos uma faixa de entrega por distância.');
-      setSalvando(false);
-      setAba('logistica');
-      return;
-    }
+    const faixasNormalizadas = faixasParaSalvar(faixasEntrega, lojaId);
 
     const [{ data: horariosSnapshot }, { data: faixasSnapshot }] = await Promise.all([
       supabase.from('horarios_funcionamento').select('dia_semana, abre, fecha').eq('loja_id', lojaId),
@@ -1309,215 +1286,16 @@ export default function Loja() {
       )}
 
       {aba === 'logistica' && (
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="flex items-center gap-1.5 text-sm font-semibold"><Bike size={15} /> {tDynamic('Motor de entrega')}</p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  {tDynamic('Configure a cobertura do tenant como operação real: raio máximo, cálculo por km e faixas comerciais por distância.')}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, aceita_entrega: !f.aceita_entrega }))}
-                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${form.aceita_entrega ? 'bg-[var(--cor-primaria)]' : 'bg-gray-300 dark:bg-gray-600'}`}
-              >
-                <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${form.aceita_entrega ? 'left-[22px]' : 'left-0.5'}`} />
-              </button>
-            </div>
-
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <label className="block">
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tDynamic('Taxa Mínima de Saída (R$)')}</span>
-                <input
-                  value={form.entrega_taxa_base}
-                  onChange={set('entrega_taxa_base')}
-                  type="number"
-                  step="0.50"
-                  placeholder="5.00"
-                  className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
-                />
-                <p className="mt-1 text-xs opacity-95 text-gray-400">{tDynamic('Valor fixo cobrado em qualquer entrega.')}</p>
-              </label>
-
-              <label className="block">
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tDynamic('Valor Adicional por Km (R$/km)')}</span>
-                <input
-                  value={form.entrega_taxa_km}
-                  onChange={set('entrega_taxa_km')}
-                  type="number"
-                  step="0.50"
-                  placeholder="2.00"
-                  className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
-                />
-                <p className="mt-1 text-xs opacity-95 text-gray-400">{tDynamic('Adicional multiplicado pela distância em km.')}</p>
-              </label>
-
-              <label className="block">
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tDynamic('Raio Máximo de Cobertura (Km)')}</span>
-                <input
-                  value={form.entrega_raio_km}
-                  onChange={set('entrega_raio_km')}
-                  type="number"
-                  step="0.5"
-                  placeholder="8.0"
-                  className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
-                />
-                <p className="mt-1 text-xs opacity-95 text-gray-400">{tDynamic('Bloqueia pedidos com distância superior a este raio.')}</p>
-              </label>
-
-              <label className="block">
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{tDynamic('Frete Grátis acima de (R$)')}</span>
-                <input
-                  value={form.frete_gratis_valor_minimo}
-                  onChange={set('frete_gratis_valor_minimo')}
-                  type="number"
-                  step="5.00"
-                  placeholder="0.00 (desativado)"
-                  className="mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <p className="mt-1 text-xs opacity-95 text-gray-400">{tDynamic('Isenta a taxa se o subtotal atingir este valor (0 = sem frete grátis).')}</p>
-              </label>
-            </div>
-
-            {/* Simulador Interativo em Tempo Real */}
-            <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50/60 dark:bg-blue-950/30 dark:border-blue-900/50 p-4 space-y-2">
-              <p className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Calculator size={14} /> {tDynamic('Simulador da Taxa no Checkout')}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
-                <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
-                  <span className="text-gray-400">{tDynamic('Distância: 3.5 km')}</span>
-                  <p className="font-bold text-gray-900 dark:text-white mt-0.5">
-                    Taxa: {fmt(Number(form.entrega_taxa_base || 0) + (3.5 * Number(form.entrega_taxa_km || 0)))}
-                  </p>
-                </div>
-                <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
-                  <span className="text-gray-400">{tDynamic('Distância: 6.0 km')}</span>
-                  <p className="font-bold text-gray-900 dark:text-white mt-0.5">
-                    Taxa: {fmt(Number(form.entrega_taxa_base || 0) + (6.0 * Number(form.entrega_taxa_km || 0)))}
-                  </p>
-                </div>
-                <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-blue-100 dark:border-blue-900/40">
-                  <span className="text-gray-400">Acima de {form.entrega_raio_km || 8} km</span>
-                  <p className="font-bold text-red-500 mt-0.5">{tDynamic('Fora da área (Bloqueado)')}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-dashed border-gray-200 p-4 dark:border-gray-700">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold dark:text-gray-100">{tDynamic('Georreferência da loja')}</p>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    {tDynamic('Usamos o endereço da loja para localizar automaticamente a origem das entregas ao salvar.')}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const geo = form.endereco.trim() ? await geocode(form.endereco.trim()) : null;
-                    if (!geo) return setErro('Não consegui localizar esse endereço da loja. Revise a rua, número, cidade e UF.');
-                    setForm((f) => ({ ...f, lat: String(geo.lat), lng: String(geo.lng) }));
-                    setOk(true);
-                    setTimeout(() => setOk(false), 1800);
-                  }}
-                  className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold text-[var(--cor-primaria)]"
-                >
-                  <LocateFixed size={14} /> Localizar loja
-                </button>
-              </div>
-
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
-                <label className="block">
-                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Latitude</span>
-                  <input value={form.lat} onChange={set('lat')} className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-                </label>
-                <label className="block">
-                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Longitude</span>
-                  <input value={form.lng} onChange={set('lng')} className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold dark:text-gray-100">{tDynamic('Faixas de entrega por distância')}</p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  {tDynamic('Exemplo profissional: até 3 km cobra fixo; até 5 km cobra outra faixa; acima disso aplica valor por km.')}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setFaixasEntrega((atual) => [...atual, { nome: '', km_ate: '', taxa_fixa: '', taxa_por_km: '', pedido_minimo: '0', ordem: atual.length + 1, ativo: true }])}
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--cor-primaria)]/10 px-3 py-2 text-xs font-bold text-[var(--cor-primaria)]"
-              >
-                <Plus size={14} /> Nova faixa
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {faixasEntrega.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-gray-200 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
-                  {tDynamic('Nenhuma faixa cadastrada ainda. No modo híbrido, cadastre pelo menos uma faixa ativa.')}
-                </div>
-              )}
-
-              {faixasEntrega.map((faixa, index) => (
-                <div key={faixa.id ?? index} className="rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
-                  <div className="grid gap-3 md:grid-cols-6">
-                    <label className="block md:col-span-2">
-                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Nome comercial</span>
-                      <input
-                        value={faixa.nome}
-                        onChange={(e) => setFaixasEntrega((atual) => atual.map((item, i) => i === index ? { ...item, nome: e.target.value } : item))}
-                        placeholder="Até 3 km"
-                        className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                      />
-                    </label>
-                    <label className="block">
-                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Até km</span>
-                      <input value={faixa.km_ate} onChange={(e) => setFaixasEntrega((atual) => atual.map((item, i) => i === index ? { ...item, km_ate: e.target.value } : item))} type="number" step="0.1"
-                        className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-                    </label>
-                    <label className="block">
-                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Taxa fixa</span>
-                      <input value={faixa.taxa_fixa} onChange={(e) => setFaixasEntrega((atual) => atual.map((item, i) => i === index ? { ...item, taxa_fixa: e.target.value } : item))} type="number" step="0.01"
-                        className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-                    </label>
-                    <label className="block">
-                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">R$/km</span>
-                      <input value={faixa.taxa_por_km} onChange={(e) => setFaixasEntrega((atual) => atual.map((item, i) => i === index ? { ...item, taxa_por_km: e.target.value } : item))} type="number" step="0.01"
-                        className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-                    </label>
-                    <label className="block">
-                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Pedido mínimo</span>
-                      <input value={faixa.pedido_minimo} onChange={(e) => setFaixasEntrega((atual) => atual.map((item, i) => i === index ? { ...item, pedido_minimo: e.target.value } : item))} type="number" step="0.01"
-                        className="mt-1 w-full rounded-xl border p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-                    </label>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between gap-3">
-                    <button type="button" onClick={() => setFaixasEntrega((atual) => atual.map((item, i) => i === index ? { ...item, ativo: !item.ativo } : item))}
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${faixa.ativo ? 'bg-emerald-500/10 text-emerald-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
-                      {faixa.ativo ? 'Faixa ativa' : 'Faixa inativa'}
-                    </button>
-                    <button type="button" onClick={() => setFaixasEntrega((atual) => atual.filter((_, i) => i !== index))}
-                      className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-500">
-                      <Trash2 size={14} /> Excluir
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
-              {tDynamic('A entrega é calculada pela localização real, não por uma lista de bairros. Use o valor mínimo, faixas por distância ou campanhas para configurar frete grátis.')}
-            </div>
-          </div>
-        </div>
+        <ConfiguracaoEntrega
+          enderecoLoja={form.endereco}
+          config={form}
+          onAceitaEntrega={(v) => setForm((f) => ({ ...f, aceita_entrega: v }))}
+          onModo={(m) => setForm((f) => ({ ...f, entrega_modo: m }))}
+          onCampo={(campo, valor) => setForm((f) => ({ ...f, [campo]: valor }))}
+          onLocalizacao={(la, ln) => setForm((f) => ({ ...f, lat: String(la), lng: String(ln) }))}
+          faixas={faixasEntrega}
+          onFaixas={setFaixasEntrega}
+        />
       )}
 
       {aba === 'horarios' && (

@@ -294,3 +294,69 @@ export function resumoEntrega(
   minimo = r2(minimo);
   return minimo > 0 ? { tipo: 'A_PARTIR_DE', valor: minimo } : { tipo: 'GRATIS' };
 }
+
+export type MotivoRegra = 'SEM_ENTREGA' | 'ENTREGA_NAO_CONFIGURADA' | 'FORA_DA_AREA' | 'ABAIXO_DO_MINIMO_DA_FAIXA';
+
+export interface ResultadoRegra {
+  atende: boolean;
+  motivo: MotivoRegra | null;
+  taxa: number | null;
+  raioKm: number | null;
+  faixaNome: string | null;
+  freteGratis: boolean;
+  pedidoMinimo: number;
+}
+
+/**
+ * Espelho de `fn_entrega_regra` (servidor) para o SIMULADOR da tela de
+ * configuração: aplica a regra com os valores ainda não salvos sobre uma
+ * distância medida pelo servidor. Quem cobra é sempre o servidor; os testes
+ * em geo.test.ts repetem os casos de supabase/tests/entrega_regra_e_cotacao.sql
+ * para as duas versões não divergirem.
+ */
+export function aplicarRegraEntrega(
+  loja: ConfigEntrega & { aceita_entrega?: boolean | null },
+  faixasDistancia: FaixaEntregaCalculo[],
+  distanciaKm: number,
+  subtotal = 0,
+): ResultadoRegra {
+  const vazio = { taxa: null, raioKm: null, faixaNome: null, freteGratis: false, pedidoMinimo: 0 };
+  if (loja.aceita_entrega === false) return { atende: false, motivo: 'SEM_ENTREGA', ...vazio };
+  if (loja.lat == null || loja.lng == null) return { atende: false, motivo: 'ENTREGA_NAO_CONFIGURADA', ...vazio };
+
+  const dist = r2(distanciaKm);
+  const base = Number(loja.entrega_taxa_base ?? 0);
+  const porKm = Number(loja.entrega_taxa_km ?? 0);
+  const minGratis = Number(loja.frete_gratis_valor_minimo ?? 0);
+  const freteGratis = minGratis > 0 && subtotal >= minGratis;
+
+  let taxa: number;
+  let raio: number | null;
+  let faixaNome: string | null = null;
+  let minFaixa = 0;
+
+  if (loja.entrega_modo === 'HIBRIDO') {
+    const faixas = faixasDistancia
+      .filter((f) => f.ativo !== false && Number(f.km_ate) > 0)
+      .sort((a, b) => Number(a.km_ate) - Number(b.km_ate));
+    if (!faixas.length) return { atende: false, motivo: 'ENTREGA_NAO_CONFIGURADA', ...vazio };
+    raio = Number(faixas[faixas.length - 1].km_ate);
+    const faixa = faixas.find((f) => dist <= Number(f.km_ate));
+    if (!faixa) return { atende: false, motivo: 'FORA_DA_AREA', ...vazio, raioKm: raio };
+    taxa = faixa.taxa_fixa != null
+      ? Number(faixa.taxa_fixa)
+      : r2(base + Number(faixa.taxa_por_km ?? porKm) * dist);
+    minFaixa = Number(faixa.pedido_minimo ?? 0);
+    faixaNome = faixa.nome ?? null;
+  } else {
+    raio = loja.entrega_raio_km != null ? Number(loja.entrega_raio_km) : null;
+    if (raio != null && raio > 0 && dist > raio) return { atende: false, motivo: 'FORA_DA_AREA', ...vazio, raioKm: raio };
+    taxa = loja.entrega_modo === 'FIXA' ? base : r2(base + porKm * dist);
+  }
+
+  if (freteGratis) taxa = 0;
+  if (minFaixa > 0 && subtotal < minFaixa) {
+    return { atende: false, motivo: 'ABAIXO_DO_MINIMO_DA_FAIXA', taxa, raioKm: raio, faixaNome, freteGratis, pedidoMinimo: minFaixa };
+  }
+  return { atende: true, motivo: null, taxa, raioKm: raio, faixaNome, freteGratis, pedidoMinimo: minFaixa };
+}
