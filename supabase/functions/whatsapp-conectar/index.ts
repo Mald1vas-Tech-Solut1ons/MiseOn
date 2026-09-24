@@ -4,6 +4,7 @@
 // RN-15: access_token e app_secret NUNCA voltam ao frontend — só máscara •••• + últimos 4.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { testarIA } from "../_shared/ia-texto.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -364,35 +365,19 @@ serve(async (req) => {
       resultados.chat_ia_ativo = lojaDiag?.chat_ia_ativo ?? false;
       resultados.loja_nome = lojaDiag?.nome ?? "—";
 
-      // 3. Verifica se GROQ_API_KEY está configurada
-      const groqKey = Deno.env.get("GROQ_API_KEY");
-      resultados.groq_configurado = !!groqKey;
-
-      // 4. Testa chamada real ao Groq (sem salvar nada)
-      if (groqKey) {
-        try {
-          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${groqKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model: Deno.env.get("GROQ_MODEL") ?? "llama-3.1-8b-instant",
-              messages: [
-                { role: "system", content: "Responda apenas: OK" },
-                { role: "user", content: "Teste de diagnóstico." },
-              ],
-              max_tokens: 10,
-            }),
-          });
-          const groqData = await groqRes.json().catch(() => ({}));
-          resultados.groq_status = groqRes.ok ? "OK" : "ERRO";
-          resultados.groq_resposta = groqData.choices?.[0]?.message?.content?.trim() ?? groqData.error?.message ?? "sem resposta";
-        } catch (e) {
-          resultados.groq_status = "ERRO";
-          resultados.groq_resposta = String(e);
-        }
+      // 3–4. Testa a IA de verdade, pelo mesmo caminho do atendimento
+      // (DeepSeek; Groq de reserva). Antes testava só a Groq, com um modelo
+      // que a Groq já tinha aposentado.
+      const iaConfigurada = !!(Deno.env.get("DEEPSEEK_API_KEY") || Deno.env.get("GROQ_API_KEY"));
+      resultados.ia_configurada = iaConfigurada;
+      if (iaConfigurada) {
+        const teste = await testarIA();
+        resultados.ia_status = teste.ok ? "OK" : "ERRO";
+        resultados.ia_provedor = teste.provedor ? `${teste.provedor}/${teste.modelo}` : null;
+        resultados.ia_resposta = teste.detalhe;
       } else {
-        resultados.groq_status = "NÃO CONFIGURADO";
-        resultados.groq_resposta = "";
+        resultados.ia_status = "NÃO CONFIGURADO";
+        resultados.ia_resposta = "";
       }
 
       // 5. Última conversa WhatsApp desta loja
@@ -422,11 +407,11 @@ serve(async (req) => {
       if (!lojaDiag?.whatsapp_ia_ativo && !lojaDiag?.chat_ia_ativo) {
         problemas.push("IA desligada: ative o toggle 'Atendimento automático com IA' na página de Integração WhatsApp e clique em Salvar.");
       }
-      if (!groqKey) {
-        problemas.push("GROQ_API_KEY ausente: vá em Supabase Dashboard → Edge Functions → Secrets e adicione GROQ_API_KEY com sua chave do Groq.");
+      if (!iaConfigurada) {
+        problemas.push("IA da plataforma sem chave: o suporte MiseOn precisa configurar DEEPSEEK_API_KEY nos Secrets das Edge Functions.");
       }
-      if (groqKey && resultados.groq_status === "ERRO") {
-        problemas.push(`Groq recusou a chamada: ${resultados.groq_resposta}. Se falar em modelo inexistente, defina o secret GROQ_MODEL com um modelo ativo (console.groq.com/docs/models); se falar em chave, gere uma nova em console.groq.com.`);
+      if (iaConfigurada && resultados.ia_status === "ERRO") {
+        problemas.push(`A IA não respondeu: ${resultados.ia_resposta}. Se falar em saldo ou crédito, é recarga na DeepSeek; se falar em modelo, ajuste o secret DEEPSEEK_MODEL.`);
       }
       if (conexaoDiag?.status !== "CONECTADO") {
         problemas.push(`WhatsApp não está CONECTADO (status: ${resultados.conexao_status}).`);

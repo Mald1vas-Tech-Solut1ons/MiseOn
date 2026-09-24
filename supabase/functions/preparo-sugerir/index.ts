@@ -1,11 +1,13 @@
 // Assistente de ficha de producao. A IA sugere um rascunho; nunca movimenta
 // estoque, cria conversao ou grava rendimento sem confirmacao do usuario.
 //
-// Modelo: deepseek-v4-flash, confirmado em 09/09/2026 pelo GET /models da
-// propria chave de producao (a lista atual e v4-flash, v4-pro e
-// v4-flash-vision-exp). Se um dia sumir, listar de novo antes de chutar nome.
+// IA: _shared/ia-texto.ts (DeepSeek com modelo em cascata e Groq de reserva).
+// Em 09/09/2026 o GET /models listava v4-flash, v4-pro e v4-flash-vision-exp;
+// em 24/09 a doc já tratava esses nomes como aposentados (deepseek-flash e
+// deepseek-v4-pro). Por isso nenhum nome fica fixo aqui.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
+import { gerarTexto } from '../_shared/ia-texto.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -50,8 +52,9 @@ Deno.serve(async (req) => {
     if (!acesso || !['admin', 'operador'].includes(acesso.papel)) return json({ error: 'Sem permissão nesta loja.' }, 403);
     if (!insumo) return json({ error: 'Matéria-prima não encontrada.' }, 404);
 
-    const apiKey = Deno.env.get('DEEPSEEK_API_KEY');
-    if (!apiKey) return json({ error: 'Assistente de produção ainda não foi configurado no servidor.' }, 503);
+    if (!Deno.env.get('DEEPSEEK_API_KEY') && !Deno.env.get('GROQ_API_KEY')) {
+      return json({ error: 'Assistente de produção ainda não foi configurado no servidor.' }, 503);
+    }
 
     const prompt = `Responda somente em JSON. Você auxilia uma cozinha profissional a RASCUNHAR uma ficha de manipulação.
 Matéria-prima: ${JSON.stringify(insumo.nome)}
@@ -73,30 +76,27 @@ Regras:
 - fogo é true SOMENTE quando a etapa mantém chama ou forno ligado — é o que vira custo de gás;
 - justificativa em português, curta, incluindo o alerta de confirmação do rendimento real.`;
 
-    const resposta = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: Deno.env.get('DEEPSEEK_MODEL') || 'deepseek-v4-flash',
+    // Módulo único de IA (DeepSeek, Groq de reserva, modelo em cascata). O
+    // nome fixo 'deepseek-v4-flash' daqui já constava como aposentado na doc.
+    let conteudo: string;
+    try {
+      ({ texto: conteudo } = await gerarTexto({
         messages: [
           { role: 'system', content: 'Você é um chef de produção e responde JSON válido, sem markdown.' },
           { role: 'user', content: prompt },
         ],
-        response_format: { type: 'json_object' },
-        thinking: { type: 'disabled' },
+        formato: 'json',
         temperature: 0.2,
         max_tokens: 1200,
-      }),
-    });
-    const payload = await resposta.json();
-    if (!resposta.ok || payload.error) {
-      console.error('preparo-sugerir deepseek:', payload?.error ?? resposta.status);
+      }));
+    } catch (e) {
+      console.error('preparo-sugerir IA:', (e as Error).message);
       return json({ error: 'A IA não respondeu agora. Preencha a ficha manualmente ou tente de novo.' }, 502);
     }
 
     let sugestao: Record<string, unknown>;
     try {
-      sugestao = JSON.parse(payload.choices?.[0]?.message?.content || '{}');
+      sugestao = JSON.parse(conteudo || '{}');
     } catch {
       return json({ error: 'A IA retornou uma sugestão incompleta. Tente novamente.' }, 502);
     }

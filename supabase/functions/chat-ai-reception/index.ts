@@ -3,6 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { checkRateLimit, ipDaRequisicao } from "../_shared/rate-limit.ts";
 import { cotarEntrega, descreverRegraEntrega } from "../_shared/entrega.ts";
+// IA de texto: DeepSeek, com a Groq só de reserva (decisão de 24/09/2026).
+import { gerarTexto, type Mensagem } from "../_shared/ia-texto.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -16,86 +18,14 @@ function erro(msg: string, status = 400) {
   return new Response(JSON.stringify({ error: msg }), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 }
 
-// ── Modelos do Groq ────────────────────────────────────────────────────────
-// NUNCA fixar um modelo só: o Groq aposenta modelo sem aviso e a IA emudece —
-// foi o que derrubou o atendimento (`llama-3.3-70b-versatile` decommissioned).
-// Tentamos em ordem e seguimos para o próximo quando o modelo não existe mais.
-// GROQ_MODEL permite fixar um preferido por env, sem precisar de deploy.
-const MODELOS_GROQ = [
-  Deno.env.get("GROQ_MODEL") ?? "",
-  "llama-3.3-70b-versatile",
-  "llama-3.1-8b-instant",
-  "openai/gpt-oss-120b",
-  "openai/gpt-oss-20b",
-  "meta-llama/llama-4-scout-17b-16e-instruct",
-  "qwen/qwen3-32b",
-].filter((m) => !!m);
-
-// Modelo que RACIOCINA antes de responder gasta o limite de tokens pensando.
-// Medido em 24/09/2026: com os Llama aposentados o chat caiu no gpt-oss-120b
-// e as respostas saíam cortadas no meio da frase (max_tokens 500 consumido
-// pelo raciocínio). Para eles: raciocínio baixo e folga no limite.
-function ajustarParaModelo(modelo: string, corpo: Record<string, unknown>): Record<string, unknown> {
-  if (/gpt-oss/i.test(modelo)) {
-    return { ...corpo, reasoning_effort: "low", max_tokens: Number(corpo.max_tokens ?? 500) + 1500 };
-  }
-  if (/qwen3/i.test(modelo)) {
-    return { ...corpo, reasoning_effort: "none" };
-  }
-  return corpo;
-}
-
-// Erro que significa "troque de modelo" em vez de "desista"
-function modeloIndisponivel(msg: string): boolean {
-  const m = msg.toLowerCase();
-  return m.includes("does not exist") || m.includes("decommission") ||
-         m.includes("not found") || m.includes("no longer supported") ||
-         m.includes("has been deprecated");
-}
-
-// Chama o Groq caindo para o próximo modelo quando o atual não existe mais.
-async function chamarGroq(
-  groqKey: string,
-  corpo: Record<string, unknown>,
-): Promise<{ texto: string; modelo: string }> {
-  let ultimoErro = "nenhum modelo configurado";
-  for (const modelo of MODELOS_GROQ) {
-    const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ ...ajustarParaModelo(modelo, corpo), model: modelo }),
-    });
-    const data = await resp.json().catch(() => ({}));
-    if (resp.ok && !data.error) {
-      const texto = data.choices?.[0]?.message?.content?.trim();
-      if (data.choices?.[0]?.finish_reason === "length") {
-        console.warn(`Groq: resposta de "${modelo}" cortada pelo limite de tokens`);
-      }
-      if (texto) {
-        if (modelo !== MODELOS_GROQ[0]) {
-          console.warn(`Groq: modelo preferido indisponível — respondido por "${modelo}"`);
-        }
-        return { texto, modelo };
-      }
-      ultimoErro = "resposta vazia";
-      continue;
-    }
-    ultimoErro = String(data.error?.message ?? resp.status);
-    if (!modeloIndisponivel(ultimoErro)) break; // erro real (chave, cota): não adianta trocar
-    console.warn(`Groq: modelo "${modelo}" indisponível — tentando o próximo`);
-  }
-  throw new Error(`Groq: ${ultimoErro}`);
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
 
   const supabaseUrl  = Deno.env.get("SUPABASE_URL")!;
   const serviceKey   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const groqKey      = Deno.env.get("GROQ_API_KEY");
 
   // Rate limit por IP. Esta função é aberta de propósito (chat da vitrine é
-  // anônimo) e cada chamada custa uma inferência no Groq — sem freio, um
+  // anônimo) e cada chamada custa uma inferência de IA — sem freio, um
   // script simples torra a cota e a fatura de IA. A chamada interna do
   // whatsapp-worker vem com service role e passa sem limite.
   const ehChamadaInterna =
@@ -106,9 +36,9 @@ serve(async (req) => {
     if (!rl.allowed) return erro("Muitas mensagens em sequência. Aguarde um instante.", 429);
   }
 
-  if (!groqKey) {
-    console.error("GROQ_API_KEY ausente");
-    return erro("GROQ_API_KEY não configurada", 503);
+  if (!Deno.env.get("DEEPSEEK_API_KEY") && !Deno.env.get("GROQ_API_KEY")) {
+    console.error("Nenhuma chave de IA configurada (DEEPSEEK_API_KEY)");
+    return erro("IA não configurada", 503);
   }
 
   const db = createClient(supabaseUrl, serviceKey);
@@ -326,17 +256,18 @@ COMO RESPONDER AS DUVIDAS E ATENDER:
    - Finalize com 1 pergunta curta e direta para dar sequência à conversa.
    - NUNCA invente preços ou pratos fora da lista acima.`;
 
-    const historico = msgs.map((m: any) => ({
+    const historico: Mensagem[] = msgs.map((m: any) => ({
       role: m.remetente_tipo === "CLIENTE" ? "user" : "assistant",
       content: m.conteudo,
     }));
 
-    // ── 9. Chama Groq (com fallback de modelo) ────────────────────────────
-    const { texto: textoIa } = await chamarGroq(groqKey, {
+    // ── 9. Chama a IA (DeepSeek; Groq de reserva) ─────────────────────────
+    const { texto: textoIa, provedor, modelo } = await gerarTexto({
       messages: [{ role: "system", content: system }, ...historico],
       temperature: 0.65,
       max_tokens: 500,
     });
+    if (provedor !== "deepseek") console.warn(`IA: chat respondido pela reserva (${provedor}/${modelo})`);
 
     let resposta = textoIa;
 

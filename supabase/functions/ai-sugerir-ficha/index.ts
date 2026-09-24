@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 import { checkRateLimit, ipDaRequisicao } from '../_shared/rate-limit.ts';
+import { gerarTexto } from '../_shared/ia-texto.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -79,38 +80,17 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await admin.auth.getUser(jwt);
     if (userError || !user) throw new Error('Sessão de usuário expirada ou inválida. Recarregue a página e faça login novamente.');
 
-    const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY');
-    if (!deepseekKey) {
-      throw new Error('Chave DEEPSEEK_API_KEY não configurada no Supabase (Secrets). Adicione DEEPSEEK_API_KEY no painel do Supabase.');
-    }
-
     const prompt = tipo === 'ficha_tecnica'
       ? PROMPT_FICHA(nome_produto, nome_categoria, descricao, insumos)
       : PROMPT_EXTRAS(nome_produto, nome_categoria, descricao);
 
-    const modelo = Deno.env.get('DEEPSEEK_MODEL') || 'deepseek-chat';
-    const deepseekResponse = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${deepseekKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: modelo,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.4,
-        max_tokens: 1200,
-        response_format: { type: 'json_object' },
-      }),
+    // Módulo único de IA (DeepSeek, Groq de reserva, modelo em cascata).
+    const { texto } = await gerarTexto({
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.4,
+      max_tokens: 1200,
+      formato: 'json',
     });
-
-    const aiData = await deepseekResponse.json();
-    if (aiData.error) {
-      throw new Error(`Erro do DeepSeek: ${aiData.error.message || JSON.stringify(aiData.error)}`);
-    }
-
-    const texto = aiData.choices?.[0]?.message?.content?.trim();
-    if (!texto) throw new Error('A IA não devolveu sugestão.');
 
     let sugestao: unknown;
     try {
