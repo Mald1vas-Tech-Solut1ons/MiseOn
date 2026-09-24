@@ -65,9 +65,13 @@ async function buscarJson(url: string, ms = 6000): Promise<any | null> {
   const t = setTimeout(() => ctrl.abort(), ms);
   try {
     const r = await fetch(url, { signal: ctrl.signal, headers: { 'User-Agent': UA, 'Accept-Language': 'pt-BR' } });
-    if (!r.ok) return null;
+    if (!r.ok) {
+      console.warn(`entrega: ${new URL(url).hostname} respondeu ${r.status}`);
+      return null;
+    }
     return await r.json();
-  } catch {
+  } catch (e) {
+    console.warn(`entrega: ${new URL(url).hostname} falhou — ${(e as Error).message}`);
     return null;
   } finally {
     clearTimeout(t);
@@ -81,13 +85,58 @@ function coordenadaValida(lat: unknown, lng: unknown): Coordenada | null {
   return { lat: a, lng: b };
 }
 
-async function nominatim(params: Record<string, string>): Promise<{ geo: Coordenada; precisao: Precisao } | null> {
-  const qs = new URLSearchParams({ format: 'jsonv2', limit: '1', countrycodes: 'br', addressdetails: '1', ...params });
-  const data = await buscarJson(`https://nominatim.openstreetmap.org/search?${qs}`);
-  const hit = Array.isArray(data) ? data[0] : null;
-  const geo = hit ? coordenadaValida(hit.lat, hit.lon) : null;
-  if (!geo) return null;
-  const temNumero = !!hit.address?.house_number || hit.addresstype === 'building' || hit.type === 'house';
+// Nominatim (OSM oficial) bloqueia com 403 QUALQUER chamada vinda da rede da
+// Supabase — confirmado em produção em 24/09/2026, as duas tentativas, sem
+// variar por horário. Não é limite de taxa: é bloqueio de política de uso
+// contra IP de nuvem (operations.osmfoundation.org/policies/nominatim). Photon
+// (Komoot) serve o mesmo dado OpenStreetMap por outro servidor, que aceita a
+// chamada. Nunca voltar a depender de nominatim.openstreetmap.org daqui.
+function normalizaTexto(s: string): string {
+  return semAcento(s).toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+const PALAVRAS_GENERICAS = new Set(['rua', 'avenida', 'av', 'alameda', 'al', 'travessa', 'estrada', 'rodovia', 'praca', 'rod']);
+
+/**
+ * Photon "chuta" uma rua parecida em outra cidade quando não acha a exata —
+ * visto em 24/09/2026 devolvendo uma rua a 272 km de distância, com precisão
+ * "RUA" (nome ausente do OSM, o buscador texto-livre caiu para o mais
+ * parecido — "Rua Pedreira do Roque" virou "Rua Roque Cordeiro", cidade
+ * diferente). Exigir só UMA palavra em comum não bastou: "Roque" batia nas
+ * duas por coincidência. Exige a MAIORIA das palavras significativas do nome
+ * pedido no nome devolvido; sem isso, rejeita — melhor "não achamos" que uma
+ * distância inventada.
+ */
+export function pareceMesmaRua(pedido: string, devolvido: string): boolean {
+  const a = normalizaTexto(pedido), b = normalizaTexto(devolvido);
+  if (!a || !b) return false;
+  const palavras = a.split(' ').filter((w) => w.length >= 4 && !PALAVRAS_GENERICAS.has(w));
+  if (!palavras.length) return a === b;
+  const bateram = palavras.filter((w) => b.includes(w)).length;
+  return bateram * 2 > palavras.length; // mais da metade — 1 de 2 não basta
+}
+
+async function photon(
+  q: string,
+  opts: { origem?: Coordenada; precisaoForcada?: Precisao; ruaEsperada?: string } = {},
+): Promise<{ geo: Coordenada; precisao: Precisao } | null> {
+  const params: Record<string, string> = { q, limit: '1', lang: 'default' };
+  if (opts.origem) { params.lat = String(opts.origem.lat); params.lon = String(opts.origem.lng); }
+  const qs = new URLSearchParams(params);
+  const data = await buscarJson(`https://photon.komoot.io/api/?${qs}`);
+  const hit = data?.features?.[0];
+  const coords = hit?.geometry?.coordinates; // [lng, lat]
+  const geo = coords ? coordenadaValida(coords[1], coords[0]) : null;
+  if (!geo || hit.properties?.countrycode !== 'BR') return null;
+  if (opts.ruaEsperada) {
+    const nomeAchado = String(hit.properties?.street ?? hit.properties?.name ?? '');
+    if (!pareceMesmaRua(opts.ruaEsperada, nomeAchado)) {
+      console.warn(`entrega: photon devolveu "${nomeAchado}" para "${opts.ruaEsperada}" — descartado`);
+      return null;
+    }
+  }
+  if (opts.precisaoForcada) return { geo, precisao: opts.precisaoForcada };
+  const temNumero = !!hit.properties?.housenumber;
   return { geo, precisao: temNumero ? 'ENDERECO' : 'RUA' };
 }
 
@@ -106,16 +155,23 @@ export async function geocodificar(
 
   let achado: { geo: Coordenada; precisao: Precisao; fonte: string } | null = null;
 
-  if (rua && e.cidade) {
-    const r = await nominatim({ street: rua, city: String(e.cidade), state: String(e.uf ?? ''), country: 'Brasil' });
-    if (r) achado = { ...r, fonte: 'nominatim' };
-  }
-  if (!achado && rua) {
-    const q = [rua, e.bairro, e.cidade, e.uf, cep].filter(Boolean).join(', ');
-    const r = await nominatim({ q });
-    if (r) achado = { ...r, fonte: 'nominatim' };
+  if (rua) {
+    const q = [rua, e.bairro, e.cidade, e.uf, 'Brasil'].filter(Boolean).join(', ');
+    const r = await photon(q, { ruaEsperada: String(e.logradouro ?? '') });
+    if (r) achado = { ...r, fonte: 'photon' };
   }
   if (!achado && cep.length === 8) {
+    // Photon pelo CEP: mesma fonte OSM, mas dá o ponto do bairro de verdade —
+    // ao contrário da BrasilAPI abaixo, que em 24/09/2026 devolveu o mesmo
+    // centro da cidade inteira para CEPs de bairros bem diferentes de
+    // Guarulhos (Centro, Aeroporto e Jardim Hanna caindo no mesmo ponto).
+    const cepFmt = cep.replace(/(\d{5})(\d{3})/, '$1-$2');
+    const q = [cepFmt, e.cidade, e.uf, 'Brasil'].filter(Boolean).join(', ');
+    const r = await photon(q, { precisaoForcada: 'CEP' });
+    if (r) achado = { ...r, fonte: 'photon-cep' };
+  }
+  if (!achado && cep.length === 8) {
+    // Último recurso mesmo: já provado impreciso na cidade de Guarulhos.
     const data = await buscarJson(`https://brasilapi.com.br/api/cep/v2/${cep}`);
     const c = data?.location?.coordinates;
     const geo = c ? coordenadaValida(c.latitude, c.longitude) : null;
@@ -147,7 +203,7 @@ export async function enderecoPorCep(cep: string): Promise<EnderecoEntrega | nul
 /** Texto livre (endereço da loja) → coordenada. */
 export async function localizarTexto(texto: string): Promise<{ geo: Coordenada; precisao: Precisao } | null> {
   if (!texto || texto.trim().length < 5) return null;
-  return await nominatim({ q: texto.trim() });
+  return await photon([texto.trim(), 'Brasil'].join(', '));
 }
 
 /** Distância pelo caminho de carro; sem rota, linha reta corrigida. */
