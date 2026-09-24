@@ -253,7 +253,7 @@ export type ResumoEntrega =
 
 /**
  * O que a vitrine anuncia sobre a entrega, derivado da MESMA regra que cobra
- * (`calcularEntrega` aqui e `fn_taxa_entrega_calculada` no servidor).
+ * (`calcularEntrega` aqui e `fn_entrega_regra` no servidor).
  *
  * Até 23/09/2026 o selo lia `entrega_taxa_padrao`, campo que o cálculo nem
  * usa: toda loja com ele zerado anunciava "Entrega grátis" enquanto o checkout

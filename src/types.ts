@@ -413,13 +413,6 @@ export interface Cupom {
   dias_semana?: number[] | null;
 }
 
-export interface TaxaEntrega {
-  id: string;
-  bairro: string;
-  valor: number;
-  ativo?: boolean;
-}
-
 export interface FaixaEntrega {
   id: string;
   loja_id: string;

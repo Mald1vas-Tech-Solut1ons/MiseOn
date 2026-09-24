@@ -119,6 +119,27 @@ begin
       exception when others then v_falhou := true; v_msg := sqlerrm;
       end;
       if not v_falhou or v_msg not ilike '%expirou%' then raise exception 'cotação vencida passou: %', v_msg; end if;
+
+      -- Sem cotação (checkout antigo mandando só lat/lng): recusado
+      begin
+        perform public.fn_criar_pedido_completo(jsonb_build_object(
+          'loja_id', v_loja, 'tipo_pedido', 'DELIVERY', 'metodo', 'DINHEIRO',
+          'nome', 'Prova entrega', 'telefone', '11999990000',
+          'lat', -23.5617, 'lng', -46.6560,
+          'endereco', jsonb_build_object('cep', '01310100', 'numero', '1000', 'logradouro', 'Av. Paulista',
+                                         'bairro', 'Bela Vista', 'cidade', 'São Paulo', 'uf', 'SP'),
+          'itens', jsonb_build_array(jsonb_build_object('produto_id', v_prod, 'quantidade', 20))));
+        v_falhou := false;
+      exception when others then v_falhou := true; v_msg := sqlerrm;
+      end;
+      if not v_falhou or v_msg not ilike '%Atualize a pagina%' then raise exception 'entrega sem cotação passou: %', v_msg; end if;
+
+      -- Retirada continua sem cotação nenhuma
+      v_pedido := public.fn_criar_pedido_completo(jsonb_build_object(
+        'loja_id', v_loja, 'tipo_pedido', 'RETIRADA_BALCAO', 'metodo', 'DINHEIRO',
+        'nome', 'Prova entrega', 'telefone', '11999990000',
+        'itens', jsonb_build_array(jsonb_build_object('produto_id', v_prod, 'quantidade', 1))));
+      if (v_pedido->>'pedido_id') is null then raise exception 'retirada deixou de funcionar'; end if;
     else
       raise notice 'AVISO: sem usuário/produto na loja de provas — prova do pedido pulada';
     end if;
