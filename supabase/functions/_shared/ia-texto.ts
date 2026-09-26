@@ -1,14 +1,14 @@
-// MiseOn — IA de texto: DeepSeek primeiro, Groq só de reserva.
+// MiseOn — IA de texto: Groq (Rápida), Gemini (Cota PRO), DeepSeek (Barata/Reserva)
 //
-// Decisão de 24/09/2026: a IA do MiseOn é a DeepSeek (barata, boa e já paga).
-// A Groq fica como rede de segurança: se o crédito da DeepSeek acabar ou a
-// API cair num sábado à noite, o atendimento do cliente não emudece.
+// Ordem de fallback exigida pelo usuário (25/09/2026):
+// 1. Groq
+// 2. Gemini
+// 3. DeepSeek
 //
-// Modelo nunca fixo num nome só — provedor aposenta sem aviso (os Llama da
-// Groq sumiram em 2026 e o chat passou dias respondendo cortado). Tenta em
-// ordem e só troca quando o erro é "este modelo não existe".
-//   DEEPSEEK_MODEL (secret, opcional) → deepseek-flash → deepseek-chat
+// Modelo nunca fixo num nome só — provedor aposenta sem aviso.
 //   GROQ_MODEL (secret, opcional)     → gpt-oss-120b → gpt-oss-20b → llama-4-scout
+//   GEMINI_MODEL (secret, opcional)   → gemini-1.5-pro → gemini-1.5-flash
+//   DEEPSEEK_MODEL (secret, opcional) → deepseek-flash → deepseek-chat
 
 // deno-lint-ignore-file no-explicit-any
 
@@ -32,17 +32,18 @@ function corpoHttp(pedido: PedidoTexto): Record<string, unknown> {
   return formato === 'json' ? { ...resto, response_format: { type: 'json_object' } } : { ...resto };
 }
 
-export interface RespostaTexto { texto: string; provedor: 'deepseek' | 'groq'; modelo: string; }
+export interface RespostaTexto { texto: string; provedor: 'groq' | 'gemini' | 'deepseek'; modelo: string; }
 
 const unicos = (xs: (string | undefined | null)[]) => [...new Set(xs.filter((x): x is string => !!x))];
 
-const MODELOS_DEEPSEEK = () => unicos([Deno.env.get('DEEPSEEK_MODEL'), 'deepseek-flash', 'deepseek-chat']);
 const MODELOS_GROQ = () => unicos([
   Deno.env.get('GROQ_MODEL'),
   'openai/gpt-oss-120b',
   'openai/gpt-oss-20b',
   'meta-llama/llama-4-scout-17b-16e-instruct',
 ]);
+const MODELOS_GEMINI = () => unicos([Deno.env.get('GEMINI_MODEL'), 'gemini-1.5-pro', 'gemini-1.5-flash']);
+const MODELOS_DEEPSEEK = () => unicos([Deno.env.get('DEEPSEEK_MODEL'), 'deepseek-flash', 'deepseek-chat']);
 
 /** Erro que significa "troque de modelo", não "desista". */
 export function modeloIndisponivel(msg: string): boolean {
@@ -61,7 +62,7 @@ function ajustarGroq(modelo: string, corpo: Record<string, unknown>): Record<str
 }
 
 async function tentar(
-  url: string, chave: string, modelos: string[], corpo: (m: string) => Record<string, unknown>, provedor: 'deepseek' | 'groq',
+  url: string, chave: string, modelos: string[], corpo: (m: string) => Record<string, unknown>, provedor: 'groq' | 'gemini' | 'deepseek',
 ): Promise<{ ok: RespostaTexto } | { erro: string }> {
   let ultimoErro = 'nenhum modelo configurado';
   for (const modelo of modelos) {
@@ -102,23 +103,37 @@ async function tentar(
 export async function gerarTexto(pedido: PedidoTexto): Promise<RespostaTexto> {
   const erros: string[] = [];
 
-  const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY');
-  if (deepseekKey) {
-    const r = await tentar('https://api.deepseek.com/chat/completions', deepseekKey, MODELOS_DEEPSEEK(),
-      () => ({ ...corpoHttp(pedido), thinking: { type: pedido.pensar ? 'enabled' : 'disabled' } }), 'deepseek');
-    if ('ok' in r) return r.ok;
-    erros.push(r.erro);
-    console.error(`IA: DeepSeek falhou (${r.erro}) — usando a reserva`);
-  } else {
-    erros.push('deepseek: DEEPSEEK_API_KEY ausente');
-  }
-
   const groqKey = Deno.env.get('GROQ_API_KEY');
   if (groqKey) {
     const r = await tentar('https://api.groq.com/openai/v1/chat/completions', groqKey, MODELOS_GROQ(),
       (m) => ajustarGroq(m, corpoHttp(pedido)), 'groq');
     if ('ok' in r) return r.ok;
     erros.push(r.erro);
+    console.error(`IA: Groq falhou (${r.erro}) — usando Gemini`);
+  } else {
+    erros.push('groq: GROQ_API_KEY ausente');
+  }
+
+  const geminiKey = Deno.env.get('GEMINI_API_KEY');
+  if (geminiKey) {
+    // Gemini suporta o endpoint compatível com OpenAI
+    const r = await tentar('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', geminiKey, MODELOS_GEMINI(),
+      () => corpoHttp(pedido), 'gemini');
+    if ('ok' in r) return r.ok;
+    erros.push(r.erro);
+    console.error(`IA: Gemini falhou (${r.erro}) — usando DeepSeek`);
+  } else {
+    erros.push('gemini: GEMINI_API_KEY ausente');
+  }
+
+  const deepseekKey = Deno.env.get('DEEPSEEK_API_KEY');
+  if (deepseekKey) {
+    const r = await tentar('https://api.deepseek.com/chat/completions', deepseekKey, MODELOS_DEEPSEEK(),
+      () => ({ ...corpoHttp(pedido), thinking: { type: pedido.pensar ? 'enabled' : 'disabled' } }), 'deepseek');
+    if ('ok' in r) return r.ok;
+    erros.push(r.erro);
+  } else {
+    erros.push('deepseek: DEEPSEEK_API_KEY ausente');
   }
 
   throw new Error(`IA indisponível — ${erros.join(' | ')}`);
