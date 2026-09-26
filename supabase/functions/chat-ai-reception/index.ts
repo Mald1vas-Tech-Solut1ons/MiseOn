@@ -110,17 +110,20 @@ serve(async (req) => {
     }
 
     // ── 4. Busca histórico de mensagens ───────────────────────────────────
-    const { data: msgs, error: msgsErr } = await db
+    const { data: msgsRaw, error: msgsErr } = await db
       .from("chat_messages")
       .select("remetente_tipo, conteudo")
       .eq("conversation_id", conversation_id)
-      .order("criado_em", { ascending: true })
+      .order("criado_em", { ascending: false })
       .limit(30);
 
-    if (msgsErr || !msgs || msgs.length === 0) {
+    if (msgsErr || !msgsRaw || msgsRaw.length === 0) {
       console.error("Msgs não encontradas:", msgsErr?.message);
       return erro("Mensagens não encontradas");
     }
+
+    // A IA precisa do histórico em ordem cronológica (mais antiga -> mais nova)
+    const msgs = [...msgsRaw].reverse();
 
     const ultima = msgs[msgs.length - 1];
     if (ultima.remetente_tipo !== "CLIENTE") {

@@ -166,7 +166,8 @@ export function useChat(lojaId: string | null, clienteId?: string | null, modoAd
     // Dispara a triagem da IA (Groq) no backend se o remetente for o CLIENTE
     if (remetenteTipo === 'CLIENTE') {
       supabase.functions.invoke('chat-ai-reception', {
-        body: { conversation_id: convId }
+        body: { conversation_id: convId },
+        headers: sessionIdRef.current ? { 'x-chat-session': sessionIdRef.current } : undefined
       }).catch(err => console.error('Falha ao acionar IA de triagem:', err));
     }
     
