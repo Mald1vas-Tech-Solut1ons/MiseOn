@@ -46,12 +46,14 @@ assim mesmo. Formulário novo chama a função e, se ela devolver `false`, mostr
 o WhatsApp com `whatsappDoLead`.
 
 **IA de texto só por `gerarTexto` (`supabase/functions/_shared/ia-texto.ts`).**
-A IA do MiseOn é a DeepSeek (decisão de 24/09/2026); a Groq é só reserva
-automática. Nada de `fetch` direto para provedor nem nome de modelo fixo:
-provedor aposenta modelo sem aviso, e foi assim que o chat passou dias
-respondendo cortado. O raciocínio da DeepSeek vem ligado por padrão e deixa
-tudo lento e mais caro; o módulo desliga (`pensar: false`). Imagem ainda é
-Gemini, até alguém medir o `deepseek-flash` contra documentos reais.
+Ordem de fallback (decisão de 25/09/2026): Groq → Gemini → DeepSeek. Substitui
+a decisão de 24/09 (DeepSeek primeiro, Groq só reserva) — não volte para
+aquela ordem sem confirmar de novo. Nada de `fetch` direto para provedor nem
+nome de modelo fixo: provedor aposenta modelo sem aviso, e foi assim que o
+chat passou dias respondendo cortado. O raciocínio da DeepSeek vem ligado por
+padrão e deixa tudo lento e mais caro; o módulo desliga (`pensar: false`).
+Imagem ainda é Gemini, até alguém medir o `deepseek-flash` contra documentos
+reais.
 
 **Ferramentas grátis (`/ferramentas`) não dependem do banco.** Conta em
 `src/lib/ferramentas.ts`, texto bilíngue em `src/data/ferramentasData.ts`. Nova
