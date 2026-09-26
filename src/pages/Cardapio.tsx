@@ -880,11 +880,11 @@ export default function Cardapio() {
                             <>
                               <button type="button" onClick={() => i.quantidade > 1 ? setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade - 1 } : x)) : setCarrinho(carrinho.filter((_, y) => y !== idx))} className="transition-colors hover:text-red-500" style={{ color: 'var(--cor-texto-suave)' }}><Minus size={14} /></button>
                               <span className="w-4 text-center text-xs font-bold" style={{ color: 'var(--cor-texto)' }}>{i.quantidade}</span>
-                              <button type="button" onClick={() => setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade + 1 } : x))} className="transition-colors hover:text-[var(--cor-primaria-texto)]" style={{ color: 'var(--cor-texto-suave)' }}><Plus size={14} /></button>
+                              <button type="button" data-cy="carrinho-incrementar" onClick={() => setCarrinho(carrinho.map((x, y) => y === idx ? { ...x, quantidade: x.quantidade + 1 } : x))} className="transition-colors hover:text-[var(--cor-primaria-texto)]" style={{ color: 'var(--cor-texto-suave)' }}><Plus size={14} /></button>
                             </>
                           )}
                         </div>
-                        <button type="button" onClick={() => setCarrinho(carrinho.filter((_, y) => y !== idx))} className="transition-colors hover:text-red-500" style={{ color: 'var(--cor-texto-fraco)' }}>
+                        <button type="button" data-cy="carrinho-remover" onClick={() => setCarrinho(carrinho.filter((_, y) => y !== idx))} className="transition-colors hover:text-red-500" style={{ color: 'var(--cor-texto-fraco)' }}>
                           <Trash2 size={15} />
                         </button>
                       </div>

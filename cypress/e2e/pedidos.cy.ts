@@ -128,6 +128,10 @@ describe('Fluxo de Pedidos', () => {
   // pedido por voz) — tudo client-side, sem rede: não precisa de intercept
   // novo além do que mockSupabase já dá.
   it('busca filtra o cardápio, filtro de categoria alterna e o modal de voz abre e fecha', () => {
+    // Viewport desktop: o painel de carrinho lateral (com incrementar/remover)
+    // só renderiza a partir do breakpoint `lg` (Cardapio.tsx: aside
+    // "hidden lg:block"); no viewport padrão do Cypress ele fica escondido.
+    cy.viewport(1280, 900);
     cy.mockAuth();
     cy.visit('/teste');
     cy.wait('@getLojas');
@@ -160,5 +164,20 @@ describe('Fluxo de Pedidos', () => {
     cy.contains('Fazer Pedido por Voz').should('be.visible');
     cy.get('[data-cy=voz-fechar]').click();
     cy.contains('Fazer Pedido por Voz').should('not.exist');
+
+    // Carrinho: incrementar dobra o total; a lixeira esvazia e volta a
+    // mensagem "adicione itens". No desktop o painel lateral já mostra o
+    // carrinho — não precisa abrir nada.
+    cy.contains('X-Burger').filter(':visible').first().click();
+    cy.get('[data-cy=produto-adicionar]').should('be.visible').click();
+    cy.get('[data-cy=carrinho-incrementar]').filter(':visible').first().click();
+    cy.contains('R$ 30,00').filter(':visible').should('be.visible');
+    cy.get('[data-cy=carrinho-remover]').filter(':visible').first().click();
+    cy.contains('Adicione itens do cardápio.').should('be.visible');
+
+    // Widget de chat: abre e fecha.
+    cy.get('[data-cy=chat-alternar]').click();
+    cy.contains('Online — Atendimento Inteligente').should('be.visible');
+    cy.get('[data-cy=chat-alternar]').click();
   });
 });
