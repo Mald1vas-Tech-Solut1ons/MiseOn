@@ -1,5 +1,5 @@
 /**
- * MiseOn — Taxa de entrega e loja aberta: as duas regras que saíram do browser
+ * MiseOn — Regra de entrega e loja aberta: as duas regras que saíram do browser
  *
  * Contexto (Sprint 6, 20260908030000 / 20260908040000): até esta data o
  * `fn_criar_pedido_completo` gravava `taxa_entrega` exatamente como o payload
@@ -7,24 +7,34 @@
  * com `"taxa_entrega": 0` entregava de graça, e relógio errado (ou fuso
  * diferente) fazia cair pedido com a loja fechada.
  *
+ * Atualizado em 24/09/2026 (migration 20260924010000): a RPC virou
+ * `fn_entrega_regra(loja, distancia_km, subtotal)` — a distância não é mais
+ * calculada dentro do banco a partir de lat/lng nem de bairro, ela chega já
+ * pronta (medida no servidor pela rua, em `entrega-cotar`; ver
+ * `supabase/functions/_shared/entrega.ts`). Este arquivo ficou testando a
+ * RPC antiga (`fn_taxa_entrega_calculada`), que não existe mais — schema
+ * cache do Postgres devolvia "could not find the function" em toda suíte de
+ * integração, quebrando o CI desde então. Portado para a função atual.
+ *
  * O que estes testes travam é o COMPORTAMENTO do dinheiro, não a linha de
- * código: a taxa tem de sair da localização real (distância → faixa), o raio
- * tem de barrar, e o frete grátis legítimo tem de continuar
- * zerando. Cada caso aqui é um cenário que já existe na operação real.
+ * código: a taxa tem de sair da distância (faixa), o raio tem de barrar, e o
+ * frete grátis legítimo tem de continuar zerando. Cada caso aqui é um
+ * cenário que já existe na operação real.
  *
  * Cobertura:
- *  ✅ DISTÂNCIA linear (base + km) e arredondamento a 2 casas
- *  ✅ Fora do raio → fora_de_area (o pedido é recusado pela RPC)
+ *  ✅ DISTANCIA linear (base + km) e arredondamento a 2 casas
+ *  ✅ Fora do raio → FORA_DA_AREA (o pedido é recusado pela RPC)
  *  ✅ HIBRIDO: faixa com taxa fixa vence base+km
- *  ✅ HIBRIDO: acima da última faixa → fora_de_area
+ *  ✅ HIBRIDO: acima da última faixa → FORA_DA_AREA
  *  ✅ Frete grátis por valor mínimo (atingido e não atingido)
- *  ✅ endereço sem coordenada é recusado; nunca cai em bairro/taxa padrão
+ *  ✅ loja sem localização (lat/lng nulos) é recusada; nunca vira taxa padrão
  *  ✅ fn_loja_aberta: aberto_manual vence horário (nos dois sentidos)
  *  ✅ fn_loja_aberta: turno que cruza a meia-noite (22:00–02:00)
  */
 
 import { it, expect, beforeAll, afterAll } from 'vitest';
 import { gated } from './gate';
+import { apagarLojaDescartavel, criarLojaDescartavel, exigirDescartavel } from './loja-descartavel';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -34,51 +44,35 @@ const isConfigured = Boolean(SERVICE_KEY);
 let db: SupabaseClient;
 let lojaId: string;
 
-/** Coordenada da loja de teste (Zona Norte de SP) e um ponto ~2 km ao sul. */
+/** Coordenada da loja de teste (Zona Norte de SP) — só precisa existir;
+ * quem decide a distância nestes testes é o parâmetro, não o ponto. */
 const LOJA_LAT = -23.4492102;
 const LOJA_LNG = -46.5546465;
-const PONTO_2KM = { lat: -23.4672102, lng: LOJA_LNG };
-const PONTO_20KM = { lat: -23.6292102, lng: LOJA_LNG };
 
-interface Entrega {
-  taxa: number;
+interface RegraEntrega {
+  atende: boolean;
+  motivo: string | null;
+  taxa: number | null;
   distancia_km: number | null;
-  origem: 'DISTANCIA' | 'NENHUM';
-  fora_de_area: boolean;
+  raio_km: number | null;
   frete_gratis: boolean;
 }
 
-async function taxa(
-  loja: string,
-  args: { lat?: number | null; lng?: number | null; bairro?: string | null; subtotal?: number },
-): Promise<Entrega> {
-  const { data, error } = await db.rpc('fn_taxa_entrega_calculada', {
+async function regra(loja: string, distanciaKm: number, subtotal = 0): Promise<RegraEntrega> {
+  const { data, error } = await db.rpc('fn_entrega_regra', {
     p_loja_id: loja,
-    p_lat: args.lat ?? null,
-    p_lng: args.lng ?? null,
-    p_bairro: args.bairro ?? null,
-    p_subtotal: args.subtotal ?? 0,
+    p_distancia_km: distanciaKm,
+    p_subtotal: subtotal,
   });
-  if (error) throw new Error(`fn_taxa_entrega_calculada: ${error.message}`);
-  return data as Entrega;
-}
-
-async function criarLoja(nome: string, extra: Record<string, unknown>) {
-  const sufixo = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const { data, error } = await db
-    .from('lojas')
-    .insert({ nome, slug: `teste-entrega-${sufixo}`, ...extra })
-    .select('id')
-    .single();
-  if (error) throw new Error(`Erro ao criar loja de teste: ${error.message}`);
-  return data.id as string;
+  if (error) throw new Error(`fn_entrega_regra: ${error.message}`);
+  return data as RegraEntrega;
 }
 
 beforeAll(async () => {
   if (!isConfigured) return;
   db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-  lojaId = await criarLoja('Loja Teste Entrega', {
+  lojaId = (await criarLojaDescartavel(db, 'entrega-taxa-e-porta', {
     entrega_modo: 'DISTANCIA',
     entrega_taxa_base: 5,
     entrega_taxa_km: 1,
@@ -87,38 +81,39 @@ beforeAll(async () => {
     frete_gratis_valor_minimo: 0,
     lat: LOJA_LAT,
     lng: LOJA_LNG,
-  });
+  })).id;
+  exigirDescartavel(lojaId, 'entrega-taxa-e-porta');
 
 });
 
 afterAll(async () => {
   if (!isConfigured) return;
-  if (lojaId) await db.from('lojas').delete().eq('id', lojaId);
+  if (lojaId) await apagarLojaDescartavel(db, lojaId);
 });
 
-gated(isConfigured, 'Taxa de entrega — o servidor é quem calcula', () => {
-  it('DISTÂNCIA linear: base 5 + 1/km a 2 km = 7,00', async () => {
-    const r = await taxa(lojaId, { ...PONTO_2KM, subtotal: 50 });
-    expect(r.origem).toBe('DISTANCIA');
+gated(isConfigured, 'Regra de entrega — o servidor é quem calcula', () => {
+  it('DISTANCIA linear: base 5 + 1/km a 2 km = 7,00', async () => {
+    const r = await regra(lojaId, 2, 50);
+    expect(r.atende).toBe(true);
+    expect(r.motivo).toBeNull();
     expect(Number(r.distancia_km)).toBeCloseTo(2, 1);
     expect(Number(r.taxa)).toBeCloseTo(7, 2);
-    expect(r.fora_de_area).toBe(false);
   });
 
-  it('fora do raio de 8 km marca fora_de_area (a RPC recusa o pedido)', async () => {
-    const r = await taxa(lojaId, { ...PONTO_20KM, subtotal: 50 });
-    expect(r.fora_de_area).toBe(true);
-    expect(Number(r.distancia_km)).toBeGreaterThan(8);
+  it('fora do raio de 8 km marca FORA_DA_AREA (a RPC recusa o pedido)', async () => {
+    const r = await regra(lojaId, 20, 50);
+    expect(r.atende).toBe(false);
+    expect(r.motivo).toBe('FORA_DA_AREA');
   });
 
   it('frete grátis por valor mínimo zera a taxa — e só a partir do mínimo', async () => {
     await db.from('lojas').update({ frete_gratis_valor_minimo: 30 }).eq('id', lojaId);
     try {
-      const atingiu = await taxa(lojaId, { ...PONTO_2KM, subtotal: 32.9 });
+      const atingiu = await regra(lojaId, 2, 32.9);
       expect(Number(atingiu.taxa)).toBe(0);
       expect(atingiu.frete_gratis).toBe(true);
 
-      const naoAtingiu = await taxa(lojaId, { ...PONTO_2KM, subtotal: 29.99 });
+      const naoAtingiu = await regra(lojaId, 2, 29.99);
       expect(Number(naoAtingiu.taxa)).toBeCloseTo(7, 2);
       expect(naoAtingiu.frete_gratis).toBe(false);
     } finally {
@@ -135,12 +130,13 @@ gated(isConfigured, 'Taxa de entrega — o servidor é quem calcula', () => {
     if (error) throw new Error(error.message);
 
     try {
-      const dentro = await taxa(lojaId, { ...PONTO_2KM, subtotal: 50 });
+      const dentro = await regra(lojaId, 2, 50);
       // 2 km cai na faixa "Perto": taxa fixa 4,50 (e NÃO 5 + 1×2 = 7).
       expect(Number(dentro.taxa)).toBeCloseTo(4.5, 2);
 
-      const longe = await taxa(lojaId, { ...PONTO_20KM, subtotal: 50 });
-      expect(longe.fora_de_area).toBe(true);
+      const longe = await regra(lojaId, 20, 50);
+      expect(longe.atende).toBe(false);
+      expect(longe.motivo).toBe('FORA_DA_AREA');
     } finally {
       await db.from('faixas_entrega').delete().eq('loja_id', lojaId);
       await db.from('lojas')
@@ -149,15 +145,21 @@ gated(isConfigured, 'Taxa de entrega — o servidor é quem calcula', () => {
     }
   });
 
-  it('endereço sem coordenada é recusado em vez de virar uma taxa por bairro', async () => {
-    await expect(taxa(lojaId, { bairro: 'São João', subtotal: 50 }))
-      .rejects.toThrow('Não foi possível localizar o endereço de entrega');
+  it('loja sem localização (lat/lng nulos) é recusada, nunca vira taxa padrão', async () => {
+    await db.from('lojas').update({ lat: null, lng: null }).eq('id', lojaId);
+    try {
+      const r = await regra(lojaId, 2, 50);
+      expect(r.atende).toBe(false);
+      expect(r.motivo).toBe('ENTREGA_NAO_CONFIGURADA');
+    } finally {
+      await db.from('lojas').update({ lat: LOJA_LAT, lng: LOJA_LNG }).eq('id', lojaId);
+    }
   });
 
-  it('loja inexistente devolve zero, nunca erro de servidor', async () => {
-    const r = await taxa('00000000-0000-0000-0000-000000000000', { ...PONTO_2KM });
-    expect(Number(r.taxa)).toBe(0);
-    expect(r.origem).toBe('NENHUM');
+  it('loja inexistente devolve atende=false, nunca erro de servidor', async () => {
+    const r = await regra('00000000-0000-0000-0000-000000000000', 2, 50);
+    expect(r.atende).toBe(false);
+    expect(r.motivo).toBe('LOJA_INEXISTENTE');
   });
 });
 

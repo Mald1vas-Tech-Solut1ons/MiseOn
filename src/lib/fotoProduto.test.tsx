@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
-import { FotoProduto, FotoIlustrativaContext } from './fotoProduto';
+import { FotoProduto } from './fotoProduto';
+import { FotoIlustrativaContext } from './fotoIlustrativaContext';
 import { obterFotoProduto } from './fotoProdutoUtils';
 
 const renderizar = (ui: React.ReactElement, demonstracao: boolean) =>

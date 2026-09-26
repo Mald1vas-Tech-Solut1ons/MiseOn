@@ -1,5 +1,52 @@
 # MISEON - Head of Engineering Document
 
+## 24/09/2026 — revisão de robustez do sistema (sem publicação)
+
+**Decisão:** o estado local corrigiu os dois bloqueios observados no último CI
+de `main` (run `36058889297`), mas isso ainda não autoriza chamar o sistema de
+robusto para operação geral. O job principal parou no lint do contexto React
+exportado junto com `FotoProduto`; o job de integração iniciou o Supabase local
+e falhou em 6 casos porque a suíte de entrega chamava uma RPC removida.
+
+**Correções locais:** contexto de fotos em módulo próprio; suíte portada para
+`fn_entrega_regra` e alinhada ao helper de loja descartável; Painel de Pedidos
+passa a mostrar falha de consulta e a reconciliar por polling somente com a aba
+visível, sem transformar indisponibilidade em “nenhum pedido”; KDS deixou de
+repetir a transição já gravada pelo primeiro `UPDATE`. A função real em produção
+confirma que o gatilho do primeiro `UPDATE` já baixa estoque e registra o
+histórico na mesma transação. A segunda RPC não fazia esses efeitos de novo e
+podia falhar ao receber os IDs locais `op_...` como UUID, produzindo alerta falso.
+
+**Prova nesta sessão:** TypeScript PASS; lint completo PASS; 704 testes de
+unidade PASS, 17 SKIPPED; integração 67 PASS, 1 SKIPPED em 9 arquivos no banco
+de produção, apenas em lojas descartáveis; build Vite, prerender de 32 rotas,
+CSS legado e sitemap PASS. O CI remoto continua vermelho até que estes diffs
+sejam revisados e publicados; push em `main` publica antes de qualquer gate.
+
+**Varreduras somente leitura em produção:** `fluxo_pedidos.sql` encontrou
+2 pedidos de prova com `estoque_baixado=true` mas sem `BAIXA_VENDA` (ambos
+vendem Coca-Cola; a ficha técnica não tem data de criação, então não se pode
+concluir se ela existia na venda), 3 pedidos antigos de totem ainda aguardando
+Pix, e 1 pedido de mesa ACEITO parado. `varredura_de_integridade.sql` encontrou
+1 pedido de prova FINALIZADO em 23/09 com pagamento DINHEIRO ainda PENDENTE,
+apesar de `receita_lancada=true`; 2 divergências de saldo contra lotes; 1 lote
+de cenoura a R$ 5,48/g contra cadastro a R$ 0,00548/g; e insumos de demonstração
+sem custo confiável. O pedido #28 com total divergente nasceu em 17/07, antes
+do corte do ledger, e não deve ser usado como evidência de regressão atual.
+Nenhuma dessas linhas foi corrigida nesta sessão.
+
+**Próximo sprint, por risco:** (1) formalizar e provar a regra
+`FINALIZADO ↔ pagamento PAGO ↔ receita/recebível` por modalidade, inclusive
+dinheiro na entrega, mesa e crédito; reconciliar o caso #308 sem inventar
+recebimento; (2) tornar a etapa do KDS, status, carimbo e operador uma única
+operação no servidor, com operador vinculado à loja (os `op_...` do navegador
+não são identidade auditável); (3) reconstruir a cadeia fiscal→unidade→lote→
+baixa→CMV e separar erro histórico de bug corrente antes de editar saldo;
+(4) provar pedidos completos por canal e falhas de rede/gateway, com o CI verde
+no mesmo commit que será entregue; (5) reduzir dependência de Photon/OSRM e
+definir política para cotação com precisão apenas de CEP/rua. Sem esses gates,
+suíte verde e build verde provam apenas o escopo testado.
+
 ## 23/09/2026 — Incidente da loja fantasma + Sprint 20 item 1: varredura de fluxo de pedidos
 
 **Incidente (resolvido):** a conta de superadmin (@yahoo) tinha ficado vinculada

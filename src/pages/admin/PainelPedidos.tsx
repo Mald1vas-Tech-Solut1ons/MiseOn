@@ -159,6 +159,8 @@ export default function PainelPedidos() {
   const { lojaId, papel } = useOutletContext<CtxLoja>();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [erroCarga, setErroCarga] = useState(false);
+  const sequenciaCarga = useRef(0);
   const [loja, setLoja] = useState<Loja | null>(null);
   const [filtro, setFiltro] = useState('TODOS');
   const [erroAcao, setErroAcao] = useState<ErroTraduzido | null>(null);
@@ -194,8 +196,9 @@ export default function PainelPedidos() {
   }, [erroAcao]);
 
   const carregar = useCallback(async () => {
+    const sequencia = ++sequenciaCarga.current;
     const cutoff24h = new Date(Date.now() - 24 * 3600e3).toISOString();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('pedidos').select(SELECT)
       .eq('loja_id', lojaId)
       .neq('status', 'AGUARDANDO_PAGAMENTO')
@@ -203,6 +206,13 @@ export default function PainelPedidos() {
       // agendamento pra daqui a 3 dias sumiria do painel antes mesmo de chegar a hora)
       .or(`criado_em.gte.${cutoff24h},agendado_para.not.is.null`)
       .order('criado_em', { ascending: false });
+    if (sequencia !== sequenciaCarga.current) return;
+    if (error) {
+      setErroCarga(true);
+      setCarregando(false);
+      return;
+    }
+    setErroCarga(false);
     setPedidos(((data as Pedido[]) ?? []).filter(pedidoEstaNaOperacao));
     setCarregando(false);
   }, [lojaId]);
@@ -228,7 +238,21 @@ export default function PainelPedidos() {
           }
         })
       .subscribe();
-    return () => { supabase.removeChannel(canal); };
+    // Realtime reduz a latência, mas não é garantia de entrega de eventos.
+    // Uma reconciliação leve, só com a aba visível, recupera pedidos perdidos
+    // durante quedas do WebSocket sem consultar o banco em abas esquecidas.
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void carregar();
+    }, 60_000);
+    const aoVoltar = () => {
+      if (document.visibilityState === 'visible') void carregar();
+    };
+    document.addEventListener('visibilitychange', aoVoltar);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', aoVoltar);
+      void supabase.removeChannel(canal);
+    };
   }, [lojaId, carregar]);
 
   // Toda mudança de status passa pela RPC fn_avancar_status_pedido — o banco
@@ -331,6 +355,15 @@ export default function PainelPedidos() {
           </div>
         )}
 
+        {erroCarga && (
+          <div role="alert" className="mt-3 flex max-w-2xl flex-wrap items-center gap-3 rounded-xl border border-red-300 bg-red-50 p-3 text-sm font-semibold text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100">
+            <span>{tDynamic('Não foi possível atualizar os pedidos. Confira a conexão e tente novamente.')}</span>
+            <button type="button" onClick={() => { void carregar(); }} className="rounded-lg border border-current px-3 py-1 font-bold">
+              {tDynamic('Tentar novamente')}
+            </button>
+          </div>
+        )}
+
         {/* Negociacao pos-entrega tem prazo curto e consequencia automatica:
             sem resposta o iFood decide sozinho, e em cancelamento pos-entrega
             isso e a loja perdendo o valor. Por isso fica ACIMA dos filtros, na
@@ -412,7 +445,7 @@ export default function PainelPedidos() {
               onErro={(e) => setErroAcao(traduzirErro(e))}
             />
           ))}
-          {visiveis.length === 0 && (
+          {visiveis.length === 0 && !erroCarga && (
             <div className="col-span-full pt-16 text-center">
               <img src="/icon.png" alt="" className="mx-auto mb-4 w-14 opacity-30 dark:opacity-20" />
               <p className="font-['JetBrains_Mono'] text-[13px] tracking-wider text-gray-500 dark:text-[#6C7A96]">

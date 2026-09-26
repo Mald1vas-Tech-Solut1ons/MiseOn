@@ -123,4 +123,42 @@ describe('Fluxo de Pedidos', () => {
 
     cy.contains('Pedido cancelado').should('be.visible');
   });
+
+  // Cobertura da vitrine em si (busca, filtro de categoria e o botão de
+  // pedido por voz) — tudo client-side, sem rede: não precisa de intercept
+  // novo além do que mockSupabase já dá.
+  it('busca filtra o cardápio, filtro de categoria alterna e o modal de voz abre e fecha', () => {
+    cy.mockAuth();
+    cy.visit('/teste');
+    cy.wait('@getLojas');
+    cy.dismissCookieBanner();
+
+    cy.contains('X-Burger').filter(':visible').should('be.visible');
+
+    // Busca sem correspondência: o produto some da vitrine.
+    cy.get('input[placeholder="Buscar no cardápio…"]').filter(':visible').first()
+      .type('produto-que-nao-existe-123');
+    cy.contains('X-Burger').should('not.exist');
+
+    // Limpa a busca: volta a aparecer.
+    cy.get('input[placeholder="Buscar no cardápio…"]').filter(':visible').first().clear();
+    cy.contains('X-Burger').filter(':visible').should('be.visible');
+
+    // Filtro de categoria: liga e desliga (aria-pressed alterna nos dois).
+    cy.contains('button', 'Lanches').filter(':visible').first()
+      .should('have.attr', 'aria-pressed', 'false')
+      .click()
+      .should('have.attr', 'aria-pressed', 'true');
+    cy.contains('X-Burger').filter(':visible').should('be.visible');
+    cy.contains('button', 'Lanches').filter(':visible').first()
+      .click()
+      .should('have.attr', 'aria-pressed', 'false');
+
+    // Pedido por voz: abre o modal e fecha sem gravar nada (Cypress/Electron
+    // não tem SpeechRecognition, então nunca clica no microfone).
+    cy.contains('button', 'Pedir por voz').filter(':visible').first().click();
+    cy.contains('Fazer Pedido por Voz').should('be.visible');
+    cy.get('[data-cy=voz-fechar]').click();
+    cy.contains('Fazer Pedido por Voz').should('not.exist');
+  });
 });

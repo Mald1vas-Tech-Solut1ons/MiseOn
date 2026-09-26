@@ -117,7 +117,7 @@ export default function VoiceOrderModal({
               {tDynamic('Fazer Pedido por Voz')}
             </h3>
           </div>
-          <button type="button" onClick={onFechar} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <button type="button" onClick={onFechar} data-cy="voz-fechar" className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
             <X size={20} />
           </button>
         </div>

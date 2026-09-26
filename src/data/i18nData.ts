@@ -382,6 +382,7 @@ const MAPA_TRADUCAO_TEXTO: Record<string, string> = {
   'Sincronizando a produção...': 'Syncing production...',
   'Só aparecem aqui quando todas as estações terminaram. Entregar registra a retirada para todos os dispositivos.': 'Orders appear here only after every station is done. Deliver records the pickup across all devices.',
   'Tentar novamente': 'Try again',
+  'Não foi possível atualizar os pedidos. Confira a conexão e tente novamente.': 'Could not refresh orders. Check the connection and try again.',
   'Transmitir para TV': 'Cast to TV',
   'atrasado(s)': 'late',
   'e informe:': 'and enter:',

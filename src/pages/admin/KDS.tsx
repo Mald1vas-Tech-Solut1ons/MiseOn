@@ -426,23 +426,10 @@ export default function KDS() {
       return;
     }
 
-    const { error: errRegras } = await supabase.rpc('fn_avancar_status_pedido', {
-      p_pedido_id: p.id,
-      p_novo_status: novoStatus,
-      ...(operadorAtivo ? { p_operador_user_id: operadorAtivo } : {}),
-    });
-
-    if (errRegras) {
-      const detalhe = traduzirErro(errRegras);
-      setErroAcao({
-        ...detalhe,
-        titulo: tDynamic('Pedido avançou, mas o estoque não baixou'),
-        explicacao: tDynamic('A etapa foi gravada, porém as regras de estoque e notificação não rodaram. ') + `${detalhe.explicacao}`,
-      });
-      tocarSom();
-      return;
-    }
-
+    // A transição e seus gatilhos de estoque/histórico já rodaram na UPDATE
+    // acima, na mesma transação. Repetir o status em outra RPC não aplica
+    // regras adicionais; operadores locais têm ids "op_..." (não UUID), e
+    // essa segunda chamada falhava depois de o pedido já ter avançado.
     setErroAcao(null);
     tocarSom();
 
