@@ -42,7 +42,7 @@ const MODELOS_GROQ = () => unicos([
   'openai/gpt-oss-20b',
   'meta-llama/llama-4-scout-17b-16e-instruct',
 ]);
-const MODELOS_GEMINI = () => unicos([Deno.env.get('GEMINI_MODEL'), 'gemini-1.5-pro', 'gemini-1.5-flash']);
+const MODELOS_GEMINI = () => unicos([Deno.env.get('GEMINI_MODEL'), 'gemini-pro-latest', 'gemini-flash-latest']);
 const MODELOS_DEEPSEEK = () => unicos([Deno.env.get('DEEPSEEK_MODEL'), 'deepseek-flash', 'deepseek-chat']);
 
 /** Erro que significa "troque de modelo", não "desista". */
